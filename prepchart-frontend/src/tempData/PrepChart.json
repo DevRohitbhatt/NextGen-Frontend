@@ -1,0 +1,86 @@
+{
+  "ForecastData": {
+    "Today": 150.75,
+    "Tomorrow": 200.50,
+    "NextDay": 180.25
+  },
+  "DefaultSafetyFactor": 10.0,
+  "Today": [
+    {
+      "itemName": "(R) Chicken",
+      "PrepType": ["Box (53 Count) / Pan Prep Half", "TypeB"],
+      "YieldType": 1043,
+      "SafetyFactor": 10,
+      "Needed": 3,
+      "OnHand": 0,
+      "PrepPullAmount": 3
+    },
+    {
+      "itemName": "(R) Steak",
+      "PrepType": ["Box (53 Count) / Pan Prep Half", "TypeD"],
+      "YieldType": 459,
+      "SafetyFactor": 8,
+      "Needed": 4,
+      "OnHand": 1,
+      "PrepPullAmount": 3
+    },
+    {
+      "itemName": "(R) Bacon Sliced",
+      "PrepType": ["Prep SHEET", "TypeB"],
+      "YieldType": 754,
+      "SafetyFactor": 10,
+      "Needed": 3.98,
+      "OnHand": 0.5,
+      "PrepPullAmount": 3.48
+    },
+    {
+      "itemName": "(R) ONION 50 LB",
+      "PrepType": ["PAN PREP 6x6", "TypeD"],
+      "YieldType": 713,
+      "SafetyFactor": 20,
+      "Needed": 4.21,
+      "OnHand": 1,
+      "PrepPullAmount": 3.21
+    }
+  ],
+  "Tomorrow": [
+    {
+      "itemName": "(R) Chicken",
+      "PrepType": ["Box (53 Count) / Pan Prep Half", "TypeC"],
+      "YieldType": 1043,
+      "SafetyFactor": 10,
+      "Needed": 3,
+      "OnHand": 2,
+      "PrepPullAmount": 1
+    },
+    {
+      "itemName": "(R) Steak",
+      "PrepType": ["Box (53 Count) / Pan Prep Half", "TypeD"],
+      "YieldType": 459,
+      "SafetyFactor": 8,
+      "Needed": 4,
+      "OnHand": 1,
+      "PrepPullAmount": 3
+    }
+  ],
+  "NextDay": [
+    {
+      "itemName": "(R) Syrup Strawberry 6/35 OZ",
+      "PrepType": ["Bottle Prep 53 OZ", "TypeD"],
+      "YieldType": 3282,
+      "SafetyFactor": 10,
+      "Needed": 0.94,
+      "OnHand": 1,
+      "PrepPullAmount": -0.06
+    },
+    {
+      "itemName": "LEMONADE GALLONS",
+      "PrepType": ["JUB PREP", "TypeB"],
+      "YieldType": 2220,
+      "SafetyFactor": 20,
+      "Needed": 1.51,
+      "OnHand": 2,
+      "PrepPullAmount": -0.49
+    }
+  ]
+}
