@@ -8,8 +8,18 @@ import ExportOptions from "../components/ExportOptions.jsx";
 import { PrepChartAPI } from "../apis/PrepChartAPI.jsx";
 import Table from "../components/TableBuilder.jsx";
 
+const prepTableColumnHeaders = [
+  "Item Name",
+  "Prep Type",
+  "Yield/Type",
+  "Safety Factor",
+  "Needed",
+  "On Hand",
+  "Prep/Pull Amount",
+];
+
 export default function PrepChart() {
-  const [prepChart, setPrepChart] = useState([]);
+  const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [prepChartDates, setPrepChartDates] = useState({
     today: new Date(),
@@ -23,50 +33,33 @@ export default function PrepChart() {
     width: "50%",
   });
   const [todayTable, setTodayTable] = useState({
-    columnHeaders: [
-      "Item Name",
-      "Prep Type",
-      "Yield/Type",
-      "Safety Factor",
-      "Needed",
-      "On Hand",
-      "Prep/Pull Amount",
-    ],
+    columnHeaders: prepTableColumnHeaders,
     columnWidths: "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
     rows: [],
   });
   const [tomorrowTable, setTomorrowTable] = useState({
-    columnHeaders: [
-      "Item Name",
-      "Prep Type",
-      "Yield/Type",
-      "Safety Factor",
-      "Needed",
-      "On Hand",
-      "Prep/Pull Amount",
-    ],
+    columnHeaders: prepTableColumnHeaders,
     columnWidths: "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
     rows: [],
   });
   const [nextDayTable, setNextDayTable] = useState({
-    columnHeaders: [
-      "Item Name",
-      "Prep Type",
-      "Yield/Type",
-      "Safety Factor",
-      "Needed",
-      "On Hand",
-      "Prep/Pull Amount",
-    ],
+    columnHeaders: prepTableColumnHeaders,
     columnWidths: "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
     rows: [],
-  })
-
+  });
+  const [defaultSafetyFactorTable, setDefaultSafetyFactorTable] = useState({
+    columnHeaders: ["Default Safety Factor"],
+    columnWidths: "1fr",
+    rows: [],
+    width: "15%",
+    height: "100px"
+  });
 
   useEffect(() => {
     //Todo use companyID and UnitID instead of 1, 1
     PrepChartAPI.get(1, 1).then((data) => {
       setPrepChart(data);
+      console.log(data);
       setIsLoading(false);
       const date = new Date(data.Date);
       const tomorrow = new Date(date);
@@ -84,14 +77,30 @@ export default function PrepChart() {
       buildPrepTable(data.Today, setTodayTable);
       buildPrepTable(data.Tomorrow, setTomorrowTable);
       buildPrepTable(data.NextDay, setNextDayTable);
+      setDefaultSafetyFactorTable({
+        ...defaultSafetyFactorTable,
+        rows: [[{ value: data.DefaultSafetyFactor, cellType: "input" }]],
+      });
     });
   }, []);
 
   const buildForecastTable = (forecastData) => {
     const rows = [
-      [{ value: "Today", cellType: ""},{ value: forecastData.Today, cellType: "input"}, { value: prepChartDates.today.toLocaleDateString(), cellType: ""}],
-      [{ value: "Tomorrow", cellType: ""},{ value: forecastData.Tomorrow, cellType: "input"}, { value: prepChartDates.tomorrow.toLocaleDateString(), cellType: ""}],
-      [{ value: "Next Day", cellType: ""},{ value: forecastData.NextDay, cellType: "input"}, { value: prepChartDates.nextDay.toLocaleDateString(), cellType: ""}],
+      [
+        { value: "Today", cellType: "" },
+        { value: forecastData.Today, cellType: "input" },
+        { value: prepChartDates.today.toLocaleDateString(), cellType: "" },
+      ],
+      [
+        { value: "Tomorrow", cellType: "" },
+        { value: forecastData.Tomorrow, cellType: "input" },
+        { value: prepChartDates.tomorrow.toLocaleDateString(), cellType: "" },
+      ],
+      [
+        { value: "Next Day", cellType: "" },
+        { value: forecastData.NextDay, cellType: "input" },
+        { value: prepChartDates.nextDay.toLocaleDateString(), cellType: "" },
+      ],
     ];
 
     setForecastTable({
@@ -100,17 +109,20 @@ export default function PrepChart() {
     });
   };
 
+  function onInputCellChange(e, row, columnName) {
+    console.log(row, columnName, e.target.value);
+  }
+
   const buildPrepTable = (prepChartSection, setTable) => {
-    console.log(prepChartSection);
     const rows = prepChartSection.map((item) => {
       return [
-        { value: item.itemName, cellType: "" },
-        { value: item.PrepType[0], cellType: "" },
-        { value: item.YieldType, cellType: "" },
-        { value: item.SafetyFactor, cellType: "input" },
-        { value: item.Needed, cellType: "input" },
-        { value: item.OnHand, cellType: "input" },
-        { value: item.PrepPullAmount, cellType: "" },
+        { value: item.itemName, cellType: "", columnName: "Item Name" },
+        { value: item.PrepType[0], cellType: "", columnName: "Prep Type" },
+        { value: item.YieldType, cellType: "", columnName: "Yield/Type" },
+        { value: item.SafetyFactor, cellType: "input", columnName: "Safety Factor", handleOnChange: {onInputCellChange}},
+        { value: item.Needed, cellType: "input", columnName: "Needed", handleOnChange: {onInputCellChange} },
+        { value: item.OnHand, cellType: "input", columnName: "On Hand", handleOnChange: {onInputCellChange} },
+        { value: item.PrepPullAmount, cellType: "", columnName: "Prep/Pull Amount" },
       ];
     });
 
@@ -141,17 +153,27 @@ export default function PrepChart() {
       ) : (
         <div>
           <h2>Forecast</h2>
-          <Table
-            columnHeaders={forecastTable.columnHeaders}
-            columnwidths={forecastTable.columnWidths}
-            rows={forecastTable.rows}
-            width={forecastTable.width}
-          />
+          <Styled.ForeCastAndSafetyFactor>
+            <Table
+              columnHeaders={forecastTable.columnHeaders}
+              columnwidths={forecastTable.columnWidths}
+              rows={forecastTable.rows}
+              width={forecastTable.width}
+            />
+            <Table
+              columnHeaders={defaultSafetyFactorTable.columnHeaders}
+              columnwidths={defaultSafetyFactorTable.columnWidths}
+              rows={defaultSafetyFactorTable.rows}
+              width={defaultSafetyFactorTable.width}
+              height={defaultSafetyFactorTable.height}
+            />
+          </Styled.ForeCastAndSafetyFactor>
           <h2>Today</h2>
           <Table
             columnHeaders={todayTable.columnHeaders}
             columnwidths={todayTable.columnWidths}
             rows={todayTable.rows}
+            handleInputCellChange={onInputCellChange}
           />
 
           <h2>Tomorrow</h2>

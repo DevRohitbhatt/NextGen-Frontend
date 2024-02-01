@@ -3,8 +3,10 @@ import PropTypes from "prop-types";
 
 const Table = styled.div`
   width: ${(props) => (props.width ? props.width : "100%")};
+  height: ${(props) => (props.height ? props.height : "auto")};
   border-radius: 30px;
   padding: 20px;
+  margin: 10px;
   box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
 
   h3 {
@@ -60,12 +62,11 @@ export const Input = styled.input`
   }
 `;
 
-const Cell = ({ value, cellType }) => {
-  console.log(value);
+const Cell = ({ value, cellType, row, columnName, handleOnChange }) => {
   if (cellType === "input")
     return (
       <TableCell>
-        <Input type="text" defaultValue={value > 0 ? value : ""} />
+        <Input type="text" defaultValue={value > 0 ? value : ""} onChange={(e) => handleOnChange(e, row, columnName)}/>
       </TableCell>
     );
   else return <TableCell>{value}</TableCell>;
@@ -74,6 +75,9 @@ const Cell = ({ value, cellType }) => {
 Cell.propTypes = {
   value: PropTypes.any,
   cellType: PropTypes.string,
+  row: PropTypes.number,
+  columnName: PropTypes.string,
+  handleOnChange: PropTypes.func,
 };
 
 export default function TableBuilder({
@@ -81,20 +85,21 @@ export default function TableBuilder({
   columnwidths,
   rows,
   width,
+  height,
+  handleInputCellChange,
 }) {
-  console.log(columnwidths);
 
   return (
-    <Table width={width}>
+    <Table width={width} height={height}>
       <TableHeader columnwidths={columnwidths}>
         {columnHeaders.map((header, index) => (
           <TableHeaderCell key={index}>{header}</TableHeaderCell>
         ))}
       </TableHeader>
-      {rows.map((row, index) => (
-        <TableRow key={index} columnwidths={columnwidths}>
-          {row.map((cell, index) => (
-            <Cell key={index} value={cell.value} cellType={cell.cellType} />
+      {rows.map((row, rowIndex) => (
+        <TableRow key={rowIndex} columnwidths={columnwidths}>
+          {row.map((cell, cellIndex) => (
+            <Cell key={cellIndex} value={cell.value} cellType={cell.cellType} row={rowIndex} columnName={cell.columnName} handleOnChange={handleInputCellChange}/>
           ))}
         </TableRow>
       ))}
@@ -108,4 +113,6 @@ TableBuilder.propTypes = {
   columnwidths: PropTypes.string,
   rows: PropTypes.array,
   width: PropTypes.string,
+  height: PropTypes.string,
+  handleInputCellChange: PropTypes.func,
 };

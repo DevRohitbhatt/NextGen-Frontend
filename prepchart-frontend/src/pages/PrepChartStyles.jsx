@@ -25,6 +25,11 @@ export const DateAndUnitContainer = styled.div`
   margin: auto;
 `;
 
+export const ForeCastAndSafetyFactor = styled.div`
+  display: flex;
+  margin: auto;
+`;
+
 export const Table = styled.div`
   width: ${(props) => props.width ? props.width : "100%"};
   border-radius: 30px;
