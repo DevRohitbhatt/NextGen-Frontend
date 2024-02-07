@@ -7,64 +7,56 @@ import DateSelector from "../components/DateSelector.jsx";
 import ExportOptions from "../components/ExportOptions.jsx";
 import { PrepChartAPI } from "../apis/PrepChartAPI.jsx";
 import Table from "../components/TableBuilder.jsx";
+import PdfBuilder from "../components/PdfBuilder.jsx";
 
-const prepTableColumnHeaders = [
-  "Item Name",
-  "Prep Type",
-  "Yield/Type",
-  "Safety Factor",
-  "Needed",
-  "On Hand",
-  "Prep/Pull Amount",
-];
+const prepTableStructure = {
+  columnHeaders : [
+    "Item Name",
+    "Prep Type",
+    "Yield/Type",
+    "Safety Factor",
+    "Needed",
+    "On Hand",
+    "Prep/Pull Amount",
+  ],
+  columnWidths : "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
+  rows : [],
+};
 
 export default function PrepChart() {
   const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [prepChartDates, setPrepChartDates] = useState({
-    today: new Date(),
-    tomorrow: new Date(),
-    nextDay: new Date(),
-  });
+  const [prepChartDates, setPrepChartDates] = useState({});
   const [forecastTable, setForecastTable] = useState({
-    columnHeaders: ["", "Forecasted Sales", "Date"],
+    columnHeaders: [" ", "Forecasted Sales", "Date"],
     columnWidths: ".5fr 1fr 1fr",
     rows: [],
     width: "50%",
   });
   const [todayTable, setTodayTable] = useState({
-    columnHeaders: prepTableColumnHeaders,
-    columnWidths: "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
-    rows: [],
+    ...prepTableStructure,
   });
   const [tomorrowTable, setTomorrowTable] = useState({
-    columnHeaders: prepTableColumnHeaders,
-    columnWidths: "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
-    rows: [],
+    ...prepTableStructure,
   });
   const [nextDayTable, setNextDayTable] = useState({
-    columnHeaders: prepTableColumnHeaders,
-    columnWidths: "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
-    rows: [],
+    ...prepTableStructure,
   });
   const [defaultSafetyFactorTable, setDefaultSafetyFactorTable] = useState({
     columnHeaders: ["Default Safety Factor"],
     columnWidths: "1fr",
     rows: [],
     width: "15%",
-    height: "100px"
+    height: "100px",
   });
 
   useEffect(() => {
     //Todo use companyID and UnitID instead of 1, 1
     PrepChartAPI.get(1, 1).then((data) => {
       setPrepChart(data);
-      console.log(data);
-      setIsLoading(false);
       const date = new Date(data.Date);
       const tomorrow = new Date(date);
-      //Todo: Date add is not working correctly
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setDate(date.getDate() + 1);
       const nextDay = new Date(tomorrow);
       nextDay.setDate(nextDay.getDate() + 1);
       setPrepChartDates({
@@ -73,7 +65,6 @@ export default function PrepChart() {
         tomorrow: tomorrow,
         nextDay: nextDay,
       });
-      buildForecastTable(data.ForecastData);
       buildPrepTable(data.Today, setTodayTable);
       buildPrepTable(data.Tomorrow, setTomorrowTable);
       buildPrepTable(data.NextDay, setNextDayTable);
@@ -83,6 +74,13 @@ export default function PrepChart() {
       });
     });
   }, []);
+
+  useEffect(() => {
+    if (prepChartDates.today) {
+      buildForecastTable(prepChart.ForecastData);
+      setIsLoading(false);
+    }
+  }, [prepChartDates]);
 
   const buildForecastTable = (forecastData) => {
     const rows = [
@@ -113,16 +111,65 @@ export default function PrepChart() {
     console.log(row, columnName, e.target.value);
   }
 
+  const handlePDFClick = () => {
+    const pdfData = {
+      title: "Prep Chart",
+      exportType: "pdf",
+      body : [
+        { type: "table/Column", title: "Forecast", widths: [50, 100, 75], data: forecastTable },
+        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable},
+        { type: "table", title: "Today", widths: [115, 140, "*", "*", "*", "*", "*"], data: todayTable },
+        { type: "table", title: "Tomorrow", widths: [115, 140, "*", "*", "*", "*", "*"], data: tomorrowTable },
+        { type: "table", title: "Next Day", widths: [115, 140, "*", "*", "*", "*", "*"], data: nextDayTable },
+      ]
+    };
+    PdfBuilder(pdfData);
+  };
+
+  const handlePrintClick = () => {
+    const pdfData = {
+      title: "Prep Chart",
+      exportType: "print",
+      body : [
+        { type: "table/Column", title: "Forecast", widths: [50, 100, 75], data: forecastTable },
+        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable},
+        { type: "table", title: "Today", widths: [115, 140, "*", "*", "*", "*", "*"], data: todayTable },
+        { type: "table", title: "Tomorrow", widths: [115, 140, "*", "*", "*", "*", "*"], data: tomorrowTable },
+        { type: "table", title: "Next Day", widths: [115, 140, "*", "*", "*", "*", "*"], data: nextDayTable },
+      ]
+    };
+    PdfBuilder(pdfData);
+  };
+
   const buildPrepTable = (prepChartSection, setTable) => {
     const rows = prepChartSection.map((item) => {
       return [
         { value: item.itemName, cellType: "", columnName: "Item Name" },
         { value: item.PrepType[0], cellType: "", columnName: "Prep Type" },
         { value: item.YieldType, cellType: "", columnName: "Yield/Type" },
-        { value: item.SafetyFactor, cellType: "input", columnName: "Safety Factor", handleOnChange: {onInputCellChange}},
-        { value: item.Needed, cellType: "input", columnName: "Needed", handleOnChange: {onInputCellChange} },
-        { value: item.OnHand, cellType: "input", columnName: "On Hand", handleOnChange: {onInputCellChange} },
-        { value: item.PrepPullAmount, cellType: "", columnName: "Prep/Pull Amount" },
+        {
+          value: item.SafetyFactor,
+          cellType: "input",
+          columnName: "Safety Factor",
+          handleOnChange: { onInputCellChange },
+        },
+        {
+          value: item.Needed,
+          cellType: "input",
+          columnName: "Needed",
+          handleOnChange: { onInputCellChange },
+        },
+        {
+          value: item.OnHand,
+          cellType: "input",
+          columnName: "On Hand",
+          handleOnChange: { onInputCellChange },
+        },
+        {
+          value: item.PrepPullAmount,
+          cellType: "",
+          columnName: "Prep/Pull Amount",
+        },
       ];
     });
 
@@ -135,23 +182,25 @@ export default function PrepChart() {
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
-      <Styled.OptionsRow>
-        <Styled.DateAndUnitContainer>
-          <UnitSelector />
-          <DateSelector date={prepChartDates.today} />
-        </Styled.DateAndUnitContainer>
-        <ExportOptions
-          includeExcel={true}
-          includePDF={true}
-          includeCSV={true}
-          includePrint={true}
-        />
-      </Styled.OptionsRow>
-
       {isLoading ? (
         <h1>Loading...</h1>
       ) : (
         <div>
+          <Styled.OptionsRow>
+            <Styled.DateAndUnitContainer>
+              <UnitSelector />
+              <DateSelector date={prepChartDates.today} />
+            </Styled.DateAndUnitContainer>
+            <ExportOptions
+              includeExcel={true}
+              includePDF={true}
+              includeCSV={true}
+              includePrint={true}
+              handlePDFClick={handlePDFClick}
+              handlePrintClick={handlePrintClick}
+            />
+          </Styled.OptionsRow>
+
           <h2>Forecast</h2>
           <Styled.ForeCastAndSafetyFactor>
             <Table
@@ -168,7 +217,7 @@ export default function PrepChart() {
               height={defaultSafetyFactorTable.height}
             />
           </Styled.ForeCastAndSafetyFactor>
-          <h2>Today</h2>
+          <h2>Today - {prepChart.ForecastData.Today}</h2>
           <Table
             columnHeaders={todayTable.columnHeaders}
             columnwidths={todayTable.columnWidths}
@@ -176,7 +225,7 @@ export default function PrepChart() {
             handleInputCellChange={onInputCellChange}
           />
 
-          <h2>Tomorrow</h2>
+          <h2>Tomorrow - {prepChart.ForecastData.Tomorrow}</h2>
           <Table
             columnHeaders={tomorrowTable.columnHeaders}
             columnwidths={tomorrowTable.columnWidths}

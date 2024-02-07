@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import PropTypes from "prop-types";
 
 const DateContainer = styled.div`
   display: flex;
@@ -27,11 +28,15 @@ const DateValue = styled.div`
   }
 `;
 
-export default function DateSelector() {
+DateSelector.propTypes = {
+  date: PropTypes.instanceOf(Date),
+};
+
+export default function DateSelector({ date }) {
   return (
     <DateContainer>
       <Label>Select Date</Label>
-      <DateValue>12/23/2023</DateValue>
+      <DateValue>{date.toLocaleDateString()}</DateValue>
     </DateContainer>
   );
 }

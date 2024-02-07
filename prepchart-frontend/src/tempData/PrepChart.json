@@ -1,7 +1,7 @@
 {
   "ForecastData": {
     "Today": 150.75,
-    "Tomorrow": 200.50,
+    "Tomorrow": 200.5,
     "NextDay": 180.25
   },
   "DefaultSafetyFactor": 10.0,
@@ -22,7 +22,7 @@
       "YieldType": 459,
       "SafetyFactor": 8,
       "Needed": 4,
-      "OnHand": 1,
+      "OnHand": 0,
       "PrepPullAmount": 3
     },
     {
@@ -31,7 +31,7 @@
       "YieldType": 754,
       "SafetyFactor": 10,
       "Needed": 3.98,
-      "OnHand": 0.5,
+      "OnHand": 0,
       "PrepPullAmount": 3.48
     },
     {
@@ -40,7 +40,7 @@
       "YieldType": 713,
       "SafetyFactor": 20,
       "Needed": 4.21,
-      "OnHand": 1,
+      "OnHand": 0,
       "PrepPullAmount": 3.21
     }
   ],
@@ -51,7 +51,7 @@
       "YieldType": 1043,
       "SafetyFactor": 10,
       "Needed": 3,
-      "OnHand": 2,
+      "OnHand": 0,
       "PrepPullAmount": 1
     },
     {
@@ -60,7 +60,7 @@
       "YieldType": 459,
       "SafetyFactor": 8,
       "Needed": 4,
-      "OnHand": 1,
+      "OnHand": 0,
       "PrepPullAmount": 3
     }
   ],
@@ -71,8 +71,8 @@
       "YieldType": 3282,
       "SafetyFactor": 10,
       "Needed": 0.94,
-      "OnHand": 1,
-      "PrepPullAmount": -0.06
+      "OnHand": 0,
+      "PrepPullAmount": 0
     },
     {
       "itemName": "LEMONADE GALLONS",
@@ -80,8 +80,8 @@
       "YieldType": 2220,
       "SafetyFactor": 20,
       "Needed": 1.51,
-      "OnHand": 2,
-      "PrepPullAmount": -0.49
+      "OnHand": 0,
+      "PrepPullAmount": 0
     }
   ]
 }

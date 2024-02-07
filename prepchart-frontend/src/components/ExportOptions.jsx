@@ -64,23 +64,27 @@ ExportOptions.propTypes = {
   includePDF: PropTypes.bool,
   includeCSV: PropTypes.bool,
   includePrint: PropTypes.bool,
+  handlePDFClick: PropTypes.func,
+  handleExcelClick: PropTypes.func,
+  handleCSVClick: PropTypes.func,
+  handlePrintClick: PropTypes.func,
 };
 
-export default function ExportOptions({ includeExcel, includePDF, includeCSV, includePrint }) {
+export default function ExportOptions({ includeExcel, includePDF, includeCSV, includePrint, handlePDFClick, handleExcelClick, handleCSVClick, handlePrintClick }) {
 
   return (
     <>
       <ExportOptionsContainer>
         {includeExcel ? (
           <ExportOption>
-            <OptionImage>
+            <OptionImage >
               <ExcelIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
         {includePDF ? (
           <ExportOption>
-            <OptionImage>
+            <OptionImage onClick={handlePDFClick}>
               <PDFIcon />
             </OptionImage>
           </ExportOption>
@@ -94,7 +98,7 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
         ) : null}
         {includePrint ? (
           <ExportOption>
-            <OptionImage>
+            <OptionImage onClick={handlePrintClick}>
               <PrintIcon />
             </OptionImage>
           </ExportOption>

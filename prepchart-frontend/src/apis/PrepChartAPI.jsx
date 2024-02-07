@@ -11,9 +11,10 @@ export const PrepChartAPI = {
     //   unitID,
     //   signal: cancel ? cancelApiObject[this.get.name].handleRequestCancellation().signal : undefined,
     // });
+    const response = await PrepChartjson;
 
     // return response.data;
-    return PrepChartjson;
+    return response;
   },
 }
 
