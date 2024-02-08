@@ -1,145 +1,245 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import * as Styled from "./PrepChartStyles.jsx";
-import axios from "axios";
 import "../components/UnitSelector.jsx";
 import UnitSelector from "../components/UnitSelector.jsx";
 import DateSelector from "../components/DateSelector.jsx";
-import Excel from "../assets/icons/file-excel.png";
-import PDF from "../assets/icons/file-pdf.png";
-import CSV from "../assets/icons/file-csv.png";
-import Print from "../assets/icons/printer.png";
-import TempData from "../tempData/PrepChart.json";
+import ExportOptions from "../components/ExportOptions.jsx";
+import { PrepChartAPI } from "../apis/PrepChartAPI.jsx";
+import Table from "../components/TableBuilder.jsx";
+import PdfBuilder from "../components/PdfBuilder.jsx";
+
+const prepTableStructure = {
+  columnHeaders : [
+    "Item Name",
+    "Prep Type",
+    "Yield/Type",
+    "Safety Factor",
+    "Needed",
+    "On Hand",
+    "Prep/Pull Amount",
+  ],
+  columnWidths : "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
+  rows : [],
+};
 
 export default function PrepChart() {
-  //Temporary API call to test it is working.
-  //Todo: move this to a specific API calling section of the code.
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         "https://localhost:7264/api/GetApp3Params?encryptedParams=" +
-  //           document.location.href
-  //       );
-  //       console.log(response.data);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
+  const [prepChart, setPrepChart] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [prepChartDates, setPrepChartDates] = useState({});
+  const [forecastTable, setForecastTable] = useState({
+    columnHeaders: [" ", "Forecasted Sales", "Date"],
+    columnWidths: ".5fr 1fr 1fr",
+    rows: [],
+    width: "50%",
+  });
+  const [todayTable, setTodayTable] = useState({
+    ...prepTableStructure,
+  });
+  const [tomorrowTable, setTomorrowTable] = useState({
+    ...prepTableStructure,
+  });
+  const [nextDayTable, setNextDayTable] = useState({
+    ...prepTableStructure,
+  });
+  const [defaultSafetyFactorTable, setDefaultSafetyFactorTable] = useState({
+    columnHeaders: ["Default Safety Factor"],
+    columnWidths: "1fr",
+    rows: [],
+    width: "15%",
+    height: "100px",
+  });
 
-  //   fetchData();
-  // }, []);
+  useEffect(() => {
+    //Todo use companyID and UnitID instead of 1, 1
+    PrepChartAPI.get(1, 1).then((data) => {
+      setPrepChart(data);
+      const date = new Date(data.Date);
+      const tomorrow = new Date(date);
+      tomorrow.setDate(date.getDate() + 1);
+      const nextDay = new Date(tomorrow);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setPrepChartDates({
+        ...prepChartDates,
+        today: date,
+        tomorrow: tomorrow,
+        nextDay: nextDay,
+      });
+      buildPrepTable(data.Today, setTodayTable);
+      buildPrepTable(data.Tomorrow, setTomorrowTable);
+      buildPrepTable(data.NextDay, setNextDayTable);
+      setDefaultSafetyFactorTable({
+        ...defaultSafetyFactorTable,
+        rows: [[{ value: data.DefaultSafetyFactor, cellType: "input" }]],
+      });
+    });
+  }, []);
 
-  const data = JSON.parse(JSON.stringify(TempData));
-  console.log(data);
+  useEffect(() => {
+    if (prepChartDates.today) {
+      buildForecastTable(prepChart.ForecastData);
+      setIsLoading(false);
+    }
+  }, [prepChartDates]);
 
-  const Cell = ({ value }) => {
-    return <Styled.TableCell>{value}</Styled.TableCell>;
+  const buildForecastTable = (forecastData) => {
+    const rows = [
+      [
+        { value: "Today", cellType: "" },
+        { value: forecastData.Today, cellType: "input" },
+        { value: prepChartDates.today.toLocaleDateString(), cellType: "" },
+      ],
+      [
+        { value: "Tomorrow", cellType: "" },
+        { value: forecastData.Tomorrow, cellType: "input" },
+        { value: prepChartDates.tomorrow.toLocaleDateString(), cellType: "" },
+      ],
+      [
+        { value: "Next Day", cellType: "" },
+        { value: forecastData.NextDay, cellType: "input" },
+        { value: prepChartDates.nextDay.toLocaleDateString(), cellType: "" },
+      ],
+    ];
+
+    setForecastTable({
+      ...forecastTable,
+      rows: rows,
+    });
+  };
+
+  function onInputCellChange(e, row, columnName) {
+    console.log(row, columnName, e.target.value);
   }
+
+  const handlePDFClick = () => {
+    const pdfData = {
+      title: "Prep Chart",
+      exportType: "pdf",
+      body : [
+        { type: "table/Column", title: "Forecast", widths: [50, 100, 75], data: forecastTable },
+        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable},
+        { type: "table", title: "Today", widths: [115, 140, "*", "*", "*", "*", "*"], data: todayTable },
+        { type: "table", title: "Tomorrow", widths: [115, 140, "*", "*", "*", "*", "*"], data: tomorrowTable },
+        { type: "table", title: "Next Day", widths: [115, 140, "*", "*", "*", "*", "*"], data: nextDayTable },
+      ]
+    };
+    PdfBuilder(pdfData);
+  };
+
+  const handlePrintClick = () => {
+    const pdfData = {
+      title: "Prep Chart",
+      exportType: "print",
+      body : [
+        { type: "table/Column", title: "Forecast", widths: [50, 100, 75], data: forecastTable },
+        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable},
+        { type: "table", title: "Today", widths: [115, 140, "*", "*", "*", "*", "*"], data: todayTable },
+        { type: "table", title: "Tomorrow", widths: [115, 140, "*", "*", "*", "*", "*"], data: tomorrowTable },
+        { type: "table", title: "Next Day", widths: [115, 140, "*", "*", "*", "*", "*"], data: nextDayTable },
+      ]
+    };
+    PdfBuilder(pdfData);
+  };
+
+  const buildPrepTable = (prepChartSection, setTable) => {
+    const rows = prepChartSection.map((item) => {
+      return [
+        { value: item.itemName, cellType: "", columnName: "Item Name" },
+        { value: item.PrepType[0], cellType: "", columnName: "Prep Type" },
+        { value: item.YieldType, cellType: "", columnName: "Yield/Type" },
+        {
+          value: item.SafetyFactor,
+          cellType: "input",
+          columnName: "Safety Factor",
+          handleOnChange: { onInputCellChange },
+        },
+        {
+          value: item.Needed,
+          cellType: "input",
+          columnName: "Needed",
+          handleOnChange: { onInputCellChange },
+        },
+        {
+          value: item.OnHand,
+          cellType: "input",
+          columnName: "On Hand",
+          handleOnChange: { onInputCellChange },
+        },
+        {
+          value: item.PrepPullAmount,
+          cellType: "",
+          columnName: "Prep/Pull Amount",
+        },
+      ];
+    });
+
+    setTable({
+      ...todayTable,
+      rows: rows,
+    });
+  };
 
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
-      <Styled.OptionsRow>
-        <Styled.DateAndUnitContainer>
-          <UnitSelector />
-          <DateSelector />
-        </Styled.DateAndUnitContainer>
-        <Styled.ExportOptionsContainer>
-          <Styled.ExportOption>
-            <Styled.OptionImage>
-              <img src={Excel} alt="Excel" />
-            </Styled.OptionImage>
-          </Styled.ExportOption>
-          <Styled.ExportOption>
-            <Styled.OptionImage>
-              <img src={PDF} alt="PDF" />
-            </Styled.OptionImage>
-          </Styled.ExportOption>
-          <Styled.ExportOption>
-            <Styled.OptionImage>
-              <img src={CSV} alt="CSV" />
-            </Styled.OptionImage>
-          </Styled.ExportOption>
-          <Styled.ExportOption>
-            <Styled.OptionImage>
-              <img src={Print} alt="Print" />
-            </Styled.OptionImage>
-          </Styled.ExportOption>
-        </Styled.ExportOptionsContainer>
-      </Styled.OptionsRow>
+      {isLoading ? (
+        <h1>Loading...</h1>
+      ) : (
+        <div>
+          <Styled.OptionsRow>
+            <Styled.DateAndUnitContainer>
+              <UnitSelector />
+              <DateSelector date={prepChartDates.today} />
+            </Styled.DateAndUnitContainer>
+            <ExportOptions
+              includeExcel={true}
+              includePDF={true}
+              includeCSV={true}
+              includePrint={true}
+              handlePDFClick={handlePDFClick}
+              handlePrintClick={handlePrintClick}
+            />
+          </Styled.OptionsRow>
 
-      <h2>Today</h2>
-      <Styled.Table>
-        <Styled.TableHeader>
-          <Styled.TableHeaderCell>Item Name</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Prep Type</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Yield/Type</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Safety Factor</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Needed</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>On Hand</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Prep/Pull Amount</Styled.TableHeaderCell>
-        </Styled.TableHeader>
-        {data.Today.map((item, index) => (
-          <Styled.TableRow key={index}>
-            <Styled.TableCell>{item.itemName}</Styled.TableCell>
-            <Styled.TableCell>{item.PrepType[0]}</Styled.TableCell>
-            <Styled.TableCell>{item.YieldType}</Styled.TableCell>
-            <Styled.TableCell>{item.SafetyFactor}</Styled.TableCell>
-            <Styled.TableCell>{item.Needed}</Styled.TableCell>
-            <Styled.TableCell>{item.OnHand}</Styled.TableCell>
-            <Styled.TableCell>{item.PrepPullAmount}</Styled.TableCell>
-          </Styled.TableRow>
-        ))}
-      </Styled.Table>
+          <h2>Forecast</h2>
+          <Styled.ForeCastAndSafetyFactor>
+            <Table
+              columnHeaders={forecastTable.columnHeaders}
+              columnwidths={forecastTable.columnWidths}
+              rows={forecastTable.rows}
+              width={forecastTable.width}
+            />
+            <Table
+              columnHeaders={defaultSafetyFactorTable.columnHeaders}
+              columnwidths={defaultSafetyFactorTable.columnWidths}
+              rows={defaultSafetyFactorTable.rows}
+              width={defaultSafetyFactorTable.width}
+              height={defaultSafetyFactorTable.height}
+            />
+          </Styled.ForeCastAndSafetyFactor>
+          <h2>Today - {prepChart.ForecastData.Today}</h2>
+          <Table
+            columnHeaders={todayTable.columnHeaders}
+            columnwidths={todayTable.columnWidths}
+            rows={todayTable.rows}
+            handleInputCellChange={onInputCellChange}
+          />
 
-      <h2>Tomorrow</h2>
-      <Styled.Table>
-        <Styled.TableHeader>
-          <Styled.TableHeaderCell>Item Name</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Prep Type</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Yield/Type</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Safety Factor</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Needed</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>On Hand</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Prep/Pull Amount</Styled.TableHeaderCell>
-        </Styled.TableHeader>
-        {data.Tomorrow.map((item, index) => (
-          <Styled.TableRow key={index}>
-            <Styled.TableCell>{item.itemName}</Styled.TableCell>
-            <Styled.TableCell>{item.PrepType[0]}</Styled.TableCell>
-            <Styled.TableCell>{item.YieldType}</Styled.TableCell>
-            <Styled.TableCell>{item.SafetyFactor}</Styled.TableCell>
-            <Styled.TableCell>{item.Needed}</Styled.TableCell>
-            <Styled.TableCell>{item.OnHand}</Styled.TableCell>
-            <Styled.TableCell>{item.PrepPullAmount}</Styled.TableCell>
-          </Styled.TableRow>
-        ))}
-      </Styled.Table>
+          <h2>Tomorrow - {prepChart.ForecastData.Tomorrow}</h2>
+          <Table
+            columnHeaders={tomorrowTable.columnHeaders}
+            columnwidths={tomorrowTable.columnWidths}
+            rows={tomorrowTable.rows}
+          />
 
-      <h2>Next Day</h2>
-      <Styled.Table>
-        <Styled.TableHeader>
-          <Styled.TableHeaderCell>Item Name</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Prep Type</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Yield/Type</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Safety Factor</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Needed</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>On Hand</Styled.TableHeaderCell>
-          <Styled.TableHeaderCell>Prep/Pull Amount</Styled.TableHeaderCell>
-        </Styled.TableHeader>
-        {data.NextDay.map((item, index) => (
-          <Styled.TableRow key={index}>
-            <Styled.TableCell>{item.itemName}</Styled.TableCell>
-            <Styled.TableCell>{item.PrepType[0]}</Styled.TableCell>
-            <Styled.TableCell>{item.YieldType}</Styled.TableCell>
-            <Styled.TableCell>{item.SafetyFactor}</Styled.TableCell>
-            <Styled.TableCell>{item.Needed}</Styled.TableCell>
-            <Styled.TableCell>{item.OnHand}</Styled.TableCell>
-            <Styled.TableCell>{item.PrepPullAmount}</Styled.TableCell>
-          </Styled.TableRow>
-        ))}
-      </Styled.Table>
-      
+          <h2>Next Day</h2>
+          <Table
+            columnHeaders={nextDayTable.columnHeaders}
+            columnwidths={nextDayTable.columnWidths}
+            rows={nextDayTable.rows}
+          />
+        </div>
+      )}
     </Styled.PageContainer>
   );
 }
