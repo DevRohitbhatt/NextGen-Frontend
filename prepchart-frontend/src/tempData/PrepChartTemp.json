@@ -1,0 +1,114 @@
+{
+  "ForecastData": {
+    "Today": 150.75,
+    "Tomorrow": 200.50,
+    "NextDay": 180.25
+  },
+  "DefaultSafetyFactor": 10.0,
+  "AllData": [
+    {
+      "InventoryItemID": "30570",
+      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ",
+      "ThawTime": 30
+    },
+    {
+      "InventoryItemID": "30571",
+      "Description": "CHIPOTLE SAUCE - I=A",
+      "ThawTime": 34
+    },
+    {
+      "InventoryItemID": "30572",
+      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A",
+      "ThawTime": 12
+    },
+    {
+      "InventoryItemID": "30573",
+      "Description": "(R) 9 Inch Bun",
+      "ThawTime": 23
+    },
+    {
+      "InventoryItemID": "30574",
+      "Description": "(R) FRIES-5LB BAGS",
+      "ThawTime": 0
+    },
+    {
+      "InventoryItemID": "30575",
+      "Description": "(R) CHICKEN",
+      "ThawTime": 15
+    },{
+      "InventoryItemID": "30570",
+      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ",
+      "ThawTime": 30
+    },
+    {
+      "InventoryItemID": "30571",
+      "Description": "CHIPOTLE SAUCE - I=A",
+      "ThawTime": 34
+    },
+    {
+      "InventoryItemID": "30572",
+      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A",
+      "ThawTime": 12
+    },{
+      "InventoryItemID": "30570",
+      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ",
+      "ThawTime": 30
+    },
+    {
+      "InventoryItemID": "30571",
+      "Description": "CHIPOTLE SAUCE - I=A",
+      "ThawTime": 34
+    },
+    {
+      "InventoryItemID": "30572",
+      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A",
+      "ThawTime": 12
+    },{
+      "InventoryItemID": "30570",
+      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ",
+      "ThawTime": 30
+    },
+    {
+      "InventoryItemID": "30571",
+      "Description": "CHIPOTLE SAUCE - I=A",
+      "ThawTime": 34
+    },
+    {
+      "InventoryItemID": "30572",
+      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A",
+      "ThawTime": 12
+    }
+  ],
+  "Today": [
+    {
+      "InventoryItemID": "30575",
+      "Description": "(R) CHICKEN",
+      "ThawTime": 15
+    },
+    {
+      "InventoryItemID": "30574",
+      "Description": "(R) FRIES-5LB BAGS",
+      "ThawTime": 0
+    }
+  ],
+  "Tomorrow": [
+    {
+      "InventoryItemID": "30573",
+      "Description": "(R) 9 Inch Bun",
+      "ThawTime": 23
+    },
+    {
+      "InventoryItemID": "30573",
+      "Description": "(R) 9 Inch Bun",
+      "ThawTime": 23
+    }
+  ],
+  "NextDay": [
+    {
+      "InventoryItemID": "30573",
+      "Description": "(R) 9 Inch Bun",
+      "ThawTime": 23
+    }
+  ]
+  
+}

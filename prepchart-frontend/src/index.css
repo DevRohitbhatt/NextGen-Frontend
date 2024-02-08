@@ -54,6 +54,36 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.drag-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  /* border: 1px solid black; */
+  height: auto;
+  width: auto;
+  cursor: pointer;
+
+  
+  /* background-color: lightblue; */
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.drop-board {
+  /* display: inherit; */
+  padding-top: 9px;
+  flex-direction: column;
+  justify-content: space-around;
+  /* border: 1px solid black; */
+  min-height: 120px;
+  width: 500px;
+  /* background-color: lightgreen; */
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
