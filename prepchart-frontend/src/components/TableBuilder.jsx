@@ -1,12 +1,13 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
+import { InventoryItem } from '../components/DraggableInventoryItem.jsx';
 
 const Table = styled.div`
-  width: ${(props) => (props.width ? props.width : "100%")};
+  width: ${(props) => (props.width ? props.width : "auto")};
   height: ${(props) => (props.height ? props.height : "auto")};
   border-radius: 30px;
   padding: 20px;
-  margin: 10px;
+  // margin: 10px;
   box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
 
   h3 {
@@ -87,6 +88,7 @@ export default function TableBuilder({
   width,
   height,
   handleInputCellChange,
+  isDrag = false,
 }) {
 
   return (
@@ -96,13 +98,20 @@ export default function TableBuilder({
           <TableHeaderCell key={index}>{header}</TableHeaderCell>
         ))}
       </TableHeader>
-      {rows.map((row, rowIndex) => (
-        <TableRow key={rowIndex} columnwidths={columnwidths}>
+      {rows.map((row, rowIndex) => {
+
+        if(isDrag){
+          return <InventoryItem Description={row.Description} InventoryItemID={row.InventoryItemID}  ThawTime={row.ThawTime} />
+        }
+
+       return <TableRow key={rowIndex} columnwidths={columnwidths}>
           {row.map((cell, cellIndex) => (
             <Cell key={cellIndex} value={cell.value} cellType={cell.cellType} row={rowIndex} columnName={cell.columnName} handleOnChange={handleInputCellChange}/>
           ))}
         </TableRow>
-      ))}
+
+
+          })}
     </Table>
   );
 }

@@ -9,35 +9,37 @@ export const PageTitle = styled.div`
   font-size: 2.75rem;
   line-height: 1.1;
   margin: 15px 0 40px 0;
+  text-align: left;
 `;
 
 export const OptionsRow = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 40px;
-  border-radius: 30px;
+  border-radius: 15px;
   padding: 10px 20px;
   box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
   
 `;
-export const OptionsRowtbl = styled.div`
+export const TableLeft = styled.div`
   // display: flex;
   // justify-content: space-between;
   // margin-bottom: 40px;
   // border-radius: 30px;
   // padding: 10px 20px;
   // box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
+  width: 70%;
 `;
 
 
-export const ExportOptionsContainer = styled.div`
+export const SaveOptionsContainer = styled.div`
   display: flex;
   justify-content: end;
   margin: auto;
   width: 100%;
 `;
 
-export const ExportOption = styled.div`
+export const SaveOption = styled.div`
   margin-left: 10px;
   width: 60px;
   height: 60px;
@@ -62,6 +64,9 @@ export const OptionImage = styled.div`
     width: 40px;
     color: white;
   }
+  img:hover {
+    filter: brightness(0) invert(1);
+  }
 `;
 
 export const DateAndUnitContainer = styled.div`
@@ -70,7 +75,7 @@ export const DateAndUnitContainer = styled.div`
 `;
 
 export const Table = styled.div`
-  border-radius: 30px;
+  border-radius: 15px;
   padding: 20px;
   box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
 
@@ -84,10 +89,10 @@ export const TableHeader = styled.div`
   display: grid;
   grid-template-columns: 1.5fr 4fr 1.5fr;
   width: 100%;
-  margin-bottom: 10px;
+  // margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
-  text-align: center;
+  text-align: left;
 `;
 
 export const TableHeaderCell = styled.div`
@@ -99,17 +104,24 @@ export const TableRow = styled.div`
   display: grid;
   grid-template-columns: 1.5fr 4fr 1.5fr;
   border-bottom: 1px solid ${(props) => props.theme.lightGrey};
-  padding: 10px 0;
+  padding: 8px 8px;
 `;
 export const TableHeaderRight = styled.div`
   display: grid;
-  grid-template-columns: 13fr 1.5fr 1.5fr;
+  grid-template-columns: 13fr 1.5fr;
   width: 100%;
   margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
 
 `;
+export const TableHeaderTop = styled.div`
+  display: grid;
+  grid-template-columns: 13fr 1.5fr 1.5fr;
+  width: 100%;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  `;
 export const TableRowRight = styled.div`
   display: grid;
   grid-template-columns: 13fr 1.5fr 1.5fr;
@@ -121,7 +133,7 @@ export const TableCell = styled.div`
   font-size: 1.0em;
 `;
 
-export const Rowright = styled.div`
+export const TableRight = styled.div`
   // display: flex;
   // justify-content: space-between;
   // margin-bottom: 40px;
@@ -130,12 +142,15 @@ export const Rowright = styled.div`
   // box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
   // // width: 40%;
   // float: right;
+  width: 30%;
 `;
+
 export const Maindiv=styled.div`
 width:100%;
 display: flex;
 gap: 40px;
 `;
-export const DivMargin=styled.div`
+
+export const RightTblMarg=styled.div`
 margin-bottom: 12px;
 `;

@@ -61,16 +61,18 @@ button:focus-visible {
   /* border: 1px solid black; */
   height: auto;
   width: auto;
-  cursor: pointer;
-
-  
   /* background-color: lightblue; */
+}
+.gtrxDw:hover {
+  background: #efefef;
+  cursor: move;
 }
 
 .container {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
+  gap:40px;
 }
 
 .drop-board {
@@ -78,12 +80,33 @@ button:focus-visible {
   padding-top: 9px;
   flex-direction: column;
   justify-content: space-around;
-  /* border: 1px solid black; */
-  min-height: 120px;
-  width: 500px;
-  /* background-color: lightgreen; */
 }
-
+.btn-save {
+  font-size: 35px !important;
+  position: relative;
+  top: 5px;
+  color: #364790 !important;
+}
+.gpKiSC:hover .btn-save {
+  color: #fff !important;
+}
+.sc-kMzELR.blJLmA:hover {
+  background: #efefef;
+  cursor: move;
+}
+.fHAJhM .blJLmA {
+  display: flex;
+}
+.fHAJhM .blJLmA div:nth-child(2) {
+  width: 59%;
+}
+.fHAJhM .blJLmA div:nth-child(3) {
+  width: 38%;
+  text-align: right;
+}
+.kWmskp:hover .btn-save {
+  color: #fff !important;
+}
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
