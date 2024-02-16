@@ -8,6 +8,7 @@ import ExportOptions from "../components/ExportOptions.jsx";
 import { PrepChartAPI } from "../apis/PrepChartAPI.jsx";
 import Table from "../components/TableBuilder.jsx";
 import PdfBuilder from "../components/PdfBuilder.jsx";
+import * as PrepChartFunctions from "../functions/PrepChart.jsx";
 
 const prepTableStructure = {
   columnHeaders : [
@@ -19,6 +20,7 @@ const prepTableStructure = {
     "On Hand",
     "Prep/Pull Amount",
   ],
+  dataTypes : ["string", "string", "number", "number", "number", "number", "number"],
   columnWidths : "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
   rows : [],
 };
@@ -29,6 +31,7 @@ export default function PrepChart() {
   const [prepChartDates, setPrepChartDates] = useState({});
   const [forecastTable, setForecastTable] = useState({
     columnHeaders: [" ", "Forecasted Sales", "Date"],
+    dataTypes: ["string", "number", "string"],
     columnWidths: ".5fr 1fr 1fr",
     rows: [],
     width: "50%",
@@ -44,6 +47,7 @@ export default function PrepChart() {
   });
   const [defaultSafetyFactorTable, setDefaultSafetyFactorTable] = useState({
     columnHeaders: ["Default Safety Factor"],
+    dataTypes: ["number"],
     columnWidths: "1fr",
     rows: [],
     width: "15%",
@@ -65,9 +69,9 @@ export default function PrepChart() {
         tomorrow: tomorrow,
         nextDay: nextDay,
       });
-      buildPrepTable(data.Today, setTodayTable);
-      buildPrepTable(data.Tomorrow, setTomorrowTable);
-      buildPrepTable(data.NextDay, setNextDayTable);
+      PrepChartFunctions.buildPrepTable(data.Today, setTodayTable, todayTable, onInputCellChange);
+      PrepChartFunctions.buildPrepTable(data.Tomorrow, setTomorrowTable, tomorrowTable, onInputCellChange);
+      PrepChartFunctions.buildPrepTable(data.NextDay, setNextDayTable, nextDayTable, onInputCellChange);
       setDefaultSafetyFactorTable({
         ...defaultSafetyFactorTable,
         rows: [[{ value: data.DefaultSafetyFactor, cellType: "input" }]],
@@ -107,8 +111,24 @@ export default function PrepChart() {
     });
   };
 
-  function onInputCellChange(e, row, columnName) {
-    console.log(row, columnName, e.target.value);
+  function onInputCellChange(e, row, columnName, tableName) {
+    if (tableName === "Today") {
+      PrepChartFunctions.onInputCellChange(e, row, columnName, tableName, todayTable, setTodayTable, prepChart, setPrepChart);
+    } else if (tableName === "Tomorrow") {
+      PrepChartFunctions.onInputCellChange(e, row, columnName, tableName, tomorrowTable, setTomorrowTable, prepChart, setPrepChart);
+    } else if (tableName === "NextDay") {
+      PrepChartFunctions.onInputCellChange(e, row, columnName, tableName, nextDayTable, setNextDayTable, prepChart, setPrepChart);
+    }
+  }
+
+  function handleDropdownChange(e, row, columnName, tableName) {
+    if (tableName === "Today") {
+      PrepChartFunctions.handleDropdownChange(e, row, columnName, tableName, todayTable, setTodayTable, prepChart, setPrepChart);
+    } else if (tableName === "Tomorrow") {
+      PrepChartFunctions.handleDropdownChange(e, row, columnName, tableName, tomorrowTable, setTomorrowTable, prepChart, setPrepChart);
+    } else if (tableName === "NextDay") {
+      PrepChartFunctions.handleDropdownChange(e, row, columnName, tableName, nextDayTable, setNextDayTable, prepChart, setPrepChart);
+    }
   }
 
   const handlePDFClick = () => {
@@ -141,44 +161,6 @@ export default function PrepChart() {
     PdfBuilder(pdfData);
   };
 
-  const buildPrepTable = (prepChartSection, setTable) => {
-    const rows = prepChartSection.map((item) => {
-      return [
-        { value: item.itemName, cellType: "", columnName: "Item Name" },
-        { value: item.PrepType[0], cellType: "", columnName: "Prep Type" },
-        { value: item.YieldType, cellType: "", columnName: "Yield/Type" },
-        {
-          value: item.SafetyFactor,
-          cellType: "input",
-          columnName: "Safety Factor",
-          handleOnChange: { onInputCellChange },
-        },
-        {
-          value: item.Needed,
-          cellType: "input",
-          columnName: "Needed",
-          handleOnChange: { onInputCellChange },
-        },
-        {
-          value: item.OnHand,
-          cellType: "input",
-          columnName: "On Hand",
-          handleOnChange: { onInputCellChange },
-        },
-        {
-          value: item.PrepPullAmount,
-          cellType: "",
-          columnName: "Prep/Pull Amount",
-        },
-      ];
-    });
-
-    setTable({
-      ...todayTable,
-      rows: rows,
-    });
-  };
-
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
@@ -205,12 +187,14 @@ export default function PrepChart() {
           <Styled.ForeCastAndSafetyFactor>
             <Table
               columnHeaders={forecastTable.columnHeaders}
+              dataTypes={forecastTable.dataTypes}
               columnwidths={forecastTable.columnWidths}
               rows={forecastTable.rows}
               width={forecastTable.width}
             />
             <Table
               columnHeaders={defaultSafetyFactorTable.columnHeaders}
+              dataTypes={defaultSafetyFactorTable.dataTypes}
               columnwidths={defaultSafetyFactorTable.columnWidths}
               rows={defaultSafetyFactorTable.rows}
               width={defaultSafetyFactorTable.width}
@@ -220,23 +204,31 @@ export default function PrepChart() {
           <h2>Today - {prepChart.ForecastData.Today}</h2>
           <Table
             columnHeaders={todayTable.columnHeaders}
+            dataTypes={todayTable.dataTypes}
             columnwidths={todayTable.columnWidths}
             rows={todayTable.rows}
+            tableName="Today"
             handleInputCellChange={onInputCellChange}
           />
 
           <h2>Tomorrow - {prepChart.ForecastData.Tomorrow}</h2>
           <Table
             columnHeaders={tomorrowTable.columnHeaders}
+            dataTypes={tomorrowTable.dataTypes}
             columnwidths={tomorrowTable.columnWidths}
             rows={tomorrowTable.rows}
+            tableName={"Tomorrow"}
+            handleInputCellChange={onInputCellChange}
           />
 
           <h2>Next Day</h2>
           <Table
             columnHeaders={nextDayTable.columnHeaders}
+            dataTypes={nextDayTable.dataTypes}
             columnwidths={nextDayTable.columnWidths}
             rows={nextDayTable.rows}
+            tableName={"NextDay"}
+            handleInputCellChange={onInputCellChange}
           />
         </div>
       )}

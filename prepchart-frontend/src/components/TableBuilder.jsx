@@ -29,6 +29,7 @@ const TableHeaderCell = styled.div`
   font-weight: bold;
   font-size: 1.2em;
   margin: 0 5px;
+  text-align: ${(props) => props.columntype === "number" ? "center" : "left"};
 `;
 
 const TableRow = styled.div`
@@ -42,6 +43,8 @@ const TableRow = styled.div`
 const TableCell = styled.div`
   font-size: 1em;
   margin: 0 5px;
+    //if value of cell is numeric center the text
+    text-align: ${(props) => props.columntype === "number" ? "center" : "left"};
 `;
 
 export const Input = styled.input`
@@ -50,6 +53,7 @@ export const Input = styled.input`
   border: none;
   border-radius: 5px;
   font-size: 1em;
+  text-align: ${(props) => props.columntype === "number" ? "center" : "left"};
 
   &:focus {
     outline: none;
@@ -62,44 +66,77 @@ export const Input = styled.input`
   }
 `;
 
-const Cell = ({ value, cellType, row, columnName, handleOnChange }) => {
+const Dropdown = styled.select`
+  width: 100%;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  padding: 5px;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:hover {
+    cursor: pointer;
+    background-color: ${(props) => props.theme.lightGrey};
+  }
+`;
+
+const Cell = ({ value, cellType, row, columnName, columntype, handleOnChange, tableName }) => {
   if (cellType === "input")
     return (
-      <TableCell>
-        <Input type="text" defaultValue={value > 0 ? value : ""} onChange={(e) => handleOnChange(e, row, columnName)}/>
+      <TableCell columntype={columntype}>
+        <Input type="text" defaultValue={value > 0 ? value : ""} columntype={columntype} onChange={(e) => handleOnChange(e, row, columnName, tableName)}/>
       </TableCell>
     );
-  else return <TableCell>{value}</TableCell>;
+  else if (cellType === "dropdown") {
+    return (
+      <TableCell columntype={columntype}>
+        <Dropdown>
+          {value.map((option, index) => (
+            <option key={index} value={option.value}>
+              {option.value}
+            </option>
+          ))}
+        </Dropdown>
+      </TableCell>
+    );
+  }
+  else return <TableCell columntype={columntype}>{value}</TableCell>;
 };
 
 Cell.propTypes = {
   value: PropTypes.any,
   cellType: PropTypes.string,
   row: PropTypes.number,
+  tableName: PropTypes.string,
   columnName: PropTypes.string,
+  columntype: PropTypes.string,
   handleOnChange: PropTypes.func,
 };
 
 export default function TableBuilder({
   columnHeaders,
+  dataTypes,
   columnwidths,
   rows,
+  tableName,
   width,
   height,
   handleInputCellChange,
 }) {
-
   return (
-    <Table width={width} height={height}>
+    <Table width={width} height={height}> 
       <TableHeader columnwidths={columnwidths}>
         {columnHeaders.map((header, index) => (
-          <TableHeaderCell key={index}>{header}</TableHeaderCell>
+          <TableHeaderCell key={index} columntype={dataTypes[index]}>{header}</TableHeaderCell>
         ))}
       </TableHeader>
       {rows.map((row, rowIndex) => (
         <TableRow key={rowIndex} columnwidths={columnwidths}>
-          {row.map((cell, cellIndex) => (
-            <Cell key={cellIndex} value={cell.value} cellType={cell.cellType} row={rowIndex} columnName={cell.columnName} handleOnChange={handleInputCellChange}/>
+          {row && row.map((cell, cellIndex) => (
+            <Cell key={cellIndex} value={cell.value} columntype={dataTypes[cellIndex]} cellType={cell.cellType} row={rowIndex} tableName={tableName} columnName={cell.columnName} handleOnChange={handleInputCellChange}/>
           ))}
         </TableRow>
       ))}
@@ -110,8 +147,10 @@ export default function TableBuilder({
 TableBuilder.propTypes = {
   props: PropTypes.object,
   columnHeaders: PropTypes.array,
+  dataTypes: PropTypes.array,
   columnwidths: PropTypes.string,
   rows: PropTypes.array,
+  tableName: PropTypes.string,
   width: PropTypes.string,
   height: PropTypes.string,
   handleInputCellChange: PropTypes.func,
