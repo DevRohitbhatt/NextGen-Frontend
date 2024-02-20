@@ -7,7 +7,7 @@ const Table = styled.div`
   height: ${(props) => (props.height ? props.height : "auto")};
   border-radius: 30px;
   padding: 20px;
-  // margin: 10px;
+  margin-top: 26px;
   box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
 
   h3 {
@@ -101,7 +101,7 @@ export default function TableBuilder({
       {rows.map((row, rowIndex) => {
 
         if(isDrag){
-          return <InventoryItem Description={row.Description} InventoryItemID={row.InventoryItemID}  ThawTime={row.ThawTime} />
+          return <InventoryItem key={row.InventoryItemID} Description={row.Description} InventoryItemID={row.InventoryItemID}  ThawTime={row.ThawTime} />
         }
 
        return <TableRow key={rowIndex} columnwidths={columnwidths}>

@@ -144,7 +144,14 @@ export const TableRight = styled.div`
   // float: right;
   width: 30%;
 `;
-
+export const TableTitle = styled.div`
+  font-size: 1.2em;
+  line-height: 1.1;
+  margin: 0px 0px 0px 9px;
+  text-align: left;
+  padding-bottom: 2px;
+  font-weight:bold;
+`;
 export const Maindiv=styled.div`
 width:100%;
 display: flex;
