@@ -19,6 +19,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -46,9 +47,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -63,6 +66,7 @@ button:focus-visible {
   width: auto;
   /* background-color: lightblue; */
 }
+
 .gtrxDw:hover {
   background: #efefef;
   cursor: move;
@@ -72,7 +76,7 @@ button:focus-visible {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  gap:40px;
+  gap: 40px;
 }
 
 .drop-board {
@@ -81,47 +85,58 @@ button:focus-visible {
   flex-direction: column;
   justify-content: space-around;
 }
+
 .btn-save {
   font-size: 35px !important;
   position: relative;
   top: 5px;
   color: #364790 !important;
 }
+
 .gpKiSC:hover .btn-save {
   color: #fff !important;
 }
+
 .sc-kMzELR.blJLmA:hover {
   background: #efefef;
   cursor: move;
 }
+
 .fHAJhM .blJLmA {
   display: flex;
 }
+
 .fHAJhM .blJLmA div:nth-child(2) {
   width: 59%;
 }
+
 .fHAJhM .blJLmA div:nth-child(3) {
   width: 38%;
   text-align: right;
 }
+
 .kWmskp:hover .btn-save {
   color: #fff !important;
 }
-.Search{
+
+.Search {
   border-radius: 31px;
   width: 173px;
   text-align: center;
 }
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
- 
+
 }

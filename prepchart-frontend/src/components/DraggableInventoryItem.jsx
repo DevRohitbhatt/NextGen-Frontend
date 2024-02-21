@@ -1,11 +1,10 @@
-import React from 'react';
 import { useDrag } from 'react-dnd';
 import * as Styled from "../pages/PrepChartTempStyles";
 
 export function InventoryItem({Description, InventoryItemID,ThawTime}) {
     const [{isDragging}, drag] = useDrag(() => ({
         type: "content",
-        item: {InventoryItemID: InventoryItemID},
+        item: {InventoryItemID: InventoryItemID,id:InventoryItemID,},
         collect: (monitor) => ({
             isDragging: !!monitor.isDragging(),
         }),
