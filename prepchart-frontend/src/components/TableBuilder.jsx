@@ -124,4 +124,5 @@ TableBuilder.propTypes = {
   width: PropTypes.string,
   height: PropTypes.string,
   handleInputCellChange: PropTypes.func,
+  isDrag: PropTypes.bool,
 };

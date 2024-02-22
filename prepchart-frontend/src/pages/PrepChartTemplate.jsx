@@ -5,12 +5,12 @@ import * as Styled from "./PrepChartTempStyles.jsx";
 import "../components/UnitSelector.jsx";
 import UnitSelector from "../components/UnitSelector.jsx";
 import Table from "../components/TableBuilder.jsx";
-import { PrepChartTempAPI } from "../apis/PrepChartTempAPI.jsx";
+import { PrepChartTempAPI } from "../apis/PrepChartTemplateAPI.jsx";
 import { FaRegSave } from "react-icons/fa";
 import SearchBar from "../components/SearchBar.jsx";
 
 var ItemList = [];
-
+const placeholder = "  Column drop here .....";
 const prepTableStructure = {
   columnHeaders: ["Inventory ID", "Description", "Thaw Time (Hrs)"],
   columnWidths: "1.5fr 2fr 1fr",
@@ -56,13 +56,19 @@ export default function PrepChartTemplate() {
   const SearchItem = (keyword) => {
     const filtered = MasterTable.rows.filter(
       (item) =>
-        (item.Description && item.Description.toLowerCase().includes(keyword.toLowerCase())) ||
-        (item.InventoryItemID && item.InventoryItemID.toString().toLowerCase().includes(keyword.toLowerCase())) ||
-        (item.ThawTime && item.ThawTime.toString().toLowerCase().includes(keyword.toLowerCase()))
+        (item.Description &&
+          item.Description.toLowerCase().includes(keyword.toLowerCase())) ||
+        (item.InventoryItemID &&
+          item.InventoryItemID.toString()
+            .toLowerCase()
+            .includes(keyword.toLowerCase())) ||
+        (item.ThawTime &&
+          item.ThawTime.toString()
+            .toLowerCase()
+            .includes(keyword.toLowerCase()))
     );
     setFilteredItem(filtered);
   };
-
   const [{ isOverToday }, dropToday] = useDrop(() => ({
     accept: "content",
     drop: (item) => DropToday(item.InventoryItemID),
@@ -170,6 +176,7 @@ export default function PrepChartTemplate() {
                 <Styled.TableHeaderTop>
                   <Styled.TableHeaderCell>Today</Styled.TableHeaderCell>
                 </Styled.TableHeaderTop>
+
                 <Styled.Table>
                   <div
                     className="drop-board"
@@ -183,7 +190,7 @@ export default function PrepChartTemplate() {
                       </Styled.TableHeaderCell>
                       <Styled.TableHeaderCell>Item</Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
-                    {Today.length > 0 ? "" : "Column drop here ....."}
+                    {Today.length > 0 ? "" : placeholder}
                     {Today}
                   </div>
                 </Styled.Table>
@@ -205,7 +212,7 @@ export default function PrepChartTemplate() {
                       </Styled.TableHeaderCell>
                       <Styled.TableHeaderCell>Item</Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
-                    {Tomorrow.length > 0 ? "" : "Column drop here ....."}
+                    {Tomorrow.length > 0 ? "" : placeholder}
                     {Tomorrow}
                   </div>
                 </Styled.Table>
@@ -226,8 +233,7 @@ export default function PrepChartTemplate() {
                       </Styled.TableHeaderCell>
                       <Styled.TableHeaderCell>Item</Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
-                    {NextDay.length > 0 ? "" : "Column drop here ....."}
-                    
+                    {NextDay.length > 0 ? "" : placeholder}
                     {NextDay}
                   </div>
                 </Styled.Table>

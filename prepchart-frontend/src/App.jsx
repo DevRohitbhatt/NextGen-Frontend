@@ -17,9 +17,9 @@ const App = () => {
           <DndProvider backend={HTML5Backend}>
             <div className="App">
                 <Routes>
-                  <Route path="/" element={<PrepChartTemplate />} />
-                  <Route path="/PrepChart" element={<PrepChart />} />
+                  <Route path="/" element={<PrepChart />} />
                   <Route path="/PrepChartTemplate" element={<PrepChartTemplate />} />
+                  <Route path="/PrepChart" element={<PrepChart />} />
                 </Routes>
             </div>
           </DndProvider>
