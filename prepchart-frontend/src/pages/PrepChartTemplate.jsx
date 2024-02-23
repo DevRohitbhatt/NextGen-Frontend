@@ -150,10 +150,6 @@ export default function PrepChartTemplate() {
               <UnitSelector />
             </Styled.DateAndUnitContainer>
             <Styled.SaveOptionsContainer>
-              <SearchBar
-                list={MasterTable.rows}
-                onSearch={(keyword) => SearchItem(keyword)}
-              />
               <Styled.SaveOption>
                 <Styled.OptionImage>
                   <FaRegSave className="btn-save" />
@@ -161,20 +157,29 @@ export default function PrepChartTemplate() {
               </Styled.SaveOption>
             </Styled.SaveOptionsContainer>
           </Styled.OptionsRow>
+          <div className="search-bar">
+          <h2 style={{ display: "contents" }}>Inventory Items</h2>
+          <SearchBar
+            list={MasterTable.rows}
+            onSearch={(keyword) => SearchItem(keyword)}
+          />
+          </div>
+         
           <div className="container">
             <Styled.TableLeft>
-              <Styled.TableTitle>Inventory Items</Styled.TableTitle>
-              <Table
-                columnHeaders={MasterTable.columnHeaders}
-                columnwidths={MasterTable.columnWidths}
-                rows={filteredItem}
-                isDrag={true}
-              />
+                <Table
+                  columnHeaders={MasterTable.columnHeaders}
+                  columnwidths={MasterTable.columnWidths}
+                  rows={filteredItem.length > 0 ? filteredItem : [{  Description: 'No data found ' }]}
+                  isDrag={true}
+                />
+                
             </Styled.TableLeft>
             <Styled.TableRight>
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>
-                  <Styled.TableHeaderCell>Today</Styled.TableHeaderCell>
+                  <h2>Today </h2>
+                  {/* <Styled.TableHeaderCell>Today</Styled.TableHeaderCell> */}
                 </Styled.TableHeaderTop>
 
                 <Styled.Table>
@@ -198,7 +203,7 @@ export default function PrepChartTemplate() {
 
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>
-                  <Styled.TableHeaderCell>Tomorrow</Styled.TableHeaderCell>
+                  <h2>Tomorrow</h2>
                 </Styled.TableHeaderTop>
                 <Styled.Table>
                   <div
@@ -219,7 +224,7 @@ export default function PrepChartTemplate() {
               </Styled.RightTblMarg>
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>
-                  <Styled.TableHeaderCell>Next Day</Styled.TableHeaderCell>
+                  <h2>Next Day</h2>
                 </Styled.TableHeaderTop>
                 <Styled.Table>
                   <div

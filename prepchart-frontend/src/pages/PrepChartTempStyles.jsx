@@ -119,7 +119,7 @@ export const TableHeaderTop = styled.div`
   display: grid;
   grid-template-columns: 13fr 1.5fr 1.5fr;
   width: 100%;
-  margin-bottom: 10px;
+  // margin-bottom: 10px;
   padding-bottom: 10px;
   `;
 export const TableRowRight = styled.div`
