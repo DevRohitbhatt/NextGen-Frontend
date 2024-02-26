@@ -114,29 +114,15 @@ export default function PrepChartTemplate() {
     setNextDayItem((NextDayItem) => [...NextDayItem, DropNextDayItem[0]]);
   };
 
-  const Today = todayItem.map((Items) => (
-    <InventoryItem
-      key={Items.InventoryItemID}
-      Description={Items.Description}
-      ThawTime={Items.ThawTime}
-    />
-  ));
-
-  const Tomorrow = TomorrowItem.map((Items) => (
-    <InventoryItem
-      key={Items.InventoryItemID}
-      Description={Items.Description}
-      ThawTime={Items.ThawTime}
-    />
-  ));
-
-  const NextDay = NextDayItem.map((Items) => (
-    <InventoryItem
-      key={Items.InventoryItemID}
-      Description={Items.Description}
-      ThawTime={Items.ThawTime}
-    />
-  ));
+  const handleReorder = (items, setItems) => (dragIndex, hoverIndex) => {
+    const draggedItem = items[dragIndex];
+    setItems((prevItems) => {
+      const newItems = [...prevItems];
+      newItems(...dragIndex, 1);
+      newItems(...hoverIndex, 0, draggedItem);
+      return newItems;
+    });
+  };
 
   return (
     <Styled.PageContainer>
@@ -158,34 +144,35 @@ export default function PrepChartTemplate() {
             </Styled.SaveOptionsContainer>
           </Styled.OptionsRow>
           <div className="search-bar">
-          <h2 style={{ display: "contents" }}>Inventory Items</h2>
-          <SearchBar
-            list={MasterTable.rows}
-            onSearch={(keyword) => SearchItem(keyword)}
-          />
+            <h2 style={{ display: "contents" }}>Inventory Items</h2>
+            <SearchBar
+              list={MasterTable.rows}
+              onSearch={(keyword) => SearchItem(keyword)}
+            />
           </div>
-         
+
           <div className="container">
             <Styled.TableLeft>
-                <Table
-                  columnHeaders={MasterTable.columnHeaders}
-                  columnwidths={MasterTable.columnWidths}
-                  rows={filteredItem.length > 0 ? filteredItem : [{  Description: 'No data found ' }]}
-                  isDrag={true}
-                />
-                
+              <Table
+                columnHeaders={MasterTable.columnHeaders}
+                columnwidths={MasterTable.columnWidths}
+                rows={
+                  filteredItem.length > 0
+                    ? filteredItem
+                    : [{ Description: "No data found " }]
+                }
+                isDrag={true}
+                hideInventoryItemID={true} // pass a prop to indicate if InventoryItemID should be hidden
+              />
             </Styled.TableLeft>
             <Styled.TableRight>
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>
                   <h2>Today </h2>
-                  {/* <Styled.TableHeaderCell>Today</Styled.TableHeaderCell> */}
                 </Styled.TableHeaderTop>
-
                 <Styled.Table>
                   <div
                     className="drop-board"
-                    draggable="false"
                     ref={dropToday}
                     style={{ border: isOverToday ? "1px solid red" : "" }}
                   >
@@ -195,8 +182,18 @@ export default function PrepChartTemplate() {
                       </Styled.TableHeaderCell>
                       <Styled.TableHeaderCell>Item</Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
-                    {Today.length > 0 ? "" : placeholder}
-                    {Today}
+                    {todayItem.length > 0 ? "" : placeholder}
+                    {todayItem.map((item, index) => (
+                      <InventoryItem
+                        key={item.InventoryItemID}
+                        InventoryItemID={item.InventoryItemID}
+                        Description={item.Description}
+                        ThawTime={item.ThawTime}
+                        moveItem={() => handleReorder(todayItem, setTodayItem)}
+                        columnIndex={index}
+                        hideInventoryItemID={true} // pass a prop to indicate if InventoryItemID should be hidden
+                      />
+                    ))}
                   </div>
                 </Styled.Table>
               </Styled.RightTblMarg>
@@ -217,8 +214,18 @@ export default function PrepChartTemplate() {
                       </Styled.TableHeaderCell>
                       <Styled.TableHeaderCell>Item</Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
-                    {Tomorrow.length > 0 ? "" : placeholder}
-                    {Tomorrow}
+                    {TomorrowItem.length > 0 ? "" : placeholder}
+                    {TomorrowItem.map((item, index) => (
+                      <InventoryItem
+                        key={item.InventoryItemID}
+                        InventoryItemID={item.InventoryItemID}
+                        Description={item.Description}
+                        ThawTime={item.ThawTime}
+                        moveItem={handleReorder(TomorrowItem, setTomorrowItem)}
+                        columnIndex={index}
+                        hideInventoryItemID={true}
+                      />
+                    ))}
                   </div>
                 </Styled.Table>
               </Styled.RightTblMarg>
@@ -238,8 +245,18 @@ export default function PrepChartTemplate() {
                       </Styled.TableHeaderCell>
                       <Styled.TableHeaderCell>Item</Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
-                    {NextDay.length > 0 ? "" : placeholder}
-                    {NextDay}
+                    {NextDayItem.length > 0 ? "" : placeholder}
+                    {NextDayItem.map((item, index) => (
+                      <InventoryItem
+                        key={item.InventoryItemID}
+                        InventoryItemID={item.InventoryItemID}
+                        Description={item.Description}
+                        ThawTime={item.ThawTime}
+                        moveItem={handleReorder(NextDayItem, setNextDayItem)}
+                        columnIndex={index}
+                        hideInventoryItemID={true}
+                      />
+                    ))}
                   </div>
                 </Styled.Table>
               </Styled.RightTblMarg>
