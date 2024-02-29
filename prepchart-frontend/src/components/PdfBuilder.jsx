@@ -18,7 +18,8 @@ const createTable = (tableInfo) => {
         ],
         ...tableInfo.data.rows.map((row) =>
           row.map((cell) => ({
-            text: cell.value !== 0 ? cell.value : "",
+            
+            text: getCellValue(cell),
             style: "tableCell",
           }))
         ),
@@ -34,7 +35,16 @@ const createTable = (tableInfo) => {
   else return { title, table };
 };
 
+const getCellValue = (cell) => {
+  if (Array.isArray(cell.value)) {
+    return cell.value.find((option) => option.IsSelected).PrepType;
+  } else {
+    return cell.value !== 0 ? cell.value : "";
+  }
+}
+
 export default function PdfBuilder(data) {
+  console.log(data);
   const content = [];
   let columns = [];
   content.push({ text: data.title, style: "header" });
