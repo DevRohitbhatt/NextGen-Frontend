@@ -8,7 +8,7 @@ import ExportOptions from "../components/ExportOptions.jsx";
 import { PrepChartAPI } from "../apis/PrepChartAPI.jsx";
 import Table from "../components/TableBuilder.jsx";
 import PdfBuilder from "../components/PdfBuilder.jsx";
-import * as PrepChartFunctions from "../functions/PrepChart.jsx";
+import * as PrepChartFunctions from "../functions/PrepChartFunctions.jsx";
 
 const prepTableStructure = {
   columnHeaders : [
@@ -69,12 +69,12 @@ export default function PrepChart() {
         tomorrow: tomorrow,
         nextDay: nextDay,
       });
-      PrepChartFunctions.buildPrepTable(data.Today, setTodayTable, todayTable, onInputCellChange);
-      PrepChartFunctions.buildPrepTable(data.Tomorrow, setTomorrowTable, tomorrowTable, onInputCellChange);
-      PrepChartFunctions.buildPrepTable(data.NextDay, setNextDayTable, nextDayTable, onInputCellChange);
+      PrepChartFunctions.buildPrepTable(data.Today, setTodayTable, todayTable, onInputCellChange, handleDropdownChange);
+      PrepChartFunctions.buildPrepTable(data.Tomorrow, setTomorrowTable, tomorrowTable, onInputCellChange, handleDropdownChange);
+      PrepChartFunctions.buildPrepTable(data.NextDay, setNextDayTable, nextDayTable, onInputCellChange, handleDropdownChange);
       setDefaultSafetyFactorTable({
         ...defaultSafetyFactorTable,
-        rows: [[{ value: data.DefaultSafetyFactor, cellType: "input" }]],
+        rows: [[{ value: data.DefaultSafetyFactor, cellType: "percent", handleOnChange: { onInputCellChange }, isInput: true}]],
       });
     });
   }, []);
@@ -89,19 +89,19 @@ export default function PrepChart() {
   const buildForecastTable = (forecastData) => {
     const rows = [
       [
-        { value: "Today", cellType: "" },
-        { value: forecastData.Today, cellType: "input" },
-        { value: prepChartDates.today.toLocaleDateString(), cellType: "" },
+        { value: "Today", cellType: "", columnName: "Day"},
+        { value: forecastData.Today, cellType: "dollar", isInput: true, columnName: "Forecasted Sales"},
+        { value: prepChartDates.today.toLocaleDateString(), cellType: "", columnName: "Date" },
       ],
       [
-        { value: "Tomorrow", cellType: "" },
-        { value: forecastData.Tomorrow, cellType: "input" },
-        { value: prepChartDates.tomorrow.toLocaleDateString(), cellType: "" },
+        { value: "Tomorrow", cellType: "", columnName: "Day"},
+        { value: forecastData.Tomorrow, cellType: "dollar", isInput: true, columnName: "Forecasted Sales" },
+        { value: prepChartDates.tomorrow.toLocaleDateString(), cellType: "", columnName: "Date" },
       ],
       [
-        { value: "Next Day", cellType: "" },
-        { value: forecastData.NextDay, cellType: "input" },
-        { value: prepChartDates.nextDay.toLocaleDateString(), cellType: "" },
+        { value: "Next Day", cellType: "", columnName: "Day"},
+        { value: forecastData.NextDay, cellType: "dollar", isInput: true, columnName: "Forecasted Sales" },
+        { value: prepChartDates.nextDay.toLocaleDateString(), cellType: "", columnName: "Date" },
       ],
     ];
 
@@ -118,16 +118,20 @@ export default function PrepChart() {
       PrepChartFunctions.onInputCellChange(e, row, columnName, tableName, tomorrowTable, setTomorrowTable, prepChart, setPrepChart);
     } else if (tableName === "NextDay") {
       PrepChartFunctions.onInputCellChange(e, row, columnName, tableName, nextDayTable, setNextDayTable, prepChart, setPrepChart);
+    } else if (tableName === "DefaultSafetyFactor") {
+      PrepChartFunctions.handleDefaultSafetyFactorChange(e, row, columnName, tableName, defaultSafetyFactorTable, setDefaultSafetyFactorTable, prepChart, setPrepChart, setTodayTable, setTomorrowTable, setNextDayTable, todayTable, tomorrowTable, nextDayTable);
+    } else if (tableName === "Forecast") {
+      PrepChartFunctions.handleForecastChange(e, row, columnName, tableName, forecastTable, setForecastTable, prepChart, setPrepChart, todayTable, tomorrowTable, nextDayTable, setTodayTable, setTomorrowTable, setNextDayTable);
     }
   }
 
   function handleDropdownChange(e, row, columnName, tableName) {
     if (tableName === "Today") {
-      PrepChartFunctions.handleDropdownChange(e, row, columnName, tableName, todayTable, setTodayTable, prepChart, setPrepChart);
+      PrepChartFunctions.onDropdownCellChange(e, row, columnName, tableName, todayTable, setTodayTable, prepChart, setPrepChart);
     } else if (tableName === "Tomorrow") {
-      PrepChartFunctions.handleDropdownChange(e, row, columnName, tableName, tomorrowTable, setTomorrowTable, prepChart, setPrepChart);
+      PrepChartFunctions.onDropdownCellChange(e, row, columnName, tableName, tomorrowTable, setTomorrowTable, prepChart, setPrepChart);
     } else if (tableName === "NextDay") {
-      PrepChartFunctions.handleDropdownChange(e, row, columnName, tableName, nextDayTable, setNextDayTable, prepChart, setPrepChart);
+      PrepChartFunctions.onDropdownCellChange(e, row, columnName, tableName, nextDayTable, setNextDayTable, prepChart, setPrepChart);
     }
   }
 
@@ -191,14 +195,18 @@ export default function PrepChart() {
               columnwidths={forecastTable.columnWidths}
               rows={forecastTable.rows}
               width={forecastTable.width}
+              tableName={"Forecast"}
+              handleInputCellChange={onInputCellChange}
             />
             <Table
               columnHeaders={defaultSafetyFactorTable.columnHeaders}
               dataTypes={defaultSafetyFactorTable.dataTypes}
               columnwidths={defaultSafetyFactorTable.columnWidths}
               rows={defaultSafetyFactorTable.rows}
+              tableName={"DefaultSafetyFactor"}
               width={defaultSafetyFactorTable.width}
               height={defaultSafetyFactorTable.height}
+              handleInputCellChange={onInputCellChange}
             />
           </Styled.ForeCastAndSafetyFactor>
           <h2>Today - {prepChart.ForecastData.Today}</h2>
@@ -209,6 +217,7 @@ export default function PrepChart() {
             rows={todayTable.rows}
             tableName="Today"
             handleInputCellChange={onInputCellChange}
+            handleDropdownChange={handleDropdownChange}
           />
 
           <h2>Tomorrow - {prepChart.ForecastData.Tomorrow}</h2>
@@ -219,6 +228,7 @@ export default function PrepChart() {
             rows={tomorrowTable.rows}
             tableName={"Tomorrow"}
             handleInputCellChange={onInputCellChange}
+            handleDropdownChange={handleDropdownChange}
           />
 
           <h2>Next Day</h2>
@@ -229,6 +239,7 @@ export default function PrepChart() {
             rows={nextDayTable.rows}
             tableName={"NextDay"}
             handleInputCellChange={onInputCellChange}
+            handleDropdownChange={handleDropdownChange}
           />
         </div>
       )}
