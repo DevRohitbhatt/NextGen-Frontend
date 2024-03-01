@@ -7,7 +7,7 @@ const Table = styled.div`
   height: ${(props) => (props.height ? props.height : "auto")};
   border-radius: 30px;
   padding: 20px;
-  margin-top: 26px;
+  // margin-top: 26px;
   box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
 
   h3 {

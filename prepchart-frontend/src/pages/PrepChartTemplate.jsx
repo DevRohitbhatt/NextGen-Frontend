@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef  } from "react";
 import { InventoryItem } from "../components/DraggableInventoryItem.jsx";
 import { useDrop } from "react-dnd";
 import * as Styled from "./PrepChartTempStyles.jsx";
 import "../components/UnitSelector.jsx";
 import UnitSelector from "../components/UnitSelector.jsx";
 import Table from "../components/TableBuilder.jsx";
-import { PrepChartTempAPI } from "../apis/PrepChartTemplateAPI.jsx";
+import { PrepChartTemplateAPI } from "../apis/PrepChartTemplateAPI.jsx";
 import { FaRegSave } from "react-icons/fa";
 import SearchBar from "../components/SearchBar.jsx";
 
@@ -13,7 +13,7 @@ var ItemList = [];
 const placeholder = "  Column drop here .....";
 const prepTableStructure = {
   columnHeaders: ["Inventory ID", "Description", "Thaw Time (Hrs)"],
-  columnWidths: "1.5fr 2fr 1fr",
+  columnWidths: "1fr 3fr 1fr",
   rows: [],
 };
 
@@ -26,6 +26,15 @@ export default function PrepChartTemplate() {
     ...prepTableStructure,
   });
   const [filteredItem, setFilteredItem] = useState([]);
+  const todayItemRef = useRef(todayItem);
+  const TomorrowItemRef = useRef(TomorrowItem);
+  const NextDayItemmRef = useRef(NextDayItem);
+
+  useEffect(() => {
+    todayItemRef.current = todayItem;
+    TomorrowItemRef.current = TomorrowItem;
+    NextDayItemmRef.current = NextDayItem;
+  }, [todayItem,TomorrowItem,NextDayItem]);
 
   useEffect(() => {
     fetchData(); // Call fetchData function on component mount
@@ -33,7 +42,7 @@ export default function PrepChartTemplate() {
 
   const fetchData = () => {
     setIsLoading(true); // Set loading to true before fetching data
-    PrepChartTempAPI.get(1, 1)
+    PrepChartTemplateAPI.get(1, 1)
       .then((data) => {
         buildPrepMasterTable(data.InventoryList);
         setIsLoading(false); // Set loading to false after data is fetched
@@ -69,6 +78,7 @@ export default function PrepChartTemplate() {
     );
     setFilteredItem(filtered);
   };
+
   const [{ isOverToday }, dropToday] = useDrop(() => ({
     accept: "content",
     drop: (item) => DropToday(item.InventoryItemID),
@@ -94,24 +104,33 @@ export default function PrepChartTemplate() {
   }));
 
   const DropToday = (InventoryItemID) => {
+   const isDuplicate = todayItemRef.current.some(item => item.InventoryItemID === InventoryItemID);
+    if (!isDuplicate) {
     const DropToDayItem = ItemList.filter(
-      (Items) => InventoryItemID === Items.InventoryItemID
+      (Items) => InventoryItemID === Items.InventoryItemID && todayItem.InventoryItemID !=InventoryItemID
     );
     setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
+    }
   };
-
+  
   const DropTomorrow = (InventoryItemID) => {
+    const isDuplicate = TomorrowItemRef.current.some(item => item.InventoryItemID === InventoryItemID);
+    if (!isDuplicate) {
     const DropTomorrowItem = ItemList.filter(
       (Items) => InventoryItemID === Items.InventoryItemID
     );
     setTomorrowItem((TomorrowItem) => [...TomorrowItem, DropTomorrowItem[0]]);
+    }
   };
 
   const DropNextDay = (InventoryItemID) => {
+    const isDuplicate = NextDayItemmRef.current.some(item => item.InventoryItemID === InventoryItemID);
+    if (!isDuplicate) {
     const DropNextDayItem = ItemList.filter(
       (Items) => InventoryItemID === Items.InventoryItemID
     );
     setNextDayItem((NextDayItem) => [...NextDayItem, DropNextDayItem[0]]);
+    }
   };
 
   const handleReorder = (items, setItems) => (dragIndex, hoverIndex) => {
@@ -149,6 +168,7 @@ export default function PrepChartTemplate() {
               list={MasterTable.rows}
               onSearch={(keyword) => SearchItem(keyword)}
             />
+                  <h2>Today </h2>
           </div>
 
           <div className="container">
@@ -162,14 +182,10 @@ export default function PrepChartTemplate() {
                     : [{ Description: "No data found " }]
                 }
                 isDrag={true}
-                hideInventoryItemID={true} // pass a prop to indicate if InventoryItemID should be hidden
               />
             </Styled.TableLeft>
             <Styled.TableRight>
               <Styled.RightTblMarg>
-                <Styled.TableHeaderTop>
-                  <h2>Today </h2>
-                </Styled.TableHeaderTop>
                 <Styled.Table>
                   <div
                     className="drop-board"
@@ -178,9 +194,9 @@ export default function PrepChartTemplate() {
                   >
                     <Styled.TableHeaderRight>
                       <Styled.TableHeaderCell>
-                        Prep Period{" "}
+                      Inventory ID{" "}
                       </Styled.TableHeaderCell>
-                      <Styled.TableHeaderCell>Item</Styled.TableHeaderCell>
+                      <Styled.TableHeaderCell>Description</Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
                     {todayItem.length > 0 ? "" : placeholder}
                     {todayItem.map((item, index) => (
@@ -188,10 +204,8 @@ export default function PrepChartTemplate() {
                         key={item.InventoryItemID}
                         InventoryItemID={item.InventoryItemID}
                         Description={item.Description}
-                        ThawTime={item.ThawTime}
                         moveItem={() => handleReorder(todayItem, setTodayItem)}
                         columnIndex={index}
-                        hideInventoryItemID={true} // pass a prop to indicate if InventoryItemID should be hidden
                       />
                     ))}
                   </div>
@@ -210,9 +224,9 @@ export default function PrepChartTemplate() {
                   >
                     <Styled.TableHeaderRight>
                       <Styled.TableHeaderCell>
-                        Prep Period{" "}
+                      Inventory ID{" "}
                       </Styled.TableHeaderCell>
-                      <Styled.TableHeaderCell>Item</Styled.TableHeaderCell>
+                      <Styled.TableHeaderCell>Description</Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
                     {TomorrowItem.length > 0 ? "" : placeholder}
                     {TomorrowItem.map((item, index) => (
@@ -220,10 +234,8 @@ export default function PrepChartTemplate() {
                         key={item.InventoryItemID}
                         InventoryItemID={item.InventoryItemID}
                         Description={item.Description}
-                        ThawTime={item.ThawTime}
                         moveItem={handleReorder(TomorrowItem, setTomorrowItem)}
                         columnIndex={index}
-                        hideInventoryItemID={true}
                       />
                     ))}
                   </div>
@@ -241,9 +253,9 @@ export default function PrepChartTemplate() {
                   >
                     <Styled.TableHeaderRight>
                       <Styled.TableHeaderCell>
-                        Prep Period{" "}
+                      Inventory ID{" "}
                       </Styled.TableHeaderCell>
-                      <Styled.TableHeaderCell>Item</Styled.TableHeaderCell>
+                      <Styled.TableHeaderCell>Description</Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
                     {NextDayItem.length > 0 ? "" : placeholder}
                     {NextDayItem.map((item, index) => (
@@ -251,10 +263,8 @@ export default function PrepChartTemplate() {
                         key={item.InventoryItemID}
                         InventoryItemID={item.InventoryItemID}
                         Description={item.Description}
-                        ThawTime={item.ThawTime}
                         moveItem={handleReorder(NextDayItem, setNextDayItem)}
                         columnIndex={index}
-                        hideInventoryItemID={true}
                       />
                     ))}
                   </div>

@@ -102,13 +102,13 @@ export const TableHeaderCell = styled.div`
 
 export const TableRow = styled.div`
   display: grid;
-  grid-template-columns: 1.5fr 4fr 1.5fr;
+  grid-template-columns: 1fr 3.3fr 0.8fr;
   border-bottom: 1px solid ${(props) => props.theme.lightGrey};
   padding: 8px 8px;
 `;
 export const TableHeaderRight = styled.div`
   display: grid;
-  grid-template-columns: 13fr 1.5fr;
+  grid-template-columns: 1.5fr 2fr;
   width: 100%;
   margin-bottom: 10px;
   padding-bottom: 10px;
@@ -122,13 +122,6 @@ export const TableHeaderTop = styled.div`
   // margin-bottom: 10px;
   padding-bottom: 10px;
   `;
-export const TableRowRight = styled.div`
-  display: grid;
-  grid-template-columns: 13fr 1.5fr 1.5fr;
-  border-bottom: 1px solid ${(props) => props.theme.lightGrey};
-  padding: 10px 0;
-  width: 100%;
-`;
 export const TableCell = styled.div`
   font-size: 1.0em;
 `;
@@ -151,11 +144,6 @@ export const TableTitle = styled.div`
   text-align: left;
   padding-bottom: 2px;
   font-weight:bold;
-`;
-export const Maindiv=styled.div`
-width:100%;
-display: flex;
-gap: 40px;
 `;
 
 export const RightTblMarg=styled.div`

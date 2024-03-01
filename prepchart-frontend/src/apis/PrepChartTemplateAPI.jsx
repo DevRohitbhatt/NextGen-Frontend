@@ -2,7 +2,7 @@ import api from "./configs/axiosConfig.jsx";
 import { defineCancelApiObject } from "./configs/axiosUtils.jsx";
 import PrepChartjson from "../tempData/PrepChartTemp.json";
 
-export const PrepChartTempAPI = {
+export const PrepChartTemplateAPI = {
   get: async function (companyID, unitID, cancel = false) {
     // const response = await api.request({
     //   method: "GET",
@@ -18,4 +18,4 @@ export const PrepChartTempAPI = {
   },
 }
 
-const cancelApiObject = defineCancelApiObject(PrepChartTempAPI);
+const cancelApiObject = defineCancelApiObject(PrepChartTemplateAPI);
