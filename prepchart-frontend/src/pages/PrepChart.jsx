@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import PropTypes from "prop-types";
 import * as Styled from "./PrepChartStyles.jsx";
 import "../components/UnitSelector.jsx";
 import UnitSelector from "../components/UnitSelector.jsx";
@@ -9,6 +8,7 @@ import { PrepChartAPI } from "../apis/PrepChartAPI.jsx";
 import Table from "../components/TableBuilder.jsx";
 import PdfBuilder from "../components/PdfBuilder.jsx";
 import * as PrepChartFunctions from "../functions/PrepChartFunctions.jsx";
+import { exportToExcel } from "../functions/ExcelExport.jsx";
 
 const prepTableStructure = {
   columnHeaders : [
@@ -175,6 +175,55 @@ export default function PrepChart() {
     PdfBuilder(pdfData);
   };
 
+  const handleExcelClick = () => {
+
+    const forecastColumns = [
+      { name: "Day", key: "Day", width: 10 },
+      { name: "Forecasted Sales", key: "Forecasted Sales", width: 20 },
+      { name: "Date", key: "Date", width: 20 },
+    ];
+
+    const defaultSafetyFactorColumns = [{ name: "Default Safety Factor", key: "Default Safety Factor", width: 20 }];
+    const prepColumns = [
+      { name: "Item Name", key: "Item Name", width: 50 },
+      { name: "Prep Type", key: "Prep Type", width: 50 },
+      { name: "Yield/Type", key: "Yield/Type", width: 20 },
+      { name: "Safety Factor", key: "Safety Factor", width: 30 },
+      { name: "Needed", key: "Needed", width: 20 },
+      { name: "On Hand", key: "On Hand", width: 20 },
+      { name: "Prep/Pull Amount", key: "Prep/Pull Amount", width: 30 },
+    ]
+
+    const data = [
+      { name: "Forecast", data: getTableData(forecastTable), columns: forecastColumns },
+      { name: "Default Safety Factor", data: getTableData(defaultSafetyFactorTable), columns: defaultSafetyFactorColumns, float: "right", cellSpan: 2, hasTableHeader: false},
+      { name: "Today", data: getTableData(todayTable), columns: prepColumns },
+      { name: "Tomorrow", data: getTableData(tomorrowTable), columns: prepColumns },
+      { name: "Next Day", data: getTableData(nextDayTable), columns: prepColumns },
+    ];
+    console.log(data)
+    exportToExcel(data, "PrepChart");
+  }
+
+  //Add a function that returns an array of arrays that contains the cell.value for each row in a table
+  const getTableData = (table) => {
+    const data = [];
+    table.rows.forEach((row) => {
+      const rowData = [];
+      let prepType;
+      row.forEach((cell) => {
+        if (cell.columnName === "Prep Type") {
+          prepType = cell.value.find((option) => option.IsSelected).PrepType;
+          rowData.push(prepType);
+        } else {
+          rowData.push(cell.value);
+        }
+      });
+      data.push(rowData);
+    });
+    return data;
+  }
+
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
@@ -194,6 +243,7 @@ export default function PrepChart() {
               includePrint={true}
               handlePDFClick={handlePDFClick}
               handlePrintClick={handlePrintClick}
+              handleExcelClick={handleExcelClick}
             />
           </Styled.OptionsRow>
 
