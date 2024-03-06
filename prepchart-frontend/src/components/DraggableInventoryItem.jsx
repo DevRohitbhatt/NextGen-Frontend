@@ -10,13 +10,10 @@ export function InventoryItem({Description,InventoryItemID,ThawTime }) {
             isDragging: !!monitor.isDragging(),
         }),
     }))
-    const handleDragEnd = () => {
-        // Implement logic to handle the drag end event if needed
-        console.log("Drag End");
-    };
+
     return (
         <>
-         <Styled.TableRow key={InventoryItemID} ref={drag} style={{ opacity: isDragging ? 0.5 : 1 }} onDragEnd={handleDragEnd}  >
+         <Styled.TableRow key={InventoryItemID} ref={drag}  >
             <Styled.TableCell> {InventoryItemID}</Styled.TableCell>
             <Styled.TableCell>{Description}</Styled.TableCell>
             <Styled.TableCell>{ThawTime}</Styled.TableCell>

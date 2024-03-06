@@ -78,6 +78,7 @@ export const Table = styled.div`
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
+  position: relative;
 
   h3 {
     margin-bottom: 20px;
@@ -108,7 +109,7 @@ export const TableRow = styled.div`
 `;
 export const TableHeaderRight = styled.div`
   display: grid;
-  grid-template-columns: 1.5fr 2fr;
+  grid-template-columns: 1.5fr 2.5fr;
   width: 100%;
   margin-bottom: 10px;
   padding-bottom: 10px;

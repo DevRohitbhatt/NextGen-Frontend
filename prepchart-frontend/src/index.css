@@ -142,7 +142,27 @@ input.Search::placeholder {
 }
 .hyToEn .iXzDqN {
   display: grid;
-  grid-template-columns: 1.5fr 2fr !important;
+  grid-template-columns: 1.5fr 2.5fr !important;
+}
+.modal-header h4 {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin: 0;
+}
+.close { 
+  font-size: 20px;
+}
+.delete {
+  position: absolute;
+  right: 28px;
+  margin-top: -29px;
+}
+.asc {
+  font-size: 16px;
+}
+.desc {
+  font-size: 16px;
 }
 @media (prefers-color-scheme: light) {
   :root {

@@ -1,5 +1,6 @@
 import styled from "styled-components";
 
+
 const UnitContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -27,11 +28,13 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector() {
+export default function UnitSelector({ onClick }) {
   return (
-    <UnitContainer>
+    <>
+    <UnitContainer onClick={onClick}>
       <Label>Select Unit(s)</Label>
-      <UnitValue>Charleys Philly Steak</UnitValue>
+      <UnitValue >Charleys Philly Steak</UnitValue>
     </UnitContainer>
+    </>
   );
 }
