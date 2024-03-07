@@ -77,7 +77,7 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
       <ExportOptionsContainer>
         {includeExcel ? (
           <ExportOption>
-            <OptionImage >
+            <OptionImage onClick={handleExcelClick}>
               <ExcelIcon />
             </OptionImage>
           </ExportOption>
