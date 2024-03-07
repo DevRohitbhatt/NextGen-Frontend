@@ -247,7 +247,6 @@ export default function PrepChart() {
             <ExportOptions
               includeExcel={true}
               includePDF={true}
-              includeCSV={true}
               includePrint={true}
               handlePDFClick={handlePDFClick}
               handlePrintClick={handlePrintClick}
