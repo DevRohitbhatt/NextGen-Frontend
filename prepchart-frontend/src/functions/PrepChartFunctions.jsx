@@ -81,7 +81,7 @@ export function onDropdownCellChange(
     ...tableData,
     rows: tableData.rows.map((item, index) => {
       if (index === row) {
-        let prepValue = 0, yieldDollars = 0, safetyFactor = 0, needed = 0, onHand = 0;
+        let prepValue = 0, yieldDollars = 0, yieldType = 0, safetyFactor = 0, needed = 0, onHand = 0;
         item.forEach((cell) => {
           if (cell.columnName === "Prep Type") {
             cell.value.forEach((option) => {

@@ -26,6 +26,9 @@ const prepTableStructure = {
 };
 
 export default function PrepChart() {
+  const [UnitName, setUnitName] = useState("0051 Sawmill");
+  const [companyID, setCompanyID] = useState(1021);
+  const [unitID, setUnitID] = useState(51);
   const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [prepChartDates, setPrepChartDates] = useState({});
@@ -176,14 +179,14 @@ export default function PrepChart() {
   };
 
   const handleExcelClick = () => {
-
     const forecastColumns = [
       { name: "Day", key: "Day", width: 10 },
       { name: "Forecasted Sales", key: "Forecasted Sales", width: 20 },
       { name: "Date", key: "Date", width: 20 },
     ];
-
+  
     const defaultSafetyFactorColumns = [{ name: "Default Safety Factor", key: "Default Safety Factor", width: 20 }];
+  
     const prepColumns = [
       { name: "Item Name", key: "Item Name", width: 50 },
       { name: "Prep Type", key: "Prep Type", width: 50 },
@@ -192,36 +195,41 @@ export default function PrepChart() {
       { name: "Needed", key: "Needed", width: 20 },
       { name: "On Hand", key: "On Hand", width: 20 },
       { name: "Prep/Pull Amount", key: "Prep/Pull Amount", width: 30 },
-    ]
-
-    const data = [
-      { name: "Forecast", data: getTableData(forecastTable), columns: forecastColumns },
-      { name: "Default Safety Factor", data: getTableData(defaultSafetyFactorTable), columns: defaultSafetyFactorColumns, float: "right", cellSpan: 2, hasTableHeader: false},
-      { name: "Today", data: getTableData(todayTable), columns: prepColumns },
-      { name: "Tomorrow", data: getTableData(tomorrowTable), columns: prepColumns },
-      { name: "Next Day", data: getTableData(nextDayTable), columns: prepColumns },
     ];
-    console.log(data)
-    exportToExcel(data, "PrepChart");
+  
+    const todayData = getTableData(todayTable);
+    const tomorrowData = getTableData(tomorrowTable);
+    const nextDayData = getTableData(nextDayTable);
+  
+    const data = [
+      { name: "Forecast", data: getTableData(forecastTable), columns: forecastColumns},
+      { name: "Default Safety Factor", data: getTableData(defaultSafetyFactorTable), columns: defaultSafetyFactorColumns, float: "right", cellSpan: 2, hasTableHeader: false },
+      { name: "Today", data: todayData, columns: prepColumns},
+      { name: "Tomorrow", data: tomorrowData, columns: prepColumns},
+      { name: "Next Day", data: nextDayData, columns: prepColumns},
+    ];
+  
+    const filename = `${companyID}_${unitID}_PrepChart_${prepChartDates.today.toLocaleDateString()}`;
+    exportToExcel(data, filename, "Prep Chart", prepChartDates.today.toLocaleDateString(), UnitName);
   }
-
-  //Add a function that returns an array of arrays that contains the cell.value for each row in a table
+  
   const getTableData = (table) => {
-    const data = [];
-    table.rows.forEach((row) => {
-      const rowData = [];
-      let prepType;
-      row.forEach((cell) => {
-        if (cell.columnName === "Prep Type") {
-          prepType = cell.value.find((option) => option.IsSelected).PrepType;
-          rowData.push(prepType);
-        } else {
-          rowData.push(cell.value);
-        }
-      });
-      data.push(rowData);
-    });
-    return data;
+    return table.rows.map(row => row.map(cell => formatCellValue(cell)));
+  }
+  
+  const formatCellValue = (cell) => {
+    switch (cell.columnName) {
+      case "Prep Type":
+        return cell.value.find(option => option.IsSelected).PrepType;
+      case "Yield/Type":
+      case "Forecasted Sales":
+        return cell.value.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      case "Safety Factor":
+      case "Default Safety Factor":
+        return (cell.value / 100).toLocaleString('en-US', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      default:
+        return cell.value;
+    }
   }
 
   return (
