@@ -220,7 +220,7 @@ export default function PrepChart() {
   const formatCellValue = (cell) => {
     switch (cell.columnName) {
       case "Prep Type":
-        return cell.value.find(option => option.IsSelected).PrepType;
+        return cell.value.find(option => option.IsSelected).PrepUOM;
       case "Yield/Type":
       case "Forecasted Sales":
         return cell.value.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });

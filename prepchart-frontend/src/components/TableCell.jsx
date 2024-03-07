@@ -206,11 +206,11 @@ export default function Cell({
       <TableCell columntype={columntype}>
         <Dropdown
           onChange={(e) => handleDropdownChange(e, row, columnName, tableName)}
-          defaultValue={selectedOption.PrepType}
+          defaultValue={selectedOption.Option}
         >
           {value.map((option, index) => (
             <option key={index} value={option.PrepType}>
-              {option.PrepType}
+              {option.Option}
             </option>
           ))}
         </Dropdown>
