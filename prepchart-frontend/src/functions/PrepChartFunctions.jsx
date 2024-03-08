@@ -45,13 +45,24 @@ export function onInputCellChange(
       ...tableData,
       rows: tableData.rows.map((item, index) => {
         if (index === row) {
+          let prepValue = 0, needed = 0, onHand = 0;
           item.forEach((cell) => {
             if (cell.columnName === "Safety Factor") {
-              cell.value = (e.target.value / 100).toLocaleString("en-US", {
-                style: "percent",
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
+              cell.value = e.target.value;
+              newPrepChart[tableName][row][cell.columnName] = cell.value;
+            } else if (cell.columnName === "Needed") {
+              prepChart[tableName][row].PrepUOM.map((option) => {
+                if (option.IsSelected) {
+                  return option.Value;
+                }
               });
+              needed = calculateNeededValue(tableName, prepChart, prepValue, prepChart[tableName][row].YieldType, e.target.value);
+              cell.value = needed;
+              newPrepChart[tableName][row][cell.columnName] = needed;
+            } else if (cell.columnName === "On Hand") {
+              onHand = parseFloat(cell.value);
+            } else if (cell.columnName === "Prep/Pull Amount") {
+              cell.value = (needed - onHand).toFixed(2);
               newPrepChart[tableName][row][cell.columnName] = cell.value;
             }
           });
@@ -200,6 +211,7 @@ export function handleDefaultSafetyFactorChange(
   });
 
   recalculatePrepChart(newPrepChart, setPrepChart, todayTable, tomorrowTable, nextDayTable, setTodayTable, setTomorrowTable, setNextDayTable, previousSafetyFactor, parseFloat(e.target.value));
+  setPrepChart(newPrepChart);
 }
 
 export const recalculatePrepChart = (prepChart, setPrepChart, todayTable, tomorrowTable, nextDayTable, setTodayTable, setTomorrowTable, setNextDayTable, previousSafetyFactor, newSafetyFactor) => {
@@ -301,7 +313,7 @@ export const buildPrepTable = (
         cellType: "percent",
         columnName: "Safety Factor",
         handleOnChange: { onInputCellChange },
-        isInput: false,
+        isInput: true,
       },
       {
         value: item.Needed,

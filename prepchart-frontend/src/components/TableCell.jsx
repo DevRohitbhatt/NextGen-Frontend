@@ -87,13 +87,17 @@ const PercentageCell = ({
   };
 
   useEffect(() => {
+    setPercentage(value);
+  }, [value]);
+
+  useEffect(() => {
     updateInputWidth();
   }, [percentage]);
   return (
     <TableCell columntype={columntype}>
       <Input
         ref={inputRef}
-        defaultValue={value}
+        value={percentage}
         columntype={columntype}
         onChange={handleInputChange}
         onBlur={(e) => handleInputCellChange(e, row, columnName, tableName)}
