@@ -28,12 +28,12 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick }) {
+export default function UnitSelector({ onClick ,UnitName}) {
   return (
     <>
     <UnitContainer onClick={onClick}>
       <Label>Select Unit(s)</Label>
-      <UnitValue >Charleys Philly Steak</UnitValue>
+      <UnitValue >{UnitName}</UnitValue>
     </UnitContainer>
     </>
   );

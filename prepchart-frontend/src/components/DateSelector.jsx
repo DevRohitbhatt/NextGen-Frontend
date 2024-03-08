@@ -32,11 +32,14 @@ DateSelector.propTypes = {
   date: PropTypes.instanceOf(Date),
 };
 
-export default function DateSelector({ date }) {
+export default function DateSelector({ date ,onClick}) {
   return (
-    <DateContainer>
+    <>
+     <DateContainer onClick={onClick}>
       <Label>Select Date</Label>
       <DateValue>{date.toLocaleDateString()}</DateValue>
     </DateContainer>
+    </>
+   
   );
 }

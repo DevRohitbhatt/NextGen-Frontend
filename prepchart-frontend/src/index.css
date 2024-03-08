@@ -120,7 +120,7 @@ input.Search::placeholder {
 .Search {
   border-radius: 50px;
   height: 30px;
-  width: 18%;
+  width: 24%;
   outline: none;
   border: 2px solid #F0F0F0;
   padding: 8px 18px;
@@ -137,7 +137,7 @@ input.Search::placeholder {
   width: 100%;
   align-items: center;
   grid-column-gap: 42px;
-  grid-template-columns: 10fr 58fr 30fr;
+  grid-template-columns: 11fr 24fr 30fr;
   margin-bottom: 12px;
 }
 .hyToEn .iXzDqN {
@@ -163,6 +163,108 @@ input.Search::placeholder {
 }
 .desc {
   font-size: 16px;
+}
+.unitsection {
+  grid-column-gap: 20px;
+  display: grid;
+  grid-template-columns: 50fr 50fr;
+}
+.unitList ul {
+  list-style: none;
+  padding: 0px;
+  margin: 0px;
+}
+.unitList {
+  border: 0.25px solid #808285;
+  border-radius: 8px;
+  margin: 10px 0px;
+  overflow-y: scroll;
+  height: 233px;
+}
+.unitList li {
+  padding: 4px 10px 4px 10px;
+}
+.form-control {
+  background: #e6e7e8;
+  border: none;
+  height: 30px;
+  width: 87%;
+  border-radius: 2px;
+}
+.input-group {
+  position: relative;
+}
+.filterColLeft label {
+  color: #364790;
+  font-weight: bold;
+  font-size: 14px;
+}
+.unitList li a {
+  color: #000;
+}
+.unitList li:hover {
+  background: #efefef;
+  cursor: pointer;
+}
+.filterColRight span {
+  
+  background: #364790;
+  display: block;
+  text-align: center;
+  color: #fff;
+  padding: 10px 0px;
+  border-radius: 4px;
+  margin-top: 13px;
+  padding: 10px;
+  min-height: 24px;
+
+}
+.unitList::-webkit-scrollbar {
+  background: #ffffff;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  border: 14px solid #fff;
+  outline: 0.25px solid #808285;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.unitList::-webkit-scrollbar-thumb {
+  background: #364790;
+  border-radius: 30px;
+  padding: 18px !important;
+  border: 2px solid #fff;
+  cursor: pointer;
+
+}
+.unitList::-webkit-scrollbar-thumb:hover {
+  background: #508bff;
+}
+
+.active {
+  background: #364790;
+  color: #fff;
+}
+.active:hover
+{
+  background: #364790 !important;
+  color: #fff !important;
+}
+.btnOuter:hover .btn-save {
+  color: white !important;
+}
+svg.clearIcone {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #364790;
+  height: 32px;
+  width: 31px;
+  color: #fff;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
 }
 @media (prefers-color-scheme: light) {
   :root {

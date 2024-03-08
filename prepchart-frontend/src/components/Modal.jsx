@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { FaTimes } from "react-icons/fa";
 import { ModalHeader } from "react-bootstrap";
 
-
 const ModalOverlay = styled.div`
   position: fixed;
   width: 500px;
@@ -42,7 +41,7 @@ const CloseButton = styled.button`
   padding-bottom: 0;
 `;
 const ModalDialog = styled.div`
-  position: absolute;
+  position: fixed;
   background: #00000073;
   width: 100%;
   height: 100vh;
@@ -50,22 +49,69 @@ const ModalDialog = styled.div`
   top: 0;
   z-index: 9;
 `;
-const Button = styled.button`
-width: 110px;
-border: 2px solid #364790;
-border-radius: 0px;
-background: #fff;
-` ;
-const ModalFooter = styled.div`
-background: #efefef;
-display: flex;
-justify-content: center;
-gap: 11px;
-padding: 0.75rem;
+const FooterButton = styled.button`
+  box-shadow: inset 0 0 0 2px #364790;
+  transition: color 0.25s 0.0833333333s;
+  position: relative;
+  border-radius: 0px;
+  width: 110px;
+
+  &::after {
+    border: 0 solid transparent;
+    box-sizing: border-box;
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: 0;
+    right: 0;
+    border-top-width: 2px;
+    border-right-width: 2px;
+  }
+  &::before {
+    border: 0 solid transparent;
+    box-sizing: border-box;
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+  }
+&:hover::after {
+  border-color: #fff;
+  transition: border-color 0s, width 0.25s, height 0.25s;
+  width: 100%;
+  height: 100%;
+  transition-delay: 0s, 0.25s, 0s;
+}
+&:hover::before {
+  border-color: #fff;
+  transition: border-color 0s, width 0.25s, height 0.25s;
+  width: 100%;
+  height: 100%;
+  transition-delay: 0s, 0s, 0.25s;
+}
+&:hover{
+  border-color: transparent;
+  color: #fff;
+    background: #364790;
+}
 
 `;
+const ModalFooter = styled.div`
+  background: #efefef;
+  display: flex;
+  justify-content: center;
+  gap: 11px;
+  padding: 0.75rem;
+`;
 const ModalBody = styled.div`
-padding:0px 14px;
+  padding: 0px 14px;
 `;
 
 const Modal = ({ show, handleClose, children }) => {
@@ -87,8 +133,8 @@ const Modal = ({ show, handleClose, children }) => {
         </ModalContent>
         <ModalBody>{children}</ModalBody>
         <ModalFooter>
-          <Button>Ok</Button>
-          <Button onClick={handleClose}>Cancel</Button>
+          <FooterButton onClick={handleClose}>Ok</FooterButton>
+          <FooterButton onClick={handleClose}>Cancel</FooterButton>
         </ModalFooter>
       </ModalOverlay>
     </ModalDialog>
