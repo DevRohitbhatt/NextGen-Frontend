@@ -266,6 +266,48 @@ svg.clearIcone {
   font-weight: bold;
   cursor: pointer;
 }
+
+.react-calendar {
+  width: 350px;
+  max-width: 100%;
+  background: white;
+  border: 1px solid #a0a096;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.125em;
+  position: fixed !important;
+  z-index: 9 !important;
+}
+.CalendarTable {
+  border-radius: 4px !important;
+  margin-top: 14px;
+  --bs-table-bg: transparent;
+  --bs-table-accent-bg: transparent;
+  --bs-table-striped-color: #212529;
+  --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
+  --bs-table-active-color: #212529;
+  --bs-table-active-bg: rgba(0, 0, 0, 0.1);
+  --bs-table-hover-color: #212529;
+  --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
+  margin-bottom: 1rem;
+  color: #212529;
+  vertical-align: top;
+}
+.react-calendar__navigation {
+  display: flex;
+  height: 44px;
+  margin-bottom: 1em;
+  background-color: #364790;
+  color: #fff;
+}
+.react-calendar__navigation button {
+  min-width: 44px;
+  background: none;
+  color: #fff;
+}
+.react-calendar__navigation button:enabled:hover {
+  background-color: #e7d315;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
