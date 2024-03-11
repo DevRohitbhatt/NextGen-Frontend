@@ -16,6 +16,7 @@ const InputBox = styled.input`
   padding-left: 7px;
   color: #000;
   font-weight: 500;
+  font-size:14px;
 `;
 const Icon = styled.div`
   position: absolute;

@@ -1,48 +1,79 @@
-import React, { useState } from "react";
+import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import { AiFillDownSquare } from "react-icons/ai";
 
-const SelectWrapper = styled.div`
+const Wrapper = styled.div`
   position: relative;
+  display: inline-block;
 `;
 
-const SelectBox = styled.select`
-  width: 156px;
-  height: 27px;
+const CustomSelect = styled.div`
+  width: 154px;
+  height: 29px;
   background: #e6e7e8;
   border: none;
-  padding-left: 7px;
+  padding: 0 7px;
   color: #000;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 14px;
 `;
 
-// const DropdownIcon = styled.div`
-//   position: absolute;
-//   top: 7px;
-//   right: 7px;
-// `;
+const SelectOverlay = styled.select`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+`;
+
+const Icon = styled.div`
+  position: absolute;
+  top: 0px;
+  right: -2px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 35px;
+  color: #364790;
+  cursor: pointer;
+`;
 
 const YearSelector = ({ selectedYear, onChange }) => {
-  const years = Array.from({ length: 10 }, (_, index) => selectedYear - 4 + index).reverse();
+  const years = Array.from(
+    { length: 7 },
+    (_, index) => selectedYear - 5 + index
+  ).reverse();
+  const selectRef = useRef(null);
 
-  const handleYearChange = (e) => {
-    const year = parseInt(e.target.value);
-    if (onChange) {
-      onChange(year);
-    }
-  };
+  const handleYearChange = (e) => onChange(parseInt(e.target.value));
+  const handleIconClick = () => selectRef.current.click();
 
-  return (  
-    <SelectWrapper>
-      <SelectBox value={selectedYear} onChange={handleYearChange}>
+  return (
+    <Wrapper>
+      <CustomSelect onClick={handleIconClick}>
+        {selectedYear}
+        <Icon>
+          <AiFillDownSquare />
+        </Icon>
+      </CustomSelect>
+      <SelectOverlay
+        ref={selectRef}
+        value={selectedYear}
+        onChange={handleYearChange}
+      >
         {years.map((year) => (
           <option key={year} value={year}>
             {year}
           </option>
         ))}
-      </SelectBox>
-      {/* <DropdownIcon>&#9660;</DropdownIcon> */}
-    </SelectWrapper>
+      </SelectOverlay>
+    </Wrapper>
   );
 };
 

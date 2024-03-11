@@ -106,10 +106,11 @@ export default function PrepChart() {
   useEffect(() => {
     if (prepChartDates.today) {
       buildForecastTable(prepChart.ForecastData);
-      buildCalendarTable();
+      buildCalendarTable(selectedYear);
       setIsLoading(false);
     }
   }, [prepChartDates]);
+  
 
   const GetUnitList = () => {
     UnitAPI.get(1, 1)
@@ -132,30 +133,35 @@ export default function PrepChart() {
     setFilteredUnit(UnitItem); // Initially, set filtered rows to all rows
   };
 
-  const buildCalendarTable = () => {
-    const rows = [
-      [
-        { value: "1", cellType: "" },
-        { value: prepChartDates.today.toLocaleDateString(), cellType: "" },
-        { value: prepChartDates.today.toLocaleDateString(), cellType: "" },
-      ],
-      [
-        { value: "1", cellType: "" },
-        { value: prepChartDates.today.toLocaleDateString(), cellType: "" },
-        { value: prepChartDates.tomorrow.toLocaleDateString(), cellType: "" },
-      ],
-      [
-        { value: "1", cellType: "" },
-        { value: prepChartDates.today.toLocaleDateString(), cellType: "" },
-        { value: prepChartDates.nextDay.toLocaleDateString(), cellType: "" },
-      ],
-    ];
+  const buildCalendarTable = (year) => {
+    const rows = [];
+    let startDate = new Date(year, 0, 1);
+    //let startDate = new Date(prepChartDates.today.toLocaleDateString());
 
+    for (let i = 0; i < 12; i++) { 
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 27); 
+
+        rows.push([
+            { value: (i + 1).toString(), cellType: "",  },
+            { value: formatDate(startDate), cellType: "" , onClick: () => handleRowClick(startDate, endDate) },
+            { value: formatDate(endDate), cellType: "" , onClick: () => handleRowClick(startDate, endDate)  }
+        ]);
+        startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() + 1); 
+    }
     setCalendarTable({
       ...CalendarTable,
       rows: rows,
     });
   };
+
+  const formatDate = (date) => {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+};
 
   const buildForecastTable = (forecastData) => {
     const rows = [
@@ -328,9 +334,10 @@ export default function PrepChart() {
     // });
   };
 
-  const handleYearChange = (year) => {
-    setSelectedYear(year);
-  };
+  const handleYearChange = (newYear) => {
+    setSelectedYear(newYear);
+    buildCalendarTable(newYear);
+};
 
   const handleFromDateChange = (date) => {
     setSelectedFromDate(date);
@@ -345,6 +352,10 @@ export default function PrepChart() {
     console.log(selectedFromDate.toLocaleDateString());
   }, [selectedToDate,selectedFromDate]); // Run this effect whenever selectedDate changes
 
+  const handleRowClick = (startDate, endDate) => {
+    console.log("Start Date:", startDate.toLocaleDateString());
+    console.log("End Date:", endDate.toLocaleDateString());
+};
 
   return (
     <Styled.PageContainer>
@@ -431,17 +442,19 @@ export default function PrepChart() {
                     <YearSelector
                       selectedYear={selectedYear}
                       onChange={handleYearChange}
+                      // onChange={(newYear) => buildCalendarTable(newYear)}
                     />
                   </div>
                   
                 </Styled.CalendarBoxWrapper>
-                <div className="CalendarTable">
+                <div>
                     <Table 
                       columnHeaders={CalendarTable.columnHeaders}
                       columnwidths={CalendarTable.columnWidths}
                       rows={CalendarTable.rows}
                       width={CalendarTable.width}
                       className="CalendarTable"
+                      
                     />
                   </div>
               </ModalDate>
