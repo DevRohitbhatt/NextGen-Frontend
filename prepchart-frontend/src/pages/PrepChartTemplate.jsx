@@ -11,12 +11,14 @@ import SearchBar from "../components/SearchBar.jsx";
 import Modal from "../components/Modal.jsx";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { FaArrowDownWideShort,FaArrowUpShortWide } from "react-icons/fa6";
+import ExportOptions from "../components/ExportOptions.jsx";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
 const prepTableStructure = {
-  columnHeaders: ["Inventory ID", "Description", "Thaw Time (Hrs)"],
-  columnWidths: "1fr 3fr 1fr",
+  columnHeaders: ["Inventory ID", "Description"],
+  dataTypes: ["string", "string"],
+  columnWidths: "auto",
   rows: [],
 };
 
@@ -217,43 +219,45 @@ return (
             <Styled.DateAndUnitContainer>
               <UnitSelector onClick={handleUnitSelectorClick} />
               <Modal show={showModal} handleClose={() => setShowModal(false)}>
-                {/* Content of your modal */}
+                <div></div>
                            
               </Modal>
             </Styled.DateAndUnitContainer>
             <Styled.SaveOptionsContainer>
-              <Styled.SaveOption>
-                <Styled.OptionImage>
-                  <FaRegSave className="btn-save" />
-                </Styled.OptionImage>
-              </Styled.SaveOption>
+              <ExportOptions
+                includeSave={true}
+              />
             </Styled.SaveOptionsContainer>
           </Styled.OptionsRow>
 
-          <div className="search-bar">
-            <h2 style={{ display: "contents" }}>Inventory Items</h2>
-            <SearchBar
-              list={MasterTable.rows}
-              onSearch={(keyword) => SearchItem(keyword)}
-            />
-            <h2>Today </h2>
-          </div>
-
           <div className="container">
-            <Styled.TableLeft>
-              <Table
-                columnHeaders={MasterTable.columnHeaders}
-                columnwidths={MasterTable.columnWidths}
-                rows={
-                  filteredItem.length > 0
-                    ? filteredItem
-                    : [{ Description: "No data found " }]
-                }
-                isDrag={true}
-              />
-            </Styled.TableLeft>
+            <Styled.InventoryItemsContainer>
+              <Styled.InventoryItemsTitle>
+                <Styled.TableHeaderTop>Inventory Items</Styled.TableHeaderTop>
+                <SearchBar
+                  list={MasterTable.rows}
+                  onSearch={(keyword) => SearchItem(keyword)}
+                />
+              </Styled.InventoryItemsTitle>
+              <Styled.TableLeft>
+                <Table
+                  columnHeaders={MasterTable.columnHeaders}
+                  columnwidths={MasterTable.columnWidths}
+                  dataTypes={MasterTable.dataTypes}
+                  rows={
+                    filteredItem.length > 0
+                      ? filteredItem
+                      : [{ Description: "No data found " }]
+                  }
+                  isDrag={true}
+                  useTableRows={true}
+                />
+              </Styled.TableLeft>
+            </Styled.InventoryItemsContainer>
             <Styled.TableRight>
+              
               <Styled.RightTblMarg>
+                <Styled.TableHeaderTop>Today</Styled.TableHeaderTop>
                 <Styled.Table>
                   <div
                     className="drop-board"
@@ -291,9 +295,7 @@ return (
               </Styled.RightTblMarg>
 
               <Styled.RightTblMarg>
-                <Styled.TableHeaderTop>
-                  <h2>Tomorrow</h2>
-                </Styled.TableHeaderTop>
+                <Styled.TableHeaderTop>Tomorrow</Styled.TableHeaderTop>
                 <Styled.Table>
                   <div
                     className="drop-board"
@@ -328,9 +330,7 @@ return (
                 </Styled.Table>
               </Styled.RightTblMarg>
               <Styled.RightTblMarg>
-                <Styled.TableHeaderTop>
-                  <h2>Next Day</h2>
-                </Styled.TableHeaderTop>
+                <Styled.TableHeaderTop>Next Day</Styled.TableHeaderTop>
                 <Styled.Table>
                   <div
                     className="drop-board"

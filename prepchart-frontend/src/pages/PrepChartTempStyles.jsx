@@ -5,6 +5,12 @@ export const PageContainer = styled.div`
   margin: auto;
 `;
 
+export const InventoryItemsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 55%;
+`;
+
 export const PageTitle = styled.div`
   font-size: 2.75rem;
   line-height: 1.1;
@@ -28,7 +34,6 @@ export const TableLeft = styled.div`
   // border-radius: 30px;
   // padding: 10px 20px;
   // box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
-  width: 70%;
 `;
 
 
@@ -86,9 +91,16 @@ export const Table = styled.div`
   }
 `;
 
+export const InventoryItemsTitle = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 export const TableHeader = styled.div`
   display: grid;
-  grid-template-columns: 1.5fr 4fr 1.5fr;
+  grid-template-columns: 1.5fr 4fr;
   width: 100%;
   // margin-bottom: 10px;
   padding-bottom: 10px;
@@ -103,7 +115,7 @@ export const TableHeaderCell = styled.div`
 
 export const TableRow = styled.div`
   display: grid;
-  grid-template-columns: 1fr 3.3fr 0.8fr;
+  grid-template-columns: 1fr 3.3fr;
   border-bottom: 1px solid ${(props) => props.theme.lightGrey};
   padding: 8px 8px;
 `;
@@ -117,11 +129,11 @@ export const TableHeaderRight = styled.div`
 
 `;
 export const TableHeaderTop = styled.div`
-  display: grid;
-  grid-template-columns: 13fr 1.5fr 1.5fr;
-  width: 100%;
-  // margin-bottom: 10px;
-  padding-bottom: 10px;
+  font-weight: bold;
+  font-size: 1.5em;
+  text-align: left;
+  margin-top: 25px;
+  margin-bottom: 25px;
   `;
 export const TableCell = styled.div`
   font-size: 1.0em;
@@ -136,7 +148,7 @@ export const TableRight = styled.div`
   // box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
   // // width: 40%;
   // float: right;
-  width: 30%;
+  width: 45%
 `;
 export const TableTitle = styled.div`
   font-size: 1.2em;

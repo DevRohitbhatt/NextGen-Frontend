@@ -2,76 +2,61 @@
   "InventoryList":[
     {
       "InventoryItemID": "30570",
-      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ",
-      "ThawTime": 30
+      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ"
     },
     {
       "InventoryItemID": "30571",
-      "Description": "CHIPOTLE SAUCE - I=A",
-      "ThawTime": 34
+      "Description": "CHIPOTLE SAUCE - I=A"
     },
     {
       "InventoryItemID": "30572",
-      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A",
-      "ThawTime": 12
+      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A"
     },
     {
       "InventoryItemID": "30573",
-      "Description": "(R) 9 Inch Bun",
-      "ThawTime": 23
+      "Description": "(R) 9 Inch Bun"
     },
     {
       "InventoryItemID": "30574",
-      "Description": "(R) FRIES-5LB BAGS",
-      "ThawTime": 0
+      "Description": "(R) FRIES-5LB BAGS"
     },
     {
       "InventoryItemID": "30575",
-      "Description": "(R) CHICKEN",
-      "ThawTime": 15
+      "Description": "(R) CHICKEN"
     },
     {
       "InventoryItemID": "30576",
-      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ",
-      "ThawTime": 30
+      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ"
     },
     {
       "InventoryItemID": "30577",
-      "Description": "CHIPOTLE SAUCE - I=A",
-      "ThawTime": 34
+      "Description": "CHIPOTLE SAUCE - I=A"
     },
     {
       "InventoryItemID": "30578",
-      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A",
-      "ThawTime": 12
+      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A"
     },{
       "InventoryItemID": "30579",
-      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ",
-      "ThawTime": 30
+      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ"
     },
     {
       "InventoryItemID": "30580",
-      "Description": "CHIPOTLE SAUCE - I=A",
-      "ThawTime": 34
+      "Description": "CHIPOTLE SAUCE - I=A"
     },
     {
       "InventoryItemID": "30582",
-      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A",
-      "ThawTime": 12
+      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A"
     },{
       "InventoryItemID": "30583",
-      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ",
-      "ThawTime": 30
+      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ"
     },
     {
       "InventoryItemID": "30584",
-      "Description": "CHIPOTLE SAUCE - I=A",
-      "ThawTime": 34
+      "Description": "CHIPOTLE SAUCE - I=A"
     },
     {
       "InventoryItemID": "30585",
-      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A",
-      "ThawTime": 12
+      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A"
     }
   ]
 }

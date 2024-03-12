@@ -1,34 +1,52 @@
 {
   "ForecastData": {
-    "Today": 150.75,
-    "Tomorrow": 200.5,
-    "NextDay": 180.25
+    "Today": 2260.21,
+    "Tomorrow": 2773.92,
+    "NextDay": 2092.86
   },
   "DefaultSafetyFactor": 10.0,
   "Date": "2024-01-26T12:30:00.000Z",
   "Today": [
     {
       "itemName": "(R) Chicken",
-      "PrepType": ["Box (53 Count) / Pan Prep Half", "TypeB"],
-      "YieldType": 1043,
+      "PrepUOM": [
+        {"Option": "Box (53 Count) / Pan Prep Half", "Value": 3, "IsSelected": true},
+        {"Option": "CASE (159 Count)", "Value": 1, "IsSelected": false},
+        {"Option": "SLICE 3OZ", "Value": 159, "IsSelected": false},
+        {"Option": "~OZ", "Value": 480, "IsSelected": false}
+      ],
+      "YieldType": 1259.23,
+      "CaseYieldDollars": 3777.7,
       "SafetyFactor": 10,
-      "Needed": 3,
+      "Needed": 1.97,
       "OnHand": 0,
-      "PrepPullAmount": 3
+      "PrepPullAmount": 1.97
     },
     {
       "itemName": "(R) Steak",
-      "PrepType": ["Box (53 Count) / Pan Prep Half", "TypeD"],
-      "YieldType": 459,
-      "SafetyFactor": 8,
-      "Needed": 4,
+      "PrepUOM": [
+        {"Option": "Box (53 Count) / Pan Prep Half", "Value": 3, "IsSelected": true},
+        {"Option": "CASE (159 Count)", "Value": 159, "IsSelected": false},
+        {"Option": "SLICE 3OZ", "Value": 159, "IsSelected": false},
+        {"Option": "~OZ", "Value": 480, "IsSelected": false}
+      ],
+      "YieldType": 581.24,
+      "CaseYieldDollars": 1743.71,
+      "SafetyFactor": 10,
+      "Needed": 4.26,
       "OnHand": 0,
-      "PrepPullAmount": 3
+      "PrepPullAmount": 4.26
     },
     {
       "itemName": "(R) Bacon Sliced",
-      "PrepType": ["Prep SHEET", "TypeB"],
+      "PrepUOM": [
+        {"Option": "PREP SHEET", "Value": 53, "IsSelected": true},
+        {"Option": "CASE (15 LB)", "Value": 15, "IsSelected": false},
+        {"Option": "PREP PAN 1/4", "Value": 4, "IsSelected": false},
+        {"Option": "~OZ", "Value": 1, "IsSelected": false}
+      ],
       "YieldType": 754,
+      "CaseYieldDollars": 18104.05,
       "SafetyFactor": 10,
       "Needed": 3.98,
       "OnHand": 0,
@@ -36,9 +54,15 @@
     },
     {
       "itemName": "(R) ONION 50 LB",
-      "PrepType": ["PAN PREP 6x6", "TypeD"],
+      "PrepUOM": [
+        {"Option": "BAG 50 LB", "Value": 50, "IsSelected": true},
+        {"Option": "PAN PREP 6X6", "Value": 15, "IsSelected": false},
+        {"Option": "PAN PREP FULL", "Value": 25, "IsSelected": false},
+        {"Option": "~PREP OZ", "Value": 1, "IsSelected": false}
+      ],
       "YieldType": 713,
-      "SafetyFactor": 20,
+      "CaseYieldDollars": 13137.09,
+      "SafetyFactor": 10,
       "Needed": 4.21,
       "OnHand": 0,
       "PrepPullAmount": 3.21
@@ -47,8 +71,14 @@
   "Tomorrow": [
     {
       "itemName": "(R) Chicken",
-      "PrepType": ["Box (53 Count) / Pan Prep Half", "TypeC"],
+      "PrepUOM": [
+        {"Option": "Box (53 Count) / Pan Prep Half", "Value": 53, "IsSelected": true},
+        {"Option": "CASE (159 Count)", "Value": 159, "IsSelected": false},
+        {"Option": "SLICE 3OZ", "Value": 3, "IsSelected": false},
+        {"Option": "~OZ", "Value": 1, "IsSelected": false}
+      ],
       "YieldType": 1043,
+      "CaseYieldDollars": 3777.7,
       "SafetyFactor": 10,
       "Needed": 3,
       "OnHand": 0,
@@ -56,9 +86,15 @@
     },
     {
       "itemName": "(R) Steak",
-      "PrepType": ["Box (53 Count) / Pan Prep Half", "TypeD"],
+      "PrepUOM": [
+        {"Option": "Box (53 Count) / Pan Prep Half", "Value": 53, "IsSelected": true},
+        {"Option": "CASE (159 Count)", "Value": 159, "IsSelected": false},
+        {"Option": "SLICE 3OZ", "Value": 3, "IsSelected": false},
+        {"Option": "~OZ", "Value": 1, "IsSelected": false}
+      ],
       "YieldType": 459,
-      "SafetyFactor": 8,
+      "CaseYieldDollars": 1743.71,
+      "SafetyFactor": 10,
       "Needed": 4,
       "OnHand": 0,
       "PrepPullAmount": 3
@@ -67,8 +103,14 @@
   "NextDay": [
     {
       "itemName": "(R) Syrup Strawberry 6/35 OZ",
-      "PrepType": ["Bottle Prep 53 OZ", "TypeD"],
+      "PrepUOM": [
+        {"Option": "CASE", "Value": 35, "IsSelected": true},
+        {"Option": "~BOTTLE PREP", "Value": 6, "IsSelected": false},
+        {"Option": "BOTTLE 35 OZ", "Value": 35, "IsSelected": false},
+        {"Option": "~OZ", "Value": 1, "IsSelected": false}
+      ],
       "YieldType": 3282,
+      "CaseYieldDollars": 27410.71,
       "SafetyFactor": 10,
       "Needed": 0.94,
       "OnHand": 0,
@@ -76,9 +118,15 @@
     },
     {
       "itemName": "LEMONADE GALLONS",
-      "PrepType": ["JUB PREP", "TypeB"],
+      "PrepUOM": [
+        {"Option": "CASE (4/1 GAL)", "Value": 4, "IsSelected": true},
+        {"Option": "JUG PREP", "Value": 1, "IsSelected": false},
+        {"Option": "JUG GALLON", "Value": 1, "IsSelected": false},
+        {"Option": "~PREP OZ", "Value": 1, "IsSelected": false}
+      ],
       "YieldType": 2220,
-      "SafetyFactor": 20,
+      "CaseYieldDollars": 9073.57,
+      "SafetyFactor": 10,
       "Needed": 1.51,
       "OnHand": 0,
       "PrepPullAmount": 0

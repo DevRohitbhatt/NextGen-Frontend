@@ -15,6 +15,7 @@
     "@mui/icons-material": "^5.15.9",
     "@mui/material": "^5.15.9",
     "axios": "^1.6.5",
+    "exceljs": "^4.4.0",
     "pdfmake": "^0.2.9",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",

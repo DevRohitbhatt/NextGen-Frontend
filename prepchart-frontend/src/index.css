@@ -75,7 +75,7 @@ button:focus-visible {
 .container {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-between;
   gap: 40px;
 }
 
@@ -120,9 +120,9 @@ input.Search::placeholder {
 .Search {
   border-radius: 50px;
   height: 30px;
-  width: 18%;
+  align-items: center;
   outline: none;
-  border: 2px solid #F0F0F0;
+  border: 1px solid #F0F0F0;
   padding: 8px 18px;
   box-shadow: 0px 0px 10px #00000014;
   display: block;
@@ -133,11 +133,10 @@ input.Search::placeholder {
   transition: 0.5s;
 }
 .search-bar {
-  display: grid;
-  width: 100%;
+  display: flex;
+  justify-content: start;
+  gap: 40px;
   align-items: center;
-  grid-column-gap: 42px;
-  grid-template-columns: 10fr 58fr 30fr;
   margin-bottom: 12px;
 }
 .hyToEn .iXzDqN {
