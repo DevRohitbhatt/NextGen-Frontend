@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { useState, useRef, useEffect } from "react";
 import Cell from "./TableCell.jsx";
 import { InventoryItem } from '../components/DraggableInventoryItem.jsx';
+import { useState, useRef, useEffect } from "react";
+import Cell from "./TableCell.jsx";
 
 const Table = styled.div`
   width: ${(props) => (props.width ? props.width : "auto")};
@@ -61,7 +63,6 @@ export default function TableBuilder({
   handleInputCellChange,
   handleDropdownChange,
 }) {
-  console.log(rows)
   return (
     <Table width={width} height={height} columnwidths={columnwidths}> 
       {useTableRows ? (
@@ -103,4 +104,5 @@ TableBuilder.propTypes = {
   handleInputCellChange: PropTypes.func,
   handleDropdownChange: PropTypes.func,
   isDrag: PropTypes.bool,
+  handleDropdownChange: PropTypes.func,
 };
