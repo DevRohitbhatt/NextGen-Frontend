@@ -28,6 +28,7 @@ export const DateAndUnitContainer = styled.div`
 export const ForeCastAndSafetyFactor = styled.div`
   display: flex;
   margin: auto;
+  gap: 40px;
 `;
 
 export const Table = styled.div`

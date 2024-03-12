@@ -19,6 +19,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -46,23 +47,135 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.drag-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  /* border: 1px solid black; */
+  height: auto;
+  width: auto;
+  /* background-color: lightblue; */
+}
+
+.gtrxDw:hover {
+  background: #efefef;
+  cursor: move;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.drop-board {
+  /* display: inherit; */
+  padding-top: 9px;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.btn-save {
+  font-size: 35px !important;
+  position: relative;
+  top: 5px;
+  color: #364790 !important;
+}
+
+.gpKiSC:hover .btn-save {
+  color: #fff !important;
+}
+
+.sc-kMzELR.blJLmA:hover {
+  background: #efefef;
+  cursor: move;
+}
+
+.fHAJhM .blJLmA {
+  display: flex;
+}
+
+.fHAJhM .blJLmA div:nth-child(3) {
+  width: 38%;
+  text-align: right;
+}
+
+.kWmskp:hover .btn-save {
+  color: #fff !important;
+}
+input.Search::placeholder {
+  font-size: 16px;
+}
+.Search {
+  border-radius: 50px;
+  height: 30px;
+  align-items: center;
+  outline: none;
+  border: 1px solid #F0F0F0;
+  padding: 8px 18px;
+  box-shadow: 0px 0px 10px #00000014;
+  display: block;
+  margin: 0 0 0 auto;
+}
+.Search:hover {
+  border: 1px solid #364790;
+  transition: 0.5s;
+}
+.search-bar {
+  display: flex;
+  justify-content: start;
+  gap: 40px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.hyToEn .iXzDqN {
+  display: grid;
+  grid-template-columns: 1.5fr 2.5fr !important;
+}
+.modal-header h4 {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin: 0;
+}
+.close { 
+  font-size: 20px;
+}
+.delete {
+  position: absolute;
+  right: 28px;
+  margin-top: -29px;
+}
+.asc {
+  font-size: 16px;
+}
+.desc {
+  font-size: 16px;
+}
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
+
+
 }
