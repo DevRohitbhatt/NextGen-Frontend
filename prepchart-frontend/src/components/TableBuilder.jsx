@@ -1,10 +1,7 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
-import { useState, useRef, useEffect } from "react";
 import Cell from "./TableCell.jsx";
 import { InventoryItem } from '../components/DraggableInventoryItem.jsx';
-import { useState, useRef, useEffect } from "react";
-import Cell from "./TableCell.jsx";
 
 const Table = styled.div`
   width: ${(props) => (props.width ? props.width : "auto")};
@@ -27,7 +24,7 @@ const Table = styled.div`
 const TableHeader = styled.div`
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 3.3fr;
+  grid-template-columns: 1fr 2.5fr;;
   margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
@@ -37,7 +34,7 @@ const TableHeaderCell = styled.div`
   font-weight: bold;
   font-size: 1.2em;
   height: 50px;
-  border-bottom: ${(props) => props.useTableRows ? "none" : "2px solid " + props.theme.primary};
+  border-bottom: ${(props) => props.$useTableRows ? "none" : "2px solid " + props.theme.primary};
   padding: 10px 0;
   text-align: ${(props) => props.columntype === "number" ? "center" : "left"};
 `;
@@ -59,16 +56,16 @@ export default function TableBuilder({
   width,
   height,
   isDrag = false,
-  useTableRows = false,
+  usetablerows = false,
   handleInputCellChange,
   handleDropdownChange,
 }) {
   return (
     <Table width={width} height={height} columnwidths={columnwidths}> 
-      {useTableRows ? (
+      {usetablerows ? (
         <TableHeader columnwidths={columnwidths}>
           {columnHeaders.map((header, index) => (
-            <TableHeaderCell key={index} columntype={dataTypes[index]} useTableRows={useTableRows}>{header}</TableHeaderCell>
+            <TableHeaderCell key={index} columntype={dataTypes[index]} $useTableRows={usetablerows}>{header}</TableHeaderCell>
           ))}
         </TableHeader>
       ) : (
@@ -104,5 +101,5 @@ TableBuilder.propTypes = {
   handleInputCellChange: PropTypes.func,
   handleDropdownChange: PropTypes.func,
   isDrag: PropTypes.bool,
-  handleDropdownChange: PropTypes.func,
+  usetablerows: PropTypes.bool,
 };

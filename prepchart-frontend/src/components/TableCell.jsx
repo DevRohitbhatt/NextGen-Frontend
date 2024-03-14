@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
@@ -113,6 +113,7 @@ PercentageCell.propTypes = {
   tableName: PropTypes.string.isRequired,
   handleInputCellChange: PropTypes.func.isRequired,
   columntype: PropTypes.string.isRequired,
+  isInput: PropTypes.bool.isRequired,
 };
 
 const DollarCell = ({
@@ -159,6 +160,15 @@ const DollarCell = ({
       ></Input>
     </TableCell>
   );
+};
+DollarCell.propTypes = {
+  value: PropTypes.number.isRequired,
+  row: PropTypes.object.isRequired,
+  columnName: PropTypes.string.isRequired,
+  tableName: PropTypes.string.isRequired,
+  handleInputCellChange: PropTypes.func.isRequired,
+  columntype: PropTypes.string.isRequired,
+  isInput: PropTypes.bool.isRequired,
 };
 
 export default function Cell({

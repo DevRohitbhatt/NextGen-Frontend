@@ -250,7 +250,7 @@ return (
                       : [{ Description: "No data found " }]
                   }
                   isDrag={true}
-                  useTableRows={true}
+                  usetablerows={true}
                 />
               </Styled.TableLeft>
             </Styled.InventoryItemsContainer>

@@ -115,13 +115,13 @@ export const TableHeaderCell = styled.div`
 
 export const TableRow = styled.div`
   display: grid;
-  grid-template-columns: 1fr 3.3fr;
+  grid-template-columns: 1fr 2.5fr;
   border-bottom: 1px solid ${(props) => props.theme.lightGrey};
   padding: 8px 8px;
 `;
 export const TableHeaderRight = styled.div`
   display: grid;
-  grid-template-columns: 1.5fr 2.5fr;
+  grid-template-columns: 1fr 2.5fr;
   width: 100%;
   margin-bottom: 10px;
   padding-bottom: 10px;
