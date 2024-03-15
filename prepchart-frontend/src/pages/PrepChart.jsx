@@ -87,8 +87,7 @@ export default function PrepChart() {
     if (parameters)
       parameters = JSON.parse(parameters);
     parameters ? setCompanyID(parameters.CompanyID) : setCompanyID(1051);
-    parameters ? setSelectedUnit(parameters.UnitID) : setSelectedUnit(51);
-    parameters ? setSelecteUnitName(parameters.UnitName) : setSelecteUnitName("0051 Sawmill");
+    parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit(51);
     parameters ? setIsActive(parameters.UnitID) : setIsActive(51);
     //Todo use companyID and UnitID instead of 1, 1
     PrepChartAPI.get(1, 1).then((data) => {
@@ -130,6 +129,9 @@ export default function PrepChart() {
     UnitAPI.get(1, 1)
       .then((data) => {
         UnitListItem(data.Units);
+        if (data.Units.length > 0) {
+          setSelecteUnitName(data.Units.find((unit) => unit.UnitID === selectedUnit).Name);
+        }
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -343,7 +345,7 @@ export default function PrepChart() {
   const formatCellValue = (cell) => {
     switch (cell.columnName) {
       case "Prep Type":
-        return cell.value.find(option => option.IsSelected).PrepUOM;
+        return cell.value.find(option => option.IsSelected).Option;
       case "Yield/Type":
       case "Forecasted Sales":
         return cell.value.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
