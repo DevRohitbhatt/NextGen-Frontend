@@ -37,13 +37,15 @@ const createTable = (tableInfo) => {
 
 const getCellValue = (cell) => {
   if (Array.isArray(cell.value)) {
-    return cell.value.find((option) => option.IsSelected).PrepType;
+    console.log("in array")
+    return cell.value.find((option) => option.IsSelected).Option;
   } else {
     return cell.value !== 0 ? cell.value : "";
   }
 }
 
 export default function PdfBuilder(data) {
+  console.log(data);
   const content = [];
   let columns = [];
   content.push({ text: data.title, style: "header" });

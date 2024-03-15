@@ -35,9 +35,7 @@ const prepTableStructure = {
 };
 
 export default function PrepChart() {
-  const [UnitName, setUnitName] = useState("0051 Sawmill");
   const [companyID, setCompanyID] = useState(1021);
-  const [unitID, setUnitID] = useState(51);
   const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [prepChartDates, setPrepChartDates] = useState({});
@@ -49,8 +47,8 @@ export default function PrepChart() {
     width: "50%",
   });
   const [unitsList, setUnitsList] = useState([]);
-  const [selectedUnit, setSelecteUnit] = useState("");
-  const [SelecteUnitName, setSelecteUnitName] = useState("");
+  const [selectedUnit, setSelectedUnit] = useState("");
+  const [selecteUnitName, setSelecteUnitName] = useState("0051 Sawmill");
   const [filteredUnit, setFilteredUnit] = useState([]);
   const [IsActive, setIsActive] = useState([]);
   const [showModal, setShowModal] = useState(false); // State to manage modal visibility
@@ -85,10 +83,19 @@ export default function PrepChart() {
   const [selectedFromDate, setSelectedFromDate] = useState(new Date());
 
   useEffect(() => {
+    let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
+    if (parameters)
+      parameters = JSON.parse(parameters);
+    parameters ? setCompanyID(parameters.CompanyID) : setCompanyID(1051);
+    parameters ? setSelectedUnit(parameters.UnitID) : setSelectedUnit(51);
+    parameters ? setSelecteUnitName(parameters.UnitName) : setSelecteUnitName("0051 Sawmill");
+    parameters ? setIsActive(parameters.UnitID) : setIsActive(51);
     //Todo use companyID and UnitID instead of 1, 1
     PrepChartAPI.get(1, 1).then((data) => {
       setPrepChart(data);
       const date = new Date(data.Date);
+      setSelectedToDate(date);
+      setSelectedFromDate(date);
       const tomorrow = new Date(date);
       tomorrow.setDate(date.getDate() + 1);
       const nextDay = new Date(tomorrow);
@@ -123,11 +130,6 @@ export default function PrepChart() {
     UnitAPI.get(1, 1)
       .then((data) => {
         UnitListItem(data.Units);
-        if (data.Units.length > 0) {
-          setSelecteUnit(data.Units[0].UnitID);
-          setSelecteUnitName(data.Units[0].Name);
-          setIsActive(data.Units[0].UnitID);
-        }
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -330,8 +332,8 @@ export default function PrepChart() {
       { name: "Next Day", data: nextDayData, columns: prepColumns},
     ];
   
-    const filename = `${companyID}_${unitID}_PrepChart_${prepChartDates.today.toLocaleDateString()}`;
-    exportToExcel(data, filename, "Prep Chart", prepChartDates.today.toLocaleDateString(), UnitName);
+    const filename = `${companyID}_${selectedUnit}_PrepChart_${prepChartDates.today.toLocaleDateString()}`;
+    exportToExcel(data, filename, "Prep Chart", prepChartDates.today.toLocaleDateString(), selecteUnitName);
   }
   
   const getTableData = (table) => {
@@ -352,43 +354,6 @@ export default function PrepChart() {
         return cell.value;
     }
   }
-  const buildPrepTable = (prepChartSection, setTable) => {
-    const rows = prepChartSection.map((item) => {
-      return [
-        { value: item.itemName, cellType: "", columnName: "Item Name" },
-        { value: item.PrepType[0], cellType: "", columnName: "Prep Type" },
-        { value: item.YieldType, cellType: "", columnName: "Yield/Type" },
-        {
-          value: item.SafetyFactor,
-          cellType: "input",
-          columnName: "Safety Factor",
-          handleOnChange: { onInputCellChange },
-        },
-        {
-          value: item.Needed,
-          cellType: "input",
-          columnName: "Needed",
-          handleOnChange: { onInputCellChange },
-        },
-        {
-          value: item.OnHand,
-          cellType: "input",
-          columnName: "On Hand",
-          handleOnChange: { onInputCellChange },
-        },
-        {
-          value: item.PrepPullAmount,
-          cellType: "",
-          columnName: "Prep/Pull Amount",
-        },
-      ];
-    });
-
-    setTable({
-      ...todayTable,
-      rows: rows,
-    });
-  };
 
   const SearchUnitItem = (keyword) => {
     const filtered = unitsList.rows.filter(
@@ -407,7 +372,7 @@ export default function PrepChart() {
     setShowDateModal(true); // Open the modal when UnitSelector is clicked
   };
   const handleUnitSelectChange = (event) => {
-    setSelecteUnit(event.target.value);
+    setSelectedUnit(event.target.value);
     const UnitId = event.target.value;
     const selectedText = event.target.textContent;
     // Set the selected text to the state variable
@@ -452,7 +417,7 @@ export default function PrepChart() {
             <Styled.DateAndUnitContainer>
               <UnitSelector
                 onClick={handleUnitSelectorClick}
-                UnitName={SelecteUnitName}
+                UnitName={selecteUnitName}
               />
               <DateSelector
                 ToDate={selectedToDate}
@@ -492,7 +457,7 @@ export default function PrepChart() {
                     </div>
                   </Styled.LeftUnitList>
                   <Styled.RightUnitList>
-                    <Styled.Span>{SelecteUnitName}</Styled.Span>
+                    <Styled.Span>{selecteUnitName}</Styled.Span>
                     <div className="unitList">
                       <ul value={selectedUnit} onClick={handleUnitSelectChange}>
                         {filteredUnit.map((item, index) => (
@@ -538,7 +503,7 @@ export default function PrepChart() {
                       rows={CalendarTable.rows}
                       width={CalendarTable.width}
                       className="CalendarTable"
-                      
+                      dataTypes={['number', 'string', 'string']}
                     />
                   </div>
               </ModalDate>

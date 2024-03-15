@@ -34,7 +34,7 @@ const TableHeader = styled.div`
 const TableHeaderCell = styled.div`
   font-weight: bold;
   font-size: 1.2em;
-  height: 50px;
+  height: 44px;
   border-bottom: ${(props) => props.$useTableRows ? "none" : "2px solid " + props.theme.primary};
   padding: 10px 0;
   text-align: ${(props) => props.columntype === "number" ? "center" : "left"};
