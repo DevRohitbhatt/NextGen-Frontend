@@ -44,7 +44,6 @@ const getCellValue = (cell) => {
 }
 
 export default function PdfBuilder(data) {
-  console.log(data);
   const content = [];
   let columns = [];
   content.push({ text: data.title, style: "header" });

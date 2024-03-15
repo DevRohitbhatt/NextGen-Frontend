@@ -1,7 +1,6 @@
 
 
 export function onInputCellChange(e, row, columnName, tableName, tableData, setTable, prepChart, setPrepChart) {
-  console.log(row, columnName, e.target.value);
   if (columnName === "On Hand") {
     if (!isNaN(parseInt(e.target.value))) {
       setTable({
@@ -29,7 +28,6 @@ export function onInputCellChange(e, row, columnName, tableName, tableData, setT
     newPrepChart[tableName][row][columnName] = parseInt(e.target.value);
     setPrepChart(newPrepChart);
   }
-  console.log(prepChart);
 }
 
 export const buildPrepTable = (prepChartSection, setTable, tableState, onInputCellChange) => {

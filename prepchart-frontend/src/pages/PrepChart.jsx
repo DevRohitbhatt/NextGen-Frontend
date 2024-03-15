@@ -431,21 +431,15 @@ export default function PrepChart() {
 
   const handleFromDateChange = (date) => {
     setSelectedFromDate(date);
-    //console.log(selectedDate.toLocaleDateString())
   };
   const handleToDateChange = (date) => {
     setSelectedToDate(date);
-    //console.log(selectedDate.toLocaleDateString())
   };
   useEffect(() => {
-    console.log(selectedToDate.toLocaleDateString());
-    console.log(selectedFromDate.toLocaleDateString());
   }, [selectedToDate,selectedFromDate]); // Run this effect whenever selectedDate changes
 
   const handleRowClick = (startDate, endDate) => {
-    console.log("Start Date:", startDate.toLocaleDateString());
-    console.log("End Date:", endDate.toLocaleDateString());
-};
+  };
 
   return (
     <Styled.PageContainer>

@@ -80,7 +80,6 @@ export default function TableBuilder({
         if(isDrag){
           return <InventoryItem key={rowIndex} rowIndex={rowIndex} Description={row.Description} InventoryItemID={row.InventoryItemID}  ThawTime={row.ThawTime} />
         }
-        console.log("testing")
        return   row && row.map((cell, cellIndex) => (
             <Cell key={cellIndex} value={cell.value} columntype={dataTypes[cellIndex]} cellType={cell.cellType} isInput={cell.isInput} row={rowIndex} tableName={tableName} columnName={cell.columnName} handleInputCellChange={handleInputCellChange} handleDropdownChange={handleDropdownChange}/>
           ))
