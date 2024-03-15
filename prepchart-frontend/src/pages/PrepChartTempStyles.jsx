@@ -25,7 +25,6 @@ export const OptionsRow = styled.div`
   border-radius: 15px;
   padding: 10px 20px;
   box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
-  
 `;
 export const TableLeft = styled.div`
   // display: flex;
@@ -35,7 +34,6 @@ export const TableLeft = styled.div`
   // padding: 10px 20px;
   // box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
 `;
-
 
 export const SaveOptionsContainer = styled.div`
   display: flex;
@@ -53,10 +51,11 @@ export const SaveOption = styled.div`
   position: relative;
   cursor: pointer;
 
-  &:hover {
+  &:hover  {
     background-color: ${(props) => props.theme.primary};
     color: white;
   }
+  
 `;
 
 export const OptionImage = styled.div`
@@ -126,7 +125,6 @@ export const TableHeaderRight = styled.div`
   margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
-
 `;
 export const TableHeaderTop = styled.div`
   font-weight: bold;
@@ -136,7 +134,7 @@ export const TableHeaderTop = styled.div`
   margin-bottom: 25px;
   `;
 export const TableCell = styled.div`
-  font-size: 1.0em;
+  font-size: 1em;
 `;
 
 export const TableRight = styled.div`
@@ -156,9 +154,45 @@ export const TableTitle = styled.div`
   margin: 0px 0px 0px 9px;
   text-align: left;
   padding-bottom: 2px;
-  font-weight:bold;
+  font-weight: bold;
 `;
 
-export const RightTblMarg=styled.div`
-margin-bottom: 12px;
+export const RightTblMarg = styled.div`
+  margin-bottom: 12px;
 `;
+export const PopupContainer = styled.div`
+  grid-column-gap: 20px;
+  display: grid;
+  grid-template-columns: 50fr 50fr;
+  margin-top: 10px;
+`;
+export const LeftUnitList = styled.div`
+  color: #000;
+  font-weight: 400;
+  font-size: 12px;
+`;
+export const InputGroup = styled.div`
+  position: relative;
+`;
+export const RightUnitList = styled.div`
+  display: block;
+  color: #000;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 10px 0px;
+  border-radius: 4px;
+  margin-top: 13px;
+  padding: 10px;
+  min-height: 24px;
+`;
+export const Span = styled.span`
+  background: #364790;
+  display: block;
+  text-align: center;
+  color: #fff;
+  border-radius: 4px;
+  margin-top: -9px;
+  padding: 10px;
+  min-height: 18px;
+`;
+

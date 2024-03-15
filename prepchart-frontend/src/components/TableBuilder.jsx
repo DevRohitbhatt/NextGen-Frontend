@@ -2,6 +2,7 @@ import styled from "styled-components";
 import PropTypes from "prop-types";
 import Cell from "./TableCell.jsx";
 import { InventoryItem } from '../components/DraggableInventoryItem.jsx';
+import { propTypes } from "react-bootstrap/esm/Image.js";
 
 const Table = styled.div`
   width: ${(props) => (props.width ? props.width : "auto")};
@@ -59,9 +60,10 @@ export default function TableBuilder({
   usetablerows = false,
   handleInputCellChange,
   handleDropdownChange,
+  className,
 }) {
   return (
-    <Table width={width} height={height} columnwidths={columnwidths}> 
+    <Table width={width} height={height} className={className} columnwidths={columnwidths}> 
       {usetablerows ? (
         <TableHeader columnwidths={columnwidths}>
           {columnHeaders.map((header, index) => (
@@ -102,4 +104,6 @@ TableBuilder.propTypes = {
   handleDropdownChange: PropTypes.func,
   isDrag: PropTypes.bool,
   usetablerows: PropTypes.bool,
+  className:PropTypes.string
+
 };

@@ -29,14 +29,18 @@ const DateValue = styled.div`
 `;
 
 DateSelector.propTypes = {
-  date: PropTypes.instanceOf(Date),
+  ToDate: PropTypes.instanceOf(Date),
+  FromDate: PropTypes.instanceOf(Date),
 };
 
-export default function DateSelector({ date }) {
+export default function DateSelector({ ToDate,FromDate ,onClick}) {
   return (
-    <DateContainer>
+    <>
+     <DateContainer onClick={onClick}>
       <Label>Select Date</Label>
-      <DateValue>{date.toLocaleDateString()}</DateValue>
+      <DateValue>{FromDate.toLocaleDateString() +" - "+ ToDate.toLocaleDateString()}</DateValue>
     </DateContainer>
+    </>
+   
   );
 }

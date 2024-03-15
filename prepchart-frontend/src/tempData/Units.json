@@ -1,0 +1,65 @@
+{
+    "Units":[
+      {
+        "UnitID": "101",
+        "Name": "101 Rowlett"
+      },
+      {
+        "UnitID": "102",
+        "Name": "101 Craft Hall"
+      },
+      {
+        "UnitID": "103",
+        "Name": "103 SDI of Summerville"
+      },
+      {
+        "UnitID": "104",
+        "Name": "104 SDI of Goose Creek"
+      },
+      {
+        "UnitID": "105",
+        "Name": "105 SDI of Moncks Corner"
+      },
+      {
+        "UnitID": "106",
+        "Name": "106 SDI of N Charleston"
+      },
+      {
+        "UnitID": "107",
+        "Name": "107 SDI of W Ashley"
+      },
+      {
+        "UnitID": "108",
+        "Name": "108 SDI of James Island"
+      },
+      {
+        "UnitID": "109",
+        "Name": "109 SDI of Berlin G Meyers"
+      },
+      {
+        "UnitID": "110",
+        "Name": "110 Tontitown"
+      },
+      {
+        "UnitID": "111",
+        "Name": "111 Rogers"
+      },
+      {
+        "UnitID": "112",
+        "Name": "112 PP - Rio Grande"
+      },
+      {
+        "UnitID": "113",
+        "Name": "113 PP - Rio Grande"
+      },
+      {
+        "UnitID": "114",
+        "Name": "114 TP - Lar- Arena"
+      },
+      {
+        "UnitID": "115",
+        "Name": "115 TP - Houston - Wayside Dr"
+      }
+    ]
+  }
+  

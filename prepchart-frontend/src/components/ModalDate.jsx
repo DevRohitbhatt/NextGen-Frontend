@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import { FaTimes } from "react-icons/fa";
@@ -82,26 +82,25 @@ const FooterButton = styled.button`
     border-bottom-width: 2px;
     border-left-width: 2px;
   }
-&:hover::after {
-  border-color: #fff;
-  transition: border-color 0s, width 0.25s, height 0.25s;
-  width: 100%;
-  height: 100%;
-  transition-delay: 0s, 0.25s, 0s;
-}
-&:hover::before {
-  border-color: #fff;
-  transition: border-color 0s, width 0.25s, height 0.25s;
-  width: 100%;
-  height: 100%;
-  transition-delay: 0s, 0s, 0.25s;
-}
-&:hover{
-  border-color: transparent;
-  color: #fff;
+  &:hover::after {
+    border-color: #fff;
+    transition: border-color 0s, width 0.25s, height 0.25s;
+    width: 100%;
+    height: 100%;
+    transition-delay: 0s, 0.25s, 0s;
+  }
+  &:hover::before {
+    border-color: #fff;
+    transition: border-color 0s, width 0.25s, height 0.25s;
+    width: 100%;
+    height: 100%;
+    transition-delay: 0s, 0s, 0.25s;
+  }
+  &:hover {
+    border-color: transparent;
+    color: #fff;
     background: #364790;
-}
-
+  }
 `;
 const ModalFooter = styled.div`
   background: #efefef;
@@ -113,25 +112,38 @@ const ModalFooter = styled.div`
 const ModalBody = styled.div`
   padding: 0px 14px;
 `;
+const InputBox = styled.input`
+  width: 130px;
+  height: 27px;
+  background: #e6e7e8;
+  border: none;
+  padding-left: 7px;
+  color: #000;
+  font-weight: 500;
+`;
+
 
 const Modal = ({ show, handleClose, children }) => {
   // Render nothing if the "show" prop is false
-  if (!show) {
+
+ if (!show) {
     return null;
   }
 
   return (
     <ModalDialog>
-      <ModalOverlay>
-        <ModalContent>
+      <ModalOverlay className="modal-overlay">
+        <ModalContent className="modal-content">
           <ModalHeader>
-            <h4>Select a Unit or Area</h4>
+            <h4>Select a business period or Date Range</h4>
             <CloseButton onClick={handleClose}>
               <FaTimes className="close" />
             </CloseButton>
           </ModalHeader>
         </ModalContent>
-        <ModalBody>{children}</ModalBody>
+        <ModalBody>
+          {children}
+        </ModalBody>
         <ModalFooter>
           <FooterButton onClick={handleClose}>Ok</FooterButton>
           <FooterButton onClick={handleClose}>Cancel</FooterButton>
