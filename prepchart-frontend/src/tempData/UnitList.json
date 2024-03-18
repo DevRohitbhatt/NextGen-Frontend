@@ -1,0 +1,82 @@
+[
+  {
+    "AreaId": 1,
+    "UnitID": 101,
+    "Name": "Rowlett 1"
+  },
+  {
+    "AreaId": 1,
+    "UnitID": 102,
+    "Name": "Rowlett"
+  },
+  {
+    "AreaId": 1,
+    "UnitID": 103,
+    "Name": "Craft Hall"
+  },
+  {
+    "AreaId": 2,
+    "UnitID": 104,
+    "Name": "SDI of Summerville"
+  },
+  {
+    "AreaId": 2,
+    "UnitID": 105,
+    "Name": "SDI of Goose Creek"
+  },
+  {
+    "AreaId": 2,
+    "UnitID": 106,
+    "Name": "SDI of Moncks Corner"
+  },
+  {
+    "AreaId": 3,
+    "UnitID": 107,
+    "Name": "SDI of N Charleston"
+  },
+  {
+    "AreaId": 3,
+    "UnitID": 108,
+    "Name": "SDI of W Ashley"
+  },
+  {
+    "AreaId": 4,
+    "UnitID": 109,
+    "Name": "SDI of James Island"
+  },
+  {
+    "AreaId": 4,
+    "UnitID": 110,
+    "Name": "SDI of Berlin G Meyers"
+  },
+  {
+    "AreaId": 5,
+    "UnitID": 111,
+    "Name": "Tontitown"
+  },
+  {
+    "AreaId": 5,
+    "UnitID": 112,
+    "Name": "Rogers"
+  },
+  {
+    "AreaId": 6,
+    "UnitID": 113,
+    "Name": "PP - Rio Grande"
+  },
+  {
+    "AreaId": 6,
+    "UnitID": 114,
+    "Name": "PP - Rio Grande"
+  },
+  {
+    "AreaId": 7,
+    "UnitID": 115,
+    "Name": "TP - Lar- Arena"
+  },
+  {
+    "AreaId": 8,
+    "UnitID": 116,
+    "Name": "TP - Houston - Wayside Dr"
+  }
+]

@@ -9,15 +9,9 @@ import Table from "../components/TableBuilder.jsx";
 import PdfBuilder from "../components/PdfBuilder.jsx";
 import * as PrepChartFunctions from "../functions/PrepChartFunctions.jsx";
 import { exportToExcel } from "../functions/ExcelExport.jsx";
-import { UnitAPI } from "../apis/UnitAPI.jsx";
-import Modal from "../components/Modal.jsx";
-import SearchUnit from "../components/SearchUnit.jsx";
-import ModalDate from "../components/ModalDate.jsx";
-import {
-  CalendarToSelector,
-  CalendarFromSelector,
-} from "../components/CalendarSelector.jsx";
-import YearSelector from "../components/YearSelector.jsx";
+import { AreaAPI } from "../apis/AreaAPI.jsx";
+import UnitModal from "../components/UnitModal.jsx";
+import CalendarModal from "../components/ModalDate.jsx";
 
 const prepTableStructure = {
   columnHeaders: [
@@ -113,7 +107,6 @@ export default function PrepChart() {
         rows: [[{ value: data.DefaultSafetyFactor, cellType: "percent", columnName: "Default Safety Factor", handleOnChange: { handleTableCellChange }, isInput: true}]],
       });
     });
-    GetUnitList();
   }, []);
 
   useEffect(() => {
@@ -123,43 +116,29 @@ export default function PrepChart() {
       setIsLoading(false);
     }
   }, [prepChartDates]);
-  
-
-  const GetUnitList = () => {
-    UnitAPI.get(1, 1)
-      .then((data) => {
-        UnitListItem(data.Units);
-        if (data.Units.length > 0) {
-          setSelecteUnitName(data.Units.find((unit) => unit.UnitID === selectedUnit).Name);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  };
-  const UnitListItem = (UnitItem) => {
-    setUnitsList({
-      rows: UnitItem,
-    });
-    setFilteredUnit(UnitItem); // Initially, set filtered rows to all rows
-  };
 
   const buildCalendarTable = (year) => {
     const rows = [];
     let startDate = new Date(year, 0, 1);
-    //let startDate = new Date(prepChartDates.today.toLocaleDateString());
+    for (let i = 0; i < 12; i++) {
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 27);
 
-    for (let i = 0; i < 12; i++) { 
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 27); 
-
-        rows.push([
-            { value: (i + 1).toString(), cellType: "",  },
-            { value: formatDate(startDate), cellType: "" , onClick: () => handleRowClick(startDate, endDate) },
-            { value: formatDate(endDate), cellType: "" , onClick: () => handleRowClick(startDate, endDate)  }
-        ]);
-        startDate = new Date(endDate);
-        startDate.setDate(startDate.getDate() + 1); 
+      rows.push([
+        { value: (i + 1).toString(), cellType: "" },
+        {
+          value: formatDate(startDate),
+          cellType: "",
+          onClick: () => handleRowClick(startDate, endDate),
+        },
+        {
+          value: formatDate(endDate),
+          cellType: "",
+          onClick: () => handleRowClick(startDate, endDate),
+        },
+      ]);
+      startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() + 1);
     }
     setCalendarTable({
       ...CalendarTable,
@@ -172,7 +151,7 @@ export default function PrepChart() {
     const day = date.getDate();
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
-};
+  };
 
   const buildForecastTable = (forecastData) => {
     const { today, tomorrow, nextDay } = prepChartDates;
@@ -303,6 +282,44 @@ export default function PrepChart() {
     PdfBuilder(pdfData);
   };
 
+  const buildPrepTable = (prepChartSection, setTable) => {
+    const rows = prepChartSection.map((item) => {
+      return [
+        { value: item.itemName, cellType: "", columnName: "Item Name" },
+        { value: item.PrepType[0], cellType: "", columnName: "Prep Type" },
+        { value: item.YieldType, cellType: "", columnName: "Yield/Type" },
+        {
+          value: item.SafetyFactor,
+          cellType: "input",
+          columnName: "Safety Factor",
+          handleOnChange: { onInputCellChange },
+        },
+        {
+          value: item.Needed,
+          cellType: "input",
+          columnName: "Needed",
+          handleOnChange: { onInputCellChange },
+        },
+        {
+          value: item.OnHand,
+          cellType: "input",
+          columnName: "On Hand",
+          handleOnChange: { onInputCellChange },
+        },
+        {
+          value: item.PrepPullAmount,
+          cellType: "",
+          columnName: "Prep/Pull Amount",
+        },
+      ];
+    });
+
+    setTable({
+      ...todayTable,
+      rows: rows,
+    });
+  };
+
   const handleExcelClick = () => {
     const forecastColumns = [
       { name: "Day", key: "Day", width: 10 },
@@ -357,55 +374,30 @@ export default function PrepChart() {
     }
   }
 
-  const SearchUnitItem = (keyword) => {
-    const filtered = unitsList.rows.filter(
-      (item) =>
-        (item.Name &&
-          item.Name.toLowerCase().includes(keyword.toLowerCase())) ||
-        (item.UnitID &&
-          item.UnitID.toString().toLowerCase().includes(keyword.toLowerCase()))
-    );
-    setFilteredUnit(filtered);
-  };
   const handleUnitSelectorClick = () => {
     setShowModal(true); // Open the modal when UnitSelector is clicked
   };
   const handleDateSelectorClick = () => {
-    setShowDateModal(true); // Open the modal when UnitSelector is clicked
-  };
-  const handleUnitSelectChange = (event) => {
-    setSelectedUnit(event.target.value);
-    const UnitId = event.target.value;
-    const selectedText = event.target.textContent;
-    // Set the selected text to the state variable
-    setSelecteUnitName(selectedText);
-
-    // UnitAPI.get(1, UnitId)
-    // .then((data) => {
-    //   buildPrepMasterTable(data.InventoryList);
-    //   setIsLoading(false); // Set loading to false after data is fetched
-    // })
-    // .catch((error) => {
-    //   console.error("Error fetching data:", error);
-    //   setIsLoading(false); // Set loading to false if there's an error
-    // });
+    setShowDateModal(true); 
   };
 
-  const handleYearChange = (newYear) => {
-    setSelectedYear(newYear);
-    buildCalendarTable(newYear);
-};
-
-  const handleFromDateChange = (date) => {
-    setSelectedFromDate(date);
-  };
-  const handleToDateChange = (date) => {
-    setSelectedToDate(date);
-  };
-  useEffect(() => {
-  }, [selectedToDate,selectedFromDate]); // Run this effect whenever selectedDate changes
+  useEffect(() => {}, [selectedToDate, selectedFromDate]); // Run this effect whenever selectedDate changes
 
   const handleRowClick = (startDate, endDate) => {
+    console.log("Start Date:", startDate.toLocaleDateString());
+    console.log("End Date:", endDate.toLocaleDateString());
+  };
+  const handleCloseModal = () => {
+    setShowDateModal(false);
+  };
+  const handleDateSelection = (fromDate, toDate) => {
+    setSelectedFromDate(fromDate);
+    setSelectedToDate(toDate);
+    setShowDateModal(false); // Close the date modal after selection
+  };
+  const handleUnitSelection = (SelecteUnitName) => {
+    setSelecteUnitName(SelecteUnitName);
+    setShowModal(false); // Close the date modal after selection
   };
 
   return (
@@ -414,7 +406,7 @@ export default function PrepChart() {
       {isLoading ? (
         <h1>Loading...</h1>
       ) : (
-        <div>
+        <>
           <Styled.OptionsRow>
             <Styled.DateAndUnitContainer>
               <UnitSelector
@@ -425,91 +417,25 @@ export default function PrepChart() {
                 ToDate={selectedToDate}
                 FromDate={selectedFromDate}
                 onClick={handleDateSelectorClick}
+                isDateRange={false}
               />
 
-              <Modal
+              <UnitModal
                 show={showModal}
                 handleClose={() => {
                   setShowModal(false);
-                  SearchUnitItem("");
                 }}
-              >
-                <Styled.PopupContainer>
-                  <Styled.LeftUnitList>
-                    <label>Filter</label>
-                    <Styled.InputGroup>
-                      <SearchUnit
-                        list={unitsList}
-                        onSearch={(keyword) => SearchUnitItem(keyword)}
-                      />
-                    </Styled.InputGroup>
-                    <div className="unitList">
-                      <ul value={selectedUnit} onClick={handleUnitSelectChange}>
-                        {filteredUnit.map((item, index) => (
-                          <li
-                            key={index}
-                            onClick={() => setIsActive(item.UnitID)}
-                            value={item.UnitID}
-                            className={IsActive === item.UnitID ? "active" : ""}
-                          >
-                            {item.Name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Styled.LeftUnitList>
-                  <Styled.RightUnitList>
-                    <Styled.Span>{selecteUnitName}</Styled.Span>
-                    <div className="unitList">
-                      <ul value={selectedUnit} onClick={handleUnitSelectChange}>
-                        {filteredUnit.map((item, index) => (
-                          <li key={index} value={item.UnitID}>
-                            {item.Name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Styled.RightUnitList>
-                </Styled.PopupContainer>
-              </Modal>
+                handleUnitSelection={handleUnitSelection}
+              />
 
-              <ModalDate
-                show={showDateModal}
-                handleClose={() => {
-                  setShowDateModal(false);
-                }}
-              >
-                <Styled.CalendarBoxWrapper>
-                  <div className="fromdiv">
-                    <Styled.Label>From:</Styled.Label>
-                    <CalendarFromSelector handleDateChange={handleFromDateChange} selectedFromDate={selectedFromDate} />
-                  </div>
-                  <div className="Todiv">
-                    <Styled.Label>To:</Styled.Label>
-                    <CalendarToSelector handleDateChange={handleToDateChange} selectedToDate={selectedToDate} />
-                  </div>
-                  <div className="yeardiv">
-                    <Styled.Label>Show Periods For Year:</Styled.Label>
-                    <YearSelector
-                      selectedYear={selectedYear}
-                      onChange={handleYearChange}
-                      // onChange={(newYear) => buildCalendarTable(newYear)}
-                    />
-                  </div>
-                  
-                </Styled.CalendarBoxWrapper>
-                <div>
-                    <Table 
-                      columnHeaders={CalendarTable.columnHeaders}
-                      columnwidths={CalendarTable.columnWidths}
-                      rows={CalendarTable.rows}
-                      width={CalendarTable.width}
-                      className="CalendarTable"
-                      dataTypes={['number', 'string', 'string']}
-                    />
-                  </div>
-              </ModalDate>
+              <CalendarModal
+                handleClose={handleCloseModal}
+                modalOpen={showDateModal}
+                isDateRang={false}
+                handleDateSelection={handleDateSelection}
+              />
             </Styled.DateAndUnitContainer>
+
             <ExportOptions
               includeExcel={true}
               includePDF={true}
@@ -574,7 +500,7 @@ export default function PrepChart() {
             handleInputCellChange={handleTableCellChange}
             handleDropdownChange={handleDropdownChange}
           />
-        </div>
+        </>
       )}
     </Styled.PageContainer>
   );

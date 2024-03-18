@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import { useEffect, useState } from "react";
+import { AreaAPI } from "../apis/AreaAPI";
 
 
 const UnitContainer = styled.div`
@@ -29,11 +31,34 @@ const UnitValue = styled.div`
 `;
 
 export default function UnitSelector({ onClick ,UnitName}) {
+
+  const [SelecteUnitName, setSelecteUnitName] = useState("");
+
+  useEffect(() => {
+    setSelecteUnitName(UnitName); // Bind UnitName to selectedUnitName on page load
+  }, [UnitName]); // Re-run effect when UnitName prop changes
+
+  useEffect(() => {
+    GetUnitList();
+  }, []);
+
+  const GetUnitList = () => {
+    AreaAPI.get(1, 1)
+      .then((data) => {
+        if (data.AreaLists.length > 0) {
+          setSelecteUnitName(data.AreaLists[0].Name);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
   return (
     <>
     <UnitContainer onClick={onClick}>
       <Label>Select Unit(s)</Label>
-      <UnitValue >{UnitName}</UnitValue>
+      <UnitValue >{SelecteUnitName}</UnitValue>
     </UnitContainer>
     </>
   );
