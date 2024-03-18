@@ -374,6 +374,12 @@ export default function PrepChart() {
     }
   }
 
+  const handleSaveClick = () => {
+    // PrepChartAPI.save(prepChart);
+    console.log("Save Clicked");
+    console.log(prepChart);
+  };
+
   const handleUnitSelectorClick = () => {
     setShowModal(true); // Open the modal when UnitSelector is clicked
   };
@@ -440,6 +446,8 @@ export default function PrepChart() {
               includeExcel={true}
               includePDF={true}
               includePrint={true}
+              includeSave={true}
+              handleSaveClick={handleSaveClick}
               handlePDFClick={handlePDFClick}
               handlePrintClick={handlePrintClick}
               handleExcelClick={handleExcelClick}

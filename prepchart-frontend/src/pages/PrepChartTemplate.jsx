@@ -13,7 +13,7 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 import ExportOptions from "../components/ExportOptions.jsx";
 import { AreaAPI } from "../apis/AreaAPI.jsx";
-import SearchUnit from "../components/SearchUnit.jsx";
+import { UnitAPI } from "../apis/UnitAPI.jsx";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
@@ -54,7 +54,7 @@ export default function PrepChartTemplate() {
     setIsLoading(true); // Set loading to true before fetching data
     PrepChartTemplateAPI.get(1, 1)
       .then((data) => {
-        buildPrepMasterTable(data.InventoryList);
+        buildPrepMasterTable(data);
         setIsLoading(false); // Set loading to false after data is fetched
       })
       .catch((error) => {
@@ -75,10 +75,10 @@ export default function PrepChartTemplate() {
   const SearchItem = (keyword) => {
     const filtered = MasterTable.rows.filter(
       (item) =>
-        (item.Description &&
-          item.Description.toLowerCase().includes(keyword.toLowerCase())) ||
-        (item.InventoryItemID &&
-          item.InventoryItemID.toString()
+        (item.description &&
+          item.description.toLowerCase().includes(keyword.toLowerCase())) ||
+        (item.inventoryItemID &&
+          item.inventoryItemID.toString()
             .toLowerCase()
             .includes(keyword.toLowerCase())) ||
         (item.ThawTime &&
@@ -90,7 +90,7 @@ export default function PrepChartTemplate() {
   };
   const [{ isOverToday }, dropToday] = useDrop(() => ({
     accept: "content",
-    drop: (item) => DropToday(item.InventoryItemID),
+    drop: (item) => DropToday(item.inventoryItemID),
     collect: (monitor) => ({
       isOverToday: !!monitor.isOver(),
     }),
@@ -98,7 +98,7 @@ export default function PrepChartTemplate() {
 
   const [{ isOverTomorrow }, dropTomorrow] = useDrop(() => ({
     accept: "content",
-    drop: (item) => DropTomorrow(item.InventoryItemID),
+    drop: (item) => DropTomorrow(item.inventoryItemID),
     collect: (monitor) => ({
       isOverTomorrow: !!monitor.isOver(),
     }),
@@ -106,45 +106,45 @@ export default function PrepChartTemplate() {
 
   const [{ isOverNextDay }, dropNextDay] = useDrop(() => ({
     accept: "content",
-    drop: (item) => DropNextDay(item.InventoryItemID),
+    drop: (item) => DropNextDay(item.inventoryItemID),
     collect: (monitor) => ({
       isOverNextDay: !!monitor.isOver(),
     }),
   }));
 
-  const DropToday = (InventoryItemID) => {
+  const DropToday = (inventoryItemID) => {
     const isDuplicate = todayItemRef.current.some(
-      (item) => item.InventoryItemID === InventoryItemID
+      (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
       const DropToDayItem = ItemList.filter(
         (Items) =>
-          InventoryItemID === Items.InventoryItemID &&
-          todayItem.InventoryItemID != InventoryItemID
+          inventoryItemID === Items.inventoryItemID &&
+          todayItem.inventoryItemID != inventoryItemID
       );
       setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
     }
   };
 
-  const DropTomorrow = (InventoryItemID) => {
+  const DropTomorrow = (inventoryItemID) => {
     const isDuplicate = TomorrowItemRef.current.some(
-      (item) => item.InventoryItemID === InventoryItemID
+      (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
       const DropTomorrowItem = ItemList.filter(
-        (Items) => InventoryItemID === Items.InventoryItemID
+        (Items) => inventoryItemID === Items.inventoryItemID
       );
       setTomorrowItem((TomorrowItem) => [...TomorrowItem, DropTomorrowItem[0]]);
     }
   };
 
-  const DropNextDay = (InventoryItemID) => {
+  const DropNextDay = (inventoryItemID) => {
     const isDuplicate = NextDayItemmRef.current.some(
-      (item) => item.InventoryItemID === InventoryItemID
+      (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
       const DropNextDayItem = ItemList.filter(
-        (Items) => InventoryItemID === Items.InventoryItemID
+        (Items) => inventoryItemID === Items.inventoryItemID
       );
       setNextDayItem((NextDayItem) => [...NextDayItem, DropNextDayItem[0]]);
     }
@@ -166,12 +166,12 @@ export default function PrepChartTemplate() {
 
   // Function to handle sorting by Inventory ID
   const sortItemsByInventoryID = (items) => {
-    return items.sort((a, b) => a.InventoryItemID - b.InventoryItemID);
+    return items.sort((a, b) => a.inventoryItemID - b.inventoryItemID);
   };
 
-  // Function to handle sorting by Description
-  const sortItemsByDescription = (items) => {
-    return items.sort((a, b) => a.Description.localeCompare(b.Description));
+  // Function to handle sorting by description
+  const sortItemsBydescription = (items) => {
+    return items.sort((a, b) => a.description.localeCompare(b.description));
   };
 
   // Function to toggle sorting order and reorder items
@@ -182,36 +182,36 @@ export default function PrepChartTemplate() {
         sortOrder === "asc"
           ? sortItemsByInventoryID(items)
           : sortItemsByInventoryID(items).reverse();
-    } else if (sortBy === "Description") {
+    } else if (sortBy === "description") {
       sortedItems =
         sortOrder === "asc"
-          ? sortItemsByDescription(items)
-          : sortItemsByDescription(items).reverse();
+          ? sortItemsBydescription(items)
+          : sortItemsBydescription(items).reverse();
     }
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     setItems(sortedItems);
   };
 
   // Function to handle row deletion
-  const handleDelete = (InventoryItemID, day) => {
+  const handleDelete = (inventoryItemID, day) => {
     // Determine which list to update based on the 'day' parameter
     let updatedItems;
     switch (day) {
       case "today":
         updatedItems = todayItem.filter(
-          (item) => item.InventoryItemID !== InventoryItemID
+          (item) => item.inventoryItemID !== inventoryItemID
         );
         setTodayItem(updatedItems);
         break;
       case "tomorrow":
         updatedItems = TomorrowItem.filter(
-          (item) => item.InventoryItemID !== InventoryItemID
+          (item) => item.inventoryItemID !== inventoryItemID
         );
         setTomorrowItem(updatedItems);
         break;
       case "nextDay":
         updatedItems = NextDayItem.filter(
-          (item) => item.InventoryItemID !== InventoryItemID
+          (item) => item.inventoryItemID !== inventoryItemID
         );
         setNextDayItem(updatedItems);
         break;
@@ -224,6 +224,44 @@ export default function PrepChartTemplate() {
     setSelecteUnitName(SelecteUnitName);
     setShowModal(false); // Close the date modal after selection
   };
+
+  const handleSave = () => {
+    console.log("Save button clicked");
+    const prepChartTemplate = constructPrepChartTemplate();
+    console.log(prepChartTemplate);
+  }
+
+  function constructPrepChartTemplate() {
+    // Sample UnitIDs
+    const unitIDs = [51];
+    
+    // Constructing PrepChartTemplate array
+    const prepChartTemplate = [
+        {
+            PrepGroupKey: "Today",
+            InventoryItemList: todayItem
+        },
+        {
+            PrepGroupKey: "Tomorrow",
+            InventoryItemList: TomorrowItem
+        },
+        {
+            PrepGroupKey: "Next Day",
+            InventoryItemList: NextDayItem
+        }
+    ];
+    
+    // Constructing the final JSON object
+    const jsonObject = {
+        CompanyID: 1021,
+        UnitIDList: unitIDs,
+        PrepChartTemplate: prepChartTemplate
+    };
+    
+    return jsonObject;
+}
+
+
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Prep Chart Template</Styled.PageTitle>
@@ -248,6 +286,7 @@ export default function PrepChartTemplate() {
             <Styled.SaveOptionsContainer>
               <ExportOptions
                 includeSave={true}
+                handleSaveClick={handleSave}
               />
             </Styled.SaveOptionsContainer>
           </Styled.OptionsRow>
@@ -269,7 +308,7 @@ export default function PrepChartTemplate() {
                   rows={
                     filteredItem.length > 0
                       ? filteredItem
-                      : [{ Description: "No data found " }]
+                      : [{ description: "No data found " }]
                   }
                   isDrag={true}
                   usetablerows={true}
@@ -308,7 +347,7 @@ export default function PrepChartTemplate() {
                       <Styled.TableHeaderCell
                         onClick={() =>
                           handleSorting(
-                            "Description",
+                            "description",
                             setTodayItem,
                             todayItem,
                             sortOrder,
@@ -316,7 +355,7 @@ export default function PrepChartTemplate() {
                           )
                         }
                       >
-                        Description{" "}
+                        description{" "}
                         {sortOrder === "asc" ? (
                           <FaArrowDownWideShort className="asc" />
                         ) : (
@@ -328,9 +367,9 @@ export default function PrepChartTemplate() {
                     {todayItem.map((item, index) => (
                       <>
                         <InventoryItem
-                          key={item.InventoryItemID}
-                          InventoryItemID={item.InventoryItemID}
-                          Description={item.Description}
+                          key={item.inventoryItemID}
+                          inventoryItemID={item.inventoryItemID}
+                          description={item.description}
                           moveItem={() =>
                             handleReorder(todayItem, setTodayItem)
                           }
@@ -339,7 +378,7 @@ export default function PrepChartTemplate() {
                         <FaRegTrashAlt
                           className="delete"
                           onClick={() =>
-                            handleDelete(item.InventoryItemID, "today")
+                            handleDelete(item.inventoryItemID, "today")
                           }
                         />
                       </>
@@ -378,7 +417,7 @@ export default function PrepChartTemplate() {
                       <Styled.TableHeaderCell
                         onClick={() =>
                           handleSorting(
-                            "Description",
+                            "description",
                             setTomorrowItem,
                             TomorrowItem,
                             sortOrder,
@@ -386,7 +425,7 @@ export default function PrepChartTemplate() {
                           )
                         }
                       >
-                        Description{" "}
+                        description{" "}
                         {sortOrder === "asc" ? (
                           <FaArrowDownWideShort className="asc" />
                         ) : (
@@ -398,9 +437,9 @@ export default function PrepChartTemplate() {
                     {TomorrowItem.map((item, index) => (
                       <>
                         <InventoryItem
-                          key={item.InventoryItemID}
-                          InventoryItemID={item.InventoryItemID}
-                          Description={item.Description}
+                          key={item.inventoryItemID}
+                          inventoryItemID={item.inventoryItemID}
+                          description={item.description}
                           moveItem={handleReorder(
                             TomorrowItem,
                             setTomorrowItem
@@ -410,7 +449,7 @@ export default function PrepChartTemplate() {
                         <FaRegTrashAlt
                           className="delete"
                           onClick={() =>
-                            handleDelete(item.InventoryItemID, "tomorrow")
+                            handleDelete(item.inventoryItemID, "tomorrow")
                           }
                         />
                       </>
@@ -448,7 +487,7 @@ export default function PrepChartTemplate() {
                       <Styled.TableHeaderCell
                         onClick={() =>
                           handleSorting(
-                            "Description",
+                            "description",
                             setNextDayItem,
                             NextDayItem,
                             sortOrder,
@@ -456,7 +495,7 @@ export default function PrepChartTemplate() {
                           )
                         }
                       >
-                        Description{" "}
+                        description{" "}
                         {sortOrder === "asc" ? (
                           <FaArrowDownWideShort className="asc" />
                         ) : (
@@ -468,16 +507,16 @@ export default function PrepChartTemplate() {
                     {NextDayItem.map((item, index) => (
                       <>
                         <InventoryItem
-                          key={item.InventoryItemID}
-                          InventoryItemID={item.InventoryItemID}
-                          Description={item.Description}
+                          key={item.inventoryItemID}
+                          inventoryItemID={item.inventoryItemID}
+                          description={item.description}
                           moveItem={handleReorder(NextDayItem, setNextDayItem)}
                           columnIndex={index}
                         />
                         <FaRegTrashAlt
                           className="delete"
                           onClick={() =>
-                            handleDelete(item.InventoryItemID, "nextDay")
+                            handleDelete(item.inventoryItemID, "nextDay")
                           }
                         />
                       </>

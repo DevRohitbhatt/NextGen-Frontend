@@ -6,9 +6,10 @@ export const PrepChartAPI = {
   get: async function (companyID, unitID, cancel = false) {
     // const response = await api.request({
     //   method: "GET",
-    //   url: `/api/prepchart/get`,
+    //   url: `/api/prepchartdetail/getprepchartdetail`,
     //   companyID,
     //   unitID,
+    //   date,
     //   signal: cancel ? cancelApiObject[this.get.name].handleRequestCancellation().signal : undefined,
     // });
     const response = await PrepChartjson;
@@ -16,6 +17,18 @@ export const PrepChartAPI = {
     // return response.data;
     return response;
   },
+  save: async function (data, cancel = false) {
+    // const response = await api.request({
+    //   method: "POST",
+    //   url: `/api/prepchartdetail/saveprepchartdetail`,
+    //   data,
+    //   signal: cancel ? cancelApiObject[this.save.name].handleRequestCancellation().signal : undefined,
+    // });
+    const response = await PrepChartjson;
+
+    // return response.data;
+    return response;
+  }
 }
 
 const cancelApiObject = defineCancelApiObject(PrepChartAPI);

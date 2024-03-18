@@ -78,7 +78,7 @@ export default function TableBuilder({
       {rows.map((row, rowIndex) => {
 
         if(isDrag){
-          return <InventoryItem key={rowIndex} rowIndex={rowIndex} Description={row.Description} InventoryItemID={row.InventoryItemID}  ThawTime={row.ThawTime} />
+          return <InventoryItem key={rowIndex} rowIndex={rowIndex} tableName={tableName} description={row.description} inventoryItemID={row.inventoryItemID}  ThawTime={row.ThawTime} />
         }
        return   row && row.map((cell, cellIndex) => (
             <Cell key={cellIndex} value={cell.value} columntype={dataTypes[cellIndex]} cellType={cell.cellType} isInput={cell.isInput} row={rowIndex} tableName={tableName} columnName={cell.columnName} handleInputCellChange={handleInputCellChange} handleDropdownChange={handleDropdownChange}/>

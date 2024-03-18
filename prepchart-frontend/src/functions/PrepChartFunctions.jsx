@@ -32,8 +32,10 @@ export function onInputCellChange(
             } else if (cell.columnName === "On Hand") {
               onHand = parseFloat(e.target.value);
               cell.value = parseFloat(e.target.value);
+              newPrepChart[tableName][row]["OnHand"] = cell.value;
             } else if (cell.columnName === "Prep/Pull Amount") {
               cell.value = (needed - onHand).toFixed(2);
+              newPrepChart[tableName][row]["PrepPullAmount"] = cell.value;
             }
           });
         }
@@ -63,7 +65,7 @@ export function onInputCellChange(
               onHand = parseFloat(cell.value);
             } else if (cell.columnName === "Prep/Pull Amount") {
               cell.value = (needed - onHand).toFixed(2);
-              newPrepChart[tableName][row][cell.columnName] = cell.value;
+              newPrepChart[tableName][row]["PrepPullAmount"] = cell.value;
             }
           });
         }
@@ -102,7 +104,6 @@ export function onDropdownCellChange(
               if (option.Option === e.target.value) {
                 prepValue = option.Value;
                 option.IsSelected = true;
-                newPrepChart[tableName][row][cell.columnName] = e.target.value;
               }
             });
           } else if (cell.columnName === "Yield/Type") {
@@ -118,17 +119,16 @@ export function onDropdownCellChange(
           } else if (cell.columnName === "On Hand") {
             onHand = parseFloat(cell.value);
             cell.value = onHand;
-            newPrepChart[tableName][row][cell.columnName] = cell.value;
+            newPrepChart[tableName][row]["OnHand"] = cell.value;
           } else if (cell.columnName === "Prep/Pull Amount") {
             cell.value = (needed - onHand).toFixed(2);
+            newPrepChart[tableName][row]["PrepPullAmount"] = cell.value;
           }
         });
       }
       return item;
     }),
   });
-
-  newPrepChart[tableName][row][columnName] = e.target.value;
   setPrepChart(newPrepChart);
 }
 
@@ -248,15 +248,17 @@ export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, t
         } else if (cell.columnName === "Safety Factor") {
           safetyFactor = (cell.value === previousSafetyFactor) ? newSafetyFactor : cell.value;
           cell.value = safetyFactor;
+          newPrepChart[tableName][index][cell.columnName] = safetyFactor;
         } else if (cell.columnName === "Needed") {
           needed = calculateNeededValue(tableName, prepChart, prepValue, yieldType, safetyFactor);
           cell.value = needed;
           newPrepChart[tableName][index][cell.columnName] = needed;
         } else if (cell.columnName === "On Hand") {
           onHand = parseFloat(cell.value);
-          newPrepChart[tableName][index][cell.columnName] = onHand;
+          newPrepChart[tableName][index]["OnHand"] = onHand;
         } else if (cell.columnName === "Prep/Pull Amount") {
           cell.value = (needed - onHand).toFixed(2);
+          newPrepChart[tableName][index]["PrepPullAmount"] = cell.value;
         }
         return cell;
       });

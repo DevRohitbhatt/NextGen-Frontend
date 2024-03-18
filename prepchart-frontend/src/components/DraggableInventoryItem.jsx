@@ -2,14 +2,14 @@ import { useDrag } from "react-dnd";
 import * as Styled from "../pages/PrepChartTempStyles";
 
 export function InventoryItem({
-  Description,
-  InventoryItemID,
+  description,
+  inventoryItemID,
   ThawTime,
   rowIndex,
 }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "content",
-    item: { InventoryItemID: InventoryItemID, id: InventoryItemID },
+    item: { inventoryItemID: inventoryItemID, id: inventoryItemID },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -17,9 +17,9 @@ export function InventoryItem({
 
     return (
         <>
-         <Styled.TableRow key={InventoryItemID} ref={drag}  >
-            <Styled.TableCell> {InventoryItemID}</Styled.TableCell>
-            <Styled.TableCell>{Description}</Styled.TableCell>
+         <Styled.TableRow key={inventoryItemID} ref={drag}  >
+            <Styled.TableCell> {inventoryItemID}</Styled.TableCell>
+            <Styled.TableCell>{description}</Styled.TableCell>
          </Styled.TableRow>
         </>
     )
