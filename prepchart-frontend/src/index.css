@@ -427,6 +427,49 @@ button.react-calendar__tile.react-calendar__year-view__months__month {
   background: #364790 !important;
   color: #fff;
 }
+.SingleCalendar .react-calendar {
+  width: 100%;
+  max-width: 100%;
+  background: white;
+  border: 0px !important;
+  line-height: 1.125em;
+  position: relative !important;
+  z-index: 9 !important;
+}
+.SingleModal {
+  width: 380px !important;
+}
+.SingleModal .ciFebe {
+  padding: 0px;
+}
+.SingleModal .react-calendar__navigation {
+  background: #efefef;
+  margin-bottom: 10px;
+}
+.SingleModal button.react-calendar__navigation__arrow.react-calendar__navigation__prev2-button, button.react-calendar__navigation__arrow.react-calendar__navigation__next2-button {
+  color: #000  !important;
+}
+.SingleModal button.react-calendar__navigation__arrow.react-calendar__navigation__prev-button, button.react-calendar__navigation__arrow.react-calendar__navigation__next-button {
+  color: #000  !important;
+}
+.SingleModal .react-calendar__navigation button {
+  color: #000  !important;
+}
+.react-calendar__viewContainer {
+  width: 95%;
+  margin: 0 auto;
+  margin-bottom: 10px;
+}
+.react-calendar button {
+  padding: 5px 0px;
+  border-radius: 0px !important;
+}
+.react-calendar button:focus-visible, :focus {
+  outline: 0px !important;
+}
+.daterangeBody {
+  padding: 0px 15px;
+}
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

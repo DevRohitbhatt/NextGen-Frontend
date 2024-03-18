@@ -8,10 +8,10 @@ import Table from "../components/TableBuilder.jsx";
 import { PrepChartTemplateAPI } from "../apis/PrepChartTemplateAPI.jsx";
 import { FaRegSave } from "react-icons/fa";
 import SearchBar from "../components/SearchBar.jsx";
-import Modal from "../components/Modal.jsx";
+import UnitModal from "../components/UnitModal.jsx";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
-import { UnitAPI } from "../apis/UnitAPI.jsx";
+import { AreaAPI } from "../apis/AreaAPI.jsx";
 import SearchUnit from "../components/SearchUnit.jsx";
 
 var ItemList = [];
@@ -36,11 +36,7 @@ export default function PrepChartTemplate() {
   const NextDayItemmRef = useRef(NextDayItem);
   const [showModal, setShowModal] = useState(false); // State to manage modal visibility
   const [sortOrder, setSortOrder] = useState("asc");
-  const [unitsList, setUnitsList] = useState([]);
-  const [selectedUnit, setSelecteUnit] = useState("");
   const [SelecteUnitName, setSelecteUnitName] = useState("");
-  const [filteredUnit, setFilteredUnit] = useState([]);
-  const [IsActive, setIsActive] = useState([]);
 
   useEffect(() => {
     todayItemRef.current = todayItem;
@@ -50,7 +46,6 @@ export default function PrepChartTemplate() {
 
   useEffect(() => {
     fetchData(); // Call fetchData function on component mount
-    GetUnitList();
   }, []);
 
   const fetchData = () => {
@@ -64,28 +59,6 @@ export default function PrepChartTemplate() {
         console.error("Error fetching data:", error);
         setIsLoading(false); // Set loading to false if there's an error
       });
-  };
-
-  const GetUnitList = () => {
-    UnitAPI.get(1, 1)
-      .then((data) => {
-        UnitListItem(data.Units);
-        if (data.Units.length > 0) {
-          setSelecteUnit(data.Units[0].UnitID);
-          setSelecteUnitName(data.Units[0].Name);
-          setIsActive(data.Units[0].UnitID);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  };
-
-  const UnitListItem = (UnitItem) => {
-    setUnitsList({
-      rows: UnitItem,
-    });
-    setFilteredUnit(UnitItem); // Initially, set filtered rows to all rows
   };
 
   const buildPrepMasterTable = (prepChartSection) => {
@@ -113,18 +86,6 @@ export default function PrepChartTemplate() {
     );
     setFilteredItem(filtered);
   };
-
-  const SearchUnitItem = (keyword) => {
-    const filtered = unitsList.rows.filter(
-      (item) =>
-        (item.Name &&
-          item.Name.toLowerCase().includes(keyword.toLowerCase())) ||
-        (item.UnitID &&
-          item.UnitID.toString().toLowerCase().includes(keyword.toLowerCase()))
-    );
-    setFilteredUnit(filtered);
-  };
-
   const [{ isOverToday }, dropToday] = useDrop(() => ({
     accept: "content",
     drop: (item) => DropToday(item.InventoryItemID),
@@ -257,22 +218,9 @@ export default function PrepChartTemplate() {
     }
   };
 
-  const handleUnitSelectChange = (event) => {
-    setSelecteUnit(event.target.value);
-    const UnitId = event.target.value;
-    const selectedText = event.target.textContent;
-    // Set the selected text to the state variable
-    setSelecteUnitName(selectedText);
-
-    // UnitAPI.get(1, UnitId)
-    // .then((data) => {
-    //   buildPrepMasterTable(data.InventoryList);
-    //   setIsLoading(false); // Set loading to false after data is fetched
-    // })
-    // .catch((error) => {
-    //   console.error("Error fetching data:", error);
-    //   setIsLoading(false); // Set loading to false if there's an error
-    // });
+  const handleUnitSelection = (SelecteUnitName) => {
+    setSelecteUnitName(SelecteUnitName);
+    setShowModal(false); // Close the date modal after selection
   };
   return (
     <Styled.PageContainer>
@@ -283,52 +231,17 @@ export default function PrepChartTemplate() {
         <div>
           <Styled.OptionsRow>
             <Styled.DateAndUnitContainer>
-              <UnitSelector onClick={handleUnitSelectorClick} UnitName={SelecteUnitName} />
-              <Modal
+              <UnitSelector
+                onClick={handleUnitSelectorClick}
+                UnitName={SelecteUnitName}
+              />
+              <UnitModal
                 show={showModal}
                 handleClose={() => {
                   setShowModal(false);
-                  SearchUnitItem("");
                 }}
-              >
-                <Styled.PopupContainer>
-                  <Styled.LeftUnitList>
-                    <label>Filter</label>
-                    <Styled.InputGroup>
-                      <SearchUnit
-                        list={unitsList}
-                        onSearch={(keyword) => SearchUnitItem(keyword)}
-                      />
-                    </Styled.InputGroup>
-                    <div className="unitList">
-                      <ul value={selectedUnit} onClick={handleUnitSelectChange}>
-                        {filteredUnit.map((item, index) => (
-                          <li
-                            key={index}
-                            onClick={() => setIsActive(item.UnitID)}
-                            value={item.UnitID}
-                            className={IsActive === item.UnitID ? "active" : ""}
-                          >
-                            {item.Name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Styled.LeftUnitList>
-                  <Styled.RightUnitList>
-                    <Styled.Span>{SelecteUnitName}</Styled.Span>
-                    <div className="unitList">
-                      <ul value={selectedUnit} onClick={handleUnitSelectChange}>
-                        {filteredUnit.map((item, index) => (
-                          <li key={index} value={item.UnitID}>
-                            {item.Name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Styled.RightUnitList>
-                </Styled.PopupContainer>
-              </Modal>
+                handleUnitSelection={handleUnitSelection}
+              />
             </Styled.DateAndUnitContainer>
             <Styled.SaveOptionsContainer>
               <Styled.SaveOption className="btnOuter">

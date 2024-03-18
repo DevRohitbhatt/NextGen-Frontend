@@ -1,8 +1,8 @@
 import api from "./configs/axiosConfig.jsx";
 import { defineCancelApiObject } from "./configs/axiosUtils.jsx";
-import unitsjson from "../tempData/Units.json";
+import AreaLists from "../tempData/AreaList.json";
 
-export const UnitAPI = {
+export const AreaAPI = {
   get: async function (companyID, unitID, cancel = false) {
     // const response = await api.request({
     //   method: "GET",
@@ -11,11 +11,11 @@ export const UnitAPI = {
     //   unitID,
     //   signal: cancel ? cancelApiObject[this.get.name].handleRequestCancellation().signal : undefined,
     // });
-    const response = await unitsjson;
+    const response = await AreaLists;
 
     // return response.data;
     return response;
   },
 }
 
-const cancelApiObject = defineCancelApiObject(UnitAPI);
+const cancelApiObject = defineCancelApiObject(AreaAPI);
