@@ -215,7 +215,7 @@ export default function Cell({
     });
   } else if (cellType === "dropdown") {
     //find the selected option based on the IsSelected property of the value array
-    const selectedOption = value.find((option) => option.IsSelected);
+    const selectedOption = value.find((option) => option.isSelected);
     return (
       <TableCell columntype={columntype}>
         <Dropdown
@@ -223,8 +223,8 @@ export default function Cell({
           defaultValue={selectedOption.Option}
         >
           {value.map((option, index) => (
-            <option key={index} value={option.PrepType}>
-              {option.Option}
+            <option key={index} value={option.prepType}>
+              {option.option}
             </option>
           ))}
         </Dropdown>

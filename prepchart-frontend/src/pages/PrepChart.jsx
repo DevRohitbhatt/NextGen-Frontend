@@ -86,7 +86,7 @@ export default function PrepChart() {
     //Todo use companyID and UnitID instead of 1, 1
     PrepChartAPI.get(1, 1).then((data) => {
       setPrepChart(data);
-      const date = new Date(data.Date);
+      const date = new Date(data.date);
       setSelectedToDate(date);
       setSelectedFromDate(date);
       const tomorrow = new Date(date);
@@ -99,19 +99,19 @@ export default function PrepChart() {
         tomorrow: tomorrow,
         nextDay: nextDay,
       });
-      PrepChartFunctions.buildPrepTable(data.Today, setTodayTable, todayTable, handleTableCellChange, handleDropdownChange);
-      PrepChartFunctions.buildPrepTable(data.Tomorrow, setTomorrowTable, tomorrowTable, handleTableCellChange, handleDropdownChange);
-      PrepChartFunctions.buildPrepTable(data.NextDay, setNextDayTable, nextDayTable, handleTableCellChange, handleDropdownChange);
+      PrepChartFunctions.buildPrepTable(data.today, setTodayTable, todayTable, handleTableCellChange, handleDropdownChange);
+      PrepChartFunctions.buildPrepTable(data.tomorrow, setTomorrowTable, tomorrowTable, handleTableCellChange, handleDropdownChange);
+      PrepChartFunctions.buildPrepTable(data.nextDay, setNextDayTable, nextDayTable, handleTableCellChange, handleDropdownChange);
       setDefaultSafetyFactorTable({
         ...defaultSafetyFactorTable,
-        rows: [[{ value: data.DefaultSafetyFactor, cellType: "percent", columnName: "Default Safety Factor", handleOnChange: { handleTableCellChange }, isInput: true}]],
+        rows: [[{ value: data.defaultSafetyFactor, cellType: "percent", columnName: "Default Safety Factor", handleOnChange: { handleTableCellChange }, isInput: true}]],
       });
     });
   }, []);
 
   useEffect(() => {
     if (prepChartDates.today) {
-      buildForecastTable(prepChart.ForecastData);
+      buildForecastTable(prepChart.forecastData);
       buildCalendarTable(selectedYear);
       setIsLoading(false);
     }
@@ -158,17 +158,17 @@ export default function PrepChart() {
     const rows = [
       [
         { value: "Today", cellType: "", columnName: "Day"},
-        { value: forecastData.Today, cellType: "dollar", isInput: true, columnName: "Forecasted Sales"},
+        { value: forecastData.today, cellType: "dollar", isInput: true, columnName: "Forecasted Sales"},
         { value: today.toLocaleDateString(), cellType: "", columnName: "Date" },
       ],
       [
         { value: "Tomorrow", cellType: "", columnName: "Day"},
-        { value: forecastData.Tomorrow, cellType: "dollar", isInput: true, columnName: "Forecasted Sales" },
+        { value: forecastData.tomorrow, cellType: "dollar", isInput: true, columnName: "Forecasted Sales" },
         { value: tomorrow.toLocaleDateString(), cellType: "", columnName: "Date" },
       ],
       [
         { value: "Next Day", cellType: "", columnName: "Day"},
-        { value: forecastData.NextDay, cellType: "dollar", isInput: true, columnName: "Forecasted Sales" },
+        { value: forecastData.nextDay, cellType: "dollar", isInput: true, columnName: "Forecasted Sales" },
         { value: nextDay.toLocaleDateString(), cellType: "", columnName: "Date" },
       ],
     ];
@@ -362,7 +362,7 @@ export default function PrepChart() {
   const formatCellValue = (cell) => {
     switch (cell.columnName) {
       case "Prep Type":
-        return cell.value.find(option => option.IsSelected).Option;
+        return cell.value.find(option => option.isSelected).option;
       case "Yield/Type":
       case "Forecasted Sales":
         return cell.value.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -476,7 +476,7 @@ export default function PrepChart() {
               handleInputCellChange={handleTableCellChange}
             />
           </Styled.ForeCastAndSafetyFactor>
-          <h2>Today - ${prepChart.ForecastData.Today}</h2>
+          <h2>Today - ${prepChart.forecastData.today}</h2>
           <Table
             columnHeaders={todayTable.columnHeaders}
             dataTypes={todayTable.dataTypes}
@@ -487,7 +487,7 @@ export default function PrepChart() {
             handleDropdownChange={handleDropdownChange}
           />
 
-          <h2>Tomorrow - ${prepChart.ForecastData.Tomorrow}</h2>
+          <h2>Tomorrow - ${prepChart.forecastData.tomorrow}</h2>
           <Table
             columnHeaders={tomorrowTable.columnHeaders}
             dataTypes={tomorrowTable.dataTypes}
@@ -498,7 +498,7 @@ export default function PrepChart() {
             handleDropdownChange={handleDropdownChange}
           />
 
-          <h2>Next Day - ${prepChart.ForecastData.NextDay}</h2>
+          <h2>Next Day - ${prepChart.forecastData.nextDay}</h2>
           <Table
             columnHeaders={nextDayTable.columnHeaders}
             dataTypes={nextDayTable.dataTypes}

@@ -1,104 +1,120 @@
 {
-  "ForecastData": {
-    "Today": 2389.33,
-    "Tomorrow": 2577.23,
-    "NextDay": 2108.28
+  "forecastData": {
+    "today": 2389.33,
+    "tomorrow": 2577.23,
+    "nextDay": 2108.28
   },
-  "DefaultSafetyFactor": 10.0,
-  "Date": "2024-01-26T12:30:00.000Z",
-  "Today": [
+  "defaultSafetyFactor": 10.0,
+  "date": "2024-01-26T12:30:00.000Z",
+  "today": [
     {
       "itemName": "(R) CHICKEN (159/3 OZ)",
-      "PrepUOM": [
-        {"Option": "Box (53 Count) / Pan Prep Half", "Value": 3, "IsSelected": true},
-        {"Option": "CASE (159 Count)", "Value": 1, "IsSelected": false},
-        {"Option": "SLICE 3OZ", "Value": 159, "IsSelected": false},
-        {"Option": "~OZ", "Value": 480, "IsSelected": false}
+      "prepUOM": [
+        {
+          "option": "Box (53 Count) / Pan Prep Half",
+          "value": 3,
+          "isSelected": true
+        },
+        { "option": "CASE (159 Count)", "value": 1, "isSelected": false },
+        { "option": "SLICE 3OZ", "value": 159, "isSelected": false },
+        { "option": "~OZ", "value": 480, "isSelected": false }
       ],
-      "YieldType": 1052.82,
-      "CaseYieldDollars": 3158.45,
-      "SafetyFactor": 10,
-      "Needed": 2.26,
-      "OnHand": 0,
-      "PrepPullAmount": 2.26
+      "yieldType": 1052.82,
+      "caseYieldDollars": 3158.45,
+      "safetyFactor": 10,
+      "needed": 2.26,
+      "onHand": 0,
+      "prepPullAmount": 2.26
     },
     {
       "itemName": "(R) Steak (159/ 3 OZ)",
-      "PrepUOM": [
-        {"Option": "Box (53 Count) / Pan Prep Half", "Value": 3, "IsSelected": true},
-        {"Option": "CASE (159 Count)", "Value": 1, "IsSelected": false},
-        {"Option": "SLICE 3OZ", "Value": 159, "IsSelected": false},
-        {"Option": "~OZ", "Value": 480, "IsSelected": false}
+      "prepUOM": [
+        {
+          "option": "Box (53 Count) / Pan Prep Half",
+          "value": 3,
+          "isSelected": true
+        },
+        { "option": "CASE (159 Count)", "value": 1, "isSelected": false },
+        { "option": "SLICE 3OZ", "value": 159, "isSelected": false },
+        { "option": "~OZ", "value": 480, "isSelected": false }
       ],
-      "YieldType": 532.31,
-      "CaseYieldDollars": 1596.92,
-      "SafetyFactor": 10,
-      "Needed": 4.46,
-      "OnHand": 0,
-      "PrepPullAmount": 4.46
+      "yieldType": 532.31,
+      "caseYieldDollars": 1596.92,
+      "safetyFactor": 10,
+      "needed": 4.46,
+      "onHand": 0,
+      "prepPullAmount": 4.46
     },
     {
       "itemName": "(R) CHICKEN TENDERS",
-      "PrepUOM": [
-        {"Option": "CASE (4/5 LB)", "Value": 1, "IsSelected": true},
-        {"Option": "BAG (5 LB)", "Value": 4, "IsSelected": false},
-        {"Option": "~OZ", "Value": 320, "IsSelected": false}
+      "prepUOM": [
+        { "option": "CASE (4/5 LB)", "value": 1, "isSelected": true },
+        { "option": "BAG (5 LB)", "value": 4, "isSelected": false },
+        { "option": "~OZ", "value": 320, "isSelected": false }
       ],
-      "YieldType": 61262.73,
-      "CaseYieldDollars": 61262.73,
-      "SafetyFactor": 10,
-      "Needed": 0.04,
-      "OnHand": 0,
-      "PrepPullAmount": 0.04
+      "yieldType": 61262.73,
+      "caseYieldDollars": 61262.73,
+      "safetyFactor": 10,
+      "needed": 0.04,
+      "onHand": 0,
+      "prepPullAmount": 0.04
     }
   ],
-  "Tomorrow": [
+  "tomorrow": [
     {
       "itemName": "(R) CHICKEN (159/3 OZ)",
-      "PrepUOM": [
-        {"Option": "Box (53 Count) / Pan Prep Half", "Value": 3, "IsSelected": true},
-        {"Option": "CASE (159 Count)", "Value": 1, "IsSelected": false},
-        {"Option": "SLICE 3OZ", "Value": 159, "IsSelected": false},
-        {"Option": "~OZ", "Value": 480, "IsSelected": false}
+      "prepUOM": [
+        {
+          "option": "Box (53 Count) / Pan Prep Half",
+          "value": 3,
+          "isSelected": true
+        },
+        { "option": "CASE (159 Count)", "value": 1, "isSelected": false },
+        { "option": "SLICE 3OZ", "value": 159, "isSelected": false },
+        { "option": "~OZ", "value": 480, "isSelected": false }
       ],
-      "YieldType": 1052.82,
-      "CaseYieldDollars": 3158.45,
-      "SafetyFactor": 0,
-      "Needed": 4.7,
-      "OnHand": 0,
-      "PrepPullAmount": 4.7
+      "yieldType": 1052.82,
+      "caseYieldDollars": 3158.45,
+      "safetyFactor": 0,
+      "needed": 4.7,
+      "onHand": 0,
+      "prepPullAmount": 4.7
     },
     {
       "itemName": "(R) Steak (159/ 3 OZ)",
-      "PrepUOM": [
-        {"Option": "Box (53 Count) / Pan Prep Half", "Value": 3, "IsSelected": true},
-        {"Option": "CASE (159 Count)", "Value": 1, "IsSelected": false},
-        {"Option": "SLICE 3OZ", "Value": 159, "IsSelected": false},
-        {"Option": "~OZ", "Value": 480, "IsSelected": false}
+      "prepUOM": [
+        {
+          "option": "Box (53 Count) / Pan Prep Half",
+          "value": 3,
+          "isSelected": true
+        },
+        { "option": "CASE (159 Count)", "value": 1, "isSelected": false },
+        { "option": "SLICE 3OZ", "value": 159, "isSelected": false },
+        { "option": "~OZ", "value": 480, "isSelected": false }
       ],
-      "YieldType": 532.31,
-      "CaseYieldDollars": 1596.92,
-      "SafetyFactor": 10,
-      "Needed": 9.28,
-      "OnHand": 0,
-      "PrepPullAmount": 9.28
+      "yieldType": 532.31,
+      "caseYieldDollars": 1596.92,
+      "safetyFactor": 10,
+      "needed": 9.28,
+      "onHand": 0,
+      "prepPullAmount": 9.28
     }
   ],
-  "NextDay": [
+  "nextDay": [
     {
       "itemName": "(R) Syrup Strawberry 6/35 OZ",
-      "PrepUOM": [
-        {"Option": "CASE", "Value": 1, "IsSelected": false},
-        {"Option": "~BOTTLE PREP", "Value": 6, "IsSelected": true},
-        {"Option": "BOTTLE 35 OZ", "Value": 6, "IsSelected": false},
-        {"Option": "~OZ", "Value": 210, "IsSelected": false}
+      "prepUOM": [
+        { "option": "CASE", "value": 1, "isSelected": false },
+        { "option": "~BOTTLE PREP", "value": 6, "isSelected": true },
+        { "option": "BOTTLE 35 OZ", "value": 6, "isSelected": false },
+        { "option": "~OZ", "value": 210, "isSelected": false }
       ],
-      "YieldType": 2586.47,
-      "CaseYieldDollars": 15518.81,
-      "SafetyFactor": 10,
-      "Needed": 2.73,
-      "OnHand": 0,
-      "PrepPullAmount": 2.73
+      "yieldType": 2586.47,
+      "caseYieldDollars": 15518.81,
+      "safetyFactor": 10,
+      "needed": 2.73,
+      "onHand": 0,
+      "prepPullAmount": 2.73
     }
   ]
 }
