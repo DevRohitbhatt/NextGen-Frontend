@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   withCredentials: true,
-  baseURL: "http://localhost:5000",
+  baseURL: "http://localhost:5295/",
 });
 
 const errorHandler = (error) => {

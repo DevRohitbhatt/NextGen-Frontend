@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { AreaAPI } from "../apis/AreaAPI";
+import { UnitAPI } from "../apis/UnitAPI";
 
 
 const UnitContainer = styled.div`
@@ -37,23 +38,23 @@ export default function UnitSelector({ onClick ,UnitName}) {
   useEffect(() => {
     setSelecteUnitName(UnitName); // Bind UnitName to selectedUnitName on page load
   }, [UnitName]); // Re-run effect when UnitName prop changes
-
-  useEffect(() => {
+  
+  if (UnitName === "") {
     GetUnitList();
-  }, []);
-
+  }
   const GetUnitList = () => {
-    AreaAPI.get(1, 1)
-      .then((data) => {
-        if (data.AreaLists.length > 0) {
-          setSelecteUnitName(data.AreaLists[0].Name);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+    UnitAPI.getUnitsByCompany(1, 1)
+    .then((data) => {
+      console.log(data.Units)
+      if (data.Units.length > 0) {
+        setSelecteUnitName(data.Units[0].Name);
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
   };
-
+  
   return (
     <>
     <UnitContainer onClick={onClick}>

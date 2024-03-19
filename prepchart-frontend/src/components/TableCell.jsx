@@ -146,6 +146,10 @@ const DollarCell = ({
   };
 
   useEffect(() => {
+    setDollar(value);
+  }, [value]);
+
+  useEffect(() => {
     updateInputWidth();
   }, [dollar]);
   return (
@@ -153,7 +157,7 @@ const DollarCell = ({
       <DollarSign>$</DollarSign>
       <Input
         ref={inputRef}
-        defaultValue={value}
+        value={dollar}
         columntype={columntype}
         onChange={handleInputChange}
         onBlur={(e) => handleInputCellChange(e, row, columnName, tableName)}
@@ -220,7 +224,7 @@ export default function Cell({
       <TableCell columntype={columntype}>
         <Dropdown
           onChange={(e) => handleDropdownChange(e, row, columnName, tableName)}
-          defaultValue={selectedOption.Option}
+          defaultValue={selectedOption.option}
         >
           {value.map((option, index) => (
             <option key={index} value={option.prepType}>

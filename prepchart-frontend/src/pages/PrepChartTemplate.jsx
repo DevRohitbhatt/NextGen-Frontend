@@ -38,7 +38,10 @@ export default function PrepChartTemplate() {
   const NextDayItemmRef = useRef(NextDayItem);
   const [showModal, setShowModal] = useState(false); // State to manage modal visibility
   const [sortOrder, setSortOrder] = useState("asc");
-  const [SelecteUnitName, setSelecteUnitName] = useState("");
+  const [companyID, setCompanyID] = useState();
+  const [selectedUnitName, setSelectedUnitName] = useState("No Store Selected");
+  const [selectedUnit, setSelectedUnit] = useState();
+  const [prepChartTemplateID, setPrepChartTemplateID] = useState();
 
   useEffect(() => {
     todayItemRef.current = todayItem;
@@ -47,21 +50,48 @@ export default function PrepChartTemplate() {
   }, [todayItem, TomorrowItem, NextDayItem]);
 
   useEffect(() => {
-    fetchData(); // Call fetchData function on component mount
+    if (!selectedUnit) {
+      console.log("testing");
+      let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
+      if (parameters)
+        parameters = JSON.parse(parameters);
+      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID(1021);
+      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit(51);
+      fetchData(1021, 51);
+    }
+    else {
+      fetchData(companyID, selectedUnit); // Call fetchData function on component mount
+    }
   }, []);
 
-  const fetchData = () => {
+  const fetchData = (companyID, selectedUnit) => {
     setIsLoading(true); // Set loading to true before fetching data
-    PrepChartTemplateAPI.get(1, 1)
+    PrepChartTemplateAPI.get(companyID, selectedUnit)
       .then((data) => {
-        buildPrepMasterTable(data);
+        setPrepChartTemplateID(data.prepChartTemplateID);
+        insertData(data);
         setIsLoading(false); // Set loading to false after data is fetched
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
         setIsLoading(false); // Set loading to false if there's an error
       });
+    PrepChartTemplateAPI.getInventoryItems(companyID)
+      .then((data) => {
+        buildPrepMasterTable(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
   };
+
+  const insertData = (data) => {
+    setTodayItem(data.prepChartTemplate.find((item) => item.prepGroupKey === "Today").inventoryItemList);
+    setTomorrowItem(data.prepChartTemplate.find((item) => item.prepGroupKey === "Tomorrow").inventoryItemList);
+    setNextDayItem(data.prepChartTemplate.find((item) => item.prepGroupKey === "Next Day").inventoryItemList);
+  };
+
+
 
   const buildPrepMasterTable = (prepChartSection) => {
     setMasterTable({
@@ -86,6 +116,7 @@ export default function PrepChartTemplate() {
             .toLowerCase()
             .includes(keyword.toLowerCase()))
     );
+    console.log(filtered)
     setFilteredItem(filtered);
   };
   const [{ isOverToday }, dropToday] = useDrop(() => ({
@@ -113,6 +144,7 @@ export default function PrepChartTemplate() {
   }));
 
   const DropToday = (inventoryItemID) => {
+    console.log(inventoryItemID)
     const isDuplicate = todayItemRef.current.some(
       (item) => item.inventoryItemID === inventoryItemID
     );
@@ -220,45 +252,37 @@ export default function PrepChartTemplate() {
     }
   };
 
-  const handleUnitSelection = (SelecteUnitName) => {
-    setSelecteUnitName(SelecteUnitName);
+  const handleUnitSelection = (selectedUnitName) => {
+    setSelectedUnitName(selectedUnitName);
     setShowModal(false); // Close the date modal after selection
   };
 
   const handleSave = () => {
-    console.log("Save button clicked");
     const prepChartTemplate = constructPrepChartTemplate();
-    console.log(prepChartTemplate);
   }
 
   function constructPrepChartTemplate() {
-    // Sample UnitIDs
-    const unitIDs = [51];
-    
-    // Constructing PrepChartTemplate array
     const prepChartTemplate = [
-        {
-            PrepGroupKey: "Today",
-            InventoryItemList: todayItem
-        },
-        {
-            PrepGroupKey: "Tomorrow",
-            InventoryItemList: TomorrowItem
-        },
-        {
-            PrepGroupKey: "Next Day",
-            InventoryItemList: NextDayItem
-        }
+      {
+        prepGroupKey: "Today",
+        inventoryItemList: todayItem,
+      },
+      {
+        prepGroupKey: "Tomorrow",
+        inventoryItemList: TomorrowItem,
+      },
+      {
+        prepGroupKey: "Next Day",
+        inventoryItemList: NextDayItem,
+      },
     ];
-    
-    // Constructing the final JSON object
-    const jsonObject = {
-        CompanyID: 1021,
-        UnitIDList: unitIDs,
-        PrepChartTemplate: prepChartTemplate
-    };
-    
-    return jsonObject;
+    const json = {
+      companyID: companyID,
+      unitIDList: [selectedUnit],
+      prepChartTemplateID: prepChartTemplateID,
+      prepChartTemplate: prepChartTemplate,
+    }
+    return PrepChartTemplateAPI.save(json);
 }
 
 
@@ -273,7 +297,7 @@ export default function PrepChartTemplate() {
             <Styled.DateAndUnitContainer>
               <UnitSelector
                 onClick={handleUnitSelectorClick}
-                UnitName={SelecteUnitName}
+                UnitName={selectedUnitName}
               />
               <UnitModal
                 show={showModal}

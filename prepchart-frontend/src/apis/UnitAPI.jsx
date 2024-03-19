@@ -1,7 +1,7 @@
 import api from "./configs/axiosConfig.jsx";
 import { defineCancelApiObject } from "./configs/axiosUtils.jsx";
 import AreaLists from "../tempData/AreaList.json";
-import UnitLists from "../tempData/UnitList.json";
+import UnitLists from "../tempData/Units.json";
 
 export const UnitAPI = {
   get: async function (companyID, cancel = false) {

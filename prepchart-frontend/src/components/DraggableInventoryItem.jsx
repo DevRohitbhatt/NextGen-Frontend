@@ -17,7 +17,7 @@ export function InventoryItem({
 
     return (
         <>
-         <Styled.TableRow key={inventoryItemID} ref={drag}  >
+         <Styled.TableRow key={rowIndex} ref={drag}  >
             <Styled.TableCell> {inventoryItemID}</Styled.TableCell>
             <Styled.TableCell>{description}</Styled.TableCell>
          </Styled.TableRow>

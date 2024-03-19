@@ -41,7 +41,7 @@ export default function PrepChart() {
     width: "50%",
   });
   const [unitsList, setUnitsList] = useState([]);
-  const [selectedUnit, setSelectedUnit] = useState("");
+  const [selectedUnit, setSelectedUnit] = useState();
   const [selecteUnitName, setSelecteUnitName] = useState("0051 Sawmill");
   const [filteredUnit, setFilteredUnit] = useState([]);
   const [IsActive, setIsActive] = useState([]);
@@ -77,14 +77,23 @@ export default function PrepChart() {
   const [selectedFromDate, setSelectedFromDate] = useState(new Date());
 
   useEffect(() => {
-    let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
-    if (parameters)
-      parameters = JSON.parse(parameters);
-    parameters ? setCompanyID(parameters.CompanyID) : setCompanyID(1051);
-    parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit(51);
-    parameters ? setIsActive(parameters.UnitID) : setIsActive(51);
+    if (!selectedUnit) {
+      let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
+      if (parameters)
+        parameters = JSON.parse(parameters);
+      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID(1021);
+      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit(51);
+      parameters ? setIsActive(parameters.UnitID) : setIsActive(51);
+      getPrepChart(1021, 51, new Date());
+    }
+    else {
+      getPrepChart(1021, 51, new Date());
+    }
+  }, []);
+
+  const getPrepChart = (companyID, unitID, date) => {
     //Todo use companyID and UnitID instead of 1, 1
-    PrepChartAPI.get(1, 1).then((data) => {
+    PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((data) => {
       setPrepChart(data);
       const date = new Date(data.date);
       setSelectedToDate(date);
@@ -93,6 +102,7 @@ export default function PrepChart() {
       tomorrow.setDate(date.getDate() + 1);
       const nextDay = new Date(tomorrow);
       nextDay.setDate(nextDay.getDate() + 1);
+      buildForecastTable(data.forecastData, date, tomorrow, nextDay);
       setPrepChartDates({
         ...prepChartDates,
         today: date,
@@ -107,11 +117,10 @@ export default function PrepChart() {
         rows: [[{ value: data.defaultSafetyFactor, cellType: "percent", columnName: "Default Safety Factor", handleOnChange: { handleTableCellChange }, isInput: true}]],
       });
     });
-  }, []);
+  }
 
   useEffect(() => {
     if (prepChartDates.today) {
-      buildForecastTable(prepChart.forecastData);
       buildCalendarTable(selectedYear);
       setIsLoading(false);
     }
@@ -153,8 +162,7 @@ export default function PrepChart() {
     return `${month}/${day}/${year}`;
   };
 
-  const buildForecastTable = (forecastData) => {
-    const { today, tomorrow, nextDay } = prepChartDates;
+  const buildForecastTable = (forecastData, today, tomorrow, nextDay) => {
     const rows = [
       [
         { value: "Today", cellType: "", columnName: "Day"},
@@ -282,44 +290,6 @@ export default function PrepChart() {
     PdfBuilder(pdfData);
   };
 
-  const buildPrepTable = (prepChartSection, setTable) => {
-    const rows = prepChartSection.map((item) => {
-      return [
-        { value: item.itemName, cellType: "", columnName: "Item Name" },
-        { value: item.PrepType[0], cellType: "", columnName: "Prep Type" },
-        { value: item.YieldType, cellType: "", columnName: "Yield/Type" },
-        {
-          value: item.SafetyFactor,
-          cellType: "input",
-          columnName: "Safety Factor",
-          handleOnChange: { onInputCellChange },
-        },
-        {
-          value: item.Needed,
-          cellType: "input",
-          columnName: "Needed",
-          handleOnChange: { onInputCellChange },
-        },
-        {
-          value: item.OnHand,
-          cellType: "input",
-          columnName: "On Hand",
-          handleOnChange: { onInputCellChange },
-        },
-        {
-          value: item.PrepPullAmount,
-          cellType: "",
-          columnName: "Prep/Pull Amount",
-        },
-      ];
-    });
-
-    setTable({
-      ...todayTable,
-      rows: rows,
-    });
-  };
-
   const handleExcelClick = () => {
     const forecastColumns = [
       { name: "Day", key: "Day", width: 10 },
@@ -375,9 +345,8 @@ export default function PrepChart() {
   }
 
   const handleSaveClick = () => {
-    // PrepChartAPI.save(prepChart);
-    console.log("Save Clicked");
-    console.log(prepChart);
+    const response = PrepChartAPI.save(prepChart);
+    console.log(response);
   };
 
   const handleUnitSelectorClick = () => {
@@ -387,7 +356,7 @@ export default function PrepChart() {
     setShowDateModal(true); 
   };
 
-  useEffect(() => {}, [selectedToDate, selectedFromDate]); // Run this effect whenever selectedDate changes
+  // useEffect(() => {}, [selectedToDate, selectedFromDate]); // Run this effect whenever selectedDate changes
 
   const handleRowClick = (startDate, endDate) => {
     console.log("Start Date:", startDate.toLocaleDateString());
@@ -400,10 +369,13 @@ export default function PrepChart() {
     setSelectedFromDate(fromDate);
     setSelectedToDate(toDate);
     setShowDateModal(false); // Close the date modal after selection
+    getPrepChart(companyID, selectedUnit, toDate);
   };
-  const handleUnitSelection = (SelecteUnitName) => {
-    setSelecteUnitName(SelecteUnitName);
+  const handleUnitSelection = (unitName, unitID) => {
+    setSelecteUnitName(unitName);
+    setSelectedUnit(unitID);
     setShowModal(false); // Close the date modal after selection
+    getPrepChart(companyID, unitID, selectedToDate);
   };
 
   return (

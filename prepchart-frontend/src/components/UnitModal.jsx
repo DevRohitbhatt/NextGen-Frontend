@@ -4,8 +4,8 @@ import styled from "styled-components";
 import { FaTimes } from "react-icons/fa";
 import { ModalHeader } from "react-bootstrap";
 import { AreaAPI } from "../apis/AreaAPI";
+import { UnitAPI } from "../apis/UnitAPI";
 import SearchUnit from "./SearchUnit";
-import Unitlist from "../tempData/UnitList.json";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -177,13 +177,13 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
     setFilteredUnit(UnitItem); // Initially, set filtered rows to all rows
   };
   const GetUnitList = () => {
-    AreaAPI.get(1, 1)
+    UnitAPI.getUnitsByCompany(1, 1)
       .then((data) => {
-        UnitListItem(data.AreaLists);
-        if (data.AreaLists.length > 0) {
-          setSelecteUnit(data.AreaLists[0].UnitID);
-          setSelecteUnitName(data.AreaLists[0].Name);
-          setIsActive(data.AreaLists[0].UnitID);
+        UnitListItem(data.Units);
+        if (data.Units.length > 0) {
+          setSelecteUnit(data.Units[0].UnitID);
+          setSelecteUnitName(data.Units[0].Name);
+          setIsActive(data.Units[0].UnitID);
         }
       })
       .catch((error) => {
@@ -216,15 +216,12 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
     //   .catch((error) => {
     //     console.error("Error fetching data from Unit list API:", error);
     //   });
-
-    console.log(selectedUnitId)
-    const data = Unitlist.filter((item) => item.AreaId === parseInt(selectedUnitId, 10));
+    const data = unitList.filter((item) => item.UnitID === parseInt(selectedUnitId, 10));
     setUnitList(data);
   };
 
   const handleOkButtonClick = () => {
-    console.log(SelecteUnitName)
-    handleUnitSelection(SelecteUnitName); 
+    handleUnitSelection(SelecteUnitName, selectedUnit); 
     handleClose();
   };
 
@@ -259,8 +256,8 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
                   {filteredUnit.map((item, index) => (
                     <li
                       key={index}
-                      onClick={() => setIsActive(item.AreaID)}
-                      value={item.AreaID}
+                      onClick={() => setIsActive(item.UnitID)}
+                      value={item.UnitID}
                       className={IsActive === item.AreaID ? "active" : ""}
                     >
                       {item.Name}
