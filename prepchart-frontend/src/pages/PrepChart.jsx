@@ -29,9 +29,10 @@ const prepTableStructure = {
 };
 
 export default function PrepChart() {
-  const [companyID, setCompanyID] = useState(1021);
+  const [companyID, setCompanyID] = useState();
   const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isUnitSelected, setIsUnitSelected] = useState(false);
   const [prepChartDates, setPrepChartDates] = useState({});
   const [forecastTable, setForecastTable] = useState({
     columnHeaders: [" ", "Forecasted Sales", "Date"],
@@ -42,7 +43,7 @@ export default function PrepChart() {
   });
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState();
-  const [selecteUnitName, setSelecteUnitName] = useState("0051 Sawmill");
+  const [selecteUnitName, setSelecteUnitName] = useState("No Unit Selected");
   const [filteredUnit, setFilteredUnit] = useState([]);
   const [IsActive, setIsActive] = useState([]);
   const [showModal, setShowModal] = useState(false); // State to manage modal visibility
@@ -63,7 +64,7 @@ export default function PrepChart() {
     columnWidths: "1fr",
     rows: [],
     width: "15%",
-    height: "100px",
+    height: "50%",
   });
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
@@ -81,10 +82,17 @@ export default function PrepChart() {
       let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
       if (parameters)
         parameters = JSON.parse(parameters);
-      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID(1021);
-      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit(51);
-      parameters ? setIsActive(parameters.UnitID) : setIsActive(51);
-      getPrepChart(1021, 51, new Date());
+      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
+      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
+      parameters ? setIsActive(parameters.UnitID) : setIsActive();
+      if (parameters.User_DefaultUnitID) {
+        getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, new Date());
+        setIsUnitSelected(true);
+      } else {
+        console.log("No unit selected. Please select a unit.");
+        setIsUnitSelected(false);
+        setIsLoading(false);
+      }
     }
     else {
       getPrepChart(1021, 51, new Date());
@@ -92,7 +100,7 @@ export default function PrepChart() {
   }, []);
 
   const getPrepChart = (companyID, unitID, date) => {
-    //Todo use companyID and UnitID instead of 1, 1
+    setIsLoading(true);
     PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((data) => {
       setPrepChart(data);
       const date = new Date(data.date);
@@ -381,106 +389,114 @@ export default function PrepChart() {
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
+      <Styled.OptionsRow>
+        <Styled.DateAndUnitContainer>
+          <UnitSelector
+            onClick={handleUnitSelectorClick}
+            unitName={selecteUnitName}
+            setUnitName={setSelecteUnitName}
+            unitID={selectedUnit}
+          />
+          <DateSelector
+            ToDate={selectedToDate}
+            FromDate={selectedFromDate}
+            onClick={handleDateSelectorClick}
+            isDateRange={false}
+          />
+
+          <UnitModal
+            show={showModal}
+            handleClose={() => {
+              setShowModal(false);
+            }}
+            handleUnitSelection={handleUnitSelection}
+          />
+
+          <CalendarModal
+            handleClose={handleCloseModal}
+            modalOpen={showDateModal}
+            isDateRang={false}
+            handleDateSelection={handleDateSelection}
+          />
+        </Styled.DateAndUnitContainer>
+
+        <ExportOptions
+          includeExcel={true}
+          includePDF={true}
+          includePrint={true}
+          includeSave={true}
+          handleSaveClick={handleSaveClick}
+          handlePDFClick={handlePDFClick}
+          handlePrintClick={handlePrintClick}
+          handleExcelClick={handleExcelClick}
+        />
+      </Styled.OptionsRow>
       {isLoading ? (
-        <h1>Loading...</h1>
-      ) : (
         <>
-          <Styled.OptionsRow>
-            <Styled.DateAndUnitContainer>
-              <UnitSelector
-                onClick={handleUnitSelectorClick}
-                UnitName={selecteUnitName}
-              />
-              <DateSelector
-                ToDate={selectedToDate}
-                FromDate={selectedFromDate}
-                onClick={handleDateSelectorClick}
-                isDateRange={false}
-              />
-
-              <UnitModal
-                show={showModal}
-                handleClose={() => {
-                  setShowModal(false);
-                }}
-                handleUnitSelection={handleUnitSelection}
-              />
-
-              <CalendarModal
-                handleClose={handleCloseModal}
-                modalOpen={showDateModal}
-                isDateRang={false}
-                handleDateSelection={handleDateSelection}
-              />
-            </Styled.DateAndUnitContainer>
-
-            <ExportOptions
-              includeExcel={true}
-              includePDF={true}
-              includePrint={true}
-              includeSave={true}
-              handleSaveClick={handleSaveClick}
-              handlePDFClick={handlePDFClick}
-              handlePrintClick={handlePrintClick}
-              handleExcelClick={handleExcelClick}
-            />
-          </Styled.OptionsRow>
-
-          <h2>Forecast</h2>
-          <Styled.ForeCastAndSafetyFactor>
-            <Table
-              columnHeaders={forecastTable.columnHeaders}
-              dataTypes={forecastTable.dataTypes}
-              columnwidths={forecastTable.columnWidths}
-              rows={forecastTable.rows}
-              width={forecastTable.width}
-              tableName={"Forecast"}
-              handleInputCellChange={handleTableCellChange}
-            />
-            <Table
-              columnHeaders={defaultSafetyFactorTable.columnHeaders}
-              dataTypes={defaultSafetyFactorTable.dataTypes}
-              columnwidths={defaultSafetyFactorTable.columnWidths}
-              rows={defaultSafetyFactorTable.rows}
-              tableName={"DefaultSafetyFactor"}
-              width={defaultSafetyFactorTable.width}
-              height={defaultSafetyFactorTable.height}
-              handleInputCellChange={handleTableCellChange}
-            />
-          </Styled.ForeCastAndSafetyFactor>
-          <h2>Today - ${prepChart.forecastData.today}</h2>
-          <Table
-            columnHeaders={todayTable.columnHeaders}
-            dataTypes={todayTable.dataTypes}
-            columnwidths={todayTable.columnWidths}
-            rows={todayTable.rows}
-            tableName="Today"
-            handleInputCellChange={handleTableCellChange}
-            handleDropdownChange={handleDropdownChange}
-          />
-
-          <h2>Tomorrow - ${prepChart.forecastData.tomorrow}</h2>
-          <Table
-            columnHeaders={tomorrowTable.columnHeaders}
-            dataTypes={tomorrowTable.dataTypes}
-            columnwidths={tomorrowTable.columnWidths}
-            rows={tomorrowTable.rows}
-            tableName={"Tomorrow"}
-            handleInputCellChange={handleTableCellChange}
-            handleDropdownChange={handleDropdownChange}
-          />
-
-          <h2>Next Day - ${prepChart.forecastData.nextDay}</h2>
-          <Table
-            columnHeaders={nextDayTable.columnHeaders}
-            dataTypes={nextDayTable.dataTypes}
-            columnwidths={nextDayTable.columnWidths}
-            rows={nextDayTable.rows}
-            tableName={"NextDay"}
-            handleInputCellChange={handleTableCellChange}
-            handleDropdownChange={handleDropdownChange}
-          />
+          <Styled.UnloadedMessage>Loading...</Styled.UnloadedMessage>
         </>
+      ) : (
+        !isUnitSelected ? (
+          <Styled.UnloadedMessage>No Unit Selected, Please select a unit.</Styled.UnloadedMessage>
+        ) : (
+          <>
+
+            <h2>Forecast</h2>
+            <Styled.ForeCastAndSafetyFactor>
+              <Table
+                columnHeaders={forecastTable.columnHeaders}
+                dataTypes={forecastTable.dataTypes}
+                columnwidths={forecastTable.columnWidths}
+                rows={forecastTable.rows}
+                width={forecastTable.width}
+                tableName={"Forecast"}
+                handleInputCellChange={handleTableCellChange}
+              />
+              <Table
+                columnHeaders={defaultSafetyFactorTable.columnHeaders}
+                dataTypes={defaultSafetyFactorTable.dataTypes}
+                columnwidths={defaultSafetyFactorTable.columnWidths}
+                rows={defaultSafetyFactorTable.rows}
+                tableName={"DefaultSafetyFactor"}
+                width={defaultSafetyFactorTable.width}
+                height={defaultSafetyFactorTable.height}
+                handleInputCellChange={handleTableCellChange}
+              />
+            </Styled.ForeCastAndSafetyFactor>
+            <h2>Today - ${prepChart.forecastData.today}</h2>
+            <Table
+              columnHeaders={todayTable.columnHeaders}
+              dataTypes={todayTable.dataTypes}
+              columnwidths={todayTable.columnWidths}
+              rows={todayTable.rows}
+              tableName="Today"
+              handleInputCellChange={handleTableCellChange}
+              handleDropdownChange={handleDropdownChange}
+            />
+
+            <h2>Tomorrow - ${prepChart.forecastData.tomorrow}</h2>
+            <Table
+              columnHeaders={tomorrowTable.columnHeaders}
+              dataTypes={tomorrowTable.dataTypes}
+              columnwidths={tomorrowTable.columnWidths}
+              rows={tomorrowTable.rows}
+              tableName={"Tomorrow"}
+              handleInputCellChange={handleTableCellChange}
+              handleDropdownChange={handleDropdownChange}
+            />
+
+            <h2>Next Day - ${prepChart.forecastData.nextDay}</h2>
+            <Table
+              columnHeaders={nextDayTable.columnHeaders}
+              dataTypes={nextDayTable.dataTypes}
+              columnwidths={nextDayTable.columnWidths}
+              rows={nextDayTable.rows}
+              tableName={"NextDay"}
+              handleInputCellChange={handleTableCellChange}
+              handleDropdownChange={handleDropdownChange}
+            />
+          </>
+        )
       )}
     </Styled.PageContainer>
   );

@@ -1,5 +1,12 @@
 import styled from "styled-components";
 
+export const UnloadedMessage = styled.div`
+  font-size: 1.5em;
+  margin: auto;
+  width: 100%;
+  text-align: center;
+`;
+
 export const PageContainer = styled.div`
   width: 85%;
   margin: auto;

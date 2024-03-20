@@ -470,7 +470,6 @@ button.react-calendar__tile.react-calendar__year-view__months__month {
   padding: 0px 15px;
 }
 .Tblleft {
-  overflow-y: scroll;
   max-height: 750px;
   padding-top: 0px !important;
 }

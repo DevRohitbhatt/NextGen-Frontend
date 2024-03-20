@@ -205,7 +205,6 @@ const CalendarModal = ({
     setShowCalendar(!showCalendar);
   };
   const handleOkButtonClick = () => {
-    console.log(isDateRang)
     if (!isDateRang) {
       handleDateSelection(selectedDate, selectedDate); // Call function passed from PrepChart
     }

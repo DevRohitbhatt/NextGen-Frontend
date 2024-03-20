@@ -5,6 +5,13 @@ export const PageContainer = styled.div`
   margin: auto;
 `;
 
+export const UnloadedMessage = styled.div`
+  font-size: 1.5em;
+  margin: auto;
+  width: 100%;
+  text-align: center;
+`;
+
 export const InventoryItemsContainer = styled.div`
   display: flex;
   flex-direction: column;

@@ -31,35 +31,28 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick ,UnitName}) {
-
-  const [SelecteUnitName, setSelecteUnitName] = useState("");
-
-  useEffect(() => {
-    setSelecteUnitName(UnitName); // Bind UnitName to selectedUnitName on page load
-  }, [UnitName]); // Re-run effect when UnitName prop changes
+export default function UnitSelector({ onClick , unitName, setUnitName, unitID}) {
   
-  if (UnitName === "") {
-    GetUnitList();
-  }
   const GetUnitList = () => {
     UnitAPI.getUnitsByCompany(1, 1)
     .then((data) => {
-      console.log(data.Units)
       if (data.Units.length > 0) {
-        setSelecteUnitName(data.Units[0].Name);
+        setUnitName(data.Units.find(unit => unit.UnitID === unitID).Name);
       }
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
   };
+  if (unitName === "No Unit Selected" && unitID) {
+    GetUnitList();
+  }
   
   return (
     <>
     <UnitContainer onClick={onClick}>
       <Label>Select Unit(s)</Label>
-      <UnitValue >{SelecteUnitName}</UnitValue>
+      <UnitValue >{unitName}</UnitValue>
     </UnitContainer>
     </>
   );
