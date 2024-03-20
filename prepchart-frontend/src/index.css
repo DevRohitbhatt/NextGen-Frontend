@@ -469,6 +469,17 @@ button.react-calendar__tile.react-calendar__year-view__months__month {
 .daterangeBody {
   padding: 0px 15px;
 }
+.Tblleft {
+  overflow-y: scroll;
+  max-height: 750px;
+  padding-top: 0px !important;
+}
+.Tblleft [columnwidths="auto"] {
+ position: sticky;
+ top: 0;
+ padding-top: 20px !important;
+ background-color: #fff;
+}
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

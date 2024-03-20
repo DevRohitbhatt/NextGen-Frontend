@@ -70,6 +70,7 @@ export default function PrepChartTemplate() {
       .then((data) => {
         setPrepChartTemplateID(data.prepChartTemplateID);
         insertData(data);
+        console.log(data);
         setIsLoading(false); // Set loading to false after data is fetched
       })
       .catch((error) => {
@@ -90,9 +91,6 @@ export default function PrepChartTemplate() {
     setTomorrowItem(data.prepChartTemplate.find((item) => item.prepGroupKey === "Tomorrow").inventoryItemList);
     setNextDayItem(data.prepChartTemplate.find((item) => item.prepGroupKey === "Next Day").inventoryItemList);
   };
-
-
-
   const buildPrepMasterTable = (prepChartSection) => {
     setMasterTable({
       ...prepTableStructure,
@@ -100,6 +98,7 @@ export default function PrepChartTemplate() {
     });
     ItemList = prepChartSection;
     setFilteredItem(prepChartSection); // Initially, set filtered rows to all rows
+    console.log("Item List",prepChartSection)
   };
 
   const SearchItem = (keyword) => {
@@ -107,17 +106,12 @@ export default function PrepChartTemplate() {
       (item) =>
         (item.description &&
           item.description.toLowerCase().includes(keyword.toLowerCase())) ||
-        (item.inventoryItemID &&
-          item.inventoryItemID.toString()
-            .toLowerCase()
-            .includes(keyword.toLowerCase())) ||
-        (item.ThawTime &&
-          item.ThawTime.toString()
+        (item.inventoryItemID && item.inventoryItemID.toString()
             .toLowerCase()
             .includes(keyword.toLowerCase()))
     );
-    console.log(filtered)
     setFilteredItem(filtered);
+    console.log("Filterd Item List",filtered)
   };
   const [{ isOverToday }, dropToday] = useDrop(() => ({
     accept: "content",
@@ -144,7 +138,6 @@ export default function PrepChartTemplate() {
   }));
 
   const DropToday = (inventoryItemID) => {
-    console.log(inventoryItemID)
     const isDuplicate = todayItemRef.current.some(
       (item) => item.inventoryItemID === inventoryItemID
     );
@@ -156,6 +149,7 @@ export default function PrepChartTemplate() {
       );
       setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
     }
+    
   };
 
   const DropTomorrow = (inventoryItemID) => {
@@ -325,6 +319,7 @@ export default function PrepChartTemplate() {
                 />
               </Styled.InventoryItemsTitle>
               <Styled.TableLeft>
+               
                 <Table
                   columnHeaders={MasterTable.columnHeaders}
                   columnwidths={MasterTable.columnWidths}
@@ -336,11 +331,13 @@ export default function PrepChartTemplate() {
                   }
                   isDrag={true}
                   usetablerows={true}
+                  className={"Tblleft"}
                 />
-              </Styled.TableLeft>
+
+              </Styled.TableLeft> 
             </Styled.InventoryItemsContainer>
+
             <Styled.TableRight>
-              
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>Today</Styled.TableHeaderTop>
                 <Styled.Table>
@@ -388,16 +385,17 @@ export default function PrepChartTemplate() {
                       </Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
                     {todayItem.length > 0 ? "" : placeholder}
-                    {todayItem.map((item, index) => (
-                      <>
+             
+                    {todayItem.map((item) => (
+                      <div key={item.inventoryItemID}> 
                         <InventoryItem
                           key={item.inventoryItemID}
                           inventoryItemID={item.inventoryItemID}
-                          description={item.description}
+                          description={item.description.trim()}
                           moveItem={() =>
                             handleReorder(todayItem, setTodayItem)
                           }
-                          columnIndex={index}
+                          columnIndex={item.inventoryItemID}
                         />
                         <FaRegTrashAlt
                           className="delete"
@@ -405,7 +403,7 @@ export default function PrepChartTemplate() {
                             handleDelete(item.inventoryItemID, "today")
                           }
                         />
-                      </>
+                      </div>
                     ))}
                   </div>
                 </Styled.Table>
@@ -458,17 +456,17 @@ export default function PrepChartTemplate() {
                       </Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
                     {TomorrowItem.length > 0 ? "" : placeholder}
-                    {TomorrowItem.map((item, index) => (
-                      <>
+                    {TomorrowItem.map((item) => (
+                      <div key={item.inventoryItemID}>
                         <InventoryItem
                           key={item.inventoryItemID}
                           inventoryItemID={item.inventoryItemID}
-                          description={item.description}
+                          description={item.description.trim()}
                           moveItem={handleReorder(
                             TomorrowItem,
                             setTomorrowItem
                           )}
-                          columnIndex={index}
+                          columnIndex={item.inventoryItemID}
                         />
                         <FaRegTrashAlt
                           className="delete"
@@ -476,7 +474,7 @@ export default function PrepChartTemplate() {
                             handleDelete(item.inventoryItemID, "tomorrow")
                           }
                         />
-                      </>
+                      </div>
                     ))}
                   </div>
                 </Styled.Table>
@@ -528,14 +526,14 @@ export default function PrepChartTemplate() {
                       </Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
                     {NextDayItem.length > 0 ? "" : placeholder}
-                    {NextDayItem.map((item, index) => (
-                      <>
+                    {NextDayItem.map((item) => (
+                      <div key={item.inventoryItemID}>
                         <InventoryItem
                           key={item.inventoryItemID}
                           inventoryItemID={item.inventoryItemID}
                           description={item.description}
                           moveItem={handleReorder(NextDayItem, setNextDayItem)}
-                          columnIndex={index}
+                          columnIndex={item.inventoryItemID}
                         />
                         <FaRegTrashAlt
                           className="delete"
@@ -543,12 +541,13 @@ export default function PrepChartTemplate() {
                             handleDelete(item.inventoryItemID, "nextDay")
                           }
                         />
-                      </>
+                      </div>
                     ))}
                   </div>
                 </Styled.Table>
               </Styled.RightTblMarg>
             </Styled.TableRight>
+
           </div>
         </div>
       )}

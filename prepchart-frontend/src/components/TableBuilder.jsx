@@ -60,7 +60,7 @@ export default function TableBuilder({
   usetablerows = false,
   handleInputCellChange,
   handleDropdownChange,
-  className,
+  className
 }) {
   return (
     <Table width={width} height={height} className={className} columnwidths={columnwidths}> 
