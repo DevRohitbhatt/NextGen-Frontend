@@ -103,7 +103,6 @@ export default function PrepChart() {
     setIsLoading(true);
     PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((data) => {
       setPrepChart(data);
-      const date = new Date(data.date);
       setSelectedToDate(date);
       setSelectedFromDate(date);
       const tomorrow = new Date(date);
