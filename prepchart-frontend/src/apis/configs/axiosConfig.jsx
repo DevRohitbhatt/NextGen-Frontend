@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   withCredentials: true,
-  baseURL: "http://192.168.192.244:8030/",
+  baseURL: "/http://192.168.192.244:8030/",
 });
 
 const errorHandler = (error) => {
