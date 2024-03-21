@@ -1,62 +1,2402 @@
-{
-  "InventoryList":[
-    {
-      "InventoryItemID": "30570",
-      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ"
-    },
-    {
-      "InventoryItemID": "30571",
-      "Description": "CHIPOTLE SAUCE - I=A"
-    },
-    {
-      "InventoryItemID": "30572",
-      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A"
-    },
-    {
-      "InventoryItemID": "30573",
-      "Description": "(R) 9 Inch Bun"
-    },
-    {
-      "InventoryItemID": "30574",
-      "Description": "(R) FRIES-5LB BAGS"
-    },
-    {
-      "InventoryItemID": "30575",
-      "Description": "(R) CHICKEN"
-    },
-    {
-      "InventoryItemID": "30576",
-      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ"
-    },
-    {
-      "InventoryItemID": "30577",
-      "Description": "CHIPOTLE SAUCE - I=A"
-    },
-    {
-      "InventoryItemID": "30578",
-      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A"
-    },{
-      "InventoryItemID": "30579",
-      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ"
-    },
-    {
-      "InventoryItemID": "30580",
-      "Description": "CHIPOTLE SAUCE - I=A"
-    },
-    {
-      "InventoryItemID": "30582",
-      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A"
-    },{
-      "InventoryItemID": "30583",
-      "Description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ"
-    },
-    {
-      "InventoryItemID": "30584",
-      "Description": "CHIPOTLE SAUCE - I=A"
-    },
-    {
-      "InventoryItemID": "30585",
-      "Description": "SAUCE SRIRACHA 20 OZ BTL - I=A"
-    }
-  ]
-}
+[
+  {
+    "inventoryItemID": 351,
+    "description": " LID SOUFFLE 2OZ 2500 EA"
+  },
+  {
+    "inventoryItemID": 2016177,
+    "description": "\" RDP\" CHICKEN SPLIT WING IQF FRZ 40LB"
+  },
+  {
+    "inventoryItemID": 4523698,
+    "description": "(R) 6 Inch Bun"
+  },
+  {
+    "inventoryItemID": 1515013,
+    "description": "(R) BACON BITS 5LB PKS"
+  },
+  {
+    "inventoryItemID": 1515074,
+    "description": "(R) BACON SLICED"
+  },
+  {
+    "inventoryItemID": 1060070,
+    "description": "(R) BANANA PEPPERS GALLON"
+  },
+  {
+    "inventoryItemID": 1082410,
+    "description": "(R) BLACK PEPPER BULK - I=A"
+  },
+  {
+    "inventoryItemID": 1073410,
+    "description": "(R) BLACK PEPPER PKTS - I=A"
+  },
+  {
+    "inventoryItemID": 6042559,
+    "description": "(R) BOAT-TRAY 1LB"
+  },
+  {
+    "inventoryItemID": 6042540,
+    "description": "(R) BOAT-TRAY 3LB"
+  },
+  {
+    "inventoryItemID": 6042561,
+    "description": "(R) BOAT-TRAY 5LB"
+  },
+  {
+    "inventoryItemID": 6040546,
+    "description": "(R) BOX LARGE CLAMSHELL"
+  },
+  {
+    "inventoryItemID": 6041563,
+    "description": "(R) BOX PAPER FRY"
+  },
+  {
+    "inventoryItemID": 3018034,
+    "description": "(R) BUN 12 INCH"
+  },
+  {
+    "inventoryItemID": 3018014,
+    "description": "(R) BUN 9 INCH"
+  },
+  {
+    "inventoryItemID": 1116968,
+    "description": "(R) CARRIER DRINK - I=A"
+  },
+  {
+    "inventoryItemID": 7197570,
+    "description": "(R) CELERY - I=A"
+  },
+  {
+    "inventoryItemID": 4396446,
+    "description": "(R) CEREAL CINN TST CRUNCH 4/45OZ - I=A"
+  },
+  {
+    "inventoryItemID": 1002550,
+    "description": "(R) CHEESE CHEDDAR SHRED 5 LB"
+  },
+  {
+    "inventoryItemID": 7018135,
+    "description": "(R) CHEESE CHEDDAR SLICE 1.25LB PKS"
+  },
+  {
+    "inventoryItemID": 1006450,
+    "description": "(R) CHEESE PARM GRATED - I=A"
+  },
+  {
+    "inventoryItemID": 8315453,
+    "description": "(R) CHEESE PEPPER JACK .75SLI 1.5 LB PKS"
+  },
+  {
+    "inventoryItemID": 1010074,
+    "description": "(R) CHEESE PROVOLONE 1.25 LB PK"
+  },
+  {
+    "inventoryItemID": 1010558,
+    "description": "(R) CHEESE SWISS .5OZ 1.25 LB PK"
+  },
+  {
+    "inventoryItemID": 3525568,
+    "description": "(R) CHICKEN (159/3 OZ)"
+  },
+  {
+    "inventoryItemID": 3019509,
+    "description": "(R) CHICKEN TENDERS"
+  },
+  {
+    "inventoryItemID": 1067845,
+    "description": "(R) CHICKEN WING 10 LB BAGS"
+  },
+  {
+    "inventoryItemID": 2016091,
+    "description": "(R) CHICKEN WING BONELESS 5 LB BAGS"
+  },
+  {
+    "inventoryItemID": 1223003,
+    "description": "(R) CHIPS SEA SALT"
+  },
+  {
+    "inventoryItemID": 3019582,
+    "description": "(R) COOKIE CHOC CHIP 48CT/60CT"
+  },
+  {
+    "inventoryItemID": 7410640,
+    "description": "(R) CUCUMBERS"
+  },
+  {
+    "inventoryItemID": 1600000,
+    "description": "(R) CUP CLEAR 16 OZ"
+  },
+  {
+    "inventoryItemID": 301,
+    "description": "(R) CUP CLEAR 20OZ"
+  },
+  {
+    "inventoryItemID": 321,
+    "description": "(R) CUP CLEAR 32OZ"
+  },
+  {
+    "inventoryItemID": 315224,
+    "description": "(R) CUP ICEE PAPER 24 OZ 20/50"
+  },
+  {
+    "inventoryItemID": 6043037,
+    "description": "(R) CUP PAPER COLD 12OZ"
+  },
+  {
+    "inventoryItemID": 6043038,
+    "description": "(R) CUP PAPER COLD 20OZ"
+  },
+  {
+    "inventoryItemID": 6043062,
+    "description": "(R) CUP PAPER COLD 30/32 OZ"
+  },
+  {
+    "inventoryItemID": 7064334,
+    "description": "(R) CUP PAPER HOT 12OZ"
+  },
+  {
+    "inventoryItemID": 7790239,
+    "description": "(R) CUP SOUFFLE 2OZ"
+  },
+  {
+    "inventoryItemID": 1078150,
+    "description": "(R) DRESSING BLUE CHEESE GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 76114,
+    "description": "(R) DRESSING HONEY MUSTARD GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 1072509,
+    "description": "(R) DRESSING JALAPENO RANCH GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 1868708,
+    "description": "(R) DRESSING RANCH CHIPOTLE GALLONS"
+  },
+  {
+    "inventoryItemID": 1076850,
+    "description": "(R) DRESSING RANCH GALLONS"
+  },
+  {
+    "inventoryItemID": 333606,
+    "description": "(R) DRESSING RANCH PKS/CUPS - I=A"
+  },
+  {
+    "inventoryItemID": 6044561,
+    "description": "(R) FORKS - I=A"
+  },
+  {
+    "inventoryItemID": 3019044,
+    "description": "(R) FRIES - 5LB BAGS"
+  },
+  {
+    "inventoryItemID": 1068850,
+    "description": "(R) GREEN PEPPER - BUSHEL"
+  },
+  {
+    "inventoryItemID": 1511501,
+    "description": "(R) HAM 2 LB PKS"
+  },
+  {
+    "inventoryItemID": 6275315,
+    "description": "(R) ICE CREAM CONE"
+  },
+  {
+    "inventoryItemID": 7087727,
+    "description": "(R) ICE CREAM VAN MIX 1/2 GAL'S"
+  },
+  {
+    "inventoryItemID": 1069800,
+    "description": "(R) ICEBERG - I=A"
+  },
+  {
+    "inventoryItemID": 3521591,
+    "description": "(R) JALAPENO SLICED GALLON"
+  },
+  {
+    "inventoryItemID": 6044520,
+    "description": "(R) KNIVES - I=A"
+  },
+  {
+    "inventoryItemID": 5539523,
+    "description": "(R) LEMONADE GALLONS"
+  },
+  {
+    "inventoryItemID": 1675529,
+    "description": "(R) LETTUCE SHREDDED - I=A"
+  },
+  {
+    "inventoryItemID": 1993817,
+    "description": "(R) LID CLEAR (CLEAR CUP) 32OZ"
+  },
+  {
+    "inventoryItemID": 7473477,
+    "description": "(R) LID CLEAR CUP 12-20OZ"
+  },
+  {
+    "inventoryItemID": 1105286,
+    "description": "(R) LID DOME CLEAR 12-24 OZ"
+  },
+  {
+    "inventoryItemID": 9820501,
+    "description": "(R) LID DOME WIDEHOLE SUNDAE (98mm) "
+  },
+  {
+    "inventoryItemID": 2667345,
+    "description": "(R) LID PAPER COLD 12-20OZ"
+  },
+  {
+    "inventoryItemID": 6043082,
+    "description": "(R) LID PAPER COLD 30-32 OZ"
+  },
+  {
+    "inventoryItemID": 7495066,
+    "description": "(R) LID PAPER HOT 12-20OZ"
+  },
+  {
+    "inventoryItemID": 7790795,
+    "description": "(R) LID SOUFFLE 2OZ"
+  },
+  {
+    "inventoryItemID": 3526029,
+    "description": "(R) MAYO GALLONS"
+  },
+  {
+    "inventoryItemID": 4219218,
+    "description": "(R) MAYO PKTS - I=A"
+  },
+  {
+    "inventoryItemID": 93024,
+    "description": "(R) MILK - I=A"
+  },
+  {
+    "inventoryItemID": 3018515,
+    "description": "(R) MOZZARELLA STICKS 2 LB BAGS"
+  },
+  {
+    "inventoryItemID": 1070653,
+    "description": "(R) MUSHROOM "
+  },
+  {
+    "inventoryItemID": 6042518,
+    "description": "(R) NAPKINS - I=A"
+  },
+  {
+    "inventoryItemID": 1068400,
+    "description": "(R) ONION 50LB "
+  },
+  {
+    "inventoryItemID": 3526026,
+    "description": "(R) ONION CRISPY"
+  },
+  {
+    "inventoryItemID": 3019089,
+    "description": "(R) ONION STRINGS - I=A"
+  },
+  {
+    "inventoryItemID": 1081768,
+    "description": "(R) OREO 2 CT PKS (SUB. TEDY GRHAM) - I=A"
+  },
+  {
+    "inventoryItemID": 1041627,
+    "description": "(R) PEPPERONI 5LBS"
+  },
+  {
+    "inventoryItemID": 3521598,
+    "description": "(R) PICKLE SLICED 5 GALLON"
+  },
+  {
+    "inventoryItemID": 1069850,
+    "description": "(R) ROMAINE - I=A"
+  },
+  {
+    "inventoryItemID": 1001150,
+    "description": "(R) SALT BULK 1/25LB - I=A"
+  },
+  {
+    "inventoryItemID": 7063112,
+    "description": "(R) SAUCE APPLE CIN/VAN HARV - I=A"
+  },
+  {
+    "inventoryItemID": 333613,
+    "description": "(R) SAUCE BBQ SWT&SPICY WING GALLONS - I=A "
+  },
+  {
+    "inventoryItemID": 33360,
+    "description": "(R) SAUCE BBQ WING GALLONS  - I=A"
+  },
+  {
+    "inventoryItemID": 3366974,
+    "description": "(R) SAUCE BOURBON"
+  },
+  {
+    "inventoryItemID": 3525598,
+    "description": "(R) SAUCE BUFFALO WING GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 3525575,
+    "description": "(R) SAUCE CHEESE"
+  },
+  {
+    "inventoryItemID": 1008710,
+    "description": "(R) SAUCE CHEESE WHIZ 6.5LB"
+  },
+  {
+    "inventoryItemID": 1002671,
+    "description": "(R) SAUCE GARLIC PARM 64OZ - I=A"
+  },
+  {
+    "inventoryItemID": 6533311,
+    "description": "(R) SAUCE GARLIC PEPPER GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 1092800,
+    "description": "(R) SAUCE MARINARA"
+  },
+  {
+    "inventoryItemID": 5043478,
+    "description": "(R) SAUCE MARINARA PKS"
+  },
+  {
+    "inventoryItemID": 3525591,
+    "description": "(R) SAUCE SWEET RED CHILI GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 7174214,
+    "description": "(R) SAUCE TERIYAKI 1/2 GAL'S - I=A"
+  },
+  {
+    "inventoryItemID": 5517024,
+    "description": "(R) SEASONING CARIBBEAN JERK WING 6/18OZ- I=A"
+  },
+  {
+    "inventoryItemID": 3799764,
+    "description": "(R) SEASONING FAJITA 24 OZ - I=A"
+  },
+  {
+    "inventoryItemID": 123015,
+    "description": "(R) SEASONING LEMON PEPPER WING 6/20.7 - I=A"
+  },
+  {
+    "inventoryItemID": 7173808,
+    "description": "(R) SEASONING STEAK"
+  },
+  {
+    "inventoryItemID": 6044593,
+    "description": "(R) SPOONS - I=A"
+  },
+  {
+    "inventoryItemID": 3525515,
+    "description": "(R) STEAK (159/ 3 OZ)"
+  },
+  {
+    "inventoryItemID": 6043059,
+    "description": "(R) STRAWS 300/375 CT BAGS"
+  },
+  {
+    "inventoryItemID": 400188,
+    "description": "(R) SUGAR BULK - I=A "
+  },
+  {
+    "inventoryItemID": 1073200,
+    "description": "(R) SUGAR PKTS - I=A"
+  },
+  {
+    "inventoryItemID": 5817251,
+    "description": "(R) SUGAR SUB - SPLENDA PKTS - I=A"
+  },
+  {
+    "inventoryItemID": 4564480,
+    "description": "(R) SUGAR SUB PINK/ SWT N LOW - I=A"
+  },
+  {
+    "inventoryItemID": 3019056,
+    "description": "(R) SYRUP BLUEBERRY 6/35OZ - I=A"
+  },
+  {
+    "inventoryItemID": 5266291,
+    "description": "(R) SYRUP CHOCOLATE - I=A"
+  },
+  {
+    "inventoryItemID": 3019058,
+    "description": "(R) SYRUP PEACH"
+  },
+  {
+    "inventoryItemID": 3019072,
+    "description": "(R) SYRUP STRAWBERRY 6/35OZ"
+  },
+  {
+    "inventoryItemID": 112233,
+    "description": "(R) SYRUP STRAWBERRY 6/64 OZ"
+  },
+  {
+    "inventoryItemID": 7204604,
+    "description": "(R) SYRUP TANGERINE 6/32OZ"
+  },
+  {
+    "inventoryItemID": 5932518,
+    "description": "(R) SYRUP VANILLA 4/1 LITER"
+  },
+  {
+    "inventoryItemID": 7200834,
+    "description": "(R) SYRUP WATERMELON STRAWBRY 6/35OZ"
+  },
+  {
+    "inventoryItemID": 5538520,
+    "description": "(R) TEA BAGS 32CT - I=A"
+  },
+  {
+    "inventoryItemID": 1069320,
+    "description": "(R) TOMATO"
+  },
+  {
+    "inventoryItemID": 1031206,
+    "description": "(R) TOPPING OREO"
+  },
+  {
+    "inventoryItemID": 1040743,
+    "description": "(R) TOPPING WHIP 14OZ CANS - I=A"
+  },
+  {
+    "inventoryItemID": 2016593,
+    "description": "(R) TURKEY 2LB PKS"
+  },
+  {
+    "inventoryItemID": 4040464,
+    "description": "(R) WATER BOTTLES"
+  },
+  {
+    "inventoryItemID": 6040566,
+    "description": "(R) WRAP DELI"
+  },
+  {
+    "inventoryItemID": 6041042,
+    "description": "*BAG PLASTIC CHARLEYS 1/1000 - I=A"
+  },
+  {
+    "inventoryItemID": 2001198,
+    "description": "1x1 LABELS SATURDAY PERM - I=A"
+  },
+  {
+    "inventoryItemID": 2001200,
+    "description": "1X1 LABELS SUNDAY PERM BLACK - I=A"
+  },
+  {
+    "inventoryItemID": 1010250,
+    "description": "A-1 STEAK SAUCE GALLONS"
+  },
+  {
+    "inventoryItemID": 4007522,
+    "description": "A-1 STEAK SAUCE LTO (10 OZ/15 OZ BTL) - I=A"
+  },
+  {
+    "inventoryItemID": 787420690,
+    "description": "BACON 10LB PKS"
+  },
+  {
+    "inventoryItemID": 2343248,
+    "description": "BACON BITS 2.5LB PKS"
+  },
+  {
+    "inventoryItemID": 6543,
+    "description": "BACON BY THE LB"
+  },
+  {
+    "inventoryItemID": 2536555,
+    "description": "BACON PRECOOKED 300 CT"
+  },
+  {
+    "inventoryItemID": 7008537,
+    "description": "BACON TURKEY"
+  },
+  {
+    "inventoryItemID": 1229,
+    "description": "BAG 15x7x26 1/1000 - I=A"
+  },
+  {
+    "inventoryItemID": 6044924,
+    "description": "BAG HANDLE KRAFT 10X6.75X12 - I=A"
+  },
+  {
+    "inventoryItemID": 7959448,
+    "description": "BAG PAPER #25 1/250CT - I=A"
+  },
+  {
+    "inventoryItemID": 1586587,
+    "description": "BAG PAPER 10LB - I=A"
+  },
+  {
+    "inventoryItemID": 6041086,
+    "description": "BAG PAPER 12LB - I=A"
+  },
+  {
+    "inventoryItemID": 2230791,
+    "description": "BAG PAPER 16LB - I=A"
+  },
+  {
+    "inventoryItemID": 1100905,
+    "description": "BAG PAPER 4LB BRN 1/500 - I=A"
+  },
+  {
+    "inventoryItemID": 71,
+    "description": "BAG PAPER 4LB WHT 1/500 - I=A"
+  },
+  {
+    "inventoryItemID": 7072133,
+    "description": "BAG PAPER 6LB 1/400CT - I=A"
+  },
+  {
+    "inventoryItemID": 79594489,
+    "description": "BAG PAPER 6LB 1/500 - I=A"
+  },
+  {
+    "inventoryItemID": 1594114,
+    "description": "BAG PAPER 8LB BRN 1/500 - I=A"
+  },
+  {
+    "inventoryItemID": 2228656,
+    "description": "BAG PAPER BRN 2O LB SHORTY - I=A"
+  },
+  {
+    "inventoryItemID": 169599,
+    "description": "BAG PAPR 12LB W/HNDL - I=A"
+  },
+  {
+    "inventoryItemID": 8082950,
+    "description": "BAG PLASTIC TY 1/1000 - I=A"
+  },
+  {
+    "inventoryItemID": 7110319,
+    "description": "BAG PLASTIC TY 1/500CT - I=A"
+  },
+  {
+    "inventoryItemID": 7065842,
+    "description": "BAG PLASTIC TY 1/750 - I=A"
+  },
+  {
+    "inventoryItemID": 5096353,
+    "description": "BAG RECLOSABLE/ZIPLOCK - I/A"
+  },
+  {
+    "inventoryItemID": 1111,
+    "description": "BANANA PEPPER RINGS QUART"
+  },
+  {
+    "inventoryItemID": 7183351,
+    "description": "BEEF ROAST TOP RND CAP ON FRSH"
+  },
+  {
+    "inventoryItemID": 5331048,
+    "description": "BLACK PEPPER BTL - I=A"
+  },
+  {
+    "inventoryItemID": 70728200,
+    "description": "BOAT-TRAY 2LB"
+  },
+  {
+    "inventoryItemID": 980143825,
+    "description": "BOAT-TRAY 3LB 500EA"
+  },
+  {
+    "inventoryItemID": 7197663,
+    "description": "BOAT-TRAY 5LB 500EA"
+  },
+  {
+    "inventoryItemID": 7173182,
+    "description": "BOAT-TRAY CHARLEY 8LB & 9LB"
+  },
+  {
+    "inventoryItemID": 600054,
+    "description": "BOIL OUT PUCK - I=A"
+  },
+  {
+    "inventoryItemID": 3525027,
+    "description": "BOX LARGE CLAMSHELL  (NO LABEL) 150CT"
+  },
+  {
+    "inventoryItemID": 162,
+    "description": "BOX LARGE CLAMSHELL (NO LABEL) 200&500 CT"
+  },
+  {
+    "inventoryItemID": 651,
+    "description": "BOX LARGE CLAMSHELL (NO LABEL) 75-125 CT"
+  },
+  {
+    "inventoryItemID": 8463515,
+    "description": "BOX LARGE CLAMSHELL 125 CT"
+  },
+  {
+    "inventoryItemID": 7172022,
+    "description": "BOX LARGE CLAMSHELL 200CT"
+  },
+  {
+    "inventoryItemID": 971199,
+    "description": "BOX SM. FRY FOAM BOX 300 EA"
+  },
+  {
+    "inventoryItemID": 7336033,
+    "description": "BOX SM. FRY FOAM BOX 500 EA"
+  },
+  {
+    "inventoryItemID": 93336033,
+    "description": "BOX SMALL FOAM"
+  },
+  {
+    "inventoryItemID": 251658,
+    "description": "BOX SMALL FRY 200CT"
+  },
+  {
+    "inventoryItemID": 3018035,
+    "description": "BREAD SEEDLESS"
+  },
+  {
+    "inventoryItemID": 980012379,
+    "description": "CAN - COCA COLA"
+  },
+  {
+    "inventoryItemID": 980012380,
+    "description": "CAN - COKE ZERO"
+  },
+  {
+    "inventoryItemID": 320421,
+    "description": "CAN - DR PEPPER "
+  },
+  {
+    "inventoryItemID": 980012387,
+    "description": "CAN - SPRITE"
+  },
+  {
+    "inventoryItemID": 63213540,
+    "description": "CELERY 2.5LB - I=A"
+  },
+  {
+    "inventoryItemID": 436344,
+    "description": "CEREAL CINN TST CRUNCH  3LB - I=A"
+  },
+  {
+    "inventoryItemID": 1008265,
+    "description": "CHEESE AMERICAN"
+  },
+  {
+    "inventoryItemID": 8635740,
+    "description": "CHEESE CREAM LOAF"
+  },
+  {
+    "inventoryItemID": 3554579,
+    "description": "CHEESE MONT JACK .75 SLI 1.5LB PKS - I=A"
+  },
+  {
+    "inventoryItemID": 1842238,
+    "description": "CHEESE PEPPER JACK SLI .5OZ 1.25 LB PK"
+  },
+  {
+    "inventoryItemID": 7221251,
+    "description": "CHEESE PROVOLONE SLICE (2.5 LB PK)"
+  },
+  {
+    "inventoryItemID": 7431760,
+    "description": "CHEESE PROVOLONE SLICE 1.5 LB PKS"
+  },
+  {
+    "inventoryItemID": 7128496,
+    "description": "CHEESE SWISS .5OZ 1 LB PKS"
+  },
+  {
+    "inventoryItemID": 1283462,
+    "description": "CHEESE SWISS .75 OZ 2.5 LB PK"
+  },
+  {
+    "inventoryItemID": 88035,
+    "description": "CHERRIES MARASCHINO - I=A"
+  },
+  {
+    "inventoryItemID": 7283208,
+    "description": "CHICKEN (162/3 OZ)"
+  },
+  {
+    "inventoryItemID": 4822112,
+    "description": "CHICKEN BRST IFZ MARN 48/5 OZ"
+  },
+  {
+    "inventoryItemID": 2016026,
+    "description": "CHICKEN STRIPS CPS"
+  },
+  {
+    "inventoryItemID": 3927795,
+    "description": "CHICKEN TENDER 2/5LB"
+  },
+  {
+    "inventoryItemID": 2335307,
+    "description": "CHICKEN TENDERS (4/10 LB)"
+  },
+  {
+    "inventoryItemID": 1063881,
+    "description": "CHICKEN WING 5 LB BAGS"
+  },
+  {
+    "inventoryItemID": 7254801,
+    "description": "CHICKEN WING BONELESS (6/5 LB)"
+  },
+  {
+    "inventoryItemID": 5231238,
+    "description": "CHICKEN WING BONELESS 10LB"
+  },
+  {
+    "inventoryItemID": 80,
+    "description": "CHIPOTLE SAUCE - I=A"
+  },
+  {
+    "inventoryItemID": 1221002,
+    "description": "CHIPS"
+  },
+  {
+    "inventoryItemID": 26196,
+    "description": "CHIPS CHEETOS CRUNCHY 1/64"
+  },
+  {
+    "inventoryItemID": 401642,
+    "description": "CHIPS DORITOS COOL RANCH 1/64"
+  },
+  {
+    "inventoryItemID": 401643,
+    "description": "CHIPS DORITOS NACHO 1/64"
+  },
+  {
+    "inventoryItemID": 168,
+    "description": "CHIPS FRITO-LAY 1/60"
+  },
+  {
+    "inventoryItemID": 7905,
+    "description": "CHIPS LAYS 1/10 CT - I=A"
+  },
+  {
+    "inventoryItemID": 401635,
+    "description": "CHIPS LAYS BBQ 1/64"
+  },
+  {
+    "inventoryItemID": 35241,
+    "description": "CHIPS MS. VICKIES - I=A"
+  },
+  {
+    "inventoryItemID": 21,
+    "description": "CHIPS ORIG SALTED KETTLE 1/24"
+  },
+  {
+    "inventoryItemID": 6725737,
+    "description": "CHIPS POTATO JALAPENO KETTLE 1/64"
+  },
+  {
+    "inventoryItemID": 2683123,
+    "description": "CHIPS POTATO KETTLE LESSFAT 1/64"
+  },
+  {
+    "inventoryItemID": 5511175,
+    "description": "CHIPS POTATO REG 1OZ 1/104"
+  },
+  {
+    "inventoryItemID": 6743530,
+    "description": "CHIPS POTATO SALT N VNGR KETTLE 1/64"
+  },
+  {
+    "inventoryItemID": 5350725,
+    "description": "CHIPS POTATO SEA SALT 1/25"
+  },
+  {
+    "inventoryItemID": 149917,
+    "description": "CHIPS PRINGLE IND 1/48 CT - I=A"
+  },
+  {
+    "inventoryItemID": 401637,
+    "description": "CHIPS SOUR CREAM & ONION"
+  },
+  {
+    "inventoryItemID": 30570,
+    "description": "CHOCOLATE TOPPING HERSHEY'S 120 OZ"
+  },
+  {
+    "inventoryItemID": 999999998,
+    "description": "CLEAN ITEM NOT APPROVED"
+  },
+  {
+    "inventoryItemID": 1240000,
+    "description": "CLEANER AJAX 1/24 oz - I=A"
+  },
+  {
+    "inventoryItemID": 1609390,
+    "description": "CLEANER BLEACH 32 OZ BTLS - I=A"
+  },
+  {
+    "inventoryItemID": 1933074,
+    "description": "CLEANER BLEACH GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 8308185,
+    "description": "CLEANER DEGREASER FLOOR - I=A"
+  },
+  {
+    "inventoryItemID": 5201199,
+    "description": "CLEANER DEGREASER FRYER EXPRESS 24OZ BTLS - I=A"
+  },
+  {
+    "inventoryItemID": 8412054,
+    "description": "CLEANER DEGREASER FRYR/GRLL GALLONS RTU - I=A"
+  },
+  {
+    "inventoryItemID": 4532011,
+    "description": "CLEANER DEGREASER HGHTMP GRILL 32OZ BTLS - I=A"
+  },
+  {
+    "inventoryItemID": 9901417,
+    "description": "CLEANER DEGREASER HGHTMP GRILL PKS - I=A"
+  },
+  {
+    "inventoryItemID": 8412068,
+    "description": "CLEANER DEGREASER ORANGE - I=A"
+  },
+  {
+    "inventoryItemID": 7715453,
+    "description": "CLEANER DEGREASER OVEN RTU"
+  },
+  {
+    "inventoryItemID": 8132112,
+    "description": "CLEANER DEGREASER PURPLE 4/1 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 2039341,
+    "description": "CLEANER DEGREASER SUPER CONTACT - I=A"
+  },
+  {
+    "inventoryItemID": 7681341,
+    "description": "CLEANER DETERGENT DISH GALLONS & BTL - I=A"
+  },
+  {
+    "inventoryItemID": 4532502,
+    "description": "CLEANER DETERGENT DISHES 2 GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 7153573,
+    "description": "CLEANER DISINFECT PEROXIDE - I=A"
+  },
+  {
+    "inventoryItemID": 8549935,
+    "description": "CLEANER DISINFECTANT ARSL 14 OZ CAN - I=A"
+  },
+  {
+    "inventoryItemID": 7670039,
+    "description": "CLEANER FLOOR 2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 1983737,
+    "description": "CLEANER FLOOR RTU PKS - I=A"
+  },
+  {
+    "inventoryItemID": 245437,
+    "description": "CLEANER GLASS 12/30 PKTS - I=A"
+  },
+  {
+    "inventoryItemID": 7682790,
+    "description": "CLEANER GLASS BTLS/CAN - I=A"
+  },
+  {
+    "inventoryItemID": 8458826,
+    "description": "CLEANER GLASS GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 4532043,
+    "description": "CLEANER POLISH BTL/CAN - I=A"
+  },
+  {
+    "inventoryItemID": 4532016,
+    "description": "CLEANER RESTROOM BTL'S - I=A"
+  },
+  {
+    "inventoryItemID": 1120,
+    "description": "CLEANER TOILET BOWL - I=A"
+  },
+  {
+    "inventoryItemID": 4532001,
+    "description": "CLEANSER MULTI DISINFECTANT BTL&GAL'S- I=A"
+  },
+  {
+    "inventoryItemID": 20,
+    "description": "CO2 CYLINDER PLUS DEPOSIT - I=A"
+  },
+  {
+    "inventoryItemID": 980094558,
+    "description": "COFFEE GRND 1/33OZ - I=A"
+  },
+  {
+    "inventoryItemID": 5932043,
+    "description": "COFFEE GRND 96/2OZ - I=A"
+  },
+  {
+    "inventoryItemID": 5932130,
+    "description": "COFFEE GRND DECAF BLEND - I=A"
+  },
+  {
+    "inventoryItemID": 3290070,
+    "description": "COFFEE STIRRER - I=A"
+  },
+  {
+    "inventoryItemID": 3291218,
+    "description": "CONTAINER FOAM RND 12OZ"
+  },
+  {
+    "inventoryItemID": 1423211,
+    "description": "CONTAINER PAPER  KRAFT 3/60CT"
+  },
+  {
+    "inventoryItemID": 1423328,
+    "description": "CONTAINER PAPER 2 KRAFT 2/70 CT"
+  },
+  {
+    "inventoryItemID": 1423225,
+    "description": "CONTAINER PAPER 8 KRFT 2/65CT"
+  },
+  {
+    "inventoryItemID": 5357322,
+    "description": "COOKIE 'TEDDY' GRAHAM - I=A"
+  },
+  {
+    "inventoryItemID": 7124424,
+    "description": "COOKIE CHOC CHIP 108CT"
+  },
+  {
+    "inventoryItemID": 18223,
+    "description": "COOKIE CHOC CHIP 192CT-200 CT"
+  },
+  {
+    "inventoryItemID": 677161009,
+    "description": "COOKIE CHOC CHIP 30CT"
+  },
+  {
+    "inventoryItemID": 3018525,
+    "description": "COOKIE CHOC CHIP 56CT"
+  },
+  {
+    "inventoryItemID": 8266157,
+    "description": "COOKIE CINNAMON TIGER 150/1OZ - I=A"
+  },
+  {
+    "inventoryItemID": 4220554,
+    "description": "COOKIE FIG NEWTON 120/1OZ - I=A"
+  },
+  {
+    "inventoryItemID": 4591646,
+    "description": "COOKIE FUDGE 8/24CT - I=A"
+  },
+  {
+    "inventoryItemID": 402,
+    "description": "COOKIE OREO 40/2CT "
+  },
+  {
+    "inventoryItemID": 4341986,
+    "description": "COOKIE OREO 48/6CT - I=A"
+  },
+  {
+    "inventoryItemID": 9514043,
+    "description": "COOKIE OREO 6/52.5OZ - I=A"
+  },
+  {
+    "inventoryItemID": 980243299,
+    "description": "COOKIE OREO MINI PACK 30EA - I=A"
+  },
+  {
+    "inventoryItemID": 10044135,
+    "description": "COOKIE OREO MINI PACK 60EA - I=A"
+  },
+  {
+    "inventoryItemID": 4125852,
+    "description": "COOKIE SHORT BREAD 120/1OZ - I=A"
+  },
+  {
+    "inventoryItemID": 10055993,
+    "description": "COOKIES CHOC CHNK 72CT - I=A"
+  },
+  {
+    "inventoryItemID": 2093213,
+    "description": "CRACKER GRAHAM 150/3CT - I=A"
+  },
+  {
+    "inventoryItemID": 5278718,
+    "description": "CRACKER GRAHAM 200/2PK - I=A"
+  },
+  {
+    "inventoryItemID": 66282,
+    "description": "CREAMER IND HALF & HALF - I=A"
+  },
+  {
+    "inventoryItemID": 7762299,
+    "description": "CROUTON PACKS"
+  },
+  {
+    "inventoryItemID": 7064604,
+    "description": "CUP 4OZ - I=A"
+  },
+  {
+    "inventoryItemID": 8783615,
+    "description": "CUP 5OZ (25/20 CT) - I=A"
+  },
+  {
+    "inventoryItemID": 7064592,
+    "description": "CUP 5OZ - I=A"
+  },
+  {
+    "inventoryItemID": 1289,
+    "description": "CUP CLEAR 12OZ"
+  },
+  {
+    "inventoryItemID": 541652,
+    "description": "CUP CLEAR 16OZ (528 CT)"
+  },
+  {
+    "inventoryItemID": 216541,
+    "description": "CUP CLEAR 9OZ - I=A"
+  },
+  {
+    "inventoryItemID": 90142586,
+    "description": "CUP FOAM 12OZ"
+  },
+  {
+    "inventoryItemID": 9885047,
+    "description": "CUP FOAM 24OZ"
+  },
+  {
+    "inventoryItemID": 321300,
+    "description": "CUP FOAM 32OZ (300 EA)"
+  },
+  {
+    "inventoryItemID": 2770273,
+    "description": "CUP FOAM 32OZ (450 EA)"
+  },
+  {
+    "inventoryItemID": 4101424,
+    "description": "CUP FOAM 32OZ (500 EA)"
+  },
+  {
+    "inventoryItemID": 2769160,
+    "description": "CUP FOAM HOT 10OZ - I=A"
+  },
+  {
+    "inventoryItemID": 129014260,
+    "description": "CUP FOAM HOT 20 OZ (500 EA)"
+  },
+  {
+    "inventoryItemID": 201000,
+    "description": "CUP FOAM HOT 20OZ (1000 EA)"
+  },
+  {
+    "inventoryItemID": 2769219,
+    "description": "CUP FOAM/PPR HOT 20OZ 500 EA"
+  },
+  {
+    "inventoryItemID": 4360855,
+    "description": "CUP HOT 16OZ"
+  },
+  {
+    "inventoryItemID": 315216,
+    "description": "CUP ICEE PAPER 16 OZ 20/50"
+  },
+  {
+    "inventoryItemID": 352220,
+    "description": "CUP ICEE PAPER 32 OZ 12/40"
+  },
+  {
+    "inventoryItemID": 1202050,
+    "description": "CUP PAPER 12OZ 20/50 "
+  },
+  {
+    "inventoryItemID": 8529354,
+    "description": "CUP PAPER 4OZ 4/500 CT "
+  },
+  {
+    "inventoryItemID": 7049266,
+    "description": "CUP PAPER COLD 12OZ 25/80CT"
+  },
+  {
+    "inventoryItemID": 1993726,
+    "description": "CUP PAPER COLD 16OZ"
+  },
+  {
+    "inventoryItemID": 5523709,
+    "description": "CUP PAPER COLD 22OZ"
+  },
+  {
+    "inventoryItemID": 7049287,
+    "description": "CUP PAPER COLD 32OZ (40&50 CT SLV)"
+  },
+  {
+    "inventoryItemID": 9429775,
+    "description": "CUP PAPER COLD 32OZ 1/25CT "
+  },
+  {
+    "inventoryItemID": 1993742,
+    "description": "CUP PAPER COLD 32OZ 15/40"
+  },
+  {
+    "inventoryItemID": 262548,
+    "description": "CUP PAPER COLD COKE 20/21 OZ"
+  },
+  {
+    "inventoryItemID": 695031634,
+    "description": "CUP PAPER HOT 10/50"
+  },
+  {
+    "inventoryItemID": 12520,
+    "description": "CUP PLASTIC 2 OZ w-LID - I=A"
+  },
+  {
+    "inventoryItemID": 7193179,
+    "description": "CUP PLASTIC SOUVENIR 32OZ - I=A"
+  },
+  {
+    "inventoryItemID": 815983015,
+    "description": "CUP SLEEVE "
+  },
+  {
+    "inventoryItemID": 7930985,
+    "description": "CUP SOUFFLE 1OZ - I=A"
+  },
+  {
+    "inventoryItemID": 5346057,
+    "description": "CUP SOUFFLE 2OZ 2000CT"
+  },
+  {
+    "inventoryItemID": 1105195,
+    "description": "CUP SOUFFLE 2OZ 2500 EA"
+  },
+  {
+    "inventoryItemID": 8385676,
+    "description": "CUP SOUFFLE PAPER 1OZ 5000 EA - I=A"
+  },
+  {
+    "inventoryItemID": 343100,
+    "description": "CUTLERY ICEE STRAW/SPOON"
+  },
+  {
+    "inventoryItemID": 5036455,
+    "description": "DISPOSABLE MASKS 1/50 - I=A "
+  },
+  {
+    "inventoryItemID": 9999,
+    "description": "DO NOT COUNT"
+  },
+  {
+    "inventoryItemID": 26,
+    "description": "DOT IT BOX LABEL - I=A"
+  },
+  {
+    "inventoryItemID": 18,
+    "description": "DOT IT DRINK LABEL - I=A"
+  },
+  {
+    "inventoryItemID": 8,
+    "description": "DOT IT FROZEN TREAT LABEL - I=A"
+  },
+  {
+    "inventoryItemID": 1400316,
+    "description": "DRESSING 1000 ISLAND PKS/CUPS"
+  },
+  {
+    "inventoryItemID": 63024,
+    "description": "DRESSING BLUE CHEESE PKS/CUPS - I=A"
+  },
+  {
+    "inventoryItemID": 915043,
+    "description": "DRESSING CAESAR PKT PKS/CUPS - I=A"
+  },
+  {
+    "inventoryItemID": 7027105,
+    "description": "DRESSING HONEY MUSTARD PKS/CUPS- I=A"
+  },
+  {
+    "inventoryItemID": 1076350,
+    "description": "DRESSING ITALIAN GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 4796173,
+    "description": "DRESSING PARMESAN PEPPERCORN"
+  },
+  {
+    "inventoryItemID": 891234,
+    "description": "DRESSING RANCH 48-52OZ - I=A"
+  },
+  {
+    "inventoryItemID": 123,
+    "description": "EASY MOP"
+  },
+  {
+    "inventoryItemID": 7723032,
+    "description": "EGG LIQUID - I=A"
+  },
+  {
+    "inventoryItemID": 1520204,
+    "description": "EGGS"
+  },
+  {
+    "inventoryItemID": 1073128,
+    "description": "EQUAL - I=A"
+  },
+  {
+    "inventoryItemID": 695010516,
+    "description": "FILM 18X2M - I=A"
+  },
+  {
+    "inventoryItemID": 7435191,
+    "description": "FILM PVC ROLL 12X2000 - I=A"
+  },
+  {
+    "inventoryItemID": 1111100,
+    "description": "FILM PVC ROLL 18X2000 - I=A"
+  },
+  {
+    "inventoryItemID": 3302601,
+    "description": "FILM PVC ROLL 24x2000 - I=A"
+  },
+  {
+    "inventoryItemID": 82610,
+    "description": "FILTER COFFEE"
+  },
+  {
+    "inventoryItemID": 2970457,
+    "description": "FILTER GREASE CONE 10 IN"
+  },
+  {
+    "inventoryItemID": 114421,
+    "description": "FILTER PAPER - I=A"
+  },
+  {
+    "inventoryItemID": 4391801,
+    "description": "FILTER POWDER MAGNESOL - I=A"
+  },
+  {
+    "inventoryItemID": 1111002,
+    "description": "FOIL ALUM SHEET"
+  },
+  {
+    "inventoryItemID": 1018,
+    "description": "FOIL ALUMINUM ROLL"
+  },
+  {
+    "inventoryItemID": 999999999,
+    "description": "FOOD COST ITEM NOT APPROVED"
+  },
+  {
+    "inventoryItemID": 7724271,
+    "description": "FORK PLASTIC SERVING - I=A"
+  },
+  {
+    "inventoryItemID": 2296000,
+    "description": "GLOVE - XXL - I=A"
+  },
+  {
+    "inventoryItemID": 1112750,
+    "description": "GLOVE LARGE - I=A"
+  },
+  {
+    "inventoryItemID": 24,
+    "description": "GLOVE MEDIUM - I=A"
+  },
+  {
+    "inventoryItemID": 165416,
+    "description": "GLOVE POLY 1 SIZE 12/500 - I=A"
+  },
+  {
+    "inventoryItemID": 1112770,
+    "description": "GLOVE SMALL - I=A"
+  },
+  {
+    "inventoryItemID": 2306610,
+    "description": "GLOVE X-LARGE - I=A"
+  },
+  {
+    "inventoryItemID": 160,
+    "description": "GREEN PEPPER BY EACH'S"
+  },
+  {
+    "inventoryItemID": 1113150,
+    "description": "GRILL BRICK 1/12 - I=A"
+  },
+  {
+    "inventoryItemID": 704060,
+    "description": "GRILL SCRAPER BLADES - I=A"
+  },
+  {
+    "inventoryItemID": 707801,
+    "description": "GRILL SCREEN 1/20 - I=A"
+  },
+  {
+    "inventoryItemID": 1113200,
+    "description": "GRILL SCREEN 4X6 50/8 - I=A"
+  },
+  {
+    "inventoryItemID": 6830111,
+    "description": "GUACAMOLE"
+  },
+  {
+    "inventoryItemID": 1112802,
+    "description": "HAIRNETS - I=A"
+  },
+  {
+    "inventoryItemID": 6872323,
+    "description": "HAM 1 LB PKS/BY THE LB"
+  },
+  {
+    "inventoryItemID": 8286411,
+    "description": "HAM 2.5LB PKS"
+  },
+  {
+    "inventoryItemID": 2279057,
+    "description": "HAM 3 LB PKS"
+  },
+  {
+    "inventoryItemID": 93018,
+    "description": "HEAVY CREAM 1/2 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 8368627,
+    "description": "HFCS SWEETENER - I=A"
+  },
+  {
+    "inventoryItemID": 40614,
+    "description": "ICE BAG 40 LB - I=A"
+  },
+  {
+    "inventoryItemID": 222222,
+    "description": "ICE CREAM CONE (130 CT/200 CT)"
+  },
+  {
+    "inventoryItemID": 5636451,
+    "description": "ICE CREAM VAN MIX (6/6 LB)"
+  },
+  {
+    "inventoryItemID": 7087742,
+    "description": "ICE CREAM VAN MIX 2.5 GAL'S"
+  },
+  {
+    "inventoryItemID": 4046124,
+    "description": "ICING RTU VANILLA CREAM"
+  },
+  {
+    "inventoryItemID": 999999997,
+    "description": "INCOMPLETE PAPER ITEM REQUEST"
+  },
+  {
+    "inventoryItemID": 3390503,
+    "description": "INSERT 4OZ CUP - I=A"
+  },
+  {
+    "inventoryItemID": 5954250,
+    "description": "ITALIAN DRESSING PKTS/CUPS - I=A"
+  },
+  {
+    "inventoryItemID": 1084900,
+    "description": "ITALIAN SEASONING - I=A"
+  },
+  {
+    "inventoryItemID": 6973396,
+    "description": "JALAPENO SLI 96OZ POUCH - I=A"
+  },
+  {
+    "inventoryItemID": 3932415,
+    "description": "JALAPENO SLICED #10 CANS - I=A"
+  },
+  {
+    "inventoryItemID": 5833462,
+    "description": "JALAPENO SLICED 8.81 LB - I=A"
+  },
+  {
+    "inventoryItemID": 1605617,
+    "description": "JUICE APPLE PET - I=A"
+  },
+  {
+    "inventoryItemID": 6050173,
+    "description": "JUICE CRANBERRY 12/46OZ - I=A"
+  },
+  {
+    "inventoryItemID": 1606490,
+    "description": "JUICE ORANGE - I=A"
+  },
+  {
+    "inventoryItemID": 1952494,
+    "description": "KETCHUP 1.5 GALLON F/ DISP. - I=A"
+  },
+  {
+    "inventoryItemID": 4029518,
+    "description": "KETCHUP 3 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 8382129,
+    "description": "KETCHUP 6/10# - I=A"
+  },
+  {
+    "inventoryItemID": 4005963,
+    "description": "KETCHUP 6/10LB - I=A"
+  },
+  {
+    "inventoryItemID": 874211771,
+    "description": "KETCHUP BOTTLE  - I=A"
+  },
+  {
+    "inventoryItemID": 6720,
+    "description": "KETCHUP CAN 7.2LB - I=A"
+  },
+  {
+    "inventoryItemID": 3520032,
+    "description": "KETCHUP PKTS - I=A"
+  },
+  {
+    "inventoryItemID": 72,
+    "description": "KIT CUTLERY"
+  },
+  {
+    "inventoryItemID": 6042593,
+    "description": "LABEL DISSOLVABLE FRIDAY 1X1 - I=A"
+  },
+  {
+    "inventoryItemID": 6042545,
+    "description": "LABEL DISSOLVABLE MONDAY 1X1 - I=A"
+  },
+  {
+    "inventoryItemID": 6042581,
+    "description": "LABEL DISSOLVABLE SATURDAY 1X1 - I=A"
+  },
+  {
+    "inventoryItemID": 6042578,
+    "description": "LABEL DISSOLVABLE SUNDAY 1X1 - I=A"
+  },
+  {
+    "inventoryItemID": 6042565,
+    "description": "LABEL DISSOLVABLE THURSDAY 1X1 - I=A"
+  },
+  {
+    "inventoryItemID": 6042556,
+    "description": "LABEL DISSOLVABLE TUESDAY 1X1 - I=A"
+  },
+  {
+    "inventoryItemID": 6042534,
+    "description": "LABEL DISSOLVABLE WEDNESDAY 1X1 - I=A"
+  },
+  {
+    "inventoryItemID": 2001218,
+    "description": "LABEL PERM FRIDAY GREEN - I=A"
+  },
+  {
+    "inventoryItemID": 2001204,
+    "description": "LABEL PERM MONDAY BLUE - I=A"
+  },
+  {
+    "inventoryItemID": 2001216,
+    "description": "LABEL PERM THURSDAY BROWN - I=A"
+  },
+  {
+    "inventoryItemID": 2001212,
+    "description": "LABEL PERM WEDNESDAY RED - I=A"
+  },
+  {
+    "inventoryItemID": 2001188,
+    "description": "LABEL SHELF LIFE 2X3 DISSOLVABLE BOX"
+  },
+  {
+    "inventoryItemID": 2001179,
+    "description": "LABEL USE FIRST 2 REMOVABLE"
+  },
+  {
+    "inventoryItemID": 102208,
+    "description": "LEMONADE CONC. 32OZ & 64OZ"
+  },
+  {
+    "inventoryItemID": 1723857,
+    "description": "LETTUCE GREEN 1/24CT - I=A"
+  },
+  {
+    "inventoryItemID": 7199680,
+    "description": "LETTUCE ROMAINE 2/5LB - I=A"
+  },
+  {
+    "inventoryItemID": 12321,
+    "description": "LETTUCE ROMAINE BLEND - I=A"
+  },
+  {
+    "inventoryItemID": 7330301,
+    "description": "LETTUCE ROMAINE HEART 12/3CT - I=A"
+  },
+  {
+    "inventoryItemID": 9681131,
+    "description": "LETTUCE SPRING MIX 2/1.5LB - I=A"
+  },
+  {
+    "inventoryItemID": 825552,
+    "description": "LID (FOAM CUP) 32OZ"
+  },
+  {
+    "inventoryItemID": 3256,
+    "description": "LID (FOAM CUP) 32OZ 500CT"
+  },
+  {
+    "inventoryItemID": 825528,
+    "description": "LID CLEAR 16-24 OZ"
+  },
+  {
+    "inventoryItemID": 7877192,
+    "description": "LID DOME CLEAR 16/24 OZ"
+  },
+  {
+    "inventoryItemID": 141200,
+    "description": "LID DOME CLEAR 16IN"
+  },
+  {
+    "inventoryItemID": 7432768,
+    "description": "LID DOME CLEAR 16IN - 36EA"
+  },
+  {
+    "inventoryItemID": 1104600,
+    "description": "LID F/ 1/2 STEAMTABLE"
+  },
+  {
+    "inventoryItemID": 32112,
+    "description": "LID F/ 1/3 STEAMABLE - I=A"
+  },
+  {
+    "inventoryItemID": 1071000,
+    "description": "LID F/CLEAR CUP 107MM 32OZ"
+  },
+  {
+    "inventoryItemID": 7239442,
+    "description": "LID F/SOUVENIR CUP 32OZ - I=A"
+  },
+  {
+    "inventoryItemID": 2777561,
+    "description": "LID FOAM 12-24 OZ"
+  },
+  {
+    "inventoryItemID": 3611,
+    "description": "LID FOIL FULL SIZE 1/50"
+  },
+  {
+    "inventoryItemID": 15000975,
+    "description": "LID ICEE CLEAR 12/24 OZ FLAT 10/100"
+  },
+  {
+    "inventoryItemID": 331416,
+    "description": "LID ICEE DOME CLEAR 16/21 OZ 10/100"
+  },
+  {
+    "inventoryItemID": 331424,
+    "description": "LID ICEE DOME CLEAR 24OZ 10/100"
+  },
+  {
+    "inventoryItemID": 331464,
+    "description": "LID ICEE DOME CLEAR 32 OZ 10/96"
+  },
+  {
+    "inventoryItemID": 1993803,
+    "description": "LID PAPER COLD 12-24 OZ (12/100 EA)"
+  },
+  {
+    "inventoryItemID": 7757182,
+    "description": "LID PAPER COLD 12OZ 12/85CT"
+  },
+  {
+    "inventoryItemID": 76069503,
+    "description": "LID PAPER COLD 16-24OZ"
+  },
+  {
+    "inventoryItemID": 3270343,
+    "description": "LID PAPER COLD 32OZ 13/80CT"
+  },
+  {
+    "inventoryItemID": 1220,
+    "description": "LID PAPER HOT 12/20OZ "
+  },
+  {
+    "inventoryItemID": 7432834,
+    "description": "LID PLAS DOME 36/18IN"
+  },
+  {
+    "inventoryItemID": 101010,
+    "description": "LID PORTION 1OZ"
+  },
+  {
+    "inventoryItemID": 7794599,
+    "description": "LID SOUFFLE .5-1OZ 25/100CT"
+  },
+  {
+    "inventoryItemID": 1521,
+    "description": "LID TRANS 20 OZ 1/1000"
+  },
+  {
+    "inventoryItemID": 4097457,
+    "description": "LID VENTED"
+  },
+  {
+    "inventoryItemID": 21654158,
+    "description": "LINER TRASH 33 GALLON CLEAR 500 CT  - I=A"
+  },
+  {
+    "inventoryItemID": 1103960,
+    "description": "LINER TRASH 33-45 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 1104100,
+    "description": "LINER TRASH 55-60 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 1099012,
+    "description": "MALT VINEGAR 12/12OZ - I=A"
+  },
+  {
+    "inventoryItemID": 1099018,
+    "description": "MALT VINEGAR PKT 200CT - I=A"
+  },
+  {
+    "inventoryItemID": 4320214,
+    "description": "MELLO YELLOW 5 GAL - I=A"
+  },
+  {
+    "inventoryItemID": 13490,
+    "description": "MILK - HALF PINT"
+  },
+  {
+    "inventoryItemID": 6355857,
+    "description": "MILK CHOCOLATE - HALF PINT"
+  },
+  {
+    "inventoryItemID": 1004812,
+    "description": "MONT JACK FEATHER SHRED"
+  },
+  {
+    "inventoryItemID": 225,
+    "description": "MOZZARELLA STICKS 2.5 LB BAGS - I=A"
+  },
+  {
+    "inventoryItemID": 9459942,
+    "description": "MOZZARELLA STICKS 3 LB BAGS"
+  },
+  {
+    "inventoryItemID": 1591015,
+    "description": "MOZZARELLA STICKS 4 LB BAGS"
+  },
+  {
+    "inventoryItemID": 7606950,
+    "description": "MOZZARELLA STICKS 72CT"
+  },
+  {
+    "inventoryItemID": 6330195,
+    "description": "MOZZERELLA STICKS 1.5 LB"
+  },
+  {
+    "inventoryItemID": 695004348,
+    "description": "MOZZERELLA STICKS 7LB"
+  },
+  {
+    "inventoryItemID": 10080,
+    "description": "MUSHROOM 8OZ PK"
+  },
+  {
+    "inventoryItemID": 7796958,
+    "description": "MUSHROOM SLICED BY LB"
+  },
+  {
+    "inventoryItemID": 6544,
+    "description": "MUSHROOM TUB 24 OZ"
+  },
+  {
+    "inventoryItemID": 3227527,
+    "description": "MUSHROOM TUB 5LB"
+  },
+  {
+    "inventoryItemID": 7048836,
+    "description": "MUSTARD 4/105OZ - I=A"
+  },
+  {
+    "inventoryItemID": 4006797,
+    "description": "MUSTARD GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 1608850,
+    "description": "MUSTARD PKTS - I=A"
+  },
+  {
+    "inventoryItemID": 24250,
+    "description": "NAPKINS 250/375 CT PKS"
+  },
+  {
+    "inventoryItemID": 40195212,
+    "description": "ONION BY LB"
+  },
+  {
+    "inventoryItemID": 6704076,
+    "description": "ORANGE MANDARIN CUP - I=A"
+  },
+  {
+    "inventoryItemID": 1376805,
+    "description": "PAD GREEN - I=A"
+  },
+  {
+    "inventoryItemID": 4534088,
+    "description": "PAD GRIDDLE - I=A"
+  },
+  {
+    "inventoryItemID": 1104550,
+    "description": "PAN FOIL 1/2 STEAMTABLE"
+  },
+  {
+    "inventoryItemID": 3211,
+    "description": "PAN FOIL 1/3 STEAMABLE - I=A"
+  },
+  {
+    "inventoryItemID": 7293283,
+    "description": "PAN FOIL FULL SIZE"
+  },
+  {
+    "inventoryItemID": 4351722,
+    "description": "PANCAKE MIX - I=A"
+  },
+  {
+    "inventoryItemID": 6042509,
+    "description": "PAPER TOWEL MULTI-FOLD - I=A"
+  },
+  {
+    "inventoryItemID": 2566081,
+    "description": "PEPPERONI 2.5 LB PKS"
+  },
+  {
+    "inventoryItemID": 1962489,
+    "description": "PEPPERONI 3 LB PKS"
+  },
+  {
+    "inventoryItemID": 7459506,
+    "description": "PICKLE SLICED GALLONS"
+  },
+  {
+    "inventoryItemID": 7808545,
+    "description": "PLACEMAT BOARD PAPER 1000 EA - I=A"
+  },
+  {
+    "inventoryItemID": 6042585,
+    "description": "PLACEMAT BOARD PAPER 2000 EA - I=A"
+  },
+  {
+    "inventoryItemID": 3019043,
+    "description": "POTATOES FROZEN TATER ROUNDABOUTS - I=A"
+  },
+  {
+    "inventoryItemID": 341,
+    "description": "PREP - (R) STEAK SEASON BLEND"
+  },
+  {
+    "inventoryItemID": 159,
+    "description": "PREP - 50/50 Lettuce Mix - I=A"
+  },
+  {
+    "inventoryItemID": 385,
+    "description": "PREP - PREP OMG "
+  },
+  {
+    "inventoryItemID": 224,
+    "description": "PREP - Small Sandwich Topping - No Mayo"
+  },
+  {
+    "inventoryItemID": 3844453,
+    "description": "RED CRUSHD PEPPER PKT - I=A"
+  },
+  {
+    "inventoryItemID": 6042572,
+    "description": "REGISTER TAPE - I=A"
+  },
+  {
+    "inventoryItemID": 65451,
+    "description": "REGISTER TAPE 20/3.25"
+  },
+  {
+    "inventoryItemID": 5383330,
+    "description": "RELISH PEPPER HOT - I=A"
+  },
+  {
+    "inventoryItemID": 1234,
+    "description": "RICE KRISPY MINI"
+  },
+  {
+    "inventoryItemID": 7681305,
+    "description": "RINSE AID LIQ DISP 1/2.5GAL"
+  },
+  {
+    "inventoryItemID": 2189819,
+    "description": "ROMAINE CHOPPED 6/2LB"
+  },
+  {
+    "inventoryItemID": 56705,
+    "description": "SALT BULK 1/50LB - I=A"
+  },
+  {
+    "inventoryItemID": 4043378,
+    "description": "SALT BULK SEASONED - I=A"
+  },
+  {
+    "inventoryItemID": 7172847,
+    "description": "SALT GRANULATED 4LB - I=A"
+  },
+  {
+    "inventoryItemID": 1401645,
+    "description": "SALT PKTS - I=A"
+  },
+  {
+    "inventoryItemID": 4532047,
+    "description": "SANITIZER GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 7136128,
+    "description": "SANITIZER HAND 32OZ BTLS - I=A"
+  },
+  {
+    "inventoryItemID": 2544510,
+    "description": "SANITIZER HAND 750ML BTLS - I=A"
+  },
+  {
+    "inventoryItemID": 11111,
+    "description": "SAUCE BACON CHIPOTLE GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 3028463,
+    "description": "SAUCE BBQ BOURBON GALLONS"
+  },
+  {
+    "inventoryItemID": 7020551,
+    "description": "SAUCE BBQ KOREAN - I=A"
+  },
+  {
+    "inventoryItemID": 2970226,
+    "description": "SAUCE BUFFALO HOT 1/2 GAL - I=A"
+  },
+  {
+    "inventoryItemID": 1010510,
+    "description": "SAUCE CAROLINA GOLD WING 4/1GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 2638676,
+    "description": "SAUCE CHILI GRLC 3/136OZ - I=A"
+  },
+  {
+    "inventoryItemID": 6065088,
+    "description": "SAUCE CHIPOTLE 5OZ - I=A"
+  },
+  {
+    "inventoryItemID": 1072530,
+    "description": "SAUCE CUP BBQ - I=A"
+  },
+  {
+    "inventoryItemID": 6,
+    "description": "SAUCE FRANKS HOT 5OZ - I=A"
+  },
+  {
+    "inventoryItemID": 3346051,
+    "description": "SAUCE GARLIC PARM 2/1 GALLON "
+  },
+  {
+    "inventoryItemID": 4845905,
+    "description": "SAUCE HOT 2 OZ/10 OZ BOTTLES"
+  },
+  {
+    "inventoryItemID": 32165,
+    "description": "SAUCE HOT FRANKS 12OZ & 25OZ BTLS - I=A"
+  },
+  {
+    "inventoryItemID": 2829440,
+    "description": "SAUCE HOT FRANKS GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 5862495,
+    "description": "SAUCE HOT GREEN PEPPER - I=A"
+  },
+  {
+    "inventoryItemID": 3526003,
+    "description": "SAUCE HOT HABANERO SMOKIN GAL -  I=A"
+  },
+  {
+    "inventoryItemID": 3957285,
+    "description": "SAUCE HOT HONEY WING GLZ 1/2 GALS - I=A"
+  },
+  {
+    "inventoryItemID": 9906703,
+    "description": "SAUCE HOT SRIRACHA GRENADE - I=A"
+  },
+  {
+    "inventoryItemID": 7109060,
+    "description": "SAUCE MANDARIN ORG CKN GAL - I=A"
+  },
+  {
+    "inventoryItemID": 1082814,
+    "description": "SAUCE MANGO HABANERO WING 1/2 GALS - I=A"
+  },
+  {
+    "inventoryItemID": 3162569,
+    "description": "SAUCE MARINARA 168CT/250CT/264CT ONLY "
+  },
+  {
+    "inventoryItemID": 2913855,
+    "description": "SAUCE MARINARA 84 CT"
+  },
+  {
+    "inventoryItemID": 33363,
+    "description": "SAUCE PICANTE - I=A"
+  },
+  {
+    "inventoryItemID": 6205698,
+    "description": "SAUCE RED HOT 4/1 GAL"
+  },
+  {
+    "inventoryItemID": 7029334,
+    "description": "SAUCE SPICY ROJA"
+  },
+  {
+    "inventoryItemID": 467,
+    "description": "SAUCE SRIRACHA 20 OZ BTL - I=A"
+  },
+  {
+    "inventoryItemID": 1091175,
+    "description": "SAUCE SRIRACHA BTL'S - I=A"
+  },
+  {
+    "inventoryItemID": 333661,
+    "description": "SAUCE SWEET RED CHILI 1/2 GALS - I=A"
+  },
+  {
+    "inventoryItemID": 1901992,
+    "description": "SAUCE SWEET RED CHILI 32 OZ - I=A"
+  },
+  {
+    "inventoryItemID": 321321321,
+    "description": "SAUCE TAPATIO 12/10 OZ - I=A"
+  },
+  {
+    "inventoryItemID": 4232682,
+    "description": "SAUCE TERIYAKI 5 LB - I=A"
+  },
+  {
+    "inventoryItemID": 3525569,
+    "description": "SAUCE TERIYAKI GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 5982525,
+    "description": "SAUCE TERIYAKI PNAPL 5.3LB - I=A"
+  },
+  {
+    "inventoryItemID": 344,
+    "description": "SAUSAGE PATTY 3\" 1.5 OZ"
+  },
+  {
+    "inventoryItemID": 1048970,
+    "description": "SAUSAGE PATTY CKD 1.5-OZ"
+  },
+  {
+    "inventoryItemID": 4982708,
+    "description": "SCREEN GRIDDLE 1/12CT - I=A"
+  },
+  {
+    "inventoryItemID": 5036091,
+    "description": "SCREEN GRIDDLE 10/20EA - I=A"
+  },
+  {
+    "inventoryItemID": 6418493,
+    "description": "SCRUBBER GRIDDLE SCOTCHBRICK - I=A"
+  },
+  {
+    "inventoryItemID": 50,
+    "description": "SCRUBBER STAINLESS - I=A"
+  },
+  {
+    "inventoryItemID": 59,
+    "description": "SCRUBBER STAINLESS STEEL 300 SERIES - I=A"
+  },
+  {
+    "inventoryItemID": 561651,
+    "description": "SCRUBBER STAINLESS STEEL 50G 6/12 - I=A"
+  },
+  {
+    "inventoryItemID": 5328194,
+    "description": "SEASONING CAJUN WING (3/6.5 LB) - I=A"
+  },
+  {
+    "inventoryItemID": 3528090,
+    "description": "SEASONING CAJUN WING - I=A"
+  },
+  {
+    "inventoryItemID": 7060862,
+    "description": "SEASONING CHILI LIME ADOBO 1/18oz - I=A"
+  },
+  {
+    "inventoryItemID": 5228788,
+    "description": "SEASONING FAJITA 30 OZ - I=A"
+  },
+  {
+    "inventoryItemID": 464328,
+    "description": "SEASONING LEMON PEPPER 28 OZ/30 OZ - I=A"
+  },
+  {
+    "inventoryItemID": 5921780,
+    "description": "SEASONING LEMON PEPPER WING 1.5LB/7.5 LB"
+  },
+  {
+    "inventoryItemID": 7441916,
+    "description": "SEASONING OLD BAY 6/24OZ"
+  },
+  {
+    "inventoryItemID": 91016198,
+    "description": "SECUREIT LID LABLE - I=A"
+  },
+  {
+    "inventoryItemID": 1086400,
+    "description": "SESAME SEEDS 16OZ/18OZ - I=A"
+  },
+  {
+    "inventoryItemID": 2473144,
+    "description": "SESAME SEEDS 5LB - I=A"
+  },
+  {
+    "inventoryItemID": 1079620,
+    "description": "SHORTENING BUTTER ALT GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 3524085,
+    "description": "SHORTENING OIL 1/1 35LB - I=A"
+  },
+  {
+    "inventoryItemID": 126604,
+    "description": "SHORTENING OIL GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 4534010,
+    "description": "SOAP HAND FOAMING - I=A"
+  },
+  {
+    "inventoryItemID": 5287436,
+    "description": "SOAP HAND LIQUID GALLONS - I=A"
+  },
+  {
+    "inventoryItemID": 4040410,
+    "description": "SODA COKE - I=A"
+  },
+  {
+    "inventoryItemID": 4090379,
+    "description": "SODA COKE CHERRY BIB - I=A"
+  },
+  {
+    "inventoryItemID": 568013735,
+    "description": "SODA COKE DIET 1/2.5 GALLON"
+  },
+  {
+    "inventoryItemID": 4040416,
+    "description": "SODA COKE DIET 1/5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 5447738,
+    "description": "SODA COKE ZERO 1/2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 102260,
+    "description": "SODA COKE ZERO 1/5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 5537513,
+    "description": "SODA DR PEPPER 1/5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 5279591,
+    "description": "SODA DR PEPPER DIET 1/5GAL - I=A"
+  },
+  {
+    "inventoryItemID": 7022130,
+    "description": "SODA FRUIT PUNCH 1/2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 9507997,
+    "description": "SODA FRUIT PUNCH 1/3 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 5198395,
+    "description": "SODA FRUIT PUNCH 1/5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 1978586,
+    "description": "SODA GINGER ALE 1/2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 250000,
+    "description": "SODA ICEE - MASTER 5 GAL"
+  },
+  {
+    "inventoryItemID": 3229204,
+    "description": "SODA ICEE BLUE RASP 2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 250111,
+    "description": "SODA ICEE CHERRY 2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 3229501,
+    "description": "SODA ICEE CHERRY 5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 3229200,
+    "description": "SODA ICEE COKE 2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 3229500,
+    "description": "SODA ICEE COKE 5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 321500,
+    "description": "SODA ICEE COLA FCB  5 GALLON"
+  },
+  {
+    "inventoryItemID": 3229504,
+    "description": "SODA ICEE FANTA BLUE RASP 5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 23229504,
+    "description": "SODA ICEE FANTA BLUE RASP FCB 5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 32295015,
+    "description": "SODA ICEE FANTA WLD CHERRY 1/5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 5022850,
+    "description": "SODA LEMONADE PINK 1/5 GALLON"
+  },
+  {
+    "inventoryItemID": 6967590,
+    "description": "SODA MOUNTAIN BLAST 1/2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 738195,
+    "description": "SODA ORANGE 1/2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 40,
+    "description": "SODA ORANGE 1/5 GAL - I=A"
+  },
+  {
+    "inventoryItemID": 5963137,
+    "description": "SODA ORANGE HI-C BIB 1/2.5 - I=A"
+  },
+  {
+    "inventoryItemID": 9090739,
+    "description": "SODA PIBB XTRA 5 GAL BIB"
+  },
+  {
+    "inventoryItemID": 6665467,
+    "description": "SODA ROOT BEER 1/2.5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 331,
+    "description": "SODA ROOT BEER 1/5 GALLON - I=A"
+  },
+  {
+    "inventoryItemID": 5960893,
+    "description": "SODA SPRITE 2.5 GAL - I=A"
+  },
+  {
+    "inventoryItemID": 4040420,
+    "description": "SODA SPRITE 5 GAL - I=A"
+  },
+  {
+    "inventoryItemID": 4555330,
+    "description": "SODA STRAWBERRY 1/5GAL - I=A"
+  },
+  {
+    "inventoryItemID": 1203207,
+    "description": "SOUR CREAM "
+  },
+  {
+    "inventoryItemID": 987654,
+    "description": "SPONGE - I=A"
+  },
+  {
+    "inventoryItemID": 7283226,
+    "description": "STEAK (162/3 OZ)"
+  },
+  {
+    "inventoryItemID": 7064530,
+    "description": "STRAWS 1000 CT BAGS"
+  },
+  {
+    "inventoryItemID": 191397,
+    "description": "STRAWS 200 & 400 CT BAGS"
+  },
+  {
+    "inventoryItemID": 3423274,
+    "description": "STRAWS 500 CT/600 CT BAGS"
+  },
+  {
+    "inventoryItemID": 4008769,
+    "description": "SYRUP - I=A"
+  },
+  {
+    "inventoryItemID": 542368,
+    "description": "SYRUP CHOCOLATE 48OZ - I=A"
+  },
+  {
+    "inventoryItemID": 1030143,
+    "description": "SYRUP CHOCOLATE SYRUP 24 OZ - I=A"
+  },
+  {
+    "inventoryItemID": 8029789,
+    "description": "SYRUP PEACH LITER"
+  },
+  {
+    "inventoryItemID": 7459035,
+    "description": "SYRUP SPRITE ZERO "
+  },
+  {
+    "inventoryItemID": 7960661,
+    "description": "SYRUP STRAWBERRY PUREE"
+  },
+  {
+    "inventoryItemID": 7297274,
+    "description": "SYRUP TROPICAL PUREE"
+  },
+  {
+    "inventoryItemID": 123366,
+    "description": "TABASCO SAUCE - I=A"
+  },
+  {
+    "inventoryItemID": 34050,
+    "description": "TEA BAGS - I=A"
+  },
+  {
+    "inventoryItemID": 1480,
+    "description": "TEA BAGS 48CT - I=A"
+  },
+  {
+    "inventoryItemID": 4040498,
+    "description": "TEA GOLD PEAK SWEET BLACK 1/2.5 GAL - I=A"
+  },
+  {
+    "inventoryItemID": 4040495,
+    "description": "TEA GOLD PEAK UNSWEET BLACK 1/2.5 GAL - I=A"
+  },
+  {
+    "inventoryItemID": 5537539,
+    "description": "TEA RASPBERRY - I=A"
+  },
+  {
+    "inventoryItemID": 12365120,
+    "description": "TEA SWEET 12/18.5OZ - I=A"
+  },
+  {
+    "inventoryItemID": 5537584,
+    "description": "TEA SWEET SOUTHERN STYLE BIB - I=A"
+  },
+  {
+    "inventoryItemID": 14512231,
+    "description": "TEA UNSWEET 12/18.5OZ - I=A"
+  },
+  {
+    "inventoryItemID": 4527913,
+    "description": "TOILET PAPER - I=A"
+  },
+  {
+    "inventoryItemID": 1235,
+    "description": "TOMATO 5X6 20LB"
+  },
+  {
+    "inventoryItemID": 4087231,
+    "description": "TOMATO by LB"
+  },
+  {
+    "inventoryItemID": 2316542,
+    "description": "TONG 7 INCH 1/48CT"
+  },
+  {
+    "inventoryItemID": 6044908,
+    "description": "TONG HEAVY 9 BLK SCALLOPED 24"
+  },
+  {
+    "inventoryItemID": 4919615,
+    "description": "TONG PLAS 9 BLK 1/36"
+  },
+  {
+    "inventoryItemID": 2102038,
+    "description": "TOOTHPICK 100 CT BX"
+  },
+  {
+    "inventoryItemID": 1112004,
+    "description": "TOOTHPICK 1000 CT BX"
+  },
+  {
+    "inventoryItemID": 1910639,
+    "description": "TOOTHPICK 300 CT BX"
+  },
+  {
+    "inventoryItemID": 546541,
+    "description": "TOOTHPICK 800 CT BX"
+  },
+  {
+    "inventoryItemID": 1251745,
+    "description": "TOPPING WHIP 15OZ CANS - I=A"
+  },
+  {
+    "inventoryItemID": 2250656,
+    "description": "TORTILLA WHEAT 12IN - I=A"
+  },
+  {
+    "inventoryItemID": 7787361,
+    "description": "TOWEL CLOTH DISPOSABLE - I=A"
+  },
+  {
+    "inventoryItemID": 6042531,
+    "description": "TOWEL CLOTH DISPOSABLE 240CT  - I=A"
+  },
+  {
+    "inventoryItemID": 4527903,
+    "description": "TOWEL ROLL F/ DISPENSER - I=A"
+  },
+  {
+    "inventoryItemID": 2005040,
+    "description": "TOWEL ROLL KITCHEN - I=A"
+  },
+  {
+    "inventoryItemID": 2005140,
+    "description": "TOWEL ROLL PAPER WHITE 1/12 - I=A"
+  },
+  {
+    "inventoryItemID": 1109250,
+    "description": "TOWELETTES MOIST - I=A"
+  },
+  {
+    "inventoryItemID": 294486,
+    "description": "TRAY PLAS CATER 1610 I/5CT "
+  },
+  {
+    "inventoryItemID": 141176,
+    "description": "TRAY PLAS CATER 16IN "
+  },
+  {
+    "inventoryItemID": 5948922,
+    "description": "TRAY PLAS CATER 16IN 36CT "
+  },
+  {
+    "inventoryItemID": 9936709,
+    "description": "TRAY PLAS CATER RND 18IN"
+  },
+  {
+    "inventoryItemID": 5181425,
+    "description": "TURKEY 1 LB PKS/BY THE LB"
+  },
+  {
+    "inventoryItemID": 7094280,
+    "description": "TURKEY 2.5 LB PKS"
+  },
+  {
+    "inventoryItemID": 4040861,
+    "description": "VINEGAR MALT 4/1 GAL - I=A"
+  },
+  {
+    "inventoryItemID": 1261357,
+    "description": "WIPE THERM PROBE 1/200 - I=A"
+  }
+]

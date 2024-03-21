@@ -1,4 +1,7 @@
 import styled from "styled-components";
+import { useEffect, useState } from "react";
+import { AreaAPI } from "../apis/AreaAPI";
+import { UnitAPI } from "../apis/UnitAPI";
 
 
 const UnitContainer = styled.div`
@@ -28,12 +31,28 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick }) {
+export default function UnitSelector({ onClick , unitName, setUnitName, unitID}) {
+  
+  const GetUnitList = () => {
+    UnitAPI.getUnitsByCompany(1, 1)
+    .then((data) => {
+      if (data.Units.length > 0) {
+        setUnitName(data.Units.find(unit => unit.UnitID === unitID).Name);
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+  };
+  if (unitName === "No Unit Selected" && unitID) {
+    GetUnitList();
+  }
+  
   return (
     <>
     <UnitContainer onClick={onClick}>
       <Label>Select Unit(s)</Label>
-      <UnitValue >Charleys Philly Steak</UnitValue>
+      <UnitValue >{unitName}</UnitValue>
     </UnitContainer>
     </>
   );

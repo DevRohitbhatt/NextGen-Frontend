@@ -2,19 +2,70 @@ import styled from "styled-components";
 import PropTypes from "prop-types";
 import Cell from "./TableCell.jsx";
 import { InventoryItem } from '../components/DraggableInventoryItem.jsx';
+import { propTypes } from "react-bootstrap/esm/Image.js";
 
-const Table = styled.div`
+const Container = styled.div`
   width: ${(props) => (props.width ? props.width : "auto")};
   height: ${(props) => (props.height ? props.height : "auto")};
   border-radius: 30px;
-  padding: 20px;
+  padding: 0 20px;
   // margin-top: 26px;
   box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+`;
+const Table = styled.div`
+  border-radius: 30px;
+  // margin-top: 26px;
+  padding: ${(props) => (props.$scrollable ? "0 15px 0 0" : "15px")};
   display: grid;
   grid-template-columns: ${(props) =>
     props.columnwidths ? props.columnwidths : "auto"};;
   grid-auto-rows: auto;
   align-items: center;
+
+  overflow-y: ${(props) => (props.$scrollable ? "scroll" : "hidden")};
+
+  &::-webkit-scrollbar {
+    /* background: #ffffff; */
+    width: 15px;
+    /* height: 75%;
+    cursor: pointer;
+    border: 14px solid #fff;
+    outline: 0.25px solid #808285;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px; */
+  }
+
+  &::-webkit-scrollbar-track-piece {
+    background: #f1f1f1;
+    border-radius: 30px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #364790;
+    border-radius: 30px;
+    padding: 18px !important;
+    border: 2px solid #fff;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #508bff;
+  }
+
+  &::-webkit-scrollbar-button:start:decrement {
+    height: 94px;
+    display: block;
+    background: transparent;
+  } 
+
+  &::-webkit-scrollbar-button:end:increment {
+    height: 20px;
+    display: block;
+    background: transparent;
+  }
+
   h3 {
     margin-bottom: 20px;
     font-size: 1.75em;
@@ -33,7 +84,7 @@ const TableHeader = styled.div`
 const TableHeaderCell = styled.div`
   font-weight: bold;
   font-size: 1.2em;
-  height: 50px;
+  height: 44px;
   border-bottom: ${(props) => props.$useTableRows ? "none" : "2px solid " + props.theme.primary};
   padding: 10px 0;
   text-align: ${(props) => props.columntype === "number" ? "center" : "left"};
@@ -59,33 +110,37 @@ export default function TableBuilder({
   usetablerows = false,
   handleInputCellChange,
   handleDropdownChange,
+  className,
+  scrollable = false
 }) {
   return (
-    <Table width={width} height={height} columnwidths={columnwidths}> 
-      {usetablerows ? (
-        <TableHeader columnwidths={columnwidths}>
-          {columnHeaders.map((header, index) => (
-            <TableHeaderCell key={index} columntype={dataTypes[index]} $useTableRows={usetablerows}>{header}</TableHeaderCell>
-          ))}
-        </TableHeader>
-      ) : (
-        columnHeaders.map((header, index) => (
-          <TableHeaderCell key={index} columntype={dataTypes[index]}>{header}</TableHeaderCell>
-        ))
-      )}
-      {rows.map((row, rowIndex) => {
-
-        if(isDrag){
-          return <InventoryItem key={rowIndex} rowIndex={rowIndex} Description={row.Description} InventoryItemID={row.InventoryItemID}  ThawTime={row.ThawTime} />
-        }
-        console.log("testing")
-       return   row && row.map((cell, cellIndex) => (
-            <Cell key={cellIndex} value={cell.value} columntype={dataTypes[cellIndex]} cellType={cell.cellType} isInput={cell.isInput} row={rowIndex} tableName={tableName} columnName={cell.columnName} handleInputCellChange={handleInputCellChange} handleDropdownChange={handleDropdownChange}/>
+    <Container width={width} height={height}>
+      <Table width={width} height={height} className={className} $scrollable={scrollable} columnwidths={columnwidths}> 
+        {usetablerows ? (
+          <TableHeader columnwidths={columnwidths}>
+            {columnHeaders.map((header, index) => (
+              <TableHeaderCell key={index} columntype={dataTypes[index]} $useTableRows={usetablerows}>{header}</TableHeaderCell>
+            ))}
+          </TableHeader>
+        ) : (
+          columnHeaders.map((header, index) => (
+            <TableHeaderCell key={index} columntype={dataTypes[index]}>{header}</TableHeaderCell>
           ))
+        )}
+        {rows.map((row, rowIndex) => {
+
+          if(isDrag){
+            const key = row.inventoryItemID ? row.inventoryItemID : `fallback_${rowIndex}`;
+            return <InventoryItem key={key} rowIndex={row.inventoryItemID} tableName={tableName} description={row.description} inventoryItemID={row.inventoryItemID} />
+          }
+        return   row && row.map((cell, cellIndex) => (
+              <Cell key={cellIndex} value={cell.value} columntype={dataTypes[cellIndex]} cellType={cell.cellType} isInput={cell.isInput} row={rowIndex} tableName={tableName} columnName={cell.columnName} handleInputCellChange={handleInputCellChange} handleDropdownChange={handleDropdownChange}/>
+            ))
 
 
-          })}
-    </Table>
+            })}
+      </Table>
+    </Container>
   );
 }
 
@@ -102,4 +157,6 @@ TableBuilder.propTypes = {
   handleDropdownChange: PropTypes.func,
   isDrag: PropTypes.bool,
   usetablerows: PropTypes.bool,
+  className:PropTypes.string
+
 };

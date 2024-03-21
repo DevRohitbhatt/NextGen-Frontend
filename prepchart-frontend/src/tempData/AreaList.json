@@ -1,0 +1,42 @@
+{
+    "AreaLists":[
+      {
+        "AreaID": "1",
+        "Name": "101 Rowlett"
+      },
+      {
+        "AreaID": "2",
+        "Name": "101 Craft Hall"
+      },
+      {
+        "AreaID": "3",
+        "Name": "103 SDI of Summerville"
+      },
+      {
+        "AreaID": "4",
+        "Name": "104 SDI of Goose Creek"
+      },
+      {
+        "AreaID": "5",
+        "Name": "105 SDI of Moncks Corner"
+      },
+      {
+        "AreaID": "6",
+        "Name": "106 SDI of N Charleston"
+      },
+      {
+        "AreaID": "7",
+        "Name": "107 SDI of W Ashley"
+      },
+      {
+        "AreaID": "8",
+        "Name": "108 SDI of James Island"
+      },
+      {
+        "AreaID": "9",
+        "Name": "109 SDI of Berlin G Meyers"
+      }
+     
+    ]
+  }
+  

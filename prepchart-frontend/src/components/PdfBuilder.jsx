@@ -1,6 +1,15 @@
-import pdfMake from "pdfmake/build/pdfmake.js";
-import pdfFonts from "pdfmake/build/vfs_fonts.js";
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+import pdfMake from 'pdfmake/build/pdfmake';
+// import pdfFonts from 'pdfmake/build/vfs_fonts';
+// pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
+pdfMake.fonts = {
+  Roboto: {
+    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
+    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
+    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
+    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf',
+  },
+};
 
 const createTable = (tableInfo) => {
   const title = { text: "", style: "subheader" };
@@ -37,14 +46,13 @@ const createTable = (tableInfo) => {
 
 const getCellValue = (cell) => {
   if (Array.isArray(cell.value)) {
-    return cell.value.find((option) => option.IsSelected).PrepType;
+    return cell.value.find((option) => option.isSelected).option;
   } else {
     return cell.value !== 0 ? cell.value : "";
   }
 }
 
 export default function PdfBuilder(data) {
-  console.log(data);
   const content = [];
   let columns = [];
   content.push({ text: data.title, style: "header" });

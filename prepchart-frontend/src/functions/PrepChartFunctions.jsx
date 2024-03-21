@@ -10,6 +10,10 @@ export function onInputCellChange(
 ) {
   const newPrepChart = { ...prepChart };
 
+  //convert tableName to camelcase
+  tableName = tableName.charAt(0).toLowerCase() + tableName.slice(1);
+  tableName = tableName.replace(/\s/g, "");
+
   if (tableName === "DefaultSafetyFactor") {
     handleDefaultSafetyFactorChange(e, row, columnName, tableData, setTable, prepChart, setPrepChart);
     return;
@@ -32,8 +36,10 @@ export function onInputCellChange(
             } else if (cell.columnName === "On Hand") {
               onHand = parseFloat(e.target.value);
               cell.value = parseFloat(e.target.value);
+              newPrepChart[tableName][row]["onHand"] = cell.value;
             } else if (cell.columnName === "Prep/Pull Amount") {
               cell.value = (needed - onHand).toFixed(2);
+              newPrepChart[tableName][row]["prepPullAmount"] = cell.value;
             }
           });
         }
@@ -49,7 +55,7 @@ export function onInputCellChange(
           item.forEach((cell) => {
             if (cell.columnName === "Safety Factor") {
               cell.value = e.target.value;
-              newPrepChart[tableName][row][cell.columnName] = cell.value;
+              newPrepChart[tableName][row]["safetyFactor"] = cell.value;
             } else if (cell.columnName === "Needed") {
               prepChart[tableName][row].PrepUOM.map((option) => {
                 if (option.IsSelected) {
@@ -58,12 +64,12 @@ export function onInputCellChange(
               });
               needed = calculateNeededValue(tableName, prepChart, prepValue, prepChart[tableName][row].YieldType, e.target.value);
               cell.value = needed;
-              newPrepChart[tableName][row][cell.columnName] = needed;
+              newPrepChart[tableName][row]["needed"] = needed;
             } else if (cell.columnName === "On Hand") {
               onHand = parseFloat(cell.value);
             } else if (cell.columnName === "Prep/Pull Amount") {
               cell.value = (needed - onHand).toFixed(2);
-              newPrepChart[tableName][row][cell.columnName] = cell.value;
+              newPrepChart[tableName][row]["prepPullAmount"] = cell.value;
             }
           });
         }
@@ -71,8 +77,6 @@ export function onInputCellChange(
       }),
     });
   }
-
-  newPrepChart[tableName][row][columnName] = parseFloat(e.target.value);
   setPrepChart(newPrepChart);
 }
 
@@ -88,6 +92,10 @@ export function onDropdownCellChange(
 ) {
   const newPrepChart = { ...prepChart };
 
+  //convert tableName to camelcase and remove spaces
+  tableName = tableName.charAt(0).toLowerCase() + tableName.slice(1);
+  tableName = tableName.replace(/\s/g, "");
+
   setTable({
     ...tableData,
     rows: tableData.rows.map((item, index) => {
@@ -96,39 +104,37 @@ export function onDropdownCellChange(
         item.forEach((cell) => {
           if (cell.columnName === "Prep Type") {
             cell.value.forEach((option) => {
-              if (option.IsSelected) {
-                option.IsSelected = false;
+              if (option.isSelected) {
+                option.isSelected = false;
               }
-              if (option.Option === e.target.value) {
-                prepValue = option.Value;
-                option.IsSelected = true;
-                newPrepChart[tableName][row][cell.columnName] = e.target.value;
+              if (option.option === e.target.value) {
+                prepValue = option.value;
+                option.isSelected = true;
               }
             });
           } else if (cell.columnName === "Yield/Type") {
             yieldType = (cell.yieldDollars / prepValue).toFixed(2);
             cell.value = yieldType;
-            newPrepChart[tableName][row][cell.columnName] = yieldType;
+            newPrepChart[tableName][row]["yieldType"] = yieldType;
           } else if (cell.columnName === "Safety Factor") {
             safetyFactor = cell.value;
           } else if (cell.columnName === "Needed") {
             needed = calculateNeededValue(tableName, prepChart, prepValue, yieldType, safetyFactor);
             cell.value = needed;
-            newPrepChart[tableName][index][cell.columnName] = needed;
+            newPrepChart[tableName][index]["needed"] = needed;
           } else if (cell.columnName === "On Hand") {
             onHand = parseFloat(cell.value);
             cell.value = onHand;
-            newPrepChart[tableName][row][cell.columnName] = cell.value;
+            newPrepChart[tableName][row]["onHand"] = cell.value;
           } else if (cell.columnName === "Prep/Pull Amount") {
             cell.value = (needed - onHand).toFixed(2);
+            newPrepChart[tableName][row]["prepPullAmount"] = cell.value;
           }
         });
       }
       return item;
     }),
   });
-
-  newPrepChart[tableName][row][columnName] = e.target.value;
   setPrepChart(newPrepChart);
 }
 
@@ -158,11 +164,13 @@ export function handleForecastChange(
         let day = "";
         item.forEach((cell) => {
           if (cell.columnName === "Day") {
-            day = cell.value;
+            //set day equal to cell.value converted to camel case
+            day = cell.value.charAt(0).toLowerCase() + cell.value.slice(1);
+            day = day.replace(/\s/g, "");
           }
           if (cell.columnName === "Forecasted Sales") {
             cell.value = e.target.value;
-            newPrepChart.ForecastData[day] = parseFloat(e.target.value);
+            newPrepChart.forecastData[day] = parseFloat(e.target.value);
           }
         });
       }
@@ -191,7 +199,7 @@ export function handleDefaultSafetyFactorChange(
   nextDayTable
 ) {
   const newPrepChart = { ...prepChart };
-  let previousSafetyFactor = prepChart.DefaultSafetyFactor;
+  let previousSafetyFactor = prepChart.defaultSafetyFactor;
 
   setTable({
     ...tableData,
@@ -200,7 +208,7 @@ export function handleDefaultSafetyFactorChange(
         return item.map((cell) => {
           if (cell.columnName === "Default Safety Factor") {
             cell.value = e.target.value;
-            newPrepChart.DefaultSafetyFactor = parseFloat(e.target.value);
+            newPrepChart.defaultSafetyFactor = parseFloat(e.target.value);
           }
           return cell;
         });
@@ -215,9 +223,9 @@ export function handleDefaultSafetyFactorChange(
 }
 
 export const recalculatePrepChart = (prepChart, setPrepChart, todayTable, tomorrowTable, nextDayTable, setTodayTable, setTomorrowTable, setNextDayTable, previousSafetyFactor, newSafetyFactor) => {
-  recalculateTable(prepChart, setPrepChart, todayTable, setTodayTable, "Today", previousSafetyFactor, newSafetyFactor);
-  recalculateTable(prepChart, setPrepChart, tomorrowTable, setTomorrowTable, "Tomorrow", previousSafetyFactor, newSafetyFactor);
-  recalculateTable(prepChart, setPrepChart, nextDayTable, setNextDayTable, "NextDay", previousSafetyFactor, newSafetyFactor);
+  recalculateTable(prepChart, setPrepChart, todayTable, setTodayTable, "today", previousSafetyFactor, newSafetyFactor);
+  recalculateTable(prepChart, setPrepChart, tomorrowTable, setTomorrowTable, "tomorrow", previousSafetyFactor, newSafetyFactor);
+  recalculateTable(prepChart, setPrepChart, nextDayTable, setNextDayTable, "nextDay", previousSafetyFactor, newSafetyFactor);
 }
 
 export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, tableName, previousSafetyFactor, newSafetyFactor) => {
@@ -235,8 +243,8 @@ export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, t
       return item.map((cell) => {
         if (cell.columnName === "Prep Type") {
           cell.value.forEach((option) => {
-            if (option.IsSelected) {
-              prepValue = option.Value;
+            if (option.isSelected) {
+              prepValue = option.value;
             }
           });
         }
@@ -244,19 +252,21 @@ export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, t
         if (cell.columnName === "Yield/Type") {
           yieldType = (cell.yieldDollars / prepValue).toFixed(2);
           cell.value = yieldType;
-          newPrepChart[tableName][index][cell.columnName] = yieldType;
+          newPrepChart[tableName][index]["yieldType"] = yieldType;
         } else if (cell.columnName === "Safety Factor") {
           safetyFactor = (cell.value === previousSafetyFactor) ? newSafetyFactor : cell.value;
           cell.value = safetyFactor;
+          newPrepChart[tableName][index]["safetyFactor"] = safetyFactor;
         } else if (cell.columnName === "Needed") {
           needed = calculateNeededValue(tableName, prepChart, prepValue, yieldType, safetyFactor);
           cell.value = needed;
-          newPrepChart[tableName][index][cell.columnName] = needed;
+          newPrepChart[tableName][index]["needed"] = needed;
         } else if (cell.columnName === "On Hand") {
           onHand = parseFloat(cell.value);
-          newPrepChart[tableName][index][cell.columnName] = onHand;
+          newPrepChart[tableName][index]["onHand"] = onHand;
         } else if (cell.columnName === "Prep/Pull Amount") {
           cell.value = (needed - onHand).toFixed(2);
+          newPrepChart[tableName][index]["prepPullAmount"] = cell.value;
         }
         return cell;
       });
@@ -265,17 +275,17 @@ export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, t
 }
 
 function calculateNeededValue(tableName, prepChart, prepValue, yieldType, safetyFactor) {
-  const todayForecast = prepChart.ForecastData.Today;
-  const tomorrowForecast = prepChart.ForecastData.Tomorrow;
-  const nextDayForecast = prepChart.ForecastData.NextDay;
+  const todayForecast = prepChart.forecastData.today;
+  const tomorrowForecast = prepChart.forecastData.tomorrow;
+  const nextDayForecast = prepChart.forecastData.nextDay;
   let needed = 0;
   safetyFactor = safetyFactor / 100 + 1;
 
-  if (tableName === "Today") {
+  if (tableName === "today") {
     needed = (todayForecast / (prepValue + parseFloat(yieldType))) * safetyFactor;
-  } else if (tableName === "Tomorrow") {
+  } else if (tableName === "tomorrow") {
     needed = ((todayForecast + tomorrowForecast) / (prepValue + parseFloat(yieldType))) * safetyFactor;
-  } else if (tableName === "NextDay") {
+  } else if (tableName === "nextDay") {
     needed = ((todayForecast + tomorrowForecast + nextDayForecast) / (prepValue + parseFloat(yieldType))) * safetyFactor;
   }
 
@@ -296,40 +306,40 @@ export const buildPrepTable = (
         cellType: "", 
         columnName: "Item Name" },
       {
-        value: item.PrepUOM,
+        value: item.prepUOM,
         cellType: "dropdown",
         columnName: "Prep Type",
         handleOnChange: { handleDropdownChange },
       },
       { 
-        value: item.YieldType,
+        value: item.yieldType,
         cellType: "dollar", 
         columnName: "Yield/Type" ,
-        yieldDollars: item.CaseYieldDollars,
+        yieldDollars: item.caseYieldDollars,
         isInput: false,
       },
       {
-        value: item.SafetyFactor,
+        value: item.safetyFactor,
         cellType: "percent",
         columnName: "Safety Factor",
         handleOnChange: { onInputCellChange },
         isInput: true,
       },
       {
-        value: item.Needed,
+        value: item.needed,
         cellType: "",
         columnName: "Needed",
         handleOnChange: { onInputCellChange },
       },
       {
-        value: item.OnHand,
+        value: item.onHand,
         cellType: "input",
         columnName: "On Hand",
         handleOnChange: { onInputCellChange },
         isInput: true,
       },
       {
-        value: item.PrepPullAmount,
+        value: item.prepPullAmount,
         cellType: "",
         columnName: "Prep/Pull Amount",
       },

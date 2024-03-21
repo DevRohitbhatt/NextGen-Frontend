@@ -146,6 +146,10 @@ const DollarCell = ({
   };
 
   useEffect(() => {
+    setDollar(value);
+  }, [value]);
+
+  useEffect(() => {
     updateInputWidth();
   }, [dollar]);
   return (
@@ -153,7 +157,7 @@ const DollarCell = ({
       <DollarSign>$</DollarSign>
       <Input
         ref={inputRef}
-        defaultValue={value}
+        value={dollar}
         columntype={columntype}
         onChange={handleInputChange}
         onBlur={(e) => handleInputCellChange(e, row, columnName, tableName)}
@@ -215,16 +219,19 @@ export default function Cell({
     });
   } else if (cellType === "dropdown") {
     //find the selected option based on the IsSelected property of the value array
-    const selectedOption = value.find((option) => option.IsSelected);
+    let selectedOption = value.find((option) => option.isSelected);
+    if (!selectedOption) {
+      selectedOption = value[0];
+    }
     return (
       <TableCell columntype={columntype}>
         <Dropdown
           onChange={(e) => handleDropdownChange(e, row, columnName, tableName)}
-          defaultValue={selectedOption.Option}
+          defaultValue={selectedOption.option}
         >
           {value.map((option, index) => (
-            <option key={index} value={option.PrepType}>
-              {option.Option}
+            <option key={index} value={option.prepType}>
+              {option.option}
             </option>
           ))}
         </Dropdown>

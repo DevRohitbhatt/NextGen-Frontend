@@ -13,6 +13,7 @@ function SearchBar({ list, onSearch }) {
       setPlaceholder("Search Item ...");
     }
   };
+
   const handleBlur = (event) => {
     setSearchTerm(event.target.value);
     onSearch(event.target.value);
@@ -20,6 +21,7 @@ function SearchBar({ list, onSearch }) {
       setPlaceholder("Search Item ...");
     }
   };
+  
   return (
     <input
       type="text"

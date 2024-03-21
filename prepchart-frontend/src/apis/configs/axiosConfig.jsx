@@ -1,17 +1,21 @@
 import axios from "axios";
 
+axios.defaults.baseURL = "http://192.168.192.244:8030/";
+
 const api = axios.create({
   withCredentials: true,
-  baseURL: "http://localhost:5000",
+  headers: {
+    'Allow-Control-Allow-Origin': '*',
+  },
+  baseURL: "http://192.168.192.244:8083/",
 });
 
 const errorHandler = (error) => {
-  const statusCode = error.response?.status
-  if (statusCode && statusCode !== 401)
-    console.log(error)
+  const statusCode = error.response?.status;
+  if (statusCode && statusCode !== 401) console.log(error);
 
-  return Promise.reject(error)
-}
+  return Promise.reject(error);
+};
 
 api.interceptors.response.use(undefined, (error) => {
   return errorHandler(error);
