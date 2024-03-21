@@ -219,7 +219,10 @@ export default function Cell({
     });
   } else if (cellType === "dropdown") {
     //find the selected option based on the IsSelected property of the value array
-    const selectedOption = value.find((option) => option.isSelected);
+    let selectedOption = value.find((option) => option.isSelected);
+    if (!selectedOption) {
+      selectedOption = value[0];
+    }
     return (
       <TableCell columntype={columntype}>
         <Dropdown
