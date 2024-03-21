@@ -4,6 +4,9 @@ axios.defaults.baseURL = "http://192.168.192.244:8030/";
 
 const api = axios.create({
   withCredentials: true,
+  headers: {
+    'Allow-Control-Allow-Origin': '*',
+  },
   baseURL: "http://192.168.192.244:8083/",
 });
 
