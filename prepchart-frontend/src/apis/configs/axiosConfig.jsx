@@ -1,13 +1,12 @@
 import axios from "axios";
 
-axios.defaults.baseURL = "http://192.168.192.244:8030/";
-
+axios.defaults.baseURL = "http://localhost:5295/";
 const api = axios.create({
   withCredentials: true,
   headers: {
     'Allow-Control-Allow-Origin': '*',
   },
-  baseURL: "http://192.168.192.244:8083/",
+  baseURL: "http://localhost:5295/",
 });
 
 const errorHandler = (error) => {

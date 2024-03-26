@@ -29,7 +29,7 @@ const prepTableStructure = {
 };
 
 export default function PrepChart() {
-  const [companyID, setCompanyID] = useState();
+  const [companyID, setCompanyID] = useState(1021);
   const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isUnitSelected, setIsUnitSelected] = useState(false);
@@ -409,6 +409,7 @@ export default function PrepChart() {
               setShowModal(false);
             }}
             handleUnitSelection={handleUnitSelection}
+            isSaveUnit={false}
           />
 
           <CalendarModal
