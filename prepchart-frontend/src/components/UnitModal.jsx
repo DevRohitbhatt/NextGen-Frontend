@@ -163,7 +163,7 @@ const UnitModal = ({
   handleClose,
   handleUnitSelection,
   isSaveUnit = true,
-  handleUnitSaveSelection
+  handleUnitSaveSelection,
 }) => {
   const [unitsList, setUnitsList] = useState([]);
   const [filteredUnit, setFilteredUnit] = useState([]);
@@ -171,10 +171,19 @@ const UnitModal = ({
   const [SelecteUnitName, setSelecteUnitName] = useState("");
   const [IsActive, setIsActive] = useState([]);
   const [unitList, setUnitList] = useState([]);
+  const [selectedUnits, setSelectedUnits] = useState([]);
 
   useEffect(() => {
     GetUnitList();
   }, []);
+
+  useEffect(() => {
+    // Select the default unit when the component mounts
+    if (filteredUnit.length > 0) {
+      setSelectedUnits([filteredUnit[7].UnitID]);
+      setSelecteUnitName(filteredUnit[7].Name);
+    }
+  }, [filteredUnit]);
 
   const UnitListItem = (UnitItem) => {
     setUnitsList({
@@ -239,9 +248,21 @@ const UnitModal = ({
   };
   const handleSaveButtonClick = () => {
     // Pass necessary data to the parent function
-    handleUnitSaveSelection(SelecteUnitName,selectedUnit)
+    handleUnitSaveSelection(SelecteUnitName, [...selectedUnits]);
     handleClose();
-};
+  };
+
+  const handleUnitItemClick = (unitID) => {
+    if (selectedUnits.includes(unitID)) {
+      setSelectedUnits(selectedUnits.filter((id) => id !== unitID));
+    } else {
+      setSelectedUnits([...selectedUnits, unitID]);
+    }
+  };
+  const handleCancelClick = () => {
+    setSelectedUnits([filteredUnit[7].UnitID]); // Reset selected units
+    handleClose();
+  };
   if (!show) {
     return null;
   }
@@ -274,18 +295,38 @@ const UnitModal = ({
                 />
               </InputGroup>
               <UnitContainer className="unitList">
-                <ul value={selectedUnit} onClick={handleUnitSelectChange}>
-                  {filteredUnit.map((item, index) => (
-                    <li
-                      key={index}
-                      onClick={() => setIsActive(item.UnitID)}
-                      value={item.UnitID}
-                      className={IsActive === item.UnitID ? "active" : ""}
-                    >
-                      {item.Name}
-                    </li>
-                  ))}
-                </ul>
+                {isSaveUnit ? (
+                  <ul value={selectedUnit} onClick={handleUnitSelectChange}>
+                    {filteredUnit.map((item, index) => (
+                      <li
+                        key={index}
+                        onClick={() => {
+                          handleUnitItemClick(item.UnitID),
+                            setIsActive(item.UnitID);
+                        }}
+                        className={
+                          selectedUnits.includes(item.UnitID) ? "active" : ""
+                        }
+                        value={item.UnitID}
+                      >
+                        {item.Name}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <ul value={selectedUnit} onClick={handleUnitSelectChange}>
+                    {filteredUnit.map((item, index) => (
+                      <li
+                        key={index}
+                        onClick={() => setIsActive(item.UnitID)}
+                        value={item.UnitID}
+                        className={IsActive === item.UnitID ? "active" : ""}
+                      >
+                        {item.Name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </UnitContainer>
             </LeftUnitList>
             <RightUnitList>
@@ -310,12 +351,16 @@ const UnitModal = ({
 
         <ModalFooter>
           {isSaveUnit ? (
-            <FooterButton onClick={handleSaveButtonClick}>Save</FooterButton>
+            <>
+              <FooterButton onClick={handleSaveButtonClick}>Save</FooterButton>
+              <FooterButton onClick={handleCancelClick}>Cancel</FooterButton>
+            </>
           ) : (
-            <FooterButton onClick={handleOkButtonClick}>Ok</FooterButton>
+            <>
+              <FooterButton onClick={handleOkButtonClick}>Ok</FooterButton>
+              <FooterButton onClick={handleClose}>Cancel</FooterButton>
+            </>
           )}
-
-          <FooterButton onClick={handleClose}>Cancel</FooterButton>
         </ModalFooter>
       </ModalOverlay>
     </ModalDialog>

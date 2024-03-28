@@ -6,18 +6,10 @@ import "../components/UnitSelector.jsx";
 import UnitSelector from "../components/UnitSelector.jsx";
 import Table from "../components/TableBuilder.jsx";
 import { PrepChartTemplateAPI } from "../apis/PrepChartTemplateAPI.jsx";
-import { FaRegSave } from "react-icons/fa";
 import SearchBar from "../components/SearchBar.jsx";
 import UnitModal from "../components/UnitModal.jsx";
 import { FaRegTrashAlt } from "react-icons/fa";
-import {
-  FaArrowDownShortWide,
-  FaArrowDownWideShort,
-  FaArrowUpShortWide,
-} from "react-icons/fa6";
 import ExportOptions from "../components/ExportOptions.jsx";
-import { AreaAPI } from "../apis/AreaAPI.jsx";
-import { UnitAPI } from "../apis/UnitAPI.jsx";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
@@ -47,7 +39,7 @@ export default function PrepChartTemplate() {
   const [selectedUnit, setSelectedUnit] = useState(51);
   const [isUnitSelected, setIsUnitSelected] = useState(false);
   const [prepChartTemplateID, setPrepChartTemplateID] = useState();
-  const draggingPos = useRef(null);
+  //const draggingPos = useRef(null);
   const dragOverPos = useRef(null);
   const [isSave, setIsSave] = useState(false);
   const [saveUnitId, setSaveUnitId] = useState();
@@ -58,48 +50,43 @@ export default function PrepChartTemplate() {
     NextDayItemmRef.current = NextDayItem;
   }, [todayItem, TomorrowItem, NextDayItem]);
 
-  // const handleDragStart = (index) => {
-  //   draggingPos.current = index;
-  // };
-
-  // const handleDragEnter = (index) => {
-  //   dragOverPos.current = index;
-  //   const newItems = [...todayItem];
-  //   const draggedItem = newItems[draggingPos.current];
-  //   newItems.splice(draggingPos.current, 1);
-  //   newItems.splice(dragOverPos.current, 0, draggedItem);
-
-  //   setTodayItem(newItems);
-  //   draggingPos.current = index;
-  //   dragOverPos.current = null;
-  // };
+  const draggingPos = useRef({ index: -1, section: "" });
   const handleDragStart = (index, section) => {
     draggingPos.current = { index, section };
   };
 
   const handleDragEnter = (index, section) => {
-    dragOverPos.current = { index, section };
-    const newItems = [...getSectionItems(section)];
-    const draggedItem = newItems[draggingPos.current.index];
-    newItems.splice(draggingPos.current.index, 1);
-    newItems.splice(dragOverPos.current.index, 0, draggedItem);
+    // Check if the drag enters a different position
+    if (
+      index !== draggingPos.current.index ||
+      section !== draggingPos.current.section
+    ) {
+      // Update the state only if the drag enters a different position
+      const newItems = [...getSectionItems(draggingPos.current.section)];
 
-    switch (section) {
-      case "today":
-        setTodayItem(newItems);
-        break;
-      case "tomorrow":
-        setTomorrowItem(newItems);
-        break;
-      case "nextDay":
-        setNextDayItem(newItems);
-        break;
-      default:
-        break;
+      // Remove the dragged item from its original position
+      const draggedItem = newItems.splice(draggingPos.current.index, 1)[0];
+
+      // Insert the dragged item at the new position
+      newItems.splice(index, 0, draggedItem);
+
+      // Update the state based on the section
+      switch (draggingPos.current.section) {
+        case "today":
+          setTodayItem(newItems);
+          break;
+        case "tomorrow":
+          setTomorrowItem(newItems);
+          break;
+        case "nextDay":
+          setNextDayItem(newItems);
+          break;
+        default:
+          break;
+      }
+      // Update dragging position
+      draggingPos.current = { index, section };
     }
-
-    draggingPos.current = { index, section };
-    dragOverPos.current = null;
   };
 
   const getSectionItems = (section) => {
@@ -227,17 +214,36 @@ export default function PrepChartTemplate() {
     }),
   }));
 
+  // const DropToday = (inventoryItemID) => {
+  //   const isDuplicate = todayItemRef.current.some(
+  //     (item) => item.inventoryItemID === inventoryItemID
+  //   );
+  //   if (!isDuplicate) {
+  //     const DropToDayItem = ItemList.filter(
+  //       (Items) =>
+  //         inventoryItemID === Items.inventoryItemID &&
+  //         todayItem.inventoryItemID != inventoryItemID
+  //     );
+  //     setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
+  //   }
+  // };
   const DropToday = (inventoryItemID) => {
     const isDuplicate = todayItemRef.current.some(
       (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
-      const DropToDayItem = ItemList.filter(
-        (Items) =>
-          inventoryItemID === Items.inventoryItemID &&
-          todayItem.inventoryItemID != inventoryItemID
+      const DropToDayItem = ItemList.find(
+        (item) => item.inventoryItemID === inventoryItemID
       );
-      setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
+      if (DropToDayItem) {
+        if (draggingPos.current.index !== -1) {
+          setTodayItem((todayItem) => {
+            const newTodayItem = [...todayItem];
+            newTodayItem.splice(draggingPos.current.index, 0, DropToDayItem);
+            return newTodayItem;
+          });
+        }
+      }
     }
   };
 
@@ -246,10 +252,18 @@ export default function PrepChartTemplate() {
       (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
-      const DropTomorrowItem = ItemList.filter(
-        (Items) => inventoryItemID === Items.inventoryItemID
+      const DropTomorrowItem = ItemList.find(
+        (item) => item.inventoryItemID === inventoryItemID
       );
-      setTomorrowItem((TomorrowItem) => [...TomorrowItem, DropTomorrowItem[0]]);
+      if (DropTomorrowItem) {
+        if (draggingPos.current.index !== -1) {
+          setTomorrowItem((TomorrowItem) => {
+            const newTomorrowItem = [...TomorrowItem];
+            newTomorrowItem.splice(draggingPos.current.index, 0, DropTomorrowItem);
+            return newTomorrowItem;
+          });
+        }
+      }
     }
   };
 
@@ -258,55 +272,25 @@ export default function PrepChartTemplate() {
       (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
-      const DropNextDayItem = ItemList.filter(
-        (Items) => inventoryItemID === Items.inventoryItemID
+      const DropNextDayItem = ItemList.find(
+        (item) => item.inventoryItemID === inventoryItemID
       );
-      setNextDayItem((NextDayItem) => [...NextDayItem, DropNextDayItem[0]]);
+      if (DropNextDayItem) {
+        if (draggingPos.current.index !== -1) {
+          setNextDayItem((NextDayItem) => {
+            const newNextDayItem = [...NextDayItem];
+            newNextDayItem.splice(draggingPos.current.index+1, 0, DropNextDayItem);
+            return newNextDayItem;
+          });
+        }
+      }
     }
-  };
-
-  const handleReorder = (items, setItems) => (dragIndex, hoverIndex) => {
-    const draggedItem = items[dragIndex];
-    setItems((prevItems) => {
-      const newItems = [...prevItems];
-      newItems(...dragIndex, 1);
-      newItems(...hoverIndex, 0, draggedItem);
-      return newItems;
-    });
   };
 
   const handleUnitSelectorClick = () => {
     setShowModal(true); // Open the modal when UnitSelector is clicked
     setIsSave(false);
   };
-
-  // Function to handle sorting by Inventory ID
-  const sortItemsByInventoryID = (items) => {
-    return items.sort((a, b) => a.inventoryItemID - b.inventoryItemID);
-  };
-
-  // Function to handle sorting by description
-  const sortItemsBydescription = (items) => {
-    return items.sort((a, b) => a.description.localeCompare(b.description));
-  };
-
-  // Function to toggle sorting order and reorder items
-  // const handleSorting = (sortBy, setItems, items, sortOrder, setSortOrder) => {
-  //   let sortedItems;
-  //   if (sortBy === "InventoryID") {
-  //     sortedItems =
-  //       sortOrder === "asc"
-  //         ? sortItemsByInventoryID(items)
-  //         : sortItemsByInventoryID(items).reverse();
-  //   } else if (sortBy === "description") {
-  //     sortedItems =
-  //       sortOrder === "asc"
-  //         ? sortItemsBydescription(items)
-  //         : sortItemsBydescription(items).reverse();
-  //   }
-  //   setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-  //   setItems(sortedItems);
-  // };
 
   // Function to handle row deletion
   const handleDelete = (inventoryItemID, day) => {
@@ -356,37 +340,32 @@ export default function PrepChartTemplate() {
   const handleUnitSaveSelection = (unitName, unitID) => {
     const prepChartTemplate = constructPrepChartTemplate(unitID);
   };
-  const handleSaveButtonClick = () => {
-    // Handle save button click logic
-    console.log("Save Button Clicked. Selected Unit:", selectedUnit);
-    // Implement your save logic here
-  };
+  const handleSaveButtonClick = () => {};
 
   function constructPrepChartTemplate(unitID) {
-    // const prepChartTemplate = [
-    //   {
-    //     prepGroupKey: "Today",
-    //     inventoryItemList: todayItem,
-    //   },
-    //   {
-    //     prepGroupKey: "Tomorrow",
-    //     inventoryItemList: TomorrowItem,
-    //   },
-    //   {
-    //     prepGroupKey: "Next Day",
-    //     inventoryItemList: NextDayItem,
-    //   },
-    // ];
-    // const json = {
-    //   companyID: companyID,
-    //   unitIDList: [unitID],
-    //   prepChartTemplateID: prepChartTemplateID,
-    //   prepChartTemplate: prepChartTemplate,
-    // }
-    // return PrepChartTemplateAPI.save(json);
-    console.log("Save list", unitID);
+    const prepChartTemplate = [
+      {
+        prepGroupKey: "Today",
+        inventoryItemList: todayItem,
+      },
+      {
+        prepGroupKey: "Tomorrow",
+        inventoryItemList: TomorrowItem,
+      },
+      {
+        prepGroupKey: "Next Day",
+        inventoryItemList: NextDayItem,
+      },
+    ];
+    const json = {
+      companyID: companyID,
+      unitIDList: [unitID],
+      prepChartTemplateID: prepChartTemplateID,
+      prepChartTemplate: prepChartTemplate,
+    };
+    return PrepChartTemplateAPI.save(json);
+    //console.log("Save list", unitID);
   }
-
 
   const handleSorting = (columnIndex) => {
     // Determine which column to sort based on the columnIndex
@@ -406,8 +385,12 @@ export default function PrepChartTemplate() {
   const handleSortByInventoryID = () => {
     const sortedItems =
       sortOrder === "asc"
-        ? MasterTable.rows.slice().sort((a, b) => a.inventoryItemID - b.inventoryItemID)
-        : MasterTable.rows.slice().sort((a, b) => b.inventoryItemID - a.inventoryItemID);
+        ? MasterTable.rows
+            .slice()
+            .sort((a, b) => a.inventoryItemID - b.inventoryItemID)
+        : MasterTable.rows
+            .slice()
+            .sort((a, b) => b.inventoryItemID - a.inventoryItemID);
 
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     setFilteredItem(sortedItems);
@@ -417,15 +400,16 @@ export default function PrepChartTemplate() {
   const handleSortByDescription = () => {
     const sortedItems =
       sortOrder === "asc"
-        ? MasterTable.rows.slice().sort((a, b) => a.description.localeCompare(b.description))
-        : MasterTable.rows.slice().sort((a, b) => b.description.localeCompare(a.description));
+        ? MasterTable.rows
+            .slice()
+            .sort((a, b) => a.description.localeCompare(b.description))
+        : MasterTable.rows
+            .slice()
+            .sort((a, b) => b.description.localeCompare(a.description));
 
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     setFilteredItem(sortedItems);
   };
-
-
-
 
   return (
     <Styled.PageContainer>
@@ -495,17 +479,13 @@ export default function PrepChartTemplate() {
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>Today</Styled.TableHeaderTop>
                 <Styled.Table>
-                  <div
-                    className="drop-board"
-                    ref={dropToday}
-                    style={{ border: isOverToday ? "1px solid red" : "" }}
-                  >
+                  <div className={`drop-board`} ref={dropToday}>
                     <Styled.TableHeaderRight>
                       <Styled.TableHeaderCell>
-                        Inventory ID{" "}
+                        Inventory ID
                       </Styled.TableHeaderCell>
                       <Styled.TableHeaderCell>
-                        description{" "}
+                        Description
                       </Styled.TableHeaderCell>
                     </Styled.TableHeaderRight>
                     {todayItem.length > 0 ? "" : placeholder}
@@ -517,6 +497,11 @@ export default function PrepChartTemplate() {
                         onDragStart={() => handleDragStart(index, "today")}
                         onDragEnter={() => handleDragEnter(index, "today")}
                         onDragOver={(e) => e.preventDefault()}
+                        className={
+                          index === draggingPos.current.index
+                            ? `dragging ${isOverToday ? "drop-highlight" : ""}`
+                            : ""
+                        }
                       >
                         <InventoryItem
                           inventoryItemID={item.inventoryItemID}
@@ -524,7 +509,7 @@ export default function PrepChartTemplate() {
                           columnIndex={item.inventoryItemID}
                         />
                         <FaRegTrashAlt
-                          className="delete"
+                          className={`delete`}
                           onClick={() =>
                             handleDelete(item.inventoryItemID, "today")
                           }
@@ -538,11 +523,7 @@ export default function PrepChartTemplate() {
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>Tomorrow</Styled.TableHeaderTop>
                 <Styled.Table>
-                  <div
-                    className="drop-board"
-                    ref={dropTomorrow}
-                    style={{ border: isOverTomorrow ? "1px solid red" : "" }}
-                  >
+                  <div className="drop-board" ref={dropTomorrow}>
                     <Styled.TableHeaderRight>
                       <Styled.TableHeaderCell>
                         Inventory ID{" "}
@@ -559,21 +540,23 @@ export default function PrepChartTemplate() {
                         onDragStart={() => handleDragStart(index, "tomorrow")}
                         onDragEnter={() => handleDragEnter(index, "tomorrow")}
                         onDragOver={(e) => e.preventDefault()}
+                        className={
+                          index === draggingPos.current.index
+                            ? `dragging ${
+                                isOverTomorrow ? "drop-highlight" : ""
+                              }`
+                            : ""
+                        }
                       >
                         <InventoryItem
-                          key={item.inventoryItemID}
                           inventoryItemID={item.inventoryItemID}
                           description={item.description.trim()}
-                          moveItem={handleReorder(
-                            TomorrowItem,
-                            setTomorrowItem
-                          )}
                           columnIndex={item.inventoryItemID}
                         />
                         <FaRegTrashAlt
-                          className="delete"
+                          className={`delete`}
                           onClick={() =>
-                            handleDelete(item.inventoryItemID, "tomorrow")
+                            handleDelete(item.inventoryItemID, "today")
                           }
                         />
                       </div>
@@ -605,12 +588,19 @@ export default function PrepChartTemplate() {
                         onDragStart={() => handleDragStart(index, "nextDay")}
                         onDragEnter={() => handleDragEnter(index, "nextDay")}
                         onDragOver={(e) => e.preventDefault()}
+                        className={
+                          index === draggingPos.current.index
+                            ? `dragging ${
+                                isOverNextDay ? "drop-highlight" : ""
+                              }`
+                            : ""
+                        }
                       >
                         <InventoryItem
                           key={item.inventoryItemID}
                           inventoryItemID={item.inventoryItemID}
                           description={item.description}
-                          moveItem={handleReorder(NextDayItem, setNextDayItem)}
+                          // moveItem={handleReorder(NextDayItem, setNextDayItem)}
                           columnIndex={item.inventoryItemID}
                         />
                         <FaRegTrashAlt

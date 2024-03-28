@@ -123,11 +123,20 @@ export default function TableBuilder({
   scrollable = false,
   handleSorting,
 }) {
+  const [sortColumnIndex, setSortColumnIndex] = useState(-1); // Initialize with -1 to indicate no column is sorted initially
   const [isAscending, setIsAscending] = useState(true);
 
+  useEffect(() => {
+    handleSorting(sortColumnIndex, isAscending);
+  }, [sortColumnIndex, isAscending]);
+
   const handleSort = (index) => {
-    handleSorting(index);
-    setIsAscending(!isAscending);
+    if (sortColumnIndex === index) {
+      setIsAscending(!isAscending);
+    } else {
+      setIsAscending(true);
+      setSortColumnIndex(index);
+    }
   };
 
   return (
@@ -150,15 +159,17 @@ export default function TableBuilder({
                 style={{ cursor: "pointer" }}
               >
                 {header}
-                {isAscending ? (
-                  <IconContainer>
-                    <FaArrowUpShortWide /> 
-                  </IconContainer>
-                ) : (
-                  <IconContainer>
-                    <FaArrowDownWideShort /> 
-                  </IconContainer>
-                )}
+                <IconContainer>
+                  {sortColumnIndex === index ? (
+                    isAscending ? (
+                      <FaArrowUpShortWide />
+                    ) : (
+                      <FaArrowDownWideShort />
+                    )
+                  ) : (
+                    <FaArrowDownWideShort /> // Default sorting icon
+                  )}
+                </IconContainer>
               </TableHeaderCell>
             ))}
           </TableHeader>
