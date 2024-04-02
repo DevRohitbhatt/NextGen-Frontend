@@ -214,56 +214,50 @@ export default function PrepChartTemplate() {
     }),
   }));
 
-  // const DropToday = (inventoryItemID) => {
-  //   const isDuplicate = todayItemRef.current.some(
-  //     (item) => item.inventoryItemID === inventoryItemID
-  //   );
-  //   if (!isDuplicate) {
-  //     const DropToDayItem = ItemList.filter(
-  //       (Items) =>
-  //         inventoryItemID === Items.inventoryItemID &&
-  //         todayItem.inventoryItemID != inventoryItemID
-  //     );
-  //     setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
-  //   }
-  // };
   const DropToday = (inventoryItemID) => {
     const isDuplicate = todayItemRef.current.some(
       (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
-      const DropToDayItem = ItemList.find(
-        (item) => item.inventoryItemID === inventoryItemID
+      const DropToDayItem = ItemList.filter(
+        (Items) =>
+          inventoryItemID === Items.inventoryItemID &&
+          todayItem.inventoryItemID != inventoryItemID
       );
-      if (DropToDayItem) {
-        if (draggingPos.current.index !== -1) {
-          setTodayItem((todayItem) => {
-            const newTodayItem = [...todayItem];
-            newTodayItem.splice(draggingPos.current.index, 0, DropToDayItem);
-            return newTodayItem;
-          });
-        }
-      }
+      setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
     }
   };
+  // const DropToday = (inventoryItemID) => {
+  //   const isDuplicate = todayItemRef.current.some(
+  //     (item) => item.inventoryItemID === inventoryItemID
+  //   );
+  //   if (!isDuplicate) {
+  //     const DropToDayItem = ItemList.find(
+  //       (item) => item.inventoryItemID === inventoryItemID
+  //     );
+  //     if (DropToDayItem) {
+  //       if (draggingPos.current.index !== -1) {
+  //         setTodayItem((todayItem) => {
+  //           const newTodayItem = [...todayItem];
+  //           newTodayItem.splice(draggingPos.current.index, 0, DropToDayItem);
+  //           return newTodayItem;
+  //         });
+  //       }
+  //     }
+  //   }
+  // };
 
+
+  
   const DropTomorrow = (inventoryItemID) => {
     const isDuplicate = TomorrowItemRef.current.some(
       (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
-      const DropTomorrowItem = ItemList.find(
-        (item) => item.inventoryItemID === inventoryItemID
+      const DropTomorrowItem = ItemList.filter(
+        (Items) => inventoryItemID === Items.inventoryItemID
       );
-      if (DropTomorrowItem) {
-        if (draggingPos.current.index !== -1) {
-          setTomorrowItem((TomorrowItem) => {
-            const newTomorrowItem = [...TomorrowItem];
-            newTomorrowItem.splice(draggingPos.current.index, 0, DropTomorrowItem);
-            return newTomorrowItem;
-          });
-        }
-      }
+      setTomorrowItem((TomorrowItem) => [...TomorrowItem, DropTomorrowItem[0]]);
     }
   };
 
@@ -272,18 +266,10 @@ export default function PrepChartTemplate() {
       (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
-      const DropNextDayItem = ItemList.find(
-        (item) => item.inventoryItemID === inventoryItemID
+      const DropNextDayItem = ItemList.filter(
+        (Items) => inventoryItemID === Items.inventoryItemID
       );
-      if (DropNextDayItem) {
-        if (draggingPos.current.index !== -1) {
-          setNextDayItem((NextDayItem) => {
-            const newNextDayItem = [...NextDayItem];
-            newNextDayItem.splice(draggingPos.current.index+1, 0, DropNextDayItem);
-            return newNextDayItem;
-          });
-        }
-      }
+      setNextDayItem((NextDayItem) => [...NextDayItem, DropNextDayItem[0]]);
     }
   };
 
@@ -471,6 +457,7 @@ export default function PrepChartTemplate() {
                   className={"Tblleft"}
                   scrollable={true}
                   handleSorting={handleSorting}
+                  isSorting={true}
                 />
               </Styled.TableLeft>
             </Styled.InventoryItemsContainer>
@@ -479,7 +466,7 @@ export default function PrepChartTemplate() {
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>Today</Styled.TableHeaderTop>
                 <Styled.Table>
-                  <div className={`drop-board`} ref={dropToday}>
+                  <div className={`drop-board`} ref={dropToday}   style={{ border: isOverToday ? "1px solid red" : "" }}>
                     <Styled.TableHeaderRight>
                       <Styled.TableHeaderCell>
                         Inventory ID
@@ -523,7 +510,9 @@ export default function PrepChartTemplate() {
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>Tomorrow</Styled.TableHeaderTop>
                 <Styled.Table>
-                  <div className="drop-board" ref={dropTomorrow}>
+                  <div className="drop-board" ref={dropTomorrow}
+                   style={{ border: isOverTomorrow ? "1px solid red" : "" }}
+                  >
                     <Styled.TableHeaderRight>
                       <Styled.TableHeaderCell>
                         Inventory ID{" "}
@@ -556,7 +545,7 @@ export default function PrepChartTemplate() {
                         <FaRegTrashAlt
                           className={`delete`}
                           onClick={() =>
-                            handleDelete(item.inventoryItemID, "today")
+                            handleDelete(item.inventoryItemID, "tomorrow")
                           }
                         />
                       </div>

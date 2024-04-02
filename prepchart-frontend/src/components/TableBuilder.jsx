@@ -122,6 +122,7 @@ export default function TableBuilder({
   className,
   scrollable = false,
   handleSorting,
+  isSorting = false,
 }) {
   const [sortColumnIndex, setSortColumnIndex] = useState(-1); // Initialize with -1 to indicate no column is sorted initially
   const [isAscending, setIsAscending] = useState(true);
@@ -155,21 +156,23 @@ export default function TableBuilder({
                 key={index}
                 columntype={dataTypes[index]}
                 $useTableRows={usetablerows}
-                onClick={() => handleSort(index)} // Call handleSort function on header click
+                onClick={isSorting && (() => handleSort(index))}  // Call handleSort function on header click
                 style={{ cursor: "pointer" }}
               >
                 {header}
-                <IconContainer>
-                  {sortColumnIndex === index ? (
-                    isAscending ? (
-                      <FaArrowUpShortWide />
+                {isSorting ? (
+                  <IconContainer>
+                    {sortColumnIndex === index ? (
+                      isAscending ? (
+                        <FaArrowUpShortWide />
+                      ) : (
+                        <FaArrowDownWideShort />
+                      )
                     ) : (
-                      <FaArrowDownWideShort />
-                    )
-                  ) : (
-                    <FaArrowDownWideShort /> // Default sorting icon
-                  )}
-                </IconContainer>
+                      <FaArrowDownWideShort /> // Default sorting icon
+                    )}
+                  </IconContainer>
+                ) : null}
               </TableHeaderCell>
             ))}
           </TableHeader>
@@ -232,4 +235,5 @@ TableBuilder.propTypes = {
   isDrag: PropTypes.bool,
   usetablerows: PropTypes.bool,
   className: PropTypes.string,
+  isSorting: PropTypes.bool,
 };
