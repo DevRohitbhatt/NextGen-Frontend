@@ -19,7 +19,7 @@ export const InventoryItemsContainer = styled.div`
 `;
 
 export const PageTitle = styled.div`
-  font-size: 2.75rem;
+  font-size: ${(props) => props.theme.fontSizes.large};
   line-height: 1.1;
   margin: 15px 0 40px 0;
   text-align: left;
