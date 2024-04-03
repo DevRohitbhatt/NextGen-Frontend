@@ -12,6 +12,7 @@ import UnitModal from "../components/UnitModal.jsx";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 import ExportOptions from "../components/ExportOptions.jsx";
+import MinimizableContainer from "../components/MinimizableContainer.jsx";
 import { AreaAPI } from "../apis/AreaAPI.jsx";
 import { UnitAPI } from "../apis/UnitAPI.jsx";
 
@@ -355,212 +356,215 @@ export default function PrepChartTemplate() {
 
               <Styled.TableRight>
                 <Styled.RightTblMarg>
-                  <Styled.TableHeaderTop>Today</Styled.TableHeaderTop>
-                  <Styled.Table>
-                    <div
-                      className="drop-board"
-                      ref={dropToday}
-                      style={{ border: isOverToday ? "1px solid red" : "" }}
-                    >
-                      <Styled.TableHeaderRight>
-                        <Styled.TableHeaderCell
-                          onClick={() =>
-                            handleSorting(
-                              "InventoryID",
-                              setTodayItem,
-                              todayItem,
-                              sortOrder,
-                              setSortOrder
-                            )
-                          }
-                        >
-                          Inventory ID{" "}
-                          {sortOrder === "asc" ? (
-                            <FaArrowDownWideShort className="asc" />
-                          ) : (
-                            <FaArrowUpShortWide className="desc" />
-                          )}
-                        </Styled.TableHeaderCell>
-                        <Styled.TableHeaderCell
-                          onClick={() =>
-                            handleSorting(
-                              "description",
-                              setTodayItem,
-                              todayItem,
-                              sortOrder,
-                              setSortOrder
-                            )
-                          }
-                        >
-                          description{" "}
-                          {sortOrder === "asc" ? (
-                            <FaArrowDownWideShort className="asc" />
-                          ) : (
-                            <FaArrowUpShortWide className="desc" />
-                          )}
-                        </Styled.TableHeaderCell>
-                      </Styled.TableHeaderRight>
-                      {todayItem.length > 0 ? "" : placeholder}
-              
-                      {todayItem.map((item) => (
-                        <div key={item.inventoryItemID}> 
-                          <InventoryItem
-                            key={item.inventoryItemID}
-                            inventoryItemID={item.inventoryItemID}
-                            description={item.description.trim()}
-                            moveItem={() =>
-                              handleReorder(todayItem, setTodayItem)
-                            }
-                            columnIndex={item.inventoryItemID}
-                          />
-                          <FaRegTrashAlt
-                            className="delete"
+                  <MinimizableContainer title="Today">
+                    <Styled.Table>
+                      <div
+                        className="drop-board"
+                        ref={dropToday}
+                        style={{ border: isOverToday ? "1px solid red" : "" }}
+                      >
+                        <Styled.TableHeaderRight>
+                          <Styled.TableHeaderCell
                             onClick={() =>
-                              handleDelete(item.inventoryItemID, "today")
+                              handleSorting(
+                                "InventoryID",
+                                setTodayItem,
+                                todayItem,
+                                sortOrder,
+                                setSortOrder
+                              )
                             }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Styled.Table>
+                          >
+                            Inventory ID{" "}
+                            {sortOrder === "asc" ? (
+                              <FaArrowDownWideShort className="asc" />
+                            ) : (
+                              <FaArrowUpShortWide className="desc" />
+                            )}
+                          </Styled.TableHeaderCell>
+                          <Styled.TableHeaderCell
+                            onClick={() =>
+                              handleSorting(
+                                "description",
+                                setTodayItem,
+                                todayItem,
+                                sortOrder,
+                                setSortOrder
+                              )
+                            }
+                          >
+                            description{" "}
+                            {sortOrder === "asc" ? (
+                              <FaArrowDownWideShort className="asc" />
+                            ) : (
+                              <FaArrowUpShortWide className="desc" />
+                            )}
+                          </Styled.TableHeaderCell>
+                        </Styled.TableHeaderRight>
+                        {todayItem.length > 0 ? "" : placeholder}
+                
+                        {todayItem.map((item) => (
+                          <div key={item.inventoryItemID}> 
+                            <InventoryItem
+                              key={item.inventoryItemID}
+                              inventoryItemID={item.inventoryItemID}
+                              description={item.description.trim()}
+                              moveItem={() =>
+                                handleReorder(todayItem, setTodayItem)
+                              }
+                              columnIndex={item.inventoryItemID}
+                            />
+                            <FaRegTrashAlt
+                              className="delete"
+                              onClick={() =>
+                                handleDelete(item.inventoryItemID, "today")
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </Styled.Table>
+                  </MinimizableContainer>
                 </Styled.RightTblMarg>
 
                 <Styled.RightTblMarg>
-                  <Styled.TableHeaderTop>Tomorrow</Styled.TableHeaderTop>
-                  <Styled.Table>
-                    <div
-                      className="drop-board"
-                      ref={dropTomorrow}
-                      style={{ border: isOverTomorrow ? "1px solid red" : "" }}
-                    >
-                      <Styled.TableHeaderRight>
-                        <Styled.TableHeaderCell
-                          onClick={() =>
-                            handleSorting(
-                              "InventoryID",
-                              setTomorrowItem,
-                              TomorrowItem,
-                              sortOrder,
-                              setSortOrder
-                            )
-                          }
-                        >
-                          Inventory ID{" "}
-                          {sortOrder === "asc" ? (
-                            <FaArrowDownWideShort className="asc" />
-                          ) : (
-                            <FaArrowUpShortWide className="desc" />
-                          )}
-                        </Styled.TableHeaderCell>
-                        <Styled.TableHeaderCell
-                          onClick={() =>
-                            handleSorting(
-                              "description",
-                              setTomorrowItem,
-                              TomorrowItem,
-                              sortOrder,
-                              setSortOrder
-                            )
-                          }
-                        >
-                          description{" "}
-                          {sortOrder === "asc" ? (
-                            <FaArrowDownWideShort className="asc" />
-                          ) : (
-                            <FaArrowUpShortWide className="desc" />
-                          )}
-                        </Styled.TableHeaderCell>
-                      </Styled.TableHeaderRight>
-                      {TomorrowItem.length > 0 ? "" : placeholder}
-                      {TomorrowItem.map((item) => (
-                        <div key={item.inventoryItemID}>
-                          <InventoryItem
-                            key={item.inventoryItemID}
-                            inventoryItemID={item.inventoryItemID}
-                            description={item.description.trim()}
-                            moveItem={handleReorder(
-                              TomorrowItem,
-                              setTomorrowItem
-                            )}
-                            columnIndex={item.inventoryItemID}
-                          />
-                          <FaRegTrashAlt
-                            className="delete"
+                  <MinimizableContainer title="Tomorrow">
+                    <Styled.Table>
+                      <div
+                        className="drop-board"
+                        ref={dropTomorrow}
+                        style={{ border: isOverTomorrow ? "1px solid red" : "" }}
+                      >
+                        <Styled.TableHeaderRight>
+                          <Styled.TableHeaderCell
                             onClick={() =>
-                              handleDelete(item.inventoryItemID, "tomorrow")
+                              handleSorting(
+                                "InventoryID",
+                                setTomorrowItem,
+                                TomorrowItem,
+                                sortOrder,
+                                setSortOrder
+                              )
                             }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Styled.Table>
+                          >
+                            Inventory ID{" "}
+                            {sortOrder === "asc" ? (
+                              <FaArrowDownWideShort className="asc" />
+                            ) : (
+                              <FaArrowUpShortWide className="desc" />
+                            )}
+                          </Styled.TableHeaderCell>
+                          <Styled.TableHeaderCell
+                            onClick={() =>
+                              handleSorting(
+                                "description",
+                                setTomorrowItem,
+                                TomorrowItem,
+                                sortOrder,
+                                setSortOrder
+                              )
+                            }
+                          >
+                            description{" "}
+                            {sortOrder === "asc" ? (
+                              <FaArrowDownWideShort className="asc" />
+                            ) : (
+                              <FaArrowUpShortWide className="desc" />
+                            )}
+                          </Styled.TableHeaderCell>
+                        </Styled.TableHeaderRight>
+                        {TomorrowItem.length > 0 ? "" : placeholder}
+                        {TomorrowItem.map((item) => (
+                          <div key={item.inventoryItemID}>
+                            <InventoryItem
+                              key={item.inventoryItemID}
+                              inventoryItemID={item.inventoryItemID}
+                              description={item.description.trim()}
+                              moveItem={handleReorder(
+                                TomorrowItem,
+                                setTomorrowItem
+                              )}
+                              columnIndex={item.inventoryItemID}
+                            />
+                            <FaRegTrashAlt
+                              className="delete"
+                              onClick={() =>
+                                handleDelete(item.inventoryItemID, "tomorrow")
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </Styled.Table>
+                  </MinimizableContainer>
                 </Styled.RightTblMarg>
                 <Styled.RightTblMarg>
-                  <Styled.TableHeaderTop>Next Day</Styled.TableHeaderTop>
-                  <Styled.Table>
-                    <div
-                      className="drop-board"
-                      ref={dropNextDay}
-                      style={{ border: isOverNextDay ? "1px solid red" : "" }}
-                    >
-                      <Styled.TableHeaderRight>
-                        <Styled.TableHeaderCell
-                          onClick={() =>
-                            handleSorting(
-                              "InventoryID",
-                              setNextDayItem,
-                              NextDayItem,
-                              sortOrder,
-                              setSortOrder
-                            )
-                          }
-                        >
-                          Inventory ID{" "}
-                          {sortOrder === "asc" ? (
-                            <FaArrowDownWideShort className="asc" />
-                          ) : (
-                            <FaArrowUpShortWide className="desc" />
-                          )}
-                        </Styled.TableHeaderCell>
-                        <Styled.TableHeaderCell
-                          onClick={() =>
-                            handleSorting(
-                              "description",
-                              setNextDayItem,
-                              NextDayItem,
-                              sortOrder,
-                              setSortOrder
-                            )
-                          }
-                        >
-                          description{" "}
-                          {sortOrder === "asc" ? (
-                            <FaArrowDownWideShort className="asc" />
-                          ) : (
-                            <FaArrowUpShortWide className="desc" />
-                          )}
-                        </Styled.TableHeaderCell>
-                      </Styled.TableHeaderRight>
-                      {NextDayItem.length > 0 ? "" : placeholder}
-                      {NextDayItem.map((item) => (
-                        <div key={item.inventoryItemID}>
-                          <InventoryItem
-                            key={item.inventoryItemID}
-                            inventoryItemID={item.inventoryItemID}
-                            description={item.description}
-                            moveItem={handleReorder(NextDayItem, setNextDayItem)}
-                            columnIndex={item.inventoryItemID}
-                          />
-                          <FaRegTrashAlt
-                            className="delete"
+                  <MinimizableContainer title="Next Day">
+                    <Styled.Table>
+                      <div
+                        className="drop-board"
+                        ref={dropNextDay}
+                        style={{ border: isOverNextDay ? "1px solid red" : "" }}
+                      >
+                        <Styled.TableHeaderRight>
+                          <Styled.TableHeaderCell
                             onClick={() =>
-                              handleDelete(item.inventoryItemID, "nextDay")
+                              handleSorting(
+                                "InventoryID",
+                                setNextDayItem,
+                                NextDayItem,
+                                sortOrder,
+                                setSortOrder
+                              )
                             }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Styled.Table>
+                          >
+                            Inventory ID{" "}
+                            {sortOrder === "asc" ? (
+                              <FaArrowDownWideShort className="asc" />
+                            ) : (
+                              <FaArrowUpShortWide className="desc" />
+                            )}
+                          </Styled.TableHeaderCell>
+                          <Styled.TableHeaderCell
+                            onClick={() =>
+                              handleSorting(
+                                "description",
+                                setNextDayItem,
+                                NextDayItem,
+                                sortOrder,
+                                setSortOrder
+                              )
+                            }
+                          >
+                            description{" "}
+                            {sortOrder === "asc" ? (
+                              <FaArrowDownWideShort className="asc" />
+                            ) : (
+                              <FaArrowUpShortWide className="desc" />
+                            )}
+                          </Styled.TableHeaderCell>
+                        </Styled.TableHeaderRight>
+                        {NextDayItem.length > 0 ? "" : placeholder}
+                        {NextDayItem.map((item) => (
+                          <div key={item.inventoryItemID}>
+                            <InventoryItem
+                              key={item.inventoryItemID}
+                              inventoryItemID={item.inventoryItemID}
+                              description={item.description}
+                              moveItem={handleReorder(NextDayItem, setNextDayItem)}
+                              columnIndex={item.inventoryItemID}
+                            />
+                            <FaRegTrashAlt
+                              className="delete"
+                              onClick={() =>
+                                handleDelete(item.inventoryItemID, "nextDay")
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </Styled.Table>
+                  </MinimizableContainer>
                 </Styled.RightTblMarg>
               </Styled.TableRight>
 
