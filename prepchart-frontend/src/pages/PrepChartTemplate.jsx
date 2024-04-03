@@ -57,6 +57,8 @@ export default function PrepChartTemplate() {
 
   const handleDragEnter = (index, section) => {
     // Check if the drag enters a different position
+    console.log("Index",index);
+    console.log("section",section);
     if (
       index !== draggingPos.current.index ||
       section !== draggingPos.current.section
@@ -190,6 +192,7 @@ export default function PrepChartTemplate() {
     );
     setFilteredItem(filtered);
   };
+
   const [{ isOverToday }, dropToday] = useDrop(() => ({
     accept: "content",
     drop: (item) => DropToday(item.inventoryItemID),
@@ -214,50 +217,99 @@ export default function PrepChartTemplate() {
     }),
   }));
 
-  const DropToday = (inventoryItemID) => {
-    const isDuplicate = todayItemRef.current.some(
-      (item) => item.inventoryItemID === inventoryItemID
-    );
-    if (!isDuplicate) {
-      const DropToDayItem = ItemList.filter(
-        (Items) =>
-          inventoryItemID === Items.inventoryItemID &&
-          todayItem.inventoryItemID != inventoryItemID
-      );
-      setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
-    }
-  };
   // const DropToday = (inventoryItemID) => {
   //   const isDuplicate = todayItemRef.current.some(
   //     (item) => item.inventoryItemID === inventoryItemID
   //   );
   //   if (!isDuplicate) {
-  //     const DropToDayItem = ItemList.find(
-  //       (item) => item.inventoryItemID === inventoryItemID
+  //     const DropToDayItem = ItemList.filter(
+  //       (Items) =>
+  //         inventoryItemID === Items.inventoryItemID &&
+  //         todayItem.inventoryItemID != inventoryItemID
   //     );
-  //     if (DropToDayItem) {
-  //       if (draggingPos.current.index !== -1) {
-  //         setTodayItem((todayItem) => {
-  //           const newTodayItem = [...todayItem];
-  //           newTodayItem.splice(draggingPos.current.index, 0, DropToDayItem);
-  //           return newTodayItem;
-  //         });
-  //       }
-  //     }
+  //     setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
+  //   }
+  // };
+  
+  // const DropTomorrow = (inventoryItemID) => {
+  //   const isDuplicate = TomorrowItemRef.current.some(
+  //     (item) => item.inventoryItemID === inventoryItemID
+  //   );
+  //   if (!isDuplicate) {
+  //     const DropTomorrowItem = ItemList.filter(
+  //       (Items) =>
+  //         inventoryItemID === Items.inventoryItemID &&
+  //         TomorrowItem.inventoryItemID != inventoryItemID
+  //     );
+  //     setTomorrowItem((TomorrowItem) => [...TomorrowItem, DropTomorrowItem[0]]);
   //   }
   // };
 
+  // const DropNextDay = (inventoryItemID) => {
+  //   const isDuplicate = NextDayItemmRef.current.some(
+  //     (item) =>
+  //       item.inventoryItemID === inventoryItemID &&
+  //       NextDayItem.inventoryItemID != inventoryItemID
+  //   );
+  //   if (!isDuplicate) {
+  //     const DropNextDayItem = ItemList.filter(
+  //       (Items) => inventoryItemID === Items.inventoryItemID
+  //     );
+  //     setNextDayItem((NextDayItem) => [...NextDayItem, DropNextDayItem[0]]);
+  //   }
+  // };
 
-  
+  const DropToday = (inventoryItemID) => {
+    const isDuplicate = todayItemRef.current.some(
+      (item) => item.inventoryItemID === inventoryItemID
+    );
+    if (!isDuplicate) {
+      const DropToDayItem = ItemList.find(
+        (item) => item.inventoryItemID === inventoryItemID
+      );
+      if (DropToDayItem) {
+        if (draggingPos.current.index !== -1) {
+          setTodayItem((todayItem) => {
+            const newTodayItem = [...todayItem];
+            newTodayItem.splice(draggingPos.current.index, 0, DropToDayItem);
+            return newTodayItem;
+          });
+        }
+        else
+        {
+          const DropToDayItem = ItemList.filter(
+            (Items) => inventoryItemID === Items.inventoryItemID
+          );
+          setTodayItem((TodayItem) => [...TodayItem, DropToDayItem[0]]);
+        }
+      }
+    }
+  };
+
   const DropTomorrow = (inventoryItemID) => {
     const isDuplicate = TomorrowItemRef.current.some(
       (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
-      const DropTomorrowItem = ItemList.filter(
-        (Items) => inventoryItemID === Items.inventoryItemID
+      const DropTomorrowItem = ItemList.find(
+        (item) => item.inventoryItemID === inventoryItemID
       );
-      setTomorrowItem((TomorrowItem) => [...TomorrowItem, DropTomorrowItem[0]]);
+      if (DropTomorrowItem) {
+        if (draggingPos.current.index !== -1) {
+          setTomorrowItem((TomorrowItem) => {
+            const newTomorrowItem = [...TomorrowItem];
+            newTomorrowItem.splice(draggingPos.current.index, 0, DropTomorrowItem);
+            return newTomorrowItem;
+          });
+        }
+        else
+        {
+          const DropTomorrowItem = ItemList.filter(
+            (Items) => inventoryItemID === Items.inventoryItemID
+          );
+          setTomorrowItem((TomorrowItem) => [...TomorrowItem, DropTomorrowItem[0]]);
+        }
+      }
     }
   };
 
@@ -266,12 +318,29 @@ export default function PrepChartTemplate() {
       (item) => item.inventoryItemID === inventoryItemID
     );
     if (!isDuplicate) {
-      const DropNextDayItem = ItemList.filter(
-        (Items) => inventoryItemID === Items.inventoryItemID
+      const DropNextDayItem = ItemList.find(
+        (item) => item.inventoryItemID === inventoryItemID
       );
-      setNextDayItem((NextDayItem) => [...NextDayItem, DropNextDayItem[0]]);
+      if (DropNextDayItem) {
+        if (draggingPos.current.index !== -1) {
+          setNextDayItem((NextDayItem) => {
+            const newNextDayItem = [...NextDayItem];
+            newNextDayItem.splice(draggingPos.current.index, 0, DropNextDayItem);
+            return newNextDayItem;
+          });
+        }
+        else
+        {
+          const DropNextDayItem = ItemList.filter(
+            (Items) => inventoryItemID === Items.inventoryItemID
+          );
+          setNextDayItem((NextDayItem) => [...NextDayItem, DropNextDayItem[0]]);
+        }
+      }
     }
   };
+
+
 
   const handleUnitSelectorClick = () => {
     setShowModal(true); // Open the modal when UnitSelector is clicked
@@ -466,7 +535,11 @@ export default function PrepChartTemplate() {
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>Today</Styled.TableHeaderTop>
                 <Styled.Table>
-                  <div className={`drop-board`} ref={dropToday}   style={{ border: isOverToday ? "1px solid red" : "" }}>
+                  <div
+                    className={`drop-board`}
+                    ref={dropToday}
+                    style={{ border: isOverToday ? "1px solid red" : "" }}
+                  >
                     <Styled.TableHeaderRight>
                       <Styled.TableHeaderCell>
                         Inventory ID
@@ -486,7 +559,7 @@ export default function PrepChartTemplate() {
                         onDragOver={(e) => e.preventDefault()}
                         className={
                           index === draggingPos.current.index
-                            ? `dragging ${isOverToday ? "drop-highlight" : ""}`
+                            ? `dragging ${isOverToday ? "" : ""}`
                             : ""
                         }
                       >
@@ -510,8 +583,10 @@ export default function PrepChartTemplate() {
               <Styled.RightTblMarg>
                 <Styled.TableHeaderTop>Tomorrow</Styled.TableHeaderTop>
                 <Styled.Table>
-                  <div className="drop-board" ref={dropTomorrow}
-                   style={{ border: isOverTomorrow ? "1px solid red" : "" }}
+                  <div
+                    className="drop-board"
+                    ref={dropTomorrow}
+                    style={{ border: isOverTomorrow ? "1px solid red" : "" }}
                   >
                     <Styled.TableHeaderRight>
                       <Styled.TableHeaderCell>
@@ -531,9 +606,7 @@ export default function PrepChartTemplate() {
                         onDragOver={(e) => e.preventDefault()}
                         className={
                           index === draggingPos.current.index
-                            ? `dragging ${
-                                isOverTomorrow ? "drop-highlight" : ""
-                              }`
+                            ? `dragging ${isOverTomorrow ? "" : ""}`
                             : ""
                         }
                       >
@@ -579,9 +652,7 @@ export default function PrepChartTemplate() {
                         onDragOver={(e) => e.preventDefault()}
                         className={
                           index === draggingPos.current.index
-                            ? `dragging ${
-                                isOverNextDay ? "drop-highlight" : ""
-                              }`
+                            ? `dragging ${isOverNextDay ? "" : ""}`
                             : ""
                         }
                       >
