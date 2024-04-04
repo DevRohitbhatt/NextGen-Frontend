@@ -127,10 +127,12 @@ export default function TableBuilder({
   const [sortColumnIndex, setSortColumnIndex] = useState(-1); // Initialize with -1 to indicate no column is sorted initially
   const [isAscending, setIsAscending] = useState(true);
 
+if (isSorting) {
   useEffect(() => {
     handleSorting(sortColumnIndex, isAscending);
   }, [sortColumnIndex, isAscending]);
-
+}
+  
   const handleSort = (index) => {
     if (sortColumnIndex === index) {
       setIsAscending(!isAscending);
@@ -235,5 +237,6 @@ TableBuilder.propTypes = {
   isDrag: PropTypes.bool,
   usetablerows: PropTypes.bool,
   className: PropTypes.string,
+  handleSorting:PropTypes.func,
   isSorting: PropTypes.bool,
 };
