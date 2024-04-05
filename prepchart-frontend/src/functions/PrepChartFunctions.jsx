@@ -47,6 +47,7 @@ export function onInputCellChange(
       }),
     });
   } else if (columnName === "Safety Factor") {
+    if (e.target.value === "") e.target.value = 0;
     const newSafetyFactor = parseFloat(e.target.value);
     setTable({
       ...tableData,
@@ -208,6 +209,7 @@ export function handleDefaultSafetyFactorChange(
       if (index === row) {
         return item.map((cell) => {
           if (cell.columnName === "Default Safety Factor") {
+            if (e.target.value === "") e.target.value = 0;
             cell.value = e.target.value;
             newPrepChart.defaultSafetyFactor = parseFloat(e.target.value);
           }

@@ -79,7 +79,9 @@ const PercentageCell = ({
   }
 
   const handleInputChange = (e) => {
-    setPercentage(e.target.value);
+    // Allow only numbers 
+    const numericValue = e.target.value.replace(/[^0-9.]/g, ""); 
+    setPercentage(numericValue);
   };
 
   const updateInputWidth = () => {
