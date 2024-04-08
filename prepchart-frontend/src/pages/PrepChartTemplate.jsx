@@ -10,8 +10,8 @@ import SearchBar from "../components/SearchBar.jsx";
 import UnitModal from "../components/UnitModal.jsx";
 import { FaRegTrashAlt } from "react-icons/fa";
 import ExportOptions from "../components/ExportOptions.jsx";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
@@ -45,7 +45,6 @@ export default function PrepChartTemplate() {
   const dragOverPos = useRef(null);
   const [isSave, setIsSave] = useState(false);
   const [saveUnitId, setSaveUnitId] = useState();
-  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     todayItemRef.current = todayItem;
@@ -53,30 +52,27 @@ export default function PrepChartTemplate() {
     NextDayItemmRef.current = NextDayItem;
   }, [todayItem, TomorrowItem, NextDayItem]);
 
-  const draggingPos = useRef({ index: -1, section: "" });
+  const draggingPos = useRef();
 
-  const handleDrop=(index, section)=> {
+  const handleDrop = (index, section) => {
     handleDragEnter(index, section);
-  }
+  };
 
-  const handleDragStart = (index, section) => {
-    draggingPos.current = { index, section };
+  const handleDragStart = (index, section, isDragStart) => {
+    draggingPos.current = { index, section, isDragStart };
   };
 
   const handleDragEnter = (index, section) => {
     if (
-      index !== draggingPos.current.index ||
-      (section !== draggingPos.current.section &&
-        draggingPos.current.section != "")
-    ) {
-      const newItems = [...getSectionItems(draggingPos.current.section)];
+      (index !== draggingPos.current?.index || section !== draggingPos.current?.section) &&  draggingPos.current?.isDragStart === true ) {
+      const newItems = [...getSectionItems(draggingPos.current?.section)];
 
-      const draggedItem = newItems.splice(draggingPos.current.index, 1)[0];
+      const draggedItem = newItems.splice(draggingPos.current?.index, 1)[0];
 
       newItems.splice(index, 0, draggedItem);
 
       // Update the state based on the section
-      switch (draggingPos.current.section) {
+      switch (draggingPos.current?.section) {
         case "today":
           setTodayItem(newItems);
           break;
@@ -89,9 +85,8 @@ export default function PrepChartTemplate() {
         default:
           break;
       }
-      // Update dragging position
-      draggingPos.current = { index, section };
     }
+    draggingPos.current = { index, section };
   };
 
   const getSectionItems = (section) => {
@@ -112,7 +107,6 @@ export default function PrepChartTemplate() {
       let parameters = decodeURIComponent(
         window.location.search.replace("?data=", "")
       );
-      console.log(parameters);
       if (parameters) parameters = JSON.parse(parameters);
       parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
       parameters
@@ -144,7 +138,6 @@ export default function PrepChartTemplate() {
       });
     PrepChartTemplateAPI.getInventoryItems(companyID)
       .then((data) => {
-        console.log(data);
         buildPrepMasterTable(data);
         setIsUnitSelected(true);
       })
@@ -220,20 +213,6 @@ export default function PrepChartTemplate() {
     }),
   }));
 
-  // const DropToday = (inventoryItemID) => {
-  //   const isDuplicate = todayItemRef.current.some(
-  //     (item) => item.inventoryItemID === inventoryItemID
-  //   );
-  //   if (!isDuplicate) {
-  //     const DropToDayItem = ItemList.filter(
-  //       (Items) =>
-  //         inventoryItemID === Items.inventoryItemID &&
-  //         todayItem.inventoryItemID != inventoryItemID
-  //     );
-  //     setTodayItem((todayItem) => [...todayItem, DropToDayItem[0]]);
-  //   }
-  // };
-
   const DropToday = (inventoryItemID) => {
     const isDuplicate = todayItemRef.current.some(
       (item) => item.inventoryItemID === inventoryItemID
@@ -243,18 +222,14 @@ export default function PrepChartTemplate() {
         (item) => item.inventoryItemID === inventoryItemID
       );
       if (DropToDayItem) {
-        if (draggingPos.current.index !== -1) {
-          setTodayItem((todayItem) => {
-            const newTodayItem = [...todayItem];
-            newTodayItem.splice(draggingPos.current.index, 0, DropToDayItem);
-            return newTodayItem;
-          });
-        } else {
-          const DropToDayItem = ItemList.filter(
-            (Items) => inventoryItemID === Items.inventoryItemID
-          );
-          setTodayItem((TodayItem) => [...TodayItem, DropToDayItem[0]]);
-        }
+        setTodayItem((todayItem) => {
+          var TodayItems = [
+            ...todayItem.slice(0, draggingPos.current?.index),
+            DropToDayItem,
+            ...todayItem.slice(draggingPos.current?.index),
+          ];
+          return TodayItems=Array.from(new Set(TodayItems.map(JSON.stringify)), JSON.parse);
+        });
       }
     }
   };
@@ -268,25 +243,15 @@ export default function PrepChartTemplate() {
         (item) => item.inventoryItemID === inventoryItemID
       );
       if (DropTomorrowItem) {
-        if (draggingPos.current.index !== -1) {
-          setTomorrowItem((TomorrowItem) => {
-            const newTomorrowItem = [...TomorrowItem];
-            newTomorrowItem.splice(
-              draggingPos.current.index,
-              0,
-              DropTomorrowItem
-            );
-            return newTomorrowItem;
-          });
-        } else {
-          const DropTomorrowItem = ItemList.filter(
-            (Items) => inventoryItemID === Items.inventoryItemID
-          );
-          setTomorrowItem((TomorrowItem) => [
-            ...TomorrowItem,
-            DropTomorrowItem[0],
-          ]);
-        }
+        setTomorrowItem((TomorrowItem) => {
+          var TomorrowItems = [
+            ...TomorrowItem.slice(0, draggingPos.current?.index),
+            DropTomorrowItem,
+            ...TomorrowItem.slice(draggingPos.current?.index),
+          ];
+          console.log("Before",TomorrowItems)
+          return TomorrowItems=Array.from(new Set(TomorrowItems.map(JSON.stringify)), JSON.parse);
+        });
       }
     }
   };
@@ -300,22 +265,15 @@ export default function PrepChartTemplate() {
         (item) => item.inventoryItemID === inventoryItemID
       );
       if (DropNextDayItem) {
-        if (draggingPos.current.index !== -1) {
-          setNextDayItem((NextDayItem) => {
-            const newNextDayItem = [...NextDayItem];
-            newNextDayItem.splice(
-              draggingPos.current.index,
-              0,
-              DropNextDayItem
-            );
-            return newNextDayItem;
-          });
-        } else {
-          const DropNextDayItem = ItemList.filter(
-            (Items) => inventoryItemID === Items.inventoryItemID
-          );
-          setNextDayItem((NextDayItem) => [...NextDayItem, DropNextDayItem[0]]);
-        }
+        setNextDayItem((NextDayItem) => {
+          var NextDayItems = [
+            ...NextDayItem.slice(0, draggingPos.current?.index),
+            DropNextDayItem,
+            ...NextDayItem.slice(draggingPos.current?.index),
+          ];
+          return NextDayItems=Array.from(new Set(NextDayItems.map(JSON.stringify)), JSON.parse);
+        });
+       
       }
     }
   };
@@ -367,8 +325,6 @@ export default function PrepChartTemplate() {
   const handleSave = () => {
     setShowModal(true);
     setIsSave(true);
-
-    //const prepChartTemplate = constructPrepChartTemplate(selectedUnit);
   };
   const handleUnitSaveSelection = (unitName, unitID) => {
     const prepChartTemplate = constructPrepChartTemplate(unitID);
@@ -397,15 +353,13 @@ export default function PrepChartTemplate() {
       prepChartTemplate: prepChartTemplate,
     };
     const jsonData = JSON.stringify(json);
-    console.log(jsonData)
-    // return PrepChartTemplateAPI.save(json);
     PrepChartTemplateAPI.save(jsonData)
-    .then(() => {
-      toast.success("Data saved successfully!");
-    })
-    .catch((error) => {
-      toast.error("Error saving data");
-    });
+      .then(() => {
+        toast.success("Data saved successfully!");
+      })
+      .catch((error) => {
+        toast.error("Error saving data");
+      });
   }
 
   const handleSorting = (columnIndex) => {
@@ -456,7 +410,7 @@ export default function PrepChartTemplate() {
     <Styled.PageContainer>
       <Styled.PageTitle>Prep Chart Template</Styled.PageTitle>
       <Styled.OptionsRow>
-      <ToastContainer />
+        <ToastContainer />
         <Styled.DateAndUnitContainer>
           <UnitSelector
             onClick={handleUnitSelectorClick}
@@ -478,7 +432,6 @@ export default function PrepChartTemplate() {
           />
         </Styled.DateAndUnitContainer>
         <Styled.SaveOptionsContainer>
-      
           <ExportOptions includeSave={true} handleSaveClick={handleSave} />
         </Styled.SaveOptionsContainer>
       </Styled.OptionsRow>
@@ -489,7 +442,7 @@ export default function PrepChartTemplate() {
           No unit selected, Please select a unit.
         </Styled.UnloadedMessage>
       ) : (
-        <div>
+        <>
           <div className="container">
             <Styled.InventoryItemsContainer>
               <Styled.InventoryItemsTitle>
@@ -516,7 +469,6 @@ export default function PrepChartTemplate() {
                   handleSorting={handleSorting}
                   isSorting={true}
                 />
-              
               </Styled.TableLeft>
             </Styled.InventoryItemsContainer>
 
@@ -543,19 +495,18 @@ export default function PrepChartTemplate() {
                       <div
                         key={item.inventoryItemID}
                         draggable
-                        onDragStart={() => handleDragStart(index, "today")}
-                        // onDragEnterCapture={() => handleDragEnter(index, "today")}
+                        onDragStart={() => handleDragStart(index, "today", true)}
                         onDrop={() => handleDrop(index, "today")}
                         onDragOver={(e) => e.preventDefault()}
                         className={
-                          index === draggingPos.current.index
+                          index === draggingPos.current?.index
                             ? `dragging ${isOverToday ? "" : ""}`
                             : ""
                         }
                       >
                         <InventoryItem
                           inventoryItemID={item.inventoryItemID}
-                          description={item.description.trim()}
+                          description={item.description?.trim()}
                           columnIndex={item.inventoryItemID}
                         />
                         <FaRegTrashAlt
@@ -591,12 +542,11 @@ export default function PrepChartTemplate() {
                       <div
                         key={item.inventoryItemID}
                         draggable
-                        onDragStart={() => handleDragStart(index, "tomorrow")}
-                        // onDragEnter={() => handleDragEnter(index, "tomorrow")}
+                        onDragStart={() => handleDragStart(index, "tomorrow",true)}
                         onDrop={() => handleDrop(index, "tomorrow")}
                         onDragOver={(e) => e.preventDefault()}
                         className={
-                          index === draggingPos.current.index
+                          index === draggingPos.current?.index
                             ? `dragging ${isOverTomorrow ? "" : ""}`
                             : ""
                         }
@@ -638,12 +588,11 @@ export default function PrepChartTemplate() {
                       <div
                         key={item.inventoryItemID}
                         draggable
-                        onDragStart={() => handleDragStart(index, "nextDay")}
-                        // onDragEnter={() => handleDragEnter(index, "nextDay")}
+                        onDragStart={() => handleDragStart(index, "nextDay",true)}
                         onDrop={() => handleDrop(index, "nextDay")}
                         onDragOver={(e) => e.preventDefault()}
                         className={
-                          index === draggingPos.current.index
+                          index === draggingPos.current?.index
                             ? `dragging ${isOverNextDay ? "" : ""}`
                             : ""
                         }
@@ -668,7 +617,7 @@ export default function PrepChartTemplate() {
               </Styled.RightTblMarg>
             </Styled.TableRight>
           </div>
-        </div>
+        </>
       )}
     </Styled.PageContainer>
   );
