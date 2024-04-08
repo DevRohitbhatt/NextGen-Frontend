@@ -150,7 +150,7 @@ const Span = styled.span`
   padding: 10px;
   min-height: 18px;
 `;
-const UnitContainer=styled.div`
+const UnitContainer = styled.div`
   border: 0.25px solid #808285;
   border-radius: 8px;
   margin: 10px 0px;
@@ -158,17 +158,32 @@ const UnitContainer=styled.div`
   height: 233px;
 `;
 
-const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
+const UnitModal = ({
+  show,
+  handleClose,
+  handleUnitSelection,
+  isSaveUnit = true,
+  handleUnitSaveSelection,
+}) => {
   const [unitsList, setUnitsList] = useState([]);
   const [filteredUnit, setFilteredUnit] = useState([]);
   const [selectedUnit, setSelecteUnit] = useState("");
   const [SelecteUnitName, setSelecteUnitName] = useState("");
   const [IsActive, setIsActive] = useState([]);
   const [unitList, setUnitList] = useState([]);
+  const [selectedUnits, setSelectedUnits] = useState([]);
 
   useEffect(() => {
     GetUnitList();
   }, []);
+
+  useEffect(() => {
+    // Select the default unit when the component mounts
+    if (filteredUnit.length > 0) {
+      setSelectedUnits([filteredUnit[7].UnitID]);
+      setSelecteUnitName(filteredUnit[7].Name);
+    }
+  }, [filteredUnit]);
 
   const UnitListItem = (UnitItem) => {
     setUnitsList({
@@ -181,9 +196,10 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
       .then((data) => {
         UnitListItem(data.Units);
         if (data.Units.length > 0) {
-          setSelecteUnit(data.Units[0].UnitID);
-          setSelecteUnitName(data.Units[0].Name);
-          setIsActive(data.Units[0].UnitID);
+          // setUnitList(data.Units);
+          setSelecteUnit(data.Units[7].UnitID);
+          setSelecteUnitName(data.Units[7].Name);
+          setIsActive(data.Units[7].UnitID);
         }
       })
       .catch((error) => {
@@ -192,14 +208,18 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
   };
 
   const SearchUnitItem = (keyword) => {
-    const filtered = unitsList.rows.filter(
-      (item) =>
-        (item.Name &&
-          item.Name.toLowerCase().includes(keyword.toLowerCase())) ||
-        (item.UnitID &&
-          item.UnitID.toString().toLowerCase().includes(keyword.toLowerCase()))
-    );
-    setFilteredUnit(filtered);
+    if (!isNaN(keyword) || keyword === "") {
+      const filtered = unitsList.rows.filter(
+        (item) =>
+          (item.Name &&
+            item.Name.toLowerCase().includes(keyword.toLowerCase())) ||
+          (item.UnitID &&
+            item.UnitID.toString()
+              .toLowerCase()
+              .includes(keyword.toLowerCase()))
+      );
+      setFilteredUnit(filtered);
+    }
   };
 
   const handleUnitSelectChange = (event) => {
@@ -216,15 +236,33 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
     //   .catch((error) => {
     //     console.error("Error fetching data from Unit list API:", error);
     //   });
-    const data = unitList.filter((item) => item.UnitID === parseInt(selectedUnitId, 10));
+    const data = unitList.filter(
+      (item) => item.UnitID === parseInt(selectedUnitId, 10)
+    );
     setUnitList(data);
   };
 
   const handleOkButtonClick = () => {
-    handleUnitSelection(SelecteUnitName, selectedUnit); 
+    handleUnitSelection(SelecteUnitName, selectedUnit);
+    handleClose();
+  };
+  const handleSaveButtonClick = () => {
+    // Pass necessary data to the parent function
+    handleUnitSaveSelection(SelecteUnitName, [...selectedUnits]);
     handleClose();
   };
 
+  const handleUnitItemClick = (unitID) => {
+    if (selectedUnits.includes(unitID)) {
+      setSelectedUnits(selectedUnits.filter((id) => id !== unitID));
+    } else {
+      setSelectedUnits([...selectedUnits, unitID]);
+    }
+  };
+  const handleCancelClick = () => {
+    setSelectedUnits([filteredUnit[7].UnitID]); // Reset selected units
+    handleClose();
+  };
   if (!show) {
     return null;
   }
@@ -234,7 +272,12 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
       <ModalOverlay>
         <ModalContent>
           <ModalHeader>
-            <h4>Select a Unit or Area</h4>
+            {isSaveUnit ? (
+              <h4>Select a Unit Save Template</h4>
+            ) : (
+              <h4>Select a Unit or Area</h4>
+            )}
+
             <CloseButton onClick={handleClose}>
               <FaTimes className="close" />
             </CloseButton>
@@ -252,18 +295,38 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
                 />
               </InputGroup>
               <UnitContainer className="unitList">
-                <ul value={selectedUnit} onClick={handleUnitSelectChange}>
-                  {filteredUnit.map((item, index) => (
-                    <li
-                      key={index}
-                      onClick={() => setIsActive(item.UnitID)}
-                      value={item.UnitID}
-                      className={IsActive === item.AreaID ? "active" : ""}
-                    >
-                      {item.Name}
-                    </li>
-                  ))}
-                </ul>
+                {isSaveUnit ? (
+                  <ul value={selectedUnit} onClick={handleUnitSelectChange}>
+                    {filteredUnit.map((item, index) => (
+                      <li
+                        key={index}
+                        onClick={() => {
+                          handleUnitItemClick(item.UnitID),
+                            setIsActive(item.UnitID);
+                        }}
+                        className={
+                          selectedUnits.includes(item.UnitID) ? "active" : ""
+                        }
+                        value={item.UnitID}
+                      >
+                        {item.Name}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <ul value={selectedUnit} onClick={handleUnitSelectChange}>
+                    {filteredUnit.map((item, index) => (
+                      <li
+                        key={index}
+                        onClick={() => setIsActive(item.UnitID)}
+                        value={item.UnitID}
+                        className={IsActive === item.UnitID ? "active" : ""}
+                      >
+                        {item.Name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </UnitContainer>
             </LeftUnitList>
             <RightUnitList>
@@ -271,8 +334,13 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
               <UnitContainer className="unitList">
                 <ul value={selectedUnit} onClick={handleUnitSelectChange}>
                   {unitList.map((item, index) => (
-                    <li key={index} value={item.UnitID}  onClick={() => setIsActive(item.UnitID)} className={IsActive === item.UnitID ? "active" : ""}>
-                      {item.UnitID}  {item.Name}
+                    <li
+                      key={index}
+                      value={item.UnitID}
+                      onClick={() => setIsActive(item.UnitID)}
+                      className={IsActive === item.UnitID ? "active" : ""}
+                    >
+                      {item.UnitID} {item.Name}
                     </li>
                   ))}
                 </ul>
@@ -282,8 +350,17 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
         </ModalBody>
 
         <ModalFooter>
-          <FooterButton onClick={handleOkButtonClick}>Ok</FooterButton>
-          <FooterButton onClick={handleClose}>Cancel</FooterButton>
+          {isSaveUnit ? (
+            <>
+              <FooterButton onClick={handleSaveButtonClick}>Save</FooterButton>
+              <FooterButton onClick={handleCancelClick}>Cancel</FooterButton>
+            </>
+          ) : (
+            <>
+              <FooterButton onClick={handleOkButtonClick}>Ok</FooterButton>
+              <FooterButton onClick={handleClose}>Cancel</FooterButton>
+            </>
+          )}
         </ModalFooter>
       </ModalOverlay>
     </ModalDialog>
@@ -293,7 +370,8 @@ const UnitModal = ({ show, handleClose,handleUnitSelection }) => {
 UnitModal.propTypes = {
   show: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  handleUnitSelection:PropTypes.func,
+  handleUnitSelection: PropTypes.func,
+  isSaveUnit: PropTypes.bool,
 };
 
 export default UnitModal;

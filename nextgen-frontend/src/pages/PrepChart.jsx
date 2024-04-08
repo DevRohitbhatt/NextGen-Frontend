@@ -29,7 +29,7 @@ const prepTableStructure = {
 };
 
 export default function PrepChart() {
-  const [companyID, setCompanyID] = useState();
+  const [companyID, setCompanyID] = useState(1021);
   const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -83,8 +83,8 @@ export default function PrepChart() {
       let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
       if (parameters)
         parameters = JSON.parse(parameters);
-      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
-      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
+      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID(1021);
+      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit(51);
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
         getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, new Date());
@@ -415,6 +415,7 @@ export default function PrepChart() {
               setShowModal(false);
             }}
             handleUnitSelection={handleUnitSelection}
+            isSaveUnit={false}
           />
 
           <CalendarModal
@@ -456,6 +457,7 @@ export default function PrepChart() {
                 width={forecastTable.width}
                 tableName={"Forecast"}
                 handleInputCellChange={handleTableCellChange}
+                isSorting={false}
               />
               <Table
                 columnHeaders={defaultSafetyFactorTable.columnHeaders}
@@ -466,6 +468,7 @@ export default function PrepChart() {
                 width={defaultSafetyFactorTable.width}
                 height={defaultSafetyFactorTable.height}
                 handleInputCellChange={handleTableCellChange}
+                isSorting={false}
               />
             </Styled.ForeCastAndSafetyFactor>
             <h2>Today - ${prepChart.forecastData.today}</h2>
@@ -477,6 +480,7 @@ export default function PrepChart() {
               tableName="Today"
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
+              isSorting={false}
             />
 
             <h2>Tomorrow - ${prepChart.forecastData.tomorrow}</h2>
@@ -488,6 +492,7 @@ export default function PrepChart() {
               tableName={"Tomorrow"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
+              isSorting={false}
             />
 
             <h2>Next Day - ${prepChart.forecastData.nextDay}</h2>
@@ -499,6 +504,7 @@ export default function PrepChart() {
               tableName={"NextDay"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
+              isSorting={false}
             />
           </>
         )

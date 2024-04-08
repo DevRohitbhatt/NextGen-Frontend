@@ -7,7 +7,7 @@ const api = axios.create({
   headers: {
     'Allow-Control-Allow-Origin': '*',
   },
-  baseURL: "https://192.168.192.244:8083/",
+  baseURL: "http://localhost:5295/",
 });
 
 const errorHandler = (error) => {

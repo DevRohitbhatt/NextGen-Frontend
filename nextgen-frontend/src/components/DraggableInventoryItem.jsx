@@ -19,12 +19,12 @@ export function InventoryItem({
   }
 
     return (
-        <>
-         <Styled.TableRow key={columnIndex} ref={drag}  >
+        <div ref={drag} >
+         <Styled.TableRow key={columnIndex}  >
             <Styled.TableCell> {inventoryItemID}</Styled.TableCell>
             <Styled.TableCell>{description}</Styled.TableCell>
          </Styled.TableRow>
-        </>
+        </div>
     )
 }
 InventoryItem.propTypes = {
