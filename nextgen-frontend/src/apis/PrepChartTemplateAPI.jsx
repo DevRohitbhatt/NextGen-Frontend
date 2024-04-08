@@ -16,7 +16,10 @@ export const PrepChartTemplateAPI = {
     const response = await api.request({
       method: "POST",
       url: `/api/prepcharttemplate/saveprepcharttemplate`,
-      data,
+      data: data,
+      headers: {
+        "Content-Type": "application/json",
+      },
       signal: cancel ? cancelApiObject[this.save.name].handleRequestCancellation().signal : undefined,
     });
 

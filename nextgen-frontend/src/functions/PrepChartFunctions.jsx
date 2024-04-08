@@ -47,6 +47,7 @@ export function onInputCellChange(
       }),
     });
   } else if (columnName === "Safety Factor") {
+    const newSafetyFactor = parseFloat(e.target.value);
     setTable({
       ...tableData,
       rows: tableData.rows.map((item, index) => {
@@ -54,15 +55,15 @@ export function onInputCellChange(
           let prepValue = 0, needed = 0, onHand = 0;
           item.forEach((cell) => {
             if (cell.columnName === "Safety Factor") {
-              cell.value = e.target.value;
+              cell.value = newSafetyFactor;
               newPrepChart[tableName][row]["safetyFactor"] = cell.value;
             } else if (cell.columnName === "Needed") {
-              prepChart[tableName][row].PrepUOM.map((option) => {
-                if (option.IsSelected) {
-                  return option.Value;
+              prepChart[tableName][row].prepUOM.map((option) => {
+                if (option.isSelected) {
+                  return option.value;
                 }
               });
-              needed = calculateNeededValue(tableName, prepChart, prepValue, prepChart[tableName][row].YieldType, e.target.value);
+              needed = calculateNeededValue(tableName, prepChart, prepValue, prepChart[tableName][row].yieldType, newSafetyFactor);
               cell.value = needed;
               newPrepChart[tableName][row]["needed"] = needed;
             } else if (cell.columnName === "On Hand") {
@@ -339,7 +340,7 @@ export const buildPrepTable = (
         isInput: true,
       },
       {
-        value: item.prepPullAmount,
+        value: item.prepPullAmt,
         cellType: "",
         columnName: "Prep/Pull Amount",
       },

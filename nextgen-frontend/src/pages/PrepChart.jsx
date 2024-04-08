@@ -32,7 +32,8 @@ export default function PrepChart() {
   const [companyID, setCompanyID] = useState(1021);
   const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [isUnitSelected, setIsUnitSelected] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("There was an error trying to load the Prep Chart, please try again later.");
   const [prepChartDates, setPrepChartDates] = useState({});
   const [forecastTable, setForecastTable] = useState({
     columnHeaders: [" ", "Forecasted Sales", "Date"],
@@ -87,10 +88,9 @@ export default function PrepChart() {
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
         getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, new Date());
-        setIsUnitSelected(true);
       } else {
-        console.log("No unit selected. Please select a unit.");
-        setIsUnitSelected(false);
+        setErrorMessage("No Unit Selected, Please select a unit.");
+        setIsError(true);
         setIsLoading(false);
       }
     }
@@ -101,7 +101,14 @@ export default function PrepChart() {
 
   const getPrepChart = (companyID, unitID, date) => {
     setIsLoading(true);
+    setIsError(false);
     PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((data) => {
+      if (data === "No Template found for the selected company and unit.") {
+        setErrorMessage("No Template found for the selected unit. Please create a template for this unit.");
+        setIsError(true);
+        setIsLoading(false);
+        return;
+      }
       setPrepChart(data);
       setSelectedToDate(date);
       setSelectedFromDate(date);
@@ -353,7 +360,6 @@ export default function PrepChart() {
 
   const handleSaveClick = () => {
     const response = PrepChartAPI.save(prepChart);
-    console.log(response);
   };
 
   const handleUnitSelectorClick = () => {
@@ -436,8 +442,8 @@ export default function PrepChart() {
           <Styled.UnloadedMessage>Loading...</Styled.UnloadedMessage>
         </>
       ) : (
-        !isUnitSelected ? (
-          <Styled.UnloadedMessage>No Unit Selected, Please select a unit.</Styled.UnloadedMessage>
+        isError ? (
+          <Styled.UnloadedMessage>{errorMessage}</Styled.UnloadedMessage>
         ) : (
           <>
 

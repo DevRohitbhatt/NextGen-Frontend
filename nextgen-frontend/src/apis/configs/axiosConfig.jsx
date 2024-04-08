@@ -1,11 +1,11 @@
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:5295/";
+axios.defaults.baseURL = "http://192.168.192.244:8030/";
+
 const api = axios.create({
   withCredentials: true,
   headers: {
     'Allow-Control-Allow-Origin': '*',
-    'Content-Type': 'application/json'
   },
   baseURL: "http://localhost:5295/",
 });
@@ -16,7 +16,7 @@ const errorHandler = (error) => {
 
   return Promise.reject(error);
 };
- 
+
 api.interceptors.response.use(undefined, (error) => {
   return errorHandler(error);
 });

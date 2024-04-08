@@ -334,23 +334,23 @@ export default function PrepChartTemplate() {
   function constructPrepChartTemplate(unitID) {
     const prepChartTemplate = [
       {
-        prepGroupKey: "Today",
-        inventoryItemList: todayItem,
+        PrepGroupKey: "Today",
+        InventoryItemList: todayItem,
       },
       {
-        prepGroupKey: "Tomorrow",
-        inventoryItemList: TomorrowItem,
+        PrepGroupKey: "Tomorrow",
+        InventoryItemList: TomorrowItem,
       },
       {
-        prepGroupKey: "Next Day",
-        inventoryItemList: NextDayItem,
+        PrepGroupKey: "Next Day",
+        InventoryItemList: NextDayItem,
       },
     ];
     const json = {
-      companyID: companyID,
-      unitIDList: unitID,
-      prepChartTemplateID: prepChartTemplateID,
-      prepChartTemplate: prepChartTemplate,
+      CompanyID: companyID,
+      UnitIDList: unitID,
+      PrepChartTemplateID: prepChartTemplateID,
+      PrepChartTemplate: prepChartTemplate,
     };
     const jsonData = JSON.stringify(json);
     PrepChartTemplateAPI.save(jsonData)

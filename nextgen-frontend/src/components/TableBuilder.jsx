@@ -92,8 +92,8 @@ const TableHeaderCell = styled.div`
     props.$useTableRows ? "none" : "2px solid " + props.theme.primary};
   padding: 10px 0;
   text-align: ${(props) => (props.columntype === "number" ? "center" : "left")};
-  display: flex;
-  vertical-align: middle;
+  display: ${(props) => (props.$isSorting ? "flex" : "block")};
+  
 `;
 
 const TableRow = styled.div`
@@ -158,6 +158,7 @@ if (isSorting) {
                 key={index}
                 columntype={dataTypes[index]}
                 $useTableRows={usetablerows}
+                $isSorting={isSorting}
                 onClick={isSorting && (() => handleSort(index))}  // Call handleSort function on header click
                 style={{ cursor: "pointer" }}
               >
