@@ -20,7 +20,7 @@ export const PrepChartAPI = {
   save: async function (data, cancel = false) {
     const response = await api.request({
       method: "POST",
-      url: `/api/PrepChartTemplate/saveprepcharttemplate`,
+      url: `/api/prepchartdetail/saveprepchartdetail`,
       data,
       signal: cancel ? cancelApiObject[this.save.name].handleRequestCancellation().signal : undefined,
     });
