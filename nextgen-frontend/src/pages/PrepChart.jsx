@@ -24,7 +24,7 @@ const prepTableStructure = {
     "Prep/Pull Amount",
   ],
   dataTypes : ["string", "string", "number", "number", "number", "number", "number"],
-  columnWidths : "1.5fr 2fr 1fr 1.2fr 1fr 1fr 1fr",
+  columnWidths : "2.5fr 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows : [],
 };
 
