@@ -12,6 +12,7 @@ import { exportToExcel } from "../functions/ExcelExport.jsx";
 import { AreaAPI } from "../apis/AreaAPI.jsx";
 import UnitModal from "../components/UnitModal.jsx";
 import CalendarModal from "../components/ModalDate.jsx";
+import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI.jsx";
 
 const prepTableStructure = {
   columnHeaders: [
@@ -29,7 +30,8 @@ const prepTableStructure = {
 };
 
 export default function PrepChart() {
-  const [companyID, setCompanyID] = useState(1021);
+  const [companyID, setCompanyID] = useState();
+  const [alignmentID, setAlignmentID] = useState();
   const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -44,7 +46,7 @@ export default function PrepChart() {
   });
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState();
-  const [selecteUnitName, setSelecteUnitName] = useState("No Unit Selected");
+  const [selectedUnitName, setselectedUnitName] = useState("No Unit Selected");
   const [filteredUnit, setFilteredUnit] = useState([]);
   const [IsActive, setIsActive] = useState([]);
   const [showModal, setShowModal] = useState(false); // State to manage modal visibility
@@ -83,11 +85,13 @@ export default function PrepChart() {
       let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
       if (parameters)
         parameters = JSON.parse(parameters);
-      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID(1021);
-      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit(51);
+      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
+      parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
+      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
         getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, new Date());
+        getUnits(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
       } else {
         setErrorMessage("No Unit Selected, Please select a unit.");
         setIsError(true);
@@ -132,6 +136,17 @@ export default function PrepChart() {
       });
     });
   }
+
+  const getUnits = (companyId, alignmentId, userId) => {
+    UnitsAndAreasAPI.getbyid(companyId, alignmentId, userId)
+      .then((data) => {
+        setUnitsList(data);
+      }).catch((error) => {
+        console.error("Error getting units: ", error);
+      });
+  };
+      
+
 
   useEffect(() => {
     if (prepChartDates.today) {
@@ -336,7 +351,7 @@ export default function PrepChart() {
     ];
   
     const filename = `${companyID}_${selectedUnit}_PrepChart_${prepChartDates.today.toLocaleDateString()}`;
-    exportToExcel(data, filename, "Prep Chart", prepChartDates.today.toLocaleDateString(), selecteUnitName);
+    exportToExcel(data, filename, "Prep Chart", prepChartDates.today.toLocaleDateString(), selectedUnitName);
   }
   
   const getTableData = (table) => {
@@ -372,8 +387,6 @@ export default function PrepChart() {
   // useEffect(() => {}, [selectedToDate, selectedFromDate]); // Run this effect whenever selectedDate changes
 
   const handleRowClick = (startDate, endDate) => {
-    console.log("Start Date:", startDate.toLocaleDateString());
-    console.log("End Date:", endDate.toLocaleDateString());
   };
   const handleCloseModal = () => {
     setShowDateModal(false);
@@ -385,7 +398,7 @@ export default function PrepChart() {
     getPrepChart(companyID, selectedUnit, toDate);
   };
   const handleUnitSelection = (unitName, unitID) => {
-    setSelecteUnitName(unitName);
+    setselectedUnitName(unitName);
     setSelectedUnit(unitID);
     setShowModal(false); // Close the date modal after selection
     getPrepChart(companyID, unitID, selectedToDate);
@@ -398,8 +411,8 @@ export default function PrepChart() {
         <Styled.DateAndUnitContainer>
           <UnitSelector
             onClick={handleUnitSelectorClick}
-            unitName={selecteUnitName}
-            setUnitName={setSelecteUnitName}
+            unitName={selectedUnitName}
+            setUnitName={setselectedUnitName}
             unitID={selectedUnit}
           />
           <DateSelector
@@ -410,12 +423,14 @@ export default function PrepChart() {
           />
 
           <UnitModal
+            unitData={unitsList}
+            unitID={selectedUnit}
+            unitName={selectedUnitName}
             show={showModal}
             handleClose={() => {
               setShowModal(false);
             }}
             handleUnitSelection={handleUnitSelection}
-            isSaveUnit={false}
           />
 
           <CalendarModal
