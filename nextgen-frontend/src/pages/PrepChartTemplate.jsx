@@ -13,6 +13,7 @@ import ExportOptions from "../components/ExportOptions.jsx";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI.jsx";
+import MinimizableContainer from "../components/MinimizableContainer.jsx";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
@@ -496,146 +497,149 @@ export default function PrepChartTemplate() {
 
             <Styled.TableRight>
               <Styled.RightTblMarg>
-                <Styled.TableHeaderTop>Today</Styled.TableHeaderTop>
-                <Styled.Table>
-                  <div
-                    className={`drop-board`}
-                    ref={dropToday}
-                    style={{ border: isOverToday ? "1px solid red" : "" }}
-                  >
-                    <Styled.TableHeaderRight>
-                      <Styled.TableHeaderCell>
-                        Inventory ID
-                      </Styled.TableHeaderCell>
-                      <Styled.TableHeaderCell>
-                        Description
-                      </Styled.TableHeaderCell>
-                    </Styled.TableHeaderRight>
-                    {todayItem.length > 0 ? "" : placeholder}
+                <MinimizableContainer title="Today">
+                  <Styled.Table>
+                    <div
+                      className={`drop-board`}
+                      ref={dropToday}
+                      style={{ border: isOverToday ? "1px solid red" : "" }}
+                    >
+                      <Styled.TableHeaderRight>
+                        <Styled.TableHeaderCell>
+                          Inventory ID
+                        </Styled.TableHeaderCell>
+                        <Styled.TableHeaderCell>
+                          Description
+                        </Styled.TableHeaderCell>
+                      </Styled.TableHeaderRight>
+                      {todayItem.length > 0 ? "" : placeholder}
 
-                    {todayItem.map((item, index) => (
-                      <div
-                        key={item.inventoryItemID}
-                        draggable
-                        onDragStart={() => handleDragStart(index, "today", true)}
-                        onDrop={() => handleDrop(index, "today")}
-                        onDragOver={(e) => e.preventDefault()}
-                        className={
-                          index === draggingPos.current?.index
-                            ? `dragging ${isOverToday ? "" : ""}`
-                            : ""
-                        }
-                      >
-                        <InventoryItem
-                          inventoryItemID={item.inventoryItemID}
-                          description={item.description?.trim()}
-                          columnIndex={item.inventoryItemID}
-                        />
-                        <FaRegTrashAlt
-                          className={`delete`}
-                          onClick={() =>
-                            handleDelete(item.inventoryItemID, "today")
-                          }
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </Styled.Table>
-              </Styled.RightTblMarg>
-
-              <Styled.RightTblMarg>
-                <Styled.TableHeaderTop>Tomorrow</Styled.TableHeaderTop>
-                <Styled.Table>
-                  <div
-                    className="drop-board"
-                    ref={dropTomorrow}
-                    style={{ border: isOverTomorrow ? "1px solid red" : "" }}
-                  >
-                    <Styled.TableHeaderRight>
-                      <Styled.TableHeaderCell>
-                        Inventory ID{" "}
-                      </Styled.TableHeaderCell>
-                      <Styled.TableHeaderCell>
-                        description{" "}
-                      </Styled.TableHeaderCell>
-                    </Styled.TableHeaderRight>
-                    {TomorrowItem.length > 0 ? "" : placeholder}
-                    {TomorrowItem.map((item, index) => (
-                      <div
-                        key={item.inventoryItemID}
-                        draggable
-                        onDragStart={() => handleDragStart(index, "tomorrow",true)}
-                        onDrop={() => handleDrop(index, "tomorrow")}
-                        onDragOver={(e) => e.preventDefault()}
-                        className={
-                          index === draggingPos.current?.index
-                            ? `dragging ${isOverTomorrow ? "" : ""}`
-                            : ""
-                        }
-                      >
-                        <InventoryItem
-                          inventoryItemID={item.inventoryItemID}
-                          description={item.description.trim()}
-                          columnIndex={item.inventoryItemID}
-                        />
-                        <FaRegTrashAlt
-                          className={`delete`}
-                          onClick={() =>
-                            handleDelete(item.inventoryItemID, "tomorrow")
-                          }
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </Styled.Table>
-              </Styled.RightTblMarg>
-              <Styled.RightTblMarg>
-                <Styled.TableHeaderTop>Next Day</Styled.TableHeaderTop>
-                <Styled.Table>
-                  <div
-                    className="drop-board"
-                    ref={dropNextDay}
-                    style={{ border: isOverNextDay ? "1px solid red" : "" }}
-                  >
-                    <Styled.TableHeaderRight>
-                      <Styled.TableHeaderCell>
-                        Inventory ID{" "}
-                      </Styled.TableHeaderCell>
-                      <Styled.TableHeaderCell>
-                        description{" "}
-                      </Styled.TableHeaderCell>
-                    </Styled.TableHeaderRight>
-                    {NextDayItem.length > 0 ? "" : placeholder}
-                    {NextDayItem.map((item, index) => (
-                      <div
-                        key={item.inventoryItemID}
-                        draggable
-                        onDragStart={() => handleDragStart(index, "nextDay",true)}
-                        onDrop={() => handleDrop(index, "nextDay")}
-                        onDragOver={(e) => e.preventDefault()}
-                        className={
-                          index === draggingPos.current?.index
-                            ? `dragging ${isOverNextDay ? "" : ""}`
-                            : ""
-                        }
-                      >
-                        <InventoryItem
+                      {todayItem.map((item, index) => (
+                        <div
                           key={item.inventoryItemID}
-                          inventoryItemID={item.inventoryItemID}
-                          description={item.description}
-                          // moveItem={handleReorder(NextDayItem, setNextDayItem)}
-                          columnIndex={item.inventoryItemID}
-                        />
-                        <FaRegTrashAlt
-                          className="delete"
-                          onClick={() =>
-                            handleDelete(item.inventoryItemID, "nextDay")
+                          draggable
+                          onDragStart={() => handleDragStart(index, "today", true)}
+                          onDrop={() => handleDrop(index, "today")}
+                          onDragOver={(e) => e.preventDefault()}
+                          className={
+                            index === draggingPos.current?.index
+                              ? `dragging ${isOverToday ? "" : ""}`
+                              : ""
                           }
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </Styled.Table>
+                        >
+                          <InventoryItem
+                            inventoryItemID={item.inventoryItemID}
+                            description={item.description?.trim()}
+                            columnIndex={item.inventoryItemID}
+                          />
+                          <FaRegTrashAlt
+                            className={`delete`}
+                            onClick={() =>
+                              handleDelete(item.inventoryItemID, "today")
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </Styled.Table>
+                </MinimizableContainer>
+              </Styled.RightTblMarg>
+
+              <Styled.RightTblMarg>
+                <MinimizableContainer title="Tomorrow">
+                  <Styled.Table>
+                    <div
+                      className="drop-board"
+                      ref={dropTomorrow}
+                      style={{ border: isOverTomorrow ? "1px solid red" : "" }}
+                    >
+                      <Styled.TableHeaderRight>
+                        <Styled.TableHeaderCell>
+                          Inventory ID{" "}
+                        </Styled.TableHeaderCell>
+                        <Styled.TableHeaderCell>
+                          description{" "}
+                        </Styled.TableHeaderCell>
+                      </Styled.TableHeaderRight>
+                      {TomorrowItem.length > 0 ? "" : placeholder}
+                      {TomorrowItem.map((item, index) => (
+                        <div
+                          key={item.inventoryItemID}
+                          draggable
+                          onDragStart={() => handleDragStart(index, "tomorrow",true)}
+                          onDrop={() => handleDrop(index, "tomorrow")}
+                          onDragOver={(e) => e.preventDefault()}
+                          className={
+                            index === draggingPos.current?.index
+                              ? `dragging ${isOverTomorrow ? "" : ""}`
+                              : ""
+                          }
+                        >
+                          <InventoryItem
+                            inventoryItemID={item.inventoryItemID}
+                            description={item.description.trim()}
+                            columnIndex={item.inventoryItemID}
+                          />
+                          <FaRegTrashAlt
+                            className={`delete`}
+                            onClick={() =>
+                              handleDelete(item.inventoryItemID, "tomorrow")
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </Styled.Table>
+                </MinimizableContainer>
+              </Styled.RightTblMarg>
+              <Styled.RightTblMarg>
+                <MinimizableContainer title="Next Day">
+                  <Styled.Table>
+                    <div
+                      className="drop-board"
+                      ref={dropNextDay}
+                      style={{ border: isOverNextDay ? "1px solid red" : "" }}
+                    >
+                      <Styled.TableHeaderRight>
+                        <Styled.TableHeaderCell>
+                          Inventory ID{" "}
+                        </Styled.TableHeaderCell>
+                        <Styled.TableHeaderCell>
+                          description{" "}
+                        </Styled.TableHeaderCell>
+                      </Styled.TableHeaderRight>
+                      {NextDayItem.length > 0 ? "" : placeholder}
+                      {NextDayItem.map((item, index) => (
+                        <div
+                          key={item.inventoryItemID}
+                          draggable
+                          onDragStart={() => handleDragStart(index, "nextDay",true)}
+                          onDrop={() => handleDrop(index, "nextDay")}
+                          onDragOver={(e) => e.preventDefault()}
+                          className={
+                            index === draggingPos.current?.index
+                              ? `dragging ${isOverNextDay ? "" : ""}`
+                              : ""
+                          }
+                        >
+                          <InventoryItem
+                            key={item.inventoryItemID}
+                            inventoryItemID={item.inventoryItemID}
+                            description={item.description}
+                            // moveItem={handleReorder(NextDayItem, setNextDayItem)}
+                            columnIndex={item.inventoryItemID}
+                          />
+                          <FaRegTrashAlt
+                            className="delete"
+                            onClick={() =>
+                              handleDelete(item.inventoryItemID, "nextDay")
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </Styled.Table>
+                </MinimizableContainer>
               </Styled.RightTblMarg>
             </Styled.TableRight>
           </div>
