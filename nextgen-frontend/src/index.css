@@ -168,21 +168,6 @@ input.Search::placeholder {
   display: grid;
   grid-template-columns: 50fr 50fr;
 }
-.unitList ul {
-  list-style: none;
-  padding: 0px;
-  margin: 0px;
-}
-.unitList {
-  border: 0.25px solid #808285;
-  border-radius: 8px;
-  margin: 10px 0px;
-  overflow-y: scroll;
-  height: 233px;
-}
-.unitList li {
-  padding: 4px 10px 4px 10px;
-}
 .form-control {
   background: #e6e7e8;
   border: none;

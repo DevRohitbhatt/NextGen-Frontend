@@ -12,6 +12,7 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import ExportOptions from "../components/ExportOptions.jsx";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI.jsx";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
@@ -36,15 +37,19 @@ export default function PrepChartTemplate() {
   const NextDayItemmRef = useRef(NextDayItem);
   const [showModal, setShowModal] = useState(false); // State to manage modal visibility
   const [sortOrder, setSortOrder] = useState("asc");
-  const [companyID, setCompanyID] = useState(1021);
+  const [companyID, setCompanyID] = useState();
+  const [alignmentID, setAlignmentID] = useState();
+  const [areaID, setAreaID] = useState();
   const [selectedUnitName, setSelectedUnitName] = useState("No Unit Selected");
-  const [selectedUnit, setSelectedUnit] = useState(51);
+  const [selectedUnit, setSelectedUnit] = useState();
   const [isUnitSelected, setIsUnitSelected] = useState(false);
   const [prepChartTemplateID, setPrepChartTemplateID] = useState();
   //const draggingPos = useRef(null);
   const dragOverPos = useRef(null);
   const [isSave, setIsSave] = useState(false);
+  const [unitData, setUnitData] = useState([]);
   const [saveUnitId, setSaveUnitId] = useState();
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     todayItemRef.current = todayItem;
@@ -104,22 +109,24 @@ export default function PrepChartTemplate() {
 
   useEffect(() => {
     if (!selectedUnit) {
-      let parameters = decodeURIComponent(
-        window.location.search.replace("?data=", "")
-      );
-      if (parameters) parameters = JSON.parse(parameters);
+      let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
+      if (parameters)
+        parameters = JSON.parse(parameters);
       parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
-      parameters
-        ? setSelectedUnit(parameters.User_DefaultUnitID)
-        : setSelectedUnit();
+      parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
+      parameters ? setAreaID(parameters.User_GroupOrUnitAccess) : setAreaID();
+      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
       if (parameters.User_DefaultUnitID) {
+        fetchUnitData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
         fetchData(parameters.CompanyID, parameters.User_DefaultUnitID);
         setIsUnitSelected(true);
       } else {
         setIsUnitSelected(false);
         setIsLoading(false);
       }
-    } else {
+    }
+    else {
+      fetchUnitData(companyID, alignmentID, areaID);
       fetchData(companyID, selectedUnit); // Call fetchData function on component mount
     }
   }, []);
@@ -140,6 +147,17 @@ export default function PrepChartTemplate() {
       .then((data) => {
         buildPrepMasterTable(data);
         setIsUnitSelected(true);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
+  
+  const fetchUnitData = (companyID, alignmentID, areaID) => {
+    UnitsAndAreasAPI.getbyid(companyID, alignmentID, areaID)
+      .then((data) => {
+        setUnitData(data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -249,7 +267,6 @@ export default function PrepChartTemplate() {
             DropTomorrowItem,
             ...TomorrowItem.slice(draggingPos.current?.index),
           ];
-          console.log("Before",TomorrowItems)
           return TomorrowItems=Array.from(new Set(TomorrowItems.map(JSON.stringify)), JSON.parse);
         });
       }
@@ -326,12 +343,12 @@ export default function PrepChartTemplate() {
     setShowModal(true);
     setIsSave(true);
   };
-  const handleUnitSaveSelection = (unitName, unitID) => {
-    const prepChartTemplate = constructPrepChartTemplate(unitID);
+  const handleUnitSaveSelection = (units) => {
+    constructPrepChartTemplate(units);
   };
   const handleSaveButtonClick = () => {};
 
-  function constructPrepChartTemplate(unitID) {
+  function constructPrepChartTemplate(units) {
     const prepChartTemplate = [
       {
         PrepGroupKey: "Today",
@@ -348,7 +365,7 @@ export default function PrepChartTemplate() {
     ];
     const json = {
       CompanyID: companyID,
-      UnitIDList: unitID,
+      UnitIDList: units.map((unit) => unit.id),
       PrepChartTemplateID: prepChartTemplateID,
       PrepChartTemplate: prepChartTemplate,
     };
@@ -419,6 +436,9 @@ export default function PrepChartTemplate() {
             unitID={selectedUnit}
           />
           <UnitModal
+            unitData={unitData}
+            unitID={selectedUnit}
+            unitName={selectedUnitName}
             show={showModal}
             handleClose={() => {
               setShowModal(false);
@@ -429,6 +449,8 @@ export default function PrepChartTemplate() {
             }
             handleUnitSaveSelection={handleUnitSaveSelection}
             isSaveUnit={isSave}
+            isMultiUnit={isSave}
+            includeAreas={isSave}
           />
         </Styled.DateAndUnitContainer>
         <Styled.SaveOptionsContainer>
