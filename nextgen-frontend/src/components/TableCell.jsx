@@ -224,6 +224,7 @@ export default function Cell({
     let selectedOption = value.find((option) => option.isSelected);
     if (!selectedOption) {
       selectedOption = value[0];
+      value[0].isSelected = true;
     }
     return (
       <TableCell columntype={columntype}>
