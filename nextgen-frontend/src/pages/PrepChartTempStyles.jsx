@@ -164,6 +164,14 @@ export const TableTitle = styled.div`
   font-weight: bold;
 `;
 
+export const AddNewItems = styled.div`
+  text-align: center;
+  padding: 10px;
+  :hover {
+    border-top: 1px solid ${(props) => props.theme.primary};
+  }
+`;
+
 export const RightTblMarg = styled.div`
   margin-bottom: 12px;
 `;

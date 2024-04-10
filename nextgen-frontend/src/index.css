@@ -465,8 +465,15 @@ button.react-calendar__tile.react-calendar__year-view__months__month {
  background-color: #fff;
 }
 .drop-highlight {
-  background-color: #364790;
-  color: #fff;
+  border-top: 1px solid #364790;
+}
+@keyframes moveUpDown {
+  0% {
+    transform: translateY(0);
+}
+  100% {
+    transform: translateY(8px) 
+  }
 }
 @media (prefers-color-scheme: light) {
   :root {

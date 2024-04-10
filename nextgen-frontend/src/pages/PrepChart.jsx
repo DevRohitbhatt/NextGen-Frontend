@@ -9,7 +9,6 @@ import Table from "../components/TableBuilder.jsx";
 import PdfBuilder from "../components/PdfBuilder.jsx";
 import * as PrepChartFunctions from "../functions/PrepChartFunctions.jsx";
 import { exportToExcel } from "../functions/ExcelExport.jsx";
-import { AreaAPI } from "../apis/AreaAPI.jsx";
 import UnitModal from "../components/UnitModal.jsx";
 import CalendarModal from "../components/ModalDate.jsx";
 import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI.jsx";
@@ -47,7 +46,6 @@ export default function PrepChart() {
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setselectedUnitName] = useState("No Unit Selected");
-  const [filteredUnit, setFilteredUnit] = useState([]);
   const [IsActive, setIsActive] = useState([]);
   const [showModal, setShowModal] = useState(false); // State to manage modal visibility
   const [showDateModal, setShowDateModal] = useState(false); // State to manage modal visibility
