@@ -1,6 +1,5 @@
 import api from "./configs/axiosConfig.jsx";
 import { defineCancelApiObject } from "./configs/axiosUtils.jsx";
-import PrepChartjson from "../tempData/PrepChartTemp.json";
 
 export const PrepChartTemplateAPI = {
   get: async function (companyID, unitID, cancel = false) {
