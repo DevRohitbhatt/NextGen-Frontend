@@ -1,5 +1,5 @@
-import api from "./configs/axiosConfig.jsx";
-import { defineCancelApiObject } from "./configs/axiosUtils";
+import api from "../configs/axiosConfig.jsx";
+import { defineCancelApiObject } from "../configs/axiosUtils.jsx";
 
 export const PrepChartAPI = {
   get: async function (companyID, unitID, date, cancel = false) {

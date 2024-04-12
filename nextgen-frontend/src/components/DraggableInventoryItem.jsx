@@ -1,5 +1,5 @@
 import { useDrag } from "react-dnd";
-import * as Styled from "../pages/PrepChartTempStyles";
+import * as Styled from "../pages/food-cost/styles/PrepChartTempStyles";
 import PropTypes from "prop-types";
 
 export function InventoryItem({
