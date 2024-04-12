@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import * as Styled from "./PrepChartStyles.jsx";
-import "../components/UnitSelector.jsx";
-import UnitSelector from "../components/UnitSelector.jsx";
-import DateSelector from "../components/DateSelector.jsx";
-import ExportOptions from "../components/ExportOptions.jsx";
-import { PrepChartAPI } from "../apis/PrepChartAPI.jsx";
-import Table from "../components/TableBuilder.jsx";
-import PdfBuilder from "../components/PdfBuilder.jsx";
-import * as PrepChartFunctions from "../functions/PrepChartFunctions.jsx";
-import { exportToExcel } from "../functions/ExcelExport.jsx";
-import UnitModal from "../components/UnitModal.jsx";
-import CalendarModal from "../components/ModalDate.jsx";
-import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI.jsx";
+import * as Styled from "./styles/PrepChartStyles.jsx";
+import "../../components/UnitSelector.jsx";
+import UnitSelector from "../../components/UnitSelector.jsx";
+import DateSelector from "../../components/DateSelector.jsx";
+import ExportOptions from "../../components/ExportOptions.jsx";
+import { PrepChartAPI } from "../../apis/food-cost/PrepChartAPI.jsx";
+import Table from "../../components/TableBuilder.jsx";
+import PdfBuilder from "../../components/PdfBuilder.jsx";
+import * as PrepChartFunctions from "../../functions/PrepChartFunctions.jsx";
+import { exportToExcel } from "../../functions/ExcelExport.jsx";
+import UnitModal from "../../components/UnitModal.jsx";
+import CalendarModal from "../../components/ModalDate.jsx";
+import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 
 const prepTableStructure = {
   columnHeaders: [
