@@ -1,5 +1,5 @@
 import { useDrag } from "react-dnd";
-import * as Styled from "../pages/PrepChartTempStyles";
+import * as Styled from "../pages/food-cost/styles/PrepChartTempStyles";
 import PropTypes from "prop-types";
 
 export function InventoryItem({
@@ -19,12 +19,12 @@ export function InventoryItem({
   }
 
     return (
-        <>
-         <Styled.TableRow key={columnIndex} ref={drag}  >
+        <div ref={drag} >
+         <Styled.TableRow key={columnIndex}  >
             <Styled.TableCell> {inventoryItemID}</Styled.TableCell>
             <Styled.TableCell>{description}</Styled.TableCell>
          </Styled.TableRow>
-        </>
+        </div>
     )
 }
 InventoryItem.propTypes = {

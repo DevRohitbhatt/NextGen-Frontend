@@ -285,11 +285,12 @@ function calculateNeededValue(tableName, prepChart, prepValue, yieldType, safety
   safetyFactor = safetyFactor / 100 + 1;
 
   if (tableName === "today") {
-    needed = (todayForecast / (prepValue + parseFloat(yieldType))) * safetyFactor;
+    console.log("todayForecast: ", todayForecast, "prepValue: ", prepValue, "yieldType: ", yieldType, "safetyFactor: ", safetyFactor)
+    needed = (todayForecast / (parseFloat(yieldType))) * safetyFactor;
   } else if (tableName === "tomorrow") {
-    needed = ((todayForecast + tomorrowForecast) / (prepValue + parseFloat(yieldType))) * safetyFactor;
+    needed = ((todayForecast + tomorrowForecast) / (parseFloat(yieldType))) * safetyFactor;
   } else if (tableName === "nextDay") {
-    needed = ((todayForecast + tomorrowForecast + nextDayForecast) / (prepValue + parseFloat(yieldType))) * safetyFactor;
+    needed = ((todayForecast + tomorrowForecast + nextDayForecast) / (parseFloat(yieldType))) * safetyFactor;
   }
 
   return needed.toFixed(2);

@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import * as Styled from "./PrepChartStyles.jsx";
-import "../components/UnitSelector.jsx";
-import UnitSelector from "../components/UnitSelector.jsx";
-import DateSelector from "../components/DateSelector.jsx";
-import ExportOptions from "../components/ExportOptions.jsx";
-import { PrepChartAPI } from "../apis/PrepChartAPI.jsx";
-import Table from "../components/TableBuilder.jsx";
-import PdfBuilder from "../components/PdfBuilder.jsx";
-import * as PrepChartFunctions from "../functions/PrepChartFunctions.jsx";
-import { exportToExcel } from "../functions/ExcelExport.jsx";
-import { AreaAPI } from "../apis/AreaAPI.jsx";
-import UnitModal from "../components/UnitModal.jsx";
-import CalendarModal from "../components/ModalDate.jsx";
+import * as Styled from "./styles/PrepChartStyles.jsx";
+import "../../components/UnitSelector.jsx";
+import UnitSelector from "../../components/UnitSelector.jsx";
+import DateSelector from "../../components/DateSelector.jsx";
+import ExportOptions from "../../components/ExportOptions.jsx";
+import { PrepChartAPI } from "../../apis/food-cost/PrepChartAPI.jsx";
+import Table from "../../components/TableBuilder.jsx";
+import PdfBuilder from "../../components/PdfBuilder.jsx";
+import * as PrepChartFunctions from "../../functions/PrepChartFunctions.jsx";
+import { exportToExcel } from "../../functions/ExcelExport.jsx";
+import UnitModal from "../../components/UnitModal.jsx";
+import CalendarModal from "../../components/ModalDate.jsx";
+import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 
 const prepTableStructure = {
   columnHeaders: [
@@ -30,6 +30,7 @@ const prepTableStructure = {
 
 export default function PrepChart() {
   const [companyID, setCompanyID] = useState();
+  const [alignmentID, setAlignmentID] = useState();
   const [prepChart, setPrepChart] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -44,8 +45,7 @@ export default function PrepChart() {
   });
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState();
-  const [selecteUnitName, setSelecteUnitName] = useState("No Unit Selected");
-  const [filteredUnit, setFilteredUnit] = useState([]);
+  const [selectedUnitName, setselectedUnitName] = useState("No Unit Selected");
   const [IsActive, setIsActive] = useState([]);
   const [showModal, setShowModal] = useState(false); // State to manage modal visibility
   const [showDateModal, setShowDateModal] = useState(false); // State to manage modal visibility
@@ -84,10 +84,12 @@ export default function PrepChart() {
       if (parameters)
         parameters = JSON.parse(parameters);
       parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
+      parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
       parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
         getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, new Date());
+        getUnits(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
       } else {
         setErrorMessage("No Unit Selected, Please select a unit.");
         setIsError(true);
@@ -132,6 +134,17 @@ export default function PrepChart() {
       });
     });
   }
+
+  const getUnits = (companyId, alignmentId, userId) => {
+    UnitsAndAreasAPI.getbyid(companyId, alignmentId, userId)
+      .then((data) => {
+        setUnitsList(data);
+      }).catch((error) => {
+        console.error("Error getting units: ", error);
+      });
+  };
+      
+
 
   useEffect(() => {
     if (prepChartDates.today) {
@@ -336,7 +349,7 @@ export default function PrepChart() {
     ];
   
     const filename = `${companyID}_${selectedUnit}_PrepChart_${prepChartDates.today.toLocaleDateString()}`;
-    exportToExcel(data, filename, "Prep Chart", prepChartDates.today.toLocaleDateString(), selecteUnitName);
+    exportToExcel(data, filename, "Prep Chart", prepChartDates.today.toLocaleDateString(), selectedUnitName);
   }
   
   const getTableData = (table) => {
@@ -372,8 +385,6 @@ export default function PrepChart() {
   // useEffect(() => {}, [selectedToDate, selectedFromDate]); // Run this effect whenever selectedDate changes
 
   const handleRowClick = (startDate, endDate) => {
-    console.log("Start Date:", startDate.toLocaleDateString());
-    console.log("End Date:", endDate.toLocaleDateString());
   };
   const handleCloseModal = () => {
     setShowDateModal(false);
@@ -385,7 +396,7 @@ export default function PrepChart() {
     getPrepChart(companyID, selectedUnit, toDate);
   };
   const handleUnitSelection = (unitName, unitID) => {
-    setSelecteUnitName(unitName);
+    setselectedUnitName(unitName);
     setSelectedUnit(unitID);
     setShowModal(false); // Close the date modal after selection
     getPrepChart(companyID, unitID, selectedToDate);
@@ -398,8 +409,8 @@ export default function PrepChart() {
         <Styled.DateAndUnitContainer>
           <UnitSelector
             onClick={handleUnitSelectorClick}
-            unitName={selecteUnitName}
-            setUnitName={setSelecteUnitName}
+            unitName={selectedUnitName}
+            setUnitName={setselectedUnitName}
             unitID={selectedUnit}
           />
           <DateSelector
@@ -410,6 +421,9 @@ export default function PrepChart() {
           />
 
           <UnitModal
+            unitData={unitsList}
+            unitID={selectedUnit}
+            unitName={selectedUnitName}
             show={showModal}
             handleClose={() => {
               setShowModal(false);
@@ -456,6 +470,7 @@ export default function PrepChart() {
                 width={forecastTable.width}
                 tableName={"Forecast"}
                 handleInputCellChange={handleTableCellChange}
+                isSorting={false}
               />
               <Table
                 columnHeaders={defaultSafetyFactorTable.columnHeaders}
@@ -466,6 +481,7 @@ export default function PrepChart() {
                 width={defaultSafetyFactorTable.width}
                 height={defaultSafetyFactorTable.height}
                 handleInputCellChange={handleTableCellChange}
+                isSorting={false}
               />
             </Styled.ForeCastAndSafetyFactor>
             <h2>Today - ${Math.round(prepChart.forecastData.today)}</h2>
@@ -477,6 +493,7 @@ export default function PrepChart() {
               tableName="Today"
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
+              isSorting={false}
             />
 
             <h2>Tomorrow - ${Math.round(prepChart.forecastData.tomorrow)}</h2>
@@ -488,6 +505,7 @@ export default function PrepChart() {
               tableName={"Tomorrow"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
+              isSorting={false}
             />
 
             <h2>Next Day - ${Math.round(prepChart.forecastData.nextDay)}</h2>
@@ -499,6 +517,7 @@ export default function PrepChart() {
               tableName={"NextDay"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
+              isSorting={false}
             />
           </>
         )

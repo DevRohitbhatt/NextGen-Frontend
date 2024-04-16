@@ -1,8 +1,11 @@
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import PropTypes from "prop-types";
 import Cell from "./TableCell.jsx";
-import { InventoryItem } from '../components/DraggableInventoryItem.jsx';
+import { InventoryItem } from "../components/DraggableInventoryItem.jsx";
 import { propTypes } from "react-bootstrap/esm/Image.js";
+import { column } from "stylis";
+import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 
 const Container = styled.div`
   width: ${(props) => (props.width ? props.width : "auto")};
@@ -20,7 +23,7 @@ const Table = styled.div`
   padding: ${(props) => (props.$scrollable ? "0 15px 0 0" : "15px")};
   display: grid;
   grid-template-columns: ${(props) =>
-    props.columnwidths ? props.columnwidths : "auto"};;
+    props.columnwidths ? props.columnwidths : "auto"};
   grid-auto-rows: auto;
   align-items: center;
 
@@ -58,7 +61,7 @@ const Table = styled.div`
     height: 94px;
     display: block;
     background: transparent;
-  } 
+  }
 
   &::-webkit-scrollbar-button:end:increment {
     height: 20px;
@@ -75,7 +78,7 @@ const Table = styled.div`
 const TableHeader = styled.div`
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 2.5fr;;
+  grid-template-columns: 1fr 2.5fr;
   margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
@@ -85,9 +88,12 @@ const TableHeaderCell = styled.div`
   font-weight: bold;
   font-size: 1.2em;
   height: 44px;
-  border-bottom: ${(props) => props.$useTableRows ? "none" : "2px solid " + props.theme.primary};
+  border-bottom: ${(props) =>
+    props.$useTableRows ? "none" : "2px solid " + props.theme.primary};
   padding: 10px 0;
-  text-align: ${(props) => props.columntype === "number" ? "center" : "left"};
+  text-align: ${(props) => (props.columntype === "number" ? "center" : "left")};
+  display: ${(props) => (props.$isSorting ? "flex" : "block")};
+  
 `;
 
 const TableRow = styled.div`
@@ -96,7 +102,10 @@ const TableRow = styled.div`
   padding: 10px 0;
 `;
 
-
+const IconContainer = styled.div`
+  margin-left: 5px; /* Adjust margin as needed */
+  float: right;
+`;
 
 export default function TableBuilder({
   columnHeaders,
@@ -111,34 +120,105 @@ export default function TableBuilder({
   handleInputCellChange,
   handleDropdownChange,
   className,
-  scrollable = false
+  scrollable = false,
+  handleSorting,
+  isSorting = false,
 }) {
+  const [sortColumnIndex, setSortColumnIndex] = useState(-1); // Initialize with -1 to indicate no column is sorted initially
+  const [isAscending, setIsAscending] = useState(true);
+
+if (isSorting) {
+  useEffect(() => {
+    handleSorting(sortColumnIndex, isAscending);
+  }, [sortColumnIndex, isAscending]);
+}
+  
+  const handleSort = (index) => {
+    if (sortColumnIndex === index) {
+      setIsAscending(!isAscending);
+    } else {
+      setIsAscending(true);
+      setSortColumnIndex(index);
+    }
+  };
+
   return (
     <Container width={width} height={height}>
-      <Table width={width} height={height} className={className} $scrollable={scrollable} columnwidths={columnwidths}> 
+      <Table
+        width={width}
+        height={height}
+        className={className}
+        $scrollable={scrollable}
+        columnwidths={columnwidths}
+      >
         {usetablerows ? (
           <TableHeader columnwidths={columnwidths}>
             {columnHeaders.map((header, index) => (
-              <TableHeaderCell key={index} columntype={dataTypes[index]} $useTableRows={usetablerows}>{header}</TableHeaderCell>
+              <TableHeaderCell
+                key={index}
+                columntype={dataTypes[index]}
+                $useTableRows={usetablerows}
+                $isSorting={isSorting}
+                onClick={isSorting && (() => handleSort(index))}  // Call handleSort function on header click
+                style={{ cursor: "pointer" }}
+              >
+                {header}
+                {isSorting ? (
+                  <IconContainer>
+                    {sortColumnIndex === index ? (
+                      isAscending ? (
+                        <FaArrowUpShortWide />
+                      ) : (
+                        <FaArrowDownWideShort />
+                      )
+                    ) : (
+                      <FaArrowDownWideShort /> // Default sorting icon
+                    )}
+                  </IconContainer>
+                ) : null}
+              </TableHeaderCell>
             ))}
           </TableHeader>
         ) : (
           columnHeaders.map((header, index) => (
-            <TableHeaderCell key={index} columntype={dataTypes[index]}>{header}</TableHeaderCell>
+            <TableHeaderCell key={index} columntype={dataTypes[index]}>
+              {header}
+            </TableHeaderCell>
           ))
         )}
         {rows.map((row, rowIndex) => {
-
-          if(isDrag){
-            const key = row.inventoryItemID ? row.inventoryItemID : `fallback_${rowIndex}`;
-            return <InventoryItem key={key} rowIndex={row.inventoryItemID} tableName={tableName} description={row.description} inventoryItemID={row.inventoryItemID} />
+          if (isDrag) {
+            const key = row.inventoryItemID
+              ? row.inventoryItemID
+              : `fallback_${rowIndex}`;
+            return (
+              <InventoryItem
+                key={key}
+                rowIndex={row.inventoryItemID}
+                tableName={tableName}
+                description={row.description}
+                inventoryItemID={row.inventoryItemID}
+              />
+            );
           }
-        return   row && row.map((cell, cellIndex) => (
-              <Cell key={cellIndex} value={cell.value} columntype={dataTypes[cellIndex]} cellType={cell.cellType} isInput={cell.isInput} row={rowIndex} tableName={tableName} columnName={cell.columnName} handleInputCellChange={handleInputCellChange} handleDropdownChange={handleDropdownChange}/>
+          return (
+            row &&
+            row.map((cell, cellIndex) => (
+              <Cell
+                key={cellIndex}
+                value={cell.value}
+                columntype={dataTypes[cellIndex]}
+                cellType={cell.cellType}
+                isInput={cell.isInput}
+                row={rowIndex}
+                tableName={tableName}
+                columnName={cell.columnName}
+                handleInputCellChange={handleInputCellChange}
+                handleDropdownChange={handleDropdownChange}
+              />
             ))
-
-
-            })}
+          );
+        })}
       </Table>
     </Container>
   );
@@ -157,6 +237,7 @@ TableBuilder.propTypes = {
   handleDropdownChange: PropTypes.func,
   isDrag: PropTypes.bool,
   usetablerows: PropTypes.bool,
-  className:PropTypes.string
-
+  className: PropTypes.string,
+  handleSorting:PropTypes.func,
+  isSorting: PropTypes.bool,
 };

@@ -7,7 +7,8 @@ const api = axios.create({
   headers: {
     'Allow-Control-Allow-Origin': '*',
   },
-  baseURL: "https://192.168.192.244:8083/",
+  'Content-Type': 'application/json',
+  baseURL: "https://192.168.192.244:8083",
 });
 
 const errorHandler = (error) => {
