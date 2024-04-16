@@ -468,7 +468,7 @@ export default function PrepChart() {
                 handleInputCellChange={handleTableCellChange}
               />
             </Styled.ForeCastAndSafetyFactor>
-            <h2>Today - ${prepChart.forecastData.today}</h2>
+            <h2>Today - ${Math.round(prepChart.forecastData.today)}</h2>
             <Table
               columnHeaders={todayTable.columnHeaders}
               dataTypes={todayTable.dataTypes}
@@ -479,7 +479,7 @@ export default function PrepChart() {
               handleDropdownChange={handleDropdownChange}
             />
 
-            <h2>Tomorrow - ${prepChart.forecastData.tomorrow}</h2>
+            <h2>Tomorrow - ${Math.round(prepChart.forecastData.tomorrow)}</h2>
             <Table
               columnHeaders={tomorrowTable.columnHeaders}
               dataTypes={tomorrowTable.dataTypes}
@@ -490,7 +490,7 @@ export default function PrepChart() {
               handleDropdownChange={handleDropdownChange}
             />
 
-            <h2>Next Day - ${prepChart.forecastData.nextDay}</h2>
+            <h2>Next Day - ${Math.round(prepChart.forecastData.nextDay)}</h2>
             <Table
               columnHeaders={nextDayTable.columnHeaders}
               dataTypes={nextDayTable.dataTypes}

@@ -148,7 +148,7 @@ const DollarCell = ({
   };
 
   useEffect(() => {
-    setDollar(value);
+    setDollar(Math.round(value));
   }, [value]);
 
   useEffect(() => {
