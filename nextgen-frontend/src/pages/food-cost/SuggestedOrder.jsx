@@ -5,6 +5,8 @@ import UnitSelector from "../../components/UnitSelector.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
+import Dropdown from "../../components/DropDown.jsx";
+import {VendorAPI} from "../../apis/food-cost/VendorAPI.jsx";
 
 export default function SuggestedOrder() {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,6 +18,9 @@ export default function SuggestedOrder() {
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setselectedUnitName] = useState("No Unit Selected");
+  const [vendorsList, setVendorsList] = useState([]);
+  const [selectedVendorName, setselectedVendorName] = useState("No Vendor Selected");
+  const [selectedVendor, setSelectedVendor] = useState();
   const [showModal, setShowModal] = useState(false);
   const [companyID, setCompanyID] = useState();
   const [alignmentID, setAlignmentID] = useState();
@@ -38,6 +43,7 @@ export default function SuggestedOrder() {
         setIsLoading(false);
       }
     }
+    getVendors();
   }, []);
 
   const getUnits = (companyId, alignmentId, userId) => {
@@ -58,7 +64,21 @@ export default function SuggestedOrder() {
     setSelectedUnit(unitID);
     setShowModal(false);
   };
+  const handleVendorSelection = (VendorName, VendorID) => {
+    setselectedVendorName(VendorName);
+    setSelectedVendor(VendorID);
+  };
   
+  const getVendors = (companyId, alignmentId, userId) => {
+    VendorAPI.getVendors(companyId, alignmentId, userId)
+      .then((data) => {
+        setVendorsList(data.Vendors)
+      }).catch((error) => {
+        console.error("Error getting units: ", error);
+      });
+  };
+      
+
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
@@ -69,6 +89,11 @@ export default function SuggestedOrder() {
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}
             unitID={selectedUnit}
+          />
+          <Dropdown
+            options={vendorsList.map(vendors => ({ Name: vendors.VendorName, value: vendors.VendorID }))}
+            selectedOption={selectedVendorName}
+            onOptionChange={handleVendorSelection}
           />
           <UnitModal
             unitData={unitsList}
