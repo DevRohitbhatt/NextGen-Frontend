@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import * as Styled from "./styles/PrepChartStyles.jsx";
 import "../../components/UnitSelector.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
@@ -6,7 +6,8 @@ import ExportOptions from "../../components/ExportOptions.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import Dropdown from "../../components/DropDown.jsx";
-import {VendorAPI} from "../../apis/food-cost/VendorAPI.jsx";
+import { VendorAPI } from "../../apis/food-cost/VendorAPI.jsx";
+import DateRangePicker from "../../components/DateRange.jsx";
 
 export default function SuggestedOrder() {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,7 +15,6 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
-
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setselectedUnitName] = useState("No Unit Selected");
@@ -25,36 +25,58 @@ export default function SuggestedOrder() {
   const [companyID, setCompanyID] = useState();
   const [alignmentID, setAlignmentID] = useState();
   const [IsActive, setIsActive] = useState([]);
+  const [selectedDates, setSelectedDates] = useState([new Date(), new Date()]);
+
 
   useEffect(() => {
     if (!selectedUnit) {
-      let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
-      if (parameters)
-        parameters = JSON.parse(parameters);
+      let parameters = decodeURIComponent(
+        window.location.search.replace("?data=", "")
+      );
+      if (parameters) parameters = JSON.parse(parameters);
       parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
       parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
-      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
+      parameters
+        ? setSelectedUnit(parameters.User_DefaultUnitID)
+        : setSelectedUnit();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
-        getUnits(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
+        getUnits(
+          parameters.CompanyID,
+          parameters.AlignmentId,
+          parameters.User_GroupOrUnitAccess
+        );
+        getVendors(parameters.CompanyID,parameters.AlignmentId,parameters.User_GroupOrUnitAccess);
       } else {
-        setErrorMessage("No Unit Selected, Please select a unit.");
+        setErrorMessage("No Unit or Vendor Selected, Please select a unit.");
         setIsError(true);
         setIsLoading(false);
       }
     }
-    getVendors();
+   
   }, []);
 
   const getUnits = (companyId, alignmentId, userId) => {
     UnitsAndAreasAPI.getbyid(companyId, alignmentId, userId)
       .then((data) => {
         setUnitsList(data);
-      }).catch((error) => {
+      })
+      .catch((error) => {
         console.error("Error getting units: ", error);
       });
   };
-      
+
+  const getVendors = (companyId, alignmentId, userId) => {
+    VendorAPI.getVendors(companyId, alignmentId, userId)
+      .then((data) => {
+        setVendorsList(data.Vendors);
+      })
+      .catch((error) => {
+        console.error("Error getting units: ", error);
+      });
+  };
+
+
   const handleUnitSelectorClick = () => {
     setShowModal(true);
   };
@@ -68,16 +90,12 @@ export default function SuggestedOrder() {
     setselectedVendorName(VendorName);
     setSelectedVendor(VendorID);
   };
-  
-  const getVendors = (companyId, alignmentId, userId) => {
-    VendorAPI.getVendors(companyId, alignmentId, userId)
-      .then((data) => {
-        setVendorsList(data.Vendors)
-      }).catch((error) => {
-        console.error("Error getting units: ", error);
-      });
+
+  const handleDateChange = (dates) => {
+    const formates = { year: "numeric", month: "2-digit", day: "2-digit" };
+    const formattedDateRange = `${dates[0].toLocaleDateString(undefined,formates)} - ${dates[1].toLocaleDateString(undefined, formates)}`;
+    setSelectedDates(formattedDateRange);
   };
-      
 
   return (
     <Styled.PageContainer>
@@ -91,10 +109,18 @@ export default function SuggestedOrder() {
             unitID={selectedUnit}
           />
           <Dropdown
-            options={vendorsList.map(vendors => ({ Name: vendors.VendorName, value: vendors.VendorID }))}
+            options={vendorsList.map((vendors) => ({
+              Name: vendors.VendorName,
+              value: vendors.VendorID,
+            }))}
             selectedOption={selectedVendorName}
             onOptionChange={handleVendorSelection}
           />
+          <DateRangePicker
+            selectedDates={selectedDates}
+            onDateChange={handleDateChange}
+          />
+
           <UnitModal
             unitData={unitsList}
             unitID={selectedUnit}
@@ -115,9 +141,7 @@ export default function SuggestedOrder() {
         </>
       ) : isError ? (
         <Styled.UnloadedMessage>{errorMessage}</Styled.UnloadedMessage>
-      ) : (
-        null
-      )}
+      ) : null}
     </Styled.PageContainer>
   );
 }
