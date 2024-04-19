@@ -99,7 +99,7 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
         ) : null}
         {includeCSV ? (
           <ExportOption>
-            <OptionImage>
+            <OptionImage onClick={handleCSVClick}>
               <CSVIcon />
             </OptionImage>
           </ExportOption>

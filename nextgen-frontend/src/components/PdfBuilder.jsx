@@ -52,6 +52,26 @@ const getCellValue = (cell) => {
   }
 }
 
+function downloadCSV(csvContent) {
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  if (navigator.msSaveBlob) {
+    // IE 10+
+    navigator.msSaveBlob(blob, "export.csv");
+  } else {
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "export.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      console.error("Anchor element with 'download' attribute not supported in this browser.");
+    }
+  }
+}
+
 export default function PdfBuilder(data) {
   const content = [];
   let columns = [];
@@ -99,4 +119,18 @@ export default function PdfBuilder(data) {
   else if (data.exportType === "print") {
     pdfMake.createPdf(docDefinition).print();
   }
+  else if (data.exportType === "csv") {
+    let csvContent = "";
+    data.body.forEach(section => {
+      if (section.type === "table") {
+        const tableInfo = section.data;
+        csvContent += tableInfo.columnHeaders.join(",") + "\n";
+        tableInfo.rows.forEach(row => {
+          csvContent += row.map(cell => getCellValue(cell)).join(",") + "\n";
+        });
+      }
+    });
+    downloadCSV(csvContent);
+  }
+
 }

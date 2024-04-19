@@ -10,6 +10,7 @@ import DateRangePicker from "../../components/DateRange.jsx";
 import MessagePopup from "../../components/MessagePopup.jsx";
 import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
+import PdfBuilder from "../../components/PdfBuilder.jsx";
 
 export default function SuggestedOrder() {
   const [isLoading, setIsLoading] = useState(false);
@@ -176,6 +177,75 @@ export default function SuggestedOrder() {
     });
   };
 
+  const handleCSVClick = () => {
+    const pdfData = {
+      title: "Suggested Order",
+      exportType: "csv",
+      body: [
+        {
+          type: "table/Column",
+          title: "Forecast",
+          widths: [50, 100, 75],
+          data: forecastTable,
+        },
+        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable },
+        {
+          type: "table",
+          title: "Today",
+          widths: [115, 140, "*", "*", "*", "*", "*"],
+          data: todayTable,
+        },
+        {
+          type: "table",
+          title: "Tomorrow",
+          widths: [115, 140, "*", "*", "*", "*", "*"],
+          data: tomorrowTable,
+        },
+        {
+          type: "table",
+          title: "Next Day",
+          widths: [115, 140, "*", "*", "*", "*", "*"],
+          data: nextDayTable,
+        },
+      ],
+    };
+    PdfBuilder(pdfData);
+  };
+
+  const handlePDFClick = () => {
+    const pdfData = {
+      title: "Prep Chart",
+      exportType: "pdf",
+      body: [
+        {
+          type: "table/Column",
+          title: "Forecast",
+          widths: [50, 100, 75],
+          data: forecastTable,
+        },
+        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable },
+        {
+          type: "table",
+          title: "Today",
+          widths: [115, 140, "*", "*", "*", "*", "*"],
+          data: todayTable,
+        },
+        {
+          type: "table",
+          title: "Tomorrow",
+          widths: [115, 140, "*", "*", "*", "*", "*"],
+          data: tomorrowTable,
+        },
+        {
+          type: "table",
+          title: "Next Day",
+          widths: [115, 140, "*", "*", "*", "*", "*"],
+          data: nextDayTable,
+        },
+      ],
+    };
+    PdfBuilder(pdfData);
+  };
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
@@ -237,7 +307,13 @@ export default function SuggestedOrder() {
             handleUnitSelection={handleUnitSelection}
           />
         </Styled.DateAndUnitContainer>
-        <ExportOptions includeSave={true} />
+        <ExportOptions 
+         includePDF={true}
+         includeCSV={true}
+         includeSave={true}
+         handlePDFClick={handlePDFClick}
+         handleCSVClick={handleCSVClick}
+        />
       </Styled.OptionsRow>
       {isLoading ? (
         <>
