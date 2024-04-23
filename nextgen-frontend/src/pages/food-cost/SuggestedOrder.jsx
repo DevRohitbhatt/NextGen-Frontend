@@ -22,7 +22,8 @@ export default function SuggestedOrder() {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [selectedUnitName, setSelectedUnitName] = useState("No Unit Selected");
   const [vendorsList, setVendorsList] = useState([]);
-  const [selectedVendorName, setSelectedVendorName] = useState("No Vendor Selected");
+  const [selectedVendorName, setSelectedVendorName] =
+    useState("No Vendor Selected");
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [companyID, setCompanyID] = useState(null);
@@ -31,6 +32,38 @@ export default function SuggestedOrder() {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
+  const [isUnitSelected, setIsUnitSelected] = useState(false);
+
+  const SuggestedTableStructure = {
+    columnHeaders: [
+      "Inventory ID",
+      "Vendor Item Description",
+      "Vendor Item Ref",
+      "Vendor Item Order Unit",
+      "Vendor Pack Size",
+      "Current/Last Price",
+      "Safety Factor",
+      "Suggested Qty",
+      "On Hand",
+    ],
+    dataTypes: [
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+    ],
+    columnWidths: "auto",
+    rows: [],
+  };
+  const [SuggestedTable, setSuggestedTable] = useState({
+    ...SuggestedTableStructure,
+  });
+
   const [forecastTable, setForecastTable] = useState({
     columnHeaders: ["Forecasted Date", "Forecasted $ Amt"],
     dataTypes: ["string", "number"],
@@ -38,6 +71,7 @@ export default function SuggestedOrder() {
     rows: [],
     width: "50%",
   });
+
   const [defaultSafetyFactorTable, setDefaultSafetyFactorTable] = useState({
     columnHeaders: ["Default Safety Factor"],
     dataTypes: ["number"],
@@ -57,11 +91,12 @@ export default function SuggestedOrder() {
       parameters && setCompanyID(parameters.CompanyID);
       parameters && setAlignmentID(parameters.AlignmentId);
       parameters && setSelectedUnit(parameters.User_DefaultUnitID);
-      parameters && getUnits(
-        parameters.CompanyID,
-        parameters.AlignmentId,
-        parameters.User_GroupOrUnitAccess
-      );
+      parameters &&
+        getUnits(
+          parameters.CompanyID,
+          parameters.AlignmentId,
+          parameters.User_GroupOrUnitAccess
+        );
       parameters && setSelectedUnitName(parameters.UnitName);
       parameters && setSelectedVendorName(parameters.VendorName);
     }
@@ -74,6 +109,7 @@ export default function SuggestedOrder() {
       setIsLoading(false);
     }
     getVendors();
+    fetchData(companyID, selectedUnit, new Date());
   }, [selectedUnit, companyID]);
 
   const getUnits = (companyId, alignmentId, userId) => {
@@ -131,46 +167,84 @@ export default function SuggestedOrder() {
   const getSuggestedOrderData = (companyID, unitID, date) => {
     setIsLoading(true);
     setIsError(false);
-    SuggestedOrderAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((data) => {
-      if (data === "No Template found for the selected company and unit.") {
-        setErrorMessage("No Template found for the selected unit. Please create a template for this unit.");
+    SuggestedOrderAPI.getItem(companyID, unitID, date.toISOString().split("T")[0])
+      .then((data) => {
+        if (data === "No Template found for the selected company and unit.") {
+          setErrorMessage(
+            "No Template found for the selected unit. Please create a template for this unit."
+          );
+          setIsError(true);
+          setIsLoading(false);
+          return;
+        }
+        const tomorrow = new Date(date);
+        tomorrow.setDate(date.getDate() + 1);
+        const nextDay = new Date(tomorrow);
+        nextDay.setDate(nextDay.getDate() + 1);
+        buildForecastTable(data.forecastData, date, tomorrow, nextDay);
+        setDefaultSafetyFactorTable({
+          ...defaultSafetyFactorTable,
+          rows: [
+            [
+              {
+                value: data.defaultSafetyFactor,
+                cellType: "percent",
+                columnName: "Default Safety Factor",
+                handleOnChange: {},
+                isInput: true,
+              },
+            ],
+          ],
+        });
+      })
+      .catch((error) => {
+        console.error("Error getting suggested order data: ", error);
         setIsError(true);
+      })
+      .finally(() => {
         setIsLoading(false);
-        return;
-      }
-      const tomorrow = new Date(date);
-      tomorrow.setDate(date.getDate() + 1);
-      const nextDay = new Date(tomorrow);
-      nextDay.setDate(nextDay.getDate() + 1);
-      buildForecastTable(data.forecastData, date, tomorrow, nextDay);
-      setDefaultSafetyFactorTable({
-        ...defaultSafetyFactorTable,
-        rows: [[{ value: data.defaultSafetyFactor, cellType: "percent", columnName: "Default Safety Factor", handleOnChange: { }, isInput: true}]],
       });
-    }).catch(error => {
-      console.error("Error getting suggested order data: ", error);
-      setIsError(true);
-    }).finally(() => {
-      setIsLoading(false);
-    });
-  }
-  
+  };
+
   const buildForecastTable = (forecastData, today, tomorrow, nextDay) => {
     const rows = [
       [
         { value: today.toLocaleDateString(), cellType: "", columnName: "Date" },
-        { value: forecastData.today, cellType: "dollar", isInput: true, columnName: "Forecasted Sales"},
+        {
+          value: forecastData.today,
+          cellType: "dollar",
+          isInput: true,
+          columnName: "Forecasted Sales",
+        },
       ],
       [
-        { value: tomorrow.toLocaleDateString(), cellType: "", columnName: "Date" },
-        { value: forecastData.tomorrow, cellType: "dollar", isInput: true, columnName: "Forecasted Sales" },
+        {
+          value: tomorrow.toLocaleDateString(),
+          cellType: "",
+          columnName: "Date",
+        },
+        {
+          value: forecastData.tomorrow,
+          cellType: "dollar",
+          isInput: true,
+          columnName: "Forecasted Sales",
+        },
       ],
       [
-        { value: nextDay.toLocaleDateString(), cellType: "", columnName: "Date" },
-        { value: forecastData.nextDay, cellType: "dollar", isInput: true, columnName: "Forecasted Sales" },
+        {
+          value: nextDay.toLocaleDateString(),
+          cellType: "",
+          columnName: "Date",
+        },
+        {
+          value: forecastData.nextDay,
+          cellType: "dollar",
+          isInput: true,
+          columnName: "Forecasted Sales",
+        },
       ],
     ];
-  
+
     setForecastTable({
       ...forecastTable,
       rows: rows,
@@ -246,6 +320,27 @@ export default function SuggestedOrder() {
     };
     PdfBuilder(pdfData);
   };
+
+  const fetchData = (companyID, selectedUnit,date) => {
+    setIsLoading(true); 
+    SuggestedOrderAPI.get(companyID, selectedUnit, date.toISOString().split("T")[0])
+      .then((data) => {
+        buildPrepMasterTable(data);
+        setIsUnitSelected(true);
+        setIsLoading(false); 
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
+  const buildPrepMasterTable = (SuggestedOrder) => {
+    setSuggestedTable({
+      ...SuggestedTableStructure,
+      rows: SuggestedOrder,
+    });
+  };
+
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
@@ -307,12 +402,12 @@ export default function SuggestedOrder() {
             handleUnitSelection={handleUnitSelection}
           />
         </Styled.DateAndUnitContainer>
-        <ExportOptions 
-         includePDF={true}
-         includeCSV={true}
-         includeSave={true}
-         handlePDFClick={handlePDFClick}
-         handleCSVClick={handleCSVClick}
+        <ExportOptions
+          includePDF={true}
+          includeCSV={true}
+          includeSave={true}
+          handlePDFClick={handlePDFClick}
+          handleCSVClick={handleCSVClick}
         />
       </Styled.OptionsRow>
       {isLoading ? (
@@ -345,6 +440,17 @@ export default function SuggestedOrder() {
               isSorting={false}
             />
           </Styled.ForeCastAndSafetyFactor>
+          <Styled.InventoryItemsContainer>
+          <Styled.TableLeft>
+            <Table
+              columnHeaders={SuggestedTable.columnHeaders}
+              columnwidths={SuggestedTable.columnWidths}
+              dataTypes={SuggestedTable.dataTypes}
+              rows={SuggestedTable.rows}
+              isSorting={false}
+            />
+          </Styled.TableLeft>
+          </Styled.InventoryItemsContainer>
         </>
       )}
     </Styled.PageContainer>

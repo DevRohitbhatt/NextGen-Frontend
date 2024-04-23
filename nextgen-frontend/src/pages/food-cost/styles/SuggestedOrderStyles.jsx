@@ -72,5 +72,18 @@ export const TableHeader = styled.div`
   padding-bottom: 10px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
 `;
+export const TableLeft = styled.div`
+  // display: flex;
+  // justify-content: space-between;
+  // margin-bottom: 40px;
+  // border-radius: 30px;
+  // padding: 10px 20px;
+  // box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
+`;
+export const InventoryItemsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
 
 
