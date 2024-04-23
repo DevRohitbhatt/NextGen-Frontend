@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import * as Styled from "./styles/PrepChartStyles.jsx";
 import "../../components/UnitSelector.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
@@ -23,15 +23,22 @@ export default function SuggestedOrder() {
 
   useEffect(() => {
     if (!selectedUnit) {
-      let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
-      if (parameters)
-        parameters = JSON.parse(parameters);
+      let parameters = decodeURIComponent(
+        window.location.search.replace("?data=", "")
+      );
+      if (parameters) parameters = JSON.parse(parameters);
       parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
       parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
-      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
+      parameters
+        ? setSelectedUnit(parameters.User_DefaultUnitID)
+        : setSelectedUnit();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
-        getUnits(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
+        getUnits(
+          parameters.CompanyID,
+          parameters.AlignmentId,
+          parameters.User_GroupOrUnitAccess
+        );
       } else {
         setErrorMessage("No Unit Selected, Please select a unit.");
         setIsError(true);
@@ -44,11 +51,21 @@ export default function SuggestedOrder() {
     UnitsAndAreasAPI.getbyid(companyId, alignmentId, userId)
       .then((data) => {
         setUnitsList(data);
-      }).catch((error) => {
-        console.error("Error getting units: ", error);
+      })
+      .catch((error) => {
+        setIsError(true);
+        if (error.response && error.response.status === 404) {
+          setErrorMessage("Units not found for the given parameters.");
+        } else if (error.response && error.response.status === 403) {
+          setErrorMessage(
+            "Access denied. You do not have permission to view units."
+          );
+        } else {
+          setErrorMessage("An error occurred while getting units.");
+        }
       });
   };
-      
+
   const handleUnitSelectorClick = () => {
     setShowModal(true);
   };
@@ -58,7 +75,7 @@ export default function SuggestedOrder() {
     setSelectedUnit(unitID);
     setShowModal(false);
   };
-  
+
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
@@ -90,9 +107,7 @@ export default function SuggestedOrder() {
         </>
       ) : isError ? (
         <Styled.UnloadedMessage>{errorMessage}</Styled.UnloadedMessage>
-      ) : (
-        null
-      )}
+      ) : null}
     </Styled.PageContainer>
   );
 }
