@@ -3,14 +3,39 @@ import * as Styled from "./styles/SuggestedOrderStyles.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
-import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import Dropdown from "../../components/DropDown.jsx";
-import { VendorAPI } from "../../apis/food-cost/VendorAPI.jsx";
 import DateRangePicker from "../../components/DateRange.jsx";
 import MessagePopup from "../../components/MessagePopup.jsx";
 import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
+
+const SuggestedTableStructure = {
+  columnHeaders: [
+    "Inventory ID",
+    "Vendor Item Description",
+    "Vendor Item Ref",
+    "Vendor Item Order Unit",
+    "Vendor Pack Size",
+    "Current/Last Price",
+    "Safety Factor",
+    "Suggested Qty",
+    "On Hand",
+  ],
+  dataTypes: [
+    "string",
+    "string",
+    "string",
+    "string",
+    "string",
+    "string",
+    "string",
+    "string",
+    "string",
+  ],
+  columnWidth: "0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
+  rows: [],
+};
 
 export default function SuggestedOrder() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,47 +44,20 @@ export default function SuggestedOrder() {
     "There was an error trying to load the Suggested Order, please try again later."
   );
   const [unitsList, setUnitsList] = useState([]);
-  const [selectedUnit, setSelectedUnit] = useState(null);
+  const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setSelectedUnitName] = useState("No Unit Selected");
   const [vendorsList, setVendorsList] = useState([]);
-  const [selectedVendorName, setSelectedVendorName] =
-    useState("No Vendor Selected");
+  const [selectedVendorName, setSelectedVendorName] = useState("No Vendor Selected");
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [companyID, setCompanyID] = useState(null);
+  const [companyID, setCompanyID] = useState();
   const [alignmentID, setAlignmentID] = useState(null);
   const [selectedDates, setSelectedDates] = useState([new Date(), new Date()]);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [isUnitSelected, setIsUnitSelected] = useState(false);
-
-  const SuggestedTableStructure = {
-    columnHeaders: [
-      "Inventory ID",
-      "Vendor Item Description",
-      "Vendor Item Ref",
-      "Vendor Item Order Unit",
-      "Vendor Pack Size",
-      "Current/Last Price",
-      "Safety Factor",
-      "Suggested Qty",
-      "On Hand",
-    ],
-    dataTypes: [
-      "string",
-      "string",
-      "string",
-      "string",
-      "string",
-      "string",
-      "string",
-      "string",
-      "string",
-    ],
-    columnWidths: "auto",
-    rows: [],
-  };
+  const [IsActive, setIsActive] = useState([]);
   const [SuggestedTable, setSuggestedTable] = useState({
     ...SuggestedTableStructure,
   });
@@ -67,7 +65,7 @@ export default function SuggestedOrder() {
   const [forecastTable, setForecastTable] = useState({
     columnHeaders: ["Forecasted Date", "Forecasted $ Amt"],
     dataTypes: ["string", "number"],
-    columnWidths: "1fr 1fr",
+    columnWidth: "1fr 1fr",
     rows: [],
     width: "50%",
   });
@@ -75,62 +73,128 @@ export default function SuggestedOrder() {
   const [defaultSafetyFactorTable, setDefaultSafetyFactorTable] = useState({
     columnHeaders: ["Default Safety Factor"],
     dataTypes: ["number"],
-    columnWidths: "1fr",
+    columnWidth: "1fr",
     rows: [],
-    width: "15%",
-    height: "50%",
+    width: "30%",
+    height: "40%",
   });
 
   useEffect(() => {
     document.title = "Suggested Order";
-    if (selectedUnit === undefined || selectedUnit === null) {
+    if (!unitsList) {
       let parameters = decodeURIComponent(
         window.location.search.replace("?data=", "")
       );
       if (parameters) parameters = JSON.parse(parameters);
-      parameters && setCompanyID(parameters.CompanyID);
-      parameters && setAlignmentID(parameters.AlignmentId);
-      parameters && setSelectedUnit(parameters.User_DefaultUnitID);
-      parameters &&
-        getUnits(
-          parameters.CompanyID,
-          parameters.AlignmentId,
-          parameters.User_GroupOrUnitAccess
-        );
-      parameters && setSelectedUnitName(parameters.UnitName);
-      parameters && setSelectedVendorName(parameters.VendorName);
-    }
-    if (selectedUnit !== undefined && selectedUnit !== null) {
-      getSuggestedOrderData(companyID, selectedUnit, new Date());
-      getVendors(companyID, selectedUnit, new Date());
+      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
+      parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
+      parameters
+        ? setSelectedUnit(parameters.User_DefaultUnitID)
+        : setSelectedUnit();
+      parameters ? setIsActive(parameters.UnitID) : setIsActive();
+      if (parameters.User_DefaultUnitID) {
+        fetchData(1021, 51, new Date());
+        getUnits(1021, 1110, 5120);
+        getVendors(1021);
+      } else {
+        setErrorMessage("No Unit or Vendor Selected, Please select a unit.");
+        setIsError(true);
+        setIsLoading(false);
+      }
     } else {
-      setErrorMessage("No Unit or Vendor Selected, Please select a unit.");
-      setIsError(true);
-      setIsLoading(false);
+      getVendors(1021);
+      getUnits(1021, 1110, 5120);
+      getSuggestedOrderData(1021, 51, new Date());
     }
-    getVendors();
-    fetchData(companyID, selectedUnit, new Date());
-  }, [selectedUnit, companyID]);
+  }, []);
 
   const getUnits = (companyId, alignmentId, userId) => {
-    UnitsAndAreasAPI.getbyid(companyId, alignmentId, userId)
-      .then((data) => {
-        setUnitsList(data);
+    SuggestedOrderAPI.getbyid(companyId, alignmentId, userId)
+      .then((response) => {
+        const data = response.data; // Extract data object from the response
+        if (response.message === "10001") {
+          setUnitsList(data);
+        }
       })
       .catch((error) => {
-        console.error("Error getting units: ", error);
         setIsError(true);
+        if (error.response && error.response.status === 404) {
+          setErrorMessage("Units not found for the given parameters.");
+        } else if (error.response && error.response.status === 403) {
+          setErrorMessage(
+            "Access denied. You do not have permission to view units."
+          );
+        } else {
+          setErrorMessage("An error occurred while getting units.");
+        }
       });
   };
 
-  const getVendors = () => {
-    VendorAPI.getVendors(companyID, alignmentID)
-      .then((data) => {
-        setVendorsList(data.Vendors);
+  const getVendors = (companyID) => {
+    SuggestedOrderAPI.getVendor(companyID)
+      .then((response) => {
+        const data = response.data; // Extract data object from the response
+        if (response.message === "10001") {
+        setVendorsList(data);
+        }
       })
       .catch((error) => {
-        console.error("Error getting vendors: ", error);
         setIsError(true);
+        if (error.response && error.response.status === 404) {
+          setErrorMessage("vendors not found for the given parameters.");
+        } else if (error.response && error.response.status === 403) {
+          setErrorMessage(
+            "Access denied. You do not have permission to view vendors."
+          );
+        } else {
+          setErrorMessage("An error occurred while getting vendors.");
+        }
+      });
+  };
+  const getSuggestedOrderData = (companyID, unitID, date) => {
+    setIsLoading(true);
+    setIsError(false);
+    SuggestedOrderAPI.getItem(
+      companyID,
+      unitID,
+      date.toISOString().split("T")[0]
+    )
+      .then((response) => {
+        const data = response.data; // Extract data object from the response
+        if (response.message === "10001") {
+          const tomorrow = new Date(date);
+          tomorrow.setDate(date.getDate() + 1);
+          const nextDay = new Date(tomorrow);
+          nextDay.setDate(nextDay.getDate() + 1);
+          buildForecastTable(data.forecastData, date, tomorrow, nextDay);
+
+          setDefaultSafetyFactorTable({
+            ...defaultSafetyFactorTable,
+            rows: [
+              [
+                {
+                  value: data.defaultSafetyFactor,
+                  cellType: "percent",
+                  columnName: "Default Safety Factor",
+                  handleOnChange: {},
+                  isInput: true,
+                },
+              ],
+            ],
+          });
+        } else {
+          setErrorMessage(
+            "No Template found for the selected unit. Please create a template for this unit."
+          );
+          setIsError(true);
+        }
+      })
+      .catch((error) => {
+        console.error("Error getting suggested order data: ", error);
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -164,49 +228,11 @@ export default function SuggestedOrder() {
     setShowWarningPopup(false);
   };
 
-  const getSuggestedOrderData = (companyID, unitID, date) => {
-    setIsLoading(true);
-    setIsError(false);
-    SuggestedOrderAPI.getItem(companyID, unitID, date.toISOString().split("T")[0])
-      .then((data) => {
-        if (data === "No Template found for the selected company and unit.") {
-          setErrorMessage(
-            "No Template found for the selected unit. Please create a template for this unit."
-          );
-          setIsError(true);
-          setIsLoading(false);
-          return;
-        }
-        const tomorrow = new Date(date);
-        tomorrow.setDate(date.getDate() + 1);
-        const nextDay = new Date(tomorrow);
-        nextDay.setDate(nextDay.getDate() + 1);
-        buildForecastTable(data.forecastData, date, tomorrow, nextDay);
-        setDefaultSafetyFactorTable({
-          ...defaultSafetyFactorTable,
-          rows: [
-            [
-              {
-                value: data.defaultSafetyFactor,
-                cellType: "percent",
-                columnName: "Default Safety Factor",
-                handleOnChange: {},
-                isInput: true,
-              },
-            ],
-          ],
-        });
-      })
-      .catch((error) => {
-        console.error("Error getting suggested order data: ", error);
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
-
   const buildForecastTable = (forecastData, today, tomorrow, nextDay) => {
+
+    const totalForecast =
+      forecastData.today + forecastData.tomorrow + forecastData.nextDay;
+
     const rows = [
       [
         { value: today.toLocaleDateString(), cellType: "", columnName: "Date" },
@@ -245,9 +271,23 @@ export default function SuggestedOrder() {
       ],
     ];
 
+    // Remove existing total row if it exists
+    const updatedRows = rows.filter((row) => row[0].value !== "Total");
+
+    const totalRow = [
+      { value: "Total", cellType: "", columnName: "" }, 
+      {
+        value: totalForecast,
+        cellType: "dollar",
+        isInput: false,
+        columnName: "Forecasted Sales",
+      },
+    ];
+    updatedRows.push(totalRow);
+   
     setForecastTable({
       ...forecastTable,
-      rows: rows,
+      rows: updatedRows,
     });
   };
 
@@ -321,13 +361,17 @@ export default function SuggestedOrder() {
     PdfBuilder(pdfData);
   };
 
-  const fetchData = (companyID, selectedUnit,date) => {
-    setIsLoading(true); 
-    SuggestedOrderAPI.get(companyID, selectedUnit, date.toISOString().split("T")[0])
+  const fetchData = (companyID, selectedUnit, date) => {
+    setIsLoading(true);
+    SuggestedOrderAPI.get(
+      companyID,
+      selectedUnit,
+      date.toISOString().split("T")[0]
+    )
       .then((data) => {
         buildPrepMasterTable(data);
         setIsUnitSelected(true);
-        setIsLoading(false); 
+        setIsLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -380,8 +424,8 @@ export default function SuggestedOrder() {
           />
           <Dropdown
             options={vendorsList.map((vendors) => ({
-              Name: vendors.VendorName,
-              value: vendors.VendorID,
+              Name: vendors.vendorName,
+              value: vendors.vendorID,
             }))}
             selectedOption={selectedVendorName}
             onOptionChange={handleVendorSelection}
@@ -423,16 +467,17 @@ export default function SuggestedOrder() {
             <Table
               columnHeaders={forecastTable.columnHeaders}
               dataTypes={forecastTable.dataTypes}
-              columnWidths={forecastTable.columnWidths}
+              columnwidths={forecastTable.columnWidth}
               rows={forecastTable.rows}
               width={forecastTable.width}
               tableName={"Forecast"}
               isSorting={false}
             />
+
             <Table
               columnHeaders={defaultSafetyFactorTable.columnHeaders}
               dataTypes={defaultSafetyFactorTable.dataTypes}
-              columnWidths={defaultSafetyFactorTable.columnWidths}
+              columnwidths={defaultSafetyFactorTable.columnWidth}
               rows={defaultSafetyFactorTable.rows}
               tableName={"DefaultSafetyFactor"}
               width={defaultSafetyFactorTable.width}
@@ -440,7 +485,8 @@ export default function SuggestedOrder() {
               isSorting={false}
             />
           </Styled.ForeCastAndSafetyFactor>
-          <Styled.InventoryItemsContainer>
+
+          {/* <Styled.InventoryItemsContainer>
           <Styled.TableLeft>
             <Table
               columnHeaders={SuggestedTable.columnHeaders}
@@ -450,7 +496,7 @@ export default function SuggestedOrder() {
               isSorting={false}
             />
           </Styled.TableLeft>
-          </Styled.InventoryItemsContainer>
+          </Styled.InventoryItemsContainer> */}
         </>
       )}
     </Styled.PageContainer>
