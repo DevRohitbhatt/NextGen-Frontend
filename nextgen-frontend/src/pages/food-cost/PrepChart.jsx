@@ -35,7 +35,7 @@ const prepTableStructure = {
   dataTypes : ["string", "string", "number", "number", "number", "number", "number"],
   columnWidths : "2.5fr 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows : [],
-  columnTooltip: ["", toolTipPrepType, toolTipYieldType, toolTipSafetyFactor, toolTipNeeded, toolTipOnHand, ""],
+  headerTooltips: ["", toolTipPrepType, toolTipYieldType, toolTipSafetyFactor, toolTipNeeded, toolTipOnHand, ""],
   toolTipDirection: ["", right, left, right, right, right, ""]
 };
 
@@ -53,7 +53,7 @@ export default function PrepChart() {
     columnWidths: ".5fr 1fr 1fr",
     rows: [],
     width: "50%",
-    columnTooltip: ["", toolTipForecastSales, ""],
+    headerTooltips: ["", toolTipForecastSales, ""],
     toolTipDirection: ["", left, ""]
   });
   const [unitsList, setUnitsList] = useState([]);
@@ -79,7 +79,7 @@ export default function PrepChart() {
     rows: [],
     width: "15%",
     height: "50%",
-    columnTooltip: [""],
+    headerTooltips: [""],
     toolTipDirection: [""]
   });
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -486,7 +486,7 @@ export default function PrepChart() {
                 tableName={"Forecast"}
                 handleInputCellChange={handleTableCellChange}
                 isSorting={false}
-                columnTooltip={forecastTable.columnTooltip}
+                headerTooltips={forecastTable.headerTooltips}
                 toolTipDirection={forecastTable.toolTipDirection}
               />
               <Table
@@ -499,7 +499,7 @@ export default function PrepChart() {
                 height={defaultSafetyFactorTable.height}
                 handleInputCellChange={handleTableCellChange}
                 isSorting={false}
-                columnTooltip={defaultSafetyFactorTable.columnTooltip}
+                headerTooltips={defaultSafetyFactorTable.headerTooltips}
                 toolTipDirection={defaultSafetyFactorTable.toolTipDirection}
               />
             </Styled.ForeCastAndSafetyFactor>
@@ -513,7 +513,7 @@ export default function PrepChart() {
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
-              columnTooltip={todayTable.columnTooltip}
+              headerTooltips={todayTable.headerTooltips}
               toolTipDirection={todayTable.toolTipDirection}
             />
 
@@ -527,7 +527,7 @@ export default function PrepChart() {
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
-              columnTooltip={tomorrowTable.columnTooltip}
+              headerTooltips={tomorrowTable.headerTooltips}
               toolTipDirection={tomorrowTable.toolTipDirection}
             />
 
@@ -541,7 +541,7 @@ export default function PrepChart() {
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
-              columnTooltip={nextDayTable.columnTooltip}
+              headerTooltips={nextDayTable.headerTooltips}
               toolTipDirection={nextDayTable.toolTipDirection}
             />
           </>

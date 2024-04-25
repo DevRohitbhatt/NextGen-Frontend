@@ -125,7 +125,7 @@ export default function TableBuilder({
   scrollable = false,
   handleSorting,
   isSorting = false,
-  columnTooltip,
+  headerTooltips,
   toolTipDirection
 }) {
   const [sortColumnIndex, setSortColumnIndex] = useState(-1); // Initialize with -1 to indicate no column is sorted initially
@@ -146,8 +146,6 @@ if (isSorting) {
     }
   };
 
-  console.log('VJ', columnTooltip);
-  console.log(columnHeaders);
   return (
     <Container width={width} height={height}>
       <Table
@@ -189,22 +187,21 @@ if (isSorting) {
             columnHeaders.map((header, index) => (
               <TableHeaderCell key={index} columntype={dataTypes[index]}>
                 {
-                  columnTooltip[index] === "" ? (
+                  headerTooltips[index] === "" ? (
                     <div> {header} </div>
                   ) :
                     (
                       toolTipDirection[index] === "left" ? (
-                        <Tooltip content={columnTooltip[index]} direction="top">
+                        <Tooltip content={headerTooltips[index]} direction="left">
                           <FcInfo /> {header}
                         </Tooltip>
                       ) : (
-                        <Tooltip content={columnTooltip[index]} direction="top">
+                        <Tooltip content={headerTooltips[index]} direction="left">
                           {header} <FcInfo />
                         </Tooltip>
                       )
                     )
                 }
-                {/* {header} */}
               </TableHeaderCell>
             ))
         )}
@@ -262,6 +259,6 @@ TableBuilder.propTypes = {
   className: PropTypes.string,
   handleSorting:PropTypes.func,
   isSorting: PropTypes.bool,
-  columnTooltip: PropTypes.array,
+  headerTooltips: PropTypes.array,
   toolTipDirection: PropTypes.array
 };
