@@ -14,6 +14,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
+import { Steps, Hints } from "intro.js-react";
+import "intro.js/introjs.css";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
@@ -52,6 +54,31 @@ export default function PrepChartTemplate() {
   const [isOverTomorrows, setIsOverTomorrow] = useState(false);
   const [isOverNextDays, setIsOverNextDay] = useState(false);
   const draggingPos = useRef();
+
+  const [introJS, setIntroJS] = useState ({ 
+    stepsEnabled: false,
+    initialStep: 0, 
+    steps: [
+      {
+        element: ".unit-selector",
+        intro: "Select a unit from the dropdown list",
+      },
+      {
+        element: ".save-option",
+        intro: "Click here to save the data",
+      },
+      {
+        element: ".inventory-items",
+        intro: "Drag items from this list that you want to add to the Prep Chart",
+        position: "right",
+      },
+      {
+        element: ".drop-tables",
+        intro: "Drop items in any of the sections here",
+        position: "left",
+      }
+    ],
+  });
 
   useEffect(() => {
     todayItemRef.current = todayItem;
@@ -174,18 +201,24 @@ export default function PrepChartTemplate() {
 
   const insertData = (data) => {
     if (data.prepChartTemplate.length > 0) {
-      setTodayItem(
-        data.prepChartTemplate.find((item) => item.prepGroupKey === "Today")
-          .inventoryItemList
-      );
-      setTomorrowItem(
-        data.prepChartTemplate.find((item) => item.prepGroupKey === "Tomorrow")
-          .inventoryItemList
-      );
-      setNextDayItem(
-        data.prepChartTemplate.find((item) => item.prepGroupKey === "Next Day")
-          .inventoryItemList
-      );
+      if (data.prepChartTemplate[0]) {
+        setTodayItem(
+          data.prepChartTemplate.find((item) => item.prepGroupKey === "Today")
+            .inventoryItemList
+        );
+      }
+      if (data.prepChartTemplate[1]) {
+        setTomorrowItem(
+          data.prepChartTemplate.find((item) => item.prepGroupKey === "Tomorrow")
+            .inventoryItemList
+        );
+      }
+      if (data.prepChartTemplate[2]) {
+        setNextDayItem(
+          data.prepChartTemplate.find((item) => item.prepGroupKey === "Next Day")
+            .inventoryItemList
+        );
+      }
     } else {
       setTodayItem([]);
       setTomorrowItem([]);
@@ -460,8 +493,18 @@ export default function PrepChartTemplate() {
     }
   };
 
+  const handleIntroStart = () => {
+    setIntroJS({ ...introJS, stepsEnabled: true });
+  };
+
   return (
     <Styled.PageContainer>
+      <Steps
+        enabled={introJS.stepsEnabled}
+        steps={introJS.steps}
+        initialStep={0}
+        onExit={() => setIntroJS({ ...introJS, stepsEnabled: false })}
+      />
       <Styled.PageTitle>Prep Chart Template</Styled.PageTitle>
       <Styled.OptionsRow>
         <ToastContainer />
@@ -491,7 +534,7 @@ export default function PrepChartTemplate() {
           />
         </Styled.DateAndUnitContainer>
         <Styled.SaveOptionsContainer>
-          <ExportOptions includeSave={true} handleSaveClick={handleSave} />
+          <ExportOptions includeSave={true} handleSaveClick={handleSave} includeHelp={true} handleHelpClick={handleIntroStart} className="export-options" />
         </Styled.SaveOptionsContainer>
       </Styled.OptionsRow>
       {isLoading ? (
@@ -511,7 +554,7 @@ export default function PrepChartTemplate() {
                   onSearch={(keyword) => SearchItem(keyword)}
                 />
               </Styled.InventoryItemsTitle>
-              <Styled.TableLeft>
+              <Styled.TableLeft className="inventory-items"> 
                 <Table
                   columnHeaders={MasterTable.columnHeaders}
                   columnwidths={MasterTable.columnWidths}
@@ -531,7 +574,7 @@ export default function PrepChartTemplate() {
               </Styled.TableLeft>
             </Styled.InventoryItemsContainer>
 
-            <Styled.TableRight>
+            <Styled.TableRight className="drop-tables">
               <Styled.RightTblMarg>
                 <MinimizableContainer title="Today">
                   <Styled.Table>
