@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 const TableCell = styled.div`
   position: relative;
-  font-size: 1em;
+  font-size: 14px;
   justify-content: ${(props) =>
     props.columntype === "number" ? "center" : "left"};
   border-bottom: 1px solid ${(props) => props.theme.lightGrey};
@@ -126,13 +126,14 @@ const DollarCell = ({
   handleInputCellChange,
   columntype,
   isInput,
+  isTotal
 }) => {
   const [dollar, setDollar] = useState(value);
   const inputRef = useRef(null);
 
   if (!isInput) {
     return (
-      <TableCell columntype={columntype}>
+      <TableCell  className={isTotal ? "Total-row" : ""} columntype={columntype}>
         <DollarSign>$</DollarSign>
         {value}
       </TableCell>
@@ -187,6 +188,7 @@ export default function Cell({
   handleInputCellChange,
   handleDropdownChange,
   tableName,
+  isTotal
 }) {
   if (cellType === "input") {
     return (
@@ -218,6 +220,7 @@ export default function Cell({
       handleInputCellChange,
       columntype,
       isInput,
+      isTotal
     });
   } else if (cellType === "dropdown") {
     //find the selected option based on the IsSelected property of the value array
@@ -240,7 +243,7 @@ export default function Cell({
         </Dropdown>
       </TableCell>
     );
-  } else return <TableCell columntype={columntype}>{value}</TableCell>;
+  } else return <TableCell   className={isTotal ? "Total-row" : ""} columntype={columntype}>{value}</TableCell>;
 }
 
 Cell.propTypes = {
@@ -253,4 +256,5 @@ Cell.propTypes = {
   isInput: PropTypes.bool,
   handleInputCellChange: PropTypes.func,
   handleDropdownChange: PropTypes.func,
+  isTotal:PropTypes.bool
 };

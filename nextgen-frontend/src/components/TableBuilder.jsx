@@ -85,8 +85,8 @@ const TableHeader = styled.div`
 `;
 
 const TableHeaderCell = styled.div`
-  font-weight: bold;
-  font-size: 1.2em;
+  font-weight: 500;
+  font-size: 14px;
   height: 44px;
   border-bottom: ${(props) =>
     props.$useTableRows ? "none" : "2px solid " + props.theme.primary};
@@ -215,6 +215,7 @@ if (isSorting) {
                 columnName={cell.columnName}
                 handleInputCellChange={handleInputCellChange}
                 handleDropdownChange={handleDropdownChange}
+                isTotal={cell.isTotal}
               />
             ))
           );

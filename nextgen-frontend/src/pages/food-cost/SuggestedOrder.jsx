@@ -9,14 +9,16 @@ import MessagePopup from "../../components/MessagePopup.jsx";
 import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
+import * as PrepChartFunctions from "../../functions/PrepChartFunctions.jsx";
+
 
 const SuggestedTableStructure = {
   columnHeaders: [
-    "Inventory ID",
-    "Vendor Item Description",
-    "Vendor Item Ref",
-    "Vendor Item Order Unit",
-    "Vendor Pack Size",
+    "Inventory Description",
+    "Item Description",
+    "Item Ref",
+    "Item Order Unit",
+    "Pack Size",
     "Current/Last Price",
     "Safety Factor",
     "Suggested Qty",
@@ -33,7 +35,7 @@ const SuggestedTableStructure = {
     "string",
     "string",
   ],
-  columnWidth: "0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
+  columnWidth: "1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows: [],
 };
 
@@ -58,14 +60,15 @@ export default function SuggestedOrder() {
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [isUnitSelected, setIsUnitSelected] = useState(false);
   const [IsActive, setIsActive] = useState([]);
+  const [prepChart, setPrepChart] = useState({});
   const [SuggestedTable, setSuggestedTable] = useState({
     ...SuggestedTableStructure,
   });
 
   const [forecastTable, setForecastTable] = useState({
-    columnHeaders: ["Forecasted Date", "Forecasted $ Amt"],
-    dataTypes: ["string", "number"],
-    columnWidth: "1fr 1fr",
+    columnHeaders: ["Forecasted Date", "Forecasted $ Amt",""],
+    dataTypes: ["string", "number","string"],
+    columnWidth: "1fr 1fr 0.5fr",
     rows: [],
     width: "50%",
   });
@@ -75,7 +78,7 @@ export default function SuggestedOrder() {
     dataTypes: ["number"],
     columnWidth: "1fr",
     rows: [],
-    width: "30%",
+    width: "20%",
     height: "40%",
   });
 
@@ -105,6 +108,7 @@ export default function SuggestedOrder() {
       getVendors(1021);
       getUnits(1021, 1110, 5120);
       getSuggestedOrderData(1021, 51, new Date());
+     // fetchData(1021, 51, new Date());
     }
   }, []);
 
@@ -135,7 +139,7 @@ export default function SuggestedOrder() {
       .then((response) => {
         const data = response.data; // Extract data object from the response
         if (response.message === "10001") {
-        setVendorsList(data);
+          setVendorsList(data);
         }
       })
       .catch((error) => {
@@ -229,7 +233,6 @@ export default function SuggestedOrder() {
   };
 
   const buildForecastTable = (forecastData, today, tomorrow, nextDay) => {
-
     const totalForecast =
       forecastData.today + forecastData.tomorrow + forecastData.nextDay;
 
@@ -242,6 +245,9 @@ export default function SuggestedOrder() {
           isInput: true,
           columnName: "Forecasted Sales",
         },
+        {
+          value:"",cellType: "", columnName: "" 
+        }
       ],
       [
         {
@@ -255,6 +261,9 @@ export default function SuggestedOrder() {
           isInput: true,
           columnName: "Forecasted Sales",
         },
+        {
+          value:"",cellType: "", columnName: "" 
+        }
       ],
       [
         {
@@ -268,23 +277,27 @@ export default function SuggestedOrder() {
           isInput: true,
           columnName: "Forecasted Sales",
         },
+        {
+          value:"",cellType: "", columnName: "" 
+        }
       ],
     ];
-
-    // Remove existing total row if it exists
     const updatedRows = rows.filter((row) => row[0].value !== "Total");
 
     const totalRow = [
-      { value: "Total", cellType: "", columnName: "" }, 
+      { value: "Total", cellType: "", columnName: "" ,isTotal:true      },
       {
         value: totalForecast,
         cellType: "dollar",
         isInput: false,
-        columnName: "Forecasted Sales",
+        isTotal:true     
       },
+      {
+        value:"",cellType: "", columnName: "" ,isTotal:true
+      }
     ];
     updatedRows.push(totalRow);
-   
+
     setForecastTable({
       ...forecastTable,
       rows: updatedRows,
@@ -366,12 +379,14 @@ export default function SuggestedOrder() {
     SuggestedOrderAPI.get(
       companyID,
       selectedUnit,
-      date.toISOString().split("T")[0]
-    )
-      .then((data) => {
-        buildPrepMasterTable(data);
-        setIsUnitSelected(true);
-        setIsLoading(false);
+      date.toISOString().split("T")[0]).then((response) => {
+        const data = response.data; // Extract data object from the response
+        console.log(data)
+        if (response.message === "10001") {
+          buildPrepMasterTable(data);
+          setIsUnitSelected(true);
+          setIsLoading(false);
+        }
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -384,6 +399,20 @@ export default function SuggestedOrder() {
       rows: SuggestedOrder,
     });
   };
+
+  function handleTableCellChange(e, row, columnName, tableName) {
+    switch (tableName) {
+      case "DefaultSafetyFactor":
+        PrepChartFunctions.handleDefaultSafetyFactorChange(e, row, columnName, tableName, defaultSafetyFactorTable, setDefaultSafetyFactorTable, prepChart, setPrepChart, setSuggestedTable, SuggestedTable);
+        break;
+      case "Forecast":
+        PrepChartFunctions.handleForecastChange(e, row, columnName, tableName, forecastTable, setForecastTable, prepChart, setPrepChart, SuggestedTable, setSuggestedTable);
+        break;
+      default:
+        console.error("Invalid table name");
+        break;
+    }
+  }
 
   return (
     <Styled.PageContainer>
@@ -471,6 +500,7 @@ export default function SuggestedOrder() {
               rows={forecastTable.rows}
               width={forecastTable.width}
               tableName={"Forecast"}
+              handleInputCellChange={handleTableCellChange}
               isSorting={false}
             />
 
@@ -482,21 +512,21 @@ export default function SuggestedOrder() {
               tableName={"DefaultSafetyFactor"}
               width={defaultSafetyFactorTable.width}
               height={defaultSafetyFactorTable.height}
+              handleInputCellChange={handleTableCellChange}
               isSorting={false}
             />
           </Styled.ForeCastAndSafetyFactor>
 
-          {/* <Styled.InventoryItemsContainer>
-          <Styled.TableLeft>
+          <Styled.InventoryItemsContainer>
             <Table
               columnHeaders={SuggestedTable.columnHeaders}
-              columnwidths={SuggestedTable.columnWidths}
+              columnwidths={SuggestedTable.columnWidth}
               dataTypes={SuggestedTable.dataTypes}
               rows={SuggestedTable.rows}
               isSorting={false}
+              className={"SuggestedTable"}
             />
-          </Styled.TableLeft>
-          </Styled.InventoryItemsContainer> */}
+          </Styled.InventoryItemsContainer>
         </>
       )}
     </Styled.PageContainer>
