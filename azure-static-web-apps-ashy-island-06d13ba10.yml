@@ -30,6 +30,14 @@ jobs:
       npm install
       npm run build
     displayName: 'Build application'
+    
+  - task: CopyFiles@2
+    displayName: 'Copy staticwebapp.config.json to dist folder'
+    inputs:
+      SourceFolder: nextgen-frontend # Path to the directory containing staticwebapp.config.json
+      Contents: 'staticwebapp.config.json'    # Name of the file to copy
+      TargetFolder: 'nextgen-frontend/dist'  # Path to the dist folder
+
   
   - task : PublishBuildArtifacts@1
     inputs:
