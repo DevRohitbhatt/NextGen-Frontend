@@ -20,10 +20,17 @@ jobs:
   steps:
   - checkout: self
     submodules: true
+
+    # Build step to compile, test, and prepare your application
+  - script: |
+      # Example build command, replace with your actual build command
+      npm install
+      npm run build
+    displayName: 'Build application'
   
   - task : PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: '/dist'
+      PathtoPublish: 'nextgen-frontend/dist'
       ArtifactName: 'drop'
 
 
