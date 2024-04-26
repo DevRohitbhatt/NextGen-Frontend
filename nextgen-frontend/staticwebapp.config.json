@@ -8,8 +8,6 @@
         },
         {
             "route": "/NextGenFrontEnd/*",
-            "statusCode": 301,
-            "allowedRoles": [],
             "rewrite": "/"
         }
     ],
