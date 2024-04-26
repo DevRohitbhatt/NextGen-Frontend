@@ -23,7 +23,7 @@ jobs:
   
   - task : PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: 'dist'
+      PathtoPublish: '/dist'
       ArtifactName: 'drop'
 
 
