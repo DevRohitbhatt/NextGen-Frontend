@@ -50,7 +50,7 @@ export default function UnitSelector({ onClick , unitName, setUnitName, unitID})
   
   return (
     <>
-    <UnitContainer onClick={onClick}>
+    <UnitContainer onClick={onClick} className="unit-selector">
       <Label>Select Unit(s)</Label>
       <UnitValue >{unitName}</UnitValue>
     </UnitContainer>

@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import  { FaFileExcel, FaFileCsv, FaFilePdf, FaRegSave } from "react-icons/fa";
+import { MdQuestionMark } from "react-icons/md";
 import { LuPrinter } from "react-icons/lu";
 import PropTypes from "prop-types";
 
@@ -65,6 +66,12 @@ const SaveIcon = styled(FaRegSave)`
   height: 40px;
 `;
 
+const HelpIcon = styled(MdQuestionMark)`
+  color: ${(props) => props.theme.primary};
+  width: 40px;
+  height: 40px;
+`;
+
 ExportOptions.propTypes = {
   includeExcel: PropTypes.bool,
   includePDF: PropTypes.bool,
@@ -78,7 +85,7 @@ ExportOptions.propTypes = {
   handleSaveClick: PropTypes.func,
 };
 
-export default function ExportOptions({ includeExcel, includePDF, includeCSV, includePrint, includeSave, handlePDFClick, handleExcelClick, handleCSVClick, handlePrintClick, handleSaveClick }) {
+export default function ExportOptions({ includeExcel, includePDF, includeCSV, includePrint, includeSave, includeHelp, handlePDFClick, handleExcelClick, handleCSVClick, handlePrintClick, handleSaveClick, handleHelpClick}) {
 
   return (
     <>
@@ -112,9 +119,16 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
           </ExportOption>
         ) : null}
         {includeSave ? (
-          <ExportOption>
+          <ExportOption className="save-option">
             <OptionImage onClick={handleSaveClick}>
               <SaveIcon />
+            </OptionImage>
+          </ExportOption>
+        ) : null}
+        {includeHelp ? (
+          <ExportOption>
+            <OptionImage onClick={handleHelpClick}>
+              <HelpIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
