@@ -5,10 +5,16 @@
         },
         {
             "route": "/PrepChartTemplate"
+        },
+        {
+            "route": "/NextGenFrontEnd/*",
+            "statusCode": 301,
+            "allowedRoles": [],
+            "rewrite": "/"
         }
     ],
     "navigationFallback": {
-        "rewrite": "index.html",
-        "exclude": ["/static/media/*.{png,jpg,gif,svg}", "/static/css/*"]
+        "rewrite": "/index.html",
+        "exclude": ["*.{css,scss,js,png,gif,ico,jpg,svg}"]
     }
 }
