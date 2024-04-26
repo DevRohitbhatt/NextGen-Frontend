@@ -25,7 +25,7 @@ jobs:
     # Build step to compile, test, and prepare your application
   - script: |
       ls -l
-      cd NextGen-Frontend/nextgen-frontend
+      cd nextgen-frontend
       # Example build command, replace with your actual build command
       npm install
       npm run build
