@@ -23,7 +23,7 @@ jobs:
   
   - task : PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: 'nextgen-frontend/dist'
+      PathtoPublish: '/nextgen-frontend/dist'
       ArtifactName: 'drop'
 
 
