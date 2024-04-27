@@ -14,10 +14,10 @@ export const SuggestedOrderAPI = {
     
     return response.data;
   },
-  getItem: async function (companyID, unitID, date, cancel = false) {
+  getItem: async function (companyID, unitID, date, VendorID,cancel = false) {
     const response = await api.request({
       method: "GET",
-      url: `/api/prepchartdetail/?companyid=${companyID}&unitid=${unitID}&date=${date}`,
+      url: `/api/prepchartdetail/?companyid=${companyID}&unitid=${unitID}&date=${date}&VendorId=${VendorID}`,
       companyID,
       unitID,
       date,

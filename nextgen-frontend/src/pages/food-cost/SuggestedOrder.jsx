@@ -55,6 +55,8 @@ export default function SuggestedOrder() {
   const [companyID, setCompanyID] = useState();
   const [alignmentID, setAlignmentID] = useState(null);
   const [selectedDates, setSelectedDates] = useState([new Date(), new Date()]);
+  const [FromDate, setFromDate] = useState();
+  const [ToDate, setToDate] = useState();
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
@@ -155,13 +157,14 @@ export default function SuggestedOrder() {
         }
       });
   };
-  const getSuggestedOrderData = (companyID, unitID, date) => {
+  const getSuggestedOrderData = (companyID, unitID, date,selectedVendor) => {
     setIsLoading(true);
     setIsError(false);
     SuggestedOrderAPI.getItem(
       companyID,
       unitID,
-      date.toISOString().split("T")[0]
+      date.toISOString().split("T")[0],
+      selectedVendor
     )
       .then((response) => {
         const data = response.data; // Extract data object from the response
@@ -215,6 +218,7 @@ export default function SuggestedOrder() {
   const handleVendorSelection = (VendorName, VendorID) => {
     setSelectedVendorName(VendorName);
     setSelectedVendor(VendorID);
+    getSuggestedOrderData(companyID,selectedUnit,selectedDates,selectedVendor)
   };
 
   const handleDateChange = (dates) => {
@@ -223,6 +227,12 @@ export default function SuggestedOrder() {
       undefined,
       formates
     )} - ${dates[1].toLocaleDateString(undefined, formates)}`;
+
+    const FromDates=`${dates[0].toLocaleDateString(undefined,formates)}`
+    const TodayDates=`${dates[0].toLocaleDateString(undefined,formates)}`
+
+    setFromDate(FromDates)
+    setToDate(TodayDates)
     setSelectedDates(formattedDateRange);
   };
 

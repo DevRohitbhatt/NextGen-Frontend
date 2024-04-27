@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 
 const MainContainer = styled.div`
   position: relative;
@@ -21,7 +22,7 @@ const DropdownButton = styled.button`
   align-items: center;
   white-space: nowrap;
   &:hover {
-    border-color: ${(props) => props.theme.primary}; 
+    border-color: ${(props) => props.theme.primary};
   }
 `;
 
@@ -93,7 +94,9 @@ const Dropdown = ({ options, selectedOption, onOptionChange }) => {
       <Label>Select Vendor(s)</Label>
       <DropdownButton onClick={toggleDropdown}>
         {selectedOption}
-        <DropdownArrow>{isOpen ? "▲" : "▼"}</DropdownArrow>
+        <DropdownArrow>
+          {isOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
+        </DropdownArrow>
       </DropdownButton>
       {isOpen && (
         <DropdownList>
@@ -115,7 +118,7 @@ Dropdown.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string,
-      value: PropTypes.string,
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     })
   ).isRequired,
   selectedOption: PropTypes.string.isRequired,
