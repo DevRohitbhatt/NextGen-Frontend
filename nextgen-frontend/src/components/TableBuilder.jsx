@@ -6,6 +6,7 @@ import { InventoryItem } from "../components/DraggableInventoryItem.jsx";
 import { propTypes } from "react-bootstrap/esm/Image.js";
 import { column } from "stylis";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
+import TreeTable from "../components/TreeTableBuilder.jsx";
 
 const Container = styled.div`
   width: ${(props) => (props.width ? props.width : "auto")};
@@ -123,6 +124,7 @@ export default function TableBuilder({
   scrollable = false,
   handleSorting,
   isSorting = false,
+  isTreeTable=false
 }) {
   const [sortColumnIndex, setSortColumnIndex] = useState(-1); // Initialize with -1 to indicate no column is sorted initially
   const [isAscending, setIsAscending] = useState(true);
@@ -144,6 +146,9 @@ if (isSorting) {
 
   return (
     <Container width={width} height={height}>
+      {isTreeTable ? (
+        <TreeTable data={rows}/>
+      ) : (
       <Table
         width={width}
         height={height}
@@ -221,6 +226,7 @@ if (isSorting) {
           );
         })}
       </Table>
+      )}
     </Container>
   );
 }
@@ -241,4 +247,5 @@ TableBuilder.propTypes = {
   className: PropTypes.string,
   handleSorting:PropTypes.func,
   isSorting: PropTypes.bool,
+  isTreeTable:PropTypes.bool
 };
