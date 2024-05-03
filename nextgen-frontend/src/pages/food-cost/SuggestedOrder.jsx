@@ -11,7 +11,6 @@ import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import * as PrepChartFunctions from "../../functions/PrepChartFunctions.jsx";
 
-
 const SuggestedTableStructure = {
   columnHeaders: [
     "Inventory Description",
@@ -49,7 +48,8 @@ export default function SuggestedOrder() {
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setSelectedUnitName] = useState("No Unit Selected");
   const [vendorsList, setVendorsList] = useState([]);
-  const [selectedVendorName, setSelectedVendorName] = useState("No Vendor Selected");
+  const [selectedVendorName, setSelectedVendorName] =
+    useState("No Vendor Selected");
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [companyID, setCompanyID] = useState();
@@ -66,10 +66,11 @@ export default function SuggestedOrder() {
   const [SuggestedTable, setSuggestedTable] = useState({
     ...SuggestedTableStructure,
   });
+  const [SuggestedItem, setSuggestedItem] = useState({});
 
   const [forecastTable, setForecastTable] = useState({
-    columnHeaders: ["Forecasted Date", "Forecasted $ Amt",""],
-    dataTypes: ["string", "number","string"],
+    columnHeaders: ["Forecasted Date", "Forecasted $ Amt", ""],
+    dataTypes: ["string", "number", "string"],
     columnWidth: "1fr 1fr 0.5fr",
     rows: [],
     width: "50%",
@@ -110,7 +111,8 @@ export default function SuggestedOrder() {
       getVendors(1021);
       getUnits(1021, 1110, 5120);
       getSuggestedOrderData(1021, 51, new Date());
-     // fetchData(1021, 51, new Date());
+      GetOrderItem(1021, 51, new Date());
+      // fetchData(1021, 51, new Date());
     }
   }, []);
 
@@ -157,7 +159,7 @@ export default function SuggestedOrder() {
         }
       });
   };
-  const getSuggestedOrderData = (companyID, unitID, date,selectedVendor) => {
+  const getSuggestedOrderData = (companyID, unitID, date, selectedVendor) => {
     setIsLoading(true);
     setIsError(false);
     SuggestedOrderAPI.getItem(
@@ -218,7 +220,12 @@ export default function SuggestedOrder() {
   const handleVendorSelection = (VendorName, VendorID) => {
     setSelectedVendorName(VendorName);
     setSelectedVendor(VendorID);
-    getSuggestedOrderData(companyID,selectedUnit,selectedDates,selectedVendor)
+    getSuggestedOrderData(
+      companyID,
+      selectedUnit,
+      selectedDates,
+      selectedVendor
+    );
   };
 
   const handleDateChange = (dates) => {
@@ -228,11 +235,11 @@ export default function SuggestedOrder() {
       formates
     )} - ${dates[1].toLocaleDateString(undefined, formates)}`;
 
-    const FromDates=`${dates[0].toLocaleDateString(undefined,formates)}`
-    const TodayDates=`${dates[0].toLocaleDateString(undefined,formates)}`
+    const FromDates = `${dates[0].toLocaleDateString(undefined, formates)}`;
+    const TodayDates = `${dates[0].toLocaleDateString(undefined, formates)}`;
 
-    setFromDate(FromDates)
-    setToDate(TodayDates)
+    setFromDate(FromDates);
+    setToDate(TodayDates);
     setSelectedDates(formattedDateRange);
   };
 
@@ -256,8 +263,10 @@ export default function SuggestedOrder() {
           columnName: "Forecasted Sales",
         },
         {
-          value:"",cellType: "", columnName: "" 
-        }
+          value: "",
+          cellType: "",
+          columnName: "",
+        },
       ],
       [
         {
@@ -272,8 +281,10 @@ export default function SuggestedOrder() {
           columnName: "Forecasted Sales",
         },
         {
-          value:"",cellType: "", columnName: "" 
-        }
+          value: "",
+          cellType: "",
+          columnName: "",
+        },
       ],
       [
         {
@@ -288,23 +299,28 @@ export default function SuggestedOrder() {
           columnName: "Forecasted Sales",
         },
         {
-          value:"",cellType: "", columnName: "" 
-        }
+          value: "",
+          cellType: "",
+          columnName: "",
+        },
       ],
     ];
     const updatedRows = rows.filter((row) => row[0].value !== "Total");
 
     const totalRow = [
-      { value: "Total", cellType: "", columnName: "" ,isTotal:true      },
+      { value: "Total", cellType: "", columnName: "", isTotal: true },
       {
         value: totalForecast,
         cellType: "dollar",
         isInput: false,
-        isTotal:true     
+        isTotal: true,
       },
       {
-        value:"",cellType: "", columnName: "" ,isTotal:true
-      }
+        value: "",
+        cellType: "",
+        columnName: "",
+        isTotal: true,
+      },
     ];
     updatedRows.push(totalRow);
 
@@ -389,11 +405,13 @@ export default function SuggestedOrder() {
     SuggestedOrderAPI.get(
       companyID,
       selectedUnit,
-      date.toISOString().split("T")[0]).then((response) => {
+      date.toISOString().split("T")[0]
+    )
+      .then((response) => {
         const data = response.data; // Extract data object from the response
-        console.log(data)
+        console.log(data);
         if (response.message === "10001") {
-          buildPrepMasterTable(data);
+          //buildPrepMasterTable(data);
           setIsUnitSelected(true);
           setIsLoading(false);
         }
@@ -403,6 +421,23 @@ export default function SuggestedOrder() {
       });
   };
 
+  const GetOrderItem = (companyID, selectedUnit, date) => {
+    setIsLoading(true);
+    SuggestedOrderAPI.getOrderItem(
+      companyID,
+      selectedUnit,
+      date.toISOString().split("T")[0]
+    )
+      .then((response) => {
+        console.log(response);
+        buildPrepMasterTable(response);
+        setIsUnitSelected(true);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
   const buildPrepMasterTable = (SuggestedOrder) => {
     setSuggestedTable({
       ...SuggestedTableStructure,
@@ -413,10 +448,32 @@ export default function SuggestedOrder() {
   function handleTableCellChange(e, row, columnName, tableName) {
     switch (tableName) {
       case "DefaultSafetyFactor":
-        PrepChartFunctions.handleDefaultSafetyFactorChange(e, row, columnName, tableName, defaultSafetyFactorTable, setDefaultSafetyFactorTable, prepChart, setPrepChart, setSuggestedTable, SuggestedTable);
+        PrepChartFunctions.handleDefaultSafetyFactorChange(
+          e,
+          row,
+          columnName,
+          tableName,
+          defaultSafetyFactorTable,
+          setDefaultSafetyFactorTable,
+          prepChart,
+          setPrepChart,
+          setSuggestedTable,
+          SuggestedTable
+        );
         break;
       case "Forecast":
-        PrepChartFunctions.handleForecastChange(e, row, columnName, tableName, forecastTable, setForecastTable, prepChart, setPrepChart, SuggestedTable, setSuggestedTable);
+        PrepChartFunctions.handleForecastChange(
+          e,
+          row,
+          columnName,
+          tableName,
+          forecastTable,
+          setForecastTable,
+          prepChart,
+          setPrepChart,
+          SuggestedTable,
+          setSuggestedTable
+        );
         break;
       default:
         console.error("Invalid table name");
@@ -493,6 +550,14 @@ export default function SuggestedOrder() {
           handleCSVClick={handleCSVClick}
         />
       </Styled.OptionsRow>
+      <Table
+  isTreeTable={true}
+  columnHeaders={SuggestedTable.columnHeaders}
+  columnWidths={forecastTable.columnWidth}
+  rows={SuggestedTable.rows}
+  dataTypes={SuggestedTable.dataTypes}
+/>
+
       {isLoading ? (
         <>
           <Styled.UnloadedMessage>Loading...</Styled.UnloadedMessage>
@@ -502,6 +567,7 @@ export default function SuggestedOrder() {
       ) : (
         <>
           <h2>Order Forecasted</h2>
+
           <Styled.ForeCastAndSafetyFactor>
             <Table
               columnHeaders={forecastTable.columnHeaders}
@@ -528,14 +594,14 @@ export default function SuggestedOrder() {
           </Styled.ForeCastAndSafetyFactor>
 
           <Styled.InventoryItemsContainer>
-            <Table
+            {/* <Table
               columnHeaders={SuggestedTable.columnHeaders}
               columnwidths={SuggestedTable.columnWidth}
               dataTypes={SuggestedTable.dataTypes}
               rows={SuggestedTable.rows}
               isSorting={false}
               className={"SuggestedTable"}
-            />
+            /> */}
           </Styled.InventoryItemsContainer>
         </>
       )}

@@ -1,82 +1,83 @@
-[
-  {
-    "name": "Parent 1",
-    "value": "0",
-    "children": [
-      {
-        "InventoryDescription":"(R) ICEBERG - I=A",
-        "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
-        "ItemRef": "1763440",
-        "ItemOrder": "CA",
-        "children": []
-      },
-      {
-        "InventoryDescription":"(R) ICEBERG - I=B",
-        "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
-        "ItemRef": "1763442",
-        "ItemOrder": "CA",
-        "children": []
-      }
-    ]
-  },
-  {
-    "name": "Parent 2",
-    "value": "1",
-    "children": [
-      {
-        "InventoryDescription":"(R) ICEBERG - I=C",
-        "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
-        "ItemRef": "1763443",
-        "ItemOrder": "CA",
-        "children": []
-      },
-      {
-        "InventoryDescription":"(R) ICEBERG - I=D",
-        "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
-        "ItemRef": "1763445",
-        "ItemOrder": "CA",
-        "children": []
-      }
-    ]
-  },
-  {
-    "name": "Parent 3",
-    "value": "2",
-    "children": [
-      {
-        "InventoryDescription":"(R) ICEBERG - I=C",
-        "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
-        "ItemRef": "1763443",
-        "ItemOrder": "CA",
-        "children": []
-      },
-      {
-        "InventoryDescription":"(R) ICEBERG - I=D",
-        "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
-        "ItemRef": "1763445",
-        "ItemOrder": "CA",
-        "children": []
-      }
-    ]
-  },
-  {
-    "name": "Parent 4",
-    "value": "3",
-    "children": [
-      {
-        "InventoryDescription":"(R) ICEBERG - I=C",
-        "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
-        "ItemRef": "1763443",
-        "ItemOrder": "CA",
-        "children": []
-      },
-      {
-        "InventoryDescription":"(R) ICEBERG - I=D",
-        "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
-        "ItemRef": "1763445",
-        "ItemOrder": "CA",
-        "children": []
-      }
-    ]
-  }
-]
+ [
+    {
+      "name": "Parent 1",
+      "value": "0",
+      "children": [
+        {
+          "InventoryDescription": "(R) ICEBERG - I=A",
+          "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
+          "ItemRef": "1763440",
+          "ItemOrder": "CA",
+          "children": []
+        },
+        {
+          "InventoryDescription": "(R) ICEBERG - I=B",
+          "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
+          "ItemRef": "1763442",
+          "ItemOrder": "CA",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "Parent 2",
+      "value": "1",
+      "children": [
+        {
+          "InventoryDescription": "(R) ICEBERG - I=C",
+          "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
+          "ItemRef": "1763443",
+          "ItemOrder": "CA",
+          "children": []
+        },
+        {
+          "InventoryDescription": "(R) ICEBERG - I=D",
+          "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
+          "ItemRef": "1763445",
+          "ItemOrder": "CA",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "Parent 3",
+      "value": "2",
+      "children": [
+        {
+          "InventoryDescription": "(R) ICEBERG - I=C",
+          "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
+          "ItemRef": "1763443",
+          "ItemOrder": "CA",
+          "children": []
+        },
+        {
+          "InventoryDescription": "(R) ICEBERG - I=D",
+          "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
+          "ItemRef": "1763445",
+          "ItemOrder": "CA",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "Parent 4",
+      "value": "3",
+      "children": [
+        {
+          "InventoryDescription": "(R) ICEBERG - I=C",
+          "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
+          "ItemRef": "1763443",
+          "ItemOrder": "CA",
+          "children": []
+        },
+        {
+          "InventoryDescription": "(R) ICEBERG - I=D",
+          "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
+          "ItemRef": "1763445",
+          "ItemOrder": "CA",
+          "children": []
+        }
+      ]
+    }
+  ]
+

@@ -143,11 +143,16 @@ if (isSorting) {
       setSortColumnIndex(index);
     }
   };
-
-  return (
+   return (
     <Container width={width} height={height}>
       {isTreeTable ? (
-        <TreeTable data={rows}/>
+        <TreeTable
+        data={rows}
+        headers={columnHeaders}
+        columntype={dataTypes}
+      />
+      
+     
       ) : (
       <Table
         width={width}

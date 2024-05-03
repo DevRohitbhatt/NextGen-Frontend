@@ -17,6 +17,10 @@ const StyledCell = styled.td`
   padding: 8px;
 `;
 
+const StyledHeaderCell = styled.th`
+  padding: 8px;
+`;
+
 const ToggleIcon = styled.span`
   cursor: pointer;
 `;
@@ -31,13 +35,12 @@ const CollapseButton = styled.button`
 
 const ExpandButton = styled.button``;
 
-const TreeNode = ({ node, isExpanded, onToggleNode }) => {
+const TreeNode = ({ node, isExpanded, onToggleNode, headers }) => {
   const hasChildren = node.children && node.children.length > 0;
 
   const toggleNode = () => {
     onToggleNode(node);
   };
-
   return (
     <>
       <StyledRow>
@@ -62,6 +65,7 @@ const TreeNode = ({ node, isExpanded, onToggleNode }) => {
               node={childNode}
               isExpanded={childNode.isExpanded}
               onToggleNode={onToggleNode}
+              headers={headers}
             />
           ))}
         </>
@@ -70,9 +74,8 @@ const TreeNode = ({ node, isExpanded, onToggleNode }) => {
   );
 };
 
-const TreeTable = ({ data }) => {
+const TreeTable = ({ data, headers }) => {
   const [expandedNodes, setExpandedNodes] = useState({});
-
   const toggleNode = (node) => {
     const updatedExpandedNodes = { ...expandedNodes };
     updatedExpandedNodes[node.name] = !updatedExpandedNodes[node.name];
@@ -94,10 +97,19 @@ const TreeTable = ({ data }) => {
   return (
     <>
       <ButtonContainer>
-        <CollapseButton onClick={handleCollapseAll}>Collapse All</CollapseButton>
+        <CollapseButton onClick={handleCollapseAll}>
+          Collapse All
+        </CollapseButton>
         <ExpandButton onClick={handleExpandAll}>Expand All</ExpandButton>
       </ButtonContainer>
       <StyledTable>
+        <thead>
+          <StyledRow>
+            {headers.map((header, index) => (
+              <StyledHeaderCell key={index}>{header}</StyledHeaderCell>
+            ))}
+          </StyledRow>
+        </thead>
         <tbody>
           {data.map((node, index) => (
             <TreeNode
@@ -105,6 +117,7 @@ const TreeTable = ({ data }) => {
               node={node}
               isExpanded={expandedNodes[node.name]}
               onToggleNode={toggleNode}
+              headers={headers}
             />
           ))}
         </tbody>
