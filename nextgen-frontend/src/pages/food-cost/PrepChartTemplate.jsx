@@ -60,18 +60,25 @@ export default function PrepChartTemplate() {
   }, [todayItem, TomorrowItem, NextDayItem]);
 
   const handleDrop = (index, indexbg, section) => {
-    console.log(section);
     handleDragEnter(index, indexbg, section);
   };
 
   const handleDragStart = (index, indexbg, section, isDragStart, isReorder) => {
-    draggingPos.current = { index, indexbg, section, isDragStart, isReorder };
+    draggingPos.current = { indexbg: indexbg, section:section, isDragStart:isDragStart,isReorder: isReorder,IsSection:section };
   };
 
   const handleDragEnter = (index, indexbg, section) => {
-    if (draggingPos.current?.isReorder) {
+
+    draggingPos.current.AnotherSection = (draggingPos.current.section === draggingPos.current.IsSection) ? true : false;
+
+    if (draggingPos.current?.isReorder && (draggingPos.current.AnotherSection)) {
       index > 0 ? index-- : "";
     }
+    else if ((!draggingPos.current.AnotherSection) && draggingPos.current?.isReorder)
+    {
+      index > 0 ? index++ : "";
+    }
+   
     if (
       (index !== draggingPos.current?.index ||
         section !== draggingPos.current?.section) &&
@@ -453,9 +460,10 @@ export default function PrepChartTemplate() {
   };
 
   const handleDropOver = (isDropOver, section, index) => {
+
     if (draggingPos.current.isDragStart) {
       (draggingPos.current.indexbg = index),
-        (draggingPos.current.section = section);
+      (draggingPos.current.section = section);
     } else {
       draggingPos.current = {
         index: draggingPos.current.index,
@@ -464,7 +472,6 @@ export default function PrepChartTemplate() {
         isDragStart: draggingPos.current.isDragStart,
       };
     }
-
     switch (section) {
       case "today":
         setIsOverToday(isDropOver);
