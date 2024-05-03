@@ -38,12 +38,12 @@ export default function DateSelector({ ToDate,FromDate ,onClick,isDateRange=fals
   return (
     <>
     {!isDateRange ? (
-          <DateContainer onClick={onClick}>
+          <DateContainer onClick={onClick} className="date-selector">
           <Label>Select Date</Label>
           <DateValue>{FromDate.toLocaleDateString()}</DateValue>
         </DateContainer>
       ) : (
-     <DateContainer onClick={onClick}>
+     <DateContainer onClick={onClick} className="date-selector">
       <Label>Select Date</Label>
       <DateValue>{FromDate.toLocaleDateString() +" - "+ ToDate.toLocaleDateString()}</DateValue>
     </DateContainer>

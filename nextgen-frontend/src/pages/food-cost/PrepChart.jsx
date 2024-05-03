@@ -12,6 +12,8 @@ import { exportToExcel } from "../../functions/ExcelExport.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
 import CalendarModal from "../../components/ModalDate.jsx";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
+import PrepChartIntroSteps from "../../assets/introJSSteps/PrepChartIntroSteps.jsx";
+import { Steps } from "intro.js-react";
 
 const toolTipForecastSales = "Copied from Web Scheduler if Web Scheduler subscriber otherwise a four-week moving average of Net Sales. NOTE: Adjustments to forecasted sales on prep chart DO NOT modify Web Scheduler Forecasted sales.";
 const toolTipPrepType = "Units of Measure collected from Inventory Configuration. Defaults to item with “PREP” in description.";
@@ -32,6 +34,7 @@ const prepTableStructure = {
     "On Hand",
     "Prep/Pull Amount",
   ],
+  classnames: ["inventory-item-name", "prep-type", "yield-type", "safety-factor", "needed", "on-hand", "prep-pull"],
   dataTypes : ["string", "string", "number", "number", "number", "number", "number"],
   columnWidths : "2.5fr 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows : [],
@@ -92,6 +95,12 @@ export default function PrepChart() {
   });
   const [selectedToDate, setSelectedToDate] = useState(new Date());
   const [selectedFromDate, setSelectedFromDate] = useState(new Date());
+
+  const [introJS, setIntroJS] = useState({
+    stepsEnabled: false,
+    steps: PrepChartIntroSteps(),
+    initialStep: 0,
+  });
 
   useEffect(() => {
     if (!selectedUnit) {
@@ -416,9 +425,21 @@ export default function PrepChart() {
     setShowModal(false); // Close the date modal after selection
     getPrepChart(companyID, unitID, selectedToDate);
   };
+  
+  const handleIntroStart = () => {
+    setIntroJS({ ...introJS, stepsEnabled: true });
+  };
 
   return (
     <Styled.PageContainer>
+      <Steps
+        enabled={introJS.stepsEnabled}
+        steps={introJS.steps}
+        initialStep={introJS.initialStep}
+        onExit={() => {
+          setIntroJS({ ...introJS, enabled: false });
+        }}
+      />
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
       <Styled.OptionsRow>
         <Styled.DateAndUnitContainer>
@@ -459,10 +480,12 @@ export default function PrepChart() {
           includePDF={true}
           includePrint={true}
           includeSave={true}
+          includeHelp={true}
           handleSaveClick={handleSaveClick}
           handlePDFClick={handlePDFClick}
           handlePrintClick={handlePrintClick}
           handleExcelClick={handleExcelClick}
+          handleHelpClick={handleIntroStart}
         />
       </Styled.OptionsRow>
       {isLoading ? (
@@ -484,6 +507,7 @@ export default function PrepChart() {
                 rows={forecastTable.rows}
                 width={forecastTable.width}
                 tableName={"Forecast"}
+                className={"sales-forecast"}
                 handleInputCellChange={handleTableCellChange}
                 isSorting={false}
                 headerTooltips={forecastTable.headerTooltips}
@@ -495,6 +519,7 @@ export default function PrepChart() {
                 columnwidths={defaultSafetyFactorTable.columnWidths}
                 rows={defaultSafetyFactorTable.rows}
                 tableName={"DefaultSafetyFactor"}
+                className={"default-safety-factor"}
                 width={defaultSafetyFactorTable.width}
                 height={defaultSafetyFactorTable.height}
                 handleInputCellChange={handleTableCellChange}
@@ -506,10 +531,12 @@ export default function PrepChart() {
             <h2>Today - ${Math.round(prepChart.forecastData.today)}</h2>
             <Table
               columnHeaders={todayTable.columnHeaders}
+              classnames={todayTable.classnames}
               dataTypes={todayTable.dataTypes}
               columnwidths={todayTable.columnWidths}
               rows={todayTable.rows}
               tableName="Today"
+              className="today-table"
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
@@ -524,6 +551,7 @@ export default function PrepChart() {
               columnwidths={tomorrowTable.columnWidths}
               rows={tomorrowTable.rows}
               tableName={"Tomorrow"}
+              className={"tomorrow-table"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
@@ -538,6 +566,7 @@ export default function PrepChart() {
               columnwidths={nextDayTable.columnWidths}
               rows={nextDayTable.rows}
               tableName={"NextDay"}
+              className={"nextday-table"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}

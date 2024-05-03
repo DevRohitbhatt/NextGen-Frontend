@@ -20,7 +20,7 @@ const ArrowButton = styled.div`
 `;
 
 const Content = styled.div`
-  display: ${({ minimized }) => (minimized ? 'none' : 'block')};
+  display: ${({ $minimized }) => ($minimized ? 'none' : 'block')};
 `;
 
 const MinimizableContainer = ({ title, children }) => {
@@ -38,7 +38,7 @@ const MinimizableContainer = ({ title, children }) => {
           {minimized ? <MdKeyboardArrowRight /> : <MdKeyboardArrowDown />}
         </ArrowButton>
       </Title>
-      <Content minimized={minimized}>{children}</Content>
+      <Content $minimized={minimized}>{children}</Content>
     </div>
   );
 };

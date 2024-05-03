@@ -111,6 +111,7 @@ const IconContainer = styled.div`
 
 export default function TableBuilder({
   columnHeaders,
+  classnames,
   dataTypes,
   columnwidths,
   rows,
@@ -185,7 +186,7 @@ if (isSorting) {
           </TableHeader>
         ) : (
             columnHeaders.map((header, index) => (
-              <TableHeaderCell key={index} columntype={dataTypes[index]}>
+              <TableHeaderCell key={index} columntype={dataTypes[index]} className={classnames && classnames.length > index ? classnames[index] : ''}>
                 {
                   headerTooltips[index] === "" ? (
                     <div> {header} </div>
