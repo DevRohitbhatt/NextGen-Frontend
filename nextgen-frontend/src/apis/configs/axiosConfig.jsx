@@ -8,7 +8,7 @@ const api = axios.create({
     'Allow-Control-Allow-Origin': '*',
   },
   'Content-Type': 'application/json',
-  baseURL: "https://192.168.192.244/NextGenAPI/",
+  baseURL: "https://www7.qsronline.com/NextGenAPI/",
 });
 
 const errorHandler = (error) => {
