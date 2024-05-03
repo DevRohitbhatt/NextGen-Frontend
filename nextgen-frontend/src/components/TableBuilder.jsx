@@ -6,6 +6,8 @@ import { InventoryItem } from "../components/DraggableInventoryItem.jsx";
 import { propTypes } from "react-bootstrap/esm/Image.js";
 import { column } from "stylis";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
+import Tooltip from "../components/ToolTip.jsx";
+import { FcInfo } from "react-icons/fc";
 
 const Container = styled.div`
   width: ${(props) => (props.width ? props.width : "auto")};
@@ -109,6 +111,7 @@ const IconContainer = styled.div`
 
 export default function TableBuilder({
   columnHeaders,
+  classnames,
   dataTypes,
   columnwidths,
   rows,
@@ -123,6 +126,8 @@ export default function TableBuilder({
   scrollable = false,
   handleSorting,
   isSorting = false,
+  headerTooltips,
+  toolTipDirection
 }) {
   const [sortColumnIndex, setSortColumnIndex] = useState(-1); // Initialize with -1 to indicate no column is sorted initially
   const [isAscending, setIsAscending] = useState(true);
@@ -180,11 +185,26 @@ if (isSorting) {
             ))}
           </TableHeader>
         ) : (
-          columnHeaders.map((header, index) => (
-            <TableHeaderCell key={index} columntype={dataTypes[index]}>
-              {header}
-            </TableHeaderCell>
-          ))
+            columnHeaders.map((header, index) => (
+              <TableHeaderCell key={index} columntype={dataTypes[index]} className={classnames && classnames.length > index ? classnames[index] : ''}>
+                {
+                  headerTooltips[index] === "" ? (
+                    <div> {header} </div>
+                  ) :
+                    (
+                      toolTipDirection[index] === "left" ? (
+                        <Tooltip content={headerTooltips[index]} direction="left">
+                          <FcInfo /> {header}
+                        </Tooltip>
+                      ) : (
+                        <Tooltip content={headerTooltips[index]} direction="left">
+                          {header} <FcInfo />
+                        </Tooltip>
+                      )
+                    )
+                }
+              </TableHeaderCell>
+            ))
         )}
         {rows.map((row, rowIndex) => {
           if (isDrag) {
@@ -240,4 +260,6 @@ TableBuilder.propTypes = {
   className: PropTypes.string,
   handleSorting:PropTypes.func,
   isSorting: PropTypes.bool,
+  headerTooltips: PropTypes.array,
+  toolTipDirection: PropTypes.array
 };

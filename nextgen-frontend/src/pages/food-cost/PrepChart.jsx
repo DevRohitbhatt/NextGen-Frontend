@@ -12,6 +12,17 @@ import { exportToExcel } from "../../functions/ExcelExport.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
 import CalendarModal from "../../components/ModalDate.jsx";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
+import PrepChartIntroSteps from "../../assets/introJSSteps/PrepChartIntroSteps.jsx";
+import { Steps } from "intro.js-react";
+
+const toolTipForecastSales = "Copied from Web Scheduler if Web Scheduler subscriber otherwise a four-week moving average of Net Sales. NOTE: Adjustments to forecasted sales on prep chart DO NOT modify Web Scheduler Forecasted sales.";
+const toolTipPrepType = "Units of Measure collected from Inventory Configuration. Defaults to item with “PREP” in description.";
+const toolTipYieldType = "Represents item dollar yield. Calculated as four week rolling average Net Sales / Item usage dollars.";
+const toolTipSafetyFactor = "Set by default safety factor OR individual item safety factor. Added buffer or cushion to the base NEEDED amount. Typically used to ensure ample quantity of prep or thaw amounts without running short of product. Short shelf-life prepped or thawed items may have a lower safety factor applied to ensure top quality while minimizing waste.";
+const toolTipNeeded = "Represents the quantity needed for Forecasted sales. (Net Sales / Yield Type) + safety factor. Items in Tomorrow section use Today Forecasted Sales + Tomorrow Forecasted Sales. Items in Next Day section use Today Forecasted Sales + Tomorrow Forecasted Sales + Next Day Forecasted Sales";
+const toolTipOnHand = "Physical count of usable product already available";
+const left = "left";
+const right = "right";
 
 const prepTableStructure = {
   columnHeaders: [
@@ -23,9 +34,12 @@ const prepTableStructure = {
     "On Hand",
     "Prep/Pull Amount",
   ],
+  classnames: ["inventory-item-name", "prep-type", "yield-type", "safety-factor", "needed", "on-hand", "prep-pull"],
   dataTypes : ["string", "string", "number", "number", "number", "number", "number"],
   columnWidths : "2.5fr 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows : [],
+  headerTooltips: ["", toolTipPrepType, toolTipYieldType, toolTipSafetyFactor, toolTipNeeded, toolTipOnHand, ""],
+  toolTipDirection: ["", right, left, right, right, right, ""]
 };
 
 export default function PrepChart() {
@@ -42,6 +56,8 @@ export default function PrepChart() {
     columnWidths: ".5fr 1fr 1fr",
     rows: [],
     width: "50%",
+    headerTooltips: ["", toolTipForecastSales, ""],
+    toolTipDirection: ["", left, ""]
   });
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState();
@@ -66,6 +82,8 @@ export default function PrepChart() {
     rows: [],
     width: "15%",
     height: "50%",
+    headerTooltips: [""],
+    toolTipDirection: [""]
   });
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
@@ -77,6 +95,12 @@ export default function PrepChart() {
   });
   const [selectedToDate, setSelectedToDate] = useState(new Date());
   const [selectedFromDate, setSelectedFromDate] = useState(new Date());
+
+  const [introJS, setIntroJS] = useState({
+    stepsEnabled: false,
+    steps: PrepChartIntroSteps(),
+    initialStep: 0,
+  });
 
   useEffect(() => {
     if (!selectedUnit) {
@@ -401,9 +425,21 @@ export default function PrepChart() {
     setShowModal(false); // Close the date modal after selection
     getPrepChart(companyID, unitID, selectedToDate);
   };
+  
+  const handleIntroStart = () => {
+    setIntroJS({ ...introJS, stepsEnabled: true });
+  };
 
   return (
     <Styled.PageContainer>
+      <Steps
+        enabled={introJS.stepsEnabled}
+        steps={introJS.steps}
+        initialStep={introJS.initialStep}
+        onExit={() => {
+          setIntroJS({ ...introJS, enabled: false });
+        }}
+      />
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
       <Styled.OptionsRow>
         <Styled.DateAndUnitContainer>
@@ -444,10 +480,12 @@ export default function PrepChart() {
           includePDF={true}
           includePrint={true}
           includeSave={true}
+          includeHelp={true}
           handleSaveClick={handleSaveClick}
           handlePDFClick={handlePDFClick}
           handlePrintClick={handlePrintClick}
           handleExcelClick={handleExcelClick}
+          handleHelpClick={handleIntroStart}
         />
       </Styled.OptionsRow>
       {isLoading ? (
@@ -469,8 +507,11 @@ export default function PrepChart() {
                 rows={forecastTable.rows}
                 width={forecastTable.width}
                 tableName={"Forecast"}
+                className={"sales-forecast"}
                 handleInputCellChange={handleTableCellChange}
                 isSorting={false}
+                headerTooltips={forecastTable.headerTooltips}
+                toolTipDirection={forecastTable.toolTipDirection}
               />
               <Table
                 columnHeaders={defaultSafetyFactorTable.columnHeaders}
@@ -478,46 +519,59 @@ export default function PrepChart() {
                 columnwidths={defaultSafetyFactorTable.columnWidths}
                 rows={defaultSafetyFactorTable.rows}
                 tableName={"DefaultSafetyFactor"}
+                className={"default-safety-factor"}
                 width={defaultSafetyFactorTable.width}
                 height={defaultSafetyFactorTable.height}
                 handleInputCellChange={handleTableCellChange}
                 isSorting={false}
+                headerTooltips={defaultSafetyFactorTable.headerTooltips}
+                toolTipDirection={defaultSafetyFactorTable.toolTipDirection}
               />
             </Styled.ForeCastAndSafetyFactor>
-            <h2>Today - ${prepChart.forecastData.today}</h2>
+            <h2>Today - ${Math.round(prepChart.forecastData.today)}</h2>
             <Table
               columnHeaders={todayTable.columnHeaders}
+              classnames={todayTable.classnames}
               dataTypes={todayTable.dataTypes}
               columnwidths={todayTable.columnWidths}
               rows={todayTable.rows}
               tableName="Today"
+              className="today-table"
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
+              headerTooltips={todayTable.headerTooltips}
+              toolTipDirection={todayTable.toolTipDirection}
             />
 
-            <h2>Tomorrow - ${prepChart.forecastData.tomorrow}</h2>
+            <h2>Tomorrow - ${Math.round(prepChart.forecastData.tomorrow)}</h2>
             <Table
               columnHeaders={tomorrowTable.columnHeaders}
               dataTypes={tomorrowTable.dataTypes}
               columnwidths={tomorrowTable.columnWidths}
               rows={tomorrowTable.rows}
               tableName={"Tomorrow"}
+              className={"tomorrow-table"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
+              headerTooltips={tomorrowTable.headerTooltips}
+              toolTipDirection={tomorrowTable.toolTipDirection}
             />
 
-            <h2>Next Day - ${prepChart.forecastData.nextDay}</h2>
+            <h2>Next Day - ${Math.round(prepChart.forecastData.nextDay)}</h2>
             <Table
               columnHeaders={nextDayTable.columnHeaders}
               dataTypes={nextDayTable.dataTypes}
               columnwidths={nextDayTable.columnWidths}
               rows={nextDayTable.rows}
               tableName={"NextDay"}
+              className={"nextday-table"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
+              headerTooltips={nextDayTable.headerTooltips}
+              toolTipDirection={nextDayTable.toolTipDirection}
             />
           </>
         )
