@@ -14,11 +14,16 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
+import Tooltip from "../../components/ToolTip.jsx";
+import { FcInfo } from "react-icons/fc";
 import { Steps, Hints } from "intro.js-react";
 import "intro.js/introjs.css";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
+const todayToolTip = "Items in Today section will use the selected date Forecasted sales to calculate the NEEDED prep or thaw quantity.";
+const tomorrowToolTip = "Items in Tomorrow section will use the Today date + Tomorrow date Forecasted sales to calculate the NEEDED prep or thaw quantity"; 
+const nextDayToolTip = "Items in Tomorrow section will use the Today date + Tomorrow date + Next Day Forecasted sales to calculate the NEEDED prep or thaw quantity.";
 const prepTableStructure = {
   columnHeaders: ["Inventory ID", "Description"],
   dataTypes: ["string", "string"],
@@ -86,25 +91,42 @@ export default function PrepChartTemplate() {
     NextDayItemmRef.current = NextDayItem;
   }, [todayItem, TomorrowItem, NextDayItem]);
 
-  const handleDrop = (index, section) => {
-    handleDragEnter(index, section);
+  const handleDrop = (index, indexbg, section) => {
+    handleDragEnter(index, indexbg, section);
   };
 
-  const handleDragStart = (index, section, isDragStart) => {
-    draggingPos.current = { index, section, isDragStart };
+  const handleDragStart = (index, indexbg, section, isDragStart, isReorder) => {
+    draggingPos.current = { indexbg: indexbg, section:section, isDragStart:isDragStart,isReorder: isReorder,IsSection:section };
   };
 
-  const handleDragEnter = (index, section) => {
+  const handleDragEnter = (index, indexbg, section) => {
+
+    draggingPos.current.AnotherSection = (draggingPos.current.section === draggingPos.current.IsSection) ? true : false;
+
+    if (draggingPos.current?.isReorder && (draggingPos.current.AnotherSection)) {
+      index > 0 ? index-- : "";
+    }
+    else if ((!draggingPos.current.AnotherSection) && draggingPos.current?.isReorder)
+    {
+      index > 0 ? index++ : "";
+    }
+   
     if (
       (index !== draggingPos.current?.index ||
         section !== draggingPos.current?.section) &&
       draggingPos.current?.isDragStart
     ) {
-      const newItems = [...getSectionItems(draggingPos.current?.section)];
+      console.log(draggingPos.current?.index, index, section)
+      console.log(TomorrowItem)
+      console.log(getSectionItems(draggingPos.current?.section))
+
+      const newItems = getSectionItems(draggingPos.current?.section);
 
       const draggedItem = newItems.splice(draggingPos.current?.index, 1)[0];
 
       newItems.splice(index, 0, draggedItem);
+
+      console.log(newItems)
 
       // Update the state based on the section
       switch (draggingPos.current?.section) {
@@ -121,7 +143,7 @@ export default function PrepChartTemplate() {
           break;
       }
     }
-    draggingPos.current = { index, section };
+    draggingPos.current = { index, indexbg, section };
   };
 
   const getSectionItems = (section) => {
@@ -297,6 +319,8 @@ export default function PrepChartTemplate() {
   };
 
   const DropTomorrow = (inventoryItemID) => {
+    console.log(inventoryItemID, "In DropTomorrow")
+    console.log(draggingPos.current?.index, "In DropTomorrow")
     const isDuplicate = TomorrowItemRef.current.some(
       (item) => item.inventoryItemID === inventoryItemID
     );
@@ -311,6 +335,7 @@ export default function PrepChartTemplate() {
             DropTomorrowItem,
             ...TomorrowItem.slice(draggingPos.current?.index),
           ];
+          console.log(TomorrowItems, "TomorrowItems")
           return (TomorrowItems = Array.from(
             new Set(TomorrowItems.map(JSON.stringify)),
             JSON.parse
@@ -472,12 +497,19 @@ export default function PrepChartTemplate() {
     setFilteredItem(sortedItems);
   };
 
-  const handleDropOver = (isDropOver, section) => {
-    draggingPos.current = {
-      index: draggingPos.current.index,
-      section: section,
-      isDragStart: draggingPos.current.isDragStart,
-    };
+  const handleDropOver = (isDropOver, section, index) => {
+
+    if (draggingPos.current.isDragStart) {
+      (draggingPos.current.indexbg = index),
+      (draggingPos.current.section = section);
+    } else {
+      draggingPos.current = {
+        index: draggingPos.current.index,
+        indexbg: draggingPos.current.indexbg,
+        section: section,
+        isDragStart: draggingPos.current.isDragStart,
+      };
+    }
     switch (section) {
       case "today":
         setIsOverToday(isDropOver);
@@ -495,6 +527,30 @@ export default function PrepChartTemplate() {
 
   const handleIntroStart = () => {
     setIntroJS({ ...introJS, stepsEnabled: true });
+  };
+
+  const todayTitle = () => {
+    return <div>
+      <Tooltip content={todayToolTip} direction="top">
+        <FcInfo /> Today
+      </Tooltip>
+    </div>
+  };
+
+  const tomorrowTitle = () => {
+    return <div>
+      <Tooltip content={tomorrowToolTip} direction="top">
+        <FcInfo /> Tomorrow
+      </Tooltip>
+    </div>
+  };
+
+  const nextDayTitle = () => {
+    return <div>
+      <Tooltip content={nextDayToolTip} direction="top">
+        <FcInfo /> Next Day
+      </Tooltip>
+    </div>
   };
 
   return (
@@ -576,7 +632,7 @@ export default function PrepChartTemplate() {
 
             <Styled.TableRight className="drop-tables">
               <Styled.RightTblMarg>
-                <MinimizableContainer title="Today">
+                <MinimizableContainer title={todayTitle}>
                   <Styled.Table>
                     <div
                       className={`drop-board`}
@@ -600,11 +656,11 @@ export default function PrepChartTemplate() {
                           key={item.inventoryItemID}
                           draggable
                           onDragStart={() =>
-                            handleDragStart(index, "today", true)
+                            handleDragStart(index, index, "today", true, true)
                           }
                           onDrop={() => {
                             handleDrop(index, "today"),
-                              handleDropOver(false, "today");
+                              handleDropOver(false, "today", index);
                           }}
                           onDragOver={(e) => {
                             e.preventDefault(),
@@ -612,15 +668,18 @@ export default function PrepChartTemplate() {
                                 ? ""
                                 : (draggingPos.current = {
                                     index,
+                                    indexbg: index,
                                     section: "today",
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
                                   }),
-                              handleDropOver(true, "today");
+                              handleDropOver(true, "today", index);
                           }}
-                          onDragLeave={() => handleDropOver(false, "today")}
+                          onDragLeave={() =>
+                            handleDropOver(false, "today", index)
+                          }
                           className={
-                            index === draggingPos.current?.index
+                            index === draggingPos.current?.indexbg
                               ? `dragging ${
                                   isOverTodays ? "drop-highlight" : ""
                                 }`
@@ -640,12 +699,11 @@ export default function PrepChartTemplate() {
                           />
                         </div>
                       ))}
-                      {
-                        todayItem.length > 0 ?
-                        <Styled.AddNewItems                           
+                      {todayItem.length > 0 ? (
+                        <Styled.AddNewItems
                           onDrop={() => {
                             handleDrop(todayItem.length, "today"),
-                            handleDropOver(false, "today");
+                              handleDropOver(false, "today");
                           }}
                           onDragOver={(e) => {
                             e.preventDefault(),
@@ -653,30 +711,31 @@ export default function PrepChartTemplate() {
                                 ? ""
                                 : (draggingPos.current = {
                                     index: todayItem.length,
+                                    indexbg: todayItem.length,
                                     section: "today",
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
                                   }),
-                              handleDropOver(true, "today");
+                              handleDropOver(true, "today", todayItem.length);
                           }}
                           className={
-                            todayItem.length === draggingPos.current?.index
-                            ? `dragging ${
-                                isOverTodays ? "drop-highlight" : ""
-                              }`
-                            : ""
+                            todayItem.length === draggingPos.current?.indexbg
+                              ? `dragging ${
+                                  isOverTodays ? "drop-highlight" : ""
+                                }`
+                              : ""
                           }
                         >
                           Drop items here or in the list above
-                        </Styled.AddNewItems> : null
-                      }
+                        </Styled.AddNewItems>
+                      ) : null}
                     </div>
                   </Styled.Table>
                 </MinimizableContainer>
               </Styled.RightTblMarg>
 
               <Styled.RightTblMarg>
-                <MinimizableContainer title="Tomorrow">
+                <MinimizableContainer title={tomorrowTitle}>
                   <Styled.Table>
                     <div
                       className="drop-board"
@@ -700,27 +759,31 @@ export default function PrepChartTemplate() {
                           key={item.inventoryItemID}
                           draggable
                           onDragStart={() =>
-                            handleDragStart(index, "tomorrow", true)
+                            handleDragStart(index, index,"tomorrow", true, true)
                           }
                           onDrop={() => {
-                            handleDrop(index, "tomorrow"),
-                              handleDropOver(false, "tomorrow");
+                            handleDrop(index, index, "tomorrow"),
+                              handleDropOver(false, "tomorrow", index);
                           }}
                           onDragOver={(e) => {
                             e.preventDefault(),
+                            console.log(draggingPos.current),
                               draggingPos.current?.isDragStart
                                 ? ""
                                 : (draggingPos.current = {
                                     index,
+                                    indexbg: index,
                                     section: "tomorrow",
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
                                   }),
-                              handleDropOver(true, "tomorrow");
+                              handleDropOver(true, "tomorrow", index);
                           }}
-                          onDragLeave={() => handleDropOver(false, "tomorrow")}
+                          onDragLeave={() =>
+                            handleDropOver(false, "tomorrow", index)
+                          }
                           className={
-                            index === draggingPos.current?.index
+                            index === draggingPos.current?.indexbg
                               ? `dragging ${
                                   isOverTomorrows ? "drop-highlight" : ""
                                 }`
@@ -740,13 +803,11 @@ export default function PrepChartTemplate() {
                           />
                         </div>
                       ))}
-                      {
-                        TomorrowItem.length > 0 ?
-                        <Styled.AddNewItems                           
+                      {TomorrowItem.length > 0 ? (
+                        <Styled.AddNewItems
                           onDrop={() => {
-                            console.log(draggingPos.current?.index),
-                            handleDrop(TomorrowItem.length, "tomorrow"),
-                            handleDropOver(false, "tomorrow");
+                              handleDrop(TomorrowItem.length, "tomorrow"),
+                              handleDropOver(false, "tomorrow");
                           }}
                           onDragOver={(e) => {
                             e.preventDefault(),
@@ -754,29 +815,30 @@ export default function PrepChartTemplate() {
                                 ? ""
                                 : (draggingPos.current = {
                                     index: TomorrowItem.length,
+                                    indexbg: TomorrowItem.length,
                                     section: "tomorrow",
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
                                   }),
-                              handleDropOver(true, "tomorrow");
+                              handleDropOver(true, "tomorrow", TomorrowItem.length);
                           }}
                           className={
-                            TomorrowItem.length === draggingPos.current?.index
-                            ? `dragging ${
-                                isOverTomorrows ? "drop-highlight" : ""
-                              }`
-                            : ""
+                            TomorrowItem.length === draggingPos.current?.indexbg
+                              ? `dragging ${
+                                  isOverTomorrows ? "drop-highlight" : ""
+                                }`
+                              : ""
                           }
                         >
                           Drop items here or in the list above
-                        </Styled.AddNewItems> : null
-                      }
+                        </Styled.AddNewItems>
+                      ) : null}
                     </div>
                   </Styled.Table>
                 </MinimizableContainer>
               </Styled.RightTblMarg>
               <Styled.RightTblMarg>
-                <MinimizableContainer title="Next Day">
+                <MinimizableContainer title={nextDayTitle}>
                   <Styled.Table>
                     <div
                       className="drop-board"
@@ -800,34 +862,31 @@ export default function PrepChartTemplate() {
                           key={item.inventoryItemID}
                           draggable
                           onDragStart={() =>
-                            handleDragStart(index, "nextDay", true)
+                            handleDragStart(index,index, "nextDay", true, true)
                           }
                           onDrop={() => {
                             handleDrop(index, "nextDay"),
-                              handleDropOver(false, "nextDay");
+                              handleDropOver(false, "nextDay", index);
                           }}
                           onDragOver={(e) => {
                             e.preventDefault(),
                               draggingPos.current?.isDragStart
                                 ? ""
                                 : (draggingPos.current = {
-                                    index: index,
+                                    index,
+                                    indexbg: index,
                                     section: "nextDay",
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
                                   }),
-                              handleDropOver(true, "nextDay");
+                              handleDropOver(true, "nextDay", index);
                           }}
                           onDragLeave={() => {
-                            handleDropOver(false, "nextDay"),
-                              (draggingPos.current = {
-                                index,
-                                section: "nextDay",
-                                isDragStart: draggingPos.current?.isDragStart,
-                              });
+                            handleDropOver(false, "nextDay", index)
+                              
                           }}
                           className={
-                            index === draggingPos.current?.index
+                            index === draggingPos.current?.indexbg
                               ? `dragging ${
                                   isOverNextDays ? "drop-highlight" : ""
                                 }`
@@ -847,13 +906,12 @@ export default function PrepChartTemplate() {
                           />
                         </div>
                       ))}
-                      {
-                        NextDayItem.length > 0 ?
-                        <Styled.AddNewItems                           
+                      {NextDayItem.length > 0 ? (
+                        <Styled.AddNewItems
                           onDrop={() => {
                             console.log(draggingPos.current?.index),
-                            handleDrop(NextDayItem.length, "nextDay"),
-                            handleDropOver(false, "nextDay");
+                              handleDrop(NextDayItem.length, "nextDay"),
+                              handleDropOver(false, "nextDay");
                           }}
                           onDragOver={(e) => {
                             e.preventDefault(),
@@ -861,23 +919,24 @@ export default function PrepChartTemplate() {
                                 ? ""
                                 : (draggingPos.current = {
                                     index: NextDayItem.length,
+                                    indexbg: NextDayItem.length,
                                     section: "nextDay",
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
                                   }),
-                              handleDropOver(true, "nextDay");
+                              handleDropOver(true, "nextDay", NextDayItem.length);
                           }}
                           className={
-                            NextDayItem.length === draggingPos.current?.index
-                            ? `dragging ${
-                                isOverNextDays ? "drop-highlight" : ""
-                              }`
-                            : ""
+                            NextDayItem.length === draggingPos.current?.indexbg
+                              ? `dragging ${
+                                  isOverNextDays ? "drop-highlight" : ""
+                                }`
+                              : ""
                           }
                         >
                           Drop items here or in the list above
-                        </Styled.AddNewItems> : null
-                      }
+                        </Styled.AddNewItems>
+                      ) : null}
                     </div>
                   </Styled.Table>
                 </MinimizableContainer>
