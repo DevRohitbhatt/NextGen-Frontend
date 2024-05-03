@@ -89,7 +89,7 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
 
   return (
     <>
-      <ExportOptionsContainer>
+      <ExportOptionsContainer className="export-options">
         {includeExcel ? (
           <ExportOption>
             <OptionImage onClick={handleExcelClick}>
@@ -126,7 +126,7 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
           </ExportOption>
         ) : null}
         {includeHelp ? (
-          <ExportOption>
+          <ExportOption className="help-option">
             <OptionImage onClick={handleHelpClick}>
               <HelpIcon />
             </OptionImage>

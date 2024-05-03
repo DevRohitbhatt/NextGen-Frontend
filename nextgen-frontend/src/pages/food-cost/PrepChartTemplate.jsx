@@ -18,6 +18,7 @@ import Tooltip from "../../components/ToolTip.jsx";
 import { FcInfo } from "react-icons/fc";
 import { Steps, Hints } from "intro.js-react";
 import "intro.js/introjs.css";
+import IntroJS from "../../components/IntroJS.jsx";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
@@ -66,21 +67,31 @@ export default function PrepChartTemplate() {
     steps: [
       {
         element: ".unit-selector",
-        intro: "Select a unit from the dropdown list",
+        intro: "Select a unit to create a Prep & Thaw template. The SAVE icon will allow the administrator to quickly SAVE and assign this particular prep & thaw template to any other unit or group of units. Friendly TIP: Remember to SAVE your template periodically while you build it.",
       },
       {
         element: ".save-option",
-        intro: "Click here to save the data",
+        intro: "SAVES the current template to this unit with the option to also SAVE (assign) to any other unit or area. Friendly TIP: To save considerable time, construct a temple for a large number of similar units and SAVE to all the like AND somewhat like units. Access the other unit/areas and simply modify and SAVE again. ",
       },
       {
-        element: ".inventory-items",
-        intro: "Drag items from this list that you want to add to the Prep Chart",
-        position: "right",
+        element: ".search-bar",
+        intro: 'Search inventory items to drag and drop to the Prep & Thaw section(s) desired. Items can be added to any number of sections i.e. TODAY, TOMORROW, NEXT DAY. Items can be placed in any order desired within each section. Friendly TIP: A search for item “chicken” will produce ALL items with “chicken” anywhere in the item description therefore making it easy to drag ALL “chicken” items produced by the search'
       },
       {
-        element: ".drop-tables",
-        intro: "Drop items in any of the sections here",
-        position: "left",
+        element: ".today-table",
+        intro: "Items in the TODAY section will use the TODAY forecast to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typical prep items for TODAY’s business. This could include product quantities to prepare OR thaw for use TODAY."
+      },
+      {
+        element: ".tomorrow-table",
+        intro: "Items in the TOMORROW section will use the TODAY + TOMORROW forecasts to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typically items requiring a 24-hour thaw period to be ready for use.  This could also include product quantities to prep for a two day period having an adequate  prepared quality shelf life. "
+      },
+      {
+        element: ".nextday-table",
+        intro: "Items in the NEXT DAY section will use the TODAY + TOMORROW + NEXT DAY forecasts to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typical items requiring a 48-hour thaw period to be ready for use. This could also include product quantities to prep for a three day period having an adequate prepared quality shelf life. "
+      },
+      {
+        element: ".help-option",
+        intro: "Use the HELP button and select View Tutorial to watch this guided tour any time!"
       }
     ],
   });
@@ -116,17 +127,12 @@ export default function PrepChartTemplate() {
         section !== draggingPos.current?.section) &&
       draggingPos.current?.isDragStart
     ) {
-      console.log(draggingPos.current?.index, index, section)
-      console.log(TomorrowItem)
-      console.log(getSectionItems(draggingPos.current?.section))
 
       const newItems = getSectionItems(draggingPos.current?.section);
 
       const draggedItem = newItems.splice(draggingPos.current?.index, 1)[0];
 
       newItems.splice(index, 0, draggedItem);
-
-      console.log(newItems)
 
       // Update the state based on the section
       switch (draggingPos.current?.section) {
@@ -319,8 +325,6 @@ export default function PrepChartTemplate() {
   };
 
   const DropTomorrow = (inventoryItemID) => {
-    console.log(inventoryItemID, "In DropTomorrow")
-    console.log(draggingPos.current?.index, "In DropTomorrow")
     const isDuplicate = TomorrowItemRef.current.some(
       (item) => item.inventoryItemID === inventoryItemID
     );
@@ -335,7 +339,6 @@ export default function PrepChartTemplate() {
             DropTomorrowItem,
             ...TomorrowItem.slice(draggingPos.current?.index),
           ];
-          console.log(TomorrowItems, "TomorrowItems")
           return (TomorrowItems = Array.from(
             new Set(TomorrowItems.map(JSON.stringify)),
             JSON.parse
@@ -633,7 +636,7 @@ export default function PrepChartTemplate() {
             <Styled.TableRight className="drop-tables">
               <Styled.RightTblMarg>
                 <MinimizableContainer title={todayTitle}>
-                  <Styled.Table>
+                  <Styled.Table className="today-table">
                     <div
                       className={`drop-board`}
                       ref={dropToday}
@@ -736,7 +739,7 @@ export default function PrepChartTemplate() {
 
               <Styled.RightTblMarg>
                 <MinimizableContainer title={tomorrowTitle}>
-                  <Styled.Table>
+                  <Styled.Table className="tomorrow-table">
                     <div
                       className="drop-board"
                       ref={dropTomorrow}
@@ -767,7 +770,6 @@ export default function PrepChartTemplate() {
                           }}
                           onDragOver={(e) => {
                             e.preventDefault(),
-                            console.log(draggingPos.current),
                               draggingPos.current?.isDragStart
                                 ? ""
                                 : (draggingPos.current = {
@@ -839,7 +841,7 @@ export default function PrepChartTemplate() {
               </Styled.RightTblMarg>
               <Styled.RightTblMarg>
                 <MinimizableContainer title={nextDayTitle}>
-                  <Styled.Table>
+                  <Styled.Table className="nextday-table">
                     <div
                       className="drop-board"
                       ref={dropNextDay}
@@ -909,7 +911,6 @@ export default function PrepChartTemplate() {
                       {NextDayItem.length > 0 ? (
                         <Styled.AddNewItems
                           onDrop={() => {
-                            console.log(draggingPos.current?.index),
                               handleDrop(NextDayItem.length, "nextDay"),
                               handleDropOver(false, "nextDay");
                           }}
