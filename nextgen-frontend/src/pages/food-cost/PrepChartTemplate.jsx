@@ -14,9 +14,14 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
+import Tooltip from "../../components/ToolTip.jsx";
+import { FcInfo } from "react-icons/fc";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
+const todayToolTip = "Items in Today section will use the selected date Forecasted sales to calculate the NEEDED prep or thaw quantity.";
+const tomorrowToolTip = "Items in Tomorrow section will use the Today date + Tomorrow date Forecasted sales to calculate the NEEDED prep or thaw quantity"; 
+const nextDayToolTip = "Items in Tomorrow section will use the Today date + Tomorrow date + Next Day Forecasted sales to calculate the NEEDED prep or thaw quantity.";
 const prepTableStructure = {
   columnHeaders: ["Inventory ID", "Description"],
   dataTypes: ["string", "string"],
@@ -487,6 +492,30 @@ export default function PrepChartTemplate() {
     }
   };
 
+  const todayTitle = () => {
+    return <div>
+      <Tooltip content={todayToolTip} direction="top">
+        <FcInfo /> Today
+      </Tooltip>
+    </div>
+  };
+
+  const tomorrowTitle = () => {
+    return <div>
+      <Tooltip content={tomorrowToolTip} direction="top">
+        <FcInfo /> Tomorrow
+      </Tooltip>
+    </div>
+  };
+
+  const nextDayTitle = () => {
+    return <div>
+      <Tooltip content={nextDayToolTip} direction="top">
+        <FcInfo /> Next Day
+      </Tooltip>
+    </div>
+  };
+
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Prep Chart Template</Styled.PageTitle>
@@ -560,7 +589,7 @@ export default function PrepChartTemplate() {
 
             <Styled.TableRight>
               <Styled.RightTblMarg>
-                <MinimizableContainer title="Today">
+                <MinimizableContainer title={todayTitle}>
                   <Styled.Table>
                     <div
                       className={`drop-board`}
@@ -663,7 +692,7 @@ export default function PrepChartTemplate() {
               </Styled.RightTblMarg>
 
               <Styled.RightTblMarg>
-                <MinimizableContainer title="Tomorrow">
+                <MinimizableContainer title={tomorrowTitle}>
                   <Styled.Table>
                     <div
                       className="drop-board"
@@ -766,7 +795,7 @@ export default function PrepChartTemplate() {
                 </MinimizableContainer>
               </Styled.RightTblMarg>
               <Styled.RightTblMarg>
-                <MinimizableContainer title="Next Day">
+                <MinimizableContainer title={nextDayTitle}>
                   <Styled.Table>
                     <div
                       className="drop-board"
