@@ -39,7 +39,7 @@ const prepTableStructure = {
   columnWidths : "2.5fr 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows : [],
   headerTooltips: ["", toolTipPrepType, toolTipYieldType, toolTipSafetyFactor, toolTipNeeded, toolTipOnHand, ""],
-  toolTipDirection: ["", right, left, right, right, right, ""]
+  toolTipDirection: ["", left, left, left, left, left, ""]
 };
 
 export default function PrepChart() {
