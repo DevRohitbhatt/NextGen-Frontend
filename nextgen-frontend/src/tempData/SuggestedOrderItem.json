@@ -8,13 +8,19 @@
           "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
           "ItemRef": "1763440",
           "ItemOrder": "CA",
-          "children": []
+          "PackSize": "1/25",
+          "LastPrice": "$45.78",
+          "SaftyFactor": "$45.78",
+          "SuggestedQnt": "$45.78",
+          "OnHand": "$45.78"
         },
         {
           "InventoryDescription": "(R) ICEBERG - I=B",
           "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
           "ItemRef": "1763442",
           "ItemOrder": "CA",
+          "PackSize": "1/25",
+          "LastPrice": "$45.78",
           "children": []
         }
       ]
@@ -28,6 +34,8 @@
           "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
           "ItemRef": "1763443",
           "ItemOrder": "CA",
+          "PackSize": "1/25",
+          "LastPrice": "$45.78",
           "children": []
         },
         {
@@ -35,6 +43,8 @@
           "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
           "ItemRef": "1763445",
           "ItemOrder": "CA",
+          "PackSize": "1/25",
+          "LastPrice": "$45.78",
           "children": []
         }
       ]
@@ -48,6 +58,8 @@
           "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
           "ItemRef": "1763443",
           "ItemOrder": "CA",
+          "PackSize": "1/25",
+          "LastPrice": "$45.78",
           "children": []
         },
         {
@@ -55,6 +67,8 @@
           "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
           "ItemRef": "1763445",
           "ItemOrder": "CA",
+          "PackSize": "1/25",
+          "LastPrice": "$45.78",
           "children": []
         }
       ]
@@ -68,6 +82,8 @@
           "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
           "ItemRef": "1763443",
           "ItemOrder": "CA",
+          "PackSize": "1/25",
+          "LastPrice": "$45.78",
           "children": []
         },
         {
@@ -75,6 +91,8 @@
           "ItemDescription": "LETTUCE ICEBERG PREMIUM PLTIZD",
           "ItemRef": "1763445",
           "ItemOrder": "CA",
+          "PackSize": "1/25",
+          "LastPrice": "$45.78",
           "children": []
         }
       ]

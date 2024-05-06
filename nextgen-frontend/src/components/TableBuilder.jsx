@@ -150,9 +150,10 @@ if (isSorting) {
         data={rows}
         headers={columnHeaders}
         columntype={dataTypes}
+        dataTypes={dataTypes}
+        columnwidths={columnwidths}
+        
       />
-      
-     
       ) : (
       <Table
         width={width}
