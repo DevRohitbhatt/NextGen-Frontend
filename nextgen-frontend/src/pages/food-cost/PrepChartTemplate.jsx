@@ -657,10 +657,10 @@ export default function PrepChartTemplate() {
                       {todayItem.map((item, index) => (
                         <div
                           key={item.inventoryItemID}
-                          draggable
-                          onDragStart={() =>
-                            handleDragStart(index, index, "today", true, true)
-                          }
+                          // draggable
+                          // onDragStart={() =>
+                          //   handleDragStart(index, index, "today", true, true)
+                          // }
                           onDrop={() => {
                             handleDrop(index, "today"),
                               handleDropOver(false, "today", index);
@@ -760,10 +760,10 @@ export default function PrepChartTemplate() {
                       {TomorrowItem.map((item, index) => (
                         <div
                           key={item.inventoryItemID}
-                          draggable
-                          onDragStart={() =>
-                            handleDragStart(index, index,"tomorrow", true, true)
-                          }
+                          // draggable
+                          // onDragStart={() =>
+                          //   handleDragStart(index, index,"tomorrow", true, true)
+                          // }
                           onDrop={() => {
                             handleDrop(index, index, "tomorrow"),
                               handleDropOver(false, "tomorrow", index);
@@ -862,10 +862,10 @@ export default function PrepChartTemplate() {
                       {NextDayItem.map((item, index) => (
                         <div
                           key={item.inventoryItemID}
-                          draggable
-                          onDragStart={() =>
-                            handleDragStart(index,index, "nextDay", true, true)
-                          }
+                          // draggable
+                          // onDragStart={() =>
+                          //   handleDragStart(index,index, "nextDay", true, true)
+                          // }
                           onDrop={() => {
                             handleDrop(index, "nextDay"),
                               handleDropOver(false, "nextDay", index);
