@@ -18,7 +18,7 @@ const TooltipTip = styled.div`
   font-size: 14px;
   font-family: sans-serif;
   line-height: 1;
-  z-index: +1;
+  z-index: 100;
   width: 300px;
   &:before {
     top: 100%;
@@ -50,9 +50,8 @@ const Tooltip = ({content, direction, delay, children}) => {
       }
       if (direction === "left") {
         tooltipRef.current.style.top = `50px`;
-        tooltipRef.current.style.left= 'auto';
-        tooltipRef.current.style.right= 'calc(100% + ${tooltipHeight}px)';
-        tooltipRef.current.style.transform= 'translateX(0) translateY(-50%)';
+        tooltipRef.current.style.left= `calc(-100% - 10px)`;
+        tooltipRef.current.style.transform= `translateX(0) translateY(-50%)`;
       }
     }
   }, [active, direction]);

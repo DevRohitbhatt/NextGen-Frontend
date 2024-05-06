@@ -26,9 +26,8 @@ const createTable = (tableInfo) => {
           })),
         ],
         ...tableInfo.data.rows.map((row) =>
-          row.map((cell) => ({
-            
-            text: getCellValue(cell),
+          row.map((cell, index) => ({
+            text: getCellValue(cell, tableInfo.dataTypes ? tableInfo.dataTypes[index] : ""),
             style: "tableCell",
           }))
         ),
@@ -44,9 +43,16 @@ const createTable = (tableInfo) => {
   else return { title, table };
 };
 
-const getCellValue = (cell) => {
+const getCellValue = (cell, dataType) => {
   if (Array.isArray(cell.value)) {
     return cell.value.find((option) => option.isSelected).option;
+  } else if (dataType === "currency") {
+    return cell.value.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
+  } else if (dataType === "percent") {
+    return `${cell.value}%`;
   } else {
     return cell.value !== 0 ? cell.value : "";
   }
