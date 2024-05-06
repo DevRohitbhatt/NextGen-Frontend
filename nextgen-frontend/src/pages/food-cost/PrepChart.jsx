@@ -437,7 +437,7 @@ export default function PrepChart() {
         steps={introJS.steps}
         initialStep={introJS.initialStep}
         onExit={() => {
-          setIntroJS({ ...introJS, enabled: false });
+          setIntroJS({ ...introJS, stepsEnabled: false });
         }}
       />
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
@@ -528,7 +528,7 @@ export default function PrepChart() {
                 toolTipDirection={defaultSafetyFactorTable.toolTipDirection}
               />
             </Styled.ForeCastAndSafetyFactor>
-            <h2>Today - ${Math.round(prepChart.forecastData.today)}</h2>
+            <h2 className="today-table">Today - ${Math.round(prepChart.forecastData.today)}</h2>
             <Table
               columnHeaders={todayTable.columnHeaders}
               classnames={todayTable.classnames}
@@ -536,7 +536,6 @@ export default function PrepChart() {
               columnwidths={todayTable.columnWidths}
               rows={todayTable.rows}
               tableName="Today"
-              className="today-table"
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
@@ -544,14 +543,13 @@ export default function PrepChart() {
               toolTipDirection={todayTable.toolTipDirection}
             />
 
-            <h2>Tomorrow - ${Math.round(prepChart.forecastData.tomorrow)}</h2>
+            <h2 className={"tomorrow-table"}>Tomorrow - ${Math.round(prepChart.forecastData.tomorrow)}</h2>
             <Table
               columnHeaders={tomorrowTable.columnHeaders}
               dataTypes={tomorrowTable.dataTypes}
               columnwidths={tomorrowTable.columnWidths}
               rows={tomorrowTable.rows}
               tableName={"Tomorrow"}
-              className={"tomorrow-table"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
@@ -559,14 +557,13 @@ export default function PrepChart() {
               toolTipDirection={tomorrowTable.toolTipDirection}
             />
 
-            <h2>Next Day - ${Math.round(prepChart.forecastData.nextDay)}</h2>
+            <h2 className={"nextday-table"} >Next Day - ${Math.round(prepChart.forecastData.nextDay)}</h2>
             <Table
               columnHeaders={nextDayTable.columnHeaders}
               dataTypes={nextDayTable.dataTypes}
               columnwidths={nextDayTable.columnWidths}
               rows={nextDayTable.rows}
               tableName={"NextDay"}
-              className={"nextday-table"}
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
