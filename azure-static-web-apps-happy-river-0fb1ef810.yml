@@ -20,12 +20,31 @@ jobs:
   steps:
   - checkout: self
     submodules: true
+    
+  - script: |
+      cd nextgen-frontend
+      npm install
+      npm run build
+    displayName: 'Build application'
+
+  - task: CopyFiles@2
+    displayName: 'Copy staticwebapp.config.json to dist folder'
+    inputs:
+     SourceFolder: nextgen-frontend
+     Contents: 'staticwebapp.config.json'
+     TargetFolder: 'nextgen-frontend/dist'
+    
+  - task : PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: 'nextgen-frontend/dist'
+      ArtifactName: 'drop'
+
   - task: AzureStaticWebApp@0
     inputs:
       azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_RIVER_0FB1EF810)
 ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
 # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-      app_location: "/prepchart-frontend" # App source code path
+      app_location: "/nextgen-frontend" # App source code path
       api_location: "" # Api source code path - optional
       output_location: "dist" # Built app content directory - optional
 ###### End of Repository/Build Configurations ######
