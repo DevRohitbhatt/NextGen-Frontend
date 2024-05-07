@@ -18,7 +18,8 @@ export default function PrepChartIntroSteps() {
         },
         {
             element: '.sales-forecast',
-            intro: "-Your prep & thaw chart pulls the selected date plus Tomorrow and Next Day sales projections forward." +"<br><br> -The Tomorrow and Next Day forecast values are typically used for 2-day prep or frozen product thaw time i.e. 24-hour thaw = “Tomorrow”, 48-hour thaw = Next Day."
+            intro: "-Your prep & thaw chart pulls the selected date plus Tomorrow and Next Day sales projections forward." 
+            +"<br><br> -The Tomorrow and Next Day forecast values are typically used for 2-day prep or frozen product thaw time i.e. 24-hour thaw = Tomorrow, 48-hour thaw = Next Day."
         },
         {
             element: '.default-safety-factor',
@@ -38,11 +39,13 @@ export default function PrepChartIntroSteps() {
         },
         {
             element: '.yield-type',
-            intro: "-This figure represents a 4-week moving average dollar yield based on your actual inventory counts." + "<br><br> -The Yield/Type dollar amount is calculated by the Prep Type selected." +"<br><br> -It is IMPORTANT to ensure inventory counts are accurate for your dollar yields to be accurate."
+            intro: "-This figure represents a 4-week moving average dollar yield based on your actual inventory counts." + 
+            "<br><br> -The Yield/Type dollar amount is calculated by the Prep Type selected." +
+            "<br><br> -It is IMPORTANT to ensure inventory counts are accurate for your dollar yields to be accurate."
         },
         {
             element: '.safety-factor',
-            intro: '-Some items require more or less safety factor versus the overall Default safety factor above." +"<br><br> -For example, a highly perishable item like prepped tomatoes, considering the prepped quality and shelf life, may use a lower safety factor i.e. 5%." +"<br"<br> -Items that carry over for a day or more may use a higher safety factor such as 10% or 20%." +"<br><br> -Line item safety factor changes will ignore the Default safety factor number above.'
+            intro: "-Some items require more or less safety factor versus the overall Default safety factor above." +"<br><br> -For example, a highly perishable item like prepped tomatoes, considering the prepped quality and shelf life, may use a lower safety factor i.e. 5%." +"<br><br> -Items that carry over for a day or more may use a higher safety factor such as 10% or 20%." +"<br><br> -Line item safety factor changes will ignore the Default safety factor number above."
         },
         {
             element: '.needed',

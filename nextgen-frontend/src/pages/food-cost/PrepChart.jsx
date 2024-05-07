@@ -17,7 +17,7 @@ import { Steps } from "intro.js-react";
 
 const toolTipForecastSales = "Copied from Web Scheduler if Web Scheduler subscriber otherwise a four-week moving average of Net Sales. NOTE: Adjustments to forecasted sales on prep chart DO NOT modify Web Scheduler Forecasted sales.";
 const toolTipPrepType = "Units of Measure collected from Inventory Configuration. Defaults to item with “PREP” in description.";
-const toolTipYieldType = "Represents item dollar yield. Calculated as four week rolling average Net Sales / Item usage dollars.";
+const toolTipYieldType = "Represents item dollar yield. Calculated as four week rolling average Net Sales / Item usage.";
 const toolTipSafetyFactor = "Set by default safety factor OR individual item safety factor. Added buffer or cushion to the base NEEDED amount. Typically used to ensure ample quantity of prep or thaw amounts without running short of product. Short shelf-life prepped or thawed items may have a lower safety factor applied to ensure top quality while minimizing waste.";
 const toolTipNeeded = "Represents the quantity needed for Forecasted sales. (Net Sales / Yield Type) + safety factor. Items in Tomorrow section use Today Forecasted Sales + Tomorrow Forecasted Sales. Items in Next Day section use Today Forecasted Sales + Tomorrow Forecasted Sales + Next Day Forecasted Sales";
 const toolTipOnHand = "Physical count of usable product already available";
@@ -561,8 +561,6 @@ export default function PrepChart() {
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
-              headerTooltips={tomorrowTable.headerTooltips}
-              toolTipDirection={tomorrowTable.toolTipDirection}
             />
 
             <h2 className={"nextday-table"} >Next Day - ${Math.round(prepChart.forecastData.nextDay)}</h2>
@@ -575,8 +573,6 @@ export default function PrepChart() {
               handleInputCellChange={handleTableCellChange}
               handleDropdownChange={handleDropdownChange}
               isSorting={false}
-              headerTooltips={nextDayTable.headerTooltips}
-              toolTipDirection={nextDayTable.toolTipDirection}
             />
           </>
         )
