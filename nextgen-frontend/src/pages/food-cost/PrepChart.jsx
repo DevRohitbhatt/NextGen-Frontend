@@ -281,6 +281,7 @@ export default function PrepChart() {
           title: "Forecast",
           widths: [50, 100, 75],
           data: forecastTable,
+          dataTypes: ["string", "currency rounded", "string"]
         },
         { type: "table/Column", widths: [100], data: defaultSafetyFactorTable },
         {
@@ -288,18 +289,21 @@ export default function PrepChart() {
           title: "Today",
           widths: [115, 140, "*", "*", "*", "*", "*"],
           data: todayTable,
+          dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
           title: "Tomorrow",
           widths: [115, 140, "*", "*", "*", "*", "*"],
           data: tomorrowTable,
+          dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
           title: "Next Day",
           widths: [115, 140, "*", "*", "*", "*", "*"],
           data: nextDayTable,
+          dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
       ],
     };
@@ -316,6 +320,7 @@ export default function PrepChart() {
           title: "Forecast",
           widths: [50, 100, 75],
           data: forecastTable,
+          dataTypes: ["string", "currency rounded", "string"]
         },
         { type: "table/Column", widths: [100], data: defaultSafetyFactorTable },
         {
@@ -323,18 +328,21 @@ export default function PrepChart() {
           title: "Today",
           widths: [115, 140, "*", "*", "*", "*", "*"],
           data: todayTable,
+          dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
           title: "Tomorrow",
           widths: [115, 140, "*", "*", "*", "*", "*"],
           data: tomorrowTable,
+          dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
           title: "Next Day",
           widths: [115, 140, "*", "*", "*", "*", "*"],
           data: nextDayTable,
+          dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
       ],
     };
