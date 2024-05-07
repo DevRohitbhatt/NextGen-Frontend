@@ -51,6 +51,9 @@ const getCellValue = (cell, dataType) => {
       style: "currency",
       currency: "USD",
     });
+  } else if (dataType === "currency rounded") {
+    const roundedValue = Math.round(cell.value);
+    return "$" + roundedValue.toLocaleString("en-US");
   } else if (dataType === "percent") {
     return `${cell.value}%`;
   } else {
