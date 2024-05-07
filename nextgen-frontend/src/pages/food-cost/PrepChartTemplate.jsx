@@ -22,9 +22,12 @@ import IntroJS from "../../components/IntroJS.jsx";
 
 var ItemList = [];
 const placeholder = "  Column drop here .....";
-const todayToolTip = "Items in Today section will use the selected date Forecasted sales to calculate the NEEDED prep or thaw quantity.";
-const tomorrowToolTip = "Items in Tomorrow section will use the Today date + Tomorrow date Forecasted sales to calculate the NEEDED prep or thaw quantity"; 
-const nextDayToolTip = "Items in Tomorrow section will use the Today date + Tomorrow date + Next Day Forecasted sales to calculate the NEEDED prep or thaw quantity.";
+const todayToolTip =
+  "Items in Today section will use the selected date Forecasted sales to calculate the NEEDED prep or thaw quantity.";
+const tomorrowToolTip =
+  "Items in Tomorrow section will use the Today date + Tomorrow date Forecasted sales to calculate the NEEDED prep or thaw quantity";
+const nextDayToolTip =
+  "Items in Tomorrow section will use the Today date + Tomorrow date + Next Day Forecasted sales to calculate the NEEDED prep or thaw quantity.";
 const prepTableStructure = {
   columnHeaders: ["Inventory ID", "Description"],
   dataTypes: ["string", "string"],
@@ -61,38 +64,45 @@ export default function PrepChartTemplate() {
   const [isOverNextDays, setIsOverNextDay] = useState(false);
   const draggingPos = useRef();
 
-  const [introJS, setIntroJS] = useState ({ 
+  const [introJS, setIntroJS] = useState({
     stepsEnabled: false,
-    initialStep: 0, 
+    initialStep: 0,
     steps: [
       {
         element: ".unit-selector",
-        intro: "Select a unit to create a Prep & Thaw template. The SAVE icon will allow the administrator to quickly SAVE and assign this particular prep & thaw template to any other unit or group of units. Friendly TIP: Remember to SAVE your template periodically while you build it.",
+        intro:
+          "Select a unit to create a Prep & Thaw template. The SAVE icon will allow the administrator to quickly SAVE and assign this particular prep & thaw template to any other unit or group of units. Friendly TIP: Remember to SAVE your template periodically while you build it.",
       },
       {
         element: ".save-option",
-        intro: "SAVES the current template to this unit with the option to also SAVE (assign) to any other unit or area. Friendly TIP: To save considerable time, construct a temple for a large number of similar units and SAVE to all the like AND somewhat like units. Access the other unit/areas and simply modify and SAVE again. ",
+        intro:
+          "SAVES the current template to this unit with the option to also SAVE (assign) to any other unit or area. Friendly TIP: To save considerable time, construct a temple for a large number of similar units and SAVE to all the like AND somewhat like units. Access the other unit/areas and simply modify and SAVE again. ",
       },
       {
         element: ".search-bar",
-        intro: 'Search inventory items to drag and drop to the Prep & Thaw section(s) desired. Items can be added to any number of sections i.e. TODAY, TOMORROW, NEXT DAY. Items can be placed in any order desired within each section. Friendly TIP: A search for item “chicken” will produce ALL items with “chicken” anywhere in the item description therefore making it easy to drag ALL “chicken” items produced by the search'
+        intro:
+          "Search inventory items to drag and drop to the Prep & Thaw section(s) desired. Items can be added to any number of sections i.e. TODAY, TOMORROW, NEXT DAY. Items can be placed in any order desired within each section. Friendly TIP: A search for item “chicken” will produce ALL items with “chicken” anywhere in the item description therefore making it easy to drag ALL “chicken” items produced by the search",
       },
       {
         element: ".today-table",
-        intro: "Items in the TODAY section will use the TODAY forecast to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typical prep items for TODAY’s business. This could include product quantities to prepare OR thaw for use TODAY."
+        intro:
+          "Items in the TODAY section will use the TODAY forecast to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typical prep items for TODAY’s business. This could include product quantities to prepare OR thaw for use TODAY.",
       },
       {
         element: ".tomorrow-table",
-        intro: "Items in the TOMORROW section will use the TODAY + TOMORROW forecasts to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typically items requiring a 24-hour thaw period to be ready for use.  This could also include product quantities to prep for a two day period having an adequate  prepared quality shelf life. "
+        intro:
+          "Items in the TOMORROW section will use the TODAY + TOMORROW forecasts to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typically items requiring a 24-hour thaw period to be ready for use.  This could also include product quantities to prep for a two day period having an adequate  prepared quality shelf life. ",
       },
       {
         element: ".nextday-table",
-        intro: "Items in the NEXT DAY section will use the TODAY + TOMORROW + NEXT DAY forecasts to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typical items requiring a 48-hour thaw period to be ready for use. This could also include product quantities to prep for a three day period having an adequate prepared quality shelf life. "
+        intro:
+          "Items in the NEXT DAY section will use the TODAY + TOMORROW + NEXT DAY forecasts to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typical items requiring a 48-hour thaw period to be ready for use. This could also include product quantities to prep for a three day period having an adequate prepared quality shelf life. ",
       },
       {
         element: ".help-option",
-        intro: "Use the HELP button and select View Tutorial to watch this guided tour any time!"
-      }
+        intro:
+          "Use the HELP button and select View Tutorial to watch this guided tour any time!",
+      },
     ],
   });
 
@@ -107,32 +117,49 @@ export default function PrepChartTemplate() {
   };
 
   const handleDragStart = (index, indexbg, section, isDragStart, isReorder) => {
-    draggingPos.current = { indexbg: indexbg, section:section, isDragStart:isDragStart,isReorder: isReorder,IsSection:section };
+    draggingPos.current = {
+      index: index,
+      indexbg: indexbg,
+      section: section,
+      isDragStart: isDragStart,
+      isReorder: isReorder,
+      IsSection: section,
+    };
   };
 
   const handleDragEnter = (index, indexbg, section) => {
+    draggingPos.current.AnotherSection =
+      draggingPos.current.section === draggingPos.current.IsSection
+        ? true
+        : false;
 
-    draggingPos.current.AnotherSection = (draggingPos.current.section === draggingPos.current.IsSection) ? true : false;
-
-    if (draggingPos.current?.isReorder && (draggingPos.current.AnotherSection)) {
+    if (draggingPos.current?.isReorder && draggingPos.current.AnotherSection) {
       index > 0 ? index-- : "";
+    } else if (
+      !draggingPos.current.AnotherSection &&
+      draggingPos.current?.isReorder
+    ) {
+      index > 0 ? index - 1 : "";
     }
-    else if ((!draggingPos.current.AnotherSection) && draggingPos.current?.isReorder)
-    {
-      index > 0 ? index++ : "";
-    }
-   
+
     if (
       (index !== draggingPos.current?.index ||
         section !== draggingPos.current?.section) &&
       draggingPos.current?.isDragStart
     ) {
-
       const newItems = getSectionItems(draggingPos.current?.section);
+      if (
+        !draggingPos.current.AnotherSection &&
+        draggingPos.current?.isReorder
+      ) {
+        const draggedItem = newItems.splice(draggingPos.current?.indexbg, 1)[0];
 
-      const draggedItem = newItems.splice(draggingPos.current?.index, 1)[0];
+        newItems.splice(indexbg, 0, draggedItem);
+      } else {
+        const draggedItem = newItems.splice(draggingPos.current?.index, 1)[0];
 
-      newItems.splice(index, 0, draggedItem);
+        newItems.splice(index, 0, draggedItem);
+      }
 
       // Update the state based on the section
       switch (draggingPos.current?.section) {
@@ -237,14 +264,16 @@ export default function PrepChartTemplate() {
       }
       if (data.prepChartTemplate[1]) {
         setTomorrowItem(
-          data.prepChartTemplate.find((item) => item.prepGroupKey === "Tomorrow")
-            .inventoryItemList
+          data.prepChartTemplate.find(
+            (item) => item.prepGroupKey === "Tomorrow"
+          ).inventoryItemList
         );
       }
       if (data.prepChartTemplate[2]) {
         setNextDayItem(
-          data.prepChartTemplate.find((item) => item.prepGroupKey === "Next Day")
-            .inventoryItemList
+          data.prepChartTemplate.find(
+            (item) => item.prepGroupKey === "Next Day"
+          ).inventoryItemList
         );
       }
     } else {
@@ -501,10 +530,9 @@ export default function PrepChartTemplate() {
   };
 
   const handleDropOver = (isDropOver, section, index) => {
-
     if (draggingPos.current.isDragStart) {
       (draggingPos.current.indexbg = index),
-      (draggingPos.current.section = section);
+        (draggingPos.current.section = section);
     } else {
       draggingPos.current = {
         index: draggingPos.current.index,
@@ -533,27 +561,33 @@ export default function PrepChartTemplate() {
   };
 
   const todayTitle = () => {
-    return <div>
-      <Tooltip content={todayToolTip} direction="top">
-        <FcInfo /> Today
-      </Tooltip>
-    </div>
+    return (
+      <div>
+        <Tooltip content={todayToolTip} direction="top">
+          <FcInfo /> Today
+        </Tooltip>
+      </div>
+    );
   };
 
   const tomorrowTitle = () => {
-    return <div>
-      <Tooltip content={tomorrowToolTip} direction="top">
-        <FcInfo /> Tomorrow
-      </Tooltip>
-    </div>
+    return (
+      <div>
+        <Tooltip content={tomorrowToolTip} direction="top">
+          <FcInfo /> Tomorrow
+        </Tooltip>
+      </div>
+    );
   };
 
   const nextDayTitle = () => {
-    return <div>
-      <Tooltip content={nextDayToolTip} direction="top">
-        <FcInfo /> Next Day
-      </Tooltip>
-    </div>
+    return (
+      <div>
+        <Tooltip content={nextDayToolTip} direction="top">
+          <FcInfo /> Next Day
+        </Tooltip>
+      </div>
+    );
   };
 
   return (
@@ -593,7 +627,13 @@ export default function PrepChartTemplate() {
           />
         </Styled.DateAndUnitContainer>
         <Styled.SaveOptionsContainer>
-          <ExportOptions includeSave={true} handleSaveClick={handleSave} includeHelp={true} handleHelpClick={handleIntroStart} className="export-options" />
+          <ExportOptions
+            includeSave={true}
+            handleSaveClick={handleSave}
+            includeHelp={true}
+            handleHelpClick={handleIntroStart}
+            className="export-options"
+          />
         </Styled.SaveOptionsContainer>
       </Styled.OptionsRow>
       {isLoading ? (
@@ -613,7 +653,7 @@ export default function PrepChartTemplate() {
                   onSearch={(keyword) => SearchItem(keyword)}
                 />
               </Styled.InventoryItemsTitle>
-              <Styled.TableLeft className="inventory-items"> 
+              <Styled.TableLeft className="inventory-items">
                 <Table
                   columnHeaders={MasterTable.columnHeaders}
                   columnwidths={MasterTable.columnWidths}
@@ -657,10 +697,10 @@ export default function PrepChartTemplate() {
                       {todayItem.map((item, index) => (
                         <div
                           key={item.inventoryItemID}
-                          // draggable
-                          // onDragStart={() =>
-                          //   handleDragStart(index, index, "today", true, true)
-                          // }
+                          draggable
+                          onDragStart={() =>
+                            handleDragStart(index, index, "today", true, true)
+                          }
                           onDrop={() => {
                             handleDrop(index, "today"),
                               handleDropOver(false, "today", index);
@@ -760,10 +800,16 @@ export default function PrepChartTemplate() {
                       {TomorrowItem.map((item, index) => (
                         <div
                           key={item.inventoryItemID}
-                          // draggable
-                          // onDragStart={() =>
-                          //   handleDragStart(index, index,"tomorrow", true, true)
-                          // }
+                          draggable
+                          onDragStart={() =>
+                            handleDragStart(
+                              index,
+                              index,
+                              "tomorrow",
+                              true,
+                              true
+                            )
+                          }
                           onDrop={() => {
                             handleDrop(index, index, "tomorrow"),
                               handleDropOver(false, "tomorrow", index);
@@ -808,7 +854,7 @@ export default function PrepChartTemplate() {
                       {TomorrowItem.length > 0 ? (
                         <Styled.AddNewItems
                           onDrop={() => {
-                              handleDrop(TomorrowItem.length, "tomorrow"),
+                            handleDrop(TomorrowItem.length, "tomorrow"),
                               handleDropOver(false, "tomorrow");
                           }}
                           onDragOver={(e) => {
@@ -822,7 +868,11 @@ export default function PrepChartTemplate() {
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
                                   }),
-                              handleDropOver(true, "tomorrow", TomorrowItem.length);
+                              handleDropOver(
+                                true,
+                                "tomorrow",
+                                TomorrowItem.length
+                              );
                           }}
                           className={
                             TomorrowItem.length === draggingPos.current?.indexbg
@@ -862,10 +912,10 @@ export default function PrepChartTemplate() {
                       {NextDayItem.map((item, index) => (
                         <div
                           key={item.inventoryItemID}
-                          // draggable
-                          // onDragStart={() =>
-                          //   handleDragStart(index,index, "nextDay", true, true)
-                          // }
+                          draggable
+                          onDragStart={() =>
+                            handleDragStart(index, index, "nextDay", true, true)
+                          }
                           onDrop={() => {
                             handleDrop(index, "nextDay"),
                               handleDropOver(false, "nextDay", index);
@@ -884,8 +934,7 @@ export default function PrepChartTemplate() {
                               handleDropOver(true, "nextDay", index);
                           }}
                           onDragLeave={() => {
-                            handleDropOver(false, "nextDay", index)
-                              
+                            handleDropOver(false, "nextDay", index);
                           }}
                           className={
                             index === draggingPos.current?.indexbg
@@ -911,7 +960,7 @@ export default function PrepChartTemplate() {
                       {NextDayItem.length > 0 ? (
                         <Styled.AddNewItems
                           onDrop={() => {
-                              handleDrop(NextDayItem.length, "nextDay"),
+                            handleDrop(NextDayItem.length, "nextDay"),
                               handleDropOver(false, "nextDay");
                           }}
                           onDragOver={(e) => {
@@ -925,7 +974,11 @@ export default function PrepChartTemplate() {
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
                                   }),
-                              handleDropOver(true, "nextDay", NextDayItem.length);
+                              handleDropOver(
+                                true,
+                                "nextDay",
+                                NextDayItem.length
+                              );
                           }}
                           className={
                             NextDayItem.length === draggingPos.current?.indexbg

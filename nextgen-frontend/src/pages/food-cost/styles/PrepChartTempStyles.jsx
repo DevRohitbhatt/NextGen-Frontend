@@ -16,6 +16,9 @@ export const InventoryItemsContainer = styled.div`
   display: flex;
   flex-direction: column;
   width: 55%;
+  position: sticky;
+  top: 0;
+  height: 500px;
 `;
 
 export const PageTitle = styled.div`
@@ -58,11 +61,10 @@ export const SaveOption = styled.div`
   position: relative;
   cursor: pointer;
 
-  &:hover  {
+  &:hover {
     background-color: ${(props) => props.theme.primary};
     color: white;
   }
-  
 `;
 
 export const OptionImage = styled.div`
@@ -139,7 +141,7 @@ export const TableHeaderTop = styled.div`
   text-align: left;
   margin-top: 25px;
   margin-bottom: 25px;
-  `;
+`;
 export const TableCell = styled.div`
   font-size: 1em;
 `;
@@ -153,7 +155,7 @@ export const TableRight = styled.div`
   // box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
   // // width: 40%;
   // float: right;
-  width: 45%
+  width: 45%;
 `;
 export const TableTitle = styled.div`
   font-size: 1.2em;
@@ -210,4 +212,3 @@ export const Span = styled.span`
   padding: 10px;
   min-height: 18px;
 `;
-
