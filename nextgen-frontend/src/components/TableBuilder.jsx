@@ -188,9 +188,9 @@ if (isSorting) {
             columnHeaders.map((header, index) => (
               <TableHeaderCell key={index} columntype={dataTypes[index]} className={classnames && classnames.length > index ? classnames[index] : ''}>
                 {
-                  headerTooltips[index] === "" ? (
-                    <div> {header} </div>
-                  ) :
+                  headerTooltips ? (headerTooltips[index] === "" ? (
+                      <div> {header} </div>
+                    ) :
                     (
                       toolTipDirection[index] === "left" ? (
                         <Tooltip content={headerTooltips[index]} direction="left">
@@ -202,6 +202,7 @@ if (isSorting) {
                         </Tooltip>
                       )
                     )
+                  ) : <div>{header}</div>
                 }
               </TableHeaderCell>
             ))
