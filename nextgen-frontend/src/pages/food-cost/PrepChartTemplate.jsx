@@ -62,6 +62,7 @@ export default function PrepChartTemplate() {
   const [isOverTodays, setIsOverToday] = useState(false);
   const [isOverTomorrows, setIsOverTomorrow] = useState(false);
   const [isOverNextDays, setIsOverNextDay] = useState(false);
+  const [isDirection, setIsDirection] = useState();
   const draggingPos = useRef();
 
   const [introJS, setIntroJS] = useState({
@@ -112,8 +113,12 @@ export default function PrepChartTemplate() {
     NextDayItemmRef.current = NextDayItem;
   }, [todayItem, TomorrowItem, NextDayItem]);
 
+  let dragTarget = null;
+  let lastDragDirection = null;
+
   const handleDrop = (index, indexbg, section) => {
     handleDragEnter(index, indexbg, section);
+    console.log("draggingPos.current.direction Enter", isDirection);
   };
 
   const handleDragStart = (index, indexbg, section, isDragStart, isReorder) => {
@@ -134,7 +139,13 @@ export default function PrepChartTemplate() {
         : false;
 
     if (draggingPos.current?.isReorder && draggingPos.current.AnotherSection) {
-      index > 0 ? index-- : "";
+      if (isDirection == "T") {
+        index > 0 ? index - 2 : "";
+      } else if (isDirection == "B") {
+        index > 0 ? index-- : "";
+      } else {
+        index > 0 ? index-- : "";
+      }
     } else if (
       !draggingPos.current.AnotherSection &&
       draggingPos.current?.isReorder
@@ -698,9 +709,10 @@ export default function PrepChartTemplate() {
                         <div
                           key={item.inventoryItemID}
                           draggable
-                          onDragStart={() =>
-                            handleDragStart(index, index, "today", true, true)
-                          }
+                          onDragStart={(e) => {
+                            handleDragStart(index, index, "today", true, true);
+                            dragTarget = e.target;
+                          }}
                           onDrop={() => {
                             handleDrop(index, "today"),
                               handleDropOver(false, "today", index);
@@ -715,8 +727,21 @@ export default function PrepChartTemplate() {
                                     section: "today",
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
-                                  }),
-                              handleDropOver(true, "today", index);
+                                  });
+
+                            const mouseY = e.clientY;
+                            let dragDirection = lastDragDirection;
+                            if (dragTarget) {
+                              const { top, height } =
+                                dragTarget.getBoundingClientRect();
+                              dragDirection =
+                                mouseY < top + height / 2 ? "T" : "B";
+                              lastDragDirection = dragDirection;
+                              console.log("dragDirection", dragDirection);
+                              setIsDirection(dragDirection);
+                            }
+
+                            handleDropOver(true, "today", index);
                           }}
                           onDragLeave={() =>
                             handleDropOver(false, "today", index)
@@ -801,15 +826,10 @@ export default function PrepChartTemplate() {
                         <div
                           key={item.inventoryItemID}
                           draggable
-                          onDragStart={() =>
-                            handleDragStart(
-                              index,
-                              index,
-                              "tomorrow",
-                              true,
-                              true
-                            )
-                          }
+                          onDragStart={(e) => {
+                            handleDragStart(index,index,"tomorrow",true,true),
+                              (dragTarget = e.target);
+                          }}
                           onDrop={() => {
                             handleDrop(index, index, "tomorrow"),
                               handleDropOver(false, "tomorrow", index);
@@ -824,8 +844,19 @@ export default function PrepChartTemplate() {
                                     section: "tomorrow",
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
-                                  }),
-                              handleDropOver(true, "tomorrow", index);
+                                  });
+                            const mouseY = e.clientY;
+                            let dragDirection = lastDragDirection;
+                            if (dragTarget) {
+                              const { top, height } =
+                                dragTarget.getBoundingClientRect();
+                              dragDirection =
+                                mouseY < top + height / 2 ? "T" : "B";
+                              lastDragDirection = dragDirection;
+                              console.log("dragDirection", dragDirection);
+                              setIsDirection(dragDirection);
+                            }
+                            handleDropOver(true, "tomorrow", index);
                           }}
                           onDragLeave={() =>
                             handleDropOver(false, "tomorrow", index)
@@ -913,9 +944,10 @@ export default function PrepChartTemplate() {
                         <div
                           key={item.inventoryItemID}
                           draggable
-                          onDragStart={() =>
-                            handleDragStart(index, index, "nextDay", true, true)
-                          }
+                          onDragStart={(e) => {
+                            handleDragStart(index,index,"nextDay",true,true),
+                            (dragTarget = e.target);
+                          }}
                           onDrop={() => {
                             handleDrop(index, "nextDay"),
                               handleDropOver(false, "nextDay", index);
@@ -930,8 +962,19 @@ export default function PrepChartTemplate() {
                                     section: "nextDay",
                                     isDragStart:
                                       draggingPos.current?.isDragStart,
-                                  }),
-                              handleDropOver(true, "nextDay", index);
+                                  });
+                            const mouseY = e.clientY;
+                            let dragDirection = lastDragDirection;
+                            if (dragTarget) {
+                              const { top, height } =
+                                dragTarget.getBoundingClientRect();
+                              dragDirection =
+                                mouseY < top + height / 2 ? "T" : "B";
+                              lastDragDirection = dragDirection;
+                              console.log("dragDirection", dragDirection);
+                              setIsDirection(dragDirection);
+                            }
+                            handleDropOver(true, "nextDay", index);
                           }}
                           onDragLeave={() => {
                             handleDropOver(false, "nextDay", index);
