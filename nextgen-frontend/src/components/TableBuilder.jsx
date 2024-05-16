@@ -7,7 +7,7 @@ import { propTypes } from "react-bootstrap/esm/Image.js";
 import { column } from "stylis";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 import Tooltip from "../components/ToolTip.jsx";
-import { FcInfo } from "react-icons/fc";
+import { FaInfoCircle } from "react-icons/fa";
 
 const Container = styled.div`
   width: ${(props) => (props.width ? props.width : "auto")};
@@ -109,6 +109,10 @@ const IconContainer = styled.div`
   float: right;
 `;
 
+const InfoIcon = styled(FaInfoCircle)`
+  color: ${(props) => props.theme.secondary};
+`;
+
 export default function TableBuilder({
   columnHeaders,
   classnames,
@@ -194,11 +198,11 @@ if (isSorting) {
                     (
                       toolTipDirection[index] === "left" ? (
                         <Tooltip content={headerTooltips[index]} direction="left">
-                          <FcInfo /> {header}
+                          <InfoIcon /> {header}
                         </Tooltip>
                       ) : (
                         <Tooltip content={headerTooltips[index]} direction="left">
-                          {header} <FcInfo />
+                          {header} <InfoIcon />
                         </Tooltip>
                       )
                     )

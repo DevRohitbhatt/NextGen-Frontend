@@ -15,13 +15,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
 import Tooltip from "../../components/ToolTip.jsx";
-import { FcInfo } from "react-icons/fc";
 import { Steps, Hints } from "intro.js-react";
 import "intro.js/introjs.css";
-import IntroJS from "../../components/IntroJS.jsx";
 
 var ItemList = [];
-const placeholder = "  Column drop here .....";
+const placeholder = "  Drop items here";
 const todayToolTip =
   "Items in Today section will use the selected date Forecasted sales to calculate the NEEDED prep or thaw quantity.";
 const tomorrowToolTip =
@@ -571,7 +569,7 @@ export default function PrepChartTemplate() {
     return (
       <div>
         <Tooltip content={todayToolTip} direction="top">
-          <FcInfo /> Today
+          <Styled.InfoIcon /> Today
         </Tooltip>
       </div>
     );
@@ -581,7 +579,7 @@ export default function PrepChartTemplate() {
     return (
       <div>
         <Tooltip content={tomorrowToolTip} direction="top">
-          <FcInfo /> Tomorrow
+          <Styled.InfoIcon /> Tomorrow
         </Tooltip>
       </div>
     );
@@ -591,7 +589,7 @@ export default function PrepChartTemplate() {
     return (
       <div>
         <Tooltip content={nextDayToolTip} direction="top">
-          <FcInfo /> Next Day
+          <Styled.InfoIcon /> Next Day
         </Tooltip>
       </div>
     );
@@ -614,6 +612,7 @@ export default function PrepChartTemplate() {
             unitName={selectedUnitName}
             setUnitName={setSelectedUnitName}
             unitID={selectedUnit}
+            label="Select Unit"
           />
           <UnitModal
             unitData={unitData}

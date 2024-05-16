@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import { FaInfoCircle } from "react-icons/fa";
+import { FaI } from "react-icons/fa6";
 
 export const PageContainer = styled.div`
   width: 85%;
@@ -18,7 +20,7 @@ export const InventoryItemsContainer = styled.div`
   width: 55%;
   position: sticky;
   top: 0;
-  height: 500px;
+  height: 90vh;
 `;
 
 export const PageTitle = styled.div`
@@ -104,6 +106,10 @@ export const InventoryItemsTitle = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+`;
+
+export const InfoIcon = styled(FaInfoCircle)`
+  color: ${(props) => props.theme.secondary};
 `;
 
 export const TableHeader = styled.div`
