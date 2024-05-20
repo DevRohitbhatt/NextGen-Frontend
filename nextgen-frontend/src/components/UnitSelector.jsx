@@ -31,7 +31,7 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick , unitName, setUnitName, unitID}) {
+export default function UnitSelector({ onClick , unitName, setUnitName, unitID, label}) {
   
   const GetUnitList = () => {
     UnitAPI.getUnitsByCompany(1, 1)
@@ -51,7 +51,7 @@ export default function UnitSelector({ onClick , unitName, setUnitName, unitID})
   return (
     <>
     <UnitContainer onClick={onClick} className="unit-selector">
-      <Label>Select Unit(s)</Label>
+      <Label>{label}</Label>
       <UnitValue >{unitName}</UnitValue>
     </UnitContainer>
     </>
