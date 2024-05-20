@@ -48,7 +48,7 @@ const Table = styled.div`
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #364790;
+    background: ${(props) => props.theme.primary};
     border-radius: 30px;
     padding: 18px !important;
     border: 2px solid #fff;
@@ -56,7 +56,7 @@ const Table = styled.div`
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: #508bff;
+    background: ${(props) => props.theme.secondary};
   }
 
   &::-webkit-scrollbar-button:start:decrement {
