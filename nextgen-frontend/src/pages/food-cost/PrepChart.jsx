@@ -456,6 +456,7 @@ export default function PrepChart() {
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}
             unitID={selectedUnit}
+            label="Select Unit"
           />
           <DateSelector
             ToDate={selectedToDate}
