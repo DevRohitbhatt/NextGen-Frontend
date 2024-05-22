@@ -119,7 +119,7 @@ const DateRangePicker = ({ selectedDates, onDateChange }) => {
 
 DateRangePicker.propTypes={
     selectedDates:PropTypes.any,
-    onDateChange:PropTypes.string
+    onDateChange:PropTypes.func
 
 }
 

@@ -1,50 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import TreeNode from "./TreeNode";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
-import Cell from "./TableCell.jsx";
+import PropTypes from "prop-types";
 
-const StyledTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-`;
+const StyledTable = styled.div`
+border-radius: 30px;
+padding: ${(props) => (props.$scrollable ? "0 15px 0 0" : "15px")};
+display: grid;
+grid-template-columns: ${(props) =>
+  props.columnWidths ? props.columnWidths : "auto"}; // Use the prop here
+grid-auto-rows: auto;
+align-items: center;
 
-const StyledRow = styled.tr`
-  &:nth-child(odd) {
-    background-color: #f2f2f2;
+  overflow-y: ${(props) => (props.$scrollable ? "scroll" : "hidden")};
+
+  &::-webkit-scrollbar {
+    width: 15px;
   }
-`;
 
-const StyledCell = styled.td`
-  padding: 8px;
-`;
+  &::-webkit-scrollbar-track-piece {
+    background: #f1f1f1;
+    border-radius: 30px;
+  }
 
-const StyledHeaderCell = styled.th`
-  padding: 8px;
-  width: 0px;
-`;
+  &::-webkit-scrollbar-thumb {
+    background: #364790;
+    border-radius: 30px;
+    padding: 18px !important;
+    border: 2px solid ${(props) => props.theme.White};
+    cursor: pointer;
+  }
 
-const ToggleIcon = styled.span`
-  cursor: pointer;
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${(props)=> props.theme.VividBlue};
+  }
+
+  &::-webkit-scrollbar-button:start:decrement {
+    height: 94px;
+    display: block;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-button:end:increment {
+    height: 20px;
+    display: block;
+    background: transparent;
+  }
+
+  h3 {
+    margin-bottom: 20px;
+    font-size: 1.75em;
+  }
 `;
 
 const ButtonContainer = styled.div`
   margin-bottom: 10px;
 `;
+const TableHeader = styled.div`
+  width: 100%;
+  display: flex;
+  gap:20px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid ${(props) => props.theme.primary};
+`;
 
-const Header=styled.thead`
-font-weight: 500;
+const TableHeaderCell = styled.div`
+  font-weight: 500;
   font-size: 14px;
-  height: 44px;
-  border-bottom: ${(props) =>
-    props.$useTableRows ? "none" : "2px solid " + props.theme.primary};
+  // height: 44px;
   padding: 10px 0;
-  text-align: ${(props) => (props.columntype === "number" ? "center" : "left")};
-`;
+  width: 170px;
 
-const MainBody=styled.tbody`
 `;
-
 const CollapseButton = styled.button`
   box-shadow: inset 0 0 0 2px #364790;
   transition: color 0.25s 0.0833333333s;
@@ -81,14 +110,14 @@ const CollapseButton = styled.button`
     border-left-width: 2px;
   }
   &:hover::after {
-    border-color: #fff;
+    border-color: ${(props) => props.theme.White};
     transition: border-color 0s, width 0.25s, height 0.25s;
     width: 100%;
     height: 100%;
     transition-delay: 0s, 0.25s, 0s;
   }
   &:hover::before {
-    border-color: #fff;
+    border-color: ${(props) => props.theme.White};
     transition: border-color 0s, width 0.25s, height 0.25s;
     width: 100%;
     height: 100%;
@@ -96,67 +125,74 @@ const CollapseButton = styled.button`
   }
   &:hover {
     border-color: transparent;
-    color: #fff;
+    color: ${(props) => props.theme.White};
     background: #364790;
   }
 `;
 const ExpandButton = styled.button`
-box-shadow: inset 0 0 0 2px #364790;
-transition: color 0.25s 0.0833333333s;
-position: relative;
-border-radius: 0px;
-width: 164px;
-margin-top: 18px;
-mar
-
-&::after {
-  border: 0 solid transparent;
-  box-sizing: border-box;
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  width: 0;
-  height: 0;
-  bottom: 0;
-  right: 0;
-  border-top-width: 2px;
-  border-right-width: 2px;
-}
-&::before {
-  border: 0 solid transparent;
-  box-sizing: border-box;
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  width: 0;
-  height: 0;
-  bottom: 0;
-  right: 0;
-  border-bottom-width: 2px;
-  border-left-width: 2px;
-}
-&:hover::after {
-  border-color: #fff;
-  transition: border-color 0s, width 0.25s, height 0.25s;
-  width: 100%;
-  height: 100%;
-  transition-delay: 0s, 0.25s, 0s;
-}
-&:hover::before {
-  border-color: #fff;
-  transition: border-color 0s, width 0.25s, height 0.25s;
-  width: 100%;
-  height: 100%;
-  transition-delay: 0s, 0s, 0.25s;
-}
-&:hover {
-  border-color: transparent;
-  color: #fff;
-  background: #364790;
-}
+  box-shadow: inset 0 0 0 2px #364790;
+  transition: color 0.25s 0.0833333333s;
+  position: relative;
+  border-radius: 0px;
+  width: 164px;
+  margin-top: 18px;
+  mar &::after {
+    border: 0 solid transparent;
+    box-sizing: border-box;
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: 0;
+    right: 0;
+    border-top-width: 2px;
+    border-right-width: 2px;
+  }
+  &::before {
+    border: 0 solid transparent;
+    box-sizing: border-box;
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+  }
+  &:hover::after {
+    border-color: ${(props) => props.theme.White};
+    transition: border-color 0s, width 0.25s, height 0.25s;
+    width: 100%;
+    height: 100%;
+    transition-delay: 0s, 0.25s, 0s;
+  }
+  &:hover::before {
+    border-color:${(props) => props.theme.White};
+    transition: border-color 0s, width 0.25s, height 0.25s;
+    width: 100%;
+    height: 100%;
+    transition-delay: 0s, 0s, 0.25s;
+  }
+  &:hover {
+    border-color: transparent;
+    color: ${(props) => props.theme.White};
+    background: ${(props) => props.theme.DarkBlue};
+  }
 `;
-const TreeTable = ({ data, headers }) => {
+
+export default function TreeTable ({ data:initialData, columnHeaders, dataTypes }) {
   const [expandedNodes, setExpandedNodes] = useState({});
+  const [isCollapseActive, setIsCollapseActive] = useState(false);
+  const [isExpandActive, setIsExpandActive] = useState(false);
+  const [data, setData] = useState(initialData);
+
+  useEffect(() => {
+    setIsCollapseActive(true);
+    setIsExpandActive(false);
+  }, []);
 
   const toggleNode = (node) => {
     const updatedExpandedNodes = { ...expandedNodes };
@@ -165,14 +201,17 @@ const TreeTable = ({ data, headers }) => {
   };
 
   const handleEdit = (updatedNode) => {
-    const updatedData = data.map((item) =>
-      item.name === updatedNode.name ? updatedNode : item
+    setData((prevData) =>
+      prevData.map((item) =>
+        item.name === updatedNode.name ? updatedNode : item
+      )
     );
-    // setData(updatedData);
   };
 
   const handleCollapseAll = () => {
     setExpandedNodes({});
+    setIsCollapseActive(true);
+    setIsExpandActive(false);
   };
 
   const handleExpandAll = () => {
@@ -181,39 +220,56 @@ const TreeTable = ({ data, headers }) => {
       allExpandedNodes[node.name] = true;
     });
     setExpandedNodes(allExpandedNodes);
+    setIsCollapseActive(false);
+    setIsExpandActive(true);
   };
 
-  console.log(data)
+  const isEditableArray = [false, false, false, false, false, true, true];
+
   return (
     <>
       <ButtonContainer>
-        <CollapseButton onClick={handleCollapseAll}>Collapse All <MdKeyboardArrowUp/></CollapseButton>
-        <ExpandButton onClick={handleExpandAll}>Expand All <MdKeyboardArrowDown/> </ExpandButton>
+        <CollapseButton
+          className={isCollapseActive ? "active" : ""}
+          onClick={handleCollapseAll}
+        >
+          Collapse All <MdKeyboardArrowDown />
+        </CollapseButton>
+        <ExpandButton
+          className={isExpandActive ? "active" : ""}
+          onClick={handleExpandAll}
+        >
+          Expand All <MdKeyboardArrowUp />
+        </ExpandButton>
       </ButtonContainer>
       <StyledTable>
-        <Header>
-          <StyledRow>
-            {headers.map((header, index) => (
-              <StyledHeaderCell key={index}>{header}</StyledHeaderCell>
-            ))}
-          </StyledRow>
-        </Header>
-        <MainBody>
-          {data.map((node, index) => (
-            <TreeNode
-              key={index}
-              node={node}
-              isExpanded={expandedNodes[node.name]}
-              onToggleNode={toggleNode}
-              headers={headers}
-              onEdit={handleEdit}
-              CellType="text"
-            />
+        <TableHeader className="Header">
+          {columnHeaders.map((header, index) => (
+            <TableHeaderCell key={index} columntype={dataTypes[index]}>
+              {header}
+            </TableHeaderCell>
           ))}
-        </MainBody>
+        </TableHeader>
+        {data.map((node, index) => (
+          <TreeNode
+            key={index}
+            node={node}
+            isExpanded={expandedNodes[node.name]}
+            onToggleNode={toggleNode}
+            headers={columnHeaders}
+            onEdit={handleEdit}
+            isEditable={isEditableArray}
+            dataTypes={dataTypes}
+          />
+        ))}
       </StyledTable>
     </>
   );
-};
+}
 
-export default TreeTable;
+TreeTable.propTypes = {
+  columnHeaders: PropTypes.array,
+  dataTypes: PropTypes.array,
+  columnWidths: PropTypes.string,
+  data: PropTypes.array
+};

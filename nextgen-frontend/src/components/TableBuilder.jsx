@@ -148,11 +148,8 @@ if (isSorting) {
       {isTreeTable ? (
         <TreeTable
         data={rows}
-        headers={columnHeaders}
-        columntype={dataTypes}
+        columnHeaders={columnHeaders}
         dataTypes={dataTypes}
-        columnwidths={columnwidths}
-        
       />
       ) : (
       <Table
