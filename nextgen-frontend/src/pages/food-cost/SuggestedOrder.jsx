@@ -10,7 +10,7 @@ import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import { VendorAPI } from "../../apis/food-cost/VendorAPI.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
-import * as PrepChartFunctions from "../../functions/PrepChartFunctions.jsx";
+import * as SuggestedOrderFunctions from "../../functions/SuggestedOrderFunctions.jsx";
 
 const SuggestedTableStructure = {
   columnHeaders: [
@@ -38,6 +38,7 @@ const SuggestedTableStructure = {
   columnWidth: "1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows: [],
 };
+let SaveSubmitStatus = 0;
 
 export default function SuggestedOrder() {
   const [isLoading, setIsLoading] = useState(false);
@@ -63,13 +64,14 @@ export default function SuggestedOrder() {
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [isUnitSelected, setIsUnitSelected] = useState(false);
   const [isActive, setIsActive] = useState([]);
-  const [prepChart, setPrepChart] = useState({});
+  const [suggestedOrder, setsuggestedOrder] = useState({});
   const [SuggestedTable, setSuggestedTable] = useState({
     ...SuggestedTableStructure,
   });
   const [IsVisible, setVisible] = useState(false);
+  const [saveIsVisible, setsaveIsVisible] = useState(false);
   const [userID, setUserID] = useState(0);
-
+  const [successMessage, setSuccessMessage] = useState("");
   const [forecastTable, setForecastTable] = useState({
     columnHeaders: ["Forecasted Date", "Forecasted $ Amt", ""],
     dataTypes: ["string", "number", "string"],
@@ -89,11 +91,10 @@ export default function SuggestedOrder() {
 
   useEffect(() => {
     document.title = "Suggested Order";
-    
     const today = new Date();
     const formattedDate = formatDate(today);
     setSelectedDates(`${formattedDate} - ${formattedDate}`);
-    
+
     if (!unitsList) {
       let parameters = decodeURIComponent(
         window.location.search.replace("?data=", "")
@@ -101,14 +102,16 @@ export default function SuggestedOrder() {
       if (parameters) parameters = JSON.parse(parameters);
       parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
       parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
-      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
+      parameters
+        ? setSelectedUnit(parameters.User_DefaultUnitID)
+        : setSelectedUnit();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
-      parameters ? setUserID(parameters.User_UserID) : setUserID()
+      parameters ? setUserID(parameters.User_UserID) : setUserID();
 
       if (parameters.User_DefaultUnitID) {
         getUnits(companyID, alignmentID, 5120);
         getVendors(companyID);
-        GetOrderItem(companyID,selectedUnit,selectedVendor,fromDate,toDate);
+        GetOrderItem(companyID, selectedUnit, selectedVendor, fromDate, toDate);
       } else {
         setErrorMessage("No Unit or Vendor Selected, Please select a unit.");
         setIsError(true);
@@ -117,13 +120,21 @@ export default function SuggestedOrder() {
     } else {
       getUnits(companyID, 1110, 5120);
       //getVendors(companyID);
-      GetOrderItem(companyID,selectedUnit,selectedVendor,fromDate, toDate,0);
+      GetOrderItem(
+        companyID,
+        selectedUnit,
+        selectedVendor,
+        fromDate,
+        toDate,
+        0
+      );
     }
+    setsaveIsVisible(SaveSubmitStatus === 0);
   }, []);
 
   const formatDate = (date) => {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are zero-based
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
   };
@@ -135,12 +146,11 @@ export default function SuggestedOrder() {
     setFromDate(start);
     setToDate(end);
     GetOrderItem(companyID, selectedUnit, selectedVendor, start, end, 0);
-   
   };
   const getUnits = (companyId, alignmentId, userId) => {
     SuggestedOrderAPI.UnitsAndAreasAPI(companyId, alignmentId, userId)
       .then((response) => {
-        const data = response.data; 
+        const data = response.data;
         if (response.message === "10001") {
           setUnitsList(data);
         }
@@ -162,7 +172,7 @@ export default function SuggestedOrder() {
   const getVendors = (companyID) => {
     VendorAPI.VendorsAPI(companyID)
       .then((response) => {
-        const data = response.data; 
+        const data = response.data;
         if (response.message === "10001") {
           setVendorsList(data);
         }
@@ -189,20 +199,35 @@ export default function SuggestedOrder() {
     setSelectedUnitName(unitName);
     setSelectedUnit(unitID);
     setShowModal(false);
-    GetOrderItem(companyID,selectedUnit,selectedVendor,fromDate,toDate,0);
+    GetOrderItem(companyID, selectedUnit, selectedVendor, fromDate, toDate, 0);
   };
 
   const handleVendorSelection = (VendorName, VendorID) => {
     setSelectedVendorName(VendorName);
     setSelectedVendor(VendorID);
-    GetOrderItem(companyID,selectedUnit,selectedVendor,fromDate,toDate,0);
+    GetOrderItem(companyID, selectedUnit, selectedVendor, fromDate, toDate, 0);
   };
 
-  const GetOrderItem = (companyID, unitID, selectedVendor,orderFromDate,orderToDate,suggestedOrderId) => {
+  const GetOrderItem = (
+    companyID,
+    unitID,
+    selectedVendor,
+    orderFromDate,
+    orderToDate,
+    suggestedOrderId
+  ) => {
     setIsLoading(true);
-    SuggestedOrderAPI.getOrderItem(companyID, unitID, selectedVendor, formatDate(orderFromDate),formatDate(orderToDate),suggestedOrderId)
+    SuggestedOrderAPI.getOrderItem(
+      companyID,
+      unitID,
+      selectedVendor,
+      formatDate(orderFromDate),
+      formatDate(orderToDate),
+      suggestedOrderId
+    )
       .then((response) => {
-        buildForecastTable(response.data.forecastedData)
+        buildForecastTable(response.data.forecastedData);
+        SaveSubmitStatus = response.data.suggestedOrderID;
         setSuggestedTable({
           ...SuggestedTableStructure,
           rows: response.data.suggestedOrderDetails,
@@ -228,7 +253,7 @@ export default function SuggestedOrder() {
         console.error("Error fetching data:", error);
       });
   };
- 
+
   const handleClose = () => {
     setShowSuccessPopup(false);
     setShowErrorPopup(false);
@@ -238,11 +263,15 @@ export default function SuggestedOrder() {
   const buildForecastTable = (forecastData) => {
     let totalForecast = 0;
     const rows = [];
-    forecastData.forEach(data => {
+    forecastData.forEach((data) => {
       totalForecast += data.projectedValue;
-  
+
       rows.push([
-        { value: new Date(data.firstMinute).toLocaleDateString(), cellType: "", columnName: "Date" },
+        {
+          value: new Date(data.firstMinute).toLocaleDateString(),
+          cellType: "",
+          columnName: "Date",
+        },
         {
           value: data.projectedValue,
           cellType: "dollar",
@@ -250,8 +279,10 @@ export default function SuggestedOrder() {
           columnName: "Forecasted Sales",
         },
         {
-          value: "", cellType: "", columnName: ""
-        }
+          value: "",
+          cellType: "",
+          columnName: "",
+        },
       ]);
     });
 
@@ -262,20 +293,23 @@ export default function SuggestedOrder() {
         value: totalForecast,
         cellType: "dollar",
         isInput: false,
-        isTotal: true
+        isTotal: true,
       },
       {
-        value: "", cellType: "", columnName: "", isTotal: true
-      }
+        value: "",
+        cellType: "",
+        columnName: "",
+        isTotal: true,
+      },
     ];
     rows.push(totalRow);
-  
+
     setForecastTable({
       ...forecastTable,
       rows: rows,
     });
   };
-  
+
   const handleCSVClick = () => {
     const csvData = {
       title: "Suggested Order",
@@ -329,10 +363,19 @@ export default function SuggestedOrder() {
   function handleTableCellChange(e, row, columnName, tableName) {
     switch (tableName) {
       case "DefaultSafetyFactor":
-        PrepChartFunctions.handleDefaultSafetyFactorChange(e, row, columnName, tableName, defaultSafetyFactorTable, setDefaultSafetyFactorTable, prepChart, setPrepChart, setSuggestedTable, SuggestedTable);
+        SuggestedOrderFunctions.handleDefaultSafetyFactorChange(e,row,columnName,tableName,defaultSafetyFactorTable,setDefaultSafetyFactorTable,suggestedOrder,setsuggestedOrder,setSuggestedTable,SuggestedTable);
         break;
       case "Forecast":
-        PrepChartFunctions.handleForecastChange(e, row, columnName, tableName, forecastTable, setForecastTable, prepChart, setPrepChart, SuggestedTable, setSuggestedTable);
+        SuggestedOrderFunctions.handleForecastChange(e,
+          row,
+          columnName,
+          tableName,
+          forecastTable,
+          setForecastTable,
+          suggestedOrder,setsuggestedOrder,
+          SuggestedTable,
+          setSuggestedTable
+        );
         break;
       default:
         console.error("Invalid table name");
@@ -342,72 +385,115 @@ export default function SuggestedOrder() {
 
   function ForecastedData(ForecastedData) {
     if (!Array.isArray(ForecastedData)) {
-        console.error('Expected ForecastedData to be an array but got:', ForecastedData);
-        return [];
+      console.error(
+        "Expected ForecastedData to be an array but got:",
+        ForecastedData
+      );
+      return [];
     }
 
     return ForecastedData.map((row, rowIndex) => {
-        if (!Array.isArray(row)) {
-            console.error(`Expected row at index ${rowIndex} to be an array but got:`, row);
-            return null;
-        }
+      if (!Array.isArray(row)) {
+        console.error(
+          `Expected row at index ${rowIndex} to be an array but got:`,
+          row
+        );
+        return null;
+      }
 
-        const dateEntry = row.find(entry => entry.columnName === "Date");
-        const valueEntry = row.find(entry => entry.columnName === "Forecasted Sales");
+      const dateEntry = row.find((entry) => entry.columnName === "Date");
+      const valueEntry = row.find(
+        (entry) => entry.columnName === "Forecasted Sales"
+      );
 
-        if (!dateEntry || !dateEntry.value || typeof valueEntry?.value !== 'number') {
-           // console.error(`Row at index ${rowIndex} is missing the "Date" entry or has invalid value:`, row);
-            return null;
-        }
+      if (
+        !dateEntry ||
+        !dateEntry.value ||
+        typeof valueEntry?.value !== "number"
+      ) {
+        return null;
+      }
 
-        const date = new Date(dateEntry.value);
-        if (isNaN(date)) {
-            console.error(`Invalid date format in row at index ${rowIndex}:`, dateEntry.value);
-            return null;
-        }
+      const date = new Date(dateEntry.value);
+      if (isNaN(date)) {
+        console.error(
+          `Invalid date format in row at index ${rowIndex}:`,
+          dateEntry.value
+        );
+        return null;
+      }
 
-        const isoDate = date.toISOString().split('T')[0] + 'T00:00:00';
+      const isoDate = date.toISOString().split("T")[0] + "T00:00:00";
 
-        return {
-            firstMinute: isoDate,
-            projectedValue: valueEntry.value
-        };
-    }).filter(item => item !== null);
-}
+      return {
+        firstMinute: isoDate,
+        projectedValue: valueEntry.value,
+      };
+    }).filter((item) => item !== null);
+  }
 
-
-function DefaultSafetyFactor(defaultSafetyFactorTable) {
-  const [row] = defaultSafetyFactorTable || [];
-  const valueEntry = row?.find(entry => entry.columnName === "Default Safety Factor");
-  return valueEntry?.value || null;
-}
+  function DefaultSafetyFactor(defaultSafetyFactorTable) {
+    const [row] = defaultSafetyFactorTable || [];
+    const valueEntry = row?.find(
+      (entry) => entry.columnName === "Default Safety Factor"
+    );
+    return valueEntry?.value || null;
+  }
 
   function handleSave() {
-    const json = {
+    const Data = {
       suggestedOrderID: 0,
       purchaseOrderID: 0,
       companyID: companyID,
       unitID: selectedUnit,
       vendorID: selectedVendor,
       createdBy: userID,
-      defaultSafetyFactor:DefaultSafetyFactor(defaultSafetyFactorTable.rows),
+      defaultSafetyFactor: DefaultSafetyFactor(defaultSafetyFactorTable.rows),
       forecastedData: ForecastedData(forecastTable.rows),
-      suggestedOrderDetails:SuggestedTable.rows
+      suggestedOrderDetails: SuggestedTable.rows,
     };
-  
-    const jsonData = JSON.stringify(json);
-    console.log("jsonData",jsonData);
-    // SuggestedOrderAPI.save(jsonData)
-    //   .then(() => {
-    //     setShowSuccessPopup(true);
-    //     setVisible(true);
-    //   })
-    //   .catch((error) => {
-    //     setShowErrorPopup(true);
-    //     setVisible(true);
-    //   });
+
+    const jsonData = JSON.stringify(Data);
+    console.log("jsonData", jsonData);
+    SuggestedOrderAPI.save(jsonData)
+      .then(() => {
+        setsaveIsVisible(false);
+        SaveSubmitStatus = 1;
+        setSuccessMessage("Save successful");
+        setShowSuccessPopup(true);
+      })
+      .catch((error) => {
+        setShowErrorPopup(true);
+      });
   }
 
+  function handleSubmit() {
+    const Data = {
+      suggestedOrderID: 0,
+      purchaseOrderID: 0,
+      companyID: companyID,
+      unitID: selectedUnit,
+      vendorID: selectedVendor,
+      createdBy: userID,
+      defaultSafetyFactor: DefaultSafetyFactor(defaultSafetyFactorTable.rows),
+      forecastedData: ForecastedData(forecastTable.rows),
+      suggestedOrderDetails: SuggestedTable.rows,
+    };
+    const jsonData = JSON.stringify(Data);
+    console.log("jsonData", jsonData);
+    SuggestedOrderAPI.submit(jsonData)
+      .then(() => {
+        setVisible(true);
+        setSuccessMessage("Submit successful");
+        setShowSuccessPopup(true);
+        setsaveIsVisible(true);
+        SaveSubmitStatus = 0;
+      })
+      .catch((error) => {
+        setShowErrorPopup(true);
+        setVisible(false);
+      });
+  }
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
@@ -416,7 +502,7 @@ function DefaultSafetyFactor(defaultSafetyFactorTable) {
           {showSuccessPopup && (
             <MessagePopup
               type="Success"
-              message="Success message"
+              message={successMessage}
               onClose={handleClose}
             />
           )}
@@ -473,14 +559,14 @@ function DefaultSafetyFactor(defaultSafetyFactorTable) {
         <ExportOptions
           includePDF={IsVisible}
           includeCSV={IsVisible}
-          includeSave={true}
+          includeSave={saveIsVisible}
+          includeSubmit={saveIsVisible}
           handlePDFClick={handlePDFClick}
           handleCSVClick={handleCSVClick}
           handleSaveClick={handleSave}
+          handleSubmitClick={handleSubmit}
         />
-
       </Styled.OptionsRow>
-      
 
       {isLoading ? (
         <>
