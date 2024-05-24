@@ -284,11 +284,13 @@ export default function PrepChart() {
   };
   
   const handlePDFClick = () => {
-    const todayForecast = forecastTable.rows[0][1].value;
+
+    const todayForecast = `$${Math.round(forecastTable.rows[0][1].value)}`;
+    const tomorrowForecast = `$${Math.round(forecastTable.rows[1][1].value)}`;
+    const nextDayForecast = `$${Math.round(forecastTable.rows[2][1].value)}`;
+    
     const todayDate = forecastTable.rows[0][2].value;
-    const tomorrowForecast = forecastTable.rows[1][1].value;
     const tomorrowDate = forecastTable.rows[1][2].value;
-    const nextDayForecast = forecastTable.rows[2][1].value;
     const nextDayDate = forecastTable.rows[2][2].value;
 
     const updatedTodayTable = { ...todayTable, rows: updatePrepPullAmount(todayTable) };
