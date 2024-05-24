@@ -1,6 +1,5 @@
 import api from "../configs/axiosConfig.jsx";
 import { defineCancelApiObject } from "../configs/axiosUtils.jsx";
-import VendorsList from "../../tempData/VendorsList.json";
 
 export const VendorAPI = {
   VendorsAPI: async function (companyID, cancel = false) {
@@ -12,6 +11,7 @@ export const VendorAPI = {
     return response.data;
   }
 }
+
 
  
 const cancelApiObject = defineCancelApiObject(VendorAPI);
