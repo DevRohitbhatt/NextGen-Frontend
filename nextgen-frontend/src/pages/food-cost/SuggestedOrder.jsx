@@ -72,6 +72,7 @@ export default function SuggestedOrder() {
   const [saveIsVisible, setsaveIsVisible] = useState(false);
   const [userID, setUserID] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
+  const [editedMessages, setEditedMessages] = useState({});
   const [forecastTable, setForecastTable] = useState({
     columnHeaders: ["Forecasted Date", "Forecasted $ Amt", ""],
     dataTypes: ["string", "number", "string"],
@@ -119,15 +120,8 @@ export default function SuggestedOrder() {
       }
     } else {
       getUnits(companyID, 1110, 5120);
-      //getVendors(companyID);
-      GetOrderItem(
-        companyID,
-        selectedUnit,
-        selectedVendor,
-        fromDate,
-        toDate,
-        0
-      );
+      getVendors(companyID);
+      GetOrderItem(companyID,selectedUnit,selectedVendor,fromDate,toDate,0);
     }
     setsaveIsVisible(SaveSubmitStatus === 0);
   }, []);
@@ -263,10 +257,12 @@ export default function SuggestedOrder() {
   const buildForecastTable = (forecastData) => {
     let totalForecast = 0;
     const rows = [];
-    forecastData.forEach((data) => {
+    
+    forecastData.forEach((data, index) => {
       totalForecast += data.projectedValue;
-
-      rows.push([
+  
+    const editedMessage = editedMessages[data.firstMinute] || '';
+      const row = [
         {
           value: new Date(data.firstMinute).toLocaleDateString(),
           cellType: "",
@@ -279,13 +275,15 @@ export default function SuggestedOrder() {
           columnName: "Forecasted Sales",
         },
         {
-          value: "",
+          value: editedMessage,
           cellType: "",
-          columnName: "",
+          columnName: "Edited Message",
         },
-      ]);
+      ];
+  
+      rows.push(row);
     });
-
+  
     totalForecast = totalForecast.toFixed(2);
     const totalRow = [
       { value: "Total", cellType: "", columnName: "", isTotal: true },
@@ -303,7 +301,7 @@ export default function SuggestedOrder() {
       },
     ];
     rows.push(totalRow);
-
+  
     setForecastTable({
       ...forecastTable,
       rows: rows,
@@ -360,28 +358,32 @@ export default function SuggestedOrder() {
     PdfBuilder(pdfData);
   };
 
-  function handleTableCellChange(e, row, columnName, tableName) {
+  const handleTableCellChange = (e, row, columnName, tableName) => {
+    const updatedValue = parseFloat(e.target.value);
+
+    if (isNaN(updatedValue)) {
+      console.error("Invalid input value");
+      return;
+    }
+
     switch (tableName) {
-      case "DefaultSafetyFactor":
-        SuggestedOrderFunctions.handleDefaultSafetyFactorChange(e,row,columnName,tableName,defaultSafetyFactorTable,setDefaultSafetyFactorTable,suggestedOrder,setsuggestedOrder,setSuggestedTable,SuggestedTable);
+      case "DefaultSafetyFactor": {
+        SuggestedOrderFunctions.handleDefaultSafetyFactorChange(e,row,columnName,tableName,defaultSafetyFactorTable,setDefaultSafetyFactorTable,suggestedOrder,
+          setsuggestedOrder,setSuggestedTable,SuggestedTable);
         break;
-      case "Forecast":
-        SuggestedOrderFunctions.handleForecastChange(e,
-          row,
-          columnName,
-          tableName,
-          forecastTable,
-          setForecastTable,
-          suggestedOrder,setsuggestedOrder,
-          SuggestedTable,
-          setSuggestedTable
-        );
+      }
+      case "Forecast": {
+        const  updatedForecastData  = SuggestedOrderFunctions.handleForecastChange(e, row, columnName, forecastTable, setForecastTable,editedMessages,setEditedMessages);
+        buildForecastTable(updatedForecastData);
         break;
+      }
+     
       default:
         console.error("Invalid table name");
         break;
     }
-  }
+  };
+
 
   function ForecastedData(ForecastedData) {
     if (!Array.isArray(ForecastedData)) {
@@ -442,7 +444,7 @@ export default function SuggestedOrder() {
 
   function handleSave() {
     const Data = {
-      suggestedOrderID: 0,
+      suggestedOrderID: 1,
       purchaseOrderID: 0,
       companyID: companyID,
       unitID: selectedUnit,
@@ -470,7 +472,7 @@ export default function SuggestedOrder() {
   function handleSubmit() {
     const Data = {
       suggestedOrderID: 0,
-      purchaseOrderID: 0,
+      purchaseOrderID: 1,
       companyID: companyID,
       unitID: selectedUnit,
       vendorID: selectedVendor,

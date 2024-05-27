@@ -1,188 +1,52 @@
-export function onInputCellChange(
+export const handleForecastChange = (
   e,
   row,
   columnName,
-  tableName,
-  tableData,
-  setTable,
-  prepChart,
-  setPrepChart
-) {
-  const newPrepChart = { ...prepChart };
+  forecastTable,
+  setForecastTable,
+  editedMessages,
+  setEditedMessages
+) => {
+  const updatedValue = parseFloat(e.target.value);
 
-  //convert tableName to camelcase
-  tableName = tableName.charAt(0).toLowerCase() + tableName.slice(1);
-  tableName = tableName.replace(/\s/g, "");
-
-  if (tableName === "DefaultSafetyFactor") {
-    handleDefaultSafetyFactorChange(e, row, columnName, tableData, setTable, prepChart, setPrepChart);
+  if (isNaN(updatedValue)) {
+    console.error("Invalid input value");
     return;
   }
-
-  if (columnName === "On Hand" ) {
-    if (isNaN(e.target.value)) {
-      e.target.value = 0;
-      console.log("Please enter a number for On Hand");
-    }
-    if (e.target.value === "") e.target.value = 0;
-    setTable({
-      ...tableData,
-      rows: tableData.rows.map((item, index) => {
-        if (index === row) {
-          let needed, onHand = 0;
-          item.forEach((cell) => {
-            if (cell.columnName === "Needed") {
-              needed = parseFloat(cell.value);
-            } else if (cell.columnName === "On Hand") {
-              onHand = parseFloat(e.target.value);
-              cell.value = parseFloat(e.target.value);
-              newPrepChart[tableName][row]["onHand"] = cell.value;
-            } else if (cell.columnName === "Prep/Pull Amount") {
-              cell.value = (needed - onHand).toFixed(2);
-              newPrepChart[tableName][row]["prepPullAmount"] = cell.value;
-            }
-          });
-        }
-        return item;
-      }),
-    });
-  } else if (columnName === "Safety Factor") {
-    if (e.target.value === "") e.target.value = 0;
-    const newSafetyFactor = parseFloat(e.target.value);
-    setTable({
-      ...tableData,
-      rows: tableData.rows.map((item, index) => {
-        if (index === row) {
-          let prepValue = 0, needed = 0, onHand = 0;
-          item.forEach((cell) => {
-            if (cell.columnName === "Safety Factor") {
-              cell.value = newSafetyFactor;
-              newPrepChart[tableName][row]["safetyFactor"] = cell.value;
-            } else if (cell.columnName === "Needed") {
-              prepChart[tableName][row].prepUOM.map((option) => {
-                if (option.isSelected) {
-                  return option.value;
-                }
-              });
-              needed = calculateNeededValue(tableName, prepChart, prepValue, prepChart[tableName][row].yieldType, newSafetyFactor);
-              cell.value = needed;
-              newPrepChart[tableName][row]["needed"] = needed;
-            } else if (cell.columnName === "On Hand") {
-              onHand = parseFloat(cell.value);
-            } else if (cell.columnName === "Prep/Pull Amount") {
-              cell.value = (needed - onHand).toFixed(2);
-              newPrepChart[tableName][row]["prepPullAmount"] = cell.value;
-            }
-          });
-        }
-        return item;
-      }),
-    });
+  const currentCellValue = forecastTable.rows[row].find(cell => cell.columnName === columnName).value;
+  const hasValueChanged = currentCellValue !== updatedValue;
+  const updatedEditedMessages = { ...editedMessages };
+  if (hasValueChanged) {
+    updatedEditedMessages[forecastTable.rows[row][0].value] = '* Changed';
   }
-  setPrepChart(newPrepChart);
-}
+  setEditedMessages(updatedEditedMessages);
 
-export function onDropdownCellChange(
-  e,
-  row,
-  columnName,
-  tableName,
-  tableData,
-  setTable,
-  prepChart,
-  setPrepChart
-) {
-  const newPrepChart = { ...prepChart };
-
-  //convert tableName to camelcase and remove spaces
-  tableName = tableName.charAt(0).toLowerCase() + tableName.slice(1);
-  tableName = tableName.replace(/\s/g, "");
-
-  setTable({
-    ...tableData,
-    rows: tableData.rows.map((item, index) => {
-      if (index === row) {
-        let prepValue = 0, yieldType = 0, safetyFactor = 0, needed = 0, onHand = 0;
-        item.forEach((cell) => {
-          if (cell.columnName === "Prep Type") {
-            cell.value.forEach((option) => {
-              if (option.isSelected) {
-                option.isSelected = false;
-              }
-              if (option.option === e.target.value) {
-                prepValue = option.value;
-                option.isSelected = true;
-              }
-            });
-          } else if (cell.columnName === "Yield/Type") {
-            yieldType = (cell.yieldDollars / prepValue).toFixed(2);
-            cell.value = yieldType;
-            newPrepChart[tableName][row]["yieldType"] = yieldType;
-          } else if (cell.columnName === "Safety Factor") {
-            safetyFactor = cell.value;
-          } else if (cell.columnName === "Needed") {
-            needed = calculateNeededValue(tableName, prepChart, prepValue, yieldType, safetyFactor);
-            cell.value = needed;
-            newPrepChart[tableName][index]["needed"] = needed;
-          } else if (cell.columnName === "On Hand") {
-            onHand = parseFloat(cell.value);
-            cell.value = onHand;
-            newPrepChart[tableName][row]["onHand"] = cell.value;
-          } else if (cell.columnName === "Prep/Pull Amount") {
-            cell.value = (needed - onHand).toFixed(2);
-            newPrepChart[tableName][row]["prepPullAmount"] = cell.value;
-          }
-        });
-      }
-      return item;
-    }),
-  });
-  setPrepChart(newPrepChart);
-}
-
-export function handleForecastChange(
-  e,
-  row,
-  columnName,
-  tableName,
-  tableData,
-  setTable,
-  prepChart,
-  setPrepChart,
-  todayTable,
-  tomorrowTable,
-  nextDayTable,
-  setTodayTable,
-  setTomorrowTable,
-  setNextDayTable
-) {
-  const newPrepChart = { ...prepChart };
-  let previousSafetyFactor = prepChart.DefaultSafetyFactor;
-
-  setTable({
-    ...tableData,
-    rows: tableData.rows.map((item, index) => {
-      if (index === row) {
-        let day = "";
-        item.forEach((cell) => {
-          if (cell.columnName === "Day") {
-            //set day equal to cell.value converted to camel case
-            day = cell.value.charAt(0).toLowerCase() + cell.value.slice(1);
-            day = day.replace(/\s/g, "");
-          }
-          if (cell.columnName === "Forecasted Sales") {
-            cell.value = e.target.value;
-            newPrepChart.forecastData[day] = parseFloat(e.target.value);
-          }
-        });
-      }
-      return item;
-    }),
+  const updatedRows = forecastTable.rows.map((r, rowIndex) => {
+    if (rowIndex === row) {
+      return r.map((cell) => {
+        if (cell.columnName === columnName) {
+          return { ...cell, value: updatedValue };
+        }
+        return cell;
+      });
+    }
+    return r;
   });
 
-  setPrepChart(newPrepChart);
-  recalculatePrepChart(newPrepChart, setPrepChart, todayTable, tomorrowTable, nextDayTable, setTodayTable, setTomorrowTable, setNextDayTable, previousSafetyFactor, previousSafetyFactor);
-}
+  setForecastTable((prevTable) => ({
+    ...prevTable,
+    rows: updatedRows,
+  }));
+
+  // Recalculate the total forecasted value
+  const updatedForecastData = updatedRows.slice(0, -1).map((row) => ({
+    firstMinute: row[0].value,
+    projectedValue: parseFloat(row[1].value),
+  }));
+
+  return updatedForecastData;
+};
+
 
 export function handleDefaultSafetyFactorChange(
   e,
@@ -191,17 +55,13 @@ export function handleDefaultSafetyFactorChange(
   tableName,
   tableData,
   setTable,
-  prepChart,
-  setPrepChart,
-  setTodayTable,
-  setTomorrowTable,
-  setNextDayTable,
-  todayTable,
-  tomorrowTable,
-  nextDayTable
+  suggestedOrder,
+  setsuggestedOrder,
+  setSuggestedTable,
+  SuggestedTable
 ) {
-  const newPrepChart = { ...prepChart };
-  let previousSafetyFactor = prepChart.defaultSafetyFactor;
+  const newsuggestedOrder = { ...suggestedOrder };
+  let previousSafetyFactor = suggestedOrder.defaultSafetyFactor;
 
   setTable({
     ...tableData,
@@ -211,7 +71,7 @@ export function handleDefaultSafetyFactorChange(
           if (cell.columnName === "Default Safety Factor") {
             if (e.target.value === "") e.target.value = 0;
             cell.value = e.target.value;
-            newPrepChart.defaultSafetyFactor = parseFloat(e.target.value);
+            newsuggestedOrder.defaultSafetyFactor = parseFloat(e.target.value);
           }
           return cell;
         });
@@ -221,18 +81,18 @@ export function handleDefaultSafetyFactorChange(
     }),
   });
 
-  recalculatePrepChart(newPrepChart, setPrepChart, todayTable, tomorrowTable, nextDayTable, setTodayTable, setTomorrowTable, setNextDayTable, previousSafetyFactor, parseFloat(e.target.value));
-  setPrepChart(newPrepChart);
+  recalculateSuggestedOrder(newsuggestedOrder, setsuggestedOrder, SuggestedTable, setSuggestedTable,previousSafetyFactor, parseFloat(e.target.value));
+  setsuggestedOrder(newsuggestedOrder);
 }
 
-export const recalculatePrepChart = (prepChart, setPrepChart, todayTable, tomorrowTable, nextDayTable, setTodayTable, setTomorrowTable, setNextDayTable, previousSafetyFactor, newSafetyFactor) => {
-  recalculateTable(prepChart, setPrepChart, todayTable, setTodayTable, "today", previousSafetyFactor, newSafetyFactor);
-  recalculateTable(prepChart, setPrepChart, tomorrowTable, setTomorrowTable, "tomorrow", previousSafetyFactor, newSafetyFactor);
-  recalculateTable(prepChart, setPrepChart, nextDayTable, setNextDayTable, "nextDay", previousSafetyFactor, newSafetyFactor);
+export const recalculateSuggestedOrder = (suggestedOrder, setsuggestedOrder, todayTable, tomorrowTable, nextDayTable, setTodayTable, setTomorrowTable, setNextDayTable, previousSafetyFactor, newSafetyFactor) => {
+  recalculateTable(suggestedOrder, setsuggestedOrder, todayTable, setTodayTable, "today", previousSafetyFactor, newSafetyFactor);
+  recalculateTable(suggestedOrder, setsuggestedOrder, tomorrowTable, setTomorrowTable, "tomorrow", previousSafetyFactor, newSafetyFactor);
+  recalculateTable(suggestedOrder, setsuggestedOrder, nextDayTable, setNextDayTable, "nextDay", previousSafetyFactor, newSafetyFactor);
 }
 
-export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, tableName, previousSafetyFactor, newSafetyFactor) => {
-  const newPrepChart = { ...prepChart };
+export const recalculateTable = (suggestedOrder, setsuggestedOrder, tableData, setTable, tableName, previousSafetyFactor, newSafetyFactor) => {
+  const newsuggestedOrder = { ...suggestedOrder };
 
   setTable({
     ...tableData,
@@ -255,21 +115,21 @@ export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, t
         if (cell.columnName === "Yield/Type") {
           yieldType = (cell.yieldDollars / prepValue).toFixed(2);
           cell.value = yieldType;
-          newPrepChart[tableName][index]["yieldType"] = yieldType;
+          newsuggestedOrder[tableName][index]["yieldType"] = yieldType;
         } else if (cell.columnName === "Safety Factor") {
           safetyFactor = (cell.value === previousSafetyFactor) ? newSafetyFactor : cell.value;
           cell.value = safetyFactor;
-          newPrepChart[tableName][index]["safetyFactor"] = safetyFactor;
+          newsuggestedOrder[tableName][index]["safetyFactor"] = safetyFactor;
         } else if (cell.columnName === "Needed") {
-          needed = calculateNeededValue(tableName, prepChart, prepValue, yieldType, safetyFactor);
+          needed = calculateNeededValue(tableName, suggestedOrder, prepValue, yieldType, safetyFactor);
           cell.value = needed;
-          newPrepChart[tableName][index]["needed"] = needed;
+          newsuggestedOrder[tableName][index]["needed"] = needed;
         } else if (cell.columnName === "On Hand") {
           onHand = parseFloat(cell.value);
-          newPrepChart[tableName][index]["onHand"] = onHand;
+          newsuggestedOrder[tableName][index]["onHand"] = onHand;
         } else if (cell.columnName === "Prep/Pull Amount") {
           cell.value = (needed - onHand).toFixed(2);
-          newPrepChart[tableName][index]["prepPullAmount"] = cell.value;
+          newsuggestedOrder[tableName][index]["prepPullAmount"] = cell.value;
         }
         return cell;
       });
@@ -277,10 +137,10 @@ export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, t
   });
 }
 
-function calculateNeededValue(tableName, prepChart, prepValue, yieldType, safetyFactor) {
-  const todayForecast = prepChart.forecastData.today;
-  const tomorrowForecast = prepChart.forecastData.tomorrow;
-  const nextDayForecast = prepChart.forecastData.nextDay;
+function calculateNeededValue(tableName, suggestedOrder, prepValue, yieldType, safetyFactor) {
+  const todayForecast = suggestedOrder.forecastData.today;
+  const tomorrowForecast = suggestedOrder.forecastData.tomorrow;
+  const nextDayForecast = suggestedOrder.forecastData.nextDay;
   let needed = 0;
   safetyFactor = safetyFactor / 100 + 1;
 
@@ -297,13 +157,13 @@ function calculateNeededValue(tableName, prepChart, prepValue, yieldType, safety
 }
 
 export const buildPrepTable = (
-  prepChartSection,
+  suggestedOrderSection,
   setTable,
   tableState,
   onInputCellChange,
   handleDropdownChange
 ) => {
-  const rows = prepChartSection.map((item) => {
+  const rows = suggestedOrderSection.map((item) => {
     return [
       { 
         value: item.itemName, 
