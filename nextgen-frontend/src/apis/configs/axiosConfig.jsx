@@ -6,9 +6,10 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     'Allow-Control-Allow-Origin': '*',
+    'Content-Type': 'application/json'
   },
-  'Content-Type': 'application/json',
-  baseURL: "https://192.168.192.244:8083",
+
+  baseURL: "http://192.168.192.244:8030/",
 });
 
 const errorHandler = (error) => {
