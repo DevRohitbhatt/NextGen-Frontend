@@ -153,14 +153,6 @@ export const TableCell = styled.div`
 `;
 
 export const TableRight = styled.div`
-  // display: flex;
-  // justify-content: space-between;
-  // margin-bottom: 40px;
-  // border-radius: 30px;
-  // padding: 10px 20px;
-  // box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
-  // // width: 40%;
-  // float: right;
   width: 45%;
 `;
 export const TableTitle = styled.div`

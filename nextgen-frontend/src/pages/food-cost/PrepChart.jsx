@@ -271,38 +271,55 @@ export default function PrepChart() {
     }
   }
 
+  const updatePrepPullAmount = (table) => {
+    return table.rows.map(row => {
+      const onHandIndex = table.columnHeaders.indexOf("On Hand");
+      const prepPullAmountIndex = table.columnHeaders.indexOf("Prep/Pull Amount");
+  
+      if (row[onHandIndex].value === 0 || row[onHandIndex].value === null) {
+        row[prepPullAmountIndex].value = ""; 
+      }
+      return row;
+    });
+  };
+  
   const handlePDFClick = () => {
+
+    const todayForecast = `$${Math.round(forecastTable.rows[0][1].value)}`;
+    const tomorrowForecast = `$${Math.round(forecastTable.rows[1][1].value)}`;
+    const nextDayForecast = `$${Math.round(forecastTable.rows[2][1].value)}`;
+    
+    const todayDate = forecastTable.rows[0][2].value;
+    const tomorrowDate = forecastTable.rows[1][2].value;
+    const nextDayDate = forecastTable.rows[2][2].value;
+
+    const updatedTodayTable = { ...todayTable, rows: updatePrepPullAmount(todayTable) };
+    const updatedTomorrowTable = { ...tomorrowTable, rows: updatePrepPullAmount(tomorrowTable) };
+    const updatedNextDayTable = { ...nextDayTable, rows: updatePrepPullAmount(nextDayTable) };
+  
     const pdfData = {
-      title: "Prep Chart",
+      title: "Prep & Thaw Chart",
       exportType: "pdf",
       body: [
         {
-          type: "table/Column",
-          title: "Forecast",
-          widths: [50, 100, 75],
-          data: forecastTable,
-          dataTypes: ["string", "currency rounded", "string"]
-        },
-        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable },
-        {
           type: "table",
-          title: "Today",
-          widths: [115, 140, "*", "*", "*", "*", "*"],
-          data: todayTable,
+          title:`Today - ${todayForecast}  ${todayDate}`,
+          widths: [160, 110, "*",27,32, "*", "*"],
+          data: updatedTodayTable,
           dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
-          title: "Tomorrow",
-          widths: [115, 140, "*", "*", "*", "*", "*"],
-          data: tomorrowTable,
+          title: `Tomorrow - ${tomorrowForecast}  ${tomorrowDate}`,
+          widths: [160, 110, "*",27,32, "*", "*"],
+          data: updatedTomorrowTable,
           dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
-          title: "Next Day",
-          widths: [115, 140, "*", "*", "*", "*", "*"],
-          data: nextDayTable,
+          title: `Next Day - ${nextDayForecast}  ${nextDayDate}`,
+          widths:  [160, 110, "*",27,32, "*", "*"],
+          data: updatedNextDayTable,
           dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
       ],
