@@ -11,7 +11,7 @@ const api = axios.create({
   baseURL: "https://sprintdemo.qsronline.com/NextGenAPI/",
 });
 
-const errorHandler = (error) => {
+const errorHandler = (error) => { 
   const statusCode = error.response?.status;
   if (statusCode && statusCode !== 401) console.log(error);
 
