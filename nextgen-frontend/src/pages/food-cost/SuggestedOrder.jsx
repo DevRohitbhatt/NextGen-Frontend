@@ -144,10 +144,9 @@ export default function SuggestedOrder() {
   const getUnits = (companyId, alignmentId, userId) => {
     SuggestedOrderAPI.UnitsAndAreasAPI(companyId, alignmentId, userId)
       .then((response) => {
-        const data = response.data;
-        if (response.message === "10001") {
-          setUnitsList(data);
-        }
+        console.log("Units ",response);  
+          setUnitsList(response);
+       
       })
       .catch((error) => {
         setIsError(true);
@@ -166,10 +165,7 @@ export default function SuggestedOrder() {
   const getVendors = (companyID) => {
     VendorAPI.VendorsAPI(companyID)
       .then((response) => {
-        const data = response.data;
-        if (response.message === "10001") {
-          setVendorsList(data);
-        }
+          setVendorsList(response);
       })
       .catch((error) => {
         setIsError(true);
@@ -220,18 +216,19 @@ export default function SuggestedOrder() {
       suggestedOrderId
     )
       .then((response) => {
-        buildForecastTable(response.data.forecastedData);
-        SaveSubmitStatus = response.data.suggestedOrderID;
+        console.log("response",response);
+        buildForecastTable(response.forecastedData);
+        SaveSubmitStatus = response.suggestedOrderID;
         setSuggestedTable({
           ...SuggestedTableStructure,
-          rows: response.data.suggestedOrderDetails,
+          rows: response.suggestedOrderDetails,
         });
         setDefaultSafetyFactorTable({
           ...defaultSafetyFactorTable,
           rows: [
             [
               {
-                value: response.data.defaultSafetyFactor,
+                value: response.defaultSafetyFactor,
                 cellType: "percent",
                 columnName: "Default Safety Factor",
                 handleOnChange: {},
