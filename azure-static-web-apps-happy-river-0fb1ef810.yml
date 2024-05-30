@@ -8,6 +8,8 @@ trigger:
   branches:
     include:
       - Testing_Server
+    exclude:
+      - develop
 
 jobs:
 - job: build_and_deploy_job
