@@ -14,6 +14,8 @@ import CalendarModal from "../../components/ModalDate.jsx";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import PrepChartIntroSteps from "../../assets/introJSSteps/PrepChartIntroSteps.jsx";
 import { Steps } from "intro.js-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const toolTipForecastSales = "Copied from Web Scheduler if Web Scheduler subscriber otherwise a four-week moving average of Net Sales. NOTE: Adjustments to forecasted sales on prep chart DO NOT modify Web Scheduler Forecasted sales.";
 const toolTipPrepType = "Units of Measure collected from Inventory Configuration. Defaults to item with “PREP” in description.";
@@ -128,7 +130,8 @@ export default function PrepChart() {
   const getPrepChart = (companyID, unitID, date) => {
     setIsLoading(true);
     setIsError(false);
-    PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((data) => {
+    PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((result) => {
+      const data = result.data;
       if (data === "No Template found for the selected company and unit.") {
         setErrorMessage("No Template found for the selected unit. Please create a template for this unit.");
         setIsError(true);
@@ -161,7 +164,8 @@ export default function PrepChart() {
 
   const getUnits = (companyId, alignmentId, userId) => {
     UnitsAndAreasAPI.getbyid(companyId, alignmentId, userId)
-      .then((data) => {
+      .then((result) => {
+        const data = result.data;
         setUnitsList(data);
       }).catch((error) => {
         console.error("Error getting units: ", error);
@@ -426,7 +430,13 @@ export default function PrepChart() {
   }
 
   const handleSaveClick = () => {
-    const response = PrepChartAPI.save(prepChart);
+    PrepChartAPI.save(prepChart)
+      .then(() => {
+        toast.success("Prep Chart saved successfully");
+      })
+      .catch((error) => {
+        toast.error("Failed to save Prep Chart");
+    });
   };
 
   const handleUnitSelectorClick = () => {
@@ -472,6 +482,7 @@ export default function PrepChart() {
       />
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
       <Styled.OptionsRow>
+        <ToastContainer />
         <Styled.DateAndUnitContainer>
           <UnitSelector
             onClick={handleUnitSelectorClick}

@@ -233,7 +233,8 @@ export default function PrepChartTemplate() {
   const fetchData = (companyID, selectedUnit) => {
     setIsLoading(true); // Set loading to true before fetching data
     PrepChartTemplateAPI.get(companyID, selectedUnit)
-      .then((data) => {
+      .then((result) => {
+        const data = result.data;
         setPrepChartTemplateID(data.prepChartTemplateID);
         insertData(data);
         setIsLoading(false); // Set loading to false after data is fetched
@@ -243,7 +244,8 @@ export default function PrepChartTemplate() {
         setIsLoading(false); // Set loading to false if there's an error
       });
     PrepChartTemplateAPI.getInventoryItems(companyID)
-      .then((data) => {
+      .then((results) => {
+        const data = results.data
         buildPrepMasterTable(data);
         setIsUnitSelected(true);
       })
@@ -254,7 +256,8 @@ export default function PrepChartTemplate() {
 
   const fetchUnitData = (companyID, alignmentID, areaID) => {
     UnitsAndAreasAPI.getbyid(companyID, alignmentID, areaID)
-      .then((data) => {
+      .then((results) => {
+        const data = results.data;
         setUnitData(data);
       })
       .catch((error) => {

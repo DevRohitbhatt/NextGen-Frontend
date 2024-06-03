@@ -5,7 +5,7 @@ export const PrepChartAPI = {
   get: async function (companyID, unitID, date, cancel = false) {
     const response = await api.request({
       method: "GET",
-      url: `/api/prepchartdetail/getprepchartdetail/?companyid=${companyID}&unitid=${unitID}&date=${date}`,
+      url: `/api/prepchartdetail?companyid=${companyID}&unitid=${unitID}&date=${date}`,
       companyID,
       unitID,
       date,
@@ -17,7 +17,7 @@ export const PrepChartAPI = {
   save: async function (data, cancel = false) {
     const response = await api.request({
       method: "POST",
-      url: `/api/prepchartdetail/saveprepchartdetail`,
+      url: `/api/prepchartdetail/save`,
       data,
       signal: cancel ? cancelApiObject[this.save.name].handleRequestCancellation().signal : undefined,
     });
