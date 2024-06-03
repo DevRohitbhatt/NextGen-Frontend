@@ -484,6 +484,7 @@ export default function PrepChartTemplate() {
       CompanyID: companyID,
       UnitIDList: units.map((unit) => unit.id),
       PrepChartTemplateID: prepChartTemplateID,
+      templatetypeID: 0, //Todo: this will change when we add support for template types.
       PrepChartTemplate: prepChartTemplate,
     };
     const jsonData = JSON.stringify(json);

@@ -130,7 +130,8 @@ export default function PrepChart() {
   const getPrepChart = (companyID, unitID, date) => {
     setIsLoading(true);
     setIsError(false);
-    PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((result) => {
+    var templateTypeID = 0;
+    PrepChartAPI.get(companyID, unitID, templateTypeID, date.toISOString().split('T')[0]).then((result) => {
       const data = result.data;
       if (data === "No Template found for the selected company and unit.") {
         setErrorMessage("No Template found for the selected unit. Please create a template for this unit.");
