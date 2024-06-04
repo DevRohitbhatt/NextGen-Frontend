@@ -84,7 +84,7 @@ const DropdownArrow = styled.span`
   display: inline-block;
 `;
 
-const Dropdown = ({ options, selectedOption, onOptionChange }) => {
+const Dropdown = ({ options, selectedOption, onOptionChange,title }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -111,7 +111,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange }) => {
 
   return (
     <MainContainer ref={dropdownRef}>
-      <Label>Select Vendor(s)</Label>
+      <Label>{title}</Label>
       <DropdownButton onClick={toggleDropdown}>
         {selectedOption}
         <DropdownArrow>
@@ -143,6 +143,7 @@ Dropdown.propTypes = {
   ).isRequired,
   selectedOption: PropTypes.string.isRequired,
   onOptionChange: PropTypes.func.isRequired,
+  title:PropTypes.string
 };
 
 export default Dropdown;

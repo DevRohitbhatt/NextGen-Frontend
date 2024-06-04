@@ -34,7 +34,7 @@ const Input = styled.input`
   cursor: pointer;
 `;
 
-const DateRangePicker = ({ selectedDates, onDateChange }) => {
+const DateRangePicker = ({ selectedDates, onDateChange,Title }) => {
   const today = new Date();
   const [dates, setDates] = useState([today, today]);
   const [calendarVisible, setCalendarVisible] = useState(false);
@@ -95,7 +95,7 @@ const DateRangePicker = ({ selectedDates, onDateChange }) => {
 
   return (
     <MainContainer>
-      <Label>Order Span </Label>
+      <Label>{Title}</Label>
       <CalendarContainer>
         <Input type="text" onClick={handleTextBoxClick} ref={textBoxRef} />
         {calendarVisible && (
