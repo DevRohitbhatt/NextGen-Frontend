@@ -8,11 +8,10 @@ const api = axios.create({
     'Allow-Control-Allow-Origin': '*',
   },
   'Content-Type': 'application/json',
-  baseURL: "https://d101.qsronline.com/NextGenAPI/",
-  //baseURL: "https://localhost:7166/",
+  baseURL: "https://www1.qsronline.com/QSROnlineGateway",
 });
 
-const errorHandler = (error) => { 
+const errorHandler = (error) => {
   const statusCode = error.response?.status;
   if (statusCode && statusCode !== 401) console.log(error);
 
