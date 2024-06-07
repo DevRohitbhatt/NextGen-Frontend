@@ -14,10 +14,10 @@ export const PrepChartAPI = {
     
     return response.data;
   },
-  save: async function (data, cancel = false) {
+  save: async function (companyID, data, cancel = false) {
     const response = await api.request({
       method: "POST",
-      url: `/api/prepchartdetail/save`,
+      url: `/api/prepchartdetail/save?companyid=${companyID}`,
       data,
       signal: cancel ? cancelApiObject[this.save.name].handleRequestCancellation().signal : undefined,
     });

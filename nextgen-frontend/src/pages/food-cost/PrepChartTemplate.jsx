@@ -66,6 +66,7 @@ export default function PrepChartTemplate() {
   const [toDayLength, setToDayLength] = useState(0); 
   const [tommorowLength, setTommorowLength] = useState(0); 
   const [nextDayLength, setNextDayLength] = useState(0); 
+  const toastId = useRef(null);
 
   const [introJS, setIntroJS] = useState({
     stepsEnabled: false,
@@ -461,6 +462,7 @@ export default function PrepChartTemplate() {
     setIsSave(true);
   };
   const handleUnitSaveSelection = (units) => {
+    toastId.current = toast.info("Saving data...", { autoClose: false });
     constructPrepChartTemplate(units);
   };
   const handleSaveButtonClick = () => {};
@@ -488,12 +490,14 @@ export default function PrepChartTemplate() {
       PrepChartTemplate: prepChartTemplate,
     };
     const jsonData = JSON.stringify(json);
-    PrepChartTemplateAPI.save(jsonData)
+    PrepChartTemplateAPI.save(companyID, jsonData)
       .then(() => {
-        toast.success("Data saved successfully!");
+        toast.success("Template Saved Successfully");
+        toast.update(toastId.current, { autoClose: 500 });
       })
       .catch((error) => {
-        toast.error("Error saving data");
+        toast.update(toastId, {type: toast.error, render: "Error saving data!", autoClose: 3000});
+        toast.update(toastId.current, { autoClose: 500 });
       });
   }
 

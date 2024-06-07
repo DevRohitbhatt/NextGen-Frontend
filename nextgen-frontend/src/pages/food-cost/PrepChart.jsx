@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as Styled from "./styles/PrepChartStyles.jsx";
 import "../../components/UnitSelector.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
@@ -103,6 +103,7 @@ export default function PrepChart() {
     steps: PrepChartIntroSteps(),
     initialStep: 0,
   });
+  const toastId = useRef(null);
 
   useEffect(() => {
     if (!selectedUnit) {
@@ -431,12 +432,15 @@ export default function PrepChart() {
   }
 
   const handleSaveClick = () => {
-    PrepChartAPI.save(prepChart)
+    toastId.current = toast.info("Saving Prep Chart...", { autoClose: false });
+    PrepChartAPI.save(companyID, prepChart)
       .then(() => {
         toast.success("Prep Chart saved successfully");
+        toast.update(toastId.current, { autoClose: 500 });
       })
       .catch((error) => {
         toast.error("Failed to save Prep Chart");
+        toast.update(toastId.current, { autoClose: 500 });
     });
   };
 
