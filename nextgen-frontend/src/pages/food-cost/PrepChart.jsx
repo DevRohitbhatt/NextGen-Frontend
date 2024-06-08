@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as Styled from "./styles/PrepChartStyles.jsx";
 import "../../components/UnitSelector.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
@@ -103,6 +103,7 @@ export default function PrepChart() {
     steps: PrepChartIntroSteps(),
     initialStep: 0,
   });
+  const toastId = useRef(null);
 
   useEffect(() => {
     if (!selectedUnit) {
@@ -130,7 +131,8 @@ export default function PrepChart() {
   const getPrepChart = (companyID, unitID, date) => {
     setIsLoading(true);
     setIsError(false);
-    PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((result) => {
+    var templateTypeID = 0;
+    PrepChartAPI.get(companyID, unitID, templateTypeID, date.toISOString().split('T')[0]).then((result) => {
       const data = result.data;
       if (data === "No Template found for the selected company and unit.") {
         setErrorMessage("No Template found for the selected unit. Please create a template for this unit.");
@@ -430,12 +432,15 @@ export default function PrepChart() {
   }
 
   const handleSaveClick = () => {
-    PrepChartAPI.save(prepChart)
+    toastId.current = toast.info("Saving Prep Chart...", { autoClose: false });
+    PrepChartAPI.save(companyID, prepChart)
       .then(() => {
         toast.success("Prep Chart saved successfully");
+        toast.update(toastId.current, { autoClose: 500 });
       })
       .catch((error) => {
         toast.error("Failed to save Prep Chart");
+        toast.update(toastId.current, { autoClose: 500 });
     });
   };
 
