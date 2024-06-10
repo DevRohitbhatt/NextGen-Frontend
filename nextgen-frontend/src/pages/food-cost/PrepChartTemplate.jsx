@@ -496,7 +496,7 @@ export default function PrepChartTemplate() {
         toast.update(toastId.current, { autoClose: 500 });
       })
       .catch((error) => {
-        toast.update(toastId, {type: toast.error, render: "Error saving data!", autoClose: 3000});
+        toast.error("Failed to save template")
         toast.update(toastId.current, { autoClose: 500 });
       });
   }
