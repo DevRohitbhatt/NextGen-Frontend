@@ -103,9 +103,9 @@ const Dropdown = ({ options, selectedOption, onOptionChange }) => {
           {options.map((option, index) => (
             <DropdownItem
               key={index}
-              onClick={() => handleOptionClick(option.Name)}
+              onClick={() => handleOptionClick(option.name)}
             >
-              {option.Name}
+              {option.name}
             </DropdownItem>
           ))}
         </DropdownList>
@@ -122,7 +122,7 @@ Dropdown.propTypes = {
     })
   ).isRequired,
   selectedOption: PropTypes.string.isRequired,
-  onOptionChange: PropTypes.func.isRequired,
+  onOptionChange: PropTypes.func,
 };
 
 export default Dropdown;

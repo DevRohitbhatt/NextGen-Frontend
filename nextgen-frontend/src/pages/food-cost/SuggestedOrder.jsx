@@ -11,8 +11,9 @@ import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import { VendorAPI } from "../../apis/food-cost/VendorAPI.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import * as SuggestedOrderFunctions from "../../functions/SuggestedOrderFunctions.jsx";
+import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 
-const SuggestedTableStructure = {
+const suggestedTableStructure = {
   columnHeaders: [
     "Inventory Description",
     "Item Description",
@@ -38,8 +39,6 @@ const SuggestedTableStructure = {
   columnWidth: "1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows: [],
 };
-let SaveSubmitStatus = 0;
-
 export default function SuggestedOrder() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -47,14 +46,14 @@ export default function SuggestedOrder() {
     "There was an error trying to load the Suggested Order, please try again later."
   );
   const [unitsList, setUnitsList] = useState([]);
-  const [selectedUnit, setSelectedUnit] = useState(87);
+  const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setSelectedUnitName] = useState("No Unit Selected");
   const [vendorsList, setVendorsList] = useState([]);
   const [selectedVendorName, setSelectedVendorName] =
     useState("No Vendor Selected");
-  const [selectedVendor, setSelectedVendor] = useState(1);
+  const [selectedVendor, setSelectedVendor] = useState();
   const [showModal, setShowModal] = useState(false);
-  const [companyID, setCompanyID] = useState(1021);
+  const [companyID, setCompanyID] = useState();
   const [alignmentID, setAlignmentID] = useState(null);
   const [selectedDates, setSelectedDates] = useState([new Date(), new Date()]);
   const [fromDate, setFromDate] = useState(new Date());
@@ -62,14 +61,12 @@ export default function SuggestedOrder() {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
-  const [isUnitSelected, setIsUnitSelected] = useState(false);
-  const [isActive, setIsActive] = useState([]);
   const [suggestedOrder, setsuggestedOrder] = useState({});
-  const [SuggestedTable, setSuggestedTable] = useState({
-    ...SuggestedTableStructure,
+  const [suggestedTable, setSuggestedTable] = useState({
+    ...suggestedTableStructure,
   });
-  const [IsVisible, setVisible] = useState(false);
-  const [saveIsVisible, setsaveIsVisible] = useState(false);
+  const [isVisible, setVisible] = useState(false);
+  const [saveIsVisible, setSaveIsVisible] = useState(false);
   const [userID, setUserID] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
   const [editedMessages, setEditedMessages] = useState({});
@@ -89,6 +86,7 @@ export default function SuggestedOrder() {
     width: "20%",
     height: "40%",
   });
+  const [saveSubmitStatus, setSaveSubmitStatus] = useState(0);
 
   useEffect(() => {
     document.title = "Suggested Order";
@@ -106,24 +104,23 @@ export default function SuggestedOrder() {
       parameters
         ? setSelectedUnit(parameters.User_DefaultUnitID)
         : setSelectedUnit();
-      parameters ? setIsActive(parameters.UnitID) : setIsActive();
       parameters ? setUserID(parameters.User_UserID) : setUserID();
 
       if (parameters.User_DefaultUnitID) {
-        getUnits(companyID, alignmentID, 5120);
+        getUnits(companyID, alignmentID, userID);
         getVendors(companyID);
-        GetOrderItem(companyID, selectedUnit, selectedVendor, fromDate, toDate);
+        getOrderItem(companyID, selectedUnit, selectedVendor, fromDate, toDate);
       } else {
         setErrorMessage("No Unit or Vendor Selected, Please select a unit.");
         setIsError(true);
         setIsLoading(false);
       }
     } else {
-      getUnits(companyID, 1110, 5120);
+      getUnits(companyID, alignmentID, userID);
       getVendors(companyID);
-      GetOrderItem(companyID,selectedUnit,selectedVendor,fromDate,toDate,0);
+      getOrderItem(companyID,selectedUnit,selectedVendor,fromDate,toDate,0);
     }
-    setsaveIsVisible(SaveSubmitStatus === 0);
+    setSaveIsVisible(saveSubmitStatus === 0);
   }, []);
 
   const formatDate = (date) => {
@@ -132,17 +129,9 @@ export default function SuggestedOrder() {
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
   };
-
-  const handleDateChange = ([start, end]) => {
-    const formattedFromDate = formatDate(new Date(start));
-    const formattedToDate = formatDate(new Date(end));
-    setSelectedDates(`${formattedFromDate} - ${formattedToDate}`);
-    setFromDate(start);
-    setToDate(end);
-    GetOrderItem(companyID, selectedUnit, selectedVendor, start, end, 0);
-  };
+  
   const getUnits = (companyId, alignmentId, userId) => {
-    SuggestedOrderAPI.UnitsAndAreasAPI(companyId, alignmentId, userId)
+    UnitsAndAreasAPI.UnitsAndAreasAPI(companyId, alignmentId, userId)
       .then((response) => {
         const data = response.data;
         if (response.message === "10001") {
@@ -164,7 +153,7 @@ export default function SuggestedOrder() {
   };
 
   const getVendors = (companyID) => {
-    VendorAPI.VendorsAPI(companyID)
+    VendorAPI.GetVendorsByCompany(companyID)
       .then((response) => {
         const data = response.data;
         if (response.message === "10001") {
@@ -185,24 +174,7 @@ export default function SuggestedOrder() {
       });
   };
 
-  const handleUnitSelectorClick = () => {
-    setShowModal(true);
-  };
-
-  const handleUnitSelection = (unitName, unitID) => {
-    setSelectedUnitName(unitName);
-    setSelectedUnit(unitID);
-    setShowModal(false);
-    GetOrderItem(companyID, selectedUnit, selectedVendor, fromDate, toDate, 0);
-  };
-
-  const handleVendorSelection = (VendorName, VendorID) => {
-    setSelectedVendorName(VendorName);
-    setSelectedVendor(VendorID);
-    GetOrderItem(companyID, selectedUnit, selectedVendor, fromDate, toDate, 0);
-  };
-
-  const GetOrderItem = (
+  const getOrderItem = (
     companyID,
     unitID,
     selectedVendor,
@@ -221,9 +193,9 @@ export default function SuggestedOrder() {
     )
       .then((response) => {
         buildForecastTable(response.data.forecastedData);
-        SaveSubmitStatus = response.data.suggestedOrderID;
+        setSaveSubmitStatus(response.data.suggestedOrderID);
         setSuggestedTable({
-          ...SuggestedTableStructure,
+          ...suggestedTableStructure,
           rows: response.data.suggestedOrderDetails,
         });
         setDefaultSafetyFactorTable({
@@ -240,7 +212,6 @@ export default function SuggestedOrder() {
             ],
           ],
         });
-        setIsUnitSelected(true);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -310,20 +281,13 @@ export default function SuggestedOrder() {
 
   const handleCSVClick = () => {
     const csvData = {
-      title: "Suggested Order",
+      title: "Order details",
       exportType: "csv",
       body: [
         {
           type: "table/Column",
-          title: "Forecast",
-          widths: [50, 100, 75],
-          data: forecastTable,
-        },
-        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable },
-        {
-          type: "table/Column",
           widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
-          data: SuggestedTable,
+          data: suggestedTable,
         },
       ],
     };
@@ -351,7 +315,7 @@ export default function SuggestedOrder() {
           type: "table/Column",
           title: "Suggested Order",
           widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
-          data: SuggestedTable,
+          data: suggestedTable,
         },
       ],
     };
@@ -369,7 +333,7 @@ export default function SuggestedOrder() {
     switch (tableName) {
       case "DefaultSafetyFactor": {
         SuggestedOrderFunctions.handleDefaultSafetyFactorChange(e,row,columnName,tableName,defaultSafetyFactorTable,setDefaultSafetyFactorTable,suggestedOrder,
-          setsuggestedOrder,setSuggestedTable,SuggestedTable);
+          setsuggestedOrder,setSuggestedTable,suggestedTable);
         break;
       }
       case "Forecast": {
@@ -385,7 +349,7 @@ export default function SuggestedOrder() {
   };
 
 
-  function ForecastedData(ForecastedData) {
+  function forecastedData(ForecastedData) {
     if (!Array.isArray(ForecastedData)) {
       console.error(
         "Expected ForecastedData to be an array but got:",
@@ -434,7 +398,7 @@ export default function SuggestedOrder() {
     }).filter((item) => item !== null);
   }
 
-  function DefaultSafetyFactor(defaultSafetyFactorTable) {
+  function defaultSafetyFactor(defaultSafetyFactorTable) {
     const [row] = defaultSafetyFactorTable || [];
     const valueEntry = row?.find(
       (entry) => entry.columnName === "Default Safety Factor"
@@ -452,17 +416,17 @@ export default function SuggestedOrder() {
       createdBy: userID,
       orderFromDate: fromDate,
       orderToDate: toDate,
-      defaultSafetyFactor: DefaultSafetyFactor(defaultSafetyFactorTable.rows),
-      forecastedData: ForecastedData(forecastTable.rows),
-      suggestedOrderDetails: SuggestedTable.rows,
+      defaultSafetyFactor: defaultSafetyFactor(defaultSafetyFactorTable.rows),
+      forecastedData: forecastedData(forecastTable.rows),
+      suggestedOrderDetails: suggestedTable.rows,
     };
 
     const jsonData = JSON.stringify(Data);
     console.log("jsonData", jsonData);
     SuggestedOrderAPI.save(jsonData)
       .then(() => {
-        setsaveIsVisible(false);
-        SaveSubmitStatus = 1;
+        setSaveIsVisible(false);
+        setSaveSubmitStatus(1);
         setSuccessMessage("Save successful");
         setShowSuccessPopup(true);
       })
@@ -472,7 +436,7 @@ export default function SuggestedOrder() {
   }
 
   function handleSubmit() {
-    const Data = {
+    const data = {
       suggestedOrderID: 0,
       purchaseOrderID: 1,
       companyID: companyID,
@@ -481,19 +445,19 @@ export default function SuggestedOrder() {
       createdBy: userID,
       orderFromDate: fromDate,
       orderToDate: toDate,
-      defaultSafetyFactor: DefaultSafetyFactor(defaultSafetyFactorTable.rows),
-      forecastedData: ForecastedData(forecastTable.rows),
-      suggestedOrderDetails: SuggestedTable.rows,
+      defaultSafetyFactor: defaultSafetyFactor(defaultSafetyFactorTable.rows),
+      forecastedData: forecastedData(forecastTable.rows),
+      suggestedOrderDetails: suggestedTable.rows,
     };
-    const jsonData = JSON.stringify(Data);
+    const jsonData = JSON.stringify(data);
     console.log("jsonData", jsonData);
     SuggestedOrderAPI.submit(jsonData)
       .then(() => {
         setVisible(true);
         setSuccessMessage("Submit successful");
         setShowSuccessPopup(true);
-        setsaveIsVisible(true);
-        SaveSubmitStatus = 0;
+        setSaveIsVisible(true);
+        setSaveSubmitStatus(0);
       })
       .catch((error) => {
         setShowErrorPopup(true);
@@ -532,22 +496,20 @@ export default function SuggestedOrder() {
 
         <Styled.DateAndUnitContainer>
           <UnitSelector
-            onClick={handleUnitSelectorClick}
             unitName={selectedUnitName}
             setUnitName={setSelectedUnitName}
             unitID={selectedUnit}
           />
           <Dropdown
             options={vendorsList.map((vendors) => ({
-              Name: vendors.vendorName,
+              name: vendors.vendorName,
               value: vendors.vendorID,
             }))}
             selectedOption={selectedVendorName}
-            onOptionChange={handleVendorSelection}
           />
           <DateRangePicker
             selectedDates={selectedDates}
-            onDateChange={handleDateChange}
+            title={"Order Span"}
           />
 
           <UnitModal
@@ -558,13 +520,13 @@ export default function SuggestedOrder() {
             handleClose={() => {
               setShowModal(false);
             }}
-            handleUnitSelection={handleUnitSelection}
+           
           />
         </Styled.DateAndUnitContainer>
 
         <ExportOptions
-          includePDF={IsVisible}
-          includeCSV={IsVisible}
+          includePDF={isVisible}
+          includeCSV={isVisible}
           includeSave={saveIsVisible}
           includeSubmit={saveIsVisible}
           handlePDFClick={handlePDFClick}
@@ -611,10 +573,10 @@ export default function SuggestedOrder() {
 
           <Styled.InventoryItemsContainer>
             <Table
-              columnHeaders={SuggestedTable.columnHeaders}
-              dataTypes={SuggestedTable.dataTypes}
-              columnwidths={SuggestedTable.columnWidth}
-              rows={SuggestedTable.rows}
+              columnHeaders={suggestedTable.columnHeaders}
+              dataTypes={suggestedTable.dataTypes}
+              columnwidths={suggestedTable.columnWidth}
+              rows={suggestedTable.rows}
               isTreeTable={true}
             />
           </Styled.InventoryItemsContainer>

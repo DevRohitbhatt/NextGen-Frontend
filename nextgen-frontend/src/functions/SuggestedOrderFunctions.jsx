@@ -97,7 +97,7 @@ export const recalculateTable = (suggestedOrder, setsuggestedOrder, tableData, s
   setTable({
     ...tableData,
     rows: tableData.rows.map((item, index) => {
-      let prepValue = 0;
+      let suggestedValue = 0;
       let yieldType = 0;
       let safetyFactor = 0;
       let needed = 0;
@@ -107,13 +107,13 @@ export const recalculateTable = (suggestedOrder, setsuggestedOrder, tableData, s
         if (cell.columnName === "Prep Type") {
           cell.value.forEach((option) => {
             if (option.isSelected) {
-              prepValue = option.value;
+              suggestedValue = option.value;
             }
           });
         }
 
         if (cell.columnName === "Yield/Type") {
-          yieldType = (cell.yieldDollars / prepValue).toFixed(2);
+          yieldType = (cell.yieldDollars / suggestedValue).toFixed(2);
           cell.value = yieldType;
           newsuggestedOrder[tableName][index]["yieldType"] = yieldType;
         } else if (cell.columnName === "Safety Factor") {
@@ -121,7 +121,7 @@ export const recalculateTable = (suggestedOrder, setsuggestedOrder, tableData, s
           cell.value = safetyFactor;
           newsuggestedOrder[tableName][index]["safetyFactor"] = safetyFactor;
         } else if (cell.columnName === "Needed") {
-          needed = calculateNeededValue(tableName, suggestedOrder, prepValue, yieldType, safetyFactor);
+          needed = calculateNeededValue(tableName, suggestedOrder, suggestedValue, yieldType, safetyFactor);
           cell.value = needed;
           newsuggestedOrder[tableName][index]["needed"] = needed;
         } else if (cell.columnName === "On Hand") {

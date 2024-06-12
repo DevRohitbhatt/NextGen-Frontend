@@ -1,4 +1,5 @@
 import pdfMake from 'pdfmake/build/pdfmake';
+import CSVDownloader from '../functions/CSVDownloader';
 // import pdfFonts from 'pdfmake/build/vfs_fonts';
 // pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -49,26 +50,6 @@ const getCellValue = (cell) => {
     return cell.value.find((option) => option.isSelected).option;
   } else {
     return cell.value !== 0 ? cell.value : "";
-  }
-}
-
-function downloadCSV(csvContent) {
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  if (navigator.msSaveBlob) {
-    // IE 10+
-    navigator.msSaveBlob(blob, "export.csv");
-  } else {
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "export.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      console.error("Anchor element with 'download' attribute not supported in this browser.");
-    }
   }
 }
 
@@ -130,7 +111,7 @@ export default function PdfBuilder(data) {
         });
       }
     });
-    downloadCSV(csvContent);
+    <CSVDownloader csvContent={csvContent} />
   }
 
 }

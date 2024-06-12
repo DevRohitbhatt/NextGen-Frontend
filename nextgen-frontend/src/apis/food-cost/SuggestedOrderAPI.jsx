@@ -15,16 +15,6 @@ export const SuggestedOrderAPI = {
         ? cancelApiObject[this.getOrderItem.name].handleRequestCancellation().signal : undefined });
     return response.data;
   },
-  UnitsAndAreasAPI: async function (companyID, alignmentID, areaID, cancel = false) {
-    const response = await api.request({
-      method: "GET",
-      url: `/api/unitsandarea/getbyid?companyID=${companyID}&alignmentID=${alignmentID}&memberID=${areaID}`,
-      signal: cancel
-        ? cancelApiObject[this.UnitsAndAreasAPI.name].handleRequestCancellation().signal
-        : undefined,
-    });
-    return response.data;
-  },
   save: async function (data, cancel = false) {
     const response = await api.request({
       method: "POST",
