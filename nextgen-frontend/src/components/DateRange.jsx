@@ -12,6 +12,7 @@ const MainContainer = styled.div`
   margin: 5px;
   cursor: pointer;
 `;
+
 const Label = styled.div`
   font-size: 1.2em;
   font-weight: bold;
@@ -29,14 +30,15 @@ const CalendarContainer = styled.div`
     border: 2px solid ${(props) => props.theme.primary};
   }
 `;
+
 const Input = styled.input`
   border: none;
   cursor: pointer;
 `;
 
-const DateRangePicker = ({ selectedDates, onDateChange,title }) => {
+const DateRangePicker = ({ selectedDates, onDateChange, title }) => {
   const today = new Date();
-  const [dates, setDates] = useState([today, today]);
+  const [dates, setDates] = useState(selectedDates ? selectedDates : [today, today]);
   const [calendarVisible, setCalendarVisible] = useState(false);
   const textBoxRef = useRef(null);
   const calendarRef = useRef(null);
@@ -67,8 +69,7 @@ const DateRangePicker = ({ selectedDates, onDateChange,title }) => {
   };
 
   useEffect(() => {
-    if (textBoxRef.current) {
-      
+    if (textBoxRef.current && selectedDates) {
       const formattedDateRange = `${dates[0].toLocaleDateString(
         undefined,
         formates
@@ -95,7 +96,7 @@ const DateRangePicker = ({ selectedDates, onDateChange,title }) => {
 
   return (
     <MainContainer>
-      <Label>{title} </Label>
+      <Label>{title}</Label>
       <CalendarContainer>
         <Input type="text" onClick={handleTextBoxClick} ref={textBoxRef} />
         {calendarVisible && (
@@ -117,11 +118,16 @@ const DateRangePicker = ({ selectedDates, onDateChange,title }) => {
   );
 };
 
-DateRangePicker.propTypes={
-    selectedDates:PropTypes.any,
-    onDateChange:PropTypes.func,
-    title:PropTypes.string
+DateRangePicker.propTypes = {
+  selectedDates: PropTypes.arrayOf(PropTypes.instanceOf(Date)),
+  onDateChange: PropTypes.func,
+  title: PropTypes.string,
+};
 
-}
+DateRangePicker.defaultProps = {
+  selectedDates: null,
+  onDateChange: () => {},
+  title: "Select Date Range",
+};
 
 export default DateRangePicker;

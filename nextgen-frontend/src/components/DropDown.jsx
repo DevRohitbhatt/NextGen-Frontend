@@ -9,7 +9,6 @@ const MainContainer = styled.div`
 `;
 
 const DropdownButton = styled.button`
-  position: relative;
   border-radius: 20px;
   border: 2px solid #f0f0f0;
   background-color: transparent;
@@ -76,6 +75,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange }) => {
     onOptionChange(optionValue);
     setIsOpen(false);
   };
+
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsOpen(false);
@@ -87,14 +87,14 @@ const Dropdown = ({ options, selectedOption, onOptionChange }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [dropdownRef]);
 
   return (
     <MainContainer ref={dropdownRef}>
       <Label>Select Vendor(s)</Label>
       <DropdownButton onClick={toggleDropdown}>
         {selectedOption}
-        <DropdownArrow>
+        <DropdownArrow isOpen={isOpen}>
           {isOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
         </DropdownArrow>
       </DropdownButton>
@@ -123,6 +123,10 @@ Dropdown.propTypes = {
   ).isRequired,
   selectedOption: PropTypes.string.isRequired,
   onOptionChange: PropTypes.func,
+};
+
+Dropdown.defaultProps = {
+  onOptionChange: () => {},
 };
 
 export default Dropdown;
