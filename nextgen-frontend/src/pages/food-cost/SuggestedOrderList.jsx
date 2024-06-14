@@ -15,7 +15,7 @@ const SuggestedOrderList = () => {
   const [userID, setUserID] = useState();
   const [companyID, setCompanyID] = useState();
   const [alignmentID, setAlignmentID] = useState();  
-  const [IsActive, setIsActive] = useState([]);
+  const [isActive, setIsActive] = useState([]);
   
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -159,8 +159,8 @@ const SuggestedOrderList = () => {
             onClick={() => setVendorShowModal(true)}
           />
           <DateSelector
-            ToDate={selectedToDate}
-            FromDate={selectedFromDate}
+            toDate={selectedToDate}
+            fromDate={selectedFromDate}
             onClick={handleDateSelectorClick}
             isDateRange={true}
           />

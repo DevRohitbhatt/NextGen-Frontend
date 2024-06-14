@@ -29,23 +29,23 @@ const DateValue = styled.div`
 `;
 
 DateSelector.propTypes = {
-  ToDate: PropTypes.instanceOf(Date),
-  FromDate: PropTypes.instanceOf(Date),
+  toDate: PropTypes.instanceOf(Date),
+  fromDate: PropTypes.instanceOf(Date),
   isDateRange:PropTypes.bool
 };
 
-export default function DateSelector({ ToDate,FromDate ,onClick,isDateRange=false}) {
+export default function DateSelector({ toDate,fromDate ,onClick,isDateRange=false}) {
   return (
     <>
     {!isDateRange ? (
           <DateContainer onClick={onClick} className="date-selector">
           <Label>Select Date</Label>
-          <DateValue>{FromDate.toLocaleDateString()}</DateValue>
+          <DateValue>{fromDate.toLocaleDateString()}</DateValue>
         </DateContainer>
       ) : (
      <DateContainer onClick={onClick} className="date-selector">
       <Label>Select Date</Label>
-      <DateValue>{FromDate.toLocaleDateString() +" - "+ ToDate.toLocaleDateString()}</DateValue>
+      <DateValue>{fromDate.toLocaleDateString() +" - "+ toDate.toLocaleDateString()}</DateValue>
     </DateContainer>
       )}
     </>
