@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
-import * as Styled from "./styles/SuggestedOrderStyles.jsx";
-import UnitSelector from "../../components/UnitSelector";
-import VendorSelector from "../../components/VendorSelector";
-import DateSelector from "../../components/DateSelector";
+import * as Styled from "./styles/SuggestedOrderListStyles.jsx";
+import UnitSelector from "../../components/UnitSelector.jsx";
+import VendorSelector from "../../components/VendorSelector.jsx";
+import DateSelector from "../../components/DateSelector.jsx";
 import Table from '../../components/SimpleTable.jsx';
-import UnitModal from "../../components/UnitModal";
-import VendorModal from "../../components/VendorModal";
+import UnitModal from "../../components/UnitModal.jsx";
+import VendorModal from "../../components/VendorModal.jsx";
 import CalendarModal from "../../components/ModalDate.jsx";
-import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI";
+import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import { VendorAPI } from "../../apis/VendorAPI.jsx";
 import { SuggestedOrderAPI } from "../../apis/SuggestedOrderAPI.jsx";
 
-const SuggestedOrder = () => {
+const SuggestedOrderList = () => {
   const [userID, setUserID] = useState();
   const [companyID, setCompanyID] = useState();
   const [alignmentID, setAlignmentID] = useState();  
@@ -27,7 +27,7 @@ const SuggestedOrder = () => {
   const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
   const [vendorsList, setVendorsList] = useState([]);
-  const [selectedVendor, setSelectedVendor] = useState();
+  const [selectedVendor, setSelectedVendor] = useState(0);
   const [selectedVendorName, setselectedVendorName] = useState("No Vendor Selected");    
   const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
   
@@ -60,7 +60,7 @@ const SuggestedOrder = () => {
       parameters ? setUserID(parameters.User_GroupOrUnitAccess) : setUserID();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
-        fetchData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess, selectedFromDate, selectedToDate);
+        fetchData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
       } else {
         setErrorMessage("No Unit Selected, Please select a unit.");
         setIsError(true);
@@ -68,7 +68,8 @@ const SuggestedOrder = () => {
       }
     }
     else {      
-      fetchData(1021, 1110, 5199);
+      setErrorMessage("There was an issue loading your orders, please try again later.");
+      //fetchData(1021, 1110, 5199)
     }
 
   }, []);
@@ -77,14 +78,14 @@ const SuggestedOrder = () => {
     setIsLoading(true);    
     fetchUnits(companyID, alignmentID, userID);
     fetchVendors(companyID);
-    fetchSuggestedOrders(companyID, alignmentID, userID, selectedUnit, selectedVendor, selectedFromDate, selectedToDate);
+    fetchSuggestedOrders(companyID, alignmentID, userID, selectedVendor, selectedFromDate, selectedToDate);
     setIsLoading(false); 
   };
 
   const fetchUnits =  (companyID, alignmentID, userID) => {
     UnitsAndAreasAPI.getbyid(companyID, alignmentID, userID)
     .then((data) => {      
-      setUnitsList(data);
+      setUnitsList(data.data);
     }).catch((error) => {
       console.error("Error getting units: ", error);
     });
@@ -99,8 +100,8 @@ const SuggestedOrder = () => {
     });
   };
 
-  const fetchSuggestedOrders = (companyID, alignmentID, userID, unitID, vendorID, fromDate, toDate) => {
-    SuggestedOrderAPI.getOrderList(companyID, alignmentID, unitID, userID,vendorID, fromDate, toDate)
+  const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID, fromDate, toDate) => {
+    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID ,vendorID, fromDate.toISOString().split('T')[0], toDate.toISOString().split('T')[0])
     .then((data) => {
       setSuggestedOrders(data);
     }).catch((error) => {
@@ -168,7 +169,7 @@ const SuggestedOrder = () => {
       {isLoading ? (
         <Styled.UnloadedMessage>Loading...</Styled.UnloadedMessage>
       ) : isError ? (
-        <Styled.UnloadedMessage>Error: {errorMessage}</Styled.UnloadedMessage>
+        <Styled.UnloadedMessage>{errorMessage}</Styled.UnloadedMessage>
       ) : (
             <Styled.OptionsRow>
               <Styled.VendorOrdersContainer>
@@ -214,4 +215,4 @@ const SuggestedOrder = () => {
   );
 };
 
-export default SuggestedOrder;
+export default SuggestedOrderList;

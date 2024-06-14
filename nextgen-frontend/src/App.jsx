@@ -7,7 +7,7 @@ import PrepChartTemplate from "./pages/food-cost/PrepChartTemplate.jsx";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import './App.css'; 
-import SuggestedOrder from "./pages/food-cost/SuggestedOrder.jsx";
+import SuggestedOrderList from "./pages/food-cost/SuggestedOrderList.jsx";
 
 const App = () => {
   const selectedTheme = themes.default; 
@@ -21,7 +21,7 @@ const App = () => {
                   <Route path="/" element={<PrepChart />} />
                   <Route path="/PrepChartTemplate" element={<PrepChartTemplate />} />
                   <Route path="/PrepChart" element={<PrepChart />} />
-                  <Route path="/SuggestedOrder" element={<SuggestedOrder />} />
+                  <Route path="/SuggestedOrderList" element={<SuggestedOrderList />} />
                 </Routes>
             </div>
           </DndProvider>
