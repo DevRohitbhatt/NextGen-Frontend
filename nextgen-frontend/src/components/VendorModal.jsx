@@ -179,7 +179,6 @@ const VendorModal = ({
   handleVendorSelection,
   isSaveVendor = false,
   isMultiVendor = false,
-  includeAreas = false,
   handleVendorSaveSelection,
 }) => {
   const [vendorsList, setVendorsList] = useState(vendorData.data || []);
@@ -193,7 +192,7 @@ const VendorModal = ({
       setVendorsList(vendorData?.data);
       setSelectedVendorName(vendorName);
       setSelectedVendor(vendorID);
-      setSelectedVendors([{id: vendorID, name: vendorName, isArea: false}]);
+      setSelectedVendors([{id: vendorID, name: vendorName}]);
     }
     else {
       console.log('No data found')
@@ -205,7 +204,7 @@ const VendorModal = ({
   }, [vendorsList]);
 
   const PopulateFilteredList = (vendorsList) => {
-    const vendorListWithFlag = vendorsList?.map(vendor => ({id: vendor.vendorID, name: vendor.vendorName, isArea: false}));
+    const vendorListWithFlag = vendorsList?.map(vendor => ({id: vendor.vendorID, name: vendor.vendorName}));
       setFilteredList(vendorListWithFlag);
   };
 
