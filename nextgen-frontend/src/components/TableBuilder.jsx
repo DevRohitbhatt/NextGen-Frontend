@@ -97,12 +97,6 @@ const TableHeaderCell = styled.div`
   
 `;
 
-const TableRow = styled.div`
-  width: 100%;
-  border-bottom: 1px solid ${(props) => props.theme.lightGrey};
-  padding: 10px 0;
-`;
-
 const IconContainer = styled.div`
   margin-left: 5px; /* Adjust margin as needed */
   float: right;
@@ -123,8 +117,7 @@ export default function TableBuilder({
   className,
   scrollable = false,
   handleSorting,
-  isSorting = false,
-  isTreeTable=false
+  isSorting = false
 }) {
   const [sortColumnIndex, setSortColumnIndex] = useState(-1); // Initialize with -1 to indicate no column is sorted initially
   const [isAscending, setIsAscending] = useState(true);
@@ -145,13 +138,6 @@ if (isSorting) {
   };
    return (
     <Container width={width} height={height}>
-      {isTreeTable ? (
-        <TreeTable
-        data={rows}
-        columnHeaders={columnHeaders}
-        dataTypes={dataTypes}
-      />
-      ) : (
       <Table
         width={width}
         height={height}
@@ -229,7 +215,6 @@ if (isSorting) {
           );
         })}
       </Table>
-      )}
     </Container>
   );
 }
@@ -249,6 +234,5 @@ TableBuilder.propTypes = {
   usetablerows: PropTypes.bool,
   className: PropTypes.string,
   handleSorting:PropTypes.func,
-  isSorting: PropTypes.bool,
-  isTreeTable:PropTypes.bool
+  isSorting: PropTypes.bool
 };

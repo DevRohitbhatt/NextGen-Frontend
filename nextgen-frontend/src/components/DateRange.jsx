@@ -43,7 +43,7 @@ const DateRangePicker = ({ selectedDates, onDateChange, title }) => {
   const textBoxRef = useRef(null);
   const calendarRef = useRef(null);
 
-  const formates = { year: "numeric", month: "2-digit", day: "2-digit" };
+  const formats = { year: "numeric", month: "2-digit", day: "2-digit" };
 
   const handleDateChange = (index, date) => {
     const newDates = [...dates];
@@ -62,8 +62,8 @@ const DateRangePicker = ({ selectedDates, onDateChange, title }) => {
     if (textBoxRef.current) {
       const formattedDateRange = `${value[0].toLocaleDateString(
         undefined,
-        formates
-      )} - ${value[1].toLocaleDateString(undefined, formates)}`;
+        formats
+      )} - ${value[1].toLocaleDateString(undefined, formats)}`;
       textBoxRef.current.value = formattedDateRange;
     }
   };
@@ -72,8 +72,8 @@ const DateRangePicker = ({ selectedDates, onDateChange, title }) => {
     if (textBoxRef.current && selectedDates) {
       const formattedDateRange = `${dates[0].toLocaleDateString(
         undefined,
-        formates
-      )} - ${dates[1].toLocaleDateString(undefined, formates)}`;
+        formats
+      )} - ${dates[1].toLocaleDateString(undefined, formats)}`;
       textBoxRef.current.value = formattedDateRange;
     }
     document.addEventListener("click", handleClickOutside);

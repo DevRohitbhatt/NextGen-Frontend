@@ -8,10 +8,9 @@ import DateRangePicker from "../../components/DateRange.jsx";
 import MessagePopup from "../../components/MessagePopup.jsx";
 import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
-import { VendorAPI } from "../../apis/food-cost/VendorAPI.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import * as SuggestedOrderFunctions from "../../functions/SuggestedOrderFunctions.jsx";
-import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
+import TreeTable from "../../components/TreeTableBuilder.jsx";
 
 const suggestedTableStructure = {
   columnHeaders: [
@@ -67,6 +66,7 @@ export default function SuggestedOrder() {
   });
   const [isVisible, setVisible] = useState(false);
   const [saveIsVisible, setSaveIsVisible] = useState(false);
+  const [submitIsVisible, setSubmitIsVisible] = useState(false);
   const [userID, setUserID] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
   const [editedMessages, setEditedMessages] = useState({});
@@ -107,8 +107,6 @@ export default function SuggestedOrder() {
       parameters ? setUserID(parameters.User_UserID) : setUserID();
 
       if (parameters.User_DefaultUnitID) {
-        getUnits(companyID, alignmentID, userID);
-        getVendors(companyID);
         getOrderItem(companyID, selectedUnit, selectedVendor, fromDate, toDate);
       } else {
         setErrorMessage("No Unit or Vendor Selected, Please select a unit.");
@@ -116,11 +114,10 @@ export default function SuggestedOrder() {
         setIsLoading(false);
       }
     } else {
-      getUnits(companyID, alignmentID, userID);
-      getVendors(companyID);
       getOrderItem(companyID,selectedUnit,selectedVendor,fromDate,toDate,0);
     }
-    setSaveIsVisible(saveSubmitStatus === 0);
+    setSaveIsVisible(saveSubmitStatus === 0 ? true : false);
+    setSubmitIsVisible(saveSubmitStatus === 0 ? false : true);
   }, []);
 
   const formatDate = (date) => {
@@ -130,67 +127,9 @@ export default function SuggestedOrder() {
     return `${month}/${day}/${year}`;
   };
   
-  const getUnits = (companyId, alignmentId, userId) => {
-    UnitsAndAreasAPI.UnitsAndAreasAPI(companyId, alignmentId, userId)
-      .then((response) => {
-        const data = response.data;
-        if (response.message === "10001") {
-          setUnitsList(data);
-        }
-      })
-      .catch((error) => {
-        setIsError(true);
-        if (error.response && error.response.status === 404) {
-          setErrorMessage("Units not found for the given parameters.");
-        } else if (error.response && error.response.status === 403) {
-          setErrorMessage(
-            "Access denied. You do not have permission to view units."
-          );
-        } else {
-          setErrorMessage("An error occurred while getting units.");
-        }
-      });
-  };
-
-  const getVendors = (companyID) => {
-    VendorAPI.GetVendorsByCompany(companyID)
-      .then((response) => {
-        const data = response.data;
-        if (response.message === "10001") {
-          setVendorsList(data);
-        }
-      })
-      .catch((error) => {
-        setIsError(true);
-        if (error.response && error.response.status === 404) {
-          setErrorMessage("vendors not found for the given parameters.");
-        } else if (error.response && error.response.status === 403) {
-          setErrorMessage(
-            "Access denied. You do not have permission to view vendors."
-          );
-        } else {
-          setErrorMessage("An error occurred while getting vendors.");
-        }
-      });
-  };
-
-  const getOrderItem = (
-    companyID,
-    unitID,
-    selectedVendor,
-    orderFromDate,
-    orderToDate,
-    suggestedOrderId
-  ) => {
+  const getOrderItem = (companyID,unitID,selectedVendor,orderFromDate,orderToDate,suggestedOrderId) => {
     setIsLoading(true);
-    SuggestedOrderAPI.getOrderItem(
-      companyID,
-      unitID,
-      selectedVendor,
-      formatDate(orderFromDate),
-      formatDate(orderToDate),
-      suggestedOrderId
-    )
+    SuggestedOrderAPI.getOrderItem(companyID,unitID,selectedVendor,formatDate(orderFromDate),formatDate(orderToDate),suggestedOrderId)
       .then((response) => {
         buildForecastTable(response.data.forecastedData);
         setSaveSubmitStatus(response.data.suggestedOrderID);
@@ -348,17 +287,16 @@ export default function SuggestedOrder() {
     }
   };
 
-
-  function forecastedData(ForecastedData) {
-    if (!Array.isArray(ForecastedData)) {
+  function forecastedData(forecastedData) {
+    if (!Array.isArray(forecastedData)) {
       console.error(
         "Expected ForecastedData to be an array but got:",
-        ForecastedData
+        forecastedData
       );
       return [];
     }
 
-    return ForecastedData.map((row, rowIndex) => {
+    return forecastedData.map((row, rowIndex) => {
       if (!Array.isArray(row)) {
         console.error(
           `Expected row at index ${rowIndex} to be an array but got:`,
@@ -422,16 +360,18 @@ export default function SuggestedOrder() {
     };
 
     const jsonData = JSON.stringify(Data);
-    console.log("jsonData", jsonData);
     SuggestedOrderAPI.save(jsonData)
       .then(() => {
         setSaveIsVisible(false);
+        setSubmitIsVisible(true);
         setSaveSubmitStatus(1);
         setSuccessMessage("Save successful");
         setShowSuccessPopup(true);
       })
       .catch((error) => {
         setShowErrorPopup(true);
+        setSaveIsVisible(true);
+        setSubmitIsVisible(false);
       });
   }
 
@@ -456,7 +396,8 @@ export default function SuggestedOrder() {
         setVisible(true);
         setSuccessMessage("Submit successful");
         setShowSuccessPopup(true);
-        setSaveIsVisible(true);
+        setSubmitIsVisible(false);
+        setSaveIsVisible(false);
         setSaveSubmitStatus(0);
       })
       .catch((error) => {
@@ -511,7 +452,6 @@ export default function SuggestedOrder() {
             selectedDates={selectedDates}
             title={"Order Span"}
           />
-
           <UnitModal
             unitData={unitsList}
             unitID={selectedUnit}
@@ -520,7 +460,6 @@ export default function SuggestedOrder() {
             handleClose={() => {
               setShowModal(false);
             }}
-           
           />
         </Styled.DateAndUnitContainer>
 
@@ -528,7 +467,7 @@ export default function SuggestedOrder() {
           includePDF={isVisible}
           includeCSV={isVisible}
           includeSave={saveIsVisible}
-          includeSubmit={saveIsVisible}
+          includeSubmit={submitIsVisible}
           handlePDFClick={handlePDFClick}
           handleCSVClick={handleCSVClick}
           handleSaveClick={handleSave}
@@ -572,12 +511,10 @@ export default function SuggestedOrder() {
           </Styled.ForeCastAndSafetyFactor>
 
           <Styled.InventoryItemsContainer>
-            <Table
+            <TreeTable
+              data={suggestedTable.rows}
               columnHeaders={suggestedTable.columnHeaders}
               dataTypes={suggestedTable.dataTypes}
-              columnwidths={suggestedTable.columnWidth}
-              rows={suggestedTable.rows}
-              isTreeTable={true}
             />
           </Styled.InventoryItemsContainer>
         </>

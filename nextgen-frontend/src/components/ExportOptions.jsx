@@ -125,7 +125,7 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
             </OptionImage>
           </ExportOption>
         ) : null}
-        {!includeSubmit ? (
+        {includeSubmit ? (
           <ExportOption title="Submit">
             <OptionImage onClick={handleSubmitClick}>
               <SubmitIcon />
