@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import styled from "styled-components";
+import styled,{css} from "styled-components";
 
 const TableCell = styled.div`
   position: relative;
@@ -56,7 +56,14 @@ const Dropdown = styled.select`
     background-color: ${(props) => props.theme.lightGrey};
   }
 `;
-
+const bgRow = css`
+ background: #efefef;
+  font-weight: bold;
+  padding-left: 5px;
+  width: auto;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000 !important;
+`;
 const PercentageCell = ({
   value,
   row,
@@ -133,7 +140,7 @@ const DollarCell = ({
 
   if (!isInput) {
     return (
-      <TableCell  className={isTotal ? "Total-row" : ""} columntype={columntype}>
+      <TableCell  className={isTotal ? bgRow : ""} columntype={columntype}>
         <DollarSign>$</DollarSign>
         {value}
       </TableCell>
@@ -149,7 +156,7 @@ const DollarCell = ({
   };
 
   useEffect(() => {
-    setDollar(value);
+    setDollar(Math.round(value));
   }, [value]);
 
   useEffect(() => {
@@ -243,7 +250,7 @@ export default function Cell({
         </Dropdown>
       </TableCell>
     );
-  } else return <TableCell   className={isTotal ? "Total-row" : ""} columntype={columntype}>{value}</TableCell>;
+  } else return <TableCell   className={isTotal ? bgRow : ""} columntype={columntype}>{value}</TableCell>;
 }
 
 Cell.propTypes = {

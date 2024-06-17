@@ -128,15 +128,19 @@ export function onDropdownCellChange(
             onHand = parseFloat(cell.value);
             cell.value = onHand;
             newPrepChart[tableName][row]["onHand"] = cell.value;
-          } else if (cell.columnName === "Prep/Pull Amount") {
-            cell.value = (needed - onHand).toFixed(2);
+          if (cell.columnName === "Prep/Pull Amount") {
+            if (needed !== 0 || onHand !== 0) {
+              cell.value = (needed - onHand).toFixed(2);
+            } else {
+              cell.value = needed - onHand;
+            }
             newPrepChart[tableName][row]["prepPullAmount"] = cell.value;
           }
-        });
-      }
-      return item;
-    }),
-  });
+        }
+      });
+    }
+    return item;
+  }),});
   setPrepChart(newPrepChart);
 }
 
@@ -278,11 +282,16 @@ export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, t
 }
 
 function calculateNeededValue(tableName, prepChart, prepValue, yieldType, safetyFactor) {
+  console.log(yieldType, "yieldType")
   const todayForecast = prepChart.forecastData.today;
   const tomorrowForecast = prepChart.forecastData.tomorrow;
   const nextDayForecast = prepChart.forecastData.nextDay;
   let needed = 0;
   safetyFactor = safetyFactor / 100 + 1;
+  if (isNaN(yieldType) || yieldType === 0.00 || yieldType === "0.00") {
+    console.log("in if statement")
+    return 0;
+  }
 
   if (tableName === "today") {
     console.log("todayForecast: ", todayForecast, "prepValue: ", prepValue, "yieldType: ", yieldType, "safetyFactor: ", safetyFactor)

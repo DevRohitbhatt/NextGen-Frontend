@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { SlArrowDown, SlArrowUp } from "react-icons/sl";
 import PropTypes from "prop-types";
 import Cell from "./TableCell.jsx";
+import { handleVendorItemChange ,handleEdit} from "../functions/Helpers.jsx"
 
 const TableCell = styled.div`
   position: relative;
@@ -129,69 +130,13 @@ const TreeNode = ({
     onToggleNode(node);
   };
 
-  const handleEdit = (field, value, index) => {
-    
-    const updatedVendorItem = {
-      ...selectedVendorItems[index],
-      [field]: value
-    };
-  
-    setSelectedVendorItems(prevSelectedVendorItems => ({
-      ...prevSelectedVendorItems,
-      [index]: updatedVendorItem
-    }));
-  
-    const updatedSuggestedOrderItem = node.suggestedOrderItem.map((childNode, i) =>
-      i === index
-        ? {
-            ...childNode,
-            vendorItems: childNode.vendorItems.map((vendorItem) =>
-              vendorItem.qsrItemID === selectedVendorItems[index]?.qsrItemID
-                ? { ...vendorItem, [field]: value }
-                : vendorItem
-            ),
-          }
-        : childNode
-    );
-  
-    const updatedNode = {
-      ...node,
-      suggestedOrderItem: updatedSuggestedOrderItem,
-    };
-  
-    onEdit(updatedNode);
+  const handleEditfield = (field, value, index) => {
+    handleEdit(field, value, index, node, selectedVendorItems, setSelectedVendorItems, onEdit);
   };
   
 
-  const handleVendorItemChange = (selectedQsrItemID, index) => {
-    const selectedVendorItem = node.suggestedOrderItem[index].vendorItems.find(
-      (vendorItem) => vendorItem.qsrItemID === parseInt(selectedQsrItemID)
-    );
-
-    setSelectedVendorItems((prevSelectedVendorItems) => ({
-      ...prevSelectedVendorItems,
-      [index]: selectedVendorItem,
-    }));
-
-    const updatedSuggestedOrderItem = node.suggestedOrderItem.map((childNode, i) =>
-      i === index
-        ? {
-            ...childNode,
-            vendorItems: childNode.vendorItems.map((vendorItem) =>
-              vendorItem.qsrItemID === parseInt(selectedQsrItemID)
-                ? { ...vendorItem, isSelected: true }
-                : { ...vendorItem, isSelected: false }
-            ),
-          }
-        : childNode
-    );
-
-    const updatedNode = {
-      ...node,
-      suggestedOrderItem: updatedSuggestedOrderItem,
-    };
-
-    onEdit(updatedNode);
+  const handleVendorChange = (selectedQsrItemID, index) => {
+    handleVendorItemChange(node, selectedQsrItemID, index, setSelectedVendorItems, onEdit);
   };
 
   useEffect(() => {
@@ -225,7 +170,7 @@ const TreeNode = ({
                 <DropdownCell
                   value={selectedVendorItems[index]?.qsrItemID || ""}
                   options={childNode.vendorItems}
-                  onChange={(value) => handleVendorItemChange(value, index)}
+                  onChange={(value) => handleVendorChange(value, index)}
                 />
               )}
             </StyledCell>
@@ -235,7 +180,7 @@ const TreeNode = ({
                   <EditableCell
                     value={selectedVendorItems[index].vendorItemReference}
                     onChange={(value) =>
-                      handleEdit("vendorItemReference", value, index)
+                      handleEditfield("vendorItemReference", value, index)
                     }
                     DataType={dataTypes[2]}
                   />
@@ -248,7 +193,7 @@ const TreeNode = ({
                   <EditableCell
                     value={selectedVendorItems[index].unitOfMeasure}
                     onChange={(value) =>
-                      handleEdit("unitOfMeasure", value, index)
+                      handleEditfield("unitOfMeasure", value, index)
                     }
                     DataType={dataTypes[3]}
                   />
@@ -260,7 +205,7 @@ const TreeNode = ({
                 {isEditable[2] ? (
                   <EditableCell
                     value={selectedVendorItems[index].packSize}
-                    onChange={(value) => handleEdit("packSize", value, index)}
+                    onChange={(value) => handleEditfield("packSize", value, index)}
                     DataType={dataTypes[4]}
                   />
                 ) : (
@@ -270,7 +215,7 @@ const TreeNode = ({
                   <EditableCell
                     value={selectedVendorItems[index].latestInvoicePrice}
                     onChange={(value) =>
-                      handleEdit("latestInvoicePrice", value, index)
+                      handleEditfield("latestInvoicePrice", value, index)
                     }
                     DataType={dataTypes[5]}
                   />
@@ -283,7 +228,7 @@ const TreeNode = ({
                   <EditableCell
                     value={selectedVendorItems[index].safetyFactor}
                     onChange={(value) =>
-                      handleEdit("safetyFactor", value, index)
+                      handleEditfield("safetyFactor", value, index)
                     }
                     DataType={dataTypes[6]}
                   />
@@ -296,7 +241,7 @@ const TreeNode = ({
                   <EditableCell
                     value={selectedVendorItems[index].suggestedQty}
                     onChange={(value) =>
-                      handleEdit("suggestedQty", value, index)
+                      handleEditfield("suggestedQty", value, index)
                     }
                     DataType={dataTypes[7]}
                   />
@@ -308,7 +253,7 @@ const TreeNode = ({
                 {isEditable[6] ? (
                   <EditableCell
                     value={selectedVendorItems[index].onHand}
-                    onChange={(value) => handleEdit("onHand", value, index)}
+                    onChange={(value) => handleEditfield("onHand", value, index)}
                     DataType={dataTypes[8]}
                   />
                 ) : (

@@ -34,18 +34,18 @@ const Title = styled.h2`
   color: ${(props) => {
     switch (props.type) {
       case "Success":
-        return "#008000"; // Green color for success
+        return props.theme.greenColor; 
       case "Error":
-        return "#FF0000"; // Red color for error
+        return props.theme.redColor; 
       case "Warning":
-        return "#FFA500"; // Orange color for warning
+        return props.theme.orangeColor; 
       default:
         return "#000000";
     }
   }};
   font-size: 24px;
   font-weight: bold;
-  margin: 0; /* Remove default margin */
+  margin: 0; 
   margin-top: -5px;
 `;
 
@@ -59,7 +59,7 @@ const CloseButton = styled.button`
 `;
 
 const Content = styled.div`
-  margin-top: 0px; /* Add some space between header and content */
+  margin-top: 0px;
 `;
 
 const ProgressBar = styled.div`

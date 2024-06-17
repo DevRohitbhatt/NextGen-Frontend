@@ -9,7 +9,6 @@ const MainContainer = styled.div`
 `;
 
 const DropdownButton = styled.button`
-  position: relative;
   border-radius: 20px;
   border: 2px solid #D3D3D3;
   background-color: ${(props) => props.theme.listBackground};
@@ -96,6 +95,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange,title }) => {
     onOptionChange(optionValue);
     setIsOpen(false);
   };
+
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsOpen(false);
@@ -107,14 +107,14 @@ const Dropdown = ({ options, selectedOption, onOptionChange,title }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [dropdownRef]);
 
   return (
     <MainContainer ref={dropdownRef}>
       <Label>{title}</Label>
       <DropdownButton onClick={toggleDropdown}>
         {selectedOption}
-        <DropdownArrow>
+        <DropdownArrow isOpen={isOpen}>
           {isOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
         </DropdownArrow>
       </DropdownButton>
@@ -123,9 +123,9 @@ const Dropdown = ({ options, selectedOption, onOptionChange,title }) => {
           {options.map((option, index) => (
             <DropdownItem
               key={index}
-              onClick={() => handleOptionClick(option.Name)}
+              onClick={() => handleOptionClick(option.name)}
             >
-              {option.Name}
+              {option.name}
             </DropdownItem>
           ))}
         </DropdownList>
@@ -144,6 +144,10 @@ Dropdown.propTypes = {
   selectedOption: PropTypes.string.isRequired,
   onOptionChange: PropTypes.func.isRequired,
   title:PropTypes.string
+};
+
+Dropdown.defaultProps = {
+  onOptionChange: () => {},
 };
 
 export default Dropdown;

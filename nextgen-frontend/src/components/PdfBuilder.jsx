@@ -1,4 +1,5 @@
 import pdfMake from 'pdfmake/build/pdfmake';
+import CSVDownloader from '../functions/CSVDownloader';
 // import pdfFonts from 'pdfmake/build/vfs_fonts';
 // pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -26,9 +27,8 @@ const createTable = (tableInfo) => {
           })),
         ],
         ...tableInfo.data.rows.map((row) =>
-          row.map((cell) => ({
-            
-            text: getCellValue(cell),
+          row.map((cell, index) => ({
+            text: getCellValue(cell, tableInfo.dataTypes ? tableInfo.dataTypes[index] : ""),
             style: "tableCell",
           }))
         ),
@@ -44,31 +44,21 @@ const createTable = (tableInfo) => {
   else return { title, table };
 };
 
-const getCellValue = (cell) => {
+const getCellValue = (cell, dataType) => {
   if (Array.isArray(cell.value)) {
     return cell.value.find((option) => option.isSelected).option;
+  } else if (dataType === "currency") {
+    return cell.value.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
+  } else if (dataType === "currency rounded") {
+    const roundedValue = Math.round(cell.value);
+    return "$" + roundedValue.toLocaleString("en-US");
+  } else if (dataType === "percent") {
+    return `${cell.value}%`;
   } else {
     return cell.value !== 0 ? cell.value : "";
-  }
-}
-
-function downloadCSV(csvContent) {
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  if (navigator.msSaveBlob) {
-    // IE 10+
-    navigator.msSaveBlob(blob, "export.csv");
-  } else {
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "export.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      console.error("Anchor element with 'download' attribute not supported in this browser.");
-    }
   }
 }
 
@@ -130,7 +120,7 @@ export default function PdfBuilder(data) {
         });
       }
     });
-    downloadCSV(csvContent);
+    <CSVDownloader csvContent={csvContent} />
   }
 
 }
