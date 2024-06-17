@@ -100,8 +100,8 @@ const SuggestedOrderList = () => {
     });
   };
 
-  const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID, fromDate, toDate) => {
-    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID ,vendorID, fromDate.toISOString().split('T')[0], toDate.toISOString().split('T')[0])
+  const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID ) => {
+    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
       setSuggestedOrders(data);
     }).catch((error) => {
@@ -121,21 +121,27 @@ const SuggestedOrderList = () => {
     setselectedUnitName(unitName);
     setSelectedUnit(unitID);
     setUnitShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, userID, unitID, selectedVendor, selectedFromDate, selectedToDate);
+    fetchSuggestedOrders(companyID, alignmentID, userID, unitID, selectedVendor);
   };
 
   const handleVendorSelection = (vendorName, vendorID) => {
     setselectedVendorName(vendorName);
     setSelectedVendor(vendorID);
     setVendorShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, userID, selectedUnit, vendorID, selectedFromDate, selectedToDate);
+    fetchSuggestedOrders(companyID, alignmentID, userID, selectedUnit, vendorID);
   };
 
- const handleDateSelection = (fromDate, toDate) => {
-    setSelectedFromDate(fromDate);
-    setSelectedToDate(toDate);
+ const handleDateSelection = () => {   
     setShowDateModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, userID, selectedUnit, selectedVendor, fromDate, toDate);
+    fetchSuggestedOrders(companyID, alignmentID, userID, selectedUnit, selectedVendor);
+  };
+
+  const handleFromDateChange = (fromDate) => {
+    setSelectedFromDate(fromDate);
+  };
+
+  const handleToDateChange = (toDate) => {
+    setSelectedToDate(toDate);
   };
 
   const handleCreateOrderClick = () => {    
@@ -209,6 +215,8 @@ const SuggestedOrderList = () => {
         modalOpen={showDateModal}
         isDateRang={true}
         handleDateSelection={handleDateSelection}
+        handleFromDateChange= {handleFromDateChange}
+        handleToDateChange= {handleToDateChange}
         selectedYear={selectedYear}
       />          
     </Styled.PageContainer>

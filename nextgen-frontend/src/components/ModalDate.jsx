@@ -207,7 +207,7 @@ const CalendarModal = ({
   };
   const handleOkButtonClick = () => {
     if (isDateRang) {
-      handleDateSelection(selectedDate, selectedDate); // Call function passed from PrepChart
+      handleDateSelection(selectedFromDate, selectedToDate); // Call function passed from PrepChart
     }
     handleClose();
   };
