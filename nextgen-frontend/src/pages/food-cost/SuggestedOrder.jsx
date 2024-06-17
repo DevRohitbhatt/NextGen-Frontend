@@ -143,7 +143,7 @@ export default function SuggestedOrder() {
           rows: [
             [
               {
-                value: response.defaultSafetyFactor,
+                value: response.data.defaultSafetyFactor,
                 cellType: "percent",
                 columnName: "Default Safety Factor",
                 handleOnChange: {},

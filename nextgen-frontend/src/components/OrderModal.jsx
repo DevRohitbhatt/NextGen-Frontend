@@ -131,6 +131,7 @@ const Rows = styled.div`
 `;
 
 const OrderModal = ({
+  companyID,
   unitData,
   unitID,
   unitName,
@@ -139,18 +140,18 @@ const OrderModal = ({
   handleUnitSelection,
   includeAreas = false,
   handleUnitSaveSelection,
-  Title,
+  title
 }) => {
-  const [unitsList, setUnitsList] = useState(unitData.units || []);
-  const [areasList, setAreasList] = useState(unitData.areas || []);
+  const [unitsList, setUnitsList] = useState([]);
+  const [areasList, setAreasList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [selectedUnits, setSelectedUnits] = useState([]);
-  const [selectedUnitName, setSelectedUnitName] = useState(unitName);
-  const [selectedUnit, setSelectedUnit] = useState(unitID);
+  const [selectedUnitName, setSelectedUnitName] = useState('');
+  const [selectedUnit, setSelectedUnit] = useState(null);
   const [selectedDates, setSelectedDates] = useState([new Date(), new Date()]);
   const [vendorsList, setVendorsList] = useState([]);
   const [errorMessage, setErrorMessage] = useState(
-    "There was an error trying to load the Suggested Order, please try again later."
+    'There was an error trying to load the Suggested Order, please try again later.'
   );
   const [isError, setIsError] = useState(false);
 
@@ -162,63 +163,52 @@ const OrderModal = ({
       setSelectedUnit(unitID);
       setSelectedUnits([{ id: unitID, name: unitName, isArea: false }]);
     } else {
-      console.log("No data found");
+      console.log('No data found');
     }
   }, [unitData, unitName, unitID]);
 
   useEffect(() => {
-    PopulateFilteredList(unitsList, areasList);
-    getVendors(1021);
+    populateFilteredList(unitsList, areasList);
+    fetchVendors();
   }, [unitsList, areasList, includeAreas]);
 
-  const getVendors = (companyID) => {
-    VendorAPI.VendorsAPI(companyID)
-      .then((response) => {
-        setVendorsList(response);
-      })
-      .catch((error) => {
-        setIsError(true);
-        if (error.response && error.response.status === 404) {
-          setErrorMessage("vendors not found for the given parameters.");
-        } else if (error.response && error.response.status === 403) {
-          setErrorMessage(
-            "Access denied. You do not have permission to view vendors."
-          );
-        } else {
-          setErrorMessage("An error occurred while getting vendors.");
-        }
-      });
+  const fetchVendors = async () => {
+    try {
+      const response = await VendorAPI.VendorsAPI(companyID);
+      setVendorsList(response);
+    } catch (error) {
+      setIsError(true);
+      if (error.response?.status === 404) {
+        setErrorMessage('Vendors not found for the given parameters.');
+      } else if (error.response?.status === 403) {
+        setErrorMessage('Access denied. You do not have permission to view vendors.');
+      } else {
+        setErrorMessage('An error occurred while getting vendors.');
+      }
+    }
   };
-  const PopulateFilteredList = (units, areas) => {
+
+  const populateFilteredList = (units, areas) => {
+    const unitListWithFlag = units.map((unit) => ({
+      id: unit.unitID,
+      name: unit.unitName,
+      isArea: false
+    }));
     if (includeAreas) {
       const areaListWithFlag = areas.map((area) => ({
         id: area.areaID,
         name: area.areaName,
-        isArea: true,
-      }));
-      const unitListWithFlag = units.map((unit) => ({
-        id: unit.unitID,
-        name: unit.unitName,
-        isArea: false,
+        isArea: true
       }));
       setFilteredList([...areaListWithFlag, ...unitListWithFlag]);
     } else {
-      const unitListWithFlag = units.map((unit) => ({
-        id: unit.unitID,
-        name: unit.unitName,
-        isArea: false,
-      }));
       setFilteredList(unitListWithFlag);
     }
   };
 
   const handleUnitSelectChange = (selectedOption) => {
-    const selectedUnitId = selectedOption.value;
-    setSelectedUnit(selectedUnitId);
+    setSelectedUnit(selectedOption.value);
     setSelectedUnitName(selectedOption.label);
-    const data = unitsList.filter(
-      (item) => item.id === parseInt(selectedUnitId, 10)
-    );
   };
 
   const handleSaveButtonClick = () => {
@@ -233,7 +223,7 @@ const OrderModal = ({
         .unitList.map((unit) => ({
           id: unit.unitID,
           name: unit.unitName,
-          isArea: false,
+          isArea: false
         }));
       areaUnits.unshift({ id, name, isArea });
       if (selectedUnits.some((unit) => unit.id === id)) {
@@ -244,14 +234,11 @@ const OrderModal = ({
       } else {
         setSelectedUnits([...selectedUnits, ...areaUnits]);
       }
-    } else if (selectedUnits.some((unit) => unit.id === id)) {
-      const newSelectedUnits = selectedUnits.filter((item) => item.id !== id);
-      setSelectedUnits(newSelectedUnits);
     } else {
-      setSelectedUnits([
-        ...selectedUnits,
-        { id: id, name: name, isArea: isArea },
-      ]);
+      const newSelectedUnits = selectedUnits.some((unit) => unit.id === id)
+        ? selectedUnits.filter((item) => item.id !== id)
+        : [...selectedUnits, { id, name, isArea }];
+      setSelectedUnits(newSelectedUnits);
     }
   };
 
@@ -261,63 +248,63 @@ const OrderModal = ({
     setSelectedUnits([{ id: unitID, name: unitName, isArea: false }]);
     handleClose();
   };
-console.log("Unit List",unitsList)
+
   return show ? (
     <ModalDialog>
       <ModalOverlay>
         <ModalContent>
           <ModalHeader>
-            {Title}
+            {title}
             <CloseButton onClick={handleClose}>
               <FaTimes className="close" />
             </CloseButton>
           </ModalHeader>
+
+          <ModalBody>
+            <PopupContainer>
+              <LeftSection>
+                <Rows>
+                  <Titles>Unit :</Titles>
+                  <Dropdown
+                    options={unitsList.map((unit) => ({
+                      label: unit.unitName,
+                      value: unit.unitID
+                    }))}
+                    onChange={handleUnitSelectChange}
+                  />
+                </Rows>
+                <Rows>
+                  <Titles>Select Vendors</Titles>
+                  <Dropdown
+                    options={vendorsList.map((vendor) => ({
+                      label: vendor.vendorName,
+                      value: vendor.vendorID
+                    }))}
+                  />
+                </Rows>
+                <Rows>
+                  <Titles>Delivery Date</Titles>
+                  <DateRangePicker
+                    selectedDates={selectedDates}
+                    onDateChange={setSelectedDates}
+                  />
+                </Rows>
+              </LeftSection>
+            </PopupContainer>
+          </ModalBody>
+
+          <ModalFooter>
+            <FooterButton onClick={handleSaveButtonClick}>Save</FooterButton>
+            <FooterButton onClick={handleCancelClick}>Cancel</FooterButton>
+          </ModalFooter>
         </ModalContent>
-
-        <ModalBody>
-          <PopupContainer>
-            <LeftSection>
-              <Rows>
-                <Titles>Unit :</Titles>
-                <Dropdown
-                  options={unitsList.map((unit) => ({
-                    Name: unit.unitName,
-                    value: unit.unitID,
-                  }))}
-                  onChange={handleUnitSelectChange}
-                />
-              </Rows>
-              <Rows>
-                <Titles>Select Vendors</Titles>
-                <Dropdown
-                  options={vendorsList.map((vendors) => ({
-                    Name: vendors.vendorName,
-                    value: vendors.vendorID,
-                  }))}
-                />
-              </Rows>
-              <Rows>
-                <Titles>Delivery Date</Titles>
-                <DateRangePicker
-                  selectedDates={selectedDates}
-                  onDateChange={setSelectedDates}
-                />
-              </Rows>
-            </LeftSection>
-          </PopupContainer>
-        </ModalBody>
-
-        <ModalFooter>
-          <FooterButton onClick={handleSaveButtonClick}>Save</FooterButton>
-          <FooterButton onClick={handleCancelClick}>Cancel</FooterButton>
-        </ModalFooter>
       </ModalOverlay>
     </ModalDialog>
   ) : null;
 };
 
 OrderModal.propTypes = {
-  unitData: PropTypes.array.isRequired,
+  unitData: PropTypes.object.isRequired,
   unitID: PropTypes.number.isRequired,
   unitName: PropTypes.string.isRequired,
   show: PropTypes.bool.isRequired,
@@ -325,7 +312,7 @@ OrderModal.propTypes = {
   handleUnitSelection: PropTypes.func.isRequired,
   includeAreas: PropTypes.bool,
   handleUnitSaveSelection: PropTypes.func,
-  Title: PropTypes.string,
+  title: PropTypes.string
 };
 
 export default OrderModal;
