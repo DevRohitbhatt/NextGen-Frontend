@@ -10,8 +10,8 @@ const MainContainer = styled.div`
 
 const DropdownButton = styled.button`
   border-radius: 20px;
-  border: 2px solid #f0f0f0;
-  background-color: transparent;
+  border: 2px solid #D3D3D3;
+  background-color: ${(props) => props.theme.listBackground};
   color: #00000094;
   padding: 10px 30px;
   cursor: pointer;
@@ -22,7 +22,8 @@ const DropdownButton = styled.button`
   white-space: nowrap;
   &:hover {
     border-color: ${(props) => props.theme.primary};
-  }
+  } 
+  
 `;
 
 const DropdownList = styled.ul`
@@ -39,6 +40,25 @@ const DropdownList = styled.ul`
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 10;
+  
+  &::-webkit-scrollbar {
+    background: #efefef;
+    width: 15px;
+    height: 15px;
+    border: 14px solid transparent;
+    outline: 0.25px solid transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb  {
+    background: #364790;
+    border-radius: 30px;
+    padding: 18px !important;
+    border: 2px solid #fff;
+    cursor: pointer;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #508cff;
+  }
 `;
 
 const DropdownItem = styled.li`
@@ -63,7 +83,7 @@ const DropdownArrow = styled.span`
   display: inline-block;
 `;
 
-const Dropdown = ({ options, selectedOption, onOptionChange }) => {
+const Dropdown = ({ options, selectedOption, onOptionChange,title }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -91,7 +111,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange }) => {
 
   return (
     <MainContainer ref={dropdownRef}>
-      <Label>Select Vendor(s)</Label>
+      <Label>{title}</Label>
       <DropdownButton onClick={toggleDropdown}>
         {selectedOption}
         <DropdownArrow isOpen={isOpen}>
@@ -122,7 +142,8 @@ Dropdown.propTypes = {
     })
   ).isRequired,
   selectedOption: PropTypes.string.isRequired,
-  onOptionChange: PropTypes.func,
+  onOptionChange: PropTypes.func.isRequired,
+  title:PropTypes.string
 };
 
 Dropdown.defaultProps = {

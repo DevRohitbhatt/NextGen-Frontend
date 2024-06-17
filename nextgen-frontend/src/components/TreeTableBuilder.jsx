@@ -136,7 +136,7 @@ const ExpandButton = styled.button`
   border-radius: 0px;
   width: 164px;
   margin-top: 18px;
-  mar &::after {
+ &::after {
     border: 0 solid transparent;
     box-sizing: border-box;
     content: "";

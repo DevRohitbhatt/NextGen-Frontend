@@ -40,4 +40,3 @@ export const SuggestedOrderAPI = {
 };
 
 const cancelApiObject = defineCancelApiObject(SuggestedOrderAPI);
-

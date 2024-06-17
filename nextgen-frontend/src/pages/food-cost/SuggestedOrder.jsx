@@ -450,6 +450,7 @@ export default function SuggestedOrder() {
               value: vendors.vendorID,
             }))}
             selectedOption={selectedVendorName}
+            title={"Vendor"}
           />
           <DateRangePicker
             selectedDates={selectedDates}
