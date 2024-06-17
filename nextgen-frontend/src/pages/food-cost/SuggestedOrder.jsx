@@ -114,7 +114,8 @@ export default function SuggestedOrder() {
         setIsLoading(false);
       }
     } else {
-      getOrderItem(companyID,selectedUnit,selectedVendor,fromDate,toDate,0);
+      setToDate(toDate.setDate(toDate.getDate() + 2));
+      getOrderItem(1021,87,1,fromDate,toDate,0);
     }
     setSaveIsVisible(saveSubmitStatus === 0 ? true : false);
     setSubmitIsVisible(saveSubmitStatus === 0 ? false : true);
@@ -155,6 +156,8 @@ export default function SuggestedOrder() {
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
+        setIsLoading(false);
+        setIsError(true);
       });
   };
 

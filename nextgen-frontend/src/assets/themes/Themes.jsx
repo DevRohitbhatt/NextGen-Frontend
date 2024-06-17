@@ -1,7 +1,7 @@
 export const themes = {
   default: {
-    primary: "#364790",
-    secondary: "#508BFF",
+    primary: "#AC162C",
+    secondary: "#828282",
     lightGrey: "#F0F0F0",
     success:"#2ecc71",
     error:"#e74c3c",

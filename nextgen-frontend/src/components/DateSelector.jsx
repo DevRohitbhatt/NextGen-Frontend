@@ -28,18 +28,18 @@ const DateValue = styled.div`
   }
 `;
 
-const DateSelector = ({ ToDate, FromDate, onClick, isDateRange }) => {
-  return (
-    <DateContainer onClick={onClick}>
-      <Label>Select Date</Label>
-      <DateValue>
-        {isDateRange
-          ? `${FromDate.toLocaleDateString()} - ${ToDate.toLocaleDateString()}`
-          : FromDate.toLocaleDateString()}
-      </DateValue>
-    </DateContainer>
-  );
-};
+// const DateSelector = ({ ToDate, FromDate, onClick, isDateRange }) => {
+//   return (
+//     <DateContainer onClick={onClick}>
+//       <Label>Select Date</Label>
+//       <DateValue>
+//         {isDateRange
+//           ? `${FromDate.toLocaleDateString()} - ${ToDate.toLocaleDateString()}`
+//           : FromDate.toLocaleDateString()}
+//       </DateValue>
+//     </DateContainer>
+//   );
+// };
 
 DateSelector.propTypes = {
   ToDate: PropTypes.instanceOf(Date),
@@ -48,9 +48,21 @@ DateSelector.propTypes = {
   onClick: PropTypes.func,
 };
 
-DateSelector.defaultProps = {
-  isDateRange: false,
-  onClick: () => {},
-};
-
-export default DateSelector;
+export default function DateSelector({ ToDate,FromDate ,onClick,isDateRange=false}) {
+  return (
+    <>
+    {!isDateRange ? (
+          <DateContainer onClick={onClick} className="date-selector">
+          <Label>Select Date</Label>
+          <DateValue>{FromDate.toLocaleDateString()}</DateValue>
+        </DateContainer>
+      ) : (
+     <DateContainer onClick={onClick} className="date-selector">
+      <Label>Select Date</Label>
+      <DateValue>{FromDate.toLocaleDateString() +" - "+ ToDate.toLocaleDateString()}</DateValue>
+    </DateContainer>
+      )}
+    </>
+   
+  );
+}

@@ -27,7 +27,7 @@ function SearchBar({ list, onSearch }) {
       type="text"
       placeholder={placeholder}
       value={searchTerm}
-      className="Search"
+      className="Search search-bar"
       onChange={handleChange}
       onClick={handleChange}
       onBlur={handleBlur}

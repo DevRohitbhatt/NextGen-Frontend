@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import  { FaFileExcel, FaFileCsv, FaFilePdf, FaRegSave } from "react-icons/fa";
-import { LuPrinter,LuSaveAll } from "react-icons/lu";
+import { MdQuestionMark } from "react-icons/md";
+import { LuPrinter, LuSaveAll } from "react-icons/lu";
 import PropTypes from "prop-types";
 
 const ExportOptionsContainer = styled.div`
@@ -70,6 +71,12 @@ const SubmitIcon = styled(LuSaveAll)`
   height: 40px;
 `;
 
+const HelpIcon = styled(MdQuestionMark)`
+  color: ${(props) => props.theme.primary};
+  width: 40px;
+  height: 40px;
+`;
+
 ExportOptions.propTypes = {
   includeExcel: PropTypes.bool,
   includePDF: PropTypes.bool,
@@ -85,11 +92,26 @@ ExportOptions.propTypes = {
   handleSubmitClick: PropTypes.func,
 };
 
-export default function ExportOptions({ includeExcel, includePDF, includeCSV, includePrint, includeSave,includeSubmit, handlePDFClick, handleExcelClick, handleCSVClick, handlePrintClick, handleSaveClick,handleSubmitClick }) {
+export default function ExportOptions({ 
+  includeExcel,
+  includePDF, 
+  includeCSV, 
+  includePrint, 
+  includeSave, 
+  includeHelp,
+  includeSubmit, 
+  handlePDFClick, 
+  handleExcelClick, 
+  handleCSVClick, 
+  handlePrintClick, 
+  handleSaveClick, 
+  handleHelpClick, 
+  handleSubmitClick
+  }) {
 
   return (
     <>
-      <ExportOptionsContainer>
+      <ExportOptionsContainer className="export-options">
         {includeExcel ? (
           <ExportOption>
             <OptionImage onClick={handleExcelClick}>
@@ -119,16 +141,23 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
           </ExportOption>
         ) : null}
         {includeSave ? (
-          <ExportOption title="Save">
+          <ExportOption className="save-option">
             <OptionImage onClick={handleSaveClick}>
               <SaveIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
         {includeSubmit ? (
-          <ExportOption title="Submit">
+          <ExportOption className="submit-option">
             <OptionImage onClick={handleSubmitClick}>
               <SubmitIcon />
+            </OptionImage>
+          </ExportOption>
+        ) : null}
+        {includeHelp ? (
+          <ExportOption className="help-option">
+            <OptionImage onClick={handleHelpClick}>
+              <HelpIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
