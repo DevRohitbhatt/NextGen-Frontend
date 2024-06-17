@@ -11,7 +11,7 @@
 #root {
   width: 100%;
   margin: auto;
-  padding: 2rem;
+  padding: 2rem 0px;
 }
 
 a {
@@ -467,6 +467,15 @@ button.react-calendar__tile.react-calendar__year-view__months__month {
 .drop-highlight {
   border-top: 1px solid #364790;
 }
+.Total-row {
+  background: #efefef;
+  font-weight: bold;
+  padding-left: 5px;
+  width: auto;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000 !important;
+}
+
 @keyframes moveUpDown {
   0% {
     transform: translateY(0);

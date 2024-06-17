@@ -1,4 +1,5 @@
 import pdfMake from 'pdfmake/build/pdfmake';
+import CSVDownloader from '../functions/CSVDownloader';
 // import pdfFonts from 'pdfmake/build/vfs_fonts';
 // pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -108,4 +109,18 @@ export default function PdfBuilder(data) {
   else if (data.exportType === "print") {
     pdfMake.createPdf(docDefinition).print();
   }
+  else if (data.exportType === "csv") {
+    let csvContent = "";
+    data.body.forEach(section => {
+      if (section.type === "table") {
+        const tableInfo = section.data;
+        csvContent += tableInfo.columnHeaders.join(",") + "\n";
+        tableInfo.rows.forEach(row => {
+          csvContent += row.map(cell => getCellValue(cell)).join(",") + "\n";
+        });
+      }
+    });
+    <CSVDownloader csvContent={csvContent} />
+  }
+
 }
