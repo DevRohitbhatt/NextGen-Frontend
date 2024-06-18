@@ -15,6 +15,15 @@ export const SuggestedOrderAPI = {
         ? cancelApiObject[this.getOrderItem.name].handleRequestCancellation().signal : undefined });
     return response.data;
   },
+  getOrderList: async function (companyID, alignmentID, memberID, vendorID, fromDate, toDate,  cancel = false) {
+    const response = await api.request({
+      method: "GET",
+      url: `/api/order/GetOrderList?companyId=${companyID}&alignmentId=${alignmentID}&memberId=${memberID}&vendorID=${vendorID}&fromDate=${fromDate}&toDate=${toDate}`,
+      signal: cancel ? cancelApiObject[this.getbyid.name].handleRequestCancellation().signal : undefined,
+    });
+
+    return response.data;
+  },
   save: async function (data, cancel = false) {
     const response = await api.request({
       method: "POST",

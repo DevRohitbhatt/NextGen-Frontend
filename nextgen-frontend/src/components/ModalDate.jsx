@@ -159,6 +159,7 @@ const CalendarModal = ({
   const [CalendarTable, setCalendarTable] = useState({
     columnHeaders: ["Period", "From", "To"],
     columnWidths: "1.5fr 2fr 2fr",
+    dataTypes : ["string", "string", "string"],  
     rows: [],
     width: "92%",
   });
@@ -205,8 +206,8 @@ const CalendarModal = ({
     setShowCalendar(!showCalendar);
   };
   const handleOkButtonClick = () => {
-    if (!isDateRang) {
-      handleDateSelection(selectedDate, selectedDate); // Call function passed from PrepChart
+    if (isDateRang) {
+      handleDateSelection(selectedFromDate, selectedToDate); // Call function passed from PrepChart
     }
     handleClose();
   };
@@ -265,6 +266,7 @@ const CalendarModal = ({
                     <Table
                       columnHeaders={CalendarTable.columnHeaders}
                       columnwidths={CalendarTable.columnWidths}
+                      dataTypes={CalendarTable.dataTypes}
                       rows={CalendarTable.rows}
                       width={CalendarTable.width}
                       className="CalendarTable"

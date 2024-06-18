@@ -1,0 +1,18 @@
+{
+    "routes": [
+        {
+            "route": "/PrepChart"
+        },
+        {
+            "route": "/PrepChartTemplate"
+        },
+        {
+            "route": "/NextGenFrontEnd/*",
+            "rewrite": "/"
+        }
+    ],
+    "navigationFallback": {
+        "rewrite": "/index.html",
+        "exclude": ["*.{css,scss,js,png,gif,ico,jpg,svg}"]
+    }
+}

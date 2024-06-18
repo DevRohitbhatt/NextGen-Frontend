@@ -262,6 +262,7 @@ svg.clearIcone {
   z-index: 9 !important;
 }
 .CalendarTable {
+  border: none !important;
   border-radius: 4px !important;
   margin-top: 14px;
   margin-bottom: 1rem;

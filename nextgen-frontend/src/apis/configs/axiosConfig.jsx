@@ -6,7 +6,6 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     'Allow-Control-Allow-Origin': '*',
-    'Content-Type': 'application/json'
   },
   'Content-Type': 'application/json',
   baseURL: "https://www7.qsronline.com/NextGenAPI/",
