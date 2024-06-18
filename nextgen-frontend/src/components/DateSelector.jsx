@@ -42,10 +42,10 @@ const DateValue = styled.div`
 // };
 
 DateSelector.propTypes = {
-  toDate: PropTypes.instanceOf(Date),
-  fromDate: PropTypes.instanceOf(Date),
-  isDateRange:PropTypes.bool,
-  onClick: PropTypes.func
+  ToDate: PropTypes.instanceOf(Date),
+  FromDate: PropTypes.instanceOf(Date),
+  isDateRange: PropTypes.bool,
+  onClick: PropTypes.func,
 };
 
 export default function DateSelector({ toDate,fromDate ,onClick,isDateRange=false}) {

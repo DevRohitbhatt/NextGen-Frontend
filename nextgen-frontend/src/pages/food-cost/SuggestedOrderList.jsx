@@ -63,13 +63,13 @@ const SuggestedOrderList = () => {
         fetchData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess, parameters.User_DefaultUnitID);
       } else {
         
-        // console.log("testing mode");
-        // setCompanyID(1021)
-        // setAlignmentID(1110)
-        // setUserID(5199)
-        // setIsActive(0)
-        // setSelectedUnit(0)
-        // fetchData(1021, 1110, 5199, 87)
+        console.log("testing mode");
+        setCompanyID(1021)
+        setAlignmentID(1110)
+        setUserID(5199)
+        setIsActive(0)
+        setSelectedUnit(0)
+        fetchData(1021, 1110, 5199, 87)
       }
     }
     else {      
