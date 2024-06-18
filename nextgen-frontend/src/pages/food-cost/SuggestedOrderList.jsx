@@ -60,30 +60,35 @@ const SuggestedOrderList = () => {
       parameters ? setUserID(parameters.User_GroupOrUnitAccess) : setUserID();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
-        fetchData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
+        fetchData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess, parameters.User_DefaultUnitID);
       } else {
-        setErrorMessage("No Unit Selected, Please select a unit.");
-        setIsError(true);
-        setIsLoading(false);
+        
+        // console.log("testing mode");
+        // setCompanyID(1021)
+        // setAlignmentID(1110)
+        // setUserID(5199)
+        // setIsActive(0)
+        // setSelectedUnit(0)
+        // fetchData(1021, 1110, 5199, 87)
       }
     }
     else {      
+      console.log("testing")
       setErrorMessage("There was an issue loading your orders, please try again later.");
-      //fetchData(1021, 1110, 5199)
     }
 
   }, []);
 
-  const fetchData = (companyID, alignmentID, userID) => {
+  const fetchData = (companyID, alignmentID, groupOrUnitAccess, unitID) => {
     setIsLoading(true);    
-    fetchUnits(companyID, alignmentID, userID);
+    fetchUnits(companyID, alignmentID, groupOrUnitAccess);
     fetchVendors(companyID);
-    fetchSuggestedOrders(companyID, alignmentID, userID, selectedVendor, selectedFromDate, selectedToDate);
+    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccess, unitID, selectedVendor);
     setIsLoading(false); 
   };
 
-  const fetchUnits =  (companyID, alignmentID, userID) => {
-    UnitsAndAreasAPI.getbyid(companyID, alignmentID, userID)
+  const fetchUnits =  (companyID, alignmentID, groupOrUnitAccess) => {
+    UnitsAndAreasAPI.getbyid(companyID, alignmentID, groupOrUnitAccess)
     .then((data) => {      
       setUnitsList(data.data);
     }).catch((error) => {
@@ -92,6 +97,7 @@ const SuggestedOrderList = () => {
   };
 
   const fetchVendors =  (companyID) => {
+    console.log("vendors")
     VendorAPI.getVendorsByCompany(companyID)
     .then((data) => {
       setVendorsList(data);
@@ -100,8 +106,8 @@ const SuggestedOrderList = () => {
     });
   };
 
-  const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID ) => {
-    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
+  const fetchSuggestedOrders = (companyID, alignmentID, memberID, unitID, vendorID) => {
+    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID, unitID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
       setSuggestedOrders(data);
     }).catch((error) => {

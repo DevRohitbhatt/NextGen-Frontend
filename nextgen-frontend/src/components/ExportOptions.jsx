@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import  { FaFileExcel, FaFileCsv, FaFilePdf, FaRegSave } from "react-icons/fa";
 import { MdQuestionMark } from "react-icons/md";
-import { LuPrinter } from "react-icons/lu";
+import { LuPrinter, LuSaveAll } from "react-icons/lu";
 import PropTypes from "prop-types";
 
 const ExportOptionsContainer = styled.div`
@@ -65,6 +65,11 @@ const SaveIcon = styled(FaRegSave)`
   width: 40px;
   height: 40px;
 `;
+const SubmitIcon = styled(LuSaveAll)`
+  color: ${(props) => props.theme.primary};
+  width: 40px;
+  height: 40px;
+`;
 
 const HelpIcon = styled(MdQuestionMark)`
   color: ${(props) => props.theme.primary};
@@ -78,14 +83,31 @@ ExportOptions.propTypes = {
   includeCSV: PropTypes.bool,
   includePrint: PropTypes.bool,
   includeSave: PropTypes.bool,
+  includeSubmit: PropTypes.bool,
   handlePDFClick: PropTypes.func,
   handleExcelClick: PropTypes.func,
   handleCSVClick: PropTypes.func,
   handlePrintClick: PropTypes.func,
   handleSaveClick: PropTypes.func,
+  handleSubmitClick: PropTypes.func,
 };
 
-export default function ExportOptions({ includeExcel, includePDF, includeCSV, includePrint, includeSave, includeHelp, handlePDFClick, handleExcelClick, handleCSVClick, handlePrintClick, handleSaveClick, handleHelpClick}) {
+export default function ExportOptions({ 
+  includeExcel,
+  includePDF, 
+  includeCSV, 
+  includePrint, 
+  includeSave, 
+  includeHelp,
+  includeSubmit, 
+  handlePDFClick, 
+  handleExcelClick, 
+  handleCSVClick, 
+  handlePrintClick, 
+  handleSaveClick, 
+  handleHelpClick, 
+  handleSubmitClick
+  }) {
 
   return (
     <>
@@ -106,7 +128,7 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
         ) : null}
         {includeCSV ? (
           <ExportOption>
-            <OptionImage>
+            <OptionImage onClick={handleCSVClick}>
               <CSVIcon />
             </OptionImage>
           </ExportOption>
@@ -122,6 +144,13 @@ export default function ExportOptions({ includeExcel, includePDF, includeCSV, in
           <ExportOption className="save-option">
             <OptionImage onClick={handleSaveClick}>
               <SaveIcon />
+            </OptionImage>
+          </ExportOption>
+        ) : null}
+        {includeSubmit ? (
+          <ExportOption className="submit-option">
+            <OptionImage onClick={handleSubmitClick}>
+              <SubmitIcon />
             </OptionImage>
           </ExportOption>
         ) : null}

@@ -116,7 +116,12 @@ const TableComponent = ({ data, headers, itemsPerPageOptions = [5, 10, 20] }) =>
           </tr>
         </thead>
         <tbody>
-          {sortedData()?.slice(startIndex, endIndex).map((row, rowIndex) => (
+          {sortedData()?.length === 0 ? (
+            <TableRow>
+              <td colSpan={headers.length} style={{ textAlign: 'center' }}>No data found for the given parameters.</td>
+            </TableRow>
+          ) : 
+          sortedData()?.slice(startIndex, endIndex).map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               {headers.map((header, cellIndex) => (
                 <Cell

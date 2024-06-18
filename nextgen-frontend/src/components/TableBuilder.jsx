@@ -6,6 +6,7 @@ import { InventoryItem } from "../components/DraggableInventoryItem.jsx";
 import { propTypes } from "react-bootstrap/esm/Image.js";
 import { column } from "stylis";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
+import TreeTable from "../components/TreeTableBuilder.jsx";
 import Tooltip from "../components/ToolTip.jsx";
 import { FcInfo } from "react-icons/fc";
 
@@ -87,8 +88,8 @@ const TableHeader = styled.div`
 `;
 
 const TableHeaderCell = styled.div`
-  font-weight: bold;
-  font-size: 1.2em;
+  font-weight: 500;
+  font-size: 14px;
   height: 44px;
   border-bottom: ${(props) =>
     props.$useTableRows ? "none" : "2px solid " + props.theme.primary};
@@ -96,12 +97,6 @@ const TableHeaderCell = styled.div`
   text-align: ${(props) => (props.columntype === "number" ? "center" : "left")};
   display: ${(props) => (props.$isSorting ? "flex" : "block")};
   
-`;
-
-const TableRow = styled.div`
-  width: 100%;
-  border-bottom: 1px solid ${(props) => props.theme.lightGrey};
-  padding: 10px 0;
 `;
 
 const IconContainer = styled.div`
@@ -146,8 +141,7 @@ if (isSorting) {
       setSortColumnIndex(index);
     }
   };
-
-  return (
+   return (
     <Container width={width} height={height}>
       <Table
         width={width}
@@ -236,6 +230,7 @@ if (isSorting) {
                 columnName={cell.columnName}
                 handleInputCellChange={handleInputCellChange}
                 handleDropdownChange={handleDropdownChange}
+                isTotal={cell.isTotal}
               />
             ))
           );
