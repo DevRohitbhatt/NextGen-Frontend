@@ -3,7 +3,8 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import { FaTimes } from "react-icons/fa";
 import { ModalHeader } from "react-bootstrap";
-import SearchUnit from "./SearchUnit";
+import SearchUnit from "./ModalSearchBar";
+import ModalSearchBar from "./ModalSearchBar";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -24,7 +25,7 @@ const ModalContent = styled.div`
   // padding: 20px;
   // border-radius: 8px;
   // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  background: #364790;
+  background: ${(props) => props.theme.primary};
   color: #fff;
   padding: 10px 14px;
 `;
@@ -51,7 +52,7 @@ const ModalDialog = styled.div`
   z-index: 9;
 `;
 const FooterButton = styled.button`
-  box-shadow: inset 0 0 0 2px #364790;
+  box-shadow: inset 0 0 0 2px ${(props) => props.theme.primary};
   transition: color 0.25s 0.0833333333s;
   position: relative;
   border-radius: 0px;
@@ -100,7 +101,7 @@ const FooterButton = styled.button`
   &:hover {
     border-color: transparent;
     color: #fff;
-    background: #364790;
+    background: ${(props) => props.theme.primary};
   }
 `;
 const ModalFooter = styled.div`
@@ -139,7 +140,7 @@ const RightUnitList = styled.div`
   min-height: 24px;
 `;
 const Span = styled.span`
-  background: #364790;
+  background: ${(props) => props.theme.primary};
   display: block;
   text-align: center;
   color: #fff;
@@ -154,6 +155,29 @@ const UnitContainer = styled.div`
   margin: 10px 0px;
   overflow-y: scroll;
   height: 233px;
+
+  &::-webkit-scrollbar {
+    background: #ffffff;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    border: 14px solid #fff;
+    outline: 0.25px solid #808285;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${(props) => props.theme.primary};
+    border-radius: 30px;
+    padding: 18px !important;
+    border: 2px solid #fff;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${(props) => props.theme.secondary};
+  }  
 `;
 
 const UnitList = styled.ul`
@@ -166,7 +190,7 @@ const UnitListItem = styled.li`
   padding: 4px 10px 4px 10px;
   cursor: pointer;
   border-bottom: 0.25px solid ${(props) => (props.$isArea ? "#fff" : props.theme.lightGrey)};
-  background: ${(props) => (props.$isActive ? "#364790" : (props.$isArea ? props.theme.lightGrey : "#fff"))};
+  background: ${(props) => (props.$isActive ? props.theme.primary : (props.$isArea ? props.theme.lightGrey : "#fff"))};
   color: ${(props) => (props.$isActive ? "#fff" :  "#000")};
 `;
 
@@ -315,11 +339,11 @@ const UnitModal = ({
               <LeftUnitList>
                 <label>Filter</label>
                 <InputGroup>
-                  <SearchUnit
+                  <ModalSearchBar
                     onSearch={(keyword) => SearchUnitItem(keyword)}
                   />
                 </InputGroup>
-                <UnitContainer className="unitList">
+                <UnitContainer >
                   {isMultiUnit ? (
                     <UnitList value={selectedUnit} onClick={handleUnitSelectChange}>
                       {filteredList.map((item, index) => (

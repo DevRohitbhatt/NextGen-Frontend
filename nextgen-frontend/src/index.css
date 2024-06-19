@@ -225,15 +225,7 @@ input.Search::placeholder {
   background: #508bff;
 }
 
-.active {
-  background: #364790;
-  color: #fff;
-}
-.active:hover
-{
-  background: #364790 !important;
-  color: #fff !important;
-}
+
 .btnOuter:hover .btn-save {
   color: white !important;
 }

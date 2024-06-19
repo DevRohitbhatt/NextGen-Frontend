@@ -2,19 +2,22 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import { FaTimes } from "react-icons/fa";
-import { ModalHeader } from "react-bootstrap";
 import Dropdown from "../components/DropDown";
 import DateRangePicker from "../components/DateRange";
-import { VendorAPI } from "../apis/food-cost/VendorAPI";
+import { useNavigate } from 'react-router-dom';
+import VendorSelector from "./VendorSelector";
+import VendorModal from "./VendorModal";
+import UnitSelector from "./UnitSelector";
+import UnitModal from "./UnitModal";
 
 const ModalOverlay = styled.div`
   position: fixed;
-  width: 500px;
+  width: 600px;
   height: auto;
   background-color: #fff;
   display: block;
   z-index: 9;
-  border-radius: 8px;
+  border-radius: 4px;
   box-shadow: 0px 0px 10px #00000047;
   overflow: hidden;
   left: 38%;
@@ -22,9 +25,14 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background: #364790;
+`;
+
+const ModalHeader = styled.div`
+  background-color: ${(props) => props.theme.primary};
   color: #fff;
-  padding: 10px 14px;
+  padding: 10px;
+  font-weight: 650;
+  font-size: 15px;
 `;
 
 const CloseButton = styled.button`
@@ -32,8 +40,8 @@ const CloseButton = styled.button`
   top: 6px;
   right: 12px;
   background-color: transparent;
-  cursor: pointer;
   color: #fff;
+  cursor: pointer;
   border: 0.25px solid #fff;
   padding: 3px;
   border-radius: 0px;
@@ -51,15 +59,25 @@ const ModalDialog = styled.div`
 `;
 
 const FooterButton = styled.button`
-  box-shadow: inset 0 0 0 2px #364790;
+  box-shadow: inset 0 0 0 2px ${(props) => props.theme.primary};
   transition: color 0.25s 0.0833333333s;
   position: relative;
   border-radius: 0px;
   width: 110px;
-  background: #efefef;
-  color: #364790;
 
-  &::after,
+  &::after {
+    border: 0 solid transparent;
+    box-sizing: border-box;
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: 0;
+    right: 0;
+    border-top-width: 2px;
+    border-right-width: 2px;
+  }
   &::before {
     border: 0 solid transparent;
     box-sizing: border-box;
@@ -70,34 +88,29 @@ const FooterButton = styled.button`
     height: 0;
     bottom: 0;
     right: 0;
-  }
-
-  &::after {
-    border-top-width: 2px;
-    border-right-width: 2px;
-  }
-
-  &::before {
     border-bottom-width: 2px;
     border-left-width: 2px;
   }
-
-  &:hover::after,
-  &:hover::before {
+  &:hover::after {
     border-color: #fff;
     transition: border-color 0s, width 0.25s, height 0.25s;
     width: 100%;
     height: 100%;
     transition-delay: 0s, 0.25s, 0s;
   }
-
+  &:hover::before {
+    border-color: #fff;
+    transition: border-color 0s, width 0.25s, height 0.25s;
+    width: 100%;
+    height: 100%;
+    transition-delay: 0s, 0s, 0.25s;
+  }
   &:hover {
     border-color: transparent;
     color: #fff;
-    background: #364790;
+    background: ${(props) => props.theme.primary};
   }
 `;
-
 const ModalFooter = styled.div`
   background: #efefef;
   display: flex;
@@ -105,7 +118,6 @@ const ModalFooter = styled.div`
   gap: 11px;
   padding: 0.75rem;
 `;
-
 const ModalBody = styled.div`
   padding: 0px 14px;
 `;
@@ -128,11 +140,33 @@ const Titles = styled.span`
 
 const Rows = styled.div`
   display: flex;
+  margin: 10px;
+  align-items: center;
+`;
+
+const Select = styled.select`
+  width: 75%;
+  padding: 8px 10px;
+  border: 2px solid ${(props) => props.theme.lightGrey};
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+
+  &:focus {
+    outline: none;
+    border: 2px solid ${(props) => props.theme.primary};
+  }
+
+`;
+
+const Option = styled.option`
+  
 `;
 
 const OrderModal = ({
   companyID,
   unitData,
+  vendorData,
   unitID,
   unitName,
   show,
@@ -148,12 +182,16 @@ const OrderModal = ({
   const [selectedUnits, setSelectedUnits] = useState([]);
   const [selectedUnitName, setSelectedUnitName] = useState('');
   const [selectedUnit, setSelectedUnit] = useState(null);
+  const [selectedVendor, setSelectedVendor] = useState(0);
+  const [selectedVendorName, setSelectedVendorName] = useState("No Vendor Selected");
   const [selectedDates, setSelectedDates] = useState([new Date(), new Date()]);
-  const [vendorsList, setVendorsList] = useState([]);
   const [errorMessage, setErrorMessage] = useState(
     'There was an error trying to load the Suggested Order, please try again later.'
   );
   const [isError, setIsError] = useState(false);
+  const [showVendorModal, setVendorShowModal] = useState(false);
+  const [showUnitModal, setUnitShowModal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (unitData && unitData.units && unitData.areas) {
@@ -169,24 +207,7 @@ const OrderModal = ({
 
   useEffect(() => {
     populateFilteredList(unitsList, areasList);
-    fetchVendors();
-  }, [unitsList, areasList, includeAreas]);
-
-  const fetchVendors = async () => {
-    try {
-      const response = await VendorAPI.VendorsAPI(companyID);
-      setVendorsList(response);
-    } catch (error) {
-      setIsError(true);
-      if (error.response?.status === 404) {
-        setErrorMessage('Vendors not found for the given parameters.');
-      } else if (error.response?.status === 403) {
-        setErrorMessage('Access denied. You do not have permission to view vendors.');
-      } else {
-        setErrorMessage('An error occurred while getting vendors.');
-      }
-    }
-  };
+  }, []);
 
   const populateFilteredList = (units, areas) => {
     const unitListWithFlag = units.map((unit) => ({
@@ -212,34 +233,33 @@ const OrderModal = ({
   };
 
   const handleSaveButtonClick = () => {
-    handleUnitSaveSelection(selectedUnits);
-    handleClose();
+    
   };
 
-  const handleUnitItemClick = (id, name, isArea) => {
-    if (isArea) {
-      let areaUnits = areasList
-        .find((area) => area.areaID === id)
-        .unitList.map((unit) => ({
-          id: unit.unitID,
-          name: unit.unitName,
-          isArea: false
-        }));
-      areaUnits.unshift({ id, name, isArea });
-      if (selectedUnits.some((unit) => unit.id === id)) {
-        const newSelectedUnits = selectedUnits.filter(
-          (unit) => !areaUnits.some((areaUnit) => areaUnit.id === unit.id)
-        );
-        setSelectedUnits(newSelectedUnits);
-      } else {
-        setSelectedUnits([...selectedUnits, ...areaUnits]);
+  const handleUnitItemClick = (name, id) => {
+    console.log("testing")
+    setSelectedUnit(id);
+    setSelectedUnitName(name);
+  };
+
+  const handleVendorChange = (newVendorName, newVendorID) => {
+    setSelectedVendor(newVendorID);
+    setSelectedVendorName(newVendorName)
+  };
+
+  const handleNextButtonClick = () => {
+    console.log(selectedUnit, selectedVendor, selectedVendorName, selectedDates), 
+    navigate('/SuggestedOrder', {
+      state: {
+        company: companyID,
+        unit: selectedUnit,
+        unitName: selectedUnitName,
+        vendorID: selectedVendor,
+        vendorName: selectedVendorName,
+        dates: selectedDates
       }
-    } else {
-      const newSelectedUnits = selectedUnits.some((unit) => unit.id === id)
-        ? selectedUnits.filter((item) => item.id !== id)
-        : [...selectedUnits, { id, name, isArea }];
-      setSelectedUnits(newSelectedUnits);
-    }
+    });
+    handleClose();
   };
 
   const handleCancelClick = () => {
@@ -264,22 +284,39 @@ const OrderModal = ({
             <PopupContainer>
               <LeftSection>
                 <Rows>
-                  <Titles>Unit :</Titles>
-                  <Dropdown
-                    options={unitsList.map((unit) => ({
-                      label: unit.unitName,
-                      value: unit.unitID
-                    }))}
-                    onChange={handleUnitSelectChange}
+                  <Titles>Select Unit</Titles>
+                  <UnitSelector
+                    unitID={selectedUnit}
+                    unitName={selectedUnitName}
+                    setUnitName={setSelectedUnitName}
+                    onClick={() => setUnitShowModal(true)}
+                    formVersion={true}
+                  />
+                  <UnitModal
+                    show={showUnitModal}
+                    handleClose={() => setUnitShowModal(false)}
+                    handleUnitSelection={handleUnitItemClick}
+                    unitData={unitData}
+                    unitID={selectedUnit}
+                    unitName={selectedUnitName}
                   />
                 </Rows>
                 <Rows>
-                  <Titles>Select Vendors</Titles>
-                  <Dropdown
-                    options={vendorsList.map((vendor) => ({
-                      label: vendor.vendorName,
-                      value: vendor.vendorID
-                    }))}
+                  <Titles>Select Vendor</Titles>
+                  <VendorSelector
+                    vendorID = {selectedVendor}
+                    vendorName = {selectedVendorName}
+                    setVendorName={setSelectedVendorName}
+                    onClick={() => setVendorShowModal(true)}
+                    formVersion={true}
+                  />
+                  <VendorModal
+                    show={showVendorModal}
+                    handleClose={() => setVendorShowModal(false)}
+                    handleVendorSelection={handleVendorChange}
+                    vendorData={vendorData}
+                    vendorID={selectedVendor}
+                    vendorName={selectedVendorName}
                   />
                 </Rows>
                 <Rows>
@@ -294,7 +331,7 @@ const OrderModal = ({
           </ModalBody>
 
           <ModalFooter>
-            <FooterButton onClick={handleSaveButtonClick}>Save</FooterButton>
+            <FooterButton onClick={handleNextButtonClick}>Next</FooterButton>
             <FooterButton onClick={handleCancelClick}>Cancel</FooterButton>
           </ModalFooter>
         </ModalContent>
@@ -304,7 +341,6 @@ const OrderModal = ({
 };
 
 OrderModal.propTypes = {
-  unitData: PropTypes.object.isRequired,
   unitID: PropTypes.number.isRequired,
   unitName: PropTypes.string.isRequired,
   show: PropTypes.bool.isRequired,

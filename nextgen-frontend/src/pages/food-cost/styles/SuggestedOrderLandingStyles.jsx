@@ -7,10 +7,8 @@ export const UnloadedMessage = styled.div`
   text-align: center;
 `;
 
-export const ButtonContainer = styled.div`
-  margin-left: auto;
-  display: flex;
-  justify-content: end;
+export const Buttonontainer = styled.div`
+  width: 100%;
   position: relative;
 `;
 
@@ -18,7 +16,12 @@ export const Button = styled.button`
   background-color: #fff;
   border-radius: 5px;
   border-color: #0000FF;
+  float:right;
   cursor: pointer;
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
 `;
 
 export const PageContainer = styled.div`

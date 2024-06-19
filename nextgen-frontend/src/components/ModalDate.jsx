@@ -31,7 +31,7 @@ const ModalContent = styled.div`
   // padding: 20px;
   // border-radius: 8px;
   // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  background: #364790;
+  background: ${(props) => props.theme.primary};
   color: #fff;
   padding: 10px 14px;
 `;
@@ -58,7 +58,7 @@ const ModalDialog = styled.div`
   z-index: 9;
 `;
 const FooterButton = styled.button`
-  box-shadow: inset 0 0 0 2px #364790;
+  box-shadow: inset 0 0 0 2px ${(props) => props.theme.primary};
   transition: color 0.25s 0.0833333333s;
   position: relative;
   border-radius: 0px;
@@ -107,7 +107,7 @@ const FooterButton = styled.button`
   &:hover {
     border-color: transparent;
     color: #fff;
-    background: #364790;
+    background: ${(props) => props.theme.primary};
   }
 `;
 const ModalFooter = styled.div`

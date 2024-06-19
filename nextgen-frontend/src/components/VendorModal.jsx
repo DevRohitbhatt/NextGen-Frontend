@@ -4,6 +4,8 @@ import styled from "styled-components";
 import { FaTimes } from "react-icons/fa";
 import { ModalHeader } from "react-bootstrap";
 import SearchVendor from "./SearchVendor";
+import SearchUnit from "./ModalSearchBar";
+import ModalSearchBar from "./ModalSearchBar";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -24,7 +26,7 @@ const ModalContent = styled.div`
   // padding: 20px;
   // border-radius: 8px;
   // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  background: #364790;
+  background: ${(props) => props.theme.primary};
   color: #fff;
   padding: 10px 14px;
 `;
@@ -51,7 +53,7 @@ const ModalDialog = styled.div`
   z-index: 9;
 `;
 const FooterButton = styled.button`
-  box-shadow: inset 0 0 0 2px #364790;
+  box-shadow: inset 0 0 0 2px ${(props) => props.theme.primary};
   transition: color 0.25s 0.0833333333s;
   position: relative;
   border-radius: 0px;
@@ -100,7 +102,7 @@ const FooterButton = styled.button`
   &:hover {
     border-color: transparent;
     color: #fff;
-    background: #364790;
+    background: ${(props) => props.theme.primary};
   }
 `;
 const ModalFooter = styled.div`
@@ -139,7 +141,7 @@ const RightVendorList = styled.div`
   min-height: 24px;
 `;
 const Span = styled.span`
-  background: #364790;
+  background: ${(props) => props.theme.primary};
   display: block;
   text-align: center;
   color: #fff;
@@ -166,7 +168,7 @@ const VendorListItem = styled.li`
   padding: 4px 10px 4px 10px;
   cursor: pointer;
   border-bottom: 0.25px solid ${(props) => (props.$isArea ? "#fff" : props.theme.lightGrey)};
-  background: ${(props) => (props.$isActive ? "#364790" : (props.$isArea ? props.theme.lightGrey : "#fff"))};
+  background: ${(props) => (props.$isActive ? props.theme.primary : (props.$isArea ? props.theme.lightGrey : "#fff"))};
   color: ${(props) => (props.$isActive ? "#fff" :  "#000")};
 `;
 
@@ -290,11 +292,11 @@ const VendorModal = ({
               <LeftVendorList>
                 <label>Filter</label>
                 <InputGroup>
-                  <SearchVendor
+                  <ModalSearchBar
                     onSearch={(keyword) => SearchVendorItem(keyword)}
                   />
                 </InputGroup>
-                <VendorContainer className="vendorList">
+                <VendorContainer >
                   {isMultiVendor ? (
                     <VendorList value={selectedVendor} onClick={handleVendorSelectChange}>
                       {filteredList?.map((item, index) => (

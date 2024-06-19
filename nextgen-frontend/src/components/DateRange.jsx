@@ -7,10 +7,9 @@ import PropTypes from "prop-types";
 const MainContainer = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  border-radius: 30px;
-  margin: 5px;
+  border-radius: 6px;
   cursor: pointer;
+  width: 100%;
 `;
 
 const Label = styled.div`
@@ -21,10 +20,10 @@ const Label = styled.div`
 
 const CalendarContainer = styled.div`
   white-space: nowrap;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 2px solid ${(props) => props.theme.lightGrey};
   text-align: center;
-  padding: 10px 30px;
+  padding: 8px;
 
   &:hover {
     border: 2px solid ${(props) => props.theme.primary};
@@ -96,7 +95,6 @@ const DateRangePicker = ({ selectedDates, onDateChange, title }) => {
 
   return (
     <MainContainer>
-      <Label>{title}</Label>
       <CalendarContainer>
         <Input type="text" onClick={handleTextBoxClick} ref={textBoxRef} />
         {calendarVisible && (

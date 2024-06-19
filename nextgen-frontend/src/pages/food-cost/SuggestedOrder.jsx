@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from 'react-router-dom';
 import * as Styled from "./styles/SuggestedOrderStyles.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
@@ -11,6 +12,9 @@ import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import * as SuggestedOrderFunctions from "../../functions/SuggestedOrderFunctions.jsx";
 import TreeTable from "../../components/TreeTableBuilder.jsx";
+import VendorSelector from "../../components/VendorSelector.jsx";
+import DateSelector from "../../components/DateSelector.jsx";
+import MinimizableContainer from "../../components/MinimizableContainer.jsx";
 
 const suggestedTableStructure = {
   columnHeaders: [
@@ -23,6 +27,8 @@ const suggestedTableStructure = {
     "Safety Factor",
     "Suggested Qty",
     "On Hand",
+    "Order Amount",
+    "Extended Price"
   ],
   dataTypes: [
     "string",
@@ -34,6 +40,8 @@ const suggestedTableStructure = {
     "number",
     "number",
     "number",
+    "number",
+    "number"
   ],
   columnWidth: "1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows: [],
@@ -44,19 +52,20 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
+  const { company, unit, unitName, vendorID, vendorName, dates } = useLocation().state || {};
   const [unitsList, setUnitsList] = useState([]);
-  const [selectedUnit, setSelectedUnit] = useState();
-  const [selectedUnitName, setSelectedUnitName] = useState("No Unit Selected");
+  const [selectedUnit, setSelectedUnit] = useState(unit);
+  const [selectedUnitName, setSelectedUnitName] = useState(unitName);
   const [vendorsList, setVendorsList] = useState([]);
   const [selectedVendorName, setSelectedVendorName] =
-    useState("No Vendor Selected");
-  const [selectedVendor, setSelectedVendor] = useState();
+    useState(vendorName);
+  const [selectedVendor, setSelectedVendor] = useState(vendorID);
   const [showModal, setShowModal] = useState(false);
-  const [companyID, setCompanyID] = useState();
+  const [companyID, setCompanyID] = useState(company);
   const [alignmentID, setAlignmentID] = useState(null);
   const [selectedDates, setSelectedDates] = useState([new Date(), new Date()]);
-  const [fromDate, setFromDate] = useState(new Date());
-  const [toDate, setToDate] = useState(new Date());
+  const [fromDate, setFromDate] = useState(dates[0]);
+  const [toDate, setToDate] = useState(dates[1]);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
@@ -92,30 +101,12 @@ export default function SuggestedOrder() {
     document.title = "Suggested Order";
     const today = new Date();
     const formattedDate = formatDate(today);
-    setSelectedDates(`${formattedDate} - ${formattedDate}`);
+    setSelectedDates(dates);
 
-    if (!unitsList) {
-      let parameters = decodeURIComponent(
-        window.location.search.replace("?data=", "")
-      );
-      if (parameters) parameters = JSON.parse(parameters);
-      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
-      parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
-      parameters
-        ? setSelectedUnit(parameters.User_DefaultUnitID)
-        : setSelectedUnit();
-      parameters ? setUserID(parameters.User_UserID) : setUserID();
+    console.log(unit, vendorID, vendorName, dates)
 
-      if (parameters.User_DefaultUnitID) {
-        getOrderItem(companyID, selectedUnit, selectedVendor, fromDate, toDate);
-      } else {
-        setErrorMessage("No Unit or Vendor Selected, Please select a unit.");
-        setIsError(true);
-        setIsLoading(false);
-      }
-    } else {
-      setToDate(toDate.setDate(toDate.getDate() + 2));
-      getOrderItem(1021,87,1,fromDate,toDate,0);
+    if (unit && vendorID && vendorName && dates) {
+      getOrderItem(companyID,unit,selectedVendor,dates[0],dates[1],0);
     }
     setSaveIsVisible(saveSubmitStatus === 0 ? true : false);
     setSubmitIsVisible(saveSubmitStatus === 0 ? false : true);
@@ -443,18 +434,19 @@ export default function SuggestedOrder() {
             unitName={selectedUnitName}
             setUnitName={setSelectedUnitName}
             unitID={selectedUnit}
+            isEditable={false}
           />
-          <Dropdown
-            options={vendorsList.map((vendors) => ({
-              name: vendors.vendorName,
-              value: vendors.vendorID,
-            }))}
-            selectedOption={selectedVendorName}
-            title={"Vendor"}
+          <VendorSelector
+            vendorName={selectedVendorName}
+            setVendorName={setSelectedVendorName}
+            vendorID={selectedVendor}
+            isEditable={false}
           />
-          <DateRangePicker
-            selectedDates={selectedDates}
-            title={"Order Span"}
+          <DateSelector
+            fromDate={fromDate}
+            toDate={toDate}
+            isDateRange={true}
+            isEditable={false}
           />
           <UnitModal
             unitData={unitsList}
@@ -487,32 +479,32 @@ export default function SuggestedOrder() {
         <Styled.UnloadedMessage>{errorMessage}</Styled.UnloadedMessage>
       ) : (
         <>
-          <h2>Order Forecasted</h2>
+          <MinimizableContainer title={() => {return <div>Sales Forecast</div>}}>
+            <Styled.ForeCastAndSafetyFactor>
+              <Table
+                columnHeaders={forecastTable.columnHeaders}
+                dataTypes={forecastTable.dataTypes}
+                columnwidths={forecastTable.columnWidth}
+                rows={forecastTable.rows}
+                width={forecastTable.width}
+                tableName={"Forecast"}
+                handleInputCellChange={handleTableCellChange}
+                isSorting={false}
+              />
 
-          <Styled.ForeCastAndSafetyFactor>
-            <Table
-              columnHeaders={forecastTable.columnHeaders}
-              dataTypes={forecastTable.dataTypes}
-              columnwidths={forecastTable.columnWidth}
-              rows={forecastTable.rows}
-              width={forecastTable.width}
-              tableName={"Forecast"}
-              handleInputCellChange={handleTableCellChange}
-              isSorting={false}
-            />
-
-            <Table
-              columnHeaders={defaultSafetyFactorTable.columnHeaders}
-              dataTypes={defaultSafetyFactorTable.dataTypes}
-              columnwidths={defaultSafetyFactorTable.columnWidth}
-              rows={defaultSafetyFactorTable.rows}
-              tableName={"DefaultSafetyFactor"}
-              width={defaultSafetyFactorTable.width}
-              height={defaultSafetyFactorTable.height}
-              handleInputCellChange={handleTableCellChange}
-              isSorting={false}
-            />
-          </Styled.ForeCastAndSafetyFactor>
+              <Table
+                columnHeaders={defaultSafetyFactorTable.columnHeaders}
+                dataTypes={defaultSafetyFactorTable.dataTypes}
+                columnwidths={defaultSafetyFactorTable.columnWidth}
+                rows={defaultSafetyFactorTable.rows}
+                tableName={"DefaultSafetyFactor"}
+                width={defaultSafetyFactorTable.width}
+                height={defaultSafetyFactorTable.height}
+                handleInputCellChange={handleTableCellChange}
+                isSorting={false}
+              />
+            </Styled.ForeCastAndSafetyFactor>
+          </MinimizableContainer>
 
           <Styled.InventoryItemsContainer>
             <TreeTable

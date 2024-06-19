@@ -21,6 +21,7 @@ const TableCell = styled.div`
 
 const TableRow = styled.div`
   position: relative;
+  align-items: center;
   font-size: 14px;
   justify-content: ${(props) =>
     props.columntype === "number" ? "center" : "left"};
@@ -34,7 +35,6 @@ const TableRow = styled.div`
 
 const StyledCell = styled.div`
   width: 100%;
-  padding-bottom: 10px;
   text-align: left;
 `;
 
@@ -74,6 +74,7 @@ const SlArrowDownIcon = styled(SlArrowDown)`
 
 const InputCell = styled.input`
   border: none;
+  width: 100%;
 `;
 
 const EditableCell = ({ value, onChange,DataType }) => {
@@ -258,6 +259,28 @@ const TreeNode = ({
                   />
                 ) : (
                   <StyledCell>{selectedVendorItems[index].onHand}</StyledCell>
+                )}
+                {isEditable[7] ? (
+                  <EditableCell
+                    value={selectedVendorItems[index].onOrder}
+                    onChange={(value) => handleEditfield("orderAmount", value, index)}
+                    DataType={dataTypes[9]}
+                  />
+                ) : (
+                  <StyledCell>{selectedVendorItems[index].orderAmount}</StyledCell>
+                )}
+                {isEditable[8] ? (
+                  <EditableCell
+                    value={selectedVendorItems[index].suggestedOrder}
+                    onChange={(value) =>
+                      handleEditfield("extendedPrice", value, index)
+                    }
+                    DataType={dataTypes[10]}
+                  />
+                ) : (
+                  <StyledCell>
+                    {selectedVendorItems[index].extendedPrice}
+                  </StyledCell>
                 )}
               </>
             )}

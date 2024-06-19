@@ -25,15 +25,10 @@ align-items: center;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #364790;
+    background: ${(props) => props.theme.primary};
     border-radius: 30px;
     padding: 18px !important;
-    border: 2px solid ${(props) => props.theme.White};
     cursor: pointer;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: ${(props)=> props.theme.VividBlue};
   }
 
   &::-webkit-scrollbar-button:start:decrement {
@@ -71,17 +66,19 @@ const TableHeaderCell = styled.div`
   font-size: 14px;
   // height: 44px;
   padding: 10px 0;
-  width: 170px;
+  width: 100%;
 
 `;
 const CollapseButton = styled.button`
-  box-shadow: inset 0 0 0 2px #364790;
+  box-shadow: inset 0 0 0 2px ${(props) => props.theme.primary};
   transition: color 0.25s 0.0833333333s;
   position: relative;
   border-radius: 0px;
   width: 164px;
   margin-top: 18px;
   margin-right: 10px;
+  background-color: ${(props) => props.isActive ? props.theme.primary : props.theme.White};
+  color: ${(props) => props.isActive ? props.theme.white : props.theme.primary};
 
   &::after {
     border: 0 solid transparent;
@@ -110,14 +107,14 @@ const CollapseButton = styled.button`
     border-left-width: 2px;
   }
   &:hover::after {
-    border-color: ${(props) => props.theme.White};
+    border-color: ${(props) => props.theme.white};
     transition: border-color 0s, width 0.25s, height 0.25s;
     width: 100%;
     height: 100%;
     transition-delay: 0s, 0.25s, 0s;
   }
   &:hover::before {
-    border-color: ${(props) => props.theme.White};
+    border-color: ${(props) => props.theme.white};
     transition: border-color 0s, width 0.25s, height 0.25s;
     width: 100%;
     height: 100%;
@@ -125,8 +122,8 @@ const CollapseButton = styled.button`
   }
   &:hover {
     border-color: transparent;
-    color: ${(props) => props.theme.White};
-    background: #364790;
+    color: ${(props) => props.theme.white};
+    background: ${(props) => props.theme.primary};
   }
 `;
 const ExpandButton = styled.button`
@@ -224,23 +221,24 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
     setIsExpandActive(true);
   };
 
-  const isEditableArray = [false, false, false, false, false, true, true];
+  const isEditableArray = [false, false, false, false, true, false, true, true, false];
 
+  console.log(dataTypes);
   return (
     <>
       <ButtonContainer>
         <CollapseButton
-          className={isCollapseActive ? "active" : ""}
+          isActive={isCollapseActive}
           onClick={handleCollapseAll}
         >
           Collapse All <MdKeyboardArrowDown />
         </CollapseButton>
-        <ExpandButton
-          className={isExpandActive ? "active" : ""}
+        <CollapseButton
+          isActive={isExpandActive}
           onClick={handleExpandAll}
         >
           Expand All <MdKeyboardArrowUp />
-        </ExpandButton>
+        </CollapseButton>
       </ButtonContainer>
       <StyledTable>
         <TableHeader className="Header">

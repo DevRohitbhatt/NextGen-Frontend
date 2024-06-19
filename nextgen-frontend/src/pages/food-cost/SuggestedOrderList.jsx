@@ -7,9 +7,11 @@ import Table from '../../components/SimpleTable.jsx';
 import UnitModal from "../../components/UnitModal.jsx";
 import VendorModal from "../../components/VendorModal.jsx";
 import CalendarModal from "../../components/ModalDate.jsx";
+import OrderModal from "../../components/OrderModal.jsx";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import { VendorAPI } from "../../apis/VendorAPI.jsx";
 import { SuggestedOrderAPI } from "../../apis/SuggestedOrderAPI.jsx";
+import ExportOptions from "../../components/ExportOptions.jsx";
 
 const SuggestedOrderList = () => {
   const [userID, setUserID] = useState();
@@ -37,7 +39,7 @@ const SuggestedOrderList = () => {
   const [showDateModal, setShowDateModal] = useState(false); // State to manage modal visibility
   
   const [suggestedOrders, setSuggestedOrders] = useState([]);  
-  //const [showCreateOrderModal, setCreateOrderShowModal] = useState(false);
+  const [showCreateOrderModal, setCreateOrderShowModal] = useState(false);
  
   const headers = [
     { key: 'unitName', label: 'Unit Name', cellType: 'string' },
@@ -150,7 +152,8 @@ const SuggestedOrderList = () => {
     setSelectedToDate(toDate);
   };
 
-  const handleCreateOrderClick = () => {    
+  const handleCreateOrderClick = () => { 
+    setCreateOrderShowModal(true);   
   };
 
   return (
@@ -177,6 +180,10 @@ const SuggestedOrderList = () => {
             isDateRange={true}
           />
         </Styled.DateAndUnitContainer>
+        <ExportOptions
+          includeAdd={true}
+          handleAddClick={() => {setCreateOrderShowModal(true)}}
+        />
       </Styled.OptionsRow>
       {isLoading ? (
         <Styled.UnloadedMessage>Loading...</Styled.UnloadedMessage>
@@ -184,14 +191,24 @@ const SuggestedOrderList = () => {
         <Styled.UnloadedMessage>{errorMessage}</Styled.UnloadedMessage>
       ) : (
             <Styled.OptionsRow>
+              <OrderModal
+                companyID={companyID}
+                unitData={unitsList}
+                vendorData={vendorsList}
+                unitID={selectedUnit}
+                unitName={selectedUnitName}
+                show={showCreateOrderModal}
+                handleClose={() => {
+                  setCreateOrderShowModal(false);
+                }}
+                handleUnitSelection={handleUnitSelection}
+                title="CREATE ORDER"
+              />
               <Styled.VendorOrdersContainer>
                 <Table
                   data={suggestedOrders?.data}
                   headers={headers}
                 />
-                <Styled.Buttonontainer>
-                  <Styled.Button onClick={handleCreateOrderClick}>Create Order</Styled.Button>
-                </Styled.Buttonontainer>
               </Styled.VendorOrdersContainer>
             </Styled.OptionsRow>            
       )}
