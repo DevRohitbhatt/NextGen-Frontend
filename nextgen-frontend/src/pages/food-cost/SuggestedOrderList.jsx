@@ -191,8 +191,6 @@ const SuggestedOrderList = () => {
           handlePDFClick={() => {console.log("PDF")}}
           includeExcel={true}
           handleExcelClick={() => {console.log("Excel")}}
-          includeSubmit={true}
-          handleSubmitClick={() => {console.log("Submit")}}
           includeHelp={true}
           handleHelpClick={() => {console.log("Help")}}
         />
