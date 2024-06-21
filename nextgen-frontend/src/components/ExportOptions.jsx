@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import  { FaFileExcel, FaFileCsv, FaFilePdf, FaRegSave, FaArrowUp } from "react-icons/fa";
 import { MdQuestionMark, MdLibraryAdd } from "react-icons/md";
+import { BsBoxArrowInRight } from "react-icons/bs";
 import { LuPrinter, LuSaveAll } from "react-icons/lu";
 import PropTypes from "prop-types";
 
@@ -82,7 +83,7 @@ const SaveIcon = styled(FaRegSave)`
   width: 40px;
   height: 40px;
 `;
-const SubmitIcon = styled(FaArrowUp)`
+const SubmitIcon = styled(BsBoxArrowInRight)`
   color: ${(props) => props.theme.primary};
   width: 40px;
   height: 40px;
