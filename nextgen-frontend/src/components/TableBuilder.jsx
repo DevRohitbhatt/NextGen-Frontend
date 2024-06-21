@@ -8,7 +8,7 @@ import { column } from "stylis";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 import TreeTable from "../components/TreeTableBuilder.jsx";
 import Tooltip from "../components/ToolTip.jsx";
-import { FcInfo } from "react-icons/fc";
+import { FaInfoCircle } from "react-icons/fa";
 
 const Container = styled.div`
   width: ${(props) => (props.width ? props.width : "auto")};
@@ -49,7 +49,7 @@ const Table = styled.div`
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #364790;
+    background: ${(props) => props.theme.primary};
     border-radius: 30px;
     padding: 18px !important;
     border: 2px solid #fff;
@@ -57,7 +57,7 @@ const Table = styled.div`
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: #508bff;
+    background: ${(props) => props.theme.secondary};
   }
 
   &::-webkit-scrollbar-button:start:decrement {
@@ -102,6 +102,10 @@ const TableHeaderCell = styled.div`
 const IconContainer = styled.div`
   margin-left: 5px; /* Adjust margin as needed */
   float: right;
+`;
+
+const InfoIcon = styled(FaInfoCircle)`
+  color: ${(props) => props.theme.secondary};
 `;
 
 export default function TableBuilder({
@@ -188,11 +192,11 @@ if (isSorting) {
                     (
                       toolTipDirection[index] === "left" ? (
                         <Tooltip content={headerTooltips[index]} direction="left">
-                          <FcInfo /> {header}
+                          <InfoIcon /> {header}
                         </Tooltip>
                       ) : (
                         <Tooltip content={headerTooltips[index]} direction="left">
-                          {header} <FcInfo />
+                          {header} <InfoIcon />
                         </Tooltip>
                       )
                     )

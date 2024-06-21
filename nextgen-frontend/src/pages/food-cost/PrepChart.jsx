@@ -14,6 +14,8 @@ import CalendarModal from "../../components/ModalDate.jsx";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import PrepChartIntroSteps from "../../assets/introJSSteps/PrepChartIntroSteps.jsx";
 import { Steps } from "intro.js-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const toolTipForecastSales = "Copied from Web Scheduler if Web Scheduler subscriber otherwise a four-week moving average of Net Sales. NOTE: Adjustments to forecasted sales on prep chart DO NOT modify Web Scheduler Forecasted sales.";
 const toolTipPrepType = "Units of Measure collected from Inventory Configuration. Defaults to item with “PREP” in description.";
@@ -130,7 +132,8 @@ export default function PrepChart() {
   const getPrepChart = (companyID, unitID, date) => {
     setIsLoading(true);
     setIsError(false);
-    PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((data) => {
+    PrepChartAPI.get(companyID, unitID, date.toISOString().split('T')[0]).then((result) => {
+      const data = result.data;
       if (data === "No Template found for the selected company and unit.") {
         setErrorMessage("No Template found for the selected unit. Please create a template for this unit.");
         setIsError(true);
@@ -163,7 +166,8 @@ export default function PrepChart() {
 
   const getUnits = (companyId, alignmentId, userId) => {
     UnitsAndAreasAPI.getbyid(companyId, alignmentId, userId)
-      .then((data) => {
+      .then((result) => {
+        const data = result.data;
         setUnitsList(data);
       }).catch((error) => {
         console.error("Error getting units: ", error);
@@ -273,38 +277,55 @@ export default function PrepChart() {
     }
   }
 
+  const updatePrepPullAmount = (table) => {
+    return table.rows.map(row => {
+      const onHandIndex = table.columnHeaders.indexOf("On Hand");
+      const prepPullAmountIndex = table.columnHeaders.indexOf("Prep/Pull Amount");
+  
+      if (row[onHandIndex].value === 0 || row[onHandIndex].value === null) {
+        row[prepPullAmountIndex].value = ""; 
+      }
+      return row;
+    });
+  };
+  
   const handlePDFClick = () => {
+
+    const todayForecast = `$${Math.round(forecastTable.rows[0][1].value)}`;
+    const tomorrowForecast = `$${Math.round(forecastTable.rows[1][1].value)}`;
+    const nextDayForecast = `$${Math.round(forecastTable.rows[2][1].value)}`;
+    
+    const todayDate = forecastTable.rows[0][2].value;
+    const tomorrowDate = forecastTable.rows[1][2].value;
+    const nextDayDate = forecastTable.rows[2][2].value;
+
+    const updatedTodayTable = { ...todayTable, rows: updatePrepPullAmount(todayTable) };
+    const updatedTomorrowTable = { ...tomorrowTable, rows: updatePrepPullAmount(tomorrowTable) };
+    const updatedNextDayTable = { ...nextDayTable, rows: updatePrepPullAmount(nextDayTable) };
+  
     const pdfData = {
-      title: "Prep Chart",
+      title: `Prep & Thaw Chart - ${selectedUnitName}`,
       exportType: "pdf",
       body: [
         {
-          type: "table/Column",
-          title: "Forecast",
-          widths: [50, 100, 75],
-          data: forecastTable,
-          dataTypes: ["string", "currency rounded", "string"]
-        },
-        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable },
-        {
           type: "table",
-          title: "Today",
-          widths: [115, 140, "*", "*", "*", "*", "*"],
-          data: todayTable,
+          title:`Today - ${todayForecast}  ${todayDate}`,
+          widths: [160, 110, "*",27,32, "*", "auto"],
+          data: updatedTodayTable,
           dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
-          title: "Tomorrow",
-          widths: [115, 140, "*", "*", "*", "*", "*"],
-          data: tomorrowTable,
+          title: `Tomorrow - ${tomorrowForecast}  ${tomorrowDate}`,
+          widths: [160, 110, "*",27,32, "*", "auto"],
+          data: updatedTomorrowTable,
           dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
-          title: "Next Day",
-          widths: [115, 140, "*", "*", "*", "*", "*"],
-          data: nextDayTable,
+          title: `Next Day - ${nextDayForecast}  ${nextDayDate}`,
+          widths:  [160, 110, "*",27,32, "*", "auto"],
+          data: updatedNextDayTable,
           dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
       ],
@@ -313,37 +334,42 @@ export default function PrepChart() {
   };
 
   const handlePrintClick = () => {
+
+    const todayForecast = `$${Math.round(forecastTable.rows[0][1].value)}`;
+    const tomorrowForecast = `$${Math.round(forecastTable.rows[1][1].value)}`;
+    const nextDayForecast = `$${Math.round(forecastTable.rows[2][1].value)}`;
+    
+    const todayDate = forecastTable.rows[0][2].value;
+    const tomorrowDate = forecastTable.rows[1][2].value;
+    const nextDayDate = forecastTable.rows[2][2].value;
+
+    const updatedTodayTable = { ...todayTable, rows: updatePrepPullAmount(todayTable) };
+    const updatedTomorrowTable = { ...tomorrowTable, rows: updatePrepPullAmount(tomorrowTable) };
+    const updatedNextDayTable = { ...nextDayTable, rows: updatePrepPullAmount(nextDayTable) };
+  
     const pdfData = {
-      title: "Prep Chart",
+      title: `Prep & Thaw Chart - ${selectedUnitName}`,
       exportType: "print",
       body: [
         {
-          type: "table/Column",
-          title: "Forecast",
-          widths: [50, 100, 75],
-          data: forecastTable,
-          dataTypes: ["string", "currency rounded", "string"]
-        },
-        { type: "table/Column", widths: [100], data: defaultSafetyFactorTable },
-        {
           type: "table",
-          title: "Today",
-          widths: [115, 140, "*", "*", "*", "*", "*"],
-          data: todayTable,
+          title:`Today - ${todayForecast}  ${todayDate}`,
+          widths: [160, 110, "*",27,32, "*", "auto"],
+          data: updatedTodayTable,
           dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
-          title: "Tomorrow",
-          widths: [115, 140, "*", "*", "*", "*", "*"],
-          data: tomorrowTable,
+          title: `Tomorrow - ${tomorrowForecast}  ${tomorrowDate}`,
+          widths: [160, 110, "*",27,32, "*", "auto"],
+          data: updatedTomorrowTable,
           dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
         {
           type: "table",
-          title: "Next Day",
-          widths: [115, 140, "*", "*", "*", "*", "*"],
-          data: nextDayTable,
+          title: `Next Day - ${nextDayForecast}  ${nextDayDate}`,
+          widths:  [160, 110, "*",27,32, "*", "auto"],
+          data: updatedNextDayTable,
           dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
         },
       ],
@@ -406,7 +432,13 @@ export default function PrepChart() {
   }
 
   const handleSaveClick = () => {
-    const response = PrepChartAPI.save(prepChart);
+    PrepChartAPI.save(prepChart)
+      .then(() => {
+        toast.success("Prep Chart saved successfully");
+      })
+      .catch((error) => {
+        toast.error("Failed to save Prep Chart");
+    });
   };
 
   const handleUnitSelectorClick = () => {
@@ -452,6 +484,7 @@ export default function PrepChart() {
       />
       <Styled.PageTitle>Prep Chart</Styled.PageTitle>
       <Styled.OptionsRow>
+        <ToastContainer />
         <Styled.DateAndUnitContainer>
           <UnitSelector
             companyID={companyID}
@@ -461,6 +494,7 @@ export default function PrepChart() {
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}
             unitID={selectedUnit}
+            label="Select Unit"
           />
           <DateSelector
             ToDate={selectedToDate}

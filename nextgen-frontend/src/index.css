@@ -448,7 +448,7 @@ button.react-calendar__tile.react-calendar__year-view__months__month {
   padding: 0px 15px;
 }
 .Tblleft {
-  max-height: 750px;
+  max-height: 85vh;
   padding-top: 0px !important;
 }
 .Tblleft [columnwidths="auto"] {

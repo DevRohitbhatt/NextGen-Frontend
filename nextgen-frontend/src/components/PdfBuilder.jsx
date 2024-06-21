@@ -81,8 +81,10 @@ export default function PdfBuilder(data) {
       columns.push(table);
     }
   });
+
   const docDefinition = {
     content: content,
+    ...(data.exportType === "pdf" && { pageMargins: [20, 20, 20, 20] }),
     styles: {
       header: {
         fontSize: 16,

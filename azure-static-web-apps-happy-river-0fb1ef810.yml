@@ -3,10 +3,12 @@ name: Azure Static Web Apps CI/CD
 pr:
   branches:
     include:
-      - develop
+      - Testing_Server
 trigger:
   branches:
     include:
+      - Testing_Server
+    exclude:
       - develop
 
 jobs:
