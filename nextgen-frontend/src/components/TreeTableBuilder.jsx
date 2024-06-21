@@ -186,11 +186,11 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
   const [isCollapseActive, setIsCollapseActive] = useState(false);
   const [isExpandActive, setIsExpandActive] = useState(false);
   const [data, setData] = useState(initialData);
-
+console.log("DATA: " , initialData);
   useEffect(() => {
     setIsCollapseActive(true);
     setIsExpandActive(false);
-  }, []);
+  }, [initialData]);
 
   const toggleNode = (node) => {
     const updatedExpandedNodes = { ...expandedNodes };

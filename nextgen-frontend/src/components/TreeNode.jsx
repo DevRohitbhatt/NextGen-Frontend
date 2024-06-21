@@ -141,7 +141,14 @@ const TreeNode = ({
   dataTypes,
 }) => {
   const [selectedVendorItems, setSelectedVendorItems] = useState({});
-  const [node, setNode] = useState(initialNode); 
+  const [node, setNode] = useState(initialNode);
+  const [editValue, setEditValue] = useState(null);
+  // Srtting node Value
+  useEffect(() => {
+    setNode(initialNode);
+  }, [initialNode]);
+
+  console.log("Tree Node", node);
 
   const toggleNode = () => {
     onToggleNode(node);
@@ -159,6 +166,7 @@ const TreeNode = ({
     );
 
     // Update state with the updated node
+    // console.log("editValue",editValue);
     setNode(updatedNode);
   };
 
@@ -174,11 +182,23 @@ const TreeNode = ({
 
   const formatPercentage = (value) => {
     if (value && value !== "%" && value !== null && value !== "") {
-      if (value.endsWith("%")) {
+      // Try to avoid string Checking issues
+      try {
+        if (value.endsWith("%")) {
         return value;
-      } else {
-        return value + "%";
       }
+      } catch (error) {
+        console.warn(error);
+      }
+      // setEditValue(value + "%");
+
+      return value + "%";
+
+      // if (value.endsWith("%")) {
+      //   return value;
+      // } else {
+      //   return value + "%";
+      // }
     } else {
       return "0%";
     }
@@ -193,7 +213,7 @@ const TreeNode = ({
       initialSelectedVendorItems[index] = defaultVendorItem;
     });
     setSelectedVendorItems(initialSelectedVendorItems);
-  }, [node]); 
+  }, [node]);
   return (
     <>
       <TableCell>
@@ -277,7 +297,9 @@ const TreeNode = ({
                 {isEditable[4] ? (
                   <>
                     <EditableCell
-                      value={formatPercentage(selectedVendorItems[index].safetyFactor)}
+                      value={formatPercentage(
+                        selectedVendorItems[index].safetyFactor
+                      )}
                       onChange={(value) =>
                         handleEditfield("safetyFactor", value, index)
                       }
@@ -329,7 +351,10 @@ const TreeNode = ({
                 )}
                 {isEditable[8] ? (
                   <EditableCell
-                    value={(selectedVendorItems[index].latestInvoicePrice * selectedVendorItems[index].orderAmount).toFixed(2)}
+                    value={(
+                      selectedVendorItems[index].latestInvoicePrice *
+                      selectedVendorItems[index].orderAmount
+                    ).toFixed(2)}
                     onChange={(value) =>
                       handleEditfield("extendedPrice", value, index)
                     }
