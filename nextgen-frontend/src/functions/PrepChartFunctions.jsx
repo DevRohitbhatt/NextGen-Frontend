@@ -289,7 +289,6 @@ function calculateNeededValue(tableName, prepChart, prepValue, yieldType, safety
   let needed = 0;
   safetyFactor = safetyFactor / 100 + 1;
   if (isNaN(yieldType) || yieldType === 0.00 || yieldType === "0.00") {
-    console.log("in if statement")
     return 0;
   }
 

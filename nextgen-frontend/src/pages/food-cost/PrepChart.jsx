@@ -60,6 +60,7 @@ export default function PrepChart() {
     toolTipDirection: ["", left, ""]
   });
   const [unitsList, setUnitsList] = useState([]);
+  const [groupOrUnitAccess, setGroupOrUnitAccess] = useState();
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setselectedUnitName] = useState("No Unit Selected");
   const [IsActive, setIsActive] = useState([]);
@@ -111,6 +112,7 @@ export default function PrepChart() {
       parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
       parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
+      parameters ? setGroupOrUnitAccess(parameters.User_GroupOrUnitAccess) : setGroupOrUnitAccess();
       if (parameters.User_DefaultUnitID) {
         getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, new Date());
         getUnits(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
@@ -452,6 +454,9 @@ export default function PrepChart() {
       <Styled.OptionsRow>
         <Styled.DateAndUnitContainer>
           <UnitSelector
+            companyID={companyID}
+            alignmentID={alignmentID}
+            memberID={groupOrUnitAccess}
             onClick={handleUnitSelectorClick}
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}

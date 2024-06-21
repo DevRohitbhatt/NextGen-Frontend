@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { AreaAPI } from "../apis/AreaAPI";
 import { UnitAPI } from "../apis/UnitAPI";
+import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI";
 
 
 const UnitContainer = styled.div`
@@ -50,14 +51,21 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick , unitName, setUnitName, unitID, formVersion = false, isEditable = true}) {
+export default function UnitSelector({ companyID, alignmentID, memberID, onClick , unitName, setUnitName, unitID, formVersion = false, isEditable = true}) {
   
   const GetUnitList = () => {
-    UnitAPI.getUnitsByCompany(1, 1)
+    UnitsAndAreasAPI.getbyid(companyID, alignmentID, memberID)
     .then((data) => {
-      if (data.Units.length > 0) {
-        setUnitName(data.Units.find(unit => unit.UnitID === unitID).Name);
-      }
+      let foundUnit = false;
+      if (data.data.units.length > 0) {
+        let unitName = data.data.units.find(unit => unit.unitID === unitID).unitName;
+        if (unitName) {
+          setUnitName(unitName);
+          foundUnit = true;
+        }
+      } else if (data.data.areas.length > 0 && unitName === "No Unit Selected") {
+        setUnitName(data.data.areas.find(area => area.areaID === unitID).areaName);
+      } 
     })
     .catch((error) => {
       console.error("Error fetching data:", error);

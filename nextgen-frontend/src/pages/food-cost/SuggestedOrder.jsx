@@ -37,7 +37,7 @@ const suggestedTableStructure = {
     "string",
     "string",
     "number",
-    "number",
+    "percent",
     "number",
     "number",
     "number",
@@ -52,7 +52,7 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
-  const { company, unit, unitName, vendorID, vendorName, dates } = useLocation().state || {};
+  const { company, unit, groupOrUnit, unitName, vendorID, vendorName, dates } = useLocation().state || {};
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(unit);
   const [selectedUnitName, setSelectedUnitName] = useState(unitName);
@@ -63,6 +63,7 @@ export default function SuggestedOrder() {
   const [showModal, setShowModal] = useState(false);
   const [companyID, setCompanyID] = useState(company);
   const [alignmentID, setAlignmentID] = useState(null);
+  const [groupOrUnitAccess, setGroupOrUnitAccess] = useState(groupOrUnit);
   const [selectedDates, setSelectedDates] = useState([new Date(), new Date()]);
   const [fromDate, setFromDate] = useState(dates[0]);
   const [toDate, setToDate] = useState(dates[1]);
@@ -123,11 +124,44 @@ export default function SuggestedOrder() {
     setIsLoading(true);
     SuggestedOrderAPI.getOrderItem(companyID,unitID,selectedVendor,formatDate(orderFromDate),formatDate(orderToDate),suggestedOrderId)
       .then((response) => {
+        console.log(response.data.suggestedOrderDetails);
         buildForecastTable(response.data.forecastedData);
         setSaveSubmitStatus(response.data.suggestedOrderID);
         setSuggestedTable({
-          ...suggestedTableStructure,
-          rows: response.data.suggestedOrderDetails,
+          ...suggestedTable,
+          rows: response.data.suggestedOrderDetails.map((category) => {
+              return {
+                name: category.name,
+                suggestedOrderItem: category.suggestedOrderItem.map((item) => {
+                  return {
+                    department: item.department,
+                    subDepartment: item.subDepartment,
+                    invItemDescription: item.invItemDescription,
+                    qsrInventoryItemID: item.qsrInventoryItemID,
+                    invItemMainUOM: item.invItemMainUOM,
+                    vendorItems: item.vendorItems.map((vendorItem) => {
+                      return {
+                        qsrItemID: vendorItem.qsrItemID,
+                        description: vendorItem.description,
+                        vendorItemReference: vendorItem.vendorItemReference,
+                        packSize: vendorItem.packSize,
+                        mappedTo: vendorItem.mappedTo,
+                        unitOfMeasure: vendorItem.unitOfMeasure,
+                        mappingQuantityMultiplier: vendorItem.mappingQuantityMultiplier,
+                        latestInvoicePrice: vendorItem.latestInvoicePrice,
+                        latestInvoiceDate: vendorItem.latestInvoiceDate,
+                        safetyFactor: vendorItem.safetyFactor,
+                        suggestedQty: vendorItem.suggestedQty,
+                        onHand: vendorItem.onHand,
+                        orderAmount: vendorItem.orderAmount,
+                        extendedPrice: vendorItem.extendedPrice,
+                        isSelected: vendorItem.isSelected
+                      };
+                    }),
+                  };
+                })
+              };
+          }),
         });
         setDefaultSafetyFactorTable({
           ...defaultSafetyFactorTable,
@@ -144,6 +178,7 @@ export default function SuggestedOrder() {
           ],
         });
         setIsLoading(false);
+        console.log(suggestedTable);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -151,6 +186,11 @@ export default function SuggestedOrder() {
         setIsError(true);
       });
   };
+
+  useEffect(() => {
+    // This effect runs whenever suggestedTable.rows changes
+    console.log('Updated rows:', suggestedTable.rows);
+  }, [suggestedTable.rows]);
 
   const handleClose = () => {
     setShowSuccessPopup(false);
@@ -340,7 +380,7 @@ export default function SuggestedOrder() {
 
   function handleSave() {
     const Data = {
-      suggestedOrderID: 1,
+      suggestedOrderID: 0,
       purchaseOrderID: 0,
       companyID: companyID,
       unitID: selectedUnit,
@@ -353,8 +393,10 @@ export default function SuggestedOrder() {
       suggestedOrderDetails: suggestedTable.rows,
     };
 
+    console.log(Data)
+
     const jsonData = JSON.stringify(Data);
-    SuggestedOrderAPI.save(jsonData)
+    SuggestedOrderAPI.save(Data)
       .then(() => {
         setSaveIsVisible(false);
         setSubmitIsVisible(true);
@@ -431,6 +473,9 @@ export default function SuggestedOrder() {
 
         <Styled.DateAndUnitContainer>
           <UnitSelector
+            companyID={companyID}
+            alignmentID={alignmentID}
+            memberID={groupOrUnitAccess}
             unitName={selectedUnitName}
             setUnitName={setSelectedUnitName}
             unitID={selectedUnit}

@@ -165,6 +165,8 @@ const Option = styled.option`
 
 const OrderModal = ({
   companyID,
+  alignmentID,
+  memberID,
   unitData,
   vendorData,
   unitID,
@@ -237,7 +239,6 @@ const OrderModal = ({
   };
 
   const handleUnitItemClick = (name, id) => {
-    console.log("testing")
     setSelectedUnit(id);
     setSelectedUnitName(name);
   };
@@ -286,6 +287,9 @@ const OrderModal = ({
                 <Rows>
                   <Titles>Select Unit</Titles>
                   <UnitSelector
+                    companyID={companyID}
+                    alignmentID={alignmentID}
+                    memberID={memberID}
                     unitID={selectedUnit}
                     unitName={selectedUnitName}
                     setUnitName={setSelectedUnitName}

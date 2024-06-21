@@ -46,7 +46,7 @@ const SuggestedOrderList = () => {
     { key: 'vendorName', label: 'Vendor Name', cellType: 'string' },
     { key: 'deliveryDate', label: 'Delivery Date', cellType: 'date' },
     { key: 'createdBy', label: 'Created By', cellType: 'string' },
-    { key: 'submittedOn', label: 'Submitted On',cellType: 'dateTime' },
+    { key: 'submittedOn', label: 'Created On',cellType: 'dateTime' },
     { key: 'status', label: 'Order Status', cellType: 'string' }
   ];
 
@@ -66,12 +66,12 @@ const SuggestedOrderList = () => {
       } else {
         
         console.log("testing mode");
-        setCompanyID(1021)
-        setAlignmentID(1110)
+        setCompanyID(256)
+        setAlignmentID(343)
         setUserID(5199)
         setIsActive(0)
         setSelectedUnit(0)
-        fetchData(1021, 1110, 5199, 87)
+        fetchData(256, 343, 5199, 0)
       }
     }
     else {      
@@ -109,6 +109,7 @@ const SuggestedOrderList = () => {
   };
 
   const fetchSuggestedOrders = (companyID, alignmentID, memberID, unitID, vendorID) => {
+    console.log("fetching orders", unitID)
     SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID, unitID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
       setSuggestedOrders(data);
@@ -162,6 +163,9 @@ const SuggestedOrderList = () => {
       <Styled.OptionsRow>
         <Styled.DateAndUnitContainer>
           <UnitSelector
+            companyID={companyID}
+            alignmentID={alignmentID}
+            memberID={userID}
             unitID={selectedUnit}
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}
@@ -193,6 +197,8 @@ const SuggestedOrderList = () => {
             <Styled.OptionsRow>
               <OrderModal
                 companyID={companyID}
+                alignmentID={alignmentID}
+                memberID={userID}
                 unitData={unitsList}
                 vendorData={vendorsList}
                 unitID={selectedUnit}

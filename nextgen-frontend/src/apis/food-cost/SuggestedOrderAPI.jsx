@@ -1,19 +1,21 @@
 import api from "../configs/axiosConfig.jsx";
 import { defineCancelApiObject } from "../configs/axiosUtils.jsx";
+import order from "../../tempData/OrderData.json";
 
 export const SuggestedOrderAPI = {
   getOrderItem: async function (companyID,unitID,vendorId,orderFromDate,orderToDate,suggestedOrderId,cancel = false) {
-    const response = await api.request({
-      method: "GET",
-      url: `/api/suggestedorder/getvendorinventoryitems?companyId=${companyID}&unitId=${unitID}&vendorId=${vendorId}&orderFromDate=${orderFromDate}&orderToDate=${orderToDate}&suggestedOrderId=${suggestedOrderId}`,
-      companyID,
-      unitID,
-      vendorId,
-      orderFromDate,
-      orderToDate,
-      signal: cancel
-        ? cancelApiObject[this.getOrderItem.name].handleRequestCancellation().signal : undefined });
-    return response.data;
+    // const response = await api.request({
+    //   method: "GET",
+    //   url: `/api/suggestedorder/getvendorinventoryitems?companyId=${companyID}&unitId=${unitID}&vendorId=${vendorId}&orderFromDate=${orderFromDate}&orderToDate=${orderToDate}&suggestedOrderId=${suggestedOrderId}`,
+    //   companyID,
+    //   unitID,
+    //   vendorId,
+    //   orderFromDate,
+    //   orderToDate,
+    //   signal: cancel
+    //     ? cancelApiObject[this.getOrderItem.name].handleRequestCancellation().signal : undefined });
+    // return response.data;
+    return order;
   },
   getOrderList: async function (companyID, alignmentID, memberID, vendorID, fromDate, toDate,  cancel = false) {
     const response = await api.request({
