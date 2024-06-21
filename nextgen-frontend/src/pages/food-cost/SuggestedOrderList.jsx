@@ -66,12 +66,12 @@ const SuggestedOrderList = () => {
       } else {
         
         console.log("testing mode");
-        setCompanyID(256)
-        setAlignmentID(343)
+        setCompanyID(1021)
+        setAlignmentID(1110)
         setUserID(5199)
         setIsActive(0)
         setSelectedUnit(0)
-        fetchData(256, 343, 5199, 0)
+        fetchData(1021, 1110, 5199, 0)
       }
     }
     else {      

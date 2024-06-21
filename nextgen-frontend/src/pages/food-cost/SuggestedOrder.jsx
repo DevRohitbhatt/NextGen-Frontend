@@ -190,7 +190,7 @@ export default function SuggestedOrder() {
   useEffect(() => {
     // This effect runs whenever suggestedTable.rows changes
     console.log('Updated rows:', suggestedTable.rows);
-  }, [suggestedTable.rows]);
+  }, [suggestedTable]);
 
   const handleClose = () => {
     setShowSuccessPopup(false);
@@ -297,29 +297,49 @@ export default function SuggestedOrder() {
 
   const handleTableCellChange = (e, row, columnName, tableName) => {
     const updatedValue = parseFloat(e.target.value);
-
+  
     if (isNaN(updatedValue)) {
       console.error("Invalid input value");
       return;
     }
-
+  
     switch (tableName) {
       case "DefaultSafetyFactor": {
-        SuggestedOrderFunctions.handleDefaultSafetyFactorChange(e,row,columnName,tableName,defaultSafetyFactorTable,setDefaultSafetyFactorTable,suggestedOrder,
-          setsuggestedOrder,setSuggestedTable,suggestedTable);
+        const updatedRows = suggestedTable.rows.map(category => {
+          return {
+            ...category,
+            suggestedOrderItem: category.suggestedOrderItem.map(item => {
+              return {
+                ...item,
+                vendorItems: item.vendorItems.map(vendorItem => {
+                  return {
+                    ...vendorItem,
+                    safetyFactor: updatedValue
+                  };
+                })
+              };
+            })
+          };
+        });
+        
+        setSuggestedTable({
+          ...suggestedTable,
+          rows: updatedRows
+        });
         break;
       }
       case "Forecast": {
-        const  updatedForecastData  = SuggestedOrderFunctions.handleForecastChange(e, row, columnName, forecastTable, setForecastTable,editedMessages,setEditedMessages);
+        const updatedForecastData = SuggestedOrderFunctions.handleForecastChange(e, row, columnName, forecastTable, setForecastTable, editedMessages, setEditedMessages);
         buildForecastTable(updatedForecastData);
         break;
       }
-     
       default:
         console.error("Invalid table name");
         break;
     }
   };
+  
+  
 
   function forecastedData(forecastedData) {
     if (!Array.isArray(forecastedData)) {
@@ -441,6 +461,8 @@ export default function SuggestedOrder() {
         setVisible(false);
       });
   }
+
+  console.log("SuggestedOrder",suggestedTable.rows);
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
