@@ -11,10 +11,10 @@ export const PrepChartTemplateAPI = {
 
     return response.data;
   },
-  save: async function (data, cancel = false) {
+  save: async function (companyID, data, cancel = false) {
     const response = await api.request({
       method: "POST",
-      url: `/api/prepcharttemplate/save`,
+      url: `/api/prepcharttemplate/save?companyid=${companyID}`,
       data: data,
       headers: {
         "Content-Type": "application/json",

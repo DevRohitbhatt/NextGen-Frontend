@@ -1,13 +1,14 @@
+
 name: Azure Static Web Apps CI/CD
 
 pr:
   branches:
     include:
-      - Testing_Server
+      - main
 trigger:
   branches:
     include:
-      - Testing_Server
+      - main
 
 jobs:
 - job: build_and_deploy_job
@@ -16,36 +17,38 @@ jobs:
   pool:
     vmImage: ubuntu-latest
   variables:
-  - group: Azure-Static-Web-Apps-happy-river-0fb1ef810-variable-group
+  - group: Azure-Static-Web-Apps-ashy-island-06d13ba10-variable-group
   steps:
   - checkout: self
     submodules: true
-    
+
+    # Build step to compile, test, and prepare your application
   - script: |
+      ls -l
       cd nextgen-frontend
+      # Example build command, replace with your actual build command
       npm install
       npm run build
     displayName: 'Build application'
-
+    
   - task: CopyFiles@2
     displayName: 'Copy staticwebapp.config.json to dist folder'
     inputs:
-     SourceFolder: nextgen-frontend
-     Contents: 'staticwebapp.config.json'
-     TargetFolder: 'nextgen-frontend/dist'
-    
+      SourceFolder: nextgen-frontend # Path to the directory containing staticwebapp.config.json
+      Contents: 'staticwebapp.config.json'    # Name of the file to copy
+      TargetFolder: 'nextgen-frontend/dist'  # Path to the dist folder
+
+  
   - task : PublishBuildArtifacts@1
     inputs:
       PathtoPublish: 'nextgen-frontend/dist'
       ArtifactName: 'drop'
 
+
   - task: AzureStaticWebApp@0
     inputs:
-      azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_RIVER_0FB1EF810)
-###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-# For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
+      azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_ISLAND_06D13BA10)
       app_location: "/nextgen-frontend" # App source code path
       api_location: "" # Api source code path - optional
       output_location: "dist" # Built app content directory - optional
-###### End of Repository/Build Configurations ######
 
