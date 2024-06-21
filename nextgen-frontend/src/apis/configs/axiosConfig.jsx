@@ -8,7 +8,7 @@ const api = axios.create({
     'Allow-Control-Allow-Origin': '*',
   },
   'Content-Type': 'application/json',
-  baseURL: "https://www1.qsronline.com/QSROnlineGateway/",
+  baseURL: "https://localhost:7278/",
 });
 
 const errorHandler = (error) => {

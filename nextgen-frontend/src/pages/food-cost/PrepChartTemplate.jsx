@@ -636,6 +636,9 @@ if(position)
         <Styled.DateAndUnitContainer>
           <UnitSelector
             onClick={handleUnitSelectorClick}
+            companyID={companyID}
+            alignmentID={alignmentID}
+            memberID={areaID}
             unitName={selectedUnitName}
             setUnitName={setSelectedUnitName}
             unitID={selectedUnit}

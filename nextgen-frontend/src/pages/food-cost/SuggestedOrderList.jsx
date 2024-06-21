@@ -187,6 +187,14 @@ const SuggestedOrderList = () => {
         <ExportOptions
           includeAdd={true}
           handleAddClick={() => {setCreateOrderShowModal(true)}}
+          includePDF={true}
+          handlePDFClick={() => {console.log("PDF")}}
+          includeExcel={true}
+          handleExcelClick={() => {console.log("Excel")}}
+          includeSubmit={true}
+          handleSubmitClick={() => {console.log("Submit")}}
+          includeHelp={true}
+          handleHelpClick={() => {console.log("Help")}}
         />
       </Styled.OptionsRow>
       {isLoading ? (

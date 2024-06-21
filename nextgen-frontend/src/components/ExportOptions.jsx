@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import  { FaFileExcel, FaFileCsv, FaFilePdf, FaRegSave } from "react-icons/fa";
+import  { FaFileExcel, FaFileCsv, FaFilePdf, FaRegSave, FaArrowUp } from "react-icons/fa";
 import { MdQuestionMark, MdLibraryAdd } from "react-icons/md";
 import { LuPrinter, LuSaveAll } from "react-icons/lu";
 import PropTypes from "prop-types";
@@ -26,6 +26,23 @@ const ExportOption = styled.div`
     svg {
       color: white;
     }
+  }
+`;
+
+const OptionButton = styled.button`
+  all: unset;
+  margin-left: 10px;
+  padding: 10px 20px;
+  border-radius: 15px;
+  border: 2px solid ${(props) => props.theme.primary};
+  color: ${(props) => props.theme.primary};
+  position: relative;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${(props) => props.theme.primary};
+    border: 2px solid ${(props) => props.theme.primary};
+    color: white;
   }
 `;
 
@@ -65,7 +82,7 @@ const SaveIcon = styled(FaRegSave)`
   width: 40px;
   height: 40px;
 `;
-const SubmitIcon = styled(LuSaveAll)`
+const SubmitIcon = styled(FaArrowUp)`
   color: ${(props) => props.theme.primary};
   width: 40px;
   height: 40px;
@@ -121,56 +138,56 @@ export default function ExportOptions({
     <>
       <ExportOptionsContainer className="export-options">
         {includeExcel ? (
-          <ExportOption>
+          <ExportOption title="Export to Excel">
             <OptionImage onClick={handleExcelClick}>
               <ExcelIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
         {includePDF ? (
-          <ExportOption>
+          <ExportOption title="Export to PDF">
             <OptionImage onClick={handlePDFClick}>
               <PDFIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
         {includeCSV ? (
-          <ExportOption>
+          <ExportOption title="Export to CSV">
             <OptionImage onClick={handleCSVClick}>
               <CSVIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
         {includePrint ? (
-          <ExportOption>
+          <ExportOption title="Print">
             <OptionImage onClick={handlePrintClick}>
               <PrintIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
         {includeSave ? (
-          <ExportOption className="save-option">
+          <ExportOption className="save-option" title="Save">
             <OptionImage onClick={handleSaveClick}>
               <SaveIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
         {includeSubmit ? (
-          <ExportOption className="submit-option">
+          <ExportOption className="submit-option" title="Submit">
             <OptionImage onClick={handleSubmitClick}>
               <SubmitIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
         {includeHelp ? (
-          <ExportOption className="help-option">
+          <ExportOption className="help-option" title="Help">
             <OptionImage onClick={handleHelpClick}>
               <HelpIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
         {includeAdd ? (
-          <ExportOption className="add-option">
+          <ExportOption className="add-option" title="Add New">
             <OptionImage onClick={handleAddClick}>
               <AddIcon />
             </OptionImage>

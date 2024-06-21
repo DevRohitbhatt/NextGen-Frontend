@@ -117,7 +117,7 @@ export default function PrepChart() {
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       parameters ? setGroupOrUnitAccess(parameters.User_GroupOrUnitAccess) : setGroupOrUnitAccess();
       if (parameters.User_DefaultUnitID) {
-        getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, new Date());
+        getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, selectedFromDate);
         getUnits(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
       } else {
         setErrorMessage("No Unit Selected, Please select a unit.");
@@ -502,8 +502,8 @@ export default function PrepChart() {
             label="Select Unit"
           />
           <DateSelector
-            ToDate={selectedToDate}
-            FromDate={selectedFromDate}
+            toDate={selectedToDate}
+            fromDate={selectedFromDate}
             onClick={handleDateSelectorClick}
             isDateRange={false}
           />

@@ -527,10 +527,10 @@ export default function SuggestedOrder() {
         </Styled.DateAndUnitContainer>
 
         <ExportOptions
-          includePDF={isVisible}
-          includeCSV={isVisible}
-          includeSave={saveIsVisible}
-          includeSubmit={submitIsVisible}
+          includePDF={true}
+          includeCSV={true}
+          includeSave={true}
+          includeSubmit={true}
           handlePDFClick={handlePDFClick}
           handleCSVClick={handleCSVClick}
           handleSaveClick={handleSave}
