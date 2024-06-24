@@ -12,6 +12,7 @@ import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import { VendorAPI } from "../../apis/VendorAPI.jsx";
 import { SuggestedOrderAPI } from "../../apis/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
+import PdfBuilder from "../../components/PdfBuilder.jsx";
 
 const SuggestedOrderList = () => {
   const [userID, setUserID] = useState();
@@ -157,6 +158,38 @@ const SuggestedOrderList = () => {
     setCreateOrderShowModal(true);   
   };
 
+  const handlePDFClick = () => {
+    const pdfData = {
+      title: "Suggested Order",
+      exportType: "pdf",
+      body: [
+        {
+          type: "table/Column",
+          title: "Suggested Order",
+          widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
+          data: suggestedOrders,
+        },
+      ],
+    };
+    PdfBuilder(pdfData);
+  };
+
+  const handleExcelClick = () => {
+    const excelData = {
+      title: "Suggested Order",
+      exportType: "excel",
+      body: [
+        {
+          type: "table/Column",
+          title: "Suggested Order",
+          widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
+          data: suggestedOrders,
+        },
+      ],
+    };
+    PdfBuilder(excelData);
+  };
+  
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
@@ -188,9 +221,9 @@ const SuggestedOrderList = () => {
           includeAdd={true}
           handleAddClick={() => {setCreateOrderShowModal(true)}}
           includePDF={true}
-          handlePDFClick={() => {console.log("PDF")}}
+          handlePDFClick={handlePDFClick}
           includeExcel={true}
-          handleExcelClick={() => {console.log("Excel")}}
+          handleExcelClick={handleExcelClick}
           includeHelp={true}
           handleHelpClick={() => {console.log("Help")}}
         />
