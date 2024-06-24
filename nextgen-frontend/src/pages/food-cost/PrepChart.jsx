@@ -491,6 +491,8 @@ export default function PrepChart() {
         <Styled.DateAndUnitContainer>
           <UnitSelector
             onClick={handleUnitSelectorClick}
+            companyID={companyID}
+            alignmentID={alignmentID}
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}
             unitID={selectedUnit}
