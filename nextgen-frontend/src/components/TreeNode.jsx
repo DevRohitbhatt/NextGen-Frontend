@@ -36,7 +36,12 @@ const TableRow = styled.div`
 
 const StyledCell = styled.div`
   width: 100%;
-  text-align: left;
+  min-width: 145px;
+
+  text-align: ${(props) =>
+    props.columntype === "number" || props.columntype === "percent"
+      ? "center"
+      : "left"};
 `;
 
 const StyledCellParent = styled.div`
@@ -75,6 +80,7 @@ const SlArrowDownIcon = styled(SlArrowDown)`
 
 const InputCell = styled.input`
   border: none;
+  min-width: 142px;
   width: 100%;
   text-align: center;
 `;
@@ -143,18 +149,17 @@ const TreeNode = ({
   const [selectedVendorItems, setSelectedVendorItems] = useState({});
   const [node, setNode] = useState(initialNode);
   const [editValue, setEditValue] = useState(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const shouldCenterText = true;
   // Srtting node Value
   useEffect(() => {
     setNode(initialNode);
   }, [initialNode]);
-
-  console.log("Tree Node", node);
-
   const toggleNode = () => {
     onToggleNode(node);
   };
 
-  const handleEditfield = (field, value, index) => {
+  const handleEditfield = (field, value, index, safetyFactor) => {
     const updatedNode = handleEdit(
       field,
       value,
@@ -165,9 +170,14 @@ const TreeNode = ({
       onEdit
     );
 
-    // Update state with the updated node
-    // console.log("editValue",editValue);
-    setNode(updatedNode);
+    let prevNodeQty = updatedNode.suggestedOrderItem[index].vendorItems[index].suggestedQty;
+    if (prevNodeQty === selectedVendorItems[index].suggestedQty && safetyFactor === selectedVendorItems[index].safetyFactor.replace("%", "") / 100) {
+      setIsEdit(false);
+      setNode(updatedNode);
+    } else {
+      setIsEdit(true);
+      setNode(updatedNode);
+    }
   };
 
   const handleVendorChange = (selectedQsrItemID, index) => {
@@ -185,10 +195,10 @@ const TreeNode = ({
       // Try to avoid string Checking issues
       try {
         if (value.endsWith("%")) {
-        return value;
-      }
+          return value;
+        }
       } catch (error) {
-        console.warn(error);
+        // console.warn(error);
       }
       // setEditValue(value + "%");
 
@@ -286,10 +296,11 @@ const TreeNode = ({
                         handleEditfield("latestInvoicePrice", value, index)
                       }
                       DataType={dataTypes[5]}
+                      style={{ textAlign: "center" }}
                     />
                   </>
                 ) : (
-                  <StyledCell>
+                  <StyledCell style={{ textAlign: "center" }}>
                     <DollarSign>$</DollarSign>
                     {selectedVendorItems[index].latestInvoicePrice}
                   </StyledCell>
@@ -312,11 +323,27 @@ const TreeNode = ({
                     <PercentSign>%</PercentSign>
                   </StyledCell>
                 )}
+
                 {isEditable[5] ? (
                   <EditableCell
-                    value={selectedVendorItems[index].suggestedQty}
+                    value={
+                      isEdit
+                        ? (
+                            parseFloat(
+                              selectedVendorItems[index].suggestedQty
+                            ) +
+                            (typeof selectedVendorItems[index].safetyFactor ==="string" ? parseFloat(selectedVendorItems[index].safetyFactor.replace("%", "")
+                                ) / 100
+                              : 0)
+                          ).toFixed(2)
+                        : selectedVendorItems[index].suggestedQty
+                    }
                     onChange={(value) =>
-                      handleEditfield("suggestedQty", value, index)
+                      handleEditfield("suggestedQty", value, index, parseFloat(
+                        selectedVendorItems[
+                          index
+                        ].safetyFactor.replace("%", "")
+                      ) / 100)
                     }
                     DataType={dataTypes[7]}
                   />
@@ -338,7 +365,10 @@ const TreeNode = ({
                 )}
                 {isEditable[7] ? (
                   <EditableCell
-                    value={selectedVendorItems[index].orderAmount}
+                    value={(
+                      selectedVendorItems[index].suggestedQty -
+                      selectedVendorItems[index].onHand
+                    ).toFixed(2)}
                     onChange={(value) =>
                       handleEditfield("orderAmount", value, index)
                     }

@@ -58,6 +58,7 @@ const TableHeader = styled.div`
   gap:20px;
   margin-bottom: 10px;
   padding-bottom: 10px;
+   min-width:145px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
 `;
 
@@ -67,6 +68,7 @@ const TableHeaderCell = styled.div`
   // height: 44px;
   padding: 10px 0;
   width: 100%;
+  min-width:145px;
   text-align: ${(props) =>
     props.columntype === "number" || props.columntype === "percent" ? "center" : "left"};
 `;
@@ -186,7 +188,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
   const [isCollapseActive, setIsCollapseActive] = useState(false);
   const [isExpandActive, setIsExpandActive] = useState(false);
   const [data, setData] = useState(initialData);
-console.log("DATA: " , initialData);
+
   useEffect(() => {
     setIsCollapseActive(true);
     setIsExpandActive(false);
@@ -227,7 +229,6 @@ console.log("DATA: " , initialData);
   };
 
   const isEditableArray = [false, false, false, false, true, true, true, true, true,true];
-
   return (
     <>
       <ButtonContainer>

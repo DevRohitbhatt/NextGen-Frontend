@@ -314,20 +314,25 @@ export default function SuggestedOrder() {
                 vendorItems: item.vendorItems.map(vendorItem => {
                   return {
                     ...vendorItem,
-                    safetyFactor: updatedValue
+                    safetyFactor: updatedValue,
+                    suggestedQty:  (vendorItem.suggestedQty +
+                      ((typeof safetyFactor === "string" ? 
+                        parseFloat(updatedValue.replace('%', '')) / 100 : 0)
+                      )) // Round to 2 decimal places
                   };
                 })
               };
             })
           };
         });
-        
+      
         setSuggestedTable({
           ...suggestedTable,
           rows: updatedRows
         });
         break;
       }
+  
       case "Forecast": {
         const updatedForecastData = SuggestedOrderFunctions.handleForecastChange(e, row, columnName, forecastTable, setForecastTable, editedMessages, setEditedMessages);
         buildForecastTable(updatedForecastData);
