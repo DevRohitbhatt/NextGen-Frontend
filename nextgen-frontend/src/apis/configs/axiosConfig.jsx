@@ -1,6 +1,6 @@
 import axios from "axios";
 
-axios.defaults.baseURL = "http://192.168.192.244:8030/";
+const baseURL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   withCredentials: true,
@@ -8,7 +8,7 @@ const api = axios.create({
     'Allow-Control-Allow-Origin': '*',
   },
   'Content-Type': 'application/json',
-  baseURL: "https://www1.qsronline.com/QSROnlineGateway/",
+  baseURL: baseURL,
 });
 
 const errorHandler = (error) => {
