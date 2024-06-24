@@ -1,7 +1,6 @@
 import pdfMake from 'pdfmake/build/pdfmake';
 import CSVDownloader from '../functions/CSVDownloader';
-import { writeFile } from 'fs';
-import { utils } from 'xlsx'; // Importing xlsx utilities
+import { utils, writeFile } from 'xlsx'; // Importing xlsx utilities
 // import pdfFonts from 'pdfmake/build/vfs_fonts';
 // pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -129,13 +128,8 @@ export default function PdfBuilder(data) {
   else if (data.exportType === "excel") {
     const ws = utils.json_to_sheet(data.body); // Assuming data.body is in a format suitable for xlsx
     const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, 'Sheet 1');
-    const excelBuffer = utils.book_write(wb, { bookType: 'xlsx', type: 'buffer' });
-
-    writeFile('output.xlsx', excelBuffer, (err) => {
-      if (err) throw err;
-      console.log('Excel file exported successfully');
-    });
+    utils.book_append_sheet(wb, ws, "Sheet1");
+    writeFile(wb, "sheetjs.xlsx");
   }
 
 }
