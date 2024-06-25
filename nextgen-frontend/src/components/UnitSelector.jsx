@@ -1,7 +1,5 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import { AreaAPI } from "../apis/AreaAPI";
-import { UnitAPI } from "../apis/UnitAPI";
 import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI";
 
 
@@ -51,29 +49,28 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ companyID, alignmentID, memberID, onClick , unitName, setUnitName, unitID, formVersion = false, isEditable = true}) {
+export default function UnitSelector({ onClick, companyID, alignmentID, unitName, setUnitName, unitID, isEditable=true, formVersion=false}) {
   
-  const GetUnitList = () => {
-    UnitsAndAreasAPI.getbyid(companyID, alignmentID, memberID)
-    .then((data) => {
-      let foundUnit = false;
-      if (data.data.units.length > 0) {
-        let unitName = data.data.units.find(unit => unit.unitID === unitID).unitName;
-        if (unitName) {
-          setUnitName(unitName);
-          foundUnit = true;
+  useEffect(() => {
+    const fetchUnitList = async () => {
+      await UnitsAndAreasAPI.getbyid(companyID, alignmentID, unitID)
+      .then((response) => {
+        if(response.data.units.length === 0) {
+          setUnitName("No unit selected");
+          return;
+        } else {
+          setUnitName(response.data.units[0].unitName);
         }
-      } else if (data.data.areas.length > 0 && unitName === "No Unit Selected") {
-        setUnitName(data.data.areas.find(area => area.areaID === unitID).areaName);
-      } 
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-  };
-  if (unitName === "No Unit Selected" && unitID) {
-    GetUnitList();
-  }
+      }).catch((error) => {
+        console.log(error);
+        setUnitName("No unit selected")
+      });
+      
+    };
+    if (companyID && alignmentID && unitID)
+      fetchUnitList();
+  }, [unitID]);
+
   
   return (
     <>

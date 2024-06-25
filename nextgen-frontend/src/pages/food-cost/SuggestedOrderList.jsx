@@ -198,7 +198,6 @@ const SuggestedOrderList = () => {
           <UnitSelector
             companyID={companyID}
             alignmentID={alignmentID}
-            memberID={userID}
             unitID={selectedUnit}
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}

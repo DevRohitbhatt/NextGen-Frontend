@@ -502,7 +502,6 @@ export default function SuggestedOrder() {
           <UnitSelector
             companyID={companyID}
             alignmentID={alignmentID}
-            memberID={groupOrUnitAccess}
             unitName={selectedUnitName}
             setUnitName={setSelectedUnitName}
             unitID={selectedUnit}

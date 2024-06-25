@@ -492,14 +492,12 @@ export default function PrepChart() {
         <ToastContainer />
         <Styled.DateAndUnitContainer>
           <UnitSelector
+            onClick={handleUnitSelectorClick}
             companyID={companyID}
             alignmentID={alignmentID}
-            memberID={groupOrUnitAccess}
-            onClick={handleUnitSelectorClick}
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}
             unitID={selectedUnit}
-            label="Select Unit"
           />
           <DateSelector
             toDate={selectedToDate}
