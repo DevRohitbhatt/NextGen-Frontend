@@ -11,7 +11,7 @@
 #root {
   width: 100%;
   margin: auto;
-  padding: 2rem;
+  padding: 2rem 0px;
 }
 
 a {
@@ -225,15 +225,7 @@ input.Search::placeholder {
   background: #508bff;
 }
 
-.active {
-  background: #364790;
-  color: #fff;
-}
-.active:hover
-{
-  background: #364790 !important;
-  color: #fff !important;
-}
+
 .btnOuter:hover .btn-save {
   color: white !important;
 }
@@ -262,6 +254,7 @@ svg.clearIcone {
   z-index: 9 !important;
 }
 .CalendarTable {
+  border: none !important;
   border-radius: 4px !important;
   margin-top: 14px;
   margin-bottom: 1rem;
@@ -467,6 +460,15 @@ button.react-calendar__tile.react-calendar__year-view__months__month {
 .drop-highlight {
   border-top: 1px solid #364790;
 }
+.Total-row {
+  background: #efefef;
+  font-weight: bold;
+  padding-left: 5px;
+  width: auto;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000 !important;
+}
+
 @keyframes moveUpDown {
   0% {
     transform: translateY(0);

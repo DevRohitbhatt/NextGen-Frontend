@@ -31,7 +31,7 @@ const ModalContent = styled.div`
   // padding: 20px;
   // border-radius: 8px;
   // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  background: #364790;
+  background: ${(props) => props.theme.primary};
   color: #fff;
   padding: 10px 14px;
 `;
@@ -58,7 +58,7 @@ const ModalDialog = styled.div`
   z-index: 9;
 `;
 const FooterButton = styled.button`
-  box-shadow: inset 0 0 0 2px #364790;
+  box-shadow: inset 0 0 0 2px ${(props) => props.theme.primary};
   transition: color 0.25s 0.0833333333s;
   position: relative;
   border-radius: 0px;
@@ -107,7 +107,7 @@ const FooterButton = styled.button`
   &:hover {
     border-color: transparent;
     color: #fff;
-    background: #364790;
+    background: ${(props) => props.theme.primary};
   }
 `;
 const ModalFooter = styled.div`
@@ -159,6 +159,7 @@ const CalendarModal = ({
   const [CalendarTable, setCalendarTable] = useState({
     columnHeaders: ["Period", "From", "To"],
     columnWidths: "1.5fr 2fr 2fr",
+    dataTypes : ["string", "string", "string"],  
     rows: [],
     width: "92%",
   });
@@ -205,8 +206,8 @@ const CalendarModal = ({
     setShowCalendar(!showCalendar);
   };
   const handleOkButtonClick = () => {
-    if (!isDateRang) {
-      handleDateSelection(selectedDate, selectedDate); // Call function passed from PrepChart
+    if (isDateRang) {
+      handleDateSelection(selectedFromDate, selectedToDate); // Call function passed from PrepChart
     }
     handleClose();
   };
@@ -265,6 +266,7 @@ const CalendarModal = ({
                     <Table
                       columnHeaders={CalendarTable.columnHeaders}
                       columnwidths={CalendarTable.columnWidths}
+                      dataTypes={CalendarTable.dataTypes}
                       rows={CalendarTable.rows}
                       width={CalendarTable.width}
                       className="CalendarTable"

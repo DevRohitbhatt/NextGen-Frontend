@@ -641,7 +641,6 @@ if(position)
             unitName={selectedUnitName}
             setUnitName={setSelectedUnitName}
             unitID={selectedUnit}
-            label="Select Unit"
           />
           <UnitModal
             unitData={unitData}

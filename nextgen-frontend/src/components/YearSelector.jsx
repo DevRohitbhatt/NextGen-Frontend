@@ -40,7 +40,7 @@ const Icon = styled.div`
   display: flex;
   align-items: center;
   font-size: 35px;
-  color: #364790;
+  color: ${(props) => props.theme.primary};
   cursor: pointer;
 `;
 

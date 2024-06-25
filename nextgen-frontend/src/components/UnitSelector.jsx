@@ -12,15 +12,15 @@ const UnitContainer = styled.div`
   cursor: pointer;
 `;
 
-const Label = styled.div`
-  white-space: nowrap;
-  font-size: 1.2em;
-  font-weight: bold;
+const FormElementContainer = styled.div`
+  width: 100%;
+  border-radius: 6px;
+  cursor: pointer;
 `;
 
-const UnitValue = styled.div`
+const FormUnitValue = styled.div`
   white-space: nowrap;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 2px solid ${(props) => props.theme.lightGrey};
   text-align: center;
   padding: 10px 30px;
@@ -30,7 +30,26 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick, companyID, alignmentID, unitName, setUnitName, unitID, label}) {
+const Label = styled.div`
+  white-space: nowrap;
+  font-size: 1.2em;
+  font-weight: bold;
+`;
+
+const UnitValue = styled.div`
+  white-space: nowrap;
+  border-radius: 20px;
+  border: 2px solid ${(props) => props.isEditable ? props.theme.lightGrey : `#D3D3D3`};
+  background-color: ${(props) => props.isEditable ? `none` : props.theme.lightGrey};
+  text-align: center;
+  padding: 10px 30px;
+
+  &:hover {
+    border: 2px solid ${(props) => props.isEditable ? props.theme.primary : `#D3D3D3`};
+  }
+`;
+
+export default function UnitSelector({ onClick, companyID, alignmentID, unitName, setUnitName, unitID, isEditable=true, formVersion=false}) {
   
   useEffect(() => {
     const fetchUnitList = async () => {
@@ -55,10 +74,20 @@ export default function UnitSelector({ onClick, companyID, alignmentID, unitName
   
   return (
     <>
-    <UnitContainer onClick={onClick} className="unit-selector">
-      <Label>{label}</Label>
-      <UnitValue >{unitName}</UnitValue>
-    </UnitContainer>
+    {formVersion ? (
+      <FormElementContainer onClick={onClick}>
+        <FormUnitValue>{unitName}</FormUnitValue>
+      </FormElementContainer> 
+    ) : (
+      <UnitContainer onClick={isEditable ? onClick : () => {}} className="unit-selector">
+        {isEditable ? (
+          <Label>Select Unit(s)</Label>
+        ) : (
+          <Label>Unit</Label>
+        )}
+        <UnitValue isEditable={isEditable}>{unitName}</UnitValue>
+      </UnitContainer>
+    )}
     </>
   );
 }

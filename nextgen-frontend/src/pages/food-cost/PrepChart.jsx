@@ -62,6 +62,7 @@ export default function PrepChart() {
     toolTipDirection: ["", left, ""]
   });
   const [unitsList, setUnitsList] = useState([]);
+  const [groupOrUnitAccess, setGroupOrUnitAccess] = useState();
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setselectedUnitName] = useState("No Unit Selected");
   const [IsActive, setIsActive] = useState([]);
@@ -114,8 +115,9 @@ export default function PrepChart() {
       parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
       parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
+      parameters ? setGroupOrUnitAccess(parameters.User_GroupOrUnitAccess) : setGroupOrUnitAccess();
       if (parameters.User_DefaultUnitID) {
-        getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, new Date());
+        getPrepChart(parameters.CompanyID, parameters.User_DefaultUnitID, selectedFromDate);
         getUnits(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
       } else {
         setErrorMessage("No Unit Selected, Please select a unit.");
@@ -496,11 +498,10 @@ export default function PrepChart() {
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}
             unitID={selectedUnit}
-            label="Select Unit"
           />
           <DateSelector
-            ToDate={selectedToDate}
-            FromDate={selectedFromDate}
+            toDate={selectedToDate}
+            fromDate={selectedFromDate}
             onClick={handleDateSelectorClick}
             isDateRange={false}
           />

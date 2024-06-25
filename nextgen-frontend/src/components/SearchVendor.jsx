@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MdClear } from "react-icons/md";
 
-function SearchUnit({ list, onSearch }) {
+function SearchVendor({ list, onSearch }) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (event) => {
@@ -29,4 +29,4 @@ function SearchUnit({ list, onSearch }) {
   );
 }
 
-export default SearchUnit;
+export default SearchVendor;
