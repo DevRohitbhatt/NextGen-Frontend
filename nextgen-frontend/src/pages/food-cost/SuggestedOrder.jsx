@@ -4,12 +4,10 @@ import * as Styled from "./styles/SuggestedOrderStyles.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
-import Dropdown from "../../components/DropDown.jsx";
-import DateRangePicker from "../../components/DateRange.jsx";
 import MessagePopup from "../../components/MessagePopup.jsx";
 import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
-import PdfBuilderTreetable from "../../components/PdfBuilderTreetable.jsx";
+import PdfBuilder from "../../components/PdfBuilder.jsx";
 import * as SuggestedOrderFunctions from "../../functions/SuggestedOrderFunctions.jsx";
 import TreeTable from "../../components/TreeTableBuilder.jsx";
 import VendorSelector from "../../components/VendorSelector.jsx";
@@ -129,39 +127,7 @@ export default function SuggestedOrder() {
         setSaveSubmitStatus(response.data.suggestedOrderID);
         setSuggestedTable({
           ...suggestedTable,
-          rows: response.data.suggestedOrderDetails.map((category) => {
-              return {
-                name: category.name,
-                suggestedOrderItem: category.suggestedOrderItem.map((item) => {
-                  return {
-                    department: item.department,
-                    subDepartment: item.subDepartment,
-                    invItemDescription: item.invItemDescription,
-                    qsrInventoryItemID: item.qsrInventoryItemID,
-                    invItemMainUOM: item.invItemMainUOM,
-                    vendorItems: item.vendorItems.map((vendorItem) => {
-                      return {
-                        qsrItemID: vendorItem.qsrItemID,
-                        description: vendorItem.description,
-                        vendorItemReference: vendorItem.vendorItemReference,
-                        packSize: vendorItem.packSize,
-                        mappedTo: vendorItem.mappedTo,
-                        unitOfMeasure: vendorItem.unitOfMeasure,
-                        mappingQuantityMultiplier: vendorItem.mappingQuantityMultiplier,
-                        latestInvoicePrice: vendorItem.latestInvoicePrice,
-                        latestInvoiceDate: vendorItem.latestInvoiceDate,
-                        safetyFactor: vendorItem.safetyFactor,
-                        suggestedQty: vendorItem.suggestedQty,
-                        onHand: vendorItem.onHand,
-                        orderAmount: vendorItem.orderAmount,
-                        extendedPrice: vendorItem.extendedPrice,
-                        isSelected: vendorItem.isSelected
-                      };
-                    }),
-                  };
-                })
-              };
-          }),
+          rows: response.data.suggestedOrderDetails
         });
         setDefaultSafetyFactorTable({
           ...defaultSafetyFactorTable,
@@ -253,37 +219,142 @@ export default function SuggestedOrder() {
   };
 
   const handleCSVClick = () => {
-    const csvData = {
-      title: "Order details",
-      exportType: "csv",
-      body: [
-        {
-          type: "table/Column",
-          widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
-          data: suggestedTable,
-        },
-      ],
-    };
-    PdfBuilderTreetable(csvData);
+    const data = suggestedTable.rows.flatMap((row) =>
+      row.suggestedOrderItem.flatMap((item) =>
+        item.vendorItems
+          .filter((vendorItem) => vendorItem.isSelected)
+          .map((selectedVendorItem) => [
+            item.invItemDescription,
+            selectedVendorItem.description,
+            selectedVendorItem.vendorItemReference,
+            selectedVendorItem.unitOfMeasure,
+            selectedVendorItem.packSize,
+            selectedVendorItem.latestInvoicePrice,
+            selectedVendorItem.safetyFactor,
+            selectedVendorItem.suggestedQty,
+            selectedVendorItem.onHand,
+            selectedVendorItem.orderAmount,
+            selectedVendorItem.extendedPrice,
+          ])
+      )
+    );
+    const csvDataString = 
+      suggestedTableStructure.columnHeaders.join(",") + "\n" + 
+      data.map((row) => row.join(",")).join("\n");
+    const csvBlob = new Blob([csvDataString], { type: "text/csv" });
+    const csvURL = window.URL.createObjectURL(csvBlob);
+    const tempLink = document.createElement("a");
+    tempLink.href = csvURL;
+    tempLink.setAttribute("download", `SuggestedOrder_${selectedUnitName}_${selectedVendorName}.csv`);
+    tempLink.click();
   };
 
   const handlePDFClick = () => {
-    console.log("suggestedTable",suggestedTable);
+    console.log(suggestedTable)
     const pdfData = {
       title: "Suggested Order",
-      exportType: "pdf",
-      body: [
-        {
-          type: "table",
-          title: "Suggested Order",
-          widths: [160, 110, "*",27,32, "*", "auto","*", "*"],
-          data: suggestedTable,
-        },
+      subHeaders: [
+        `Unit: ${selectedUnitName}`,
+        `Vendor: ${selectedVendorName}`,
+        `Order Span: ${fromDate.toDateString()} - ${toDate.toDateString()}`
       ],
+      pageOrientation: "landscape",
+      exportType: "pdf",
+      body: buildPDFBody(),
     };
-    console.log("pdfData",pdfData);
-    PdfBuilderTreetable(pdfData);
+    PdfBuilder(pdfData);
   };
+
+  const buildPDFBody = () => {
+    const body = suggestedTable.rows.map((row) => {
+      return {
+        type: "table",
+        title: row.name,
+        widths: [100, 75, "*", 50, "*", "*", "*", "*", 75, 75, "*"],
+        data: formatPDFData(row.suggestedOrderItem),
+        dataTypes: ["string", "string", "string", "string", "string", "currency", "percent", "number", "number", "number", "currency"],
+      }
+    });
+
+    return body;
+  };
+
+  const formatPDFData = (data) => {
+    console.log(data)
+    return {
+      ...suggestedTableStructure,
+      classNames: ["inventory-description", "item-description", "item-ref", "item-order-unit", "pack-size", "current-last-price", "safety-factor", "suggested-qty", "on-hand", "order-amount", "extended-price"],
+      rows: data.map((row) => {
+        const selectedVendorItem = row.vendorItems.find((item) => item.isSelected);
+        return [
+          {
+            value: row.invItemDescription,
+            cellType: "",
+            columnName: "Inventory Description",
+          },
+          {
+            value: selectedVendorItem.description,
+            cellType: "",
+            columnName: "Item Description",
+          },
+          {
+            value: selectedVendorItem.vendorItemReference,
+            cellType: "",
+            columnName: "Item Ref",
+          },
+          {
+            value: selectedVendorItem.unitOfMeasure,
+            cellType: "",
+            columnName: "Item Order Unit",
+          },
+          {
+            value: selectedVendorItem.packSize,
+            cellType: "",
+            columnName: "Pack Size",
+          },
+          {
+            value: selectedVendorItem.latestInvoicePrice,
+            cellType: "dollar",
+            columnName: "Current/Last Price",
+          },
+          {
+            value: selectedVendorItem.safetyFactor,
+            cellType: "percent",
+            columnName: "Safety Factor",
+          },
+          {
+            value: selectedVendorItem.suggestedQty,
+            cellType: "",
+            columnName: "Suggested Qty",
+          },
+          {
+            value: selectedVendorItem.onHand,
+            cellType: "",
+            columnName: "On Hand",
+          },
+          {
+            value: selectedVendorItem.orderAmount,
+            cellType: "",
+            columnName: "Order Amount",
+          },
+          {
+            value: selectedVendorItem.extendedPrice,
+            cellType: "dollar",
+            columnName: "Extended Price",
+          },
+        ];
+      }),
+    };
+  };
+
+  // {
+  //   type: "table",
+  //   title:`Today - ${todayForecast}  ${todayDate}`,
+  //   widths: [160, 110, "*",27,32, "*", "auto"],
+  //   data: updatedTodayTable,
+  //   dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
+  // },
+
 
   const handleTableCellChange = (e, row, columnName, tableName) => {
     const updatedValue = parseFloat(e.target.value);

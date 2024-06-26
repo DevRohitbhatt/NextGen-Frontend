@@ -228,7 +228,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
     setIsExpandActive(true);
   };
 
-  const isEditableArray = [false, false, false, false, true, true, false, true, true,false];
+  const isEditableArray = [false, false, false, false, true, false, true, true, false,false];
   return (
     <>
       <ButtonContainer>

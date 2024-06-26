@@ -352,7 +352,7 @@ const TreeNode = ({
                     DataType={dataTypes[7]}
                   />
                 ) : (
-                  <StyledCell>
+                  <StyledCell columntype={dataTypes[7]}>
                     {selectedVendorItems[index].suggestedQty}
                   </StyledCell>
                 )}
@@ -394,7 +394,7 @@ const TreeNode = ({
                     DataType={dataTypes[10]}
                   />
                 ) : (
-                  <StyledCell>
+                  <StyledCell columntype={dataTypes[10]}>
                     {selectedVendorItems[index].extendedPrice}
                   </StyledCell>
                 )}

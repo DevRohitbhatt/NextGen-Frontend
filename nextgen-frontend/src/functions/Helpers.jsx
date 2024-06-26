@@ -53,12 +53,14 @@ export const handleEdit = async (
     if (field === "safetyFactor") {
       const safetyFactor = parseFloat(value.replace("%", ""));
       if (!isNaN(safetyFactor) && safetyFactor !== parseFloat(item.safetyFactor)) {
+        const newSuggestedQty = calculateSuggestedQty(item.suggestedQty, safetyFactor);
+        const newOrderAmount = calculateOrderAmount(newSuggestedQty, item.onHand);
         updatedItem = {
           ...updatedItem,
           safetyFactor: safetyFactor,
-          suggestedQty: parseFloat(item.suggestedQty) * (1 + safetyFactor / 100),
-          orderAmount: (parseFloat(item.suggestedQty) - item.onHand).toFixed(2),
-          extendedPrice:(parseFloat((parseFloat(item.suggestedQty) - item.onHand).toFixed(2)) * parseFloat(item.latestInvoicePrice)).toFixed(2),
+          suggestedQty: newSuggestedQty,
+          orderAmount: newOrderAmount,
+          extendedPrice: calculateExtendedPrice(newOrderAmount, item.latestInvoicePrice)
         };
         updatedItem.suggestedQty = parseFloat(updatedItem.suggestedQty.toFixed(2));
        
@@ -66,22 +68,23 @@ export const handleEdit = async (
       console.log("aaaa",updatedItem);
     } else if (field === "onHand") {
       const onHand = parseFloat(value);
+      const newOrderAmount = calculateOrderAmount(item.suggestedQty, onHand);
       updatedItem = {
         ...updatedItem,
         onHand: isNaN(onHand) ? "NaN" : onHand,
-        orderAmount: (parseFloat(item.suggestedQty) - onHand).toFixed(2),
-        extendedPrice:(((parseFloat(item.suggestedQty) - onHand).toFixed(2)) * parseFloat(item.latestInvoicePrice)).toFixed(2),
+        orderAmount: newOrderAmount,
+        extendedPrice: calculateExtendedPrice(newOrderAmount, item.latestInvoicePrice)
       };
     } else if (field === "orderAmount") {
       const orderAmount = parseFloat(value);
       const latestInvoicePrice = parseFloat(item.latestInvoicePrice);
       updatedItem = {
         ...updatedItem,
-        orderAmount: (parseFloat(item.suggestedQty) - parseFloat(item.onHand)).toFixed(2),
+        orderAmount: orderAmount,
         extendedPrice:
           isNaN(orderAmount) || latestInvoicePrice === 0
             ? "NaN"
-            : (orderAmount * latestInvoicePrice).toFixed(2),
+            : calculateExtendedPrice(orderAmount, latestInvoicePrice)
       };
     } else if (field === "extendedPrice") {
       const extendedPrice = parseFloat(value);
@@ -132,3 +135,23 @@ export const handleEdit = async (
 
   return updatedNode;
 };
+
+const formatNumberTwoDecimals = (value) => {
+    const rounded = value.toFixed(2);
+    return parseFloat(rounded);
+}
+
+const calculateSuggestedQty = (suggestedQty, safetyFactor) => {
+    return formatNumberTwoDecimals(suggestedQty * (1 + safetyFactor / 100));
+}
+
+const calculateOrderAmount = (suggestedQty, onHand) => {
+    if (onHand > suggestedQty) {
+        return 0;
+    }
+    return formatNumberTwoDecimals(suggestedQty - onHand);
+}
+
+const calculateExtendedPrice = (orderAmount, latestInvoicePrice) => {
+    return (orderAmount * latestInvoicePrice).toFixed(2);
+}
