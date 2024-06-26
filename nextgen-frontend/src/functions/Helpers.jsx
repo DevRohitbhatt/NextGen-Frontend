@@ -35,8 +35,7 @@ export const handleVendorItemChange = (
 
   onEdit(updatedNode);
 };
-
-export const handleEdit = (
+export const handleEdit = async (
   field,
   value,
   index,
@@ -46,97 +45,90 @@ export const handleEdit = (
   onEdit
 ) => {
   // Update the selectedVendorItems state for the specific index
-  const updatedVendorItem = {
-    ...selectedVendorItems[index],
-    [field]: value,
-  };
+  const updatedItems = selectedVendorItems.map((item, idx) => {
+    if (idx !== index) return item;
 
-  // Update the selectedVendorItems state
-  setSelectedVendorItems((prevSelectedVendorItems) => ({
-    ...prevSelectedVendorItems,
-    [index]: updatedVendorItem,
-  }));
+    let updatedItem = { ...item, [field]: value };
+
+    if (field === "safetyFactor") {
+      const safetyFactor = parseFloat(value.replace("%", ""));
+      if (!isNaN(safetyFactor) && safetyFactor !== parseFloat(item.safetyFactor)) {
+        updatedItem = {
+          ...updatedItem,
+          safetyFactor: safetyFactor,
+          suggestedQty: parseFloat(item.suggestedQty) * (1 + safetyFactor / 100),
+          orderAmount: (parseFloat(item.suggestedQty) - item.onHand).toFixed(2),
+          extendedPrice:(parseFloat((parseFloat(item.suggestedQty) - item.onHand).toFixed(2)) * parseFloat(item.latestInvoicePrice)).toFixed(2),
+        };
+        updatedItem.suggestedQty = parseFloat(updatedItem.suggestedQty.toFixed(2));
+       
+      }
+      console.log("aaaa",updatedItem);
+    } else if (field === "onHand") {
+      const onHand = parseFloat(value);
+      updatedItem = {
+        ...updatedItem,
+        onHand: isNaN(onHand) ? "NaN" : onHand,
+        orderAmount: (parseFloat(item.suggestedQty) - onHand).toFixed(2),
+        extendedPrice:(((parseFloat(item.suggestedQty) - onHand).toFixed(2)) * parseFloat(item.latestInvoicePrice)).toFixed(2),
+      };
+    } else if (field === "orderAmount") {
+      const orderAmount = parseFloat(value);
+      const latestInvoicePrice = parseFloat(item.latestInvoicePrice);
+      updatedItem = {
+        ...updatedItem,
+        orderAmount: (parseFloat(item.suggestedQty) - parseFloat(item.onHand)).toFixed(2),
+        extendedPrice:
+          isNaN(orderAmount) || latestInvoicePrice === 0
+            ? "NaN"
+            : (orderAmount * latestInvoicePrice).toFixed(2),
+      };
+    } else if (field === "extendedPrice") {
+      const extendedPrice = parseFloat(value);
+      const latestInvoicePrice = parseFloat(item.latestInvoicePrice);
+      updatedItem = {
+        ...updatedItem,
+        extendedPrice: isNaN(extendedPrice) ? "NaN" : extendedPrice.toFixed(2),
+        orderAmount:
+          isNaN(extendedPrice) || latestInvoicePrice === 0
+            ? "NaN"
+            : (extendedPrice / latestInvoicePrice).toFixed(2),
+      };
+    }
+
+    return updatedItem;
+  });
+
+  // Update the state with updatedItems
+  setSelectedVendorItems(updatedItems);
 
   // Update the node's suggestedOrderItem to reflect changes in vendorItems
   const updatedSuggestedOrderItem = node.suggestedOrderItem.map(
-    (childNode, i) =>
-      i === index
-        ? {
-            ...childNode,
-            vendorItems: childNode.vendorItems.map((vendorItem) =>
-              vendorItem.qsrItemID === selectedVendorItems[index]?.qsrItemID
-                ? { ...vendorItem, [field]: value }
-                : vendorItem
-            ),
+    (childNode) => {
+
+      let returntItem = {
+        ...childNode,
+        vendorItems: childNode.vendorItems.map((vendorItem) => {
+          if (vendorItem.qsrItemID === updatedItems[index]?.qsrItemID) {
+            return updatedItems[index];
           }
-        : childNode
+        }),
+      };
+
+      return returntItem;
+    }
   );
 
-  // Update the node with the updated suggestedOrderItem
   const updatedNode = {
     ...node,
     suggestedOrderItem: updatedSuggestedOrderItem,
   };
 
-  // Calculate extendedPrice if editing orderAmount or latestInvoicePrice if editing extendedPrice
   if (
-    field === "orderAmount" ||
-    field === "extendedPrice" ||
-    field === "onHand"
+    ["safetyFactor", "onHand", "orderAmount", "extendedPrice"].includes(field)
   ) {
-    const currentItem = updatedVendorItem;
-    const orderAmount = parseFloat(currentItem.orderAmount);
-    const latestInvoicePrice = parseFloat(currentItem.latestInvoicePrice);
-    const extendedPrice = parseFloat(currentItem.extendedPrice);
-
-    const suggestedQty = parseFloat(currentItem.suggestedQty);
-    const onHand = parseFloat(currentItem.onHand);
-
-    if (field === "orderAmount") {
-      // Calculate extendedPrice based on latestInvoicePrice * orderAmount
-      const newExtendedPrice = latestInvoicePrice * orderAmount;
-
-      // Update the selectedVendorItems state with calculated extendedPrice
-      setSelectedVendorItems((prevSelectedVendorItems) => ({
-        ...prevSelectedVendorItems,
-        [index]: {
-          ...currentItem,
-          orderAmount: value, // Update orderAmount
-          extendedPrice: newExtendedPrice.toFixed(2), // Update extendedPrice
-        },
-      }));
-    } else if (field === "extendedPrice") {
-      // Calculate latestInvoicePrice based on extendedPrice / orderAmount (handle division by zero)
-      const newLatestInvoicePrice =
-        orderAmount !== 0 ? extendedPrice / orderAmount : 0;
-
-      // Update the selectedVendorItems state with calculated latestInvoicePrice
-      setSelectedVendorItems((prevSelectedVendorItems) => ({
-        ...prevSelectedVendorItems,
-        [index]: {
-          ...currentItem,
-          extendedPrice: value, // Update extendedPrice
-          latestInvoicePrice: newLatestInvoicePrice.toFixed(2), // Update latestInvoicePrice
-        },
-      }));
-    } else if (field === "onHand") {
-      // Calculate extendedPrice based on latestInvoicePrice * orderAmount
-      const newOrderAmount = suggestedQty - onHand;
-
-      // Update the selectedVendorItems state with calculated extendedPrice
-      setSelectedVendorItems((prevSelectedVendorItems) => ({
-        ...prevSelectedVendorItems,
-        [index]: {
-          ...currentItem,
-          onHand: value, // Update orderAmount
-          orderAmount: newOrderAmount.toFixed(2), // Update extendedPrice
-        },
-      }));
-    }
+    onEdit(updatedNode);
   }
 
-  // Callback to notify parent component about the updated node
-  onEdit(updatedNode);
-  // Return the updated node to set in the component state if needed
   return updatedNode;
 };

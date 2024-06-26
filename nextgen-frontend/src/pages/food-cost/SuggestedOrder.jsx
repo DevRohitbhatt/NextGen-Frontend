@@ -9,7 +9,7 @@ import DateRangePicker from "../../components/DateRange.jsx";
 import MessagePopup from "../../components/MessagePopup.jsx";
 import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
-import PdfBuilder from "../../components/PdfBuilder.jsx";
+import PdfBuilderTreetable from "../../components/PdfBuilderTreetable.jsx";
 import * as SuggestedOrderFunctions from "../../functions/SuggestedOrderFunctions.jsx";
 import TreeTable from "../../components/TreeTableBuilder.jsx";
 import VendorSelector from "../../components/VendorSelector.jsx";
@@ -264,35 +264,25 @@ export default function SuggestedOrder() {
         },
       ],
     };
-    PdfBuilder(csvData);
+    PdfBuilderTreetable(csvData);
   };
 
   const handlePDFClick = () => {
+    console.log("suggestedTable",suggestedTable);
     const pdfData = {
-      title: "Prep Chart",
+      title: "Suggested Order",
       exportType: "pdf",
       body: [
         {
-          type: "table/Column",
-          title: "Forecast",
-          widths: [50, 100, 75],
-          data: forecastTable,
-        },
-        {
-          type: "table/Column",
-          title: "Default Safety Factor",
-          widths: [100],
-          data: defaultSafetyFactorTable,
-        },
-        {
-          type: "table/Column",
+          type: "table",
           title: "Suggested Order",
-          widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
+          widths: [160, 110, "*",27,32, "*", "auto","*", "*"],
           data: suggestedTable,
         },
       ],
     };
-    PdfBuilder(pdfData);
+    console.log("pdfData",pdfData);
+    PdfBuilderTreetable(pdfData);
   };
 
   const handleTableCellChange = (e, row, columnName, tableName) => {
@@ -312,27 +302,30 @@ export default function SuggestedOrder() {
               return {
                 ...item,
                 vendorItems: item.vendorItems.map(vendorItem => {
+                  const safetyFactor = parseFloat(updatedValue) / 100;
+                  const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+                  const roundedQty = Math.round(suggestedQty * 100) / 100; 
+                  
                   return {
                     ...vendorItem,
-                    safetyFactor: updatedValue,
-                    suggestedQty:  (vendorItem.suggestedQty +
-                      ((typeof safetyFactor === "string" ? 
-                        parseFloat(updatedValue.replace('%', '')) / 100 : 0)
-                      )) // Round to 2 decimal places
+                    safetyFactor: updatedValue, 
+                    suggestedQty: isNaN(roundedQty) ? 0 : roundedQty ,
+                    orderAmount: (roundedQty - vendorItem.onHand).toFixed(2),
+                    extendedPrice:(parseFloat((roundedQty - vendorItem.onHand).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
                   };
                 })
               };
             })
           };
         });
-      
         setSuggestedTable({
           ...suggestedTable,
           rows: updatedRows
         });
+        
         break;
       }
-  
+      
       case "Forecast": {
         const updatedForecastData = SuggestedOrderFunctions.handleForecastChange(e, row, columnName, forecastTable, setForecastTable, editedMessages, setEditedMessages);
         buildForecastTable(updatedForecastData);

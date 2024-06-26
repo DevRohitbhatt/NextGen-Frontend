@@ -1,34 +1,62 @@
-import pdfMake from 'pdfmake/build/pdfmake';
-import CSVDownloader from '../functions/CSVDownloader';
+import pdfMake from "pdfmake/build/pdfmake";
+import CSVDownloader from "../functions/CSVDownloader";
 // import pdfFonts from 'pdfmake/build/vfs_fonts';
 // pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 pdfMake.fonts = {
   Roboto: {
-    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
-    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
-    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
-    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf',
+    normal:
+      "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf",
+    bold: "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf",
+    italics:
+      "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf",
+    bolditalics:
+      "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf",
   },
 };
 
 const createTable = (tableInfo) => {
+  let tableValues = [];
+  let tableheading = [
+    "qsrItemID",
+    "description",
+    "vendorItemReference",
+    "packSize",
+    "mappedTo",
+    "unitOfMeasure",
+    "mappingQuantityMultiplier",
+    "latestInvoicePrice",
+    "latestInvoiceDate",
+    "safetyFactor",
+    "suggestedQty",
+    "onHand",
+    "orderAmount",
+    "extendedPrice",
+    "isSelected",
+  ];
   const title = { text: "", style: "subheader" };
   if (tableInfo.title) title.text = tableInfo.title;
+  tableInfo.data.rows.map((row) =>
+    row.suggestedOrderItem.map((row) =>
+      row.vendorItems.map((row, index) => {
+        if(index < 2) tableValues.push(Object.values(row));
+      })
+    )
+  );
   const table = {
     table: {
       headerRows: 1,
       widths: tableInfo.widths,
       body: [
         [
-          ...tableInfo.data.columnHeaders.map((header) => ({
+          ...tableheading.map((header) => ({
             text: header,
             style: "tableHeader",
           })),
         ],
-        ...tableInfo.data.rows.map((row) =>
-          row.map((cell, index) => ({
-            text: getCellValue(cell, tableInfo.dataTypes ? tableInfo.dataTypes[index] : ""),
+        ...tableValues.map((row) =>
+          row.map((cell) => ({
+            text: cell,
             style: "tableCell",
           }))
         ),
@@ -60,7 +88,7 @@ const getCellValue = (cell, dataType) => {
   } else {
     return cell.value !== 0 ? cell.value : "";
   }
-}
+};
 
 export default function PdfBuilder(data) {
   const content = [];
@@ -72,9 +100,11 @@ export default function PdfBuilder(data) {
       columns = [];
     }
     if (section.type === "table") {
-      const { title, table } = createTable(section);
+      const { table, title } = createTable(section);
       if (title) content.push(title);
       content.push(table);
+      console.log("idhar chala", content);
+      // console.log("idhar chala2",table);
     } else if (section.type === "table/Column") {
       const { title, table } = createTable(section);
       if (title) content.push(title);
@@ -105,25 +135,22 @@ export default function PdfBuilder(data) {
       },
     },
   };
-  console.log("docDefinition",docDefinition);
+  console.log("docDefinition", docDefinition);
   if (data.exportType === "pdf") {
     pdfMake.createPdf(docDefinition).open();
-  }
-  else if (data.exportType === "print") {
+  } else if (data.exportType === "print") {
     pdfMake.createPdf(docDefinition).print();
-  }
-  else if (data.exportType === "csv") {
+  } else if (data.exportType === "csv") {
     let csvContent = "";
-    data.body.forEach(section => {
+    data.body.forEach((section) => {
       if (section.type === "table") {
         const tableInfo = section.data;
         csvContent += tableInfo.columnHeaders.join(",") + "\n";
-        tableInfo.rows.forEach(row => {
-          csvContent += row.map(cell => getCellValue(cell)).join(",") + "\n";
+        tableInfo.rows.forEach((row) => {
+          csvContent += row.map((cell) => getCellValue(cell)).join(",") + "\n";
         });
       }
     });
-    <CSVDownloader csvContent={csvContent} />
+    <CSVDownloader csvContent={csvContent} />;
   }
-
 }

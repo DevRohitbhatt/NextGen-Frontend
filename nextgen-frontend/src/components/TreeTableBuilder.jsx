@@ -58,7 +58,7 @@ const TableHeader = styled.div`
   gap:20px;
   margin-bottom: 10px;
   padding-bottom: 10px;
-   min-width:145px;
+  //  min-width:145px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
 `;
 
@@ -228,7 +228,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
     setIsExpandActive(true);
   };
 
-  const isEditableArray = [false, false, false, false, true, true, true, true, true,true];
+  const isEditableArray = [false, false, false, false, true, true, false, true, true,false];
   return (
     <>
       <ButtonContainer>
