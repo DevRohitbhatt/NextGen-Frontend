@@ -19,7 +19,7 @@
     "exceljs": "^4.4.0",
     "framer-motion": "^11.0.20",
     "intro.js-react": "^1.0.0",
-    "pdfmake": "^0.2.9",
+    "pdfmake": "^0.2.10",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^2.10.1",

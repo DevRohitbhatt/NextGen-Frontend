@@ -349,6 +349,7 @@ export default function PrepChart() {
     const updatedTomorrowTable = { ...tomorrowTable, rows: updatePrepPullAmount(tomorrowTable) };
     const updatedNextDayTable = { ...nextDayTable, rows: updatePrepPullAmount(nextDayTable) };
   
+    console.log(updatedTodayTable)
     const pdfData = {
       title: `Prep & Thaw Chart - ${selectedUnitName}`,
       exportType: "print",
