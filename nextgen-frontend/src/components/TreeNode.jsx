@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { SlArrowDown, SlArrowUp } from "react-icons/sl";
 import PropTypes from "prop-types";
-import Cell from "./TableCell.jsx";
 import { handleVendorItemChange, handleEdit } from "../functions/Helpers.jsx";
-import { json } from "react-router-dom";
 
 const TableCell = styled.div`
   position: relative;
@@ -145,13 +143,11 @@ const TreeNode = ({
   columnWidths,
   isEditable,
   dataTypes,
+  setQid
 }) => {
   const [selectedVendorItems, setSelectedVendorItems] = useState([]);
   const [node, setNode] = useState(initialNode);
-  const [editValue, setEditValue] = useState(null);
-  const [isEdit, setIsEdit] = useState(false);
-  const shouldCenterText = true;
-  // Srtting node Value
+  
   useEffect(() => {
     setNode(initialNode);
   }, [initialNode]);
@@ -168,17 +164,16 @@ const TreeNode = ({
         node,
         selectedVendorItems,
         setSelectedVendorItems,
-        onEdit
+        onEdit,
+        setQid
       );
-  console.log("updated data",updatedNode);
       if (!updatedNode) {
         throw new Error('Failed to update node');
       }
-  
       const updatedSuggestedOrderItem = node.suggestedOrderItem.map(item => {
         const updatedItem = updatedNode.suggestedOrderItem.find(updItem => updItem.qsrInventoryItemID === item.qsrInventoryItemID);
         if (updatedItem) {
-          const updatedVendorItems = item.vendorItems.map((vendorItem, idx) => {
+          const updatedVendorItems = item.vendorItems.map((vendorItem, idx) => {            
             const updatedVendorItem = updatedItem.vendorItems[idx];
             return updatedVendorItem ? { ...vendorItem, ...updatedVendorItem } : vendorItem;
           });
@@ -414,6 +409,7 @@ TreeNode.propTypes = {
   columnWidths: PropTypes.string,
   isEditable: PropTypes.arrayOf(PropTypes.bool).isRequired,
   dataTypes: PropTypes.array,
+  setQid:PropTypes.func
 };
 
 export default TreeNode;

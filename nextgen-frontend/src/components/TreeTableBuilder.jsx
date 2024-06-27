@@ -183,7 +183,7 @@ const ExpandButton = styled.button`
   }
 `;
 
-export default function TreeTable ({ data:initialData, columnHeaders, dataTypes }) {
+export default function TreeTable ({ data:initialData, columnHeaders, dataTypes, setQid }) {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [isCollapseActive, setIsCollapseActive] = useState(false);
   const [isExpandActive, setIsExpandActive] = useState(false);
@@ -263,6 +263,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
             onEdit={handleEdit}
             isEditable={isEditableArray}
             dataTypes={dataTypes}
+            setQid={setQid}
           />
         ))}
       </StyledTable>
@@ -274,5 +275,6 @@ TreeTable.propTypes = {
   columnHeaders: PropTypes.array,
   dataTypes: PropTypes.array,
   columnWidths: PropTypes.string,
-  data: PropTypes.array
+  data: PropTypes.array,
+  setQid:PropTypes.func
 };

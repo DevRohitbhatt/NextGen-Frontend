@@ -42,7 +42,8 @@ export const handleEdit = async (
   node,
   selectedVendorItems,
   setSelectedVendorItems,
-  onEdit
+  onEdit,
+  setQid
 ) => {
   // Update the selectedVendorItems state for the specific index
   const updatedItems = selectedVendorItems.map((item, idx) => {
@@ -60,12 +61,12 @@ export const handleEdit = async (
           safetyFactor: safetyFactor,
           suggestedQty: newSuggestedQty,
           orderAmount: newOrderAmount,
-          extendedPrice: calculateExtendedPrice(newOrderAmount, item.latestInvoicePrice)
+          extendedPrice: calculateExtendedPrice(newOrderAmount, item.latestInvoicePrice),
         };
+        setQid(item.qsrItemID, safetyFactor);
         updatedItem.suggestedQty = parseFloat(updatedItem.suggestedQty.toFixed(2));
        
       }
-      console.log("aaaa",updatedItem);
     } else if (field === "onHand") {
       const onHand = parseFloat(value);
       const newOrderAmount = calculateOrderAmount(item.suggestedQty, onHand);

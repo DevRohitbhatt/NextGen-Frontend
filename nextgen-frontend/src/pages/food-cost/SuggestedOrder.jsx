@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useLocation } from 'react-router-dom';
+import { useEffect, useState, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import * as Styled from "./styles/SuggestedOrderStyles.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
@@ -13,6 +13,7 @@ import TreeTable from "../../components/TreeTableBuilder.jsx";
 import VendorSelector from "../../components/VendorSelector.jsx";
 import DateSelector from "../../components/DateSelector.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
+import { toast, ToastContainer } from "react-toastify";
 
 const suggestedTableStructure = {
   columnHeaders: [
@@ -26,7 +27,7 @@ const suggestedTableStructure = {
     "Suggested Qty",
     "On Hand",
     "Order Amount",
-    "Extended Price"
+    "Extended Price",
   ],
   dataTypes: [
     "string",
@@ -39,7 +40,7 @@ const suggestedTableStructure = {
     "number",
     "number",
     "number",
-    "number"
+    "number",
   ],
   columnWidth: "1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows: [],
@@ -50,13 +51,13 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
-  const { company, unit, groupOrUnit, unitName, vendorID, vendorName, dates } = useLocation().state || {};
+  const { company, unit, groupOrUnit, unitName, vendorID, vendorName, dates } =
+    useLocation().state || {};
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(unit);
   const [selectedUnitName, setSelectedUnitName] = useState(unitName);
   const [vendorsList, setVendorsList] = useState([]);
-  const [selectedVendorName, setSelectedVendorName] =
-    useState(vendorName);
+  const [selectedVendorName, setSelectedVendorName] = useState(vendorName);
   const [selectedVendor, setSelectedVendor] = useState(vendorID);
   const [showModal, setShowModal] = useState(false);
   const [companyID, setCompanyID] = useState(company);
@@ -86,6 +87,9 @@ export default function SuggestedOrder() {
     width: "50%",
   });
 
+  const [saftyFactor, setSaftyFactor] = useState({});
+  const toastId = useRef(null);
+
   const [defaultSafetyFactorTable, setDefaultSafetyFactorTable] = useState({
     columnHeaders: ["Default Safety Factor"],
     dataTypes: ["number"],
@@ -102,10 +106,10 @@ export default function SuggestedOrder() {
     const formattedDate = formatDate(today);
     setSelectedDates(dates);
 
-    console.log(unit, vendorID, vendorName, dates)
+    console.log(unit, vendorID, vendorName, dates);
 
     if (unit && vendorID && vendorName && dates) {
-      getOrderItem(companyID,unit,selectedVendor,dates[0],dates[1],0);
+      getOrderItem(companyID, unit, selectedVendor, dates[0], dates[1], 0);
     }
     setSaveIsVisible(saveSubmitStatus === 0 ? true : false);
     setSubmitIsVisible(saveSubmitStatus === 0 ? false : true);
@@ -117,17 +121,30 @@ export default function SuggestedOrder() {
     const year = date.getFullYear();
     return `${month}/${day}/${year}`;
   };
-  
-  const getOrderItem = (companyID,unitID,selectedVendor,orderFromDate,orderToDate,suggestedOrderId) => {
+
+  const getOrderItem = (
+    companyID,
+    unitID,
+    selectedVendor,
+    orderFromDate,
+    orderToDate,
+    suggestedOrderId
+  ) => {
     setIsLoading(true);
-    SuggestedOrderAPI.getOrderItem(companyID,unitID,selectedVendor,formatDate(orderFromDate),formatDate(orderToDate),suggestedOrderId)
+    SuggestedOrderAPI.getOrderItem(
+      companyID,
+      unitID,
+      selectedVendor,
+      formatDate(orderFromDate),
+      formatDate(orderToDate),
+      suggestedOrderId
+    )
       .then((response) => {
-        console.log(response.data.suggestedOrderDetails);
         buildForecastTable(response.data.forecastedData);
         setSaveSubmitStatus(response.data.suggestedOrderID);
         setSuggestedTable({
           ...suggestedTable,
-          rows: response.data.suggestedOrderDetails
+          rows: response.data.suggestedOrderDetails,
         });
         setDefaultSafetyFactorTable({
           ...defaultSafetyFactorTable,
@@ -155,7 +172,7 @@ export default function SuggestedOrder() {
 
   useEffect(() => {
     // This effect runs whenever suggestedTable.rows changes
-    console.log('Updated rows:', suggestedTable.rows);
+    console.log("Updated rows:", suggestedTable.rows);
   }, [suggestedTable]);
 
   const handleClose = () => {
@@ -167,11 +184,11 @@ export default function SuggestedOrder() {
   const buildForecastTable = (forecastData) => {
     let totalForecast = 0;
     const rows = [];
-    
+
     forecastData.forEach((data, index) => {
       totalForecast += data.projectedValue;
-  
-    const editedMessage = editedMessages[data.firstMinute] || '';
+
+      const editedMessage = editedMessages[data.firstMinute] || "";
       const row = [
         {
           value: new Date(data.firstMinute).toLocaleDateString(),
@@ -190,10 +207,10 @@ export default function SuggestedOrder() {
           columnName: "Edited Message",
         },
       ];
-  
+
       rows.push(row);
     });
-  
+
     totalForecast = totalForecast.toFixed(2);
     const totalRow = [
       { value: "Total", cellType: "", columnName: "", isTotal: true },
@@ -211,7 +228,7 @@ export default function SuggestedOrder() {
       },
     ];
     rows.push(totalRow);
-  
+
     setForecastTable({
       ...forecastTable,
       rows: rows,
@@ -238,25 +255,29 @@ export default function SuggestedOrder() {
           ])
       )
     );
-    const csvDataString = 
-      suggestedTableStructure.columnHeaders.join(",") + "\n" + 
+    const csvDataString =
+      suggestedTableStructure.columnHeaders.join(",") +
+      "\n" +
       data.map((row) => row.join(",")).join("\n");
     const csvBlob = new Blob([csvDataString], { type: "text/csv" });
     const csvURL = window.URL.createObjectURL(csvBlob);
     const tempLink = document.createElement("a");
     tempLink.href = csvURL;
-    tempLink.setAttribute("download", `SuggestedOrder_${selectedUnitName}_${selectedVendorName}.csv`);
+    tempLink.setAttribute(
+      "download",
+      `SuggestedOrder_${selectedUnitName}_${selectedVendorName}.csv`
+    );
     tempLink.click();
   };
 
   const handlePDFClick = () => {
-    console.log(suggestedTable)
+    console.log(suggestedTable);
     const pdfData = {
       title: "Suggested Order",
       subHeaders: [
         `Unit: ${selectedUnitName}`,
         `Vendor: ${selectedVendorName}`,
-        `Order Span: ${fromDate.toDateString()} - ${toDate.toDateString()}`
+        `Order Span: ${fromDate.toDateString()} - ${toDate.toDateString()}`,
       ],
       pageOrientation: "landscape",
       exportType: "pdf",
@@ -272,20 +293,46 @@ export default function SuggestedOrder() {
         title: row.name,
         widths: [100, 75, "*", 50, "*", "*", "*", "*", 75, 75, "*"],
         data: formatPDFData(row.suggestedOrderItem),
-        dataTypes: ["string", "string", "string", "string", "string", "currency", "percent", "number", "number", "number", "currency"],
-      }
+        dataTypes: [
+          "string",
+          "string",
+          "string",
+          "string",
+          "string",
+          "currency",
+          "percent",
+          "number",
+          "number",
+          "number",
+          "currency",
+        ],
+      };
     });
 
     return body;
   };
 
   const formatPDFData = (data) => {
-    console.log(data)
+    console.log(data);
     return {
       ...suggestedTableStructure,
-      classNames: ["inventory-description", "item-description", "item-ref", "item-order-unit", "pack-size", "current-last-price", "safety-factor", "suggested-qty", "on-hand", "order-amount", "extended-price"],
+      classNames: [
+        "inventory-description",
+        "item-description",
+        "item-ref",
+        "item-order-unit",
+        "pack-size",
+        "current-last-price",
+        "safety-factor",
+        "suggested-qty",
+        "on-hand",
+        "order-amount",
+        "extended-price",
+      ],
       rows: data.map((row) => {
-        const selectedVendorItem = row.vendorItems.find((item) => item.isSelected);
+        const selectedVendorItem = row.vendorItems.find(
+          (item) => item.isSelected
+        );
         return [
           {
             value: row.invItemDescription,
@@ -355,50 +402,73 @@ export default function SuggestedOrder() {
   //   dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
   // },
 
-
   const handleTableCellChange = (e, row, columnName, tableName) => {
     const updatedValue = parseFloat(e.target.value);
-  
+
     if (isNaN(updatedValue)) {
       console.error("Invalid input value");
       return;
     }
-  
+
     switch (tableName) {
       case "DefaultSafetyFactor": {
-        const updatedRows = suggestedTable.rows.map(category => {
+        const updatedRows = suggestedTable.rows.map((category) => {
           return {
             ...category,
-            suggestedOrderItem: category.suggestedOrderItem.map(item => {
+            suggestedOrderItem: category.suggestedOrderItem.map((item) => {
               return {
                 ...item,
-                vendorItems: item.vendorItems.map(vendorItem => {
-                  const safetyFactor = parseFloat(updatedValue) / 100;
-                  const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
-                  const roundedQty = Math.round(suggestedQty * 100) / 100; 
-                  
-                  return {
-                    ...vendorItem,
-                    safetyFactor: updatedValue, 
-                    suggestedQty: isNaN(roundedQty) ? 0 : roundedQty ,
-                    orderAmount: (roundedQty - vendorItem.onHand).toFixed(2),
-                    extendedPrice:(parseFloat((roundedQty - vendorItem.onHand).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
-                  };
-                })
+                vendorItems: item.vendorItems.map((vendorItem) => {
+                 
+                  if (vendorItem.qsrItemID in saftyFactor) {
+                    const safetyFactor = parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100;
+                    const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+                    const roundedQty = Math.round(suggestedQty * 100) / 100;
+                    return {
+                      ...vendorItem,
+                      safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID] : updatedValue,
+                      suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
+                      orderAmount: (roundedQty - vendorItem.onHand).toFixed(2),
+                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHand).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
+
+                    };
+                  }
+                   else {
+                    const safetyFactor = parseFloat(updatedValue) / 100;
+                    const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+                    const roundedQty = Math.round(suggestedQty * 100) / 100;
+  
+                    return {
+                      ...vendorItem,
+                      safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID]: updatedValue,
+                      suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
+                      orderAmount: (roundedQty - vendorItem.onHand).toFixed(2),
+                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHand).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
+                    };
+                  }
+                }),
               };
-            })
+            }),
           };
         });
         setSuggestedTable({
           ...suggestedTable,
-          rows: updatedRows
+          rows: updatedRows,
         });
-        
         break;
       }
-      
+
       case "Forecast": {
-        const updatedForecastData = SuggestedOrderFunctions.handleForecastChange(e, row, columnName, forecastTable, setForecastTable, editedMessages, setEditedMessages);
+        const updatedForecastData =
+          SuggestedOrderFunctions.handleForecastChange(
+            e,
+            row,
+            columnName,
+            forecastTable,
+            setForecastTable,
+            editedMessages,
+            setEditedMessages
+          );
         buildForecastTable(updatedForecastData);
         break;
       }
@@ -407,8 +477,6 @@ export default function SuggestedOrder() {
         break;
     }
   };
-  
-  
 
   function forecastedData(forecastedData) {
     if (!Array.isArray(forecastedData)) {
@@ -419,44 +487,46 @@ export default function SuggestedOrder() {
       return [];
     }
 
-    return forecastedData.map((row, rowIndex) => {
-      if (!Array.isArray(row)) {
-        console.error(
-          `Expected row at index ${rowIndex} to be an array but got:`,
-          row
+    return forecastedData
+      .map((row, rowIndex) => {
+        if (!Array.isArray(row)) {
+          console.error(
+            `Expected row at index ${rowIndex} to be an array but got:`,
+            row
+          );
+          return null;
+        }
+
+        const dateEntry = row.find((entry) => entry.columnName === "Date");
+        const valueEntry = row.find(
+          (entry) => entry.columnName === "Forecasted Sales"
         );
-        return null;
-      }
 
-      const dateEntry = row.find((entry) => entry.columnName === "Date");
-      const valueEntry = row.find(
-        (entry) => entry.columnName === "Forecasted Sales"
-      );
+        if (
+          !dateEntry ||
+          !dateEntry.value ||
+          typeof valueEntry?.value !== "number"
+        ) {
+          return null;
+        }
 
-      if (
-        !dateEntry ||
-        !dateEntry.value ||
-        typeof valueEntry?.value !== "number"
-      ) {
-        return null;
-      }
+        const date = new Date(dateEntry.value);
+        if (isNaN(date)) {
+          console.error(
+            `Invalid date format in row at index ${rowIndex}:`,
+            dateEntry.value
+          );
+          return null;
+        }
 
-      const date = new Date(dateEntry.value);
-      if (isNaN(date)) {
-        console.error(
-          `Invalid date format in row at index ${rowIndex}:`,
-          dateEntry.value
-        );
-        return null;
-      }
+        const isoDate = date.toISOString().split("T")[0] + "T00:00:00";
 
-      const isoDate = date.toISOString().split("T")[0] + "T00:00:00";
-
-      return {
-        firstMinute: isoDate,
-        projectedValue: valueEntry.value,
-      };
-    }).filter((item) => item !== null);
+        return {
+          firstMinute: isoDate,
+          projectedValue: valueEntry.value,
+        };
+      })
+      .filter((item) => item !== null);
   }
 
   function defaultSafetyFactor(defaultSafetyFactorTable) {
@@ -481,25 +551,25 @@ export default function SuggestedOrder() {
       forecastedData: forecastedData(forecastTable.rows),
       suggestedOrderDetails: suggestedTable.rows,
     };
-
-    console.log(Data)
-
     const jsonData = JSON.stringify(Data);
+    toastId.current = toast.info("Saving Suggested Order...", {
+      autoClose: false,
+    });
     SuggestedOrderAPI.save(Data)
       .then(() => {
         setSaveIsVisible(false);
         setSubmitIsVisible(true);
         setSaveSubmitStatus(1);
-        setSuccessMessage("Save successful");
-        setShowSuccessPopup(true);
+        toast.success("Suggested Order Saved successfully");
+        toast.update(toastId.current, { autoClose: 500 });
       })
       .catch((error) => {
-        setShowErrorPopup(true);
+        toast.error("Failed to Save Suggested Order");
+        toast.update(toastId.current, { autoClose: 500 });
         setSaveIsVisible(true);
         setSubmitIsVisible(false);
       });
   }
-
   function handleSubmit() {
     const data = {
       suggestedOrderID: 0,
@@ -516,26 +586,36 @@ export default function SuggestedOrder() {
     };
     const jsonData = JSON.stringify(data);
     console.log("jsonData", jsonData);
+    toastId.current = toast.info("Submiting Suggested Order...", {
+      autoClose: false,
+    });
     SuggestedOrderAPI.submit(jsonData)
       .then(() => {
         setVisible(true);
         setSuccessMessage("Submit successful");
-        setShowSuccessPopup(true);
+        // setShowSuccessPopup(true);
         setSubmitIsVisible(false);
         setSaveIsVisible(false);
         setSaveSubmitStatus(0);
       })
       .catch((error) => {
-        setShowErrorPopup(true);
+        // setShowErrorPopup(true);
+        toast.error("Failed to Submit Suggested Order");
+        toast.update(toastId.current, { autoClose: 500 });
         setVisible(false);
       });
   }
 
-  console.log("SuggestedOrder",suggestedTable.rows);
+  const setQid = (ind, sfValue) => {
+    setSaftyFactor({ ...saftyFactor, [ind]: sfValue });
+  };
+
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
       <Styled.OptionsRow>
+        <ToastContainer />
+
         <Styled.MessageContainer>
           {showSuccessPopup && (
             <MessagePopup
@@ -614,7 +694,11 @@ export default function SuggestedOrder() {
         <Styled.UnloadedMessage>{errorMessage}</Styled.UnloadedMessage>
       ) : (
         <>
-          <MinimizableContainer title={() => {return <div>Sales Forecast</div>}}>
+          <MinimizableContainer
+            title={() => {
+              return <div>Sales Forecast</div>;
+            }}
+          >
             <Styled.ForeCastAndSafetyFactor>
               <Table
                 columnHeaders={forecastTable.columnHeaders}
@@ -646,6 +730,7 @@ export default function SuggestedOrder() {
               data={suggestedTable.rows}
               columnHeaders={suggestedTable.columnHeaders}
               dataTypes={suggestedTable.dataTypes}
+              setQid={setQid}
             />
           </Styled.InventoryItemsContainer>
         </>
