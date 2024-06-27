@@ -47,8 +47,10 @@ const SuggestedOrderList = () => {
     { key: 'vendorName', label: 'Vendor Name', cellType: 'string' },
     { key: 'deliveryDate', label: 'Delivery Date', cellType: 'date' },
     { key: 'createdBy', label: 'Created By', cellType: 'string' },
-    { key: 'submittedOn', label: 'Created On',cellType: 'dateTime' },
-    { key: 'status', label: 'Order Status', cellType: 'string' }
+    { key: 'createdOn', label: 'Created On',cellType: 'dateTime' },
+    { key: 'modifiedOn', label: 'Submitted On', cellType: 'dateTime'},
+    { key: 'status', label: 'Order Status', cellType: 'string' },
+    { key: 'orderSpan', label: 'Order Span', cellType: 'string' }
   ];
 
   useEffect(() => {    
@@ -113,12 +115,28 @@ const SuggestedOrderList = () => {
     console.log("fetching orders", unitID)
     SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID, unitID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
+      data.map((x) => {
+        if(x.status !== "Submitted") 
+          x.modifiedOn = "";
+
+        const formatFromDate = formatDate(x.orderFromDate);
+        const formatToDate = formatDate(x.orderToDate);
+        x.orderSpan = `${formatFromDate} - ${formatToDate}`;
+      });
       setSuggestedOrders(data);
     }).catch((error) => {
       console.error("Error getting orders: ", error);
     });    
   };
 
+  const formatDate = (orderDate) => {
+    let date = new Date(orderDate);
+    const day = date.toString().substr(0, 3);
+    date = date.toLocaleString('en-US');
+    const formattedDate = `${day}, ${date}`;
+    return formattedDate;
+  };
+  
   const handleDateSelectorClick = () => {
     setShowDateModal(true); 
   };
