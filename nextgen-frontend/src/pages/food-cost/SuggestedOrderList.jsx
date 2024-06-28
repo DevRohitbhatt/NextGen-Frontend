@@ -12,6 +12,8 @@ import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import { VendorAPI } from "../../apis/VendorAPI.jsx";
 import { SuggestedOrderAPI } from "../../apis/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
+import PdfBuilder from "../../components/PdfBuilder.jsx";
+import { useNavigate } from 'react-router-dom';
 
 const SuggestedOrderList = () => {
   const [userID, setUserID] = useState();
@@ -46,9 +48,13 @@ const SuggestedOrderList = () => {
     { key: 'vendorName', label: 'Vendor Name', cellType: 'string' },
     { key: 'deliveryDate', label: 'Delivery Date', cellType: 'date' },
     { key: 'createdBy', label: 'Created By', cellType: 'string' },
-    { key: 'submittedOn', label: 'Submitted On',cellType: 'dateTime' },
-    { key: 'status', label: 'Order Status', cellType: 'string' }
+    { key: 'createdOn', label: 'Created On',cellType: 'dateTime' },
+    { key: 'submittedOn', label: 'Submitted On', cellType: 'dateTime'},
+    { key: 'status', label: 'Order Status', cellType: 'string' },
+    { key: 'orderSpan', label: 'Order Span', cellType: 'string' }
   ];
+
+  const navigate = useNavigate();
 
   useEffect(() => {    
     // Fetch initial data
@@ -71,11 +77,10 @@ const SuggestedOrderList = () => {
         setUserID(5199)
         setIsActive(0)
         setSelectedUnit(0)
-        fetchData(1021, 1110, 5199, 87)
+        fetchData(1021, 1110, 5199, 0)
       }
     }
     else {      
-      console.log("testing")
       setErrorMessage("There was an issue loading your orders, please try again later.");
     }
 
@@ -99,7 +104,6 @@ const SuggestedOrderList = () => {
   };
 
   const fetchVendors =  (companyID) => {
-    console.log("vendors")
     VendorAPI.getVendorsByCompany(companyID)
     .then((data) => {
       setVendorsList(data);
@@ -111,12 +115,27 @@ const SuggestedOrderList = () => {
   const fetchSuggestedOrders = (companyID, alignmentID, memberID, unitID, vendorID) => {
     SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID, unitID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
+      data.data.map((x) => {
+        const formatFromDate = formatDate(x.orderFromDate);
+        const formatToDate = formatDate(x.orderToDate);
+        x.orderSpan = `${formatFromDate} - ${formatToDate}`;
+      });
       setSuggestedOrders(data);
     }).catch((error) => {
       console.error("Error getting orders: ", error);
     });    
   };
 
+  const formatDate = (orderDate) => {
+    const date = new Date(orderDate);
+    const day = date.getDate();
+    const month = date.getMonth() + 1; // Months are zero-based, so add 1
+    const year = date.getFullYear();
+  
+    const formattedDate = `${month}/${day}/${year}`;
+    return formattedDate;
+  };
+  
   const handleDateSelectorClick = () => {
     setShowDateModal(true); 
   };
@@ -152,16 +171,70 @@ const SuggestedOrderList = () => {
     setSelectedToDate(toDate);
   };
 
+  const handleRowItemClick = (selectedRow) => {
+    if (selectedRow.status !== "Submitted") {
+      const toDate = new Date(selectedRow.orderToDate);
+      const fromDate = new Date(selectedRow.orderFromDate);
+      let selectedDates = [toDate, fromDate];
+      console.log(selectedRow);
+      navigate('/SuggestedOrder', {
+        state: {
+          company: companyID,
+          unit: selectedUnit,
+          unitName: selectedRow.unitID,
+          vendorID: selectedRow.vendorID,
+          vendorName: selectedRow.vendorName,
+          orderID: selectedRow.suggestedOrderID,
+          dates: selectedDates
+        }
+      });
+    }
+  };
+
   const handleCreateOrderClick = () => { 
     setCreateOrderShowModal(true);   
   };
 
+  const handlePDFClick = () => {
+    const pdfData = {
+      title: "Suggested Order",
+      exportType: "pdf",
+      body: [
+        {
+          type: "table/Column",
+          title: "Suggested Order",
+          widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
+          data: suggestedOrders,
+        },
+      ],
+    };
+    PdfBuilder(pdfData);
+  };
+
+  const handleExcelClick = () => {
+    const excelData = {
+      title: "Suggested Order",
+      exportType: "excel",
+      body: [
+        {
+          type: "table/Column",
+          title: "Suggested Order",
+          widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
+          data: suggestedOrders,
+        },
+      ],
+    };
+    PdfBuilder(excelData);
+  };
+  
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
       <Styled.OptionsRow>
         <Styled.DateAndUnitContainer>
           <UnitSelector
+            companyID={companyID}
+            alignmentID={alignmentID}
             unitID={selectedUnit}
             unitName={selectedUnitName}
             setUnitName={setselectedUnitName}
@@ -183,6 +256,12 @@ const SuggestedOrderList = () => {
         <ExportOptions
           includeAdd={true}
           handleAddClick={() => {setCreateOrderShowModal(true)}}
+          includePDF={true}
+          handlePDFClick={handlePDFClick}
+          includeExcel={true}
+          handleExcelClick={handleExcelClick}
+          includeHelp={true}
+          handleHelpClick={() => {console.log("Help")}}
         />
       </Styled.OptionsRow>
       {isLoading ? (
@@ -193,6 +272,8 @@ const SuggestedOrderList = () => {
             <Styled.OptionsRow>
               <OrderModal
                 companyID={companyID}
+                alignmentID={alignmentID}
+                memberID={userID}
                 unitData={unitsList}
                 vendorData={vendorsList}
                 unitID={selectedUnit}
@@ -208,6 +289,7 @@ const SuggestedOrderList = () => {
                 <Table
                   data={suggestedOrders?.data}
                   headers={headers}
+                  onRowClick={handleRowItemClick}
                 />
               </Styled.VendorOrdersContainer>
             </Styled.OptionsRow>            

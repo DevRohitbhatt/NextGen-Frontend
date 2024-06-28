@@ -165,6 +165,8 @@ const Option = styled.option`
 
 const OrderModal = ({
   companyID,
+  alignmentID,
+  memberID,
   unitData,
   vendorData,
   unitID,
@@ -201,7 +203,7 @@ const OrderModal = ({
       setSelectedUnit(unitID);
       setSelectedUnits([{ id: unitID, name: unitName, isArea: false }]);
     } else {
-      console.log('No data found');
+
     }
   }, [unitData, unitName, unitID]);
 
@@ -237,7 +239,6 @@ const OrderModal = ({
   };
 
   const handleUnitItemClick = (name, id) => {
-    console.log("testing")
     setSelectedUnit(id);
     setSelectedUnitName(name);
   };
@@ -248,7 +249,7 @@ const OrderModal = ({
   };
 
   const handleNextButtonClick = () => {
-    console.log(selectedUnit, selectedVendor, selectedVendorName, selectedDates), 
+    console.log(selectedDates)
     navigate('/SuggestedOrder', {
       state: {
         company: companyID,
@@ -286,6 +287,9 @@ const OrderModal = ({
                 <Rows>
                   <Titles>Select Unit</Titles>
                   <UnitSelector
+                    companyID={companyID}
+                    alignmentID={alignmentID}
+                    memberID={memberID}
                     unitID={selectedUnit}
                     unitName={selectedUnitName}
                     setUnitName={setSelectedUnitName}
@@ -320,7 +324,7 @@ const OrderModal = ({
                   />
                 </Rows>
                 <Rows>
-                  <Titles>Delivery Date</Titles>
+                  <Titles>Date Range</Titles>
                   <DateRangePicker
                     selectedDates={selectedDates}
                     onDateChange={setSelectedDates}

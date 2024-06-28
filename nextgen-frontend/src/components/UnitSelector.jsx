@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import { AreaAPI } from "../apis/AreaAPI";
-import { UnitAPI } from "../apis/UnitAPI";
+import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI";
 
 
 const UnitContainer = styled.div`
@@ -50,22 +49,27 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick , unitName, setUnitName, unitID, formVersion = false, isEditable = true}) {
+export default function UnitSelector({ onClick, companyID, alignmentID, unitName, setUnitName, unitID, isEditable=true, formVersion=false}) {
   
-  const GetUnitList = () => {
-    UnitAPI.getUnitsByCompany(1, 1)
-    .then((data) => {
-      if (data.Units.length > 0) {
-        setUnitName(data.Units.find(unit => unit.UnitID === unitID).Name);
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-  };
-  if (unitName === "No Unit Selected" && unitID) {
-    GetUnitList();
-  }
+  useEffect(() => {
+    const fetchUnitList = async () => {
+      await UnitsAndAreasAPI.getbyid(companyID, alignmentID, unitID)
+      .then((response) => {
+        if(response.data.units.length === 0) {
+          setUnitName("No unit selected");
+          return;
+        } else {
+          setUnitName(response.data.units[0].unitName);
+        }
+      }).catch((error) => {
+        setUnitName("No unit selected")
+      });
+      
+    };
+    if (companyID && alignmentID && unitID)
+      fetchUnitList();
+  }, [unitID]);
+
   
   return (
     <>

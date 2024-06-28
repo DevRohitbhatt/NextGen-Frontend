@@ -58,6 +58,7 @@ const TableHeader = styled.div`
   gap:20px;
   margin-bottom: 10px;
   padding-bottom: 10px;
+  //  min-width:145px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
 `;
 
@@ -67,7 +68,9 @@ const TableHeaderCell = styled.div`
   // height: 44px;
   padding: 10px 0;
   width: 100%;
-
+  min-width:145px;
+  text-align: ${(props) =>
+    props.columntype === "number" || props.columntype === "percent" ? "center" : "left"};
 `;
 const CollapseButton = styled.button`
   box-shadow: inset 0 0 0 2px ${(props) => props.theme.primary};
@@ -180,7 +183,7 @@ const ExpandButton = styled.button`
   }
 `;
 
-export default function TreeTable ({ data:initialData, columnHeaders, dataTypes }) {
+export default function TreeTable ({ data:initialData, columnHeaders, dataTypes, setQid }) {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [isCollapseActive, setIsCollapseActive] = useState(false);
   const [isExpandActive, setIsExpandActive] = useState(false);
@@ -189,7 +192,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
   useEffect(() => {
     setIsCollapseActive(true);
     setIsExpandActive(false);
-  }, []);
+  }, [initialData]);
 
   const toggleNode = (node) => {
     const updatedExpandedNodes = { ...expandedNodes };
@@ -204,6 +207,10 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
       )
     );
   };
+
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
 
   const handleCollapseAll = () => {
     setExpandedNodes({});
@@ -221,9 +228,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
     setIsExpandActive(true);
   };
 
-  const isEditableArray = [false, false, false, false, true, false, true, true, false];
-
-  console.log(dataTypes);
+  const isEditableArray = [false, false, false, false, true, false, true, true, false,false];
   return (
     <>
       <ButtonContainer>
@@ -258,6 +263,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
             onEdit={handleEdit}
             isEditable={isEditableArray}
             dataTypes={dataTypes}
+            setQid={setQid}
           />
         ))}
       </StyledTable>
@@ -269,5 +275,6 @@ TreeTable.propTypes = {
   columnHeaders: PropTypes.array,
   dataTypes: PropTypes.array,
   columnWidths: PropTypes.string,
-  data: PropTypes.array
+  data: PropTypes.array,
+  setQid:PropTypes.func
 };

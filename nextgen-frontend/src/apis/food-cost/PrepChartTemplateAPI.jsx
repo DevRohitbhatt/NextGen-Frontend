@@ -5,16 +5,16 @@ export const PrepChartTemplateAPI = {
   get: async function (companyID, unitID, cancel = false) {
     const response = await api.request({
       method: "GET",
-      url: `/api/prepcharttemplate/getprepcharttemplate?companyid=${companyID}&unitid=${unitID}&templatetypeid=${0}`,
+      url: `/api/prepcharttemplate?companyid=${companyID}&unitid=${unitID}&templatetypeid=${0}`,
       signal: cancel ? cancelApiObject[this.get.name].handleRequestCancellation().signal : undefined,
     });
 
     return response.data;
   },
-  save: async function (data, cancel = false) {
+  save: async function (companyID, data, cancel = false) {
     const response = await api.request({
       method: "POST",
-      url: `/api/prepcharttemplate/saveprepcharttemplate`,
+      url: `/api/prepcharttemplate/save?companyid=${companyID}`,
       data: data,
       headers: {
         "Content-Type": "application/json",

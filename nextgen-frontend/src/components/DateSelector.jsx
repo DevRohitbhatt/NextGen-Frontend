@@ -60,7 +60,7 @@ export default function DateSelector({ toDate, fromDate, onClick, isDateRange=fa
           ) : (
             <Label>Date</Label>
           )}
-          <DateValue isEditable={isEditable}>{fromDate.toLocaleDateString()}</DateValue>
+          <DateValue isEditable={isEditable}>{fromDate?.toLocaleDateString()}</DateValue>
         </DateContainer>
       ) : (
      <DateContainer onClick={isEditable ? onClick : () => {}} className="date-selector">
@@ -69,7 +69,7 @@ export default function DateSelector({ toDate, fromDate, onClick, isDateRange=fa
       ) : (
         <Label>Date Range</Label>
       )}
-      <DateValue isEditable={isEditable}>{fromDate.toLocaleDateString() +" - "+ toDate.toLocaleDateString()}</DateValue>
+      <DateValue isEditable={isEditable}>{fromDate?.toLocaleDateString() +" - "+ toDate?.toLocaleDateString()}</DateValue>
     </DateContainer>
       )}
     </>

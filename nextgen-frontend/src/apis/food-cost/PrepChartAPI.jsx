@@ -2,10 +2,10 @@ import api from "../configs/axiosConfig.jsx";
 import { defineCancelApiObject } from "../configs/axiosUtils.jsx";
 
 export const PrepChartAPI = {
-  get: async function (companyID, unitID, date, cancel = false) {
+  get: async function (companyID, unitID, templateTypeID, date, cancel = false) {
     const response = await api.request({
       method: "GET",
-      url: `/api/prepchartdetail/getprepchartdetail/?companyid=${companyID}&unitid=${unitID}&date=${date}`,
+      url: `/api/prepchartdetail?companyid=${companyID}&unitid=${unitID}&templatetypeid=${templateTypeID}&date=${date}`,
       companyID,
       unitID,
       date,
@@ -14,10 +14,10 @@ export const PrepChartAPI = {
     
     return response.data;
   },
-  save: async function (data, cancel = false) {
+  save: async function (companyID, data, cancel = false) {
     const response = await api.request({
       method: "POST",
-      url: `/api/prepchartdetail/saveprepchartdetail`,
+      url: `/api/prepchartdetail/save?companyid=${companyID}`,
       data,
       signal: cancel ? cancelApiObject[this.save.name].handleRequestCancellation().signal : undefined,
     });

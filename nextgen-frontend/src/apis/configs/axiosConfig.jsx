@@ -1,6 +1,6 @@
 import axios from "axios";
 
-axios.defaults.baseURL = "http://192.168.192.244:8030/";
+const baseURL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   withCredentials: true,
@@ -8,7 +8,7 @@ const api = axios.create({
     'Allow-Control-Allow-Origin': '*',
   },
   'Content-Type': 'application/json',
-  baseURL: "https://localhost:7278/",
+  baseURL: baseURL,
 });
 
 const errorHandler = (error) => {
@@ -32,4 +32,4 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export default api;
+export default api; 

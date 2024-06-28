@@ -47,171 +47,200 @@ export const handleForecastChange = (
   return updatedForecastData;
 };
 
-
-export function handleDefaultSafetyFactorChange(
-  e,
-  row,
-  columnName,
-  tableName,
-  tableData,
-  setTable,
-  suggestedOrder,
-  setsuggestedOrder,
-  setSuggestedTable,
-  SuggestedTable
-) {
-  const newsuggestedOrder = { ...suggestedOrder };
-  let previousSafetyFactor = suggestedOrder.defaultSafetyFactor;
-
-  setTable({
-    ...tableData,
-    rows: tableData.rows.map((item, index) => {
-      if (index === row) {
-        return item.map((cell) => {
-          if (cell.columnName === "Default Safety Factor") {
-            if (e.target.value === "") e.target.value = 0;
-            cell.value = e.target.value;
-            newsuggestedOrder.defaultSafetyFactor = parseFloat(e.target.value);
-          }
-          return cell;
-        });
-      } else {
-        return item;
-      }
-    }),
-  });
-
-  recalculateSuggestedOrder(newsuggestedOrder, setsuggestedOrder, SuggestedTable, setSuggestedTable,previousSafetyFactor, parseFloat(e.target.value));
-  setsuggestedOrder(newsuggestedOrder);
-}
-
-export const recalculateSuggestedOrder = (suggestedOrder, setsuggestedOrder, todayTable, tomorrowTable, nextDayTable, setTodayTable, setTomorrowTable, setNextDayTable, previousSafetyFactor, newSafetyFactor) => {
-  recalculateTable(suggestedOrder, setsuggestedOrder, todayTable, setTodayTable, "today", previousSafetyFactor, newSafetyFactor);
-  recalculateTable(suggestedOrder, setsuggestedOrder, tomorrowTable, setTomorrowTable, "tomorrow", previousSafetyFactor, newSafetyFactor);
-  recalculateTable(suggestedOrder, setsuggestedOrder, nextDayTable, setNextDayTable, "nextDay", previousSafetyFactor, newSafetyFactor);
-}
-
-export const recalculateTable = (suggestedOrder, setsuggestedOrder, tableData, setTable, tableName, previousSafetyFactor, newSafetyFactor) => {
-  const newsuggestedOrder = { ...suggestedOrder };
-
-  setTable({
-    ...tableData,
-    rows: tableData.rows.map((item, index) => {
-      let suggestedValue = 0;
-      let yieldType = 0;
-      let safetyFactor = 0;
-      let needed = 0;
-      let onHand = 0;
-
-      return item.map((cell) => {
-        if (cell.columnName === "Prep Type") {
-          cell.value.forEach((option) => {
-            if (option.isSelected) {
-              suggestedValue = option.value;
+export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData) => { 
+  const updatedSuggestedOrderData = suggestedOrderData.rows.map((detail) => {
+    return {
+      name: detail.name,
+      suggestedOrderItem: detail.suggestedOrderItem.map((inventoryItem) => {
+        return {
+          ...inventoryItem,
+          vendorItems: inventoryItem.vendorItems.map((vendorItem) => {
+            var suggestedQty = vendorItem.suggestedQty;
+            var onHand = vendorItem.onHandQty;
+            var orderQty = vendorItem.orderQty;
+            var extendedPrice = 0;
+            if (inventoryItem.invItemAvgSalesYieldPerMainUOM > 0) {
+              suggestedQty = Math.ceil(
+                (
+                  (forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM) * vendorItem.mappingQuantityMultiplier
+                ) * 1 + (vendorItem.safetyFactor / 100)
+              );
             }
-          });
+            orderQty = calculateOrderQty(suggestedQty, onHand);
+            extendedPrice = calculateExtendedPrice(orderQty, vendorItem.latestInvoicePrice);
+            const updatedVendorItem = {
+              ...vendorItem,
+              suggestedQty: suggestedQty,
+              orderQty: orderQty,
+              extendedPrice: extendedPrice,
+            };
+            return updatedVendorItem;
+          }),
         }
-
-        if (cell.columnName === "Yield/Type") {
-          yieldType = (cell.yieldDollars / suggestedValue).toFixed(2);
-          cell.value = yieldType;
-          newsuggestedOrder[tableName][index]["yieldType"] = yieldType;
-        } else if (cell.columnName === "Safety Factor") {
-          safetyFactor = (cell.value === previousSafetyFactor) ? newSafetyFactor : cell.value;
-          cell.value = safetyFactor;
-          newsuggestedOrder[tableName][index]["safetyFactor"] = safetyFactor;
-        } else if (cell.columnName === "Needed") {
-          needed = calculateNeededValue(tableName, suggestedOrder, suggestedValue, yieldType, safetyFactor);
-          cell.value = needed;
-          newsuggestedOrder[tableName][index]["needed"] = needed;
-        } else if (cell.columnName === "On Hand") {
-          onHand = parseFloat(cell.value);
-          newsuggestedOrder[tableName][index]["onHand"] = onHand;
-        } else if (cell.columnName === "Prep/Pull Amount") {
-          cell.value = (needed - onHand).toFixed(2);
-          newsuggestedOrder[tableName][index]["prepPullAmount"] = cell.value;
-        }
-        return cell;
-      });
-    }),
+      }),
+    }
   });
+
+  return updatedSuggestedOrderData;
 }
 
-function calculateNeededValue(tableName, suggestedOrder, prepValue, yieldType, safetyFactor) {
-  const todayForecast = suggestedOrder.forecastData.today;
-  const tomorrowForecast = suggestedOrder.forecastData.tomorrow;
-  const nextDayForecast = suggestedOrder.forecastData.nextDay;
-  let needed = 0;
-  safetyFactor = safetyFactor / 100 + 1;
 
-  if (tableName === "today") {
-    console.log("todayForecast: ", todayForecast, "prepValue: ", prepValue, "yieldType: ", yieldType, "safetyFactor: ", safetyFactor)
-    needed = (todayForecast / (parseFloat(yieldType))) * safetyFactor;
-  } else if (tableName === "tomorrow") {
-    needed = ((todayForecast + tomorrowForecast) / (parseFloat(yieldType))) * safetyFactor;
-  } else if (tableName === "nextDay") {
-    needed = ((todayForecast + tomorrowForecast + nextDayForecast) / (parseFloat(yieldType))) * safetyFactor;
+export const handleVendorItemChange = (
+  node,
+  selectedQsrItemID,
+  index,
+  setSelectedVendorItems,
+  onEdit
+) => {
+  const selectedVendorItem = node.suggestedOrderItem[index].vendorItems.find(
+    (vendorItem) => vendorItem.qsrItemID === parseInt(selectedQsrItemID)
+  );
+
+  setSelectedVendorItems((prevSelectedVendorItems) => ({
+    ...prevSelectedVendorItems,
+    [index]: selectedVendorItem,
+  }));
+
+  const updatedSuggestedOrderItem = node.suggestedOrderItem.map(
+    (childNode, i) =>
+      i === index
+        ? {
+            ...childNode,
+            vendorItems: childNode.vendorItems.map((vendorItem) =>
+              vendorItem.qsrItemID === parseInt(selectedQsrItemID)
+                ? { ...vendorItem, isSelected: true }
+                : { ...vendorItem, isSelected: false }
+            ),
+          }
+        : childNode
+  );
+
+  const updatedNode = {
+    ...node,
+    suggestedOrderItem: updatedSuggestedOrderItem,
+  };
+
+  onEdit(updatedNode);
+};
+export const handleEdit = async (
+  field,
+  value,
+  index,
+  node,
+  selectedVendorItems,
+  setSelectedVendorItems,
+  onEdit,
+  setQid
+) => {
+  // Update the selectedVendorItems state for the specific index
+  const updatedItems = selectedVendorItems.map((item, idx) => {
+    if (idx !== index) return item;
+
+    let updatedItem = { ...item, [field]: value };
+
+    if (field === "safetyFactor") {
+      const safetyFactor = parseFloat(value.replace("%", ""));
+      if (!isNaN(safetyFactor) && safetyFactor !== parseFloat(item.safetyFactor)) {
+        const newSuggestedQty = calculateSuggestedQty(item.suggestedQty, safetyFactor);
+        const newOrderQty = calculateOrderQty(newSuggestedQty, item.onHandQty);
+        updatedItem = {
+          ...updatedItem,
+          safetyFactor: safetyFactor,
+          suggestedQty: newSuggestedQty,
+          orderQty: newOrderQty,
+          extendedPrice: calculateExtendedPrice(newOrderQty, item.latestInvoicePrice),
+        };
+        setQid(item.qsrItemID, safetyFactor);
+        updatedItem.suggestedQty = parseFloat(updatedItem.suggestedQty.toFixed(2));
+       
+      }
+    } else if (field === "onHandQty") {
+      const onHandQty = parseFloat(value);
+      const neworderQty = calculateOrderQty(item.suggestedQty, onHandQty);
+      updatedItem = {
+        ...updatedItem,
+        onHandQty: isNaN(onHandQty) ? "NaN" : onHandQty,
+        orderQty: neworderQty,
+        extendedPrice: calculateExtendedPrice(neworderQty, item.latestInvoicePrice)
+      };
+    } else if (field === "orderQty") {
+      const orderQty = parseFloat(value);
+      const latestInvoicePrice = parseFloat(item.latestInvoicePrice);
+      updatedItem = {
+        ...updatedItem,
+        orderQty: orderQty,
+        extendedPrice:
+          isNaN(orderQty) || latestInvoicePrice === 0
+            ? "NaN"
+            : calculateExtendedPrice(orderQty, latestInvoicePrice)
+      };
+    } else if (field === "extendedPrice") {
+      const extendedPrice = parseFloat(value);
+      const latestInvoicePrice = parseFloat(item.latestInvoicePrice);
+      updatedItem = {
+        ...updatedItem,
+        extendedPrice: isNaN(extendedPrice) ? "NaN" : extendedPrice.toFixed(2),
+        orderQty:
+          isNaN(extendedPrice) || latestInvoicePrice === 0
+            ? "NaN"
+            : (extendedPrice / latestInvoicePrice).toFixed(2),
+      };
+    }
+
+    return updatedItem;
+  });
+
+  // Update the state with updatedItems
+  setSelectedVendorItems(updatedItems);
+
+  // Update the node's suggestedOrderItem to reflect changes in vendorItems
+  const updatedSuggestedOrderItem = node.suggestedOrderItem.map(
+    (childNode) => {
+
+      let returntItem = {
+        ...childNode,
+        vendorItems: childNode.vendorItems.map((vendorItem) => {
+          if (vendorItem.qsrItemID === updatedItems[index]?.qsrItemID) {
+            return updatedItems[index];
+          }
+        }),
+      };
+
+      return returntItem;
+    }
+  );
+
+  const updatedNode = {
+    ...node,
+    suggestedOrderItem: updatedSuggestedOrderItem,
+  };
+
+  if (
+    ["safetyFactor", "onHandQty", "orderQty", "extendedPrice"].includes(field)
+  ) {
+    onEdit(updatedNode);
   }
 
-  return needed.toFixed(2);
+  return updatedNode;
+};
+
+const formatNumberTwoDecimals = (value) => {
+    const rounded = value.toFixed(2);
+    return parseFloat(rounded);
 }
 
-export const buildPrepTable = (
-  suggestedOrderSection,
-  setTable,
-  tableState,
-  onInputCellChange,
-  handleDropdownChange
-) => {
-  const rows = suggestedOrderSection.map((item) => {
-    return [
-      { 
-        value: item.itemName, 
-        cellType: "", 
-        columnName: "Item Name" },
-      {
-        value: item.prepUOM,
-        cellType: "dropdown",
-        columnName: "Prep Type",
-        handleOnChange: { handleDropdownChange },
-      },
-      { 
-        value: item.yieldType,
-        cellType: "dollar", 
-        columnName: "Yield/Type" ,
-        yieldDollars: item.caseYieldDollars,
-        isInput: false,
-      },
-      {
-        value: item.safetyFactor,
-        cellType: "percent",
-        columnName: "Safety Factor",
-        handleOnChange: { onInputCellChange },
-        isInput: true,
-      },
-      {
-        value: item.needed,
-        cellType: "",
-        columnName: "Needed",
-        handleOnChange: { onInputCellChange },
-      },
-      {
-        value: item.onHand,
-        cellType: "input",
-        columnName: "On Hand",
-        handleOnChange: { onInputCellChange },
-        isInput: true,
-      },
-      {
-        value: item.prepPullAmt,
-        cellType: "",
-        columnName: "Prep/Pull Amount",
-      },
-    ];
-  });
+const calculateSuggestedQty = (suggestedQty, safetyFactor) => {
+    return formatNumberTwoDecimals(suggestedQty * (1 + safetyFactor / 100));
+}
 
-  setTable({
-    ...tableState,
-    rows: rows,
-  });
-};
+const calculateOrderQty = (suggestedQty, onHandQty) => {
+    if (onHandQty > suggestedQty) {
+        return 0;
+    }
+    return formatNumberTwoDecimals(suggestedQty - onHandQty);
+}
+
+const calculateExtendedPrice = (orderQty, latestInvoicePrice) => {
+    const extendedPrice = '$' + ((orderQty * latestInvoicePrice).toFixed(2)).toString();
+    return extendedPrice;
+}
