@@ -13,6 +13,7 @@ import { VendorAPI } from "../../apis/VendorAPI.jsx";
 import { SuggestedOrderAPI } from "../../apis/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
+import { useNavigate } from 'react-router-dom';
 
 const SuggestedOrderList = () => {
   const [userID, setUserID] = useState();
@@ -52,6 +53,8 @@ const SuggestedOrderList = () => {
     { key: 'status', label: 'Order Status', cellType: 'string' },
     { key: 'orderSpan', label: 'Order Span', cellType: 'string' }
   ];
+
+  const navigate = useNavigate();
 
   useEffect(() => {    
     // Fetch initial data
@@ -168,6 +171,22 @@ const SuggestedOrderList = () => {
     setSelectedToDate(toDate);
   };
 
+  const handleRowItemClick = (selectedRow) => {
+    if (selectedRow.status !== "Submitted") {
+      let selectedDates = [selectedRow.orderFromDate, selectedRow.orderToDate];
+      navigate('/SuggestedOrder', {
+        state: {
+          company: companyID,
+          unit: selectedUnit,
+          unitName: selectedUnitName,
+          vendorID: selectedVendor,
+          vendorName: selectedVendorName,
+          dates: selectedDates
+        }
+      });
+    }
+  };
+
   const handleCreateOrderClick = () => { 
     setCreateOrderShowModal(true);   
   };
@@ -266,6 +285,7 @@ const SuggestedOrderList = () => {
                 <Table
                   data={suggestedOrders?.data}
                   headers={headers}
+                  onRowClick={handleRowItemClick}
                 />
               </Styled.VendorOrdersContainer>
             </Styled.OptionsRow>            
