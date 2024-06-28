@@ -173,14 +173,18 @@ const SuggestedOrderList = () => {
 
   const handleRowItemClick = (selectedRow) => {
     if (selectedRow.status !== "Submitted") {
-      let selectedDates = [selectedRow.orderFromDate, selectedRow.orderToDate];
+      const toDate = new Date(selectedRow.orderToDate);
+      const fromDate = new Date(selectedRow.orderFromDate);
+      let selectedDates = [toDate, fromDate];
+      console.log(selectedRow);
       navigate('/SuggestedOrder', {
         state: {
           company: companyID,
           unit: selectedUnit,
-          unitName: selectedUnitName,
-          vendorID: selectedVendor,
-          vendorName: selectedVendorName,
+          unitName: selectedRow.unitID,
+          vendorID: selectedRow.vendorID,
+          vendorName: selectedRow.vendorName,
+          orderID: selectedRow.suggestedOrderID,
           dates: selectedDates
         }
       });

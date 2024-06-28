@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { SlArrowDown, SlArrowUp } from "react-icons/sl";
 import PropTypes from "prop-types";
-import { handleVendorItemChange, handleEdit } from "../functions/Helpers.jsx";
+import { handleVendorItemChange, handleEdit } from "../functions/SuggestedOrderFunctions.jsx";
 
 const TableCell = styled.div`
   position: relative;
@@ -353,36 +353,36 @@ const TreeNode = ({
                 )}
                 {isEditable[6] ? (
                   <EditableCell
-                    value={selectedVendorItems[index].onHand}
+                    value={selectedVendorItems[index].onHandQty}
                     onChange={(value) =>
-                      handleEditfield("onHand", value, index)
+                      handleEditfield("onHandQty", value, index)
                     }
                     DataType={dataTypes[8]}
                   />
                 ) : (
-                  <StyledCell>{selectedVendorItems[index].onHand}</StyledCell>
+                  <StyledCell>{selectedVendorItems[index].onHandQty}</StyledCell>
                 )}
                 {isEditable[7] ? (
                   <EditableCell
-                  value={selectedVendorItems[index].orderAmount}
+                  value={selectedVendorItems[index].orderQty}
                     // value={(
                     //   selectedVendorItems[index].suggestedQty -
-                    //   selectedVendorItems[index].onHand
+                    //   selectedVendorItems[index].onHandQty
                     // ).toFixed(2)}
                     onChange={(value) =>
-                      handleEditfield("orderAmount", value, index)
+                      handleEditfield("orderQty", value, index)
                     }
                     DataType={dataTypes[9]}
                   />
                 ) : (
                   <StyledCell>
-                    {selectedVendorItems[index].orderAmount}
+                    {selectedVendorItems[index].orderQty}
                   </StyledCell>
                 )}
                 {isEditable[8] ? (
                   <EditableCell
                   value={selectedVendorItems[index].extendedPrice}
-                    // value={(selectedVendorItems[index].latestInvoicePrice * selectedVendorItems[index].orderAmount).toFixed(2)}
+                    // value={(selectedVendorItems[index].latestInvoicePrice * selectedVendorItems[index].orderQty).toFixed(2)}
                     onChange={(value) =>
                       handleEditfield("extendedPrice", value, index)
                     }

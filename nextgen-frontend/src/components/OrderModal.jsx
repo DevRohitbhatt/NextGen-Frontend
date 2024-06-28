@@ -249,6 +249,7 @@ const OrderModal = ({
   };
 
   const handleNextButtonClick = () => {
+    console.log(selectedDates)
     navigate('/SuggestedOrder', {
       state: {
         company: companyID,

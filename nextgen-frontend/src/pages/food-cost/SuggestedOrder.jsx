@@ -51,7 +51,7 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
-  const { company, unit, groupOrUnit, unitName, vendorID, vendorName, dates } =
+  const { company, unit, groupOrUnit, unitName, vendorID, vendorName, orderID, dates } =
     useLocation().state || {};
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(unit);
@@ -69,6 +69,7 @@ export default function SuggestedOrder() {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
+  const [suggestedOrderID, setSuggestedOrderID] = useState(orderID || 0);
   const [suggestedOrder, setsuggestedOrder] = useState({});
   const [suggestedTable, setSuggestedTable] = useState({
     ...suggestedTableStructure,
@@ -108,9 +109,8 @@ export default function SuggestedOrder() {
     const today = new Date();
     const formattedDate = formatDate(today);
     setSelectedDates(dates);
-
     if (unit && vendorID && vendorName && dates) {
-      getOrderItem(companyID, unit, selectedVendor, dates[0], dates[1], 0);
+      getOrderItem(companyID, unit, selectedVendor, dates[0], dates[1], suggestedOrderID);
     }
     setSaveIsVisible(saveSubmitStatus === 0 ? true : false);
     setSubmitIsVisible(saveSubmitStatus === 0 ? false : true);
@@ -141,6 +141,12 @@ export default function SuggestedOrder() {
       suggestedOrderId
     )
       .then((response) => {
+        if (response.message == 10003 || !response.data) {
+          setErrorMessage("No data found for the selected unit and vendor");
+          setIsError(true);
+          setIsLoading(false);
+          return;
+        }
         buildForecastTable(response.data.forecastedData);
         setSaveSubmitStatus(response.data.suggestedOrderID);
         setSuggestedTable({
@@ -171,8 +177,14 @@ export default function SuggestedOrder() {
   };
 
   useEffect(() => {
-    // This effect runs whenever suggestedTable.rows changes
-  }, [suggestedTable]);
+    if (forecastTable.rows.length > 0 && suggestedTable.rows.length > 0) {
+      const newSuggestedOrder = SuggestedOrderFunctions.calculateSuggestedQuantities(forecastTable.rows[forecastTable.rows.length - 1][1].value, suggestedTable);
+      setSuggestedTable({
+        ...suggestedTable,
+        rows: newSuggestedOrder,
+      });
+    }
+  }, [forecastTable]);
 
   const handleClose = () => {
     setShowSuccessPopup(false);
@@ -248,8 +260,8 @@ export default function SuggestedOrder() {
             selectedVendorItem.latestInvoicePrice,
             selectedVendorItem.safetyFactor,
             selectedVendorItem.suggestedQty,
-            selectedVendorItem.onHand,
-            selectedVendorItem.orderAmount,
+            selectedVendorItem.onHandQty,
+            selectedVendorItem.orderQty,
             selectedVendorItem.extendedPrice,
           ])
       )
@@ -372,12 +384,12 @@ export default function SuggestedOrder() {
             columnName: "Suggested Qty",
           },
           {
-            value: selectedVendorItem.onHand,
+            value: selectedVendorItem.onHandQty,
             cellType: "",
             columnName: "On Hand",
           },
           {
-            value: selectedVendorItem.orderAmount,
+            value: selectedVendorItem.orderQty,
             cellType: "",
             columnName: "Order Amount",
           },
@@ -425,8 +437,8 @@ export default function SuggestedOrder() {
                       ...vendorItem,
                       safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID] : updatedValue,
                       suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
-                      orderAmount: (roundedQty - vendorItem.onHand).toFixed(2),
-                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHand).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
+                      orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
+                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHandQty).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
 
                     };
                   }
@@ -439,8 +451,8 @@ export default function SuggestedOrder() {
                       ...vendorItem,
                       safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID]: updatedValue,
                       suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
-                      orderAmount: (roundedQty - vendorItem.onHand).toFixed(2),
-                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHand).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
+                      orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
+                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHandQty).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
                     };
                   }
                 }),

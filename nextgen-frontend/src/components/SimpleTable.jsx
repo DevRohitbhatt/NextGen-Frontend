@@ -19,6 +19,13 @@ const TableHeader = styled.th`
   text-align: left;
 `;
 
+const TableRow = styled.tr`
+  border-bottom: 1px solid #ddd;
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
 const PagingContainer = styled.div`
   margin-top: 20px;
   display: flex;
@@ -119,7 +126,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
             </TableRow>
           ) : 
           sortedData()?.slice(startIndex, endIndex).map((row, rowIndex) => (
-            <Row key={rowIndex} item={row} onItemClick={handleRowClick} />           
+            <Row headers={headers} key={rowIndex} item={row} onItemClick={handleRowClick} />           
           ))}
         </tbody>
       </Table>
