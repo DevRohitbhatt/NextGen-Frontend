@@ -282,7 +282,6 @@ export const recalculateTable = (prepChart, setPrepChart, tableData, setTable, t
 }
 
 function calculateNeededValue(tableName, prepChart, prepValue, yieldType, safetyFactor) {
-  console.log(yieldType, "yieldType")
   const todayForecast = prepChart.forecastData.today;
   const tomorrowForecast = prepChart.forecastData.tomorrow;
   const nextDayForecast = prepChart.forecastData.nextDay;
@@ -293,7 +292,6 @@ function calculateNeededValue(tableName, prepChart, prepValue, yieldType, safety
   }
 
   if (tableName === "today") {
-    console.log("todayForecast: ", todayForecast, "prepValue: ", prepValue, "yieldType: ", yieldType, "safetyFactor: ", safetyFactor)
     needed = (todayForecast / (parseFloat(yieldType))) * safetyFactor;
   } else if (tableName === "tomorrow") {
     needed = ((todayForecast + tomorrowForecast) / (parseFloat(yieldType))) * safetyFactor;

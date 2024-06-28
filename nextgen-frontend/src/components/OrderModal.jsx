@@ -203,7 +203,7 @@ const OrderModal = ({
       setSelectedUnit(unitID);
       setSelectedUnits([{ id: unitID, name: unitName, isArea: false }]);
     } else {
-      console.log('No data found');
+
     }
   }, [unitData, unitName, unitID]);
 
@@ -249,7 +249,7 @@ const OrderModal = ({
   };
 
   const handleNextButtonClick = () => {
-    console.log(selectedUnit, selectedVendor, selectedVendorName, selectedDates), 
+    console.log(selectedDates)
     navigate('/SuggestedOrder', {
       state: {
         company: companyID,

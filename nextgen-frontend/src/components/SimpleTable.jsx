@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from "prop-types";
-import Cell from './SimpleTableCell';
+import Row from './SimpleTableRow';
 
 const TableWrapper = styled.div`
   margin: 20px;
@@ -54,7 +54,7 @@ const PaginationInfo = styled.span`
   margin: 0 10px;
 `;
 
-const TableComponent = ({ data, headers, itemsPerPageOptions = [5, 10, 20] }) => {
+const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 10, 20] }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(itemsPerPageOptions[0]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -101,6 +101,10 @@ const TableComponent = ({ data, headers, itemsPerPageOptions = [5, 10, 20] }) =>
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, data?.length);
 
+  const handleRowClick = (selectedRow) => {
+    onRowClick(selectedRow);
+  };
+
   return (
     <TableWrapper>
       <Table>
@@ -116,21 +120,13 @@ const TableComponent = ({ data, headers, itemsPerPageOptions = [5, 10, 20] }) =>
           </tr>
         </thead>
         <tbody>
-          {sortedData()?.length === 0 ? (
+          {sortedData()?.length === 0 || !sortedData()?.length ? (
             <TableRow>
               <td colSpan={headers.length} style={{ textAlign: 'center' }}>No data found for the given parameters.</td>
             </TableRow>
           ) : 
           sortedData()?.slice(startIndex, endIndex).map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
-              {headers.map((header, cellIndex) => (
-                <Cell
-                  key={cellIndex}
-                  value={row[header.key]}
-                  cellType={header.cellType}                
-                />
-              ))}
-            </TableRow>
+            <Row headers={headers} key={rowIndex} item={row} onItemClick={handleRowClick} />           
           ))}
         </tbody>
       </Table>
@@ -160,7 +156,8 @@ const TableComponent = ({ data, headers, itemsPerPageOptions = [5, 10, 20] }) =>
 
 TableComponent.propTypes = {
   data: PropTypes.array,
-  headers: PropTypes.array, 
+  headers: PropTypes.array,
+  onRowClick: PropTypes.func, 
   itemsPerPageOptions: PropTypes.array  
 };
 

@@ -221,7 +221,6 @@ const UnitModal = ({
       setSelectedUnit(unitID);
       setSelectedUnits([{id: unitID, name: unitName, isArea: false}]);
     } else {
-      console.log('No data found')
     }
   }, [unitData, unitName, unitID]);
 
@@ -287,7 +286,6 @@ const UnitModal = ({
       const selectedUnitIDs = new Set(selectedUnits.map(unit => unit.id));
       areaUnits = areaUnits.filter(unit => !selectedUnitIDs.has(unit.id));
       if (selectedUnits.some(unit => unit.id === id)) {
-        console.log('testing')
         const newSelectedUnits = selectedUnits.filter(unit => !areaUnits.some(areaUnit => areaUnit.id === unit.id));
         setSelectedUnits(newSelectedUnits);
       } else {

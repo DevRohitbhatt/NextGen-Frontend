@@ -62,7 +62,6 @@ export default function UnitSelector({ onClick, companyID, alignmentID, unitName
           setUnitName(response.data.units[0].unitName);
         }
       }).catch((error) => {
-        console.log(error);
         setUnitName("No unit selected")
       });
       

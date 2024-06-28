@@ -13,11 +13,16 @@ const DateTimeCell = ({
   const [dateTime, setDateTime] = useState(value);
   
   useEffect(() => {
+    if(value) {
     let date = new Date(value).toString();
     const day = date.substr(0, 3);
     date = new Date(value).toLocaleString('en-US');    
     const formattedDate = `${day}, ${date}`;
     setDateTime(formattedDate);
+    }
+    else {
+      setDateTime("");
+    }
   }, [value]);
 
   return (

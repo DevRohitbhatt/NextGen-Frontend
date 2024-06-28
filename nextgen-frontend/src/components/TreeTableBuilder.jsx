@@ -58,7 +58,7 @@ const TableHeader = styled.div`
   gap:20px;
   margin-bottom: 10px;
   padding-bottom: 10px;
-   min-width:145px;
+  //  min-width:145px;
   border-bottom: 2px solid ${(props) => props.theme.primary};
 `;
 
@@ -183,7 +183,7 @@ const ExpandButton = styled.button`
   }
 `;
 
-export default function TreeTable ({ data:initialData, columnHeaders, dataTypes }) {
+export default function TreeTable ({ data:initialData, columnHeaders, dataTypes, setQid }) {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [isCollapseActive, setIsCollapseActive] = useState(false);
   const [isExpandActive, setIsExpandActive] = useState(false);
@@ -228,7 +228,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
     setIsExpandActive(true);
   };
 
-  const isEditableArray = [false, false, false, false, true, true, true, true, true,true];
+  const isEditableArray = [false, false, false, false, true, false, true, true, false,false];
   return (
     <>
       <ButtonContainer>
@@ -263,6 +263,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes 
             onEdit={handleEdit}
             isEditable={isEditableArray}
             dataTypes={dataTypes}
+            setQid={setQid}
           />
         ))}
       </StyledTable>
@@ -274,5 +275,6 @@ TreeTable.propTypes = {
   columnHeaders: PropTypes.array,
   dataTypes: PropTypes.array,
   columnWidths: PropTypes.string,
-  data: PropTypes.array
+  data: PropTypes.array,
+  setQid:PropTypes.func
 };

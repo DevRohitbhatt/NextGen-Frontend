@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { SlArrowDown, SlArrowUp } from "react-icons/sl";
 import PropTypes from "prop-types";
-import Cell from "./TableCell.jsx";
-import { handleVendorItemChange, handleEdit } from "../functions/Helpers.jsx";
-import { json } from "react-router-dom";
+import { handleVendorItemChange, handleEdit } from "../functions/SuggestedOrderFunctions.jsx";
 
 const TableCell = styled.div`
   position: relative;
@@ -14,7 +12,7 @@ const TableCell = styled.div`
   border-bottom: 1px solid ${(props) => props.theme.lightGrey};
   padding: 10px 0;
   height: 25px;
-  overflow: hidden;
+  // overflow: hidden;
   display: flex;
   flex-direction: row;
   gap: 20px;
@@ -28,7 +26,7 @@ const TableRow = styled.div`
     props.columntype === "number" ? "center" : "left"};
   border-bottom: 1px solid ${(props) => props.theme.lightGrey};
   padding: 10px 0;
-  overflow: hidden;
+  // overflow: hidden;
   display: flex;
   flex-direction: row;
   gap: 20px;
@@ -145,13 +143,11 @@ const TreeNode = ({
   columnWidths,
   isEditable,
   dataTypes,
+  setQid
 }) => {
-  const [selectedVendorItems, setSelectedVendorItems] = useState({});
+  const [selectedVendorItems, setSelectedVendorItems] = useState([]);
   const [node, setNode] = useState(initialNode);
-  const [editValue, setEditValue] = useState(null);
-  const [isEdit, setIsEdit] = useState(false);
-  const shouldCenterText = true;
-  // Srtting node Value
+  
   useEffect(() => {
     setNode(initialNode);
   }, [initialNode]);
@@ -159,27 +155,43 @@ const TreeNode = ({
     onToggleNode(node);
   };
 
-  const handleEditfield = (field, value, index, safetyFactor) => {
-    const updatedNode = handleEdit(
-      field,
-      value,
-      index,
-      node,
-      selectedVendorItems,
-      setSelectedVendorItems,
-      onEdit
-    );
-
-    let prevNodeQty = updatedNode.suggestedOrderItem[index].vendorItems[index].suggestedQty;
-    if (prevNodeQty === selectedVendorItems[index].suggestedQty && safetyFactor === selectedVendorItems[index].safetyFactor.replace("%", "") / 100) {
-      setIsEdit(false);
-      setNode(updatedNode);
-    } else {
-      setIsEdit(true);
-      setNode(updatedNode);
+  const handleEditfield = async (field, value, index) => {
+    try {
+      const updatedNode = await handleEdit(
+        field,
+        value,
+        index,
+        node,
+        selectedVendorItems,
+        setSelectedVendorItems,
+        onEdit,
+        setQid
+      );
+      if (!updatedNode) {
+        throw new Error('Failed to update node');
+      }
+      const updatedSuggestedOrderItem = node.suggestedOrderItem.map(item => {
+        const updatedItem = updatedNode.suggestedOrderItem.find(updItem => updItem.qsrInventoryItemID === item.qsrInventoryItemID);
+        if (updatedItem) {
+          const updatedVendorItems = item.vendorItems.map((vendorItem, idx) => {            
+            const updatedVendorItem = updatedItem.vendorItems[idx];
+            return updatedVendorItem ? { ...vendorItem, ...updatedVendorItem } : vendorItem;
+          });
+          return { ...item, vendorItems: updatedVendorItems };
+        }
+        return item;
+      });
+  
+      setNode(prevNode => ({
+        ...prevNode,
+        suggestedOrderItem: updatedSuggestedOrderItem
+      }));
+  
+    } catch (error) {
+      console.error('Error updating node:', error);
     }
   };
-
+  
   const handleVendorChange = (selectedQsrItemID, index) => {
     handleVendorItemChange(
       node,
@@ -215,7 +227,7 @@ const TreeNode = ({
   };
 
   useEffect(() => {
-    const initialSelectedVendorItems = {};
+    const initialSelectedVendorItems = [];
     node.suggestedOrderItem.forEach((childNode, index) => {
       const defaultVendorItem = childNode.vendorItems.find(
         (vendorItem) => vendorItem.isSelected
@@ -327,71 +339,57 @@ const TreeNode = ({
                 {isEditable[5] ? (
                   <EditableCell
                     value={
-                      isEdit
-                        ? (
-                            parseFloat(
-                              selectedVendorItems[index].suggestedQty
-                            ) +
-                            (typeof selectedVendorItems[index].safetyFactor ==="string" ? parseFloat(selectedVendorItems[index].safetyFactor.replace("%", "")
-                                ) / 100
-                              : 0)
-                          ).toFixed(2)
-                        : selectedVendorItems[index].suggestedQty
+                      selectedVendorItems[index].suggestedQty
                     }
                     onChange={(value) =>
-                      handleEditfield("suggestedQty", value, index, parseFloat(
-                        selectedVendorItems[
-                          index
-                        ].safetyFactor.replace("%", "")
-                      ) / 100)
+                      handleEditfield("suggestedQty", value, index)
                     }
                     DataType={dataTypes[7]}
                   />
                 ) : (
-                  <StyledCell>
+                  <StyledCell columntype={dataTypes[7]}>
                     {selectedVendorItems[index].suggestedQty}
                   </StyledCell>
                 )}
                 {isEditable[6] ? (
                   <EditableCell
-                    value={selectedVendorItems[index].onHand}
+                    value={selectedVendorItems[index].onHandQty}
                     onChange={(value) =>
-                      handleEditfield("onHand", value, index)
+                      handleEditfield("onHandQty", value, index)
                     }
                     DataType={dataTypes[8]}
                   />
                 ) : (
-                  <StyledCell>{selectedVendorItems[index].onHand}</StyledCell>
+                  <StyledCell>{selectedVendorItems[index].onHandQty}</StyledCell>
                 )}
                 {isEditable[7] ? (
                   <EditableCell
-                    value={(
-                      selectedVendorItems[index].suggestedQty -
-                      selectedVendorItems[index].onHand
-                    ).toFixed(2)}
+                  value={selectedVendorItems[index].orderQty}
+                    // value={(
+                    //   selectedVendorItems[index].suggestedQty -
+                    //   selectedVendorItems[index].onHandQty
+                    // ).toFixed(2)}
                     onChange={(value) =>
-                      handleEditfield("orderAmount", value, index)
+                      handleEditfield("orderQty", value, index)
                     }
                     DataType={dataTypes[9]}
                   />
                 ) : (
                   <StyledCell>
-                    {selectedVendorItems[index].orderAmount}
+                    {selectedVendorItems[index].orderQty}
                   </StyledCell>
                 )}
                 {isEditable[8] ? (
                   <EditableCell
-                    value={(
-                      selectedVendorItems[index].latestInvoicePrice *
-                      selectedVendorItems[index].orderAmount
-                    ).toFixed(2)}
+                  value={selectedVendorItems[index].extendedPrice}
+                    // value={(selectedVendorItems[index].latestInvoicePrice * selectedVendorItems[index].orderQty).toFixed(2)}
                     onChange={(value) =>
                       handleEditfield("extendedPrice", value, index)
                     }
                     DataType={dataTypes[10]}
                   />
                 ) : (
-                  <StyledCell>
+                  <StyledCell columntype={dataTypes[10]}>
                     {selectedVendorItems[index].extendedPrice}
                   </StyledCell>
                 )}
@@ -411,6 +409,7 @@ TreeNode.propTypes = {
   columnWidths: PropTypes.string,
   isEditable: PropTypes.arrayOf(PropTypes.bool).isRequired,
   dataTypes: PropTypes.array,
+  setQid:PropTypes.func
 };
 
 export default TreeNode;
