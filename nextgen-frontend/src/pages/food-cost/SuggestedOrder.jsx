@@ -87,6 +87,8 @@ export default function SuggestedOrder() {
     width: "50%",
   });
 
+  
+
   const [saftyFactor, setSaftyFactor] = useState({});
   const toastId = useRef(null);
 
@@ -101,12 +103,11 @@ export default function SuggestedOrder() {
   const [saveSubmitStatus, setSaveSubmitStatus] = useState(0);
 
   useEffect(() => {
+    window.parent.postMessage(JSON.stringify(window.location.pathname), "*");
     document.title = "Suggested Order";
     const today = new Date();
     const formattedDate = formatDate(today);
     setSelectedDates(dates);
-
-    console.log(unit, vendorID, vendorName, dates);
 
     if (unit && vendorID && vendorName && dates) {
       getOrderItem(companyID, unit, selectedVendor, dates[0], dates[1], 0);
@@ -161,7 +162,6 @@ export default function SuggestedOrder() {
           ],
         });
         setIsLoading(false);
-        console.log(suggestedTable);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -172,7 +172,6 @@ export default function SuggestedOrder() {
 
   useEffect(() => {
     // This effect runs whenever suggestedTable.rows changes
-    console.log("Updated rows:", suggestedTable.rows);
   }, [suggestedTable]);
 
   const handleClose = () => {
@@ -271,7 +270,6 @@ export default function SuggestedOrder() {
   };
 
   const handlePDFClick = () => {
-    console.log(suggestedTable);
     const pdfData = {
       title: "Suggested Order",
       subHeaders: [
@@ -313,7 +311,6 @@ export default function SuggestedOrder() {
   };
 
   const formatPDFData = (data) => {
-    console.log(data);
     return {
       ...suggestedTableStructure,
       classNames: [
@@ -585,7 +582,6 @@ export default function SuggestedOrder() {
       suggestedOrderDetails: suggestedTable.rows,
     };
     const jsonData = JSON.stringify(data);
-    console.log("jsonData", jsonData);
     toastId.current = toast.info("Submiting Suggested Order...", {
       autoClose: false,
     });

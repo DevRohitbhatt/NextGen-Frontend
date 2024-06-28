@@ -48,7 +48,7 @@ const SuggestedOrderList = () => {
     { key: 'deliveryDate', label: 'Delivery Date', cellType: 'date' },
     { key: 'createdBy', label: 'Created By', cellType: 'string' },
     { key: 'createdOn', label: 'Created On',cellType: 'dateTime' },
-    { key: 'modifiedOn', label: 'Submitted On', cellType: 'dateTime'},
+    { key: 'submittedOn', label: 'Submitted On', cellType: 'dateTime'},
     { key: 'status', label: 'Order Status', cellType: 'string' },
     { key: 'orderSpan', label: 'Order Span', cellType: 'string' }
   ];
@@ -78,7 +78,6 @@ const SuggestedOrderList = () => {
       }
     }
     else {      
-      console.log("testing")
       setErrorMessage("There was an issue loading your orders, please try again later.");
     }
 
@@ -102,7 +101,6 @@ const SuggestedOrderList = () => {
   };
 
   const fetchVendors =  (companyID) => {
-    console.log("vendors")
     VendorAPI.getVendorsByCompany(companyID)
     .then((data) => {
       setVendorsList(data);
@@ -112,13 +110,9 @@ const SuggestedOrderList = () => {
   };
 
   const fetchSuggestedOrders = (companyID, alignmentID, memberID, unitID, vendorID) => {
-    console.log("fetching orders", unitID)
     SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID, unitID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
-      data.map((x) => {
-        if(x.status !== "Submitted") 
-          x.modifiedOn = "";
-
+      data.data.map((x) => {
         const formatFromDate = formatDate(x.orderFromDate);
         const formatToDate = formatDate(x.orderToDate);
         x.orderSpan = `${formatFromDate} - ${formatToDate}`;
@@ -130,10 +124,12 @@ const SuggestedOrderList = () => {
   };
 
   const formatDate = (orderDate) => {
-    let date = new Date(orderDate);
-    const day = date.toString().substr(0, 3);
-    date = date.toLocaleString('en-US');
-    const formattedDate = `${day}, ${date}`;
+    const date = new Date(orderDate);
+    const day = date.getDate();
+    const month = date.getMonth() + 1; // Months are zero-based, so add 1
+    const year = date.getFullYear();
+  
+    const formattedDate = `${month}/${day}/${year}`;
     return formattedDate;
   };
   

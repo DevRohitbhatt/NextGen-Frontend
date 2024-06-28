@@ -197,7 +197,6 @@ const VendorModal = ({
       setSelectedVendors([{id: vendorID, name: vendorName}]);
     }
     else {
-      console.log('No data found')
     }
   }, [vendorData, vendorName, vendorID]);
 

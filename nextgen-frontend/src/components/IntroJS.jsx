@@ -4,7 +4,6 @@ import "intro.js/introjs.css";
 
 export default function IntroJS({ introJS, setIntroJS }) {
     //Destructure introJS into steps, enabled, so on
-    console.log(introJS);
 
     const handleIntroStart = () => {
         setIntroJS({ ...introJS, stepsEnabled: true });

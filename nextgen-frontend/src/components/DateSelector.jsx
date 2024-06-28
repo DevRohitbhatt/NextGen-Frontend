@@ -51,7 +51,6 @@ DateSelector.propTypes = {
 };
 
 export default function DateSelector({ toDate, fromDate, onClick, isDateRange=false, isEditable=true }) {
-  console.log(fromDate, toDate)
   return (
     <>
     {!isDateRange ? (

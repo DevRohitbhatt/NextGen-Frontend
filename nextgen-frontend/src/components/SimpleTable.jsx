@@ -116,7 +116,7 @@ const TableComponent = ({ data, headers, itemsPerPageOptions = [5, 10, 20] }) =>
           </tr>
         </thead>
         <tbody>
-          {sortedData()?.length === 0 ? (
+          {sortedData()?.length === 0 || !sortedData()?.length ? (
             <TableRow>
               <td colSpan={headers.length} style={{ textAlign: 'center' }}>No data found for the given parameters.</td>
             </TableRow>

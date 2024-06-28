@@ -47,10 +47,10 @@ const getCellValue = (cell, dataType) => {
   if (Array.isArray(cell.value)) {
     return cell.value.find((option) => option.isSelected).option;
   } else if (dataType === "currency") {
-    return cell.value.toLocaleString("en-US", {
+    return cell.value ? cell.value.toLocaleString("en-US", {
       style: "currency",
       currency: "USD",
-    });
+    }) : "";
   } else if (dataType === "currency rounded") {
     const roundedValue = Math.round(cell.value);
     return "$" + roundedValue.toLocaleString("en-US");
@@ -115,7 +115,6 @@ export default function PdfBuilder(data) {
       },
     },
   };
-  console.log("docDefinition",docDefinition);
   if (data.exportType === "pdf") {
     pdfMake.createPdf(docDefinition).open();
   }
