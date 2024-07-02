@@ -10,7 +10,7 @@ import CalendarModal from "../../components/ModalDate.jsx";
 import OrderModal from "../../components/OrderModal.jsx";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import { VendorAPI } from "../../apis/VendorAPI.jsx";
-import { SuggestedOrderAPI } from "../../apis/SuggestedOrderAPI.jsx";
+import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import { useNavigate } from 'react-router-dom';
@@ -175,7 +175,7 @@ const SuggestedOrderList = () => {
     if (selectedRow.status !== "Submitted") {
       const toDate = new Date(selectedRow.orderToDate);
       const fromDate = new Date(selectedRow.orderFromDate);
-      let selectedDates = [toDate, fromDate];
+      let selectedDates = [fromDate, toDate];
       console.log(selectedRow);
       navigate('/SuggestedOrder', {
         state: {
