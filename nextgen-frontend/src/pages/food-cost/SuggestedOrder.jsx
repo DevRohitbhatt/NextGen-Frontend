@@ -4,6 +4,7 @@ import * as Styled from "./styles/SuggestedOrderStyles.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
+import Modal from "../../components/Modal.jsx";
 import MessagePopup from "../../components/MessagePopup.jsx";
 import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
@@ -60,6 +61,7 @@ export default function SuggestedOrder() {
   const [selectedVendorName, setSelectedVendorName] = useState(vendorName);
   const [selectedVendor, setSelectedVendor] = useState(vendorID);
   const [showModal, setShowModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [companyID, setCompanyID] = useState(company);
   const [alignmentID, setAlignmentID] = useState(null);
   const [groupOrUnitAccess, setGroupOrUnitAccess] = useState(groupOrUnit);
@@ -579,10 +581,33 @@ export default function SuggestedOrder() {
         setSubmitIsVisible(false);
       });
   }
+
+  function onSubmitClick() {
+    setShowSubmitModal(true);
+  }
+
+  function submitSuggestedOrderPDF() {
+    SuggestedOrderFunctions.submitSuggestedOrderPDF(suggestedTable);
+    handleSubmit();
+    setShowSubmitModal(false);
+  }
+
+  function formatFileName () {
+    const dateOptions = { year: "numeric", month: "2-digit", day: "2-digit"}
+    const [month, day, year] = fromDate.toLocaleDateString('en-US', dateOptions).split('/');
+    return "Order" + "_" + selectedVendorName + "_" + month + "_" + day + "_" + year;
+  }
+
+  function submitSuggestedOrderCSV() {
+    SuggestedOrderFunctions.submitSuggestedOrderCSV(suggestedTable, formatFileName());
+    //handleSubmit();
+    setShowSubmitModal(false);
+  }
+
   function handleSubmit() {
     const data = {
-      suggestedOrderID: 0,
-      purchaseOrderID: 1,
+      suggestedOrderID: suggestedOrderID,
+      purchaseOrderID: 0,
       companyID: companyID,
       unitID: selectedUnit,
       vendorID: selectedVendor,
@@ -593,11 +618,10 @@ export default function SuggestedOrder() {
       forecastedData: forecastedData(forecastTable.rows),
       suggestedOrderDetails: suggestedTable.rows,
     };
-    const jsonData = JSON.stringify(data);
     toastId.current = toast.info("Submiting Suggested Order...", {
       autoClose: false,
     });
-    SuggestedOrderAPI.submit(jsonData)
+    SuggestedOrderAPI.submit(data)
       .then(() => {
         setVisible(true);
         setSuccessMessage("Submit successful");
@@ -690,8 +714,21 @@ export default function SuggestedOrder() {
           handlePDFClick={handlePDFClick}
           handleCSVClick={handleCSVClick}
           handleSaveClick={handleSave}
-          handleSubmitClick={handleSubmit}
+          handleSubmitClick={onSubmitClick}
         />
+        <Modal isOpen={showSubmitModal} setIsOpen={setShowSubmitModal} onClose={() => {setShowSubmitModal(false)}} title="Submit Suggested Order">
+          <Styled.SubmitModalContainer>
+            <Styled.SubmitModalBody>
+              <Styled.SubmitModalText>
+                How would you like to submit the Suggested Order?
+              </Styled.SubmitModalText>
+              <Styled.SubmitModalButtonContainer>
+                <Styled.PDFButton onClick={() => submitSuggestedOrderPDF()}>PDF</Styled.PDFButton>
+                <Styled.CSVButton onClick={() => submitSuggestedOrderCSV()}>CSV</Styled.CSVButton>
+              </Styled.SubmitModalButtonContainer>
+            </Styled.SubmitModalBody>
+          </Styled.SubmitModalContainer>
+        </Modal>
       </Styled.OptionsRow>
 
       {isLoading ? (

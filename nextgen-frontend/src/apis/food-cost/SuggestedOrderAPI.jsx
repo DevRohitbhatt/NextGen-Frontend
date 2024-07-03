@@ -16,10 +16,10 @@ export const SuggestedOrderAPI = {
         ? cancelApiObject[this.getOrderItem.name].handleRequestCancellation().signal : undefined });
     return response.data;
   },
-  getOrderList: async function (companyID, alignmentID, memberID, vendorID, fromDate, toDate,  cancel = false) {
+  getOrderList: async function (companyID, alignmentID, memberID, unitID, vendorID, fromDate, toDate,  cancel = false) {
     const response = await api.request({
       method: "GET",
-      url: `/api/order/GetOrderList?companyId=${companyID}&alignmentId=${alignmentID}&memberId=${memberID}&vendorID=${vendorID}&fromDate=${fromDate}&toDate=${toDate}`,
+      url: `/api/order/GetOrderList?companyId=${companyID}&alignmentId=${alignmentID}&memberId=${memberID}&unitID=${unitID}&vendorID=${vendorID}&fromDate=${fromDate}&toDate=${toDate}`,
       signal: cancel ? cancelApiObject[this.getbyid.name].handleRequestCancellation().signal : undefined,
     });
 
@@ -39,7 +39,7 @@ export const SuggestedOrderAPI = {
   submit: async function (data, cancel = false) {
     const response = await api.request({
       method: "POST",
-      url: `/api/suggestedorder/submitsuggestedrrderheader`,
+      url: `/api/suggestedorder/submitsuggestedorderheader`,
       data,
       signal: cancel
         ? cancelApiObject[this.submit.name].handleRequestCancellation().signal
