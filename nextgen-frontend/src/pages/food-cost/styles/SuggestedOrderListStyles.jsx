@@ -133,3 +133,23 @@ export const Label=styled.label`
     font-weight: bold;
     font-size: 12px;
 `;
+export const SubmitModalContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const SubmitModalBody = styled.div`
+  padding: 0px 1px;
+`;
+
+export const SubmitModalText = styled.div`
+  margin-bottom: 20px;
+`;
+
+export const SubmitModalButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 11px;
+  padding: 0.75rem;
+`;

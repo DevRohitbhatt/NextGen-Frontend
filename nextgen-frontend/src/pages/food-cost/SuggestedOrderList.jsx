@@ -5,6 +5,7 @@ import VendorSelector from "../../components/VendorSelector.jsx";
 import DateSelector from "../../components/DateSelector.jsx";
 import Table from '../../components/SimpleTable.jsx';
 import UnitModal from "../../components/UnitModal.jsx";
+import Modal from "../../components/Modal.jsx";
 import VendorModal from "../../components/VendorModal.jsx";
 import CalendarModal from "../../components/ModalDate.jsx";
 import OrderModal from "../../components/OrderModal.jsx";
@@ -14,6 +15,38 @@ import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import { useNavigate } from 'react-router-dom';
+import * as SuggestedOrderFunctions from "../../functions/SuggestedOrderFunctions.jsx";
+
+const suggestedTableStructure = {
+  columnHeaders: [
+    "Inventory Description",
+    "Item Description",
+    "Item Ref",
+    "Item Order Unit",
+    "Pack Size",
+    "Current/Last Price",
+    "Safety Factor",
+    "Suggested Qty",
+    "On Hand",
+    "Order Amount",
+    "Extended Price",
+  ],
+  dataTypes: [
+    "string",
+    "string",
+    "string",
+    "string",
+    "string",
+    "number",
+    "percent",
+    "number",
+    "number",
+    "number",
+    "number",
+  ],
+  columnWidth: "1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
+  rows: [],
+};
 
 const SuggestedOrderList = () => {
   const [userID, setUserID] = useState();
@@ -42,7 +75,12 @@ const SuggestedOrderList = () => {
   
   const [suggestedOrders, setSuggestedOrders] = useState([]);  
   const [showCreateOrderModal, setCreateOrderShowModal] = useState(false);
- 
+  const [showSuggestedModal, setShowSuggestedModal] = useState(false);
+  const [sugestedOrderbyId, setSugestedOrderbyId] = useState([]);
+  const [suggestedTable, setSuggestedTable] = useState({
+    ...suggestedTableStructure,
+  });
+  const [isTableUpdated, setIsTableUpdated] = useState(false);
   const headers = [
     { key: 'unitName', label: 'Unit Name', cellType: 'string' },
     { key: 'vendorName', label: 'Vendor Name', cellType: 'string' },
@@ -52,6 +90,13 @@ const SuggestedOrderList = () => {
     { key: 'submittedOn', label: 'Submitted On', cellType: 'dateTime'},
     { key: 'status', label: 'Order Status', cellType: 'string' },
     { key: 'orderSpan', label: 'Order Span', cellType: 'string' }
+  ];
+  const headersItem = [
+    { key: 'ItemDescription', label: 'Item Description', cellType: 'string' },
+    { key: 'ItemRef', label: 'Item Ref', cellType: 'string' },
+    { key: 'OrderUnit', label: 'Order Unit', cellType: 'date' },
+    { key: 'PackSize', label: 'Pack Size', cellType: 'string' },
+    { key: 'orderAmount', label: 'Order Amount',cellType: 'string' }
   ];
 
   const navigate = useNavigate();
@@ -170,9 +215,69 @@ const SuggestedOrderList = () => {
   const handleToDateChange = (toDate) => {
     setSelectedToDate(toDate);
   };
-
+  const getOrderItem = (
+    companyID,
+    unitID,
+    selectedVendor,
+    orderFromDate,
+    orderToDate,
+    suggestedOrderId
+  ) => {
+    SuggestedOrderAPI.getOrderItem(
+      companyID,
+      unitID,
+      selectedVendor,
+      formatDate(orderFromDate),
+      formatDate(orderToDate),
+      suggestedOrderId
+    ).then((response) => {
+        if (response.message == 10003 || !response.data) {
+          setErrorMessage("No data found for the selected unit and vendor");
+          setIsError(true);
+          // setIsLoading(false);
+          return;
+        }
+        setSuggestedTable({
+          ...suggestedTable,
+          rows: response.data.suggestedOrderDetails,
+        });
+        
+        setIsTableUpdated(true); // Indicate that the table has been updated
+        // setIsLoading(false);
+      }).catch((error) => {
+        console.error("Error fetching data:", error);
+        setIsLoading(false);
+        setIsError(true);
+      });
+  };
+  
+  useEffect(() => {
+    if (isTableUpdated) {
+      submitSuggestedOrderPDF();
+      setIsTableUpdated(false); // Reset the flag
+    }
+  }, [isTableUpdated]);
+  
+  function submitSuggestedOrderPDF() {
+    SuggestedOrderFunctions.fetchSuggestedOrderData(suggestedTable, (result) => {
+      console.log(" response.data.suggestedOrderDetails", result);
+      if (result.error) {
+        console.error(result.error);
+      } else {
+        setSugestedOrderbyId(result.data);
+       
+      }
+    });
+  }
+  
   const handleRowItemClick = (selectedRow) => {
-    if (selectedRow.status !== "Submitted") {
+    if (selectedRow.purchaseOrderID > 0 || selectedRow.purchaseOrderID !== 0) {
+      const toDate = new Date(selectedRow.orderToDate);
+      const fromDate = new Date(selectedRow.orderFromDate);
+      setShowSuggestedModal(true);
+      getOrderItem(selectedRow.companyID, selectedRow.unitID, selectedRow.vendorID, fromDate, toDate, selectedRow.suggestedOrderID);
+      return;
+    } else if (selectedRow.status !== "Submitted" || selectedRow.purchaseOrderID == 0) {
       const toDate = new Date(selectedRow.orderToDate);
       const fromDate = new Date(selectedRow.orderFromDate);
       let selectedDates = [fromDate, toDate];
@@ -264,6 +369,21 @@ const SuggestedOrderList = () => {
           handleHelpClick={() => {console.log("Help")}}
         />
       </Styled.OptionsRow>
+
+      <Modal isOpen={showSuggestedModal} setIsOpen={setShowSuggestedModal} onClose={() => {setShowSuggestedModal(false)}} title="Suggested Order Details">
+          <Styled.SubmitModalContainer>
+            <Styled.SubmitModalBody>
+              <Styled.SubmitModalButtonContainer>
+                <Table
+                    data={sugestedOrderbyId}
+                    headers={headersItem}
+                    onRowClick={{}}
+                  />
+              </Styled.SubmitModalButtonContainer>
+            </Styled.SubmitModalBody>
+          </Styled.SubmitModalContainer>
+        </Modal>
+
       {isLoading ? (
         <Styled.UnloadedMessage>Loading...</Styled.UnloadedMessage>
       ) : isError ? (

@@ -587,6 +587,7 @@ export default function SuggestedOrder() {
   }
 
   function submitSuggestedOrderPDF() {
+    console.log("Saving Suggested Order",suggestedTable)
     SuggestedOrderFunctions.submitSuggestedOrderPDF(suggestedTable);
   }
 
