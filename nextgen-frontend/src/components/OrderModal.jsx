@@ -166,6 +166,7 @@ const Option = styled.option`
 const OrderModal = ({
   companyID,
   alignmentID,
+  userID,
   memberID,
   unitData,
   vendorData,
@@ -255,6 +256,7 @@ const OrderModal = ({
         company: companyID,
         unit: selectedUnit,
         unitName: selectedUnitName,
+        user: userID,
         vendorID: selectedVendor,
         vendorName: selectedVendorName,
         dates: selectedDates

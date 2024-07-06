@@ -16,7 +16,7 @@ export const handleForecastChange = (
     return;
   }
   const currentCellValue = forecastTable.rows[row].find(cell => cell.columnName === columnName).value;
-  const hasValueChanged = currentCellValue !== updatedValue;
+  const hasValueChanged = Math.round(currentCellValue, 0) !== updatedValue;
   const updatedEditedMessages = { ...editedMessages };
   if (hasValueChanged) {
     updatedEditedMessages[forecastTable.rows[row][0].value] = '* Changed';
