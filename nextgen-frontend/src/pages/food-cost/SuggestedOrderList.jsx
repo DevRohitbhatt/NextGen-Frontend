@@ -5,6 +5,7 @@ import VendorSelector from "../../components/VendorSelector.jsx";
 import DateSelector from "../../components/DateSelector.jsx";
 import Table from '../../components/SimpleTable.jsx';
 import UnitModal from "../../components/UnitModal.jsx";
+import PurchaseOrderModal from "../../components/PurchaseOrderModal.jsx";
 import VendorModal from "../../components/VendorModal.jsx";
 import CalendarModal from "../../components/ModalDate.jsx";
 import OrderModal from "../../components/OrderModal.jsx";
@@ -43,7 +44,8 @@ const SuggestedOrderList = () => {
   
   const [suggestedOrders, setSuggestedOrders] = useState([]);  
   const [showCreateOrderModal, setCreateOrderShowModal] = useState(false);
- 
+  const [showSuggestedModal, setShowSuggestedModal] = useState(false);
+  const [purchaseOrderID, setPurchaseOrderID] = useState(0);
   const headers = [
     { key: 'unitName', label: 'Unit Name', cellType: 'string' },
     { key: 'vendorName', label: 'Vendor Name', cellType: 'string' },
@@ -172,9 +174,13 @@ const SuggestedOrderList = () => {
   const handleToDateChange = (toDate) => {
     setSelectedToDate(toDate);
   };
-
+  
   const handleRowItemClick = (selectedRow) => {
-    if (selectedRow.status !== "Submitted") {
+    if (selectedRow.purchaseOrderID > 0 || selectedRow.purchaseOrderID !== 0) {
+      setPurchaseOrderID(selectedRow.purchaseOrderID);
+      setShowSuggestedModal(true);
+      return;
+    } else if (selectedRow.status !== "Submitted" || selectedRow.purchaseOrderID == 0) {
       const toDate = new Date(selectedRow.orderToDate);
       const fromDate = new Date(selectedRow.orderFromDate);
       let selectedDates = [fromDate, toDate];
@@ -267,6 +273,18 @@ const SuggestedOrderList = () => {
           handleHelpClick={() => {console.log("Help")}}
         />
       </Styled.OptionsRow>
+
+      <PurchaseOrderModal
+        companyID={companyID}
+        purchaseOrderID={purchaseOrderID}
+        show={showSuggestedModal}
+        setShow={setShowSuggestedModal}
+        handleClose={() => {
+          setShowSuggestedModal(false);
+          setPurchaseOrderID(0);
+        }}
+      />
+
       {isLoading ? (
         <Styled.UnloadedMessage>Loading...</Styled.UnloadedMessage>
       ) : isError ? (

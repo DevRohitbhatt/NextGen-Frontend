@@ -25,6 +25,14 @@ export const SuggestedOrderAPI = {
 
     return response.data;
   },
+  getPurchaseOrderDetails: async function (companyID, purchaseOrderID, cancel = false) {
+    const response = await api.request({
+      method: "GET",
+      url: `/api/order/getpurchaseorderdetails?companyId=${companyID}&purchaseOrderId=${purchaseOrderID}`,
+      signal: cancel ? cancelApiObject[this.getPurchaseOrderDetails.name].handleRequestCancellation().signal : undefined,
+    });
+    return response.data;
+  },
   save: async function (data, cancel = false) {
     const response = await api.request({
       method: "POST",

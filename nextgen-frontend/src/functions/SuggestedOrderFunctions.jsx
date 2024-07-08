@@ -1,5 +1,4 @@
 import PdfBuilder from "../components/PdfBuilder";
-
 export const handleForecastChange = (
   e,
   row,
@@ -247,8 +246,7 @@ const calculateExtendedPrice = (orderQty, latestInvoicePrice) => {
   return extendedPrice;
 }
 
-export const submitSuggestedOrderPDF = (suggestedOrderData) => {
-  console.log(suggestedOrderData)
+export const submitSuggestedOrderPDF =(suggestedOrderData) => {
   const pdfData = {
     title: "Suggested Order",
     subHeaders: ["Suggested Order Details"],
@@ -265,8 +263,8 @@ export const submitSuggestedOrderPDF = (suggestedOrderData) => {
       }
     ],
   };
-  console.log(pdfData);
-  PdfBuilder(pdfData);
+
+  PdfBuilder(pdfData); 
 }
 
 const formatExportArray = (data) => {

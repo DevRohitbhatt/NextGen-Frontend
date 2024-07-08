@@ -5,11 +5,53 @@ import Row from './SimpleTableRow';
 
 const TableWrapper = styled.div`
   margin: 20px;
+  padding-right: 5px;
+  max-height: 60vh;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    margin-left: 5px;
+    background: #ffffff;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${(props) => props.theme.primary};
+    border-radius: 30px;
+    padding: 18px !important;
+    border: 2px solid #fff;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${(props) => props.theme.secondary};
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+
+  thead {
+    background-color: #fff;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  tbody {
+    max-height: 50vh;
+
+    tr {
+      &:hover {
+        background-color: #f9f9f9;
+      }
+    }
+  
+  }
 `;
 
 const TableHeader = styled.th`

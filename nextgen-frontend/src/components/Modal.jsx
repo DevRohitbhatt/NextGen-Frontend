@@ -20,6 +20,7 @@ const ModalContent = styled.div`
     margin: auto;
     border: 1px solid #888;
     width: max-content;
+    border-radius: 15px;
 `;
 
 const ModalHeader = styled.div`
@@ -28,6 +29,8 @@ const ModalHeader = styled.div`
     color: white;
     font-weight: 600;
     font-size: 20px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
 `;
 
 const CloseButton = styled(FaRegWindowClose)`
