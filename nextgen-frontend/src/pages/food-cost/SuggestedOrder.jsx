@@ -52,16 +52,8 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
-  const {
-    company,
-    unit,
-    groupOrUnit,
-    unitName,
-    vendorID,
-    vendorName,
-    orderID,
-    dates,
-  } = useLocation().state || {};
+  const { company, unit, groupOrUnit, unitName, user, vendorID, vendorName, orderID, dates } =
+    useLocation().state || {};
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(unit);
   const [selectedUnitName, setSelectedUnitName] = useState(unitName);
@@ -87,7 +79,7 @@ export default function SuggestedOrder() {
   const [isVisible, setVisible] = useState(false);
   const [saveIsVisible, setSaveIsVisible] = useState(false);
   const [submitIsVisible, setSubmitIsVisible] = useState(false);
-  const [userID, setUserID] = useState(0);
+  const [userID, setUserID] = useState(user);
   const [successMessage, setSuccessMessage] = useState("");
   const [editedMessages, setEditedMessages] = useState({});
   const [forecastTable, setForecastTable] = useState({
@@ -216,7 +208,8 @@ export default function SuggestedOrder() {
     const rows = [];
 
     forecastData.forEach((data, index) => {
-      totalForecast += data.projectedValue;
+      const projectedValue = Math.round(data.projectedValue);
+      totalForecast += projectedValue;
 
       const editedMessage = editedMessages[data.firstMinute] || "";
       const row = [
@@ -226,7 +219,7 @@ export default function SuggestedOrder() {
           columnName: "Date",
         },
         {
-          value: data.projectedValue,
+          value: projectedValue,
           cellType: "dollar",
           isInput: true,
           columnName: "Forecasted Sales",
@@ -241,7 +234,6 @@ export default function SuggestedOrder() {
       rows.push(row);
     });
 
-    totalForecast = totalForecast.toFixed(2);
     const totalRow = [
       { value: "Total", cellType: "", columnName: "", isTotal: true },
       {
@@ -264,6 +256,26 @@ export default function SuggestedOrder() {
       rows: rows,
     });
   };
+
+  useEffect(() => {
+    const updateEditedMessages = () => {
+      setForecastTable({
+        ...forecastTable,
+        rows: forecastTable.rows.map((row) => {
+          const editedMessage = editedMessages[row[0].value] || "";
+          return [
+            row[0],
+            row[1],
+            {
+              ...row[2],
+              value: editedMessage,
+            },
+          ];
+        }),
+      });
+    };
+    updateEditedMessages();
+  }, [editedMessages]);
 
   const handleCSVClick = () => {
     const data = suggestedTable.rows.flatMap((row) =>
@@ -421,14 +433,6 @@ export default function SuggestedOrder() {
       }),
     };
   };
-
-  // {
-  //   type: "table",
-  //   title:`Today - ${todayForecast}  ${todayDate}`,
-  //   widths: [160, 110, "*",27,32, "*", "auto"],
-  //   data: updatedTodayTable,
-  //   dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
-  // },
 
   const handleTableCellChange = (e, row, columnName, tableName) => {
     const updatedValue = parseFloat(e.target.value);

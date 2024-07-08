@@ -17,9 +17,10 @@ import PdfBuilder from "../../components/PdfBuilder.jsx";
 import { useNavigate } from 'react-router-dom';
 
 const SuggestedOrderList = () => {
-  const [userID, setUserID] = useState();
+  const [groupOrUnitAccessID, setGroupOrUnitAccessID] = useState();
   const [companyID, setCompanyID] = useState();
   const [alignmentID, setAlignmentID] = useState();  
+  const [userID, setUserID] = useState();
   const [isActive, setIsActive] = useState([]);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +50,7 @@ const SuggestedOrderList = () => {
     { key: 'unitName', label: 'Unit Name', cellType: 'string' },
     { key: 'vendorName', label: 'Vendor Name', cellType: 'string' },
     { key: 'deliveryDate', label: 'Delivery Date', cellType: 'date' },
-    { key: 'createdBy', label: 'Created By', cellType: 'string' },
+    { key: 'createdByName', label: 'Created By', cellType: 'string' },
     { key: 'createdOn', label: 'Created On',cellType: 'dateTime' },
     { key: 'submittedOn', label: 'Submitted On', cellType: 'dateTime'},
     { key: 'status', label: 'Order Status', cellType: 'string' },
@@ -66,8 +67,9 @@ const SuggestedOrderList = () => {
         parameters = JSON.parse(parameters);
       parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
       parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
+      parameters ? setUserID(parameters.User_UserID) : setUserID();
       parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
-      parameters ? setUserID(parameters.User_GroupOrUnitAccess) : setUserID();
+      parameters ? setGroupOrUnitAccessID(parameters.User_GroupOrUnitAccess) : setGroupOrUnitAccessID();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
         fetchData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess, parameters.User_DefaultUnitID);
@@ -76,7 +78,7 @@ const SuggestedOrderList = () => {
         console.log("testing mode");
         setCompanyID(1021)
         setAlignmentID(1110)
-        setUserID(5199)
+        setGroupOrUnitAccessID(5199)
         setIsActive(0)
         setSelectedUnit(0)
         fetchData(1021, 1110, 5199, 0)
@@ -150,19 +152,19 @@ const SuggestedOrderList = () => {
     setselectedUnitName(unitName);
     setSelectedUnit(unitID);
     setUnitShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, userID, unitID, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccessID, unitID, selectedVendor);
   };
 
   const handleVendorSelection = (vendorName, vendorID) => {
     setselectedVendorName(vendorName);
     setSelectedVendor(vendorID);
     setVendorShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, userID, selectedUnit, vendorID);
+    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccessID, selectedUnit, vendorID);
   };
 
  const handleDateSelection = () => {   
     setShowDateModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, userID, selectedUnit, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccessID, selectedUnit, selectedVendor);
   };
 
   const handleFromDateChange = (fromDate) => {
@@ -188,6 +190,7 @@ const SuggestedOrderList = () => {
           company: companyID,
           unit: selectedUnit,
           unitName: selectedRow.unitID,
+          user: userID,
           vendorID: selectedRow.vendorID,
           vendorName: selectedRow.vendorName,
           orderID: selectedRow.suggestedOrderID,
@@ -291,7 +294,8 @@ const SuggestedOrderList = () => {
               <OrderModal
                 companyID={companyID}
                 alignmentID={alignmentID}
-                memberID={userID}
+                userID={userID}
+                memberID={groupOrUnitAccessID}
                 unitData={unitsList}
                 vendorData={vendorsList}
                 unitID={selectedUnit}
