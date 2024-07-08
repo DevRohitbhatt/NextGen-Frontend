@@ -52,7 +52,7 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
-  const { company, unit, groupOrUnit, unitName, vendorID, vendorName, orderID, dates } =
+  const { company, unit, groupOrUnit, unitName, user, vendorID, vendorName, orderID, dates } =
     useLocation().state || {};
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(unit);
@@ -79,7 +79,7 @@ export default function SuggestedOrder() {
   const [isVisible, setVisible] = useState(false);
   const [saveIsVisible, setSaveIsVisible] = useState(false);
   const [submitIsVisible, setSubmitIsVisible] = useState(false);
-  const [userID, setUserID] = useState(0);
+  const [userID, setUserID] = useState(user);
   const [successMessage, setSuccessMessage] = useState("");
   const [editedMessages, setEditedMessages] = useState({});
   const [forecastTable, setForecastTable] = useState({
@@ -89,8 +89,6 @@ export default function SuggestedOrder() {
     rows: [],
     width: "50%",
   });
-
-  
 
   const [saftyFactor, setSaftyFactor] = useState({});
   const toastId = useRef(null);
@@ -112,7 +110,14 @@ export default function SuggestedOrder() {
     const formattedDate = formatDate(today);
     setSelectedDates(dates);
     if (unit && vendorID && vendorName && dates) {
-      getOrderItem(companyID, unit, selectedVendor, dates[0], dates[1], suggestedOrderID);
+      getOrderItem(
+        companyID,
+        unit,
+        selectedVendor,
+        dates[0],
+        dates[1],
+        suggestedOrderID
+      );
     }
     setSaveIsVisible(saveSubmitStatus === 0 ? true : false);
     setSubmitIsVisible(saveSubmitStatus === 0 ? false : true);
@@ -180,7 +185,11 @@ export default function SuggestedOrder() {
 
   useEffect(() => {
     if (forecastTable.rows.length > 0 && suggestedTable.rows.length > 0) {
-      const newSuggestedOrder = SuggestedOrderFunctions.calculateSuggestedQuantities(forecastTable.rows[forecastTable.rows.length - 1][1].value, suggestedTable);
+      const newSuggestedOrder =
+        SuggestedOrderFunctions.calculateSuggestedQuantities(
+          forecastTable.rows[forecastTable.rows.length - 1][1].value,
+          suggestedTable
+        );
       setSuggestedTable({
         ...suggestedTable,
         rows: newSuggestedOrder,
@@ -199,7 +208,8 @@ export default function SuggestedOrder() {
     const rows = [];
 
     forecastData.forEach((data, index) => {
-      totalForecast += data.projectedValue;
+      const projectedValue = Math.round(data.projectedValue);
+      totalForecast += projectedValue;
 
       const editedMessage = editedMessages[data.firstMinute] || "";
       const row = [
@@ -209,7 +219,7 @@ export default function SuggestedOrder() {
           columnName: "Date",
         },
         {
-          value: data.projectedValue,
+          value: projectedValue,
           cellType: "dollar",
           isInput: true,
           columnName: "Forecasted Sales",
@@ -224,7 +234,6 @@ export default function SuggestedOrder() {
       rows.push(row);
     });
 
-    totalForecast = totalForecast.toFixed(2);
     const totalRow = [
       { value: "Total", cellType: "", columnName: "", isTotal: true },
       {
@@ -247,6 +256,26 @@ export default function SuggestedOrder() {
       rows: rows,
     });
   };
+
+  useEffect(() => {
+    const updateEditedMessages = () => {
+      setForecastTable({
+        ...forecastTable,
+        rows: forecastTable.rows.map((row) => {
+          const editedMessage = editedMessages[row[0].value] || "";
+          return [
+            row[0],
+            row[1],
+            {
+              ...row[2],
+              value: editedMessage,
+            },
+          ];
+        }),
+      });
+    };
+    updateEditedMessages();
+  }, [editedMessages]);
 
   const handleCSVClick = () => {
     const data = suggestedTable.rows.flatMap((row) =>
@@ -405,14 +434,6 @@ export default function SuggestedOrder() {
     };
   };
 
-  // {
-  //   type: "table",
-  //   title:`Today - ${todayForecast}  ${todayDate}`,
-  //   widths: [160, 110, "*",27,32, "*", "auto"],
-  //   data: updatedTodayTable,
-  //   dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
-  // },
-
   const handleTableCellChange = (e, row, columnName, tableName) => {
     const updatedValue = parseFloat(e.target.value);
 
@@ -430,31 +451,45 @@ export default function SuggestedOrder() {
               return {
                 ...item,
                 vendorItems: item.vendorItems.map((vendorItem) => {
-                 
                   if (vendorItem.qsrItemID in saftyFactor) {
-                    const safetyFactor = parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100;
-                    const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+                    const safetyFactor =
+                      parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100;
+                    const suggestedQty =
+                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
                     const roundedQty = Math.round(suggestedQty * 100) / 100;
                     return {
                       ...vendorItem,
-                      safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID] : updatedValue,
+                      safetyFactor:
+                        vendorItem.qsrItemID in saftyFactor
+                          ? saftyFactor[vendorItem.qsrItemID]
+                          : updatedValue,
                       suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
                       orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHandQty).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
-
+                      extendedPrice: (
+                        parseFloat(
+                          (roundedQty - vendorItem.onHandQty).toFixed(2)
+                        ) * parseFloat(vendorItem.latestInvoicePrice)
+                      ).toFixed(2),
                     };
-                  }
-                   else {
+                  } else {
                     const safetyFactor = parseFloat(updatedValue) / 100;
-                    const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+                    const suggestedQty =
+                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
                     const roundedQty = Math.round(suggestedQty * 100) / 100;
-  
+
                     return {
                       ...vendorItem,
-                      safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID]: updatedValue,
+                      safetyFactor:
+                        vendorItem.qsrItemID in saftyFactor
+                          ? saftyFactor[vendorItem.qsrItemID]
+                          : updatedValue,
                       suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
                       orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHandQty).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
+                      extendedPrice: (
+                        parseFloat(
+                          (roundedQty - vendorItem.onHandQty).toFixed(2)
+                        ) * parseFloat(vendorItem.latestInvoicePrice)
+                      ).toFixed(2),
                     };
                   }
                 }),
@@ -716,7 +751,14 @@ export default function SuggestedOrder() {
           handleSaveClick={handleSave}
           handleSubmitClick={onSubmitClick}
         />
-        <Modal isOpen={showSubmitModal} setIsOpen={setShowSubmitModal} onClose={() => {setShowSubmitModal(false)}} title="Submit Suggested Order">
+        <Modal
+          isOpen={showSubmitModal}
+          setIsOpen={setShowSubmitModal}
+          onClose={() => {
+            setShowSubmitModal(false);
+          }}
+          title="Submit Suggested Order"
+        >
           <Styled.SubmitModalContainer>
             <Styled.SubmitModalBody>
               <Styled.SubmitModalText>
