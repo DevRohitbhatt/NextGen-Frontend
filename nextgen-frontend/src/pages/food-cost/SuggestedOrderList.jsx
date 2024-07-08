@@ -15,7 +15,6 @@ import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import { useNavigate } from 'react-router-dom';
-import * as SuggestedOrderFunctions from "../../functions/SuggestedOrderFunctions.jsx";
 
 const SuggestedOrderList = () => {
   const [userID, setUserID] = useState();
@@ -45,9 +44,7 @@ const SuggestedOrderList = () => {
   const [suggestedOrders, setSuggestedOrders] = useState([]);  
   const [showCreateOrderModal, setCreateOrderShowModal] = useState(false);
   const [showSuggestedModal, setShowSuggestedModal] = useState(false);
-  const [sugestedOrderbyId, setSugestedOrderbyId] = useState([]);
   const [purchaseOrderID, setPurchaseOrderID] = useState(0);
-  const [isTableUpdated, setIsTableUpdated] = useState(false);
   const headers = [
     { key: 'unitName', label: 'Unit Name', cellType: 'string' },
     { key: 'vendorName', label: 'Vendor Name', cellType: 'string' },
@@ -175,13 +172,6 @@ const SuggestedOrderList = () => {
   const handleToDateChange = (toDate) => {
     setSelectedToDate(toDate);
   };
-  
-  useEffect(() => {
-    if (isTableUpdated) {
-      submitSuggestedOrderPDF();
-      setIsTableUpdated(false); // Reset the flag
-    }
-  }, [isTableUpdated]);
   
   const handleRowItemClick = (selectedRow) => {
     if (selectedRow.purchaseOrderID > 0 || selectedRow.purchaseOrderID !== 0) {

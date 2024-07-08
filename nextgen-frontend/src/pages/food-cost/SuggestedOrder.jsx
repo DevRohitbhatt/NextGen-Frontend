@@ -52,8 +52,16 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
-  const { company, unit, groupOrUnit, unitName, vendorID, vendorName, orderID, dates } =
-    useLocation().state || {};
+  const {
+    company,
+    unit,
+    groupOrUnit,
+    unitName,
+    vendorID,
+    vendorName,
+    orderID,
+    dates,
+  } = useLocation().state || {};
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(unit);
   const [selectedUnitName, setSelectedUnitName] = useState(unitName);
@@ -90,8 +98,6 @@ export default function SuggestedOrder() {
     width: "50%",
   });
 
-  
-
   const [saftyFactor, setSaftyFactor] = useState({});
   const toastId = useRef(null);
 
@@ -112,7 +118,14 @@ export default function SuggestedOrder() {
     const formattedDate = formatDate(today);
     setSelectedDates(dates);
     if (unit && vendorID && vendorName && dates) {
-      getOrderItem(companyID, unit, selectedVendor, dates[0], dates[1], suggestedOrderID);
+      getOrderItem(
+        companyID,
+        unit,
+        selectedVendor,
+        dates[0],
+        dates[1],
+        suggestedOrderID
+      );
     }
     setSaveIsVisible(saveSubmitStatus === 0 ? true : false);
     setSubmitIsVisible(saveSubmitStatus === 0 ? false : true);
@@ -180,7 +193,11 @@ export default function SuggestedOrder() {
 
   useEffect(() => {
     if (forecastTable.rows.length > 0 && suggestedTable.rows.length > 0) {
-      const newSuggestedOrder = SuggestedOrderFunctions.calculateSuggestedQuantities(forecastTable.rows[forecastTable.rows.length - 1][1].value, suggestedTable);
+      const newSuggestedOrder =
+        SuggestedOrderFunctions.calculateSuggestedQuantities(
+          forecastTable.rows[forecastTable.rows.length - 1][1].value,
+          suggestedTable
+        );
       setSuggestedTable({
         ...suggestedTable,
         rows: newSuggestedOrder,
@@ -430,31 +447,45 @@ export default function SuggestedOrder() {
               return {
                 ...item,
                 vendorItems: item.vendorItems.map((vendorItem) => {
-                 
                   if (vendorItem.qsrItemID in saftyFactor) {
-                    const safetyFactor = parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100;
-                    const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+                    const safetyFactor =
+                      parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100;
+                    const suggestedQty =
+                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
                     const roundedQty = Math.round(suggestedQty * 100) / 100;
                     return {
                       ...vendorItem,
-                      safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID] : updatedValue,
+                      safetyFactor:
+                        vendorItem.qsrItemID in saftyFactor
+                          ? saftyFactor[vendorItem.qsrItemID]
+                          : updatedValue,
                       suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
                       orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHandQty).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
-
+                      extendedPrice: (
+                        parseFloat(
+                          (roundedQty - vendorItem.onHandQty).toFixed(2)
+                        ) * parseFloat(vendorItem.latestInvoicePrice)
+                      ).toFixed(2),
                     };
-                  }
-                   else {
+                  } else {
                     const safetyFactor = parseFloat(updatedValue) / 100;
-                    const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+                    const suggestedQty =
+                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
                     const roundedQty = Math.round(suggestedQty * 100) / 100;
-  
+
                     return {
                       ...vendorItem,
-                      safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID]: updatedValue,
+                      safetyFactor:
+                        vendorItem.qsrItemID in saftyFactor
+                          ? saftyFactor[vendorItem.qsrItemID]
+                          : updatedValue,
                       suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
                       orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHandQty).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
+                      extendedPrice: (
+                        parseFloat(
+                          (roundedQty - vendorItem.onHandQty).toFixed(2)
+                        ) * parseFloat(vendorItem.latestInvoicePrice)
+                      ).toFixed(2),
                     };
                   }
                 }),
@@ -587,7 +618,6 @@ export default function SuggestedOrder() {
   }
 
   function submitSuggestedOrderPDF() {
-    console.log("Saving Suggested Order",suggestedTable)
     SuggestedOrderFunctions.submitSuggestedOrderPDF(suggestedTable);
   }
 
@@ -704,14 +734,23 @@ export default function SuggestedOrder() {
           handleSaveClick={handleSave}
           handleSubmitClick={onSubmitClick}
         />
-        <Modal isOpen={showSubmitModal} setIsOpen={setShowSubmitModal} onClose={() => {setShowSubmitModal(false)}} title="Submit Suggested Order">
+        <Modal
+          isOpen={showSubmitModal}
+          setIsOpen={setShowSubmitModal}
+          onClose={() => {
+            setShowSubmitModal(false);
+          }}
+          title="Submit Suggested Order"
+        >
           <Styled.SubmitModalContainer>
             <Styled.SubmitModalBody>
               <Styled.SubmitModalText>
                 How would you like to submit the Suggested Order?
               </Styled.SubmitModalText>
               <Styled.SubmitModalButtonContainer>
-                <Styled.PDFButton onClick={() => submitSuggestedOrderPDF()}>PDF</Styled.PDFButton>
+                <Styled.PDFButton onClick={() => submitSuggestedOrderPDF()}>
+                  PDF
+                </Styled.PDFButton>
                 <Styled.CSVButton onClick={() => {}}>CSV</Styled.CSVButton>
               </Styled.SubmitModalButtonContainer>
             </Styled.SubmitModalBody>

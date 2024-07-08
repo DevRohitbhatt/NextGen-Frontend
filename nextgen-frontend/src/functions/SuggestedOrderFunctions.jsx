@@ -245,14 +245,6 @@ const calculateExtendedPrice = (orderQty, latestInvoicePrice) => {
   const extendedPrice = '$' + ((orderQty * latestInvoicePrice).toFixed(2)).toString();
   return extendedPrice;
 }
-let call = false;
-let storedCallback = null;
-
-export const fetchSuggestedOrderData = (suggestedOrderData, callback) => {
-  call = true;
-  storedCallback = callback;
-  return submitSuggestedOrderPDF(suggestedOrderData); 
-};
 
 export const submitSuggestedOrderPDF =(suggestedOrderData) => {
   const pdfData = {
@@ -271,17 +263,8 @@ export const submitSuggestedOrderPDF =(suggestedOrderData) => {
       }
     ],
   };
- 
-  if (call && storedCallback) {
-    const result = {pdfData };
-    storedCallback(result);
-    call = false; 
-    storedCallback = null; 
-    return result; 
-  } else {
-    PdfBuilder(pdfData); 
-    return null; 
-  }
+
+  PdfBuilder(pdfData); 
 }
 
 const formatPDFData = (data) => {
