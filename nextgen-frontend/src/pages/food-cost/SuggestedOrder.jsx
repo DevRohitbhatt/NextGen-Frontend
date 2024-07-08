@@ -619,12 +619,26 @@ export default function SuggestedOrder() {
 
   function submitSuggestedOrderPDF() {
     SuggestedOrderFunctions.submitSuggestedOrderPDF(suggestedTable);
+    handleSubmit();
+    setShowSubmitModal(false);
+  }
+
+  function formatFileName () {
+    const dateOptions = { year: "numeric", month: "2-digit", day: "2-digit"}
+    const [month, day, year] = fromDate.toLocaleDateString('en-US', dateOptions).split('/');
+    return "Order" + "_" + selectedVendorName + "_" + month + "_" + day + "_" + year;
+  }
+
+  function submitSuggestedOrderCSV() {
+    SuggestedOrderFunctions.submitSuggestedOrderCSV(suggestedTable, formatFileName());
+    //handleSubmit();
+    setShowSubmitModal(false);
   }
 
   function handleSubmit() {
     const data = {
-      suggestedOrderID: 0,
-      purchaseOrderID: 1,
+      suggestedOrderID: suggestedOrderID,
+      purchaseOrderID: 0,
       companyID: companyID,
       unitID: selectedUnit,
       vendorID: selectedVendor,
@@ -635,11 +649,10 @@ export default function SuggestedOrder() {
       forecastedData: forecastedData(forecastTable.rows),
       suggestedOrderDetails: suggestedTable.rows,
     };
-    const jsonData = JSON.stringify(data);
     toastId.current = toast.info("Submiting Suggested Order...", {
       autoClose: false,
     });
-    SuggestedOrderAPI.submit(jsonData)
+    SuggestedOrderAPI.submit(data)
       .then(() => {
         setVisible(true);
         setSuccessMessage("Submit successful");
@@ -748,10 +761,8 @@ export default function SuggestedOrder() {
                 How would you like to submit the Suggested Order?
               </Styled.SubmitModalText>
               <Styled.SubmitModalButtonContainer>
-                <Styled.PDFButton onClick={() => submitSuggestedOrderPDF()}>
-                  PDF
-                </Styled.PDFButton>
-                <Styled.CSVButton onClick={() => {}}>CSV</Styled.CSVButton>
+                <Styled.PDFButton onClick={() => submitSuggestedOrderPDF()}>PDF</Styled.PDFButton>
+                <Styled.CSVButton onClick={() => submitSuggestedOrderCSV()}>CSV</Styled.CSVButton>
               </Styled.SubmitModalButtonContainer>
             </Styled.SubmitModalBody>
           </Styled.SubmitModalContainer>
