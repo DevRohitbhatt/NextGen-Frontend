@@ -4,6 +4,7 @@ import * as Styled from "./styles/SuggestedOrderStyles.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
+import Modal from "../../components/Modal.jsx";
 import MessagePopup from "../../components/MessagePopup.jsx";
 import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
@@ -51,7 +52,7 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
-  const { company, unit, groupOrUnit, unitName, vendorID, vendorName, orderID, dates } =
+  const { company, unit, groupOrUnit, unitName, user, vendorID, vendorName, orderID, dates } =
     useLocation().state || {};
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(unit);
@@ -60,6 +61,7 @@ export default function SuggestedOrder() {
   const [selectedVendorName, setSelectedVendorName] = useState(vendorName);
   const [selectedVendor, setSelectedVendor] = useState(vendorID);
   const [showModal, setShowModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [companyID, setCompanyID] = useState(company);
   const [alignmentID, setAlignmentID] = useState(null);
   const [groupOrUnitAccess, setGroupOrUnitAccess] = useState(groupOrUnit);
@@ -77,7 +79,7 @@ export default function SuggestedOrder() {
   const [isVisible, setVisible] = useState(false);
   const [saveIsVisible, setSaveIsVisible] = useState(false);
   const [submitIsVisible, setSubmitIsVisible] = useState(false);
-  const [userID, setUserID] = useState(0);
+  const [userID, setUserID] = useState(user);
   const [successMessage, setSuccessMessage] = useState("");
   const [editedMessages, setEditedMessages] = useState({});
   const [forecastTable, setForecastTable] = useState({
@@ -87,8 +89,6 @@ export default function SuggestedOrder() {
     rows: [],
     width: "50%",
   });
-
-  
 
   const [saftyFactor, setSaftyFactor] = useState({});
   const toastId = useRef(null);
@@ -110,7 +110,14 @@ export default function SuggestedOrder() {
     const formattedDate = formatDate(today);
     setSelectedDates(dates);
     if (unit && vendorID && vendorName && dates) {
-      getOrderItem(companyID, unit, selectedVendor, dates[0], dates[1], suggestedOrderID);
+      getOrderItem(
+        companyID,
+        unit,
+        selectedVendor,
+        dates[0],
+        dates[1],
+        suggestedOrderID
+      );
     }
     setSaveIsVisible(saveSubmitStatus === 0 ? true : false);
     setSubmitIsVisible(saveSubmitStatus === 0 ? false : true);
@@ -178,7 +185,11 @@ export default function SuggestedOrder() {
 
   useEffect(() => {
     if (forecastTable.rows.length > 0 && suggestedTable.rows.length > 0) {
-      const newSuggestedOrder = SuggestedOrderFunctions.calculateSuggestedQuantities(forecastTable.rows[forecastTable.rows.length - 1][1].value, suggestedTable);
+      const newSuggestedOrder =
+        SuggestedOrderFunctions.calculateSuggestedQuantities(
+          forecastTable.rows[forecastTable.rows.length - 1][1].value,
+          suggestedTable
+        );
       setSuggestedTable({
         ...suggestedTable,
         rows: newSuggestedOrder,
@@ -197,7 +208,8 @@ export default function SuggestedOrder() {
     const rows = [];
 
     forecastData.forEach((data, index) => {
-      totalForecast += data.projectedValue;
+      const projectedValue = Math.round(data.projectedValue);
+      totalForecast += projectedValue;
 
       const editedMessage = editedMessages[data.firstMinute] || "";
       const row = [
@@ -207,7 +219,7 @@ export default function SuggestedOrder() {
           columnName: "Date",
         },
         {
-          value: data.projectedValue,
+          value: projectedValue,
           cellType: "dollar",
           isInput: true,
           columnName: "Forecasted Sales",
@@ -222,7 +234,6 @@ export default function SuggestedOrder() {
       rows.push(row);
     });
 
-    totalForecast = totalForecast.toFixed(2);
     const totalRow = [
       { value: "Total", cellType: "", columnName: "", isTotal: true },
       {
@@ -245,6 +256,26 @@ export default function SuggestedOrder() {
       rows: rows,
     });
   };
+
+  useEffect(() => {
+    const updateEditedMessages = () => {
+      setForecastTable({
+        ...forecastTable,
+        rows: forecastTable.rows.map((row) => {
+          const editedMessage = editedMessages[row[0].value] || "";
+          return [
+            row[0],
+            row[1],
+            {
+              ...row[2],
+              value: editedMessage,
+            },
+          ];
+        }),
+      });
+    };
+    updateEditedMessages();
+  }, [editedMessages]);
 
   const handleCSVClick = () => {
     const data = suggestedTable.rows.flatMap((row) =>
@@ -403,14 +434,6 @@ export default function SuggestedOrder() {
     };
   };
 
-  // {
-  //   type: "table",
-  //   title:`Today - ${todayForecast}  ${todayDate}`,
-  //   widths: [160, 110, "*",27,32, "*", "auto"],
-  //   data: updatedTodayTable,
-  //   dataTypes: ["string", "string", "currency", "percent", "numnber", "number", "number"]
-  // },
-
   const handleTableCellChange = (e, row, columnName, tableName) => {
     const updatedValue = parseFloat(e.target.value);
 
@@ -428,31 +451,45 @@ export default function SuggestedOrder() {
               return {
                 ...item,
                 vendorItems: item.vendorItems.map((vendorItem) => {
-                 
                   if (vendorItem.qsrItemID in saftyFactor) {
-                    const safetyFactor = parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100;
-                    const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+                    const safetyFactor =
+                      parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100;
+                    const suggestedQty =
+                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
                     const roundedQty = Math.round(suggestedQty * 100) / 100;
                     return {
                       ...vendorItem,
-                      safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID] : updatedValue,
+                      safetyFactor:
+                        vendorItem.qsrItemID in saftyFactor
+                          ? saftyFactor[vendorItem.qsrItemID]
+                          : updatedValue,
                       suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
                       orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHandQty).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
-
+                      extendedPrice: (
+                        parseFloat(
+                          (roundedQty - vendorItem.onHandQty).toFixed(2)
+                        ) * parseFloat(vendorItem.latestInvoicePrice)
+                      ).toFixed(2),
                     };
-                  }
-                   else {
+                  } else {
                     const safetyFactor = parseFloat(updatedValue) / 100;
-                    const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+                    const suggestedQty =
+                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
                     const roundedQty = Math.round(suggestedQty * 100) / 100;
-  
+
                     return {
                       ...vendorItem,
-                      safetyFactor: vendorItem.qsrItemID in saftyFactor ? saftyFactor[vendorItem.qsrItemID]: updatedValue,
+                      safetyFactor:
+                        vendorItem.qsrItemID in saftyFactor
+                          ? saftyFactor[vendorItem.qsrItemID]
+                          : updatedValue,
                       suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
                       orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (parseFloat((roundedQty - vendorItem.onHandQty).toFixed(2)) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2),
+                      extendedPrice: (
+                        parseFloat(
+                          (roundedQty - vendorItem.onHandQty).toFixed(2)
+                        ) * parseFloat(vendorItem.latestInvoicePrice)
+                      ).toFixed(2),
                     };
                   }
                 }),
@@ -579,10 +616,33 @@ export default function SuggestedOrder() {
         setSubmitIsVisible(false);
       });
   }
+
+  function onSubmitClick() {
+    setShowSubmitModal(true);
+  }
+
+  function submitSuggestedOrderPDF() {
+    SuggestedOrderFunctions.submitSuggestedOrderPDF(suggestedTable);
+    handleSubmit();
+    setShowSubmitModal(false);
+  }
+
+  function formatFileName () {
+    const dateOptions = { year: "numeric", month: "2-digit", day: "2-digit"}
+    const [month, day, year] = fromDate.toLocaleDateString('en-US', dateOptions).split('/');
+    return "Order" + "_" + selectedVendorName + "_" + month + "_" + day + "_" + year;
+  }
+
+  function submitSuggestedOrderCSV() {
+    SuggestedOrderFunctions.submitSuggestedOrderCSV(suggestedTable, formatFileName());
+    //handleSubmit();
+    setShowSubmitModal(false);
+  }
+
   function handleSubmit() {
     const data = {
-      suggestedOrderID: 0,
-      purchaseOrderID: 1,
+      suggestedOrderID: suggestedOrderID,
+      purchaseOrderID: 0,
       companyID: companyID,
       unitID: selectedUnit,
       vendorID: selectedVendor,
@@ -593,11 +653,10 @@ export default function SuggestedOrder() {
       forecastedData: forecastedData(forecastTable.rows),
       suggestedOrderDetails: suggestedTable.rows,
     };
-    const jsonData = JSON.stringify(data);
     toastId.current = toast.info("Submiting Suggested Order...", {
       autoClose: false,
     });
-    SuggestedOrderAPI.submit(jsonData)
+    SuggestedOrderAPI.submit(data)
       .then(() => {
         setVisible(true);
         setSuccessMessage("Submit successful");
@@ -690,8 +749,28 @@ export default function SuggestedOrder() {
           handlePDFClick={handlePDFClick}
           handleCSVClick={handleCSVClick}
           handleSaveClick={handleSave}
-          handleSubmitClick={handleSubmit}
+          handleSubmitClick={onSubmitClick}
         />
+        <Modal
+          isOpen={showSubmitModal}
+          setIsOpen={setShowSubmitModal}
+          onClose={() => {
+            setShowSubmitModal(false);
+          }}
+          title="Submit Suggested Order"
+        >
+          <Styled.SubmitModalContainer>
+            <Styled.SubmitModalBody>
+              <Styled.SubmitModalText>
+                How would you like to submit the Suggested Order?
+              </Styled.SubmitModalText>
+              <Styled.SubmitModalButtonContainer>
+                <Styled.PDFButton onClick={() => submitSuggestedOrderPDF()}>PDF</Styled.PDFButton>
+                <Styled.CSVButton onClick={() => submitSuggestedOrderCSV()}>CSV</Styled.CSVButton>
+              </Styled.SubmitModalButtonContainer>
+            </Styled.SubmitModalBody>
+          </Styled.SubmitModalContainer>
+        </Modal>
       </Styled.OptionsRow>
 
       {isLoading ? (

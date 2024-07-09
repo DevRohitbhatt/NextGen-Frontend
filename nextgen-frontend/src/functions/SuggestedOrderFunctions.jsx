@@ -1,3 +1,4 @@
+import PdfBuilder from "../components/PdfBuilder";
 export const handleForecastChange = (
   e,
   row,
@@ -14,7 +15,7 @@ export const handleForecastChange = (
     return;
   }
   const currentCellValue = forecastTable.rows[row].find(cell => cell.columnName === columnName).value;
-  const hasValueChanged = currentCellValue !== updatedValue;
+  const hasValueChanged = Math.round(currentCellValue, 0) !== updatedValue;
   const updatedEditedMessages = { ...editedMessages };
   if (hasValueChanged) {
     updatedEditedMessages[forecastTable.rows[row][0].value] = '* Changed';
@@ -241,6 +242,78 @@ const calculateOrderQty = (suggestedQty, onHandQty) => {
 }
 
 const calculateExtendedPrice = (orderQty, latestInvoicePrice) => {
-    const extendedPrice = '$' + ((orderQty * latestInvoicePrice).toFixed(2)).toString();
-    return extendedPrice;
+  const extendedPrice = '$' + ((orderQty * latestInvoicePrice).toFixed(2)).toString();
+  return extendedPrice;
+}
+
+export const submitSuggestedOrderPDF =(suggestedOrderData) => {
+  const pdfData = {
+    title: "Suggested Order",
+    subHeaders: ["Suggested Order Details"],
+    exportType: "pdf",
+    body: [
+      {
+        type: "table",
+        widths: ["*", "*", "*", "*", "*"],
+        dataTypes: ["string", "string", "string", "string", "string"],
+        data: {
+          columnHeaders: ["Item Description", "Item Ref", "Order Unit", "Pack Size", "Order Amount"],
+          rows: formatExportArray(suggestedOrderData),
+        }
+      }
+    ],
+  };
+
+  PdfBuilder(pdfData); 
+}
+
+const formatExportArray = (data) => {
+  var returnArray = [];
+  data.rows.map((detail) => {
+    detail.suggestedOrderItem.map((inventoryItem) => {
+      const selectedVendorItem = inventoryItem.vendorItems.find((vendorItem) => vendorItem.isSelected);
+      if (selectedVendorItem.orderQty > 0) {
+        returnArray.push([
+          {
+            value: selectedVendorItem.description,
+            cellType: "",
+            columnName: "Item Description",
+          },
+          {
+            value: selectedVendorItem.vendorItemReference,
+            cellType: "",
+            columnName: "Item Ref",
+          },
+          {
+            value: selectedVendorItem.unitOfMeasure,
+            cellType: "",
+            columnName: "Order Unit",
+          },
+          {
+            value: selectedVendorItem.packSize,
+            cellType: "",
+            columnName: "Pack Size",
+          },
+          {
+            value: selectedVendorItem.orderQty,
+            cellType: "",
+            columnName: "Order Amount",
+          }
+        ]);
+      }
+    });
+  });
+  return returnArray;
+};
+
+export const submitSuggestedOrderCSV = (suggestedOrderData, filename) => {
+  const csvData = formatExportArray(suggestedOrderData);
+  const headers = ["Item Description", "Item Ref", "Order Unit", "Pack Size", "Order Amount"];
+  const csvDataString = headers.join(",") + "\n" + csvData.map((row) => row.map((cell) => cell.value).join(",")).join("\n");
+  const csvBlob = new Blob([csvDataString], { type: "text/csv" });
+  const csvURL = window.URL.createObjectURL(csvBlob);
+  const tempLink = document.createElement("a");
+  tempLink.href = csvURL;
+  tempLink.setAttribute("download", filename + ".csv");
+  tempLink.click();
 }
