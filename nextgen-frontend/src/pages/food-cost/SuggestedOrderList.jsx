@@ -68,11 +68,11 @@ const SuggestedOrderList = () => {
       parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
       parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
       parameters ? setUserID(parameters.User_UserID) : setUserID();
-      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
+      parameters ? setSelectedUnit(parameters.User_GroupOrUnitAccess || parameters.User_DefaultUnitID) : setSelectedUnit();
       parameters ? setGroupOrUnitAccessID(parameters.User_GroupOrUnitAccess) : setGroupOrUnitAccessID();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
-        fetchData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess, parameters.User_DefaultUnitID);
+        fetchData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess || parameters.User_DefaultUnitID);
       } else {
         
         console.log("testing mode");
@@ -81,7 +81,7 @@ const SuggestedOrderList = () => {
         setGroupOrUnitAccessID(5199)
         setIsActive(0)
         setSelectedUnit(0)
-        fetchData(1021, 1110, 5199, 0)
+        fetchData(1021, 1110, 5199)
       }
     }
     else {      
@@ -90,16 +90,16 @@ const SuggestedOrderList = () => {
 
   }, []);
 
-  const fetchData = (companyID, alignmentID, groupOrUnitAccess, unitID) => {
+  const fetchData = (companyID, alignmentID, selectedUnit) => {
     setIsLoading(true);    
-    fetchUnits(companyID, alignmentID, groupOrUnitAccess);
+    fetchUnits(companyID, alignmentID, selectedUnit);
     fetchVendors(companyID);
-    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccess, unitID, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, selectedVendor);
     setIsLoading(false); 
   };
 
-  const fetchUnits =  (companyID, alignmentID, groupOrUnitAccess) => {
-    UnitsAndAreasAPI.getbyid(companyID, alignmentID, groupOrUnitAccess)
+  const fetchUnits =  (companyID, alignmentID, memberID) => {
+    UnitsAndAreasAPI.getbyid(companyID, alignmentID, memberID)
     .then((data) => {      
       setUnitsList(data.data);
     }).catch((error) => {
@@ -116,8 +116,8 @@ const SuggestedOrderList = () => {
     });
   };
 
-  const fetchSuggestedOrders = (companyID, alignmentID, memberID, unitID, vendorID) => {
-    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID, unitID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
+  const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID) => {
+    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID, vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
       data.data.map((x) => {
         const formatFromDate = formatDate(x.orderFromDate);
@@ -152,19 +152,19 @@ const SuggestedOrderList = () => {
     setselectedUnitName(unitName);
     setSelectedUnit(unitID);
     setUnitShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccessID, unitID, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, unitID, selectedVendor);
   };
 
   const handleVendorSelection = (vendorName, vendorID) => {
     setselectedVendorName(vendorName);
     setSelectedVendor(vendorID);
     setVendorShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccessID, selectedUnit, vendorID);
+    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, vendorID);
   };
 
  const handleDateSelection = () => {   
     setShowDateModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccessID, selectedUnit, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, selectedVendor);
   };
 
   const handleFromDateChange = (fromDate) => {
@@ -244,9 +244,10 @@ const SuggestedOrderList = () => {
           <UnitSelector
             companyID={companyID}
             alignmentID={alignmentID}
-            unitID={selectedUnit}
-            unitName={selectedUnitName}
-            setUnitName={setselectedUnitName}
+            memberID={selectedUnit}
+            memberName={selectedUnitName}
+            includeAreas={true}
+            setMemberName={setselectedUnitName}
             onClick={() => setUnitShowModal(true)}
           />
           <VendorSelector
@@ -318,9 +319,10 @@ const SuggestedOrderList = () => {
       )}
       <UnitModal
         unitData={unitsList}
-        unitID={selectedUnit}
-        unitName={selectedUnitName}
+        memberID={selectedUnit}
+        memberName={selectedUnitName}
         show={showModal}
+        includeAreas={true}
         handleClose={() => {
           setUnitShowModal(false);
         }}

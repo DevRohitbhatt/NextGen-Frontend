@@ -713,9 +713,9 @@ export default function SuggestedOrder() {
           <UnitSelector
             companyID={companyID}
             alignmentID={alignmentID}
-            unitName={selectedUnitName}
-            setUnitName={setSelectedUnitName}
-            unitID={selectedUnit}
+            memberName={selectedUnitName}
+            setMemberName={setSelectedUnitName}
+            memberID={selectedUnit}
             isEditable={false}
           />
           <VendorSelector
@@ -732,8 +732,8 @@ export default function SuggestedOrder() {
           />
           <UnitModal
             unitData={unitsList}
-            unitID={selectedUnit}
-            unitName={selectedUnitName}
+            memberID={selectedUnit}
+            memberName={selectedUnitName}
             show={showModal}
             handleClose={() => {
               setShowModal(false);

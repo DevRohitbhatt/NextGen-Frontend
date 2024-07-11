@@ -495,9 +495,9 @@ export default function PrepChart() {
             onClick={handleUnitSelectorClick}
             companyID={companyID}
             alignmentID={alignmentID}
-            unitName={selectedUnitName}
-            setUnitName={setselectedUnitName}
-            unitID={selectedUnit}
+            memberName={selectedUnitName}
+            setMemberName={setselectedUnitName}
+            memberID={selectedUnit}
           />
           <DateSelector
             toDate={selectedToDate}
@@ -508,8 +508,8 @@ export default function PrepChart() {
 
           <UnitModal
             unitData={unitsList}
-            unitID={selectedUnit}
-            unitName={selectedUnitName}
+            memberID={selectedUnit}
+            memberName={selectedUnitName}
             show={showModal}
             handleClose={() => {
               setShowModal(false);
