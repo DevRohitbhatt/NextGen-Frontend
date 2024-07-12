@@ -49,33 +49,42 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick, companyID, alignmentID, unitName, setUnitName, unitID, isEditable=true, formVersion=false}) {
+export default function UnitSelector({ onClick, companyID, alignmentID, memberName, setMemberName, memberID, isEditable=true, includeAreas=false, formVersion=false}) {
   
   useEffect(() => {
     const fetchUnitList = async () => {
-      await UnitsAndAreasAPI.getbyid(companyID, alignmentID, unitID)
+      await UnitsAndAreasAPI.getbyid(companyID, alignmentID, memberID)
       .then((response) => {
-        if(response.data.units.length === 0) {
-          setUnitName("No unit selected");
-          return;
-        } else {
-          setUnitName(response.data.units[0].unitName);
+        if (response.data.areas.length > 0 && includeAreas) {
+          const areaName = response.data.areas.find(area => area.areaID === memberID).areaName;
+          if (areaName) {
+            setMemberName(areaName);
+            return;
+          }
         }
+        if(response.data.units.length > 0) {
+          const unitName = response.data.units.find(unit => unit.unitID === memberID).unitName;
+          if (unitName) {
+            setMemberName(unitName);
+            return;
+          }
+        } 
+        setMemberName("No unit selected")
       }).catch((error) => {
-        setUnitName("No unit selected")
+        setMemberName("No unit selected")
       });
       
     };
-    if (companyID && alignmentID && unitID)
+    if (companyID && alignmentID && memberID)
       fetchUnitList();
-  }, [unitID]);
+  }, [memberID]);
 
   
   return (
     <>
     {formVersion ? (
       <FormElementContainer onClick={onClick}>
-        <FormUnitValue>{unitName}</FormUnitValue>
+        <FormUnitValue>{memberName}</FormUnitValue>
       </FormElementContainer> 
     ) : (
       <UnitContainer onClick={isEditable ? onClick : () => {}} className="unit-selector">
@@ -84,7 +93,7 @@ export default function UnitSelector({ onClick, companyID, alignmentID, unitName
         ) : (
           <Label>Unit</Label>
         )}
-        <UnitValue isEditable={isEditable}>{unitName}</UnitValue>
+        <UnitValue isEditable={isEditable}>{memberName}</UnitValue>
       </UnitContainer>
     )}
     </>

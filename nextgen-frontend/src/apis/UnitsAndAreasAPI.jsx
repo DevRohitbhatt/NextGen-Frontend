@@ -3,10 +3,10 @@ import { defineCancelApiObject } from "./configs/axiosUtils";
 
 
 export const UnitsAndAreasAPI = {
-    getbyid: async function (companyID, alignmentID, areaID, cancel = false) {
+    getbyid: async function (companyID, alignmentID, memberID, cancel = false) {
         const response = await api.request({
             method: "GET",
-            url: `/api/unitsandareas/getbyid?companyID=${companyID}&alignmentID=${alignmentID}&memberID=${areaID}`,
+            url: `/api/unitsandareas/getbyid?companyID=${companyID}&alignmentID=${alignmentID}&memberID=${memberID}`,
             signal: cancel ? cancelApiObject[this.getbyid.name].handleRequestCancellation().signal : undefined,
         });
 
