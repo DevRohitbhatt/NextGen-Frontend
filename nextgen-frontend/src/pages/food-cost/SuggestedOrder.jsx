@@ -444,6 +444,7 @@ export default function SuggestedOrder() {
 
     switch (tableName) {
       case "DefaultSafetyFactor": {
+        setDefaultSafetyFactorTable({ ...defaultSafetyFactorTable, rows: [[{ value: updatedValue, cellType: "percent", columnName: "Default Safety Factor", handleOnChange: {}, isInput: true }]] });
         const updatedRows = suggestedTable.rows.map((category) => {
           return {
             ...category,
