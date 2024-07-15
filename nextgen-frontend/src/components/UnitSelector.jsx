@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI";
 
-
 const UnitContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -49,8 +48,8 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick, companyID, alignmentID, memberName, setMemberName, memberID, isEditable=true, includeAreas=false, formVersion=false}) {
-  
+export default function UnitSelector({ onClick, companyID, alignmentID, memberName, setMemberName, memberID, isEditable=true, includeAreas=false, formVersion=false,isInvalid=false}) {
+  console.log("UnitSelector",isInvalid);
   useEffect(() => {
     const fetchUnitList = async () => {
       await UnitsAndAreasAPI.getbyid(companyID, alignmentID, memberID)
@@ -79,21 +78,20 @@ export default function UnitSelector({ onClick, companyID, alignmentID, memberNa
       fetchUnitList();
   }, [memberID]);
 
-  
   return (
     <>
     {formVersion ? (
       <FormElementContainer onClick={onClick}>
-        <FormUnitValue>{memberName}</FormUnitValue>
+        <FormUnitValue style={isInvalid ? { borderColor: 'red' } : {}}>{memberName}</FormUnitValue>
       </FormElementContainer> 
     ) : (
-      <UnitContainer onClick={isEditable ? onClick : () => {}} className="unit-selector">
+      <UnitContainer onClick={isEditable ? onClick : () => {}} className="unit-selector" >
         {isEditable ? (
           <Label>Select Unit(s)</Label>
         ) : (
           <Label>Unit</Label>
         )}
-        <UnitValue isEditable={isEditable}>{memberName}</UnitValue>
+        <UnitValue  isEditable={isEditable}>{memberName}</UnitValue>
       </UnitContainer>
     )}
     </>

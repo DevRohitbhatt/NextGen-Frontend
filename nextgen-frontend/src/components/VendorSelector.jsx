@@ -49,7 +49,7 @@ const VendorValue = styled.div`
   }
 `;
 
-export default function VendorSelector({ onClick , vendorName, setVendorName, vendorID, formVersion, isEditable = true }) {
+export default function VendorSelector({ onClick , vendorName, setVendorName, vendorID, formVersion, isEditable = true,isInvalid=false }) {
   
   const GetVendorList = () => {
     VendorAPI.getVendorsByCompany(1, 1)
@@ -70,7 +70,7 @@ export default function VendorSelector({ onClick , vendorName, setVendorName, ve
     <>
       {formVersion ? (
         <FormElementContainer onClick={onClick}>
-          <FormVendorValue>{vendorName}</FormVendorValue>
+          <FormVendorValue  style={isInvalid ? { borderColor: 'red' } : {}}>{vendorName}</FormVendorValue>
         </FormElementContainer>
       ) : (
         <VendorContainer onClick={isEditable ? onClick : () => {}} className="vendor-selector">
