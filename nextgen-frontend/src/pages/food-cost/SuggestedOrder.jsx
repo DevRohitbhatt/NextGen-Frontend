@@ -16,6 +16,24 @@ import DateSelector from "../../components/DateSelector.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
 import { toast, ToastContainer } from "react-toastify";
 
+const toolTipForecastedDate = "Forecasted Sales dates selected for this order";
+const toolTipForecastedAmt = "Forecasted sales from the main Forecast module. Forecasted sales may be adjusted for this order and will not impact any other module. Adjusted amounts will be flagged as *Changed.";
+
+const toolTipDefaultSafetyFactor = "Set a default safety factor OR individual item safety factor below. Added buffer or cushion to the base SUGGESTED QTY amount. Typically used to ensure ample quantity, without running short of product. Short shelf-life items may have a lower safety factor applied to ensure top quality while minimizing waste and over stock.";
+
+const toolTipItemDescription = "Vendor item description. Dropdown list shows substitute products ordered prior and mapped to the Inventory item.";
+const toolTipItemRef = "Vendor reference #.";
+const toolTipItemOrderUnit = "Vendor order unit i.e. case, box, etc.";
+const toolTipPackSize = "Vendor packaging. How the item is packaged within the Vendor Order Unit.";
+const toolTipCurrentLastPrice = "Integrated Vendor = Current vendor catalog pricing. NON-Integrated Vendor = last invoice price.";
+const toolTipSafetyFactor = "Individual line item Safety Factor can be selected if different from the Default Safety Factor.";
+const toolTipSuggestedQty = "(Order Span Forecasted Sales total / 4 week rolling average item dollar yield) * Safety Factor. The Suggested QTY value requires at least one instance of item usage.";
+const toolTipOnHand = "Physical count of product on hand when creating your order. The On Hand value entered is deducted from the Suggested QTY to calculate the Order Amount.";
+const toolTipOrderAmount = "The amount of product to order from your vendor. Suggested Qty - On Hand.";
+const toolTipExtendedPrice = "Order Amount * Current/Last Price.";
+const left = "left";
+const right = "right";
+
 const suggestedTableStructure = {
   columnHeaders: [
     "Inventory Description",
@@ -45,6 +63,8 @@ const suggestedTableStructure = {
   ],
   columnWidth: "1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows: [],
+  headerTooltips: ["", toolTipItemDescription, toolTipItemRef, toolTipItemOrderUnit, toolTipPackSize, toolTipCurrentLastPrice, toolTipSafetyFactor, toolTipSuggestedQty, toolTipOnHand, toolTipOrderAmount, toolTipExtendedPrice],
+  toolTipDirection: ["", right, right, right, right, right, right, right, right, right, right]
 };
 export default function SuggestedOrder() {
   const [isLoading, setIsLoading] = useState(false);
@@ -88,6 +108,8 @@ export default function SuggestedOrder() {
     columnWidth: "1fr 1fr 0.5fr",
     rows: [],
     width: "50%",
+    headerTooltips: [toolTipForecastedDate, toolTipForecastedAmt, ""],
+    toolTipDirection: [right, right, ""]
   });
 
   const [saftyFactor, setSaftyFactor] = useState({});
@@ -100,6 +122,8 @@ export default function SuggestedOrder() {
     rows: [],
     width: "20%",
     height: "40%",
+    headerTooltips: [toolTipDefaultSafetyFactor],
+    toolTipDirection: [right]
   });
   const [saveSubmitStatus, setSaveSubmitStatus] = useState(0);
 
@@ -796,6 +820,8 @@ export default function SuggestedOrder() {
                 tableName={"Forecast"}
                 handleInputCellChange={handleTableCellChange}
                 isSorting={false}
+                headerTooltips={forecastTable.headerTooltips}
+                toolTipDirection={forecastTable.toolTipDirection}
               />
 
               <Table
@@ -808,6 +834,8 @@ export default function SuggestedOrder() {
                 height={defaultSafetyFactorTable.height}
                 handleInputCellChange={handleTableCellChange}
                 isSorting={false}
+                headerTooltips={defaultSafetyFactorTable.headerTooltips}
+                toolTipDirection={defaultSafetyFactorTable.toolTipDirection}
               />
             </Styled.ForeCastAndSafetyFactor>
           </MinimizableContainer>
@@ -818,6 +846,8 @@ export default function SuggestedOrder() {
               columnHeaders={suggestedTable.columnHeaders}
               dataTypes={suggestedTable.dataTypes}
               setQid={setQid}
+              headerTooltips={suggestedTable.headerTooltips}
+              toolTipDirection={suggestedTable.toolTipDirection}
             />
           </Styled.InventoryItemsContainer>
         </>
