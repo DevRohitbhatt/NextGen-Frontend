@@ -16,6 +16,14 @@ import ExportOptions from "../../components/ExportOptions.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import { useNavigate } from 'react-router-dom';
 
+const toolTipDeliveryDate = "Date the order is scheduled to be delivered, If using an integrated vendor, this date come from the vendor otherwise....";
+const toolTipCreatedBy = "User logged on when the order was created.";
+const toolTipCreatedOn = "The system date when the order was orginially created.";
+const toolTipSubmittedOn = "The system date when the order was Submitted.";
+const toolTipOrderStatus = "For NON integrated vendors, the status will display 1.Created, 2.Submitted, 3.Delivered. For integrated vendors, the Order Status will come from the vendor.";
+const toolTipOrderSpan = "Forecasted dates and sales selected for this order.";
+const left = "left";
+
 const SuggestedOrderList = () => {
   const [groupOrUnitAccessID, setGroupOrUnitAccessID] = useState();
   const [companyID, setCompanyID] = useState();
@@ -47,14 +55,14 @@ const SuggestedOrderList = () => {
   const [showSuggestedModal, setShowSuggestedModal] = useState(false);
   const [purchaseOrderID, setPurchaseOrderID] = useState(0);
   const headers = [
-    { key: 'unitName', label: 'Unit Name', cellType: 'string' },
-    { key: 'vendorName', label: 'Vendor Name', cellType: 'string' },
-    { key: 'deliveryDate', label: 'Delivery Date', cellType: 'date' },
-    { key: 'createdByName', label: 'Created By', cellType: 'string' },
-    { key: 'createdOn', label: 'Created On',cellType: 'dateTime' },
-    { key: 'submittedOn', label: 'Submitted On', cellType: 'dateTime'},
-    { key: 'status', label: 'Order Status', cellType: 'string' },
-    { key: 'orderSpan', label: 'Order Span', cellType: 'string' }
+    { key: 'unitName', label: 'Unit Name', cellType: 'string', toolTip: "", toolTipDirection: "" },
+    { key: 'vendorName', label: 'Vendor Name', cellType: 'string', toolTip: "", toolTipDirection: "" },
+    { key: 'deliveryDate', label: 'Delivery Date', cellType: 'date', toolTip: toolTipDeliveryDate, toolTipDirection: left },
+    { key: 'createdByName', label: 'Created By', cellType: 'string', toolTip: toolTipCreatedBy, toolTipDirection: left },
+    { key: 'createdOn', label: 'Created On',cellType: 'dateTime', toolTip: toolTipCreatedOn, toolTipDirection: left },
+    { key: 'submittedOn', label: 'Submitted On', cellType: 'dateTime', toolTip: toolTipSubmittedOn, toolTipDirection: left },
+    { key: 'status', label: 'Order Status', cellType: 'string', toolTip: toolTipOrderStatus, toolTipDirection: left },
+    { key: 'orderSpan', label: 'Order Span', cellType: 'string', toolTip: toolTipOrderSpan, toolTipDirection: left }
   ];
 
   const navigate = useNavigate();
@@ -119,7 +127,7 @@ const SuggestedOrderList = () => {
   const fetchSuggestedOrders = (companyID, alignmentID, memberID, unitID, vendorID) => {
     SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID, unitID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
-      data.data.map((x) => {
+      data?.data?.map((x) => {
         const formatFromDate = formatDate(x.orderFromDate);
         const formatToDate = formatDate(x.orderToDate);
         x.orderSpan = `${formatFromDate} - ${formatToDate}`;

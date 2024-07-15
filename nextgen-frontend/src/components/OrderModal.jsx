@@ -9,6 +9,14 @@ import VendorSelector from "./VendorSelector";
 import VendorModal from "./VendorModal";
 import UnitSelector from "./UnitSelector";
 import UnitModal from "./UnitModal";
+import Tooltip from "../components/ToolTip.jsx";
+import { FaInfoCircle } from "react-icons/fa";
+
+const toolTipText = "The Order Span Date typically starts with the next order delivery date and extened through either the day before or day of the follwing delivery date";
+
+const InfoIcon = styled(FaInfoCircle)`
+  color: ${(props) => props.theme.secondary};
+`;
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -326,7 +334,9 @@ const OrderModal = ({
                   />
                 </Rows>
                 <Rows>
-                  <Titles>Date Range</Titles>
+                  <Tooltip content={toolTipText} direction="left">
+                  <Titles>Order Span Dates</Titles> <InfoIcon />
+                  </Tooltip>
                   <DateRangePicker
                     selectedDates={selectedDates}
                     onDateChange={setSelectedDates}
