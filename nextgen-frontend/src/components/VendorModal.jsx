@@ -325,6 +325,7 @@ const VendorModal = ({
                           }}
                           value={item.id}
                           className={selectedVendor === item.id ? true : false}
+                          $isActive={selectedVendor === item.id}
                         >
                           {item.name}
                         </VendorListItem>

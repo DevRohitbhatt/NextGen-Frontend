@@ -3,18 +3,18 @@ import * as Styled from "./styles/SuggestedOrderListStyles.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
 import VendorSelector from "../../components/VendorSelector.jsx";
 import DateSelector from "../../components/DateSelector.jsx";
-import Table from '../../components/SimpleTable.jsx';
+import Table from "../../components/SimpleTable.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
 import PurchaseOrderModal from "../../components/PurchaseOrderModal.jsx";
 import VendorModal from "../../components/VendorModal.jsx";
-import CalendarModal from "../../components/ModalDate.jsx";
+import CalendarModal from "../../components/DateModal.jsx";
 import OrderModal from "../../components/OrderModal.jsx";
 import { UnitsAndAreasAPI } from "../../apis/UnitsAndAreasAPI.jsx";
 import { VendorAPI } from "../../apis/VendorAPI.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const toolTipDeliveryDate = "Date the order is scheduled to be delivered, If using an integrated vendor, this date come from the vendor otherwise....";
 const toolTipCreatedBy = "User logged on when the order was created.";
@@ -27,13 +27,15 @@ const left = "left";
 const SuggestedOrderList = () => {
   const [groupOrUnitAccessID, setGroupOrUnitAccessID] = useState();
   const [companyID, setCompanyID] = useState();
-  const [alignmentID, setAlignmentID] = useState();  
+  const [alignmentID, setAlignmentID] = useState();
   const [userID, setUserID] = useState();
   const [isActive, setIsActive] = useState([]);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("There was an error trying to load the Suggested Order, please try again later.");
+  const [errorMessage, setErrorMessage] = useState(
+    "There was an error trying to load the Suggested Order, please try again later."
+  );
 
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState();
@@ -42,15 +44,16 @@ const SuggestedOrderList = () => {
 
   const [vendorsList, setVendorsList] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState(0);
-  const [selectedVendorName, setselectedVendorName] = useState("No Vendor Selected");    
+  const [selectedVendorName, setselectedVendorName] =
+    useState("No Vendor Selected");
   const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
-  
+
   const [selectedToDate, setSelectedToDate] = useState(new Date());
-  const [selectedFromDate, setSelectedFromDate] = useState(new Date());
+  const [selectedFromDate, setSelectedFromDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showDateModal, setShowDateModal] = useState(false); // State to manage modal visibility
-  
-  const [suggestedOrders, setSuggestedOrders] = useState([]);  
+
+  const [suggestedOrders, setSuggestedOrders] = useState([]);
   const [showCreateOrderModal, setCreateOrderShowModal] = useState(false);
   const [showSuggestedModal, setShowSuggestedModal] = useState(false);
   const [purchaseOrderID, setPurchaseOrderID] = useState(0);
@@ -67,61 +70,73 @@ const SuggestedOrderList = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {    
+  useEffect(() => {
     // Fetch initial data
     if (!selectedUnit) {
-      let parameters = decodeURIComponent(window.location.search.replace("?data=", ""));
-      if (parameters)
-        parameters = JSON.parse(parameters);
+      let parameters = decodeURIComponent(
+        window.location.search.replace("?data=", "")
+      );
+      if (parameters) parameters = JSON.parse(parameters);
       parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
       parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
       parameters ? setUserID(parameters.User_UserID) : setUserID();
-      parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
-      parameters ? setGroupOrUnitAccessID(parameters.User_GroupOrUnitAccess) : setGroupOrUnitAccessID();
+      parameters
+        ? setSelectedUnit(
+            parameters.User_GroupOrUnitAccess || parameters.User_DefaultUnitID
+          )
+        : setSelectedUnit();
+      parameters
+        ? setGroupOrUnitAccessID(parameters.User_GroupOrUnitAccess)
+        : setGroupOrUnitAccessID();
       parameters ? setIsActive(parameters.UnitID) : setIsActive();
       if (parameters.User_DefaultUnitID) {
-        fetchData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess, parameters.User_DefaultUnitID);
+        fetchData(
+          parameters.CompanyID,
+          parameters.AlignmentId,
+          parameters.User_GroupOrUnitAccess || parameters.User_DefaultUnitID
+        );
       } else {
-        
         console.log("testing mode");
-        setCompanyID(1021)
-        setAlignmentID(1110)
-        setGroupOrUnitAccessID(5199)
-        setIsActive(0)
-        setSelectedUnit(0)
-        fetchData(1021, 1110, 5199, 0)
+        setCompanyID(1021);
+        setAlignmentID(1110);
+        setGroupOrUnitAccessID(5199);
+        setIsActive(0);
+        setSelectedUnit(0);
+        fetchData(1021, 1110, 5199);
       }
+    } else {
+      setErrorMessage(
+        "There was an issue loading your orders, please try again later."
+      );
     }
-    else {      
-      setErrorMessage("There was an issue loading your orders, please try again later.");
-    }
-
   }, []);
 
-  const fetchData = (companyID, alignmentID, groupOrUnitAccess, unitID) => {
-    setIsLoading(true);    
-    fetchUnits(companyID, alignmentID, groupOrUnitAccess);
+  const fetchData = (companyID, alignmentID, selectedUnit) => {
+    setIsLoading(true);
+    fetchUnits(companyID, alignmentID, selectedUnit);
     fetchVendors(companyID);
-    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccess, unitID, selectedVendor);
-    setIsLoading(false); 
+    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, selectedVendor);
+    setIsLoading(false);
   };
 
-  const fetchUnits =  (companyID, alignmentID, groupOrUnitAccess) => {
-    UnitsAndAreasAPI.getbyid(companyID, alignmentID, groupOrUnitAccess)
-    .then((data) => {      
-      setUnitsList(data.data);
-    }).catch((error) => {
-      console.error("Error getting units: ", error);
-    });
+  const fetchUnits = (companyID, alignmentID, memberID) => {
+    UnitsAndAreasAPI.getbyid(companyID, alignmentID, memberID)
+      .then((data) => {
+        setUnitsList(data.data);
+      })
+      .catch((error) => {
+        console.error("Error getting units: ", error);
+      });
   };
 
-  const fetchVendors =  (companyID) => {
+  const fetchVendors = (companyID) => {
     VendorAPI.getVendorsByCompany(companyID)
-    .then((data) => {
-      setVendorsList(data);
-    }).catch((error) => {
-      console.error("Error getting vendors: ", error);
-    });
+      .then((data) => {
+        setVendorsList(data);
+      })
+      .catch((error) => {
+        console.error("Error getting vendors: ", error);
+      });
   };
 
   const fetchSuggestedOrders = (companyID, alignmentID, memberID, unitID, vendorID) => {
@@ -143,13 +158,13 @@ const SuggestedOrderList = () => {
     const day = date.getDate();
     const month = date.getMonth() + 1; // Months are zero-based, so add 1
     const year = date.getFullYear();
-  
+
     const formattedDate = `${month}/${day}/${year}`;
     return formattedDate;
   };
-  
+
   const handleDateSelectorClick = () => {
-    setShowDateModal(true); 
+    setShowDateModal(true);
   };
 
   const handleCloseModal = () => {
@@ -160,19 +175,21 @@ const SuggestedOrderList = () => {
     setselectedUnitName(unitName);
     setSelectedUnit(unitID);
     setUnitShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccessID, unitID, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, unitID, selectedVendor);
   };
 
   const handleVendorSelection = (vendorName, vendorID) => {
     setselectedVendorName(vendorName);
     setSelectedVendor(vendorID);
     setVendorShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccessID, selectedUnit, vendorID);
+    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, vendorID);
   };
 
- const handleDateSelection = () => {   
+  const handleDateSelection = (from, to) => {
+    setSelectedFromDate(from);
+    setSelectedToDate(to);
     setShowDateModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, groupOrUnitAccessID, selectedUnit, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, selectedVendor);
   };
 
   const handleFromDateChange = (fromDate) => {
@@ -182,18 +199,21 @@ const SuggestedOrderList = () => {
   const handleToDateChange = (toDate) => {
     setSelectedToDate(toDate);
   };
-  
+
   const handleRowItemClick = (selectedRow) => {
     if (selectedRow.purchaseOrderID > 0 || selectedRow.purchaseOrderID !== 0) {
       setPurchaseOrderID(selectedRow.purchaseOrderID);
       setShowSuggestedModal(true);
       return;
-    } else if (selectedRow.status !== "Submitted" || selectedRow.purchaseOrderID == 0) {
+    } else if (
+      selectedRow.status !== "Submitted" ||
+      selectedRow.purchaseOrderID == 0
+    ) {
       const toDate = new Date(selectedRow.orderToDate);
       const fromDate = new Date(selectedRow.orderFromDate);
       let selectedDates = [fromDate, toDate];
       console.log(selectedRow);
-      navigate('/SuggestedOrder', {
+      navigate("/SuggestedOrder", {
         state: {
           company: companyID,
           unit: selectedUnit,
@@ -202,14 +222,14 @@ const SuggestedOrderList = () => {
           vendorID: selectedRow.vendorID,
           vendorName: selectedRow.vendorName,
           orderID: selectedRow.suggestedOrderID,
-          dates: selectedDates
-        }
+          dates: selectedDates,
+        },
       });
     }
   };
 
-  const handleCreateOrderClick = () => { 
-    setCreateOrderShowModal(true);   
+  const handleCreateOrderClick = () => {
+    setCreateOrderShowModal(true);
   };
 
   const handlePDFClick = () => {
@@ -243,7 +263,7 @@ const SuggestedOrderList = () => {
     };
     PdfBuilder(excelData);
   };
-  
+
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
@@ -252,14 +272,15 @@ const SuggestedOrderList = () => {
           <UnitSelector
             companyID={companyID}
             alignmentID={alignmentID}
-            unitID={selectedUnit}
-            unitName={selectedUnitName}
-            setUnitName={setselectedUnitName}
+            memberID={selectedUnit}
+            memberName={selectedUnitName}
+            includeAreas={true}
+            setMemberName={setselectedUnitName}
             onClick={() => setUnitShowModal(true)}
           />
           <VendorSelector
-            vendorID = {selectedVendor}
-            vendorName = {selectedVendorName}
+            vendorID={selectedVendor}
+            vendorName={selectedVendorName}
             setVendorName={setselectedVendorName}
             onClick={() => setVendorShowModal(true)}
           />
@@ -272,13 +293,17 @@ const SuggestedOrderList = () => {
         </Styled.DateAndUnitContainer>
         <ExportOptions
           includeAdd={true}
-          handleAddClick={() => {setCreateOrderShowModal(true)}}
+          handleAddClick={() => {
+            setCreateOrderShowModal(true);
+          }}
           includePDF={true}
           handlePDFClick={handlePDFClick}
           includeExcel={true}
           handleExcelClick={handleExcelClick}
           includeHelp={true}
-          handleHelpClick={() => {console.log("Help")}}
+          handleHelpClick={() => {
+            console.log("Help");
+          }}
         />
       </Styled.OptionsRow>
 
@@ -298,37 +323,38 @@ const SuggestedOrderList = () => {
       ) : isError ? (
         <Styled.UnloadedMessage>{errorMessage}</Styled.UnloadedMessage>
       ) : (
-            <Styled.OptionsRow>
-              <OrderModal
-                companyID={companyID}
-                alignmentID={alignmentID}
-                userID={userID}
-                memberID={groupOrUnitAccessID}
-                unitData={unitsList}
-                vendorData={vendorsList}
-                unitID={selectedUnit}
-                unitName={selectedUnitName}
-                show={showCreateOrderModal}
-                handleClose={() => {
-                  setCreateOrderShowModal(false);
-                }}
-                handleUnitSelection={handleUnitSelection}
-                title="CREATE ORDER"
-              />
-              <Styled.VendorOrdersContainer>
-                <Table
-                  data={suggestedOrders?.data}
-                  headers={headers}
-                  onRowClick={handleRowItemClick}
-                />
-              </Styled.VendorOrdersContainer>
-            </Styled.OptionsRow>            
+        <Styled.OptionsRow>
+          <OrderModal
+            companyID={companyID}
+            alignmentID={alignmentID}
+            userID={userID}
+            memberID={groupOrUnitAccessID}
+            unitData={unitsList}
+            vendorData={vendorsList}
+            unitID={selectedUnit}
+            unitName={selectedUnitName}
+            show={showCreateOrderModal}
+            handleClose={() => {
+              setCreateOrderShowModal(false);
+            }}
+            handleUnitSelection={handleUnitSelection}
+            title="CREATE ORDER"
+          />
+          <Styled.VendorOrdersContainer>
+            <Table
+              data={suggestedOrders?.data}
+              headers={headers}
+              onRowClick={handleRowItemClick}
+            />
+          </Styled.VendorOrdersContainer>
+        </Styled.OptionsRow>
       )}
       <UnitModal
         unitData={unitsList}
-        unitID={selectedUnit}
-        unitName={selectedUnitName}
+        memberID={selectedUnit}
+        memberName={selectedUnitName}
         show={showModal}
+        includeAreas={true}
         handleClose={() => {
           setUnitShowModal(false);
         }}
@@ -348,12 +374,13 @@ const SuggestedOrderList = () => {
       <CalendarModal
         handleClose={handleCloseModal}
         modalOpen={showDateModal}
-        isDateRang={true}
+        isDateRange={true}
         handleDateSelection={handleDateSelection}
-        handleFromDateChange= {handleFromDateChange}
-        handleToDateChange= {handleToDateChange}
-        selectedYear={selectedYear}
-      />          
+        handleFromDateChange={handleFromDateChange}
+        handleToDateChange={handleToDateChange}
+        selectedFromDate={selectedFromDate}
+        selectedToDate={selectedToDate}
+      />
     </Styled.PageContainer>
   );
 };

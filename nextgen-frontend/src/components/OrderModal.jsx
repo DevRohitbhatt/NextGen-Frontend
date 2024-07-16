@@ -208,44 +208,10 @@ const OrderModal = ({
     if (unitData && unitData.units && unitData.areas) {
       setUnitsList(unitData.units);
       setAreasList(unitData.areas);
-      setSelectedUnitName(unitName);
-      setSelectedUnit(unitID);
-      setSelectedUnits([{ id: unitID, name: unitName, isArea: false }]);
-    } else {
-
-    }
+      setSelectedUnitName("No unit selected");
+      setSelectedUnit();
+    } 
   }, [unitData, unitName, unitID]);
-
-  useEffect(() => {
-    populateFilteredList(unitsList, areasList);
-  }, []);
-
-  const populateFilteredList = (units, areas) => {
-    const unitListWithFlag = units.map((unit) => ({
-      id: unit.unitID,
-      name: unit.unitName,
-      isArea: false
-    }));
-    if (includeAreas) {
-      const areaListWithFlag = areas.map((area) => ({
-        id: area.areaID,
-        name: area.areaName,
-        isArea: true
-      }));
-      setFilteredList([...areaListWithFlag, ...unitListWithFlag]);
-    } else {
-      setFilteredList(unitListWithFlag);
-    }
-  };
-
-  const handleUnitSelectChange = (selectedOption) => {
-    setSelectedUnit(selectedOption.value);
-    setSelectedUnitName(selectedOption.label);
-  };
-
-  const handleSaveButtonClick = () => {
-    
-  };
 
   const handleUnitItemClick = (name, id) => {
     setSelectedUnit(id);
@@ -299,10 +265,9 @@ const OrderModal = ({
                   <UnitSelector
                     companyID={companyID}
                     alignmentID={alignmentID}
-                    memberID={memberID}
-                    unitID={selectedUnit}
-                    unitName={selectedUnitName}
-                    setUnitName={setSelectedUnitName}
+                    memberID={selectedUnit}
+                    memberName={selectedUnitName}
+                    setMemberName={setSelectedUnitName}
                     onClick={() => setUnitShowModal(true)}
                     formVersion={true}
                   />
@@ -311,8 +276,8 @@ const OrderModal = ({
                     handleClose={() => setUnitShowModal(false)}
                     handleUnitSelection={handleUnitItemClick}
                     unitData={unitData}
-                    unitID={selectedUnit}
-                    unitName={selectedUnitName}
+                    memberID={selectedUnit}
+                    memberName={selectedUnitName}
                   />
                 </Rows>
                 <Rows>

@@ -468,6 +468,7 @@ export default function SuggestedOrder() {
 
     switch (tableName) {
       case "DefaultSafetyFactor": {
+        setDefaultSafetyFactorTable({ ...defaultSafetyFactorTable, rows: [[{ value: updatedValue, cellType: "percent", columnName: "Default Safety Factor", handleOnChange: {}, isInput: true }]] });
         const updatedRows = suggestedTable.rows.map((category) => {
           return {
             ...category,
@@ -737,9 +738,9 @@ export default function SuggestedOrder() {
           <UnitSelector
             companyID={companyID}
             alignmentID={alignmentID}
-            unitName={selectedUnitName}
-            setUnitName={setSelectedUnitName}
-            unitID={selectedUnit}
+            memberName={selectedUnitName}
+            setMemberName={setSelectedUnitName}
+            memberID={selectedUnit}
             isEditable={false}
           />
           <VendorSelector
@@ -756,8 +757,8 @@ export default function SuggestedOrder() {
           />
           <UnitModal
             unitData={unitsList}
-            unitID={selectedUnit}
-            unitName={selectedUnitName}
+            memberID={selectedUnit}
+            memberName={selectedUnitName}
             show={showModal}
             handleClose={() => {
               setShowModal(false);

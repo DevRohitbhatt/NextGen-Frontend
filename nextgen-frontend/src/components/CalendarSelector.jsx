@@ -30,9 +30,9 @@ const Icon = styled.div`
   color: ${(props) => props.theme.primary};
 `;
 
-export const CalendarToSelector = ({ handleDateChange }) => {
+export const CalendarToSelector = ({ handleDateChange, selectedToDate }) => {
   const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(selectedToDate || new Date());
   const inputRef = useRef(null);
   const calendarRef = useRef(null);
 
@@ -98,9 +98,9 @@ export const CalendarToSelector = ({ handleDateChange }) => {
   );
 };
 
-export const CalendarFromSelector = ({ handleDateChange }) => {
+export const CalendarFromSelector = ({ handleDateChange, selectedFromDate }) => {
   const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(selectedFromDate || new Date());
   const inputRef = useRef(null);
   const calendarRef = useRef(null);
 
