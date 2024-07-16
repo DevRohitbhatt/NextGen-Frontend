@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MdClear } from "react-icons/md";
 import styled from "styled-components";
 
@@ -18,6 +18,12 @@ const ClearSearch = styled(MdClear)`
 
 function ModalSearchBar({ list, onSearch }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (inputRef.current)
+      inputRef.current.focus();
+  }, []);
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value);
@@ -38,6 +44,7 @@ function ModalSearchBar({ list, onSearch }) {
       value={searchTerm}
       onChange={handleChange}
       onClick={handleChange}
+      ref={inputRef}
     />
     <ClearSearch onClick={handleClear}/>
     </div>
