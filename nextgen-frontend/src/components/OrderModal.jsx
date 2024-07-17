@@ -291,7 +291,7 @@ const OrderModal = ({
                   />
                 </Rows>
                 <Rows>
-                  <Titles>Date Range</Titles>
+                  <Titles>Order Span</Titles>
                   <DateRangePicker
                     selectedDates={selectedDates}
                     onDateChange={setSelectedDates}

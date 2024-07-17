@@ -178,7 +178,7 @@ const SuggestedOrderList = () => {
     fetchSuggestedOrders(companyID, alignmentID, unitID, selectedVendor);
   };
 
-  const handleVendorSelection = (vendorName, vendorID) => {
+  const handleVendorSelection = (vendorList) => {
     setselectedVendorName(vendorName);
     setSelectedVendor(vendorID);
     setVendorShowModal(false);
@@ -370,6 +370,7 @@ const SuggestedOrderList = () => {
           setVendorShowModal(false);
         }}
         handleVendorSelection={handleVendorSelection}
+        isMultiVendor={true}
       />
       <CalendarModal
         handleClose={handleCloseModal}
