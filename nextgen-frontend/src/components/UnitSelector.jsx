@@ -20,7 +20,7 @@ const FormElementContainer = styled.div`
 const FormUnitValue = styled.div`
   white-space: nowrap;
   border-radius: 6px;
-  border: 2px solid ${(props) => props.theme.lightGrey};
+  border: 2px solid ${(props) => props.isInvalid ? props.theme.error : props.theme.lightGrey};
   text-align: center;
   padding: 10px 30px;
 
@@ -49,7 +49,6 @@ const UnitValue = styled.div`
 `;
 
 export default function UnitSelector({ onClick, companyID, alignmentID, memberName, setMemberName, memberID, isEditable=true, includeAreas=false, formVersion=false,isInvalid=false}) {
-  console.log("UnitSelector",isInvalid);
   useEffect(() => {
     const fetchUnitList = async () => {
       await UnitsAndAreasAPI.getbyid(companyID, alignmentID, memberID)
@@ -82,7 +81,7 @@ export default function UnitSelector({ onClick, companyID, alignmentID, memberNa
     <>
     {formVersion ? (
       <FormElementContainer onClick={onClick}>
-        <FormUnitValue style={isInvalid ? { borderColor: 'red' } : {}}>{memberName}</FormUnitValue>
+        <FormUnitValue isInvalid={isInvalid} >{memberName}</FormUnitValue>
       </FormElementContainer> 
     ) : (
       <UnitContainer onClick={isEditable ? onClick : () => {}} className="unit-selector" >
