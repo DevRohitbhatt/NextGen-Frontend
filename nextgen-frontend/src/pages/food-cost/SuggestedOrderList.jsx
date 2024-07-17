@@ -233,36 +233,57 @@ const SuggestedOrderList = () => {
   };
 
   const handlePDFClick = () => {
+    if (!suggestedOrders.data.length) return;
+    const vendorName = (selectedVendor === 0) ? "All Vendors" : selectedVendorName;
     const pdfData = {
-      title: "Suggested Order",
+      title: "Suggested Orders",
+      subHeaders: [`${formatDate(selectedFromDate)} - ${formatDate(selectedToDate)}  |  ${selectedUnitName}  |  ${vendorName}`],
       exportType: "pdf",
+      pageOrientation: "landscape",
       body: [
         {
-          type: "table/Column",
-          title: "Suggested Order",
-          widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
-          data: suggestedOrders,
-        },
-      ],
+          type: "table",
+          widths: ["auto", "auto", "auto", "auto", "auto", "auto", "auto", "auto"],
+          dataTypes: ["string", "string", "date", "string", "string", "string", "string", "string"],
+          data: {
+            columnHeaders: ["Unit Name", "Vendor Name", "Delivery Date", "Created By", "Created On", "Submitted On", "Order Status", "Order Span"],
+            rows: suggestedOrders.data.map(row => [
+              { value: row.unitName, cellType: "", columnName: "Unit Name" },
+              { value: row.vendorName, cellType: "", columnName: "Vendor Name" },
+              { value: row.deliveryDate, cellType: "", columnName: "Delivery Date" },
+              { value: row.createdByName, cellType: "", columnName: "Created By" },
+              { value: row.createdOn, cellType: "", columnName: "Created On" },
+              { value: row.submittedOn, cellType: "", columnName: "Submitted On" },
+              { value: row.status, cellType: "", columnName: "Order Status" },
+              { value: row.orderSpan, cellType: "", columnName: "Order Span" }
+            ])
+          }
+        }
+      ]
     };
+  
     PdfBuilder(pdfData);
   };
+  
 
-  const handleExcelClick = () => {
-    const excelData = {
-      title: "Suggested Order",
-      exportType: "excel",
-      body: [
-        {
-          type: "table/Column",
-          title: "Suggested Order",
-          widths: [100, 75, 75, 75, 75, 75, 75, 75, 75],
-          data: suggestedOrders,
-        },
-      ],
-    };
-    PdfBuilder(excelData);
+  const handleCSVClick = () => {
+    if (!suggestedOrders.data.length) return;
+  
+    const headers = ["Unit Name", "Vendor Name", "Delivery Date", "Created By", "Created On", "Submitted On", "Order Status", "Order Span"];
+    const csvData = suggestedOrders.data.map(row =>
+      [row.unitName, row.vendorName, row.deliveryDate, row.createdByName, row.createdOn, row.submittedOn, row.status, row.orderSpan].join(",")
+    );
+  
+    const csvString = [headers.join(","), ...csvData].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+  
+    const tempLink = document.createElement("a");
+    tempLink.href = url;
+    tempLink.setAttribute("download", "SuggestedOrders.csv");
+    tempLink.click();
   };
+  
 
   return (
     <Styled.PageContainer>
@@ -298,8 +319,8 @@ const SuggestedOrderList = () => {
           }}
           includePDF={true}
           handlePDFClick={handlePDFClick}
-          includeExcel={true}
-          handleExcelClick={handleExcelClick}
+          includeCSV={true}
+          handleCSVClick={handleCSVClick}
           includeHelp={true}
           handleHelpClick={() => {
             console.log("Help");
