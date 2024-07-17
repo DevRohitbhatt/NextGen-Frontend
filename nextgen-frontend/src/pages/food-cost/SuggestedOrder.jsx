@@ -594,7 +594,7 @@ export default function SuggestedOrder() {
       createdBy: userID,
       orderFromDate: fromDate,
       orderToDate: toDate,
-      defaultSafetyFactor: defaultSafetyFactor(defaultSafetyFactorTable.rows),
+      defaultSafetyFactor: defaultSafetyFactorTable.rows[0].value,
       forecastedData: forecastedData(forecastTable.rows),
       suggestedOrderDetails: suggestedTable.rows,
     };
