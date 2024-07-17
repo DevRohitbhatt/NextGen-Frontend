@@ -585,7 +585,6 @@ export default function SuggestedOrder() {
   }
 
   function handleSave() {
-    console.log(defaultSafetyFactorTable)
     const Data = {
       suggestedOrderID: 0,
       purchaseOrderID: 0,
