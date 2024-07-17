@@ -16,6 +16,7 @@ const toolTipText = "The Order Span Date typically starts with the next order de
 
 const InfoIcon = styled(FaInfoCircle)`
   color: ${(props) => props.theme.secondary};
+  margin-left: 0.5rem; /* Adjust as needed */
 `;
 
 const ModalOverlay = styled.div`
@@ -299,9 +300,11 @@ const OrderModal = ({
                   />
                 </Rows>
                 <Rows>
-                  <Tooltip content={toolTipText} direction="left">
-                  <Titles>Order Span Dates</Titles> <InfoIcon />
+                <Titles>Order Span Dates
+                <Tooltip content={toolTipText} direction="left">
+                   <InfoIcon />
                   </Tooltip>
+                </Titles>
                   <DateRangePicker
                     selectedDates={selectedDates}
                     onDateChange={setSelectedDates}

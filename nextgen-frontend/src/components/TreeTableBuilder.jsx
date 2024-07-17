@@ -257,7 +257,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes,
             <TableHeaderCell key={index} columntype={dataTypes[index]}>
               {
                   headerTooltips ? (headerTooltips[index] === "" ? (
-                      {header}
+                      <div> {header} </div>
                     ) :
                     (
                       toolTipDirection[index] === "left" ? (
@@ -270,7 +270,7 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes,
                         </Tooltip>
                       )
                     )
-                  ) : {header}
+                  ) : <div>{header}</div>
                 }
             </TableHeaderCell>
           ))}

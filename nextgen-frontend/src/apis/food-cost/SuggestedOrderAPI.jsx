@@ -20,7 +20,7 @@ export const SuggestedOrderAPI = {
     const response = await api.request({
       method: "GET",
       url: `/api/order/GetOrderList?companyId=${companyID}&alignmentId=${alignmentID}&memberId=${memberID}&vendorID=${vendorID}&fromDate=${fromDate}&toDate=${toDate}`,
-      signal: cancel ? cancelApiObject[this.getbyid.name].handleRequestCancellation().signal : undefined,
+      signal: cancel ? cancelApiObject[this.getOrderList.name].handleRequestCancellation().signal : undefined,
     });
 
     return response.data;
