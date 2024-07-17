@@ -585,6 +585,7 @@ export default function SuggestedOrder() {
   }
 
   function handleSave() {
+    console.log(defaultSafetyFactorTable)
     const Data = {
       suggestedOrderID: 0,
       purchaseOrderID: 0,
@@ -594,7 +595,7 @@ export default function SuggestedOrder() {
       createdBy: userID,
       orderFromDate: fromDate,
       orderToDate: toDate,
-      defaultSafetyFactor: defaultSafetyFactor(defaultSafetyFactorTable.rows),
+      defaultSafetyFactor: defaultSafetyFactorTable.rows[0].value,
       forecastedData: forecastedData(forecastTable.rows),
       suggestedOrderDetails: suggestedTable.rows,
     };
