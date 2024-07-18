@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { UnitsAndAreasAPI } from "../apis/UnitsAndAreasAPI";
 
-
 const UnitContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -21,7 +20,7 @@ const FormElementContainer = styled.div`
 const FormUnitValue = styled.div`
   white-space: nowrap;
   border-radius: 6px;
-  border: 2px solid ${(props) => props.theme.lightGrey};
+  border: 2px solid ${(props) => props.isInvalid ? props.theme.error : props.theme.lightGrey};
   text-align: center;
   padding: 10px 30px;
 
@@ -49,8 +48,7 @@ const UnitValue = styled.div`
   }
 `;
 
-export default function UnitSelector({ onClick, companyID, alignmentID, memberName, setMemberName, memberID, isEditable=true, includeAreas=false, formVersion=false}) {
-  
+export default function UnitSelector({ onClick, companyID, alignmentID, memberName, setMemberName, memberID, isEditable=true, includeAreas=false, formVersion=false,isInvalid=false}) {
   useEffect(() => {
     const fetchUnitList = async () => {
       await UnitsAndAreasAPI.getbyid(companyID, alignmentID, memberID)
@@ -79,21 +77,20 @@ export default function UnitSelector({ onClick, companyID, alignmentID, memberNa
       fetchUnitList();
   }, [memberID]);
 
-  
   return (
     <>
     {formVersion ? (
       <FormElementContainer onClick={onClick}>
-        <FormUnitValue>{memberName}</FormUnitValue>
+        <FormUnitValue isInvalid={isInvalid} >{memberName}</FormUnitValue>
       </FormElementContainer> 
     ) : (
-      <UnitContainer onClick={isEditable ? onClick : () => {}} className="unit-selector">
+      <UnitContainer onClick={isEditable ? onClick : () => {}} className="unit-selector" >
         {isEditable ? (
           <Label>Select Unit(s)</Label>
         ) : (
           <Label>Unit</Label>
         )}
-        <UnitValue isEditable={isEditable}>{memberName}</UnitValue>
+        <UnitValue  isEditable={isEditable}>{memberName}</UnitValue>
       </UnitContainer>
     )}
     </>

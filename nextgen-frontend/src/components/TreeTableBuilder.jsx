@@ -3,6 +3,12 @@ import styled from "styled-components";
 import TreeNode from "./TreeNode";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import PropTypes from "prop-types";
+import Tooltip from "../components/ToolTip.jsx";
+import { FaInfoCircle } from "react-icons/fa";
+
+const InfoIcon = styled(FaInfoCircle)`
+  color: ${(props) => props.theme.secondary};
+`;
 
 const StyledTable = styled.div`
 border-radius: 30px;
@@ -183,7 +189,7 @@ const ExpandButton = styled.button`
   }
 `;
 
-export default function TreeTable ({ data:initialData, columnHeaders, dataTypes, setQid }) {
+export default function TreeTable ({ data:initialData, columnHeaders, dataTypes, setQid, headerTooltips, toolTipDirection }) {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [isCollapseActive, setIsCollapseActive] = useState(false);
   const [isExpandActive, setIsExpandActive] = useState(false);
@@ -249,7 +255,23 @@ export default function TreeTable ({ data:initialData, columnHeaders, dataTypes,
         <TableHeader className="Header">
           {columnHeaders.map((header, index) => (
             <TableHeaderCell key={index} columntype={dataTypes[index]}>
-              {header}
+              {
+                  headerTooltips ? (headerTooltips[index] === "" ? (
+                      <div> {header} </div>
+                    ) :
+                    (
+                      toolTipDirection[index] === "left" ? (
+                        <Tooltip content={headerTooltips[index]} direction="left">
+                          <InfoIcon /> {header}
+                        </Tooltip>
+                      ) : (
+                        <Tooltip content={headerTooltips[index]} direction="left">
+                          {header} <InfoIcon />
+                        </Tooltip>
+                      )
+                    )
+                  ) : <div>{header}</div>
+                }
             </TableHeaderCell>
           ))}
         </TableHeader>
@@ -276,5 +298,7 @@ TreeTable.propTypes = {
   dataTypes: PropTypes.array,
   columnWidths: PropTypes.string,
   data: PropTypes.array,
-  setQid:PropTypes.func
+  setQid:PropTypes.func,
+  headerTooltips: PropTypes.array,
+  toolTipDirection: PropTypes.array
 };

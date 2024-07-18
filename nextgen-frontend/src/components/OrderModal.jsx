@@ -9,6 +9,15 @@ import VendorSelector from "./VendorSelector";
 import VendorModal from "./VendorModal";
 import UnitSelector from "./UnitSelector";
 import UnitModal from "./UnitModal";
+import Tooltip from "../components/ToolTip.jsx";
+import { FaInfoCircle } from "react-icons/fa";
+
+const toolTipText = "The Order Span Date typically starts with the next order delivery date and extened through either the day before or day of the follwing delivery date";
+
+const InfoIcon = styled(FaInfoCircle)`
+  color: ${(props) => props.theme.secondary};
+  margin-left: 0.5rem; /* Adjust as needed */
+`;
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -194,6 +203,8 @@ const OrderModal = ({
   const [isError, setIsError] = useState(false);
   const [showVendorModal, setVendorShowModal] = useState(false);
   const [showUnitModal, setUnitShowModal] = useState(false);
+  const [isUnitInvalid, setIsUnitInvalid] = useState(false);
+  const [isVendorInvalid, setIsVendorInvalid] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -216,20 +227,30 @@ const OrderModal = ({
   };
 
   const handleNextButtonClick = () => {
-    console.log(selectedDates)
-    navigate('/SuggestedOrder', {
-      state: {
-        company: companyID,
-        unit: selectedUnit,
-        unitName: selectedUnitName,
-        user: userID,
-        vendorID: selectedVendor,
-        vendorName: selectedVendorName,
-        dates: selectedDates
-      }
-    });
-    handleClose();
+      const validate = () => {
+        const unitValid = selectedUnit != null; 
+        const vendorValid = selectedVendor != null  && selectedVendor !==0; 
+        setIsUnitInvalid(!unitValid);
+        setIsVendorInvalid(!vendorValid);
+        return unitValid && vendorValid; // Both must be valid
+      };
+    
+      if (validate()) {
+      navigate('/SuggestedOrder', {
+        state: {
+          company: companyID,
+          unit: selectedUnit,
+          unitName: selectedUnitName,
+          user: userID,
+          vendorID: selectedVendor,
+          vendorName: selectedVendorName,
+          dates: selectedDates,
+        },
+      });
+      handleClose();
+    }
   };
+  
 
   const handleCancelClick = () => {
     setSelectedUnit(unitID);
@@ -262,6 +283,7 @@ const OrderModal = ({
                     setMemberName={setSelectedUnitName}
                     onClick={() => setUnitShowModal(true)}
                     formVersion={true}
+                    isInvalid={isUnitInvalid}
                   />
                   <UnitModal
                     show={showUnitModal}
@@ -280,6 +302,7 @@ const OrderModal = ({
                     setVendorName={setSelectedVendorName}
                     onClick={() => setVendorShowModal(true)}
                     formVersion={true}
+                    isInvalid={isVendorInvalid}
                   />
                   <VendorModal
                     show={showVendorModal}
@@ -291,7 +314,11 @@ const OrderModal = ({
                   />
                 </Rows>
                 <Rows>
-                  <Titles>Date Range</Titles>
+                <Titles>Order Span Dates
+                <Tooltip content={toolTipText} direction="left">
+                   <InfoIcon />
+                  </Tooltip>
+                </Titles>
                   <DateRangePicker
                     selectedDates={selectedDates}
                     onDateChange={setSelectedDates}

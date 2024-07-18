@@ -17,8 +17,8 @@ const UnitModal = ({
   includeAreas = false,
   handleUnitSaveSelection,
 }) => {
-  const [unitsList, setUnitsList] = useState(unitData.units || []);
-  const [areasList, setAreasList] = useState(unitData.areas || []);
+  const [unitsList, setUnitsList] = useState(unitData?.units || []);
+  const [areasList, setAreasList] = useState(unitData?.areas || []);
   const [filteredList, setFilteredList] = useState([]);
   const [selectedUnits, setSelectedUnits] = useState([]);
   const [selectedMemberName, setSelectedMemberName] = useState(memberName);

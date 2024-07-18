@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from "prop-types";
 import Row from './SimpleTableRow';
+import Tooltip from "../components/ToolTip.jsx";
+import { FaInfoCircle } from "react-icons/fa";
+
+const InfoIcon = styled(FaInfoCircle)`
+  color: ${(props) => props.theme.secondary};
+`;
 
 const TableWrapper = styled.div`
   margin: 20px;
@@ -154,7 +160,22 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
           <tr>
             {headers.map((header, index) => (
               <TableHeader key={index} onClick={() => handleSort(header.key)}>
-                {header.label} {sortConfig.key === header.key && (
+                {
+                  header.toolTipDirection === "" ? (
+                      header.label
+                    ) :
+                    (
+                      header.toolTipDirection  === "left" ? (
+                        <Tooltip content={header.toolTip} direction="left">
+                          <InfoIcon /> {header.label}
+                        </Tooltip>
+                      ) : (
+                        <Tooltip content={header.toolTip} direction="right">
+                          {header.label} <InfoIcon />
+                        </Tooltip>
+                      )
+                    )
+                } {sortConfig.key === header.key && (
                   sortConfig.direction === 'asc' ? '↑' : '↓'
                 )}
               </TableHeader>
