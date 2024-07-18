@@ -194,6 +194,8 @@ const OrderModal = ({
   const [isError, setIsError] = useState(false);
   const [showVendorModal, setVendorShowModal] = useState(false);
   const [showUnitModal, setUnitShowModal] = useState(false);
+  const [isUnitInvalid, setIsUnitInvalid] = useState(false);
+  const [isVendorInvalid, setIsVendorInvalid] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -216,20 +218,30 @@ const OrderModal = ({
   };
 
   const handleNextButtonClick = () => {
-    console.log(selectedDates)
-    navigate('/SuggestedOrder', {
-      state: {
-        company: companyID,
-        unit: selectedUnit,
-        unitName: selectedUnitName,
-        user: userID,
-        vendorID: selectedVendor,
-        vendorName: selectedVendorName,
-        dates: selectedDates
-      }
-    });
-    handleClose();
+      const validate = () => {
+        const unitValid = selectedUnit != null; 
+        const vendorValid = selectedVendor != null  && selectedVendor !==0; 
+        setIsUnitInvalid(!unitValid);
+        setIsVendorInvalid(!vendorValid);
+        return unitValid && vendorValid; // Both must be valid
+      };
+    
+      if (validate()) {
+      navigate('/SuggestedOrder', {
+        state: {
+          company: companyID,
+          unit: selectedUnit,
+          unitName: selectedUnitName,
+          user: userID,
+          vendorID: selectedVendor,
+          vendorName: selectedVendorName,
+          dates: selectedDates,
+        },
+      });
+      handleClose();
+    }
   };
+  
 
   const handleCancelClick = () => {
     setSelectedUnit(unitID);
@@ -262,6 +274,7 @@ const OrderModal = ({
                     setMemberName={setSelectedUnitName}
                     onClick={() => setUnitShowModal(true)}
                     formVersion={true}
+                    isInvalid={isUnitInvalid}
                   />
                   <UnitModal
                     show={showUnitModal}
@@ -280,6 +293,7 @@ const OrderModal = ({
                     setVendorName={setSelectedVendorName}
                     onClick={() => setVendorShowModal(true)}
                     formVersion={true}
+                    isInvalid={isVendorInvalid}
                   />
                   <VendorModal
                     show={showVendorModal}

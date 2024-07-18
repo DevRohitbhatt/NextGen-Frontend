@@ -21,7 +21,7 @@ const FormElementContainer = styled.div`
 const FormVendorValue = styled.div`
   white-space: nowrap;
   border-radius: 6px;
-  border: 2px solid ${(props) => props.theme.lightGrey};
+  border: 2px solid ${(props) => props.isInvalid ? props.theme.error : props.theme.lightGrey};
   text-align: center;
   padding: 10px 30px;
 
@@ -49,7 +49,7 @@ const VendorValue = styled.div`
   }
 `;
 
-export default function VendorSelector({ onClick , vendorName, setVendorName, vendorID, formVersion, isEditable = true }) {
+export default function VendorSelector({ onClick , vendorName, setVendorName, vendorID, formVersion, isEditable = true,isInvalid=false }) {
   
   const GetVendorList = () => {
     VendorAPI.getVendorsByCompany(1, 1)
@@ -70,7 +70,7 @@ export default function VendorSelector({ onClick , vendorName, setVendorName, ve
     <>
       {formVersion ? (
         <FormElementContainer onClick={onClick}>
-          <FormVendorValue>{vendorName}</FormVendorValue>
+          <FormVendorValue isInvalid={isInvalid}>{vendorName}</FormVendorValue>
         </FormElementContainer>
       ) : (
         <VendorContainer onClick={isEditable ? onClick : () => {}} className="vendor-selector">
