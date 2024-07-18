@@ -30,7 +30,7 @@ const Table = styled.div`
   grid-auto-rows: auto;
   align-items: center;
 
-  overflow-y: ${(props) => (props.$scrollable ? "scroll" : "hidden")};
+  overflow-y: ${(props) => (props.$scrollable ? "scroll" : "none")};
 
   &::-webkit-scrollbar {
     /* background: #ffffff; */
