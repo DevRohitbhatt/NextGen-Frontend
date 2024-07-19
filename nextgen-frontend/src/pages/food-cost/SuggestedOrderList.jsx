@@ -45,7 +45,7 @@ const SuggestedOrderList = () => {
   const [vendorsList, setVendorsList] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState(0);
   const [selectedVendorName, setselectedVendorName] =
-    useState("No Vendor Selected");
+    useState("All Vendors");
   const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
   const [selectedToDate, setSelectedToDate] = useState(new Date());
