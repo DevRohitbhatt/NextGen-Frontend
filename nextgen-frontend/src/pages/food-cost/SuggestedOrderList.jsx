@@ -139,8 +139,9 @@ const SuggestedOrderList = () => {
       });
   };
 
-  const fetchSuggestedOrders = (companyID, alignmentID, memberID, unitID, vendorID) => {
-    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID, unitID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
+  const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID) => {
+    console.log(selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0]);
+    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
       data?.data?.map((x) => {
         const formatFromDate = formatDate(x.orderFromDate);

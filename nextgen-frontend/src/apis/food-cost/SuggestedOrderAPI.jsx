@@ -17,6 +17,7 @@ export const SuggestedOrderAPI = {
     return response.data;
   },
   getOrderList: async function (companyID, alignmentID, memberID, vendorID, fromDate, toDate,  cancel = false) {
+    console.log(fromDate, toDate);
     const response = await api.request({
       method: "GET",
       url: `/api/order/GetOrderList?companyId=${companyID}&alignmentId=${alignmentID}&memberId=${memberID}&vendorID=${vendorID}&fromDate=${fromDate}&toDate=${toDate}`,

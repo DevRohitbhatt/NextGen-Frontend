@@ -171,21 +171,28 @@ const TreeNode = ({
         throw new Error('Failed to update node');
       }
       const updatedSuggestedOrderItem = node.suggestedOrderItem.map(item => {
-        const updatedItem = updatedNode.suggestedOrderItem.find(updItem => updItem.qsrInventoryItemID === item.qsrInventoryItemID);
-        if (updatedItem) {
-          const updatedVendorItems = item.vendorItems.map((vendorItem, idx) => {            
-            const updatedVendorItem = updatedItem.vendorItems[idx];
-            return updatedVendorItem ? { ...vendorItem, ...updatedVendorItem } : vendorItem;
-          });
-          return { ...item, vendorItems: updatedVendorItems };
-        }
-        return item;
-      });
-  
-      setNode(prevNode => ({
-        ...prevNode,
+        //Combine the updatedNodes vendorItems with the initialNodes vendorItems replacing any matches.
+        const updatedVendorItems = updatedNode.suggestedOrderItem.find(
+          updatedItem => updatedItem.qsrInventoryItemID === item.qsrInventoryItemID
+        ).vendorItems;
+        return {
+          ...item,
+          vendorItems: item.vendorItems.map(vendorItem => {
+            const updatedVendorItem = updatedVendorItems.find(
+              updatedItem => updatedItem?.vendorItemReference === vendorItem.vendorItemReference
+            );
+            return updatedVendorItem ? updatedVendorItem : vendorItem;
+          })
+        };
+      }); 
+
+      const newNode = {
+        ...node,
         suggestedOrderItem: updatedSuggestedOrderItem
-      }));
+      };
+  
+      setNode(newNode);
+      onEdit(newNode);
   
     } catch (error) {
       console.error('Error updating node:', error);
@@ -246,156 +253,159 @@ const TreeNode = ({
           </ToggleIcon>
         </StyledCellParent>
       </TableCell>
-      {isExpanded &&
+      { isExpanded &&
         node.suggestedOrderItem &&
         node.suggestedOrderItem.map((childNode, index) => (
-          <TableRow key={index} columnWidths={columnWidths}>
-            <StyledCell>{childNode.invItemDescription}</StyledCell>
-            <StyledCell>
-              {childNode.vendorItems && (
-                <DropdownCell
-                  value={selectedVendorItems[index]?.qsrItemID || ""}
-                  options={childNode.vendorItems}
-                  onChange={(value) => handleVendorChange(value, index)}
-                />
-              )}
-            </StyledCell>
-            {selectedVendorItems[index] && (
-              <>
-                {isEditable[0] ? (
-                  <EditableCell
-                    value={selectedVendorItems[index].vendorItemReference}
-                    onChange={(value) =>
-                      handleEditfield("vendorItemReference", value, index)
-                    }
-                    DataType={dataTypes[2]}
-                  />
-                ) : (
-                  <StyledCell>
-                    {selectedVendorItems[index].vendorItemReference}
-                  </StyledCell>
-                )}
-                {isEditable[1] ? (
-                  <EditableCell
-                    value={selectedVendorItems[index].unitOfMeasure}
-                    onChange={(value) =>
-                      handleEditfield("unitOfMeasure", value, index)
-                    }
-                    DataType={dataTypes[3]}
-                  />
-                ) : (
-                  <StyledCell>
-                    {selectedVendorItems[index].unitOfMeasure}
-                  </StyledCell>
-                )}
-                {isEditable[2] ? (
-                  <EditableCell
-                    value={selectedVendorItems[index].packSize}
-                    onChange={(value) =>
-                      handleEditfield("packSize", value, index)
-                    }
-                    DataType={dataTypes[4]}
-                  />
-                ) : (
-                  <StyledCell>{selectedVendorItems[index].packSize}</StyledCell>
-                )}
-                {isEditable[3] ? (
-                  <>
-                    <DollarSign>$</DollarSign>
-                    <EditableCell
-                      value={selectedVendorItems[index].latestInvoicePrice}
-                      onChange={(value) =>
-                        handleEditfield("latestInvoicePrice", value, index)
-                      }
-                      DataType={dataTypes[5]}
-                      style={{ textAlign: "center" }}
-                    />
-                  </>
-                ) : (
-                  <StyledCell style={{ textAlign: "center" }}>
-                    <DollarSign>$</DollarSign>
-                    {selectedVendorItems[index].latestInvoicePrice}
-                  </StyledCell>
-                )}
-                {isEditable[4] ? (
-                  <>
-                    <EditableCell
-                      value={formatPercentage(
-                        selectedVendorItems[index].safetyFactor
-                      )}
-                      onChange={(value) =>
-                        handleEditfield("safetyFactor", value, index)
-                      }
-                      DataType={dataTypes[6]}
-                    />
-                  </>
-                ) : (
-                  <StyledCell>
-                    {selectedVendorItems[index].safetyFactor}
-                    <PercentSign>%</PercentSign>
-                  </StyledCell>
-                )}
+          !childNode.isHidden ? (
 
-                {isEditable[5] ? (
-                  <EditableCell
-                    value={
-                      selectedVendorItems[index].suggestedQty
-                    }
-                    onChange={(value) =>
-                      handleEditfield("suggestedQty", value, index)
-                    }
-                    DataType={dataTypes[7]}
+            <TableRow key={index} columnWidths={columnWidths}>
+              <StyledCell>{childNode.invItemDescription}</StyledCell>
+              <StyledCell>
+                {childNode.vendorItems && (
+                  <DropdownCell
+                    value={selectedVendorItems[index]?.qsrItemID || ""}
+                    options={childNode.vendorItems}
+                    onChange={(value) => handleVendorChange(value, index)}
                   />
-                ) : (
-                  <StyledCell columntype={dataTypes[7]}>
-                    {selectedVendorItems[index].suggestedQty}
-                  </StyledCell>
                 )}
-                {isEditable[6] ? (
-                  <EditableCell
-                    value={selectedVendorItems[index].onHandQty}
-                    onChange={(value) =>
-                      handleEditfield("onHandQty", value, index)
-                    }
-                    DataType={dataTypes[8]}
-                  />
-                ) : (
-                  <StyledCell>{selectedVendorItems[index].onHandQty}</StyledCell>
-                )}
-                {isEditable[7] ? (
-                  <EditableCell
-                  value={selectedVendorItems[index].orderQty}
-                    // value={(
-                    //   selectedVendorItems[index].suggestedQty -
-                    //   selectedVendorItems[index].onHandQty
-                    // ).toFixed(2)}
-                    onChange={(value) =>
-                      handleEditfield("orderQty", value, index)
-                    }
-                    DataType={dataTypes[9]}
-                  />
-                ) : (
-                  <StyledCell>
-                    {selectedVendorItems[index].orderQty}
-                  </StyledCell>
-                )}
-                {isEditable[8] ? (
-                  <EditableCell
-                  value={selectedVendorItems[index].extendedPrice}
-                    // value={(selectedVendorItems[index].latestInvoicePrice * selectedVendorItems[index].orderQty).toFixed(2)}
-                    onChange={(value) =>
-                      handleEditfield("extendedPrice", value, index)
-                    }
-                    DataType={dataTypes[10]}
-                  />
-                ) : (
-                  <StyledCell columntype={dataTypes[10]}>
-                    {selectedVendorItems[index].extendedPrice}
-                  </StyledCell>
-                )}
-              </>
-            )}
-          </TableRow>
+              </StyledCell>
+              {selectedVendorItems[index] && (
+                <>
+                  {isEditable[0] ? (
+                    <EditableCell
+                      value={selectedVendorItems[index].vendorItemReference}
+                      onChange={(value) =>
+                        handleEditfield("vendorItemReference", value, index)
+                      }
+                      DataType={dataTypes[2]}
+                    />
+                  ) : (
+                    <StyledCell>
+                      {selectedVendorItems[index].vendorItemReference}
+                    </StyledCell>
+                  )}
+                  {isEditable[1] ? (
+                    <EditableCell
+                      value={selectedVendorItems[index].unitOfMeasure}
+                      onChange={(value) =>
+                        handleEditfield("unitOfMeasure", value, index)
+                      }
+                      DataType={dataTypes[3]}
+                    />
+                  ) : (
+                    <StyledCell>
+                      {selectedVendorItems[index].unitOfMeasure}
+                    </StyledCell>
+                  )}
+                  {isEditable[2] ? (
+                    <EditableCell
+                      value={selectedVendorItems[index].packSize}
+                      onChange={(value) =>
+                        handleEditfield("packSize", value, index)
+                      }
+                      DataType={dataTypes[4]}
+                    />
+                  ) : (
+                    <StyledCell>{selectedVendorItems[index].packSize}</StyledCell>
+                  )}
+                  {isEditable[3] ? (
+                    <>
+                      <DollarSign>$</DollarSign>
+                      <EditableCell
+                        value={selectedVendorItems[index].latestInvoicePrice}
+                        onChange={(value) =>
+                          handleEditfield("latestInvoicePrice", value, index)
+                        }
+                        DataType={dataTypes[5]}
+                        style={{ textAlign: "center" }}
+                      />
+                    </>
+                  ) : (
+                    <StyledCell style={{ textAlign: "center" }}>
+                      <DollarSign>$</DollarSign>
+                      {selectedVendorItems[index].latestInvoicePrice}
+                    </StyledCell>
+                  )}
+                  {isEditable[4] ? (
+                    <>
+                      <EditableCell
+                        value={formatPercentage(
+                          selectedVendorItems[index].safetyFactor
+                        )}
+                        onChange={(value) =>
+                          handleEditfield("safetyFactor", value, index)
+                        }
+                        DataType={dataTypes[6]}
+                      />
+                    </>
+                  ) : (
+                    <StyledCell>
+                      {selectedVendorItems[index].safetyFactor}
+                      <PercentSign>%</PercentSign>
+                    </StyledCell>
+                  )}
+
+                  {isEditable[5] ? (
+                    <EditableCell
+                      value={
+                        selectedVendorItems[index].suggestedQty
+                      }
+                      onChange={(value) =>
+                        handleEditfield("suggestedQty", value, index)
+                      }
+                      DataType={dataTypes[7]}
+                    />
+                  ) : (
+                    <StyledCell columntype={dataTypes[7]}>
+                      {selectedVendorItems[index].suggestedQty}
+                    </StyledCell>
+                  )}
+                  {isEditable[6] ? (
+                    <EditableCell
+                      value={selectedVendorItems[index].onHandQty}
+                      onChange={(value) =>
+                        handleEditfield("onHandQty", value, index)
+                      }
+                      DataType={dataTypes[8]}
+                    />
+                  ) : (
+                    <StyledCell>{selectedVendorItems[index].onHandQty}</StyledCell>
+                  )}
+                  {isEditable[7] ? (
+                    <EditableCell
+                    value={selectedVendorItems[index].orderQty}
+                      // value={(
+                      //   selectedVendorItems[index].suggestedQty -
+                      //   selectedVendorItems[index].onHandQty
+                      // ).toFixed(2)}
+                      onChange={(value) =>
+                        handleEditfield("orderQty", value, index)
+                      }
+                      DataType={dataTypes[9]}
+                    />
+                  ) : (
+                    <StyledCell>
+                      {selectedVendorItems[index].orderQty}
+                    </StyledCell>
+                  )}
+                  {isEditable[8] ? (
+                    <EditableCell
+                    value={selectedVendorItems[index].extendedPrice}
+                      // value={(selectedVendorItems[index].latestInvoicePrice * selectedVendorItems[index].orderQty).toFixed(2)}
+                      onChange={(value) =>
+                        handleEditfield("extendedPrice", value, index)
+                      }
+                      DataType={dataTypes[10]}
+                    />
+                  ) : (
+                    <StyledCell columntype={dataTypes[10]}>
+                      {selectedVendorItems[index].extendedPrice}
+                    </StyledCell>
+                  )}
+                </>
+              )}
+            </TableRow>
+          ) : null
         ))}
     </>
   );
