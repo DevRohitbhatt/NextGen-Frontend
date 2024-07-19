@@ -138,6 +138,13 @@ export default function ExportOptions({
   return (
     <>
       <ExportOptionsContainer className="export-options">
+        {includeHelp ? (
+          <ExportOption className="help-option" title="Help">
+            <OptionImage onClick={handleHelpClick}>
+              <HelpIcon />
+            </OptionImage>
+          </ExportOption>
+        ) : null}
         {includeExcel ? (
           <ExportOption title="Export to Excel">
             <OptionImage onClick={handleExcelClick}>
@@ -145,17 +152,17 @@ export default function ExportOptions({
             </OptionImage>
           </ExportOption>
         ) : null}
-        {includePDF ? (
-          <ExportOption title="Export to PDF">
-            <OptionImage onClick={handlePDFClick}>
-              <PDFIcon />
-            </OptionImage>
-          </ExportOption>
-        ) : null}
         {includeCSV ? (
           <ExportOption title="Export to CSV">
             <OptionImage onClick={handleCSVClick}>
               <CSVIcon />
+            </OptionImage>
+          </ExportOption>
+        ) : null}
+        {includePDF ? (
+          <ExportOption title="Export to PDF">
+            <OptionImage onClick={handlePDFClick}>
+              <PDFIcon />
             </OptionImage>
           </ExportOption>
         ) : null}
@@ -180,15 +187,8 @@ export default function ExportOptions({
             </OptionImage>
           </ExportOption>
         ) : null}
-        {includeHelp ? (
-          <ExportOption className="help-option" title="Help">
-            <OptionImage onClick={handleHelpClick}>
-              <HelpIcon />
-            </OptionImage>
-          </ExportOption>
-        ) : null}
         {includeAdd ? (
-          <ExportOption className="add-option" title="Add New">
+          <ExportOption className="add-option" title="Create New">
             <OptionImage onClick={handleAddClick}>
               <AddIcon />
             </OptionImage>
