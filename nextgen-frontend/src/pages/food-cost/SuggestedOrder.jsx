@@ -14,6 +14,7 @@ import TreeTable from "../../components/TreeTableBuilder.jsx";
 import VendorSelector from "../../components/VendorSelector.jsx";
 import DateSelector from "../../components/DateSelector.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
+import SearchBar from "../../components/SearchBar.jsx";
 import { toast, ToastContainer } from "react-toastify";
 
 const toolTipForecastedDate = "Forecasted Sales dates selected for this order";
@@ -94,6 +95,9 @@ export default function SuggestedOrder() {
   const [suggestedOrderID, setSuggestedOrderID] = useState(orderID || 0);
   const [suggestedOrder, setsuggestedOrder] = useState({});
   const [suggestedTable, setSuggestedTable] = useState({
+    ...suggestedTableStructure,
+  });
+  const [filteredSuggestedTable, setFilteredSuggestedTable] = useState({
     ...suggestedTableStructure,
   });
   const [isVisible, setVisible] = useState(false);
@@ -702,6 +706,17 @@ export default function SuggestedOrder() {
     setSaftyFactor({ ...saftyFactor, [ind]: sfValue });
   };
 
+  const handleSearch = (searchValue, setExpandedNodes) => {
+    SuggestedOrderFunctions.onSearch(searchValue, suggestedTable, setSuggestedTable, setExpandedNodes);
+  };
+
+  const updateSuggestedTable = (newData) => {
+    setSuggestedTable({
+      ...suggestedTable,
+      rows: newData,
+    });
+  }
+
   return (
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
@@ -844,11 +859,13 @@ export default function SuggestedOrder() {
           <Styled.InventoryItemsContainer>
             <TreeTable
               data={suggestedTable.rows}
+              setData={updateSuggestedTable}
               columnHeaders={suggestedTable.columnHeaders}
               dataTypes={suggestedTable.dataTypes}
               setQid={setQid}
               headerTooltips={suggestedTable.headerTooltips}
               toolTipDirection={suggestedTable.toolTipDirection}
+              onSearch={handleSearch}
             />
           </Styled.InventoryItemsContainer>
         </>
