@@ -133,7 +133,6 @@ export const handleEdit = async (
   onEdit,
   setQid
 ) => {
-  // Update the selectedVendorItems state for the specific index
   const updatedItems = selectedVendorItems.map((item, idx) => {
     if (idx !== index) return item;
 
@@ -317,3 +316,25 @@ export const submitSuggestedOrderCSV = (suggestedOrderData, filename) => {
   tempLink.setAttribute("download", filename + ".csv");
   tempLink.click();
 }
+
+export const onSearch = (searchTerm, data, setFilteredData, setExpandedNodes) => {
+  const updatedExpandedNodes = {};
+  const filteredData = data.rows.map((node) => {
+    const updatedSuggestedOrderItem = node.suggestedOrderItem.map((item) => {
+      let isHidden = false;
+      if (
+        item.invItemDescription
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      ) {
+        updatedExpandedNodes[node.name] = true;
+      } else {
+        isHidden = true;
+      }
+      return { ...item, isHidden: isHidden };
+    });
+    return { ...node, suggestedOrderItem: updatedSuggestedOrderItem };
+  });
+  setExpandedNodes(updatedExpandedNodes);
+  setFilteredData({ ...data, rows: filteredData });
+};
