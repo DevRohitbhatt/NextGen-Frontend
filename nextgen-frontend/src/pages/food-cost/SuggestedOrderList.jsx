@@ -140,7 +140,6 @@ const SuggestedOrderList = () => {
   };
 
   const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID) => {
-    console.log(selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0]);
     SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
     .then((data) => {
       data?.data?.map((x) => {
@@ -213,7 +212,6 @@ const SuggestedOrderList = () => {
       const toDate = new Date(selectedRow.orderToDate);
       const fromDate = new Date(selectedRow.orderFromDate);
       let selectedDates = [fromDate, toDate];
-      console.log(selectedRow);
       navigate("/SuggestedOrder", {
         state: {
           company: companyID,

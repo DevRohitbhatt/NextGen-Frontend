@@ -171,7 +171,6 @@ const TreeNode = ({
         throw new Error('Failed to update node');
       }
       const updatedSuggestedOrderItem = node.suggestedOrderItem.map(item => {
-        //Combine the updatedNodes vendorItems with the initialNodes vendorItems replacing any matches.
         const updatedVendorItems = updatedNode.suggestedOrderItem.find(
           updatedItem => updatedItem.qsrInventoryItemID === item.qsrInventoryItemID
         ).vendorItems;
@@ -257,7 +256,6 @@ const TreeNode = ({
         node.suggestedOrderItem &&
         node.suggestedOrderItem.map((childNode, index) => (
           !childNode.isHidden ? (
-
             <TableRow key={index} columnWidths={columnWidths}>
               <StyledCell>{childNode.invItemDescription}</StyledCell>
               <StyledCell>

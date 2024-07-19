@@ -133,7 +133,6 @@ export const handleEdit = async (
   onEdit,
   setQid
 ) => {
-  // Update the selectedVendorItems state for the specific index
   const updatedItems = selectedVendorItems.map((item, idx) => {
     if (idx !== index) return item;
 
@@ -338,7 +337,4 @@ export const onSearch = (searchTerm, data, setFilteredData, setExpandedNodes) =>
   });
   setExpandedNodes(updatedExpandedNodes);
   setFilteredData({ ...data, rows: filteredData });
-
-
-  
 };
