@@ -56,6 +56,13 @@ export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData) 
         return {
           ...inventoryItem,
           vendorItems: inventoryItem.vendorItems.map((vendorItem) => {
+            if (vendorItem.suggestedQty !== 0 || vendorItem.onHandQty !== 0 || vendorItem.orderQty !== 0) {
+              var extendedPrice = calculateExtendedPrice(vendorItem.orderQty, vendorItem.latestInvoicePrice);
+              return {
+                ...vendorItem,
+                extendedPrice: extendedPrice,
+              }
+            }
             var suggestedQty = vendorItem.suggestedQty;
             var onHand = vendorItem.onHandQty;
             var orderQty = vendorItem.orderQty;
