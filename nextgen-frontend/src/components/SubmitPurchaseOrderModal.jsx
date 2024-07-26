@@ -29,6 +29,13 @@ const FormRow = styled.div`
 
 const SubmitModalText = styled.div``;
 
+const UnloadedMessage = styled.div`
+  font-size: 1.5em;
+  margin: auto;
+  width: 100%;
+  text-align: center; 
+`;
+
 const SubmitModalButtonContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -100,6 +107,7 @@ export default function SubmitPurchaseOrderModal({
   isOpen,
   onClose,
   orderData,
+  vendorName
 }) {
   const [isPDFSelected, setIsPDFSelected] = useState(true);
   const [isCSVSelected, setIsCSVSelected] = useState(false);
@@ -165,6 +173,16 @@ export default function SubmitPurchaseOrderModal({
     setIsCSVSelected(!isCSVSelected);
   };
 
+  function formatFileName() {
+    const dateOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
+    const [month, day, year] = orderData.orderFromDate
+      .toLocaleDateString("en-US", dateOptions)
+      .split("/");
+    return (
+      "Order" + "_" + vendorName + "_" + month + "_" + day + "_" + year
+    );
+  }
+
   const handleSubmit = () => {
     toastRef.current = toast.info("Submitting Suggested Order...", {
       autoClose: false,
@@ -180,7 +198,7 @@ export default function SubmitPurchaseOrderModal({
         if (isPDFSelected) {
           SuggestedOrderFunctions.submitSuggestedOrderPDF(orderDetails);
         } else {
-          SuggestedOrderFunctions.submitSuggestedOrderCSV(orderDetails);
+          SuggestedOrderFunctions.submitSuggestedOrderCSV(orderDetails, formatFileName());
         }
         navigate("/SuggestedOrderList");
       })
@@ -223,7 +241,7 @@ export default function SubmitPurchaseOrderModal({
             </SubmitModalButtonContainer>
           </FormRow>
           {!isPreviewLoaded ? (
-            <SubmitModalText>No items to display</SubmitModalText>
+            <UnloadedMessage>Loading Preview</UnloadedMessage>
           ) : (
             <SimpleTable headers={tableHeaders} data={orderDetails} />
           )}

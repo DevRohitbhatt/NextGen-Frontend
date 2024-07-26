@@ -180,6 +180,8 @@ export default function SuggestedOrder() {
     const today = new Date();
     const formattedDate = formatDate(today);
     setSelectedDates(dates);
+    console.log(unit, vendorID, vendorName, dates);
+    console.log(unit && vendorID && vendorName && dates);
     if (unit && vendorID && vendorName && dates) {
       getOrderItem(
         companyID,
@@ -706,31 +708,6 @@ export default function SuggestedOrder() {
     setShowSubmitModal(true);
   }
 
-  function submitSuggestedOrderPDF() {
-    SuggestedOrderFunctions.submitSuggestedOrderPDF(suggestedTable);
-    handleSubmit();
-    setShowSubmitModal(false);
-  }
-
-  function formatFileName() {
-    const dateOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
-    const [month, day, year] = fromDate
-      .toLocaleDateString("en-US", dateOptions)
-      .split("/");
-    return (
-      "Order" + "_" + selectedVendorName + "_" + month + "_" + day + "_" + year
-    );
-  }
-
-  function submitSuggestedOrderCSV() {
-    SuggestedOrderFunctions.submitSuggestedOrderCSV(
-      suggestedTable,
-      formatFileName()
-    );
-    //handleSubmit();
-    setShowSubmitModal(false);
-  }
-
   function getSubmitData() {
     return {
       suggestedOrderID: suggestedOrderID,
@@ -745,41 +722,6 @@ export default function SuggestedOrder() {
       forecastedData: forecastedData(forecastTable.rows),
       suggestedOrderDetails: suggestedTable.rows,
     }
-  }
-
-  function handleSubmit() {
-    const data = {
-      suggestedOrderID: suggestedOrderID,
-      purchaseOrderID: 0,
-      companyID: companyID,
-      unitID: selectedUnit,
-      vendorID: selectedVendor,
-      createdBy: userID,
-      orderFromDate: fromDate,
-      orderToDate: toDate,
-      defaultSafetyFactor: defaultSafetyFactor(defaultSafetyFactorTable.rows),
-      forecastedData: forecastedData(forecastTable.rows),
-      suggestedOrderDetails: suggestedTable.rows,
-    };
-    toastId.current = toast.info("Submiting Suggested Order...", {
-      autoClose: false,
-    });
-
-    SuggestedOrderAPI.submit(data)
-      .then(() => {
-        setVisible(true);
-        setSuccessMessage("Submit successful");
-        // setShowSuccessPopup(true);
-        setSubmitIsVisible(false);
-        setSaveIsVisible(false);
-        setSaveSubmitStatus(0);
-      })
-      .catch((error) => {
-        // setShowErrorPopup(true);
-        toast.error("Failed to Submit Suggested Order");
-        toast.update(toastId.current, { autoClose: 500 });
-        setVisible(false);
-      });
   }
 
   const setQid = (ind, sfValue) => {
@@ -880,6 +822,7 @@ export default function SuggestedOrder() {
           isOpen={showSubmitModal}
           onClose={() => setShowSubmitModal(false)}
           orderData={getSubmitData()}
+          vendorName={selectedVendorName}
         />
       </Styled.OptionsRow>
 

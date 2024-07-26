@@ -161,7 +161,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
             {headers.map((header, index) => (
               <TableHeader key={index} onClick={() => handleSort(header.key)}>
                 {
-                  header.toolTipDirection === "" ? (
+                  header.toolTipDirection === "" || !header.toolTipDirection ? (
                       header.label
                     ) :
                     (
