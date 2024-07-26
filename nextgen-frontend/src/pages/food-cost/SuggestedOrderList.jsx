@@ -215,8 +215,8 @@ const SuggestedOrderList = () => {
       navigate("/SuggestedOrder", {
         state: {
           company: companyID,
-          unit: selectedUnit,
-          unitName: selectedRow.unitID,
+          unit: selectedRow.unitID,
+          unitName: selectedRow.unitName,
           user: userID,
           vendorID: selectedRow.vendorID,
           vendorName: selectedRow.vendorName,
