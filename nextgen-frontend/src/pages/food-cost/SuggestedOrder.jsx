@@ -180,8 +180,6 @@ export default function SuggestedOrder() {
     const today = new Date();
     const formattedDate = formatDate(today);
     setSelectedDates(dates);
-    console.log(unit, vendorID, vendorName, dates);
-    console.log(unit && vendorID && vendorName && dates);
     if (unit && vendorID && vendorName && dates) {
       getOrderItem(
         companyID,
@@ -748,7 +746,6 @@ export default function SuggestedOrder() {
     <Styled.PageContainer>
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
       <Styled.OptionsRow>
-        <ToastContainer />
 
         <Styled.MessageContainer>
           {showSuccessPopup && (

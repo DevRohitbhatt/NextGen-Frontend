@@ -5,7 +5,7 @@ import { ThemeProvider } from "styled-components";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import './App.css'; 
-import { GlobalToastProvider } from "./functions/utils/GlobalToastProvider.jsx";
+import { ToastContainer } from "react-toastify";
 import PrepChart from "./pages/food-cost/PrepChart.jsx";
 import PrepChartTemplate from "./pages/food-cost/PrepChartTemplate.jsx";
 import SuggestedOrder from "./pages/food-cost/SuggestedOrder.jsx";
@@ -18,17 +18,16 @@ const App = () => {
     <Router>
       <ThemeProvider theme={selectedTheme}> 
           <DndProvider backend={HTML5Backend}>
-            <GlobalToastProvider>
-              <div className="App">
-                  <Routes>
-                    <Route path="/" element={<PrepChart />} />
-                    <Route path="/PrepChartTemplate" element={<PrepChartTemplate />} />
-                    <Route path="/PrepChart" element={<PrepChart />} />
-                    <Route path="/SuggestedOrderList" element={<SuggestedOrderList />} />
-                    <Route path="/SuggestedOrder" element={<SuggestedOrder />} />
-                  </Routes>
-              </div>
-            </GlobalToastProvider>
+            <ToastContainer/>
+            <div className="App">
+                <Routes>
+                  <Route path="/" element={<PrepChart />} />
+                  <Route path="/PrepChartTemplate" element={<PrepChartTemplate />} />
+                  <Route path="/PrepChart" element={<PrepChart />} />
+                  <Route path="/SuggestedOrderList" element={<SuggestedOrderList />} />
+                  <Route path="/SuggestedOrder" element={<SuggestedOrder />} />
+                </Routes>
+            </div>
           </DndProvider>
         </ThemeProvider>
     </Router>

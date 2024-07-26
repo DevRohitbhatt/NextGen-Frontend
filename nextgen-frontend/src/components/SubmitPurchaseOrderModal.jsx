@@ -5,9 +5,8 @@ import styled from "styled-components";
 import Modal from "./Modal";
 import SimpleTable from "./SimpleTable";
 import * as SuggestedOrderFunctions from "../functions/SuggestedOrderFunctions";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { SuggestedOrderAPI } from "../apis/food-cost/SuggestedOrderAPI";
-import { notify } from "../functions/utils/GlobalToastProvider";
 
 const SubmitModalContainer = styled.div`
   display: flex;
@@ -25,6 +24,8 @@ const FormRow = styled.div`
   justify-content: space-between;
   margin: 20px;
   align-items: center;
+
+  ${(props) => props.$isDisabled && `display: none;`}
 `;
 
 const SubmitModalText = styled.div``;
@@ -33,7 +34,7 @@ const UnloadedMessage = styled.div`
   font-size: 1.5em;
   margin: auto;
   width: 100%;
-  text-align: center; 
+  text-align: center;
 `;
 
 const SubmitModalButtonContainer = styled.div`
@@ -107,7 +108,7 @@ export default function SubmitPurchaseOrderModal({
   isOpen,
   onClose,
   orderData,
-  vendorName
+  vendorName,
 }) {
   const [isPDFSelected, setIsPDFSelected] = useState(true);
   const [isCSVSelected, setIsCSVSelected] = useState(false);
@@ -115,7 +116,6 @@ export default function SubmitPurchaseOrderModal({
   const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
   const [orderDetails, setOrderDetails] = useState([]);
   const navigate = useNavigate();
-  const toastRef = useRef(null);
 
   useEffect(() => {
     if (orderData.suggestedOrderDetails.length === 0) return;
@@ -144,24 +144,27 @@ export default function SubmitPurchaseOrderModal({
   ];
 
   const formatPreviewData = (data) => {
-    return data.flatMap((detail) =>
-      detail.suggestedOrderItem.flatMap((inventoryItem) => {
-        const selectedVendorItem = inventoryItem.vendorItems.find(
-          (vendorItem) => vendorItem.isSelected
-        );
-        return selectedVendorItem && selectedVendorItem.orderQty > 0
-          ? {
-              vendorItemDescription: selectedVendorItem.description,
-              vendorItemReference: selectedVendorItem.vendorItemReference,
-              vendorItemUOM: selectedVendorItem.unitOfMeasure,
-              vendorItemPackSize: selectedVendorItem.packSize,
-              quantity: selectedVendorItem.orderQty,
-            }
-          : [];
-      })
-    ).sort((a, b) => a.vendorItemReference.localeCompare(b.vendorItemReference));
+    return data
+      .flatMap((detail) =>
+        detail.suggestedOrderItem.flatMap((inventoryItem) => {
+          const selectedVendorItem = inventoryItem.vendorItems.find(
+            (vendorItem) => vendorItem.isSelected
+          );
+          return selectedVendorItem && selectedVendorItem.orderQty > 0
+            ? {
+                vendorItemDescription: selectedVendorItem.description,
+                vendorItemReference: selectedVendorItem.vendorItemReference,
+                vendorItemUOM: selectedVendorItem.unitOfMeasure,
+                vendorItemPackSize: selectedVendorItem.packSize,
+                quantity: selectedVendorItem.orderQty,
+              }
+            : [];
+        })
+      )
+      .sort((a, b) =>
+        a.vendorItemReference.localeCompare(b.vendorItemReference)
+      );
   };
-  
 
   const updateExportType = () => {
     setIsPDFSelected(!isPDFSelected);
@@ -173,41 +176,46 @@ export default function SubmitPurchaseOrderModal({
     const [month, day, year] = orderData.orderFromDate
       .toLocaleDateString("en-US", dateOptions)
       .split("/");
-  
+
     return `Order_${vendorName}_${month}_${day}_${year}`;
   };
-  
 
   const handleSubmit = () => {
-    toastRef.current = toast.info("Submitting Suggested Order...", {
+    toast.info("Submitting Suggested Order...", {
       autoClose: false,
+      toastId: "submit-toast",
     });
-  
+
     SuggestedOrderAPI.submit(orderData)
       .then(() => {
-        notify("Suggested Order submitted successfully", {
+        toast.update("submit-toast", {
+          render: "Suggested Order Submitted",
           type: "success",
           autoClose: 3000,
         });
-        toast.dismiss(toastRef.current);
         onClose();
-  
+
         if (isPDFSelected) {
           SuggestedOrderFunctions.submitSuggestedOrderPDF(orderDetails);
         } else {
-          SuggestedOrderFunctions.submitSuggestedOrderCSV(orderDetails, formatFileName());
+          SuggestedOrderFunctions.submitSuggestedOrderCSV(
+            orderDetails,
+            formatFileName()
+          );
         }
-  
+
         navigate("/SuggestedOrderList");
       })
       .catch((error) => {
-        toast.error("Error submitting Suggested Order");
+        toast.update("submit-toast", {
+          render: "Error submitting Suggested Order",
+          type: "error",
+          autoClose: 3000,
+        });
         console.error("Error submitting Suggested Order", error);
-        toast.dismiss(toastRef.current);
         onClose();
       });
   };
-  
 
   return (
     <Modal
@@ -216,7 +224,6 @@ export default function SubmitPurchaseOrderModal({
       onClose={onClose}
       title="Submit Suggested Order"
     >
-      <ToastContainer />
       <SubmitModalContainer>
         <SubmitModalBody>
           <FormRow onClick={updateExportType}>
@@ -228,7 +235,7 @@ export default function SubmitPurchaseOrderModal({
               <RightButton $isSelected={isCSVSelected}>CSV</RightButton>
             </SubmitModalButtonContainer>
           </FormRow>
-          <FormRow>
+          <FormRow $isDisabled={true}>
             <SubmitModalText>
               How would you like to sort the order?
             </SubmitModalText>
