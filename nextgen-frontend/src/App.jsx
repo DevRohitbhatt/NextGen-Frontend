@@ -1,13 +1,14 @@
 import React from "react";
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
-import PrepChart from "./pages/food-cost/PrepChart.jsx";
 import { themes } from "./assets/themes/Themes.jsx";
 import { ThemeProvider } from "styled-components";
-import PrepChartTemplate from "./pages/food-cost/PrepChartTemplate.jsx";
-import SuggestedOrder from "./pages/food-cost/SuggestedOrder.jsx";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import './App.css'; 
+import { ToastContainer } from "react-toastify";
+import PrepChart from "./pages/food-cost/PrepChart.jsx";
+import PrepChartTemplate from "./pages/food-cost/PrepChartTemplate.jsx";
+import SuggestedOrder from "./pages/food-cost/SuggestedOrder.jsx";
 import SuggestedOrderList from "./pages/food-cost/SuggestedOrderList.jsx";
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
     <Router>
       <ThemeProvider theme={selectedTheme}> 
           <DndProvider backend={HTML5Backend}>
+            <ToastContainer/>
             <div className="App">
                 <Routes>
                   <Route path="/" element={<PrepChart />} />

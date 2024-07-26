@@ -62,7 +62,7 @@ export default function VendorSelector({ onClick , vendorName, setVendorName, ve
       console.error("Error fetching data:", error);
     });
   };
-  if (vendorName === "No Vendor Selected" && vendorID) {
+  if (vendorName === "All Vendors" && vendorID) {
     GetVendorList();
   }
   

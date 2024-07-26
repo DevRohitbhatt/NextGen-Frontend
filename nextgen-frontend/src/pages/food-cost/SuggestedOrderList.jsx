@@ -45,7 +45,7 @@ const SuggestedOrderList = () => {
   const [vendorsList, setVendorsList] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState(0);
   const [selectedVendorName, setselectedVendorName] =
-    useState("No Vendor Selected");
+    useState("All Vendors");
   const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
   const [selectedToDate, setSelectedToDate] = useState(new Date());
@@ -215,8 +215,8 @@ const SuggestedOrderList = () => {
       navigate("/SuggestedOrder", {
         state: {
           company: companyID,
-          unit: selectedUnit,
-          unitName: selectedRow.unitID,
+          unit: selectedRow.unitID,
+          unitName: selectedRow.unitName,
           user: userID,
           vendorID: selectedRow.vendorID,
           vendorName: selectedRow.vendorName,

@@ -56,6 +56,13 @@ export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData) 
         return {
           ...inventoryItem,
           vendorItems: inventoryItem.vendorItems.map((vendorItem) => {
+            if (vendorItem.suggestedQty !== 0 || vendorItem.onHandQty !== 0 || vendorItem.orderQty !== 0) {
+              var extendedPrice = calculateExtendedPrice(vendorItem.orderQty, vendorItem.latestInvoicePrice);
+              return {
+                ...vendorItem,
+                extendedPrice: extendedPrice,
+              }
+            }
             var suggestedQty = vendorItem.suggestedQty;
             var onHand = vendorItem.onHandQty;
             var orderQty = vendorItem.orderQty;
@@ -268,39 +275,34 @@ export const submitSuggestedOrderPDF =(suggestedOrderData) => {
 
 const formatExportArray = (data) => {
   var returnArray = [];
-  data.rows.map((detail) => {
-    detail.suggestedOrderItem.map((inventoryItem) => {
-      const selectedVendorItem = inventoryItem.vendorItems.find((vendorItem) => vendorItem.isSelected);
-      if (selectedVendorItem.orderQty > 0) {
-        returnArray.push([
-          {
-            value: selectedVendorItem.description,
-            cellType: "",
-            columnName: "Item Description",
-          },
-          {
-            value: selectedVendorItem.vendorItemReference,
-            cellType: "",
-            columnName: "Item Ref",
-          },
-          {
-            value: selectedVendorItem.unitOfMeasure,
-            cellType: "",
-            columnName: "Order Unit",
-          },
-          {
-            value: selectedVendorItem.packSize,
-            cellType: "",
-            columnName: "Pack Size",
-          },
-          {
-            value: selectedVendorItem.orderQty,
-            cellType: "",
-            columnName: "Order Amount",
-          }
-        ]);
+  data.map((detail) => {
+    returnArray.push([
+      {
+        value: detail.vendorItemDescription,
+        cellType: "",
+        columnName: "Item Description",
+      },
+      {
+        value: detail.vendorItemReference,
+        cellType: "",
+        columnName: "Item Ref",
+      },
+      {
+        value: detail.vendorItemUOM,
+        cellType: "",
+        columnName: "Order Unit",
+      },
+      {
+        value: detail.vendorItemPackSize,
+        cellType: "",
+        columnName: "Pack Size",
+      },
+      {
+        value: detail.quantity,
+        cellType: "",
+        columnName: "Order Amount",
       }
-    });
+    ]);
   });
   return returnArray;
 };
