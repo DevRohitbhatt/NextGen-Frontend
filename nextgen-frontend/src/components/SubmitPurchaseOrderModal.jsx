@@ -144,49 +144,45 @@ export default function SubmitPurchaseOrderModal({
   ];
 
   const formatPreviewData = (data) => {
-    var returnArray = [];
-    data.map((detail) => {
-      detail.suggestedOrderItem.map((inventoryItem) => {
+    return data.flatMap((detail) =>
+      detail.suggestedOrderItem.flatMap((inventoryItem) => {
         const selectedVendorItem = inventoryItem.vendorItems.find(
           (vendorItem) => vendorItem.isSelected
         );
-        if (selectedVendorItem.orderQty > 0) {
-          returnArray.push({
-            vendorItemDescription: selectedVendorItem.description,
-            vendorItemReference: selectedVendorItem.vendorItemReference,
-            vendorItemUOM: selectedVendorItem.unitOfMeasure,
-            vendorItemPackSize: selectedVendorItem.packSize,
-            quantity: selectedVendorItem.orderQty,
-          });
-        }
-      });
-    });
-    returnArray.sort((a, b) => {
-      //sort by vendorItemReference
-      return a.vendorItemReference.localeCompare(b.vendorItemReference);
-    });
-    return returnArray;
+        return selectedVendorItem && selectedVendorItem.orderQty > 0
+          ? {
+              vendorItemDescription: selectedVendorItem.description,
+              vendorItemReference: selectedVendorItem.vendorItemReference,
+              vendorItemUOM: selectedVendorItem.unitOfMeasure,
+              vendorItemPackSize: selectedVendorItem.packSize,
+              quantity: selectedVendorItem.orderQty,
+            }
+          : [];
+      })
+    ).sort((a, b) => a.vendorItemReference.localeCompare(b.vendorItemReference));
   };
+  
 
   const updateExportType = () => {
     setIsPDFSelected(!isPDFSelected);
     setIsCSVSelected(!isCSVSelected);
   };
 
-  function formatFileName() {
+  const formatFileName = () => {
     const dateOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
     const [month, day, year] = orderData.orderFromDate
       .toLocaleDateString("en-US", dateOptions)
       .split("/");
-    return (
-      "Order" + "_" + vendorName + "_" + month + "_" + day + "_" + year
-    );
-  }
+  
+    return `Order_${vendorName}_${month}_${day}_${year}`;
+  };
+  
 
   const handleSubmit = () => {
     toastRef.current = toast.info("Submitting Suggested Order...", {
       autoClose: false,
     });
+  
     SuggestedOrderAPI.submit(orderData)
       .then(() => {
         notify("Suggested Order submitted successfully", {
@@ -195,11 +191,13 @@ export default function SubmitPurchaseOrderModal({
         });
         toast.dismiss(toastRef.current);
         onClose();
+  
         if (isPDFSelected) {
           SuggestedOrderFunctions.submitSuggestedOrderPDF(orderDetails);
         } else {
           SuggestedOrderFunctions.submitSuggestedOrderCSV(orderDetails, formatFileName());
         }
+  
         navigate("/SuggestedOrderList");
       })
       .catch((error) => {
@@ -209,6 +207,7 @@ export default function SubmitPurchaseOrderModal({
         onClose();
       });
   };
+  
 
   return (
     <Modal
