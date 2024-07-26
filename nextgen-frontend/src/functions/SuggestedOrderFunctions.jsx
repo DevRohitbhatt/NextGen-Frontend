@@ -275,39 +275,34 @@ export const submitSuggestedOrderPDF =(suggestedOrderData) => {
 
 const formatExportArray = (data) => {
   var returnArray = [];
-  data.rows.map((detail) => {
-    detail.suggestedOrderItem.map((inventoryItem) => {
-      const selectedVendorItem = inventoryItem.vendorItems.find((vendorItem) => vendorItem.isSelected);
-      if (selectedVendorItem.orderQty > 0) {
-        returnArray.push([
-          {
-            value: selectedVendorItem.description,
-            cellType: "",
-            columnName: "Item Description",
-          },
-          {
-            value: selectedVendorItem.vendorItemReference,
-            cellType: "",
-            columnName: "Item Ref",
-          },
-          {
-            value: selectedVendorItem.unitOfMeasure,
-            cellType: "",
-            columnName: "Order Unit",
-          },
-          {
-            value: selectedVendorItem.packSize,
-            cellType: "",
-            columnName: "Pack Size",
-          },
-          {
-            value: selectedVendorItem.orderQty,
-            cellType: "",
-            columnName: "Order Amount",
-          }
-        ]);
+  data.map((detail) => {
+    returnArray.push([
+      {
+        value: detail.vendorItemDescription,
+        cellType: "",
+        columnName: "Item Description",
+      },
+      {
+        value: detail.vendorItemReference,
+        cellType: "",
+        columnName: "Item Ref",
+      },
+      {
+        value: detail.vendorItemUOM,
+        cellType: "",
+        columnName: "Order Unit",
+      },
+      {
+        value: detail.vendorItemPackSize,
+        cellType: "",
+        columnName: "Pack Size",
+      },
+      {
+        value: detail.quantity,
+        cellType: "",
+        columnName: "Order Amount",
       }
-    });
+    ]);
   });
   return returnArray;
 };

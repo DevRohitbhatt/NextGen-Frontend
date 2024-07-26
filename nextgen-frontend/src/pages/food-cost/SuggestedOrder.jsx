@@ -16,21 +16,31 @@ import DateSelector from "../../components/DateSelector.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
 import SearchBar from "../../components/SearchBar.jsx";
 import { toast, ToastContainer } from "react-toastify";
+import SubmitPurchaseOrderModal from "../../components/SubmitPurchaseOrderModal.jsx";
 
 const toolTipForecastedDate = "Forecasted Sales dates selected for this order";
-const toolTipForecastedAmt = "Forecasted sales from the main Forecast module. Forecasted sales may be adjusted for this order and will not impact any other module. Adjusted amounts will be flagged as *Changed.";
+const toolTipForecastedAmt =
+  "Forecasted sales from the main Forecast module. Forecasted sales may be adjusted for this order and will not impact any other module. Adjusted amounts will be flagged as *Changed.";
 
-const toolTipDefaultSafetyFactor = "Set a default safety factor OR individual item safety factor below. Added buffer or cushion to the base SUGGESTED QTY amount. Typically used to ensure ample quantity, without running short of product. Short shelf-life items may have a lower safety factor applied to ensure top quality while minimizing waste and over stock.";
+const toolTipDefaultSafetyFactor =
+  "Set a default safety factor OR individual item safety factor below. Added buffer or cushion to the base SUGGESTED QTY amount. Typically used to ensure ample quantity, without running short of product. Short shelf-life items may have a lower safety factor applied to ensure top quality while minimizing waste and over stock.";
 
-const toolTipItemDescription = "Vendor item description. Dropdown list shows substitute products ordered prior and mapped to the Inventory item.";
+const toolTipItemDescription =
+  "Vendor item description. Dropdown list shows substitute products ordered prior and mapped to the Inventory item.";
 const toolTipItemRef = "Vendor reference #.";
 const toolTipItemOrderUnit = "Vendor order unit i.e. case, box, etc.";
-const toolTipPackSize = "Vendor packaging. How the item is packaged within the Vendor Order Unit.";
-const toolTipCurrentLastPrice = "Integrated Vendor = Current vendor catalog pricing. NON-Integrated Vendor = last invoice price.";
-const toolTipSafetyFactor = "Individual line item Safety Factor can be selected if different from the Default Safety Factor.";
-const toolTipSuggestedQty = "(Order Span Forecasted Sales total / 4 week rolling average item dollar yield) * Safety Factor. The Suggested QTY value requires at least one instance of item usage.";
-const toolTipOnHand = "Physical count of product on hand when creating your order. The On Hand value entered is deducted from the Suggested QTY to calculate the Order Amount.";
-const toolTipOrderAmount = "The amount of product to order from your vendor. Suggested Qty - On Hand.";
+const toolTipPackSize =
+  "Vendor packaging. How the item is packaged within the Vendor Order Unit.";
+const toolTipCurrentLastPrice =
+  "Integrated Vendor = Current vendor catalog pricing. NON-Integrated Vendor = last invoice price.";
+const toolTipSafetyFactor =
+  "Individual line item Safety Factor can be selected if different from the Default Safety Factor.";
+const toolTipSuggestedQty =
+  "(Order Span Forecasted Sales total / 4 week rolling average item dollar yield) * Safety Factor. The Suggested QTY value requires at least one instance of item usage.";
+const toolTipOnHand =
+  "Physical count of product on hand when creating your order. The On Hand value entered is deducted from the Suggested QTY to calculate the Order Amount.";
+const toolTipOrderAmount =
+  "The amount of product to order from your vendor. Suggested Qty - On Hand.";
 const toolTipExtendedPrice = "Order Amount * Current/Last Price.";
 const left = "left";
 const right = "right";
@@ -64,8 +74,32 @@ const suggestedTableStructure = {
   ],
   columnWidth: "1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
   rows: [],
-  headerTooltips: ["", toolTipItemDescription, toolTipItemRef, toolTipItemOrderUnit, toolTipPackSize, toolTipCurrentLastPrice, toolTipSafetyFactor, toolTipSuggestedQty, toolTipOnHand, toolTipOrderAmount, toolTipExtendedPrice],
-  toolTipDirection: ["", right, right, right, right, right, right, right, right, right, right]
+  headerTooltips: [
+    "",
+    toolTipItemDescription,
+    toolTipItemRef,
+    toolTipItemOrderUnit,
+    toolTipPackSize,
+    toolTipCurrentLastPrice,
+    toolTipSafetyFactor,
+    toolTipSuggestedQty,
+    toolTipOnHand,
+    toolTipOrderAmount,
+    toolTipExtendedPrice,
+  ],
+  toolTipDirection: [
+    "",
+    right,
+    right,
+    right,
+    right,
+    right,
+    right,
+    right,
+    right,
+    right,
+    right,
+  ],
 };
 export default function SuggestedOrder() {
   const [isLoading, setIsLoading] = useState(false);
@@ -73,8 +107,17 @@ export default function SuggestedOrder() {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Suggested Order, please try again later."
   );
-  const { company, unit, groupOrUnit, unitName, user, vendorID, vendorName, orderID, dates } =
-    useLocation().state || {};
+  const {
+    company,
+    unit,
+    groupOrUnit,
+    unitName,
+    user,
+    vendorID,
+    vendorName,
+    orderID,
+    dates,
+  } = useLocation().state || {};
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(unit);
   const [selectedUnitName, setSelectedUnitName] = useState(unitName);
@@ -113,7 +156,7 @@ export default function SuggestedOrder() {
     rows: [],
     width: "50%",
     headerTooltips: [toolTipForecastedDate, toolTipForecastedAmt, ""],
-    toolTipDirection: [right, right, ""]
+    toolTipDirection: [right, right, ""],
   });
 
   const [saftyFactor, setSaftyFactor] = useState({});
@@ -127,7 +170,7 @@ export default function SuggestedOrder() {
     width: "20%",
     height: "40%",
     headerTooltips: [toolTipDefaultSafetyFactor],
-    toolTipDirection: [right]
+    toolTipDirection: [right],
   });
   const [saveSubmitStatus, setSaveSubmitStatus] = useState(0);
 
@@ -472,7 +515,20 @@ export default function SuggestedOrder() {
 
     switch (tableName) {
       case "DefaultSafetyFactor": {
-        setDefaultSafetyFactorTable({ ...defaultSafetyFactorTable, rows: [[{ value: updatedValue, cellType: "percent", columnName: "Default Safety Factor", handleOnChange: {}, isInput: true }]] });
+        setDefaultSafetyFactorTable({
+          ...defaultSafetyFactorTable,
+          rows: [
+            [
+              {
+                value: updatedValue,
+                cellType: "percent",
+                columnName: "Default Safety Factor",
+                handleOnChange: {},
+                isInput: true,
+              },
+            ],
+          ],
+        });
         const updatedRows = suggestedTable.rows.map((category) => {
           return {
             ...category,
@@ -609,7 +665,7 @@ export default function SuggestedOrder() {
     const valueEntry = row?.find(
       (entry) => entry.columnName === "Default Safety Factor"
     );
-    return valueEntry?.value || null;
+    return valueEntry?.value || 0;
   }
 
   function handleSave() {
@@ -656,16 +712,39 @@ export default function SuggestedOrder() {
     setShowSubmitModal(false);
   }
 
-  function formatFileName () {
-    const dateOptions = { year: "numeric", month: "2-digit", day: "2-digit"}
-    const [month, day, year] = fromDate.toLocaleDateString('en-US', dateOptions).split('/');
-    return "Order" + "_" + selectedVendorName + "_" + month + "_" + day + "_" + year;
+  function formatFileName() {
+    const dateOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
+    const [month, day, year] = fromDate
+      .toLocaleDateString("en-US", dateOptions)
+      .split("/");
+    return (
+      "Order" + "_" + selectedVendorName + "_" + month + "_" + day + "_" + year
+    );
   }
 
   function submitSuggestedOrderCSV() {
-    SuggestedOrderFunctions.submitSuggestedOrderCSV(suggestedTable, formatFileName());
+    SuggestedOrderFunctions.submitSuggestedOrderCSV(
+      suggestedTable,
+      formatFileName()
+    );
     //handleSubmit();
     setShowSubmitModal(false);
+  }
+
+  function getSubmitData() {
+    return {
+      suggestedOrderID: suggestedOrderID,
+      purchaseOrderID: 0,
+      companyID: companyID,
+      unitID: selectedUnit,
+      vendorID: selectedVendor,
+      createdBy: userID,
+      orderFromDate: fromDate,
+      orderToDate: toDate,
+      defaultSafetyFactor: defaultSafetyFactor(defaultSafetyFactorTable.rows),
+      forecastedData: forecastedData(forecastTable.rows),
+      suggestedOrderDetails: suggestedTable.rows,
+    }
   }
 
   function handleSubmit() {
@@ -685,6 +764,7 @@ export default function SuggestedOrder() {
     toastId.current = toast.info("Submiting Suggested Order...", {
       autoClose: false,
     });
+
     SuggestedOrderAPI.submit(data)
       .then(() => {
         setVisible(true);
@@ -707,7 +787,12 @@ export default function SuggestedOrder() {
   };
 
   const handleSearch = (searchValue, setExpandedNodes) => {
-    SuggestedOrderFunctions.onSearch(searchValue, suggestedTable, setSuggestedTable, setExpandedNodes);
+    SuggestedOrderFunctions.onSearch(
+      searchValue,
+      suggestedTable,
+      setSuggestedTable,
+      setExpandedNodes
+    );
   };
 
   const updateSuggestedTable = (newData) => {
@@ -715,7 +800,7 @@ export default function SuggestedOrder() {
       ...suggestedTable,
       rows: newData,
     });
-  }
+  };
 
   return (
     <Styled.PageContainer>
@@ -791,26 +876,11 @@ export default function SuggestedOrder() {
           handleSaveClick={handleSave}
           handleSubmitClick={onSubmitClick}
         />
-        <Modal
+        <SubmitPurchaseOrderModal
           isOpen={showSubmitModal}
-          setIsOpen={setShowSubmitModal}
-          onClose={() => {
-            setShowSubmitModal(false);
-          }}
-          title="Submit Suggested Order"
-        >
-          <Styled.SubmitModalContainer>
-            <Styled.SubmitModalBody>
-              <Styled.SubmitModalText>
-                How would you like to submit the Suggested Order?
-              </Styled.SubmitModalText>
-              <Styled.SubmitModalButtonContainer>
-                <Styled.PDFButton onClick={() => submitSuggestedOrderPDF()}>PDF</Styled.PDFButton>
-                <Styled.CSVButton onClick={() => submitSuggestedOrderCSV()}>CSV</Styled.CSVButton>
-              </Styled.SubmitModalButtonContainer>
-            </Styled.SubmitModalBody>
-          </Styled.SubmitModalContainer>
-        </Modal>
+          onClose={() => setShowSubmitModal(false)}
+          orderData={getSubmitData()}
+        />
       </Styled.OptionsRow>
 
       {isLoading ? (
