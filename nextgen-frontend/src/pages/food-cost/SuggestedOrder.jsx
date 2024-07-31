@@ -21,8 +21,7 @@ import SuggestedOrderIntro from "../../assets/introJSSteps/SuggestedOrderIntro.j
 
 const toolTipForecastedDate = "Forecasted Sales dates selected for this order";
 const toolTipForecastedAmt =
-  "Forecasted sales from the main Forecast module. Forecasted sales may be adjusted for this order and will not impact any other module. Adjusted amounts will be flagged as *Changed.";
-
+  "Forecasted sales from the main Forecast module. Forecasted sales may be adjusted for this order and will not impact any other module. Adjusted amounts will be flagged as *Changed. If Forecasted Sales = $0, Forecasted Sales have not been saved in the main Forecast module for these dates";
 const toolTipDefaultSafetyFactor =
   "Set a default safety factor OR individual item safety factor below. Added buffer or cushion to the base SUGGESTED QTY amount. Typically used to ensure ample quantity, without running short of product. Short shelf-life items may have a lower safety factor applied to ensure top quality while minimizing waste and over stock.";
 
@@ -40,9 +39,9 @@ const toolTipSuggestedQty =
   "(Order Span Forecasted Sales total / 4 week rolling average item dollar yield) * Safety Factor. The Suggested QTY value requires at least one instance of item usage.";
 const toolTipOnHand =
   "Physical count of product on hand when creating your order. The On Hand value entered is deducted from the Suggested QTY to calculate the Order Amount.";
-const toolTipOrderLimits = "Minimum and Maximum order quantity limits.";
-  const toolTipOrderAmount =
-  "The amount of product to order from your vendor. Suggested Qty - On Hand.";
+const toolTipOrderLimits = "You can set a MINIMUM and MAXIMUM order limit amounts by item to aid in determining proper order levels. Any order limit amount set will carry forward to your next Suggested Order. Order limit amounts will be flagged, but editable.";
+const toolTipOrderAmount =
+  "The amount of product to order from your vendor. Suggested Qty - On Hand. The Order Amount is rounded to nearest whole value to avoid fractional order amounts submitted to your vendor.";
 const toolTipExtendedPrice = "Order Amount * Current/Last Price.";
 const left = "left";
 const right = "right";
@@ -90,7 +89,18 @@ const suggestedTableStructure = {
     "number",
     "number",
   ],
-  columnWidth: ["160px", "160px", "70px", "80px", "70px", "145px", "80px", "80px", "80px", "80px"],
+  columnWidth: [
+    "160px",
+    "160px",
+    "70px",
+    "80px",
+    "70px",
+    "145px",
+    "120px",
+    "80px",
+    "80px",
+    "80px",
+  ],
   rows: [],
   headerTooltips: [
     "",
@@ -428,7 +438,7 @@ export default function SuggestedOrder() {
       title: "Suggested Order",
       subHeaders: [
         `Unit: ${selectedUnitName}`,
-        `Vendor: ${selectedVendorName}`, 
+        `Vendor: ${selectedVendorName}`,
         `Order Span: ${fromDate.toDateString()} - ${toDate.toDateString()}`,
       ],
       pageOrientation: "landscape",
@@ -622,7 +632,7 @@ export default function SuggestedOrder() {
             }),
           };
         });
-        setSuggestedTable({ 
+        setSuggestedTable({
           ...suggestedTable,
           rows: updatedRows,
         });
@@ -759,7 +769,7 @@ export default function SuggestedOrder() {
       defaultSafetyFactor: defaultSafetyFactor(defaultSafetyFactorTable.rows),
       forecastedData: forecastedData(forecastTable.rows),
       suggestedOrderDetails: suggestedTable.rows,
-    }
+    };
   }
 
   const setQid = (ind, sfValue) => {
@@ -787,7 +797,7 @@ export default function SuggestedOrder() {
       ...introJS,
       stepsEnabled: true,
     });
-  }
+  };
 
   return (
     <Styled.PageContainer>
@@ -799,7 +809,6 @@ export default function SuggestedOrder() {
       />
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
       <Styled.OptionsRow>
-
         <Styled.MessageContainer>
           {showSuccessPopup && (
             <MessagePopup

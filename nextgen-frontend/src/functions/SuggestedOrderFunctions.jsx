@@ -69,11 +69,10 @@ export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, 
             var orderQty = vendorItem.orderQty;
             var extendedPrice = 0;
             if (inventoryItem.invItemAvgSalesYieldPerMainUOM > 0) {
-              suggestedQty = Math.ceil(
-                (
-                  (forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM) * vendorItem.mappingQuantityMultiplier
-                ) * 1 + (vendorItem.safetyFactor / 100)
-              );
+              const qty = (
+                (forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM) * vendorItem.mappingQuantityMultiplier
+              ) * 1 + (vendorItem.safetyFactor / 100);
+              suggestedQty = formatNumberTwoDecimals(qty);
             }
             orderQty = calculateOrderQty(suggestedQty, onHand, orderLimit);
             extendedPrice = calculateExtendedPrice(orderQty, vendorItem.latestInvoicePrice);
@@ -250,7 +249,7 @@ const calculateOrderQty = (suggestedQty, onHandQty, orderLimit = null) => {
       returnQty = Math.min(returnQty, orderLimit.maxOrderQuantity);
       returnQty = Math.max(returnQty, orderLimit.minOrderQuantity);
     }
-    return formatNumberTwoDecimals(returnQty);
+    return Math.round(returnQty);
 }
 
 const calculateExtendedPrice = (orderQty, latestInvoicePrice) => {

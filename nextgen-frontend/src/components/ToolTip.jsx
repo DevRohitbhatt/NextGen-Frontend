@@ -3,7 +3,8 @@ import ReactDOM from "react-dom";
 import styled from 'styled-components';
 
 const TooltipWrapper = styled.div`
-  display: inline-block;
+  gap: 5px;
+  align-items: center;
   position: relative;
 `;
 

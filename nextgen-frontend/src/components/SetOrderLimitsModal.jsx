@@ -252,7 +252,7 @@ export default function SetOrderLimitsModal({
                 type="text"
                 name="Vendor Item Minimum"
                 value={
-                  inventoryItemOrderLimits?.minOrderQuantity *
+                  inventoryItemOrderLimits?.minOrderQuantity /
                     (vendorItemData?.mappingQuantityMultiplier || 0) || ""
                 }
                 disabled
@@ -264,7 +264,7 @@ export default function SetOrderLimitsModal({
                 type="text"
                 name="Vendor Item Maximum"
                 value={
-                  inventoryItemOrderLimits?.maxOrderQuantity *
+                  inventoryItemOrderLimits?.maxOrderQuantity /
                     (vendorItemData?.mappingQuantityMultiplier || 0) || ""
                 }
                 disabled

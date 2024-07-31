@@ -48,7 +48,22 @@ const StyledCellParent = styled.div`
   width: 100%;
   margin-bottom: 10px;
   padding-bottom: 10px;
-  font-weight: 500;
+  font-weight: 500; 
+`;
+
+const LimitsCell = styled.div`
+  width: 100%;  
+  min-width: ${(props) => props.$columnWidth || "145px"};
+  text-align: center;
+  cursor: pointer;
+  padding: 3px 0px;
+  border-radius: 8px;
+  transition: all 0.1s ease;
+  &:hover {
+    background-color: ${(props) => props.theme.primary};
+    color: white;
+
+  } 
 `;
 
 const ToggleIcon = styled.span`
@@ -171,7 +186,7 @@ const OrderLimitsCell = ({ orderLimits, mappingQuantityMultiplier, inventoryItem
     maxOrderQuantity = orderLimit.maxOrderQuantity * mappingQuantityMultiplier;
   }
   return (
-    <StyledCell columntype={columntype} onClick={onClick} $columnWidth={columnWidth}>{minOrderQuantity}  |  {maxOrderQuantity}</StyledCell>
+    <LimitsCell columntype={columntype} onClick={onClick} $columnWidth={columnWidth} className="order-limits">{minOrderQuantity}  |  {maxOrderQuantity}</LimitsCell>
   );
 };
 
