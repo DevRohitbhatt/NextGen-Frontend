@@ -267,6 +267,10 @@ svg.clearIcone {
   border-top: 1px solid #000;
   border-bottom: 1px solid #000 !important;
 }
+.wide-tooltip {
+  width: 400px;
+  max-width: none;
+}
 
 @keyframes moveUpDown {
   0% {
