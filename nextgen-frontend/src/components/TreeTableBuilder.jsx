@@ -154,6 +154,7 @@ export default function TreeTable({
   data: initialData,
   setData,
   columnHeaders,
+  headerClassNames,
   dataTypes,
   setQid,
   headerTooltips,
@@ -240,10 +241,10 @@ export default function TreeTable({
         </ButtonContainer>
         { onSearch ? <SearchBar data={initialData} onSearch={handleSearch} /> : null }
       </ButtonAndSearchContainer>
-      <StyledTable>
+      <StyledTable className="tree-table">
         <TableHeader className="Header">
           {columnHeaders.map((header, index) => (
-            <TableHeaderCell key={index} columntype={dataTypes[index]} $columnWidth={columnWidths[index]}>
+            <TableHeaderCell key={index} columntype={dataTypes[index]} $columnWidth={columnWidths[index]} className={headerClassNames[index]}>
               {headerTooltips ? (
                 headerTooltips[index] === "" ? (
                   <div> {header} </div>

@@ -16,6 +16,8 @@ import DateSelector from "../../components/DateSelector.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
 import { toast } from "react-toastify";
 import SubmitPurchaseOrderModal from "../../components/SubmitPurchaseOrderModal.jsx";
+import { Steps } from "intro.js-react";
+import SuggestedOrderIntro from "../../assets/introJSSteps/SuggestedOrderIntro.jsx";
 
 const toolTipForecastedDate = "Forecasted Sales dates selected for this order";
 const toolTipForecastedAmt =
@@ -59,6 +61,20 @@ const suggestedTableStructure = {
     "Order Limits",
     "Order Amount",
     "Extended Price",
+  ],
+  classNames: [
+    "inventory-description",
+    "item-description",
+    "item-ref",
+    "item-order-unit",
+    "pack-size",
+    "current-last-price",
+    "safety-factor",
+    "suggested-qty",
+    "on-hand",
+    "order-limits",
+    "order-amount",
+    "extended-price",
   ],
   dataTypes: [
     "string",
@@ -178,6 +194,11 @@ export default function SuggestedOrder() {
     toolTipDirection: [right],
   });
   const [saveSubmitStatus, setSaveSubmitStatus] = useState(0);
+  const [introJS, setIntroJS] = useState({
+    stepsEnabled: false,
+    initialStep: 0,
+    steps: SuggestedOrderIntro(),
+  });
 
   useEffect(() => {
     window.parent.postMessage(JSON.stringify(window.location.pathname), "*");
@@ -761,8 +782,21 @@ export default function SuggestedOrder() {
     });
   };
 
+  const handleIntroJSStart = () => {
+    setIntroJS({
+      ...introJS,
+      stepsEnabled: true,
+    });
+  }
+
   return (
     <Styled.PageContainer>
+      <Steps
+        enabled={introJS.stepsEnabled}
+        steps={introJS.steps}
+        initialStep={introJS.initialStep}
+        onExit={() => setIntroJS({ ...introJS, stepsEnabled: false })}
+      />
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
       <Styled.OptionsRow>
 
@@ -829,10 +863,12 @@ export default function SuggestedOrder() {
           includeCSV={true}
           includeSave={true}
           includeSubmit={true}
+          includeHelp={true}
           handlePDFClick={handlePDFClick}
           handleCSVClick={handleCSVClick}
           handleSaveClick={handleSave}
           handleSubmitClick={onSubmitClick}
+          handleHelpClick={handleIntroJSStart}
         />
         <SubmitPurchaseOrderModal
           isOpen={showSubmitModal}
@@ -867,6 +903,7 @@ export default function SuggestedOrder() {
                 isSorting={false}
                 headerTooltips={forecastTable.headerTooltips}
                 toolTipDirection={forecastTable.toolTipDirection}
+                className={"sales-forecast"}
               />
 
               <Table
@@ -881,6 +918,7 @@ export default function SuggestedOrder() {
                 isSorting={false}
                 headerTooltips={defaultSafetyFactorTable.headerTooltips}
                 toolTipDirection={defaultSafetyFactorTable.toolTipDirection}
+                className={"default-safety-factor"}
               />
             </Styled.ForeCastAndSafetyFactor>
           </MinimizableContainer>
@@ -895,6 +933,7 @@ export default function SuggestedOrder() {
               data={suggestedTable.rows}
               setData={updateSuggestedTable}
               columnHeaders={suggestedTable.columnHeaders}
+              headerClassNames={suggestedTable.classNames}
               dataTypes={suggestedTable.dataTypes}
               setQid={setQid}
               headerTooltips={suggestedTable.headerTooltips}

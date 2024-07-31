@@ -15,6 +15,8 @@ import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import { useNavigate } from "react-router-dom";
+import { Steps } from "intro.js-react";
+import SuggestedOrderListIntro from "../../assets/introJSSteps/SuggestedOrderListIntro.jsx";
 
 const toolTipDeliveryDate = "Date the order is scheduled to be delivered, If using an integrated vendor, this date come from the vendor otherwise....";
 const toolTipCreatedBy = "User logged on when the order was created.";
@@ -67,6 +69,12 @@ const SuggestedOrderList = () => {
     { key: 'status', label: 'Order Status', cellType: 'string', toolTip: toolTipOrderStatus, toolTipDirection: left },
     { key: 'orderSpan', label: 'Order Span', cellType: 'string', toolTip: toolTipOrderSpan, toolTipDirection: left }
   ];
+  const [introSteps, setIntroSteps] = useState({
+    steps: SuggestedOrderListIntro(),
+    initialStep: 0,
+    stepsEnabled: false
+  });
+      
 
   const navigate = useNavigate();
 
@@ -282,10 +290,19 @@ const SuggestedOrderList = () => {
     tempLink.setAttribute("download", "SuggestedOrders.csv");
     tempLink.click();
   };
-  
+
+  const handleIntroJSStart = () => {
+    setIntroSteps({ ...introSteps, stepsEnabled: true });
+  };
 
   return (
     <Styled.PageContainer>
+      <Steps
+        enabled={introSteps.stepsEnabled}
+        steps={introSteps.steps}
+        initialStep={introSteps.initialStep}
+        onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+      />
       <Styled.PageTitle>Suggested Order</Styled.PageTitle>
       <Styled.OptionsRow>
         <Styled.DateAndUnitContainer>
@@ -321,9 +338,7 @@ const SuggestedOrderList = () => {
           includeCSV={true}
           handleCSVClick={handleCSVClick}
           includeHelp={true}
-          handleHelpClick={() => {
-            console.log("Help");
-          }}
+          handleHelpClick={handleIntroJSStart}
         />
       </Styled.OptionsRow>
 

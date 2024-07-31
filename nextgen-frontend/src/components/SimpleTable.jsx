@@ -155,7 +155,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 
   return (
     <TableWrapper>
-      <Table>
+      <Table className='paged-table'>
         <thead>
           <tr>
             {headers.map((header, index) => (
