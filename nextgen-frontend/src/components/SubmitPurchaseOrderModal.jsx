@@ -127,7 +127,7 @@ export default function SubmitPurchaseOrderModal({
     if (orderDetails.length > 0) {
       setIsPreviewLoaded(true);
     } else {
-      setIsPreviewLoaded(false);
+      setIsPreviewLoaded(false); 
     }
   }, [orderDetails]);
 
@@ -148,7 +148,7 @@ export default function SubmitPurchaseOrderModal({
       .flatMap((detail) =>
         detail.suggestedOrderItem.flatMap((inventoryItem) => {
           const selectedVendorItem = inventoryItem.vendorItems.find(
-            (vendorItem) => vendorItem.isSelected
+            (vendorItem) => vendorItem?.isSelected
           );
           return selectedVendorItem && selectedVendorItem.orderQty > 0
             ? {

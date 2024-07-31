@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { SlArrowDown, SlArrowUp } from "react-icons/sl";
 import PropTypes from "prop-types";
 import { handleVendorItemChange, handleEdit } from "../functions/SuggestedOrderFunctions.jsx";
+import SetOrderLimitsModal from "./SetOrderLimitsModal.jsx";
+import Tooltip from "./ToolTip.jsx";
 
 const TableCell = styled.div`
   position: relative;
@@ -29,12 +31,12 @@ const TableRow = styled.div`
   // overflow: hidden;
   display: flex;
   flex-direction: row;
-  gap: 20px;
+  gap: 10px;
 `;
 
 const StyledCell = styled.div`
   width: 100%;
-  min-width: 145px;
+  min-width: ${(props) => props.$columnWidth || "145px"};
 
   text-align: ${(props) =>
     props.columntype === "number" || props.columntype === "percent"
@@ -78,9 +80,12 @@ const SlArrowDownIcon = styled(SlArrowDown)`
 
 const InputCell = styled.input`
   border: none;
-  min-width: 142px;
+  min-width: ${(props) => props.$columnWidth || "145px"};
+  padding: 5px 0px;
+  border-radius: 8px;
   width: 100%;
   text-align: center;
+  background: ${(props) => (props.$isOutOfBounds && props.theme.error)};
 `;
 const DollarSign = styled.span`
   font-size: 1em;
@@ -88,7 +93,7 @@ const DollarSign = styled.span`
 const PercentSign = styled.span`
   font-size: 1em;
 `;
-const EditableCell = ({ value, onChange, DataType }) => {
+const EditableCell = ({ value, onChange, DataType, isOutOfBounds = false, columnWidth }) => {
   const [inputValue, setInputValue] = useState(value);
 
   const handleInputChange = (e) => {
@@ -111,15 +116,34 @@ const EditableCell = ({ value, onChange, DataType }) => {
           value={inputValue}
           onChange={handleInputChange}
           onBlur={handleBlur}
+          $columnWidth={columnWidth}
+          $isOutOfBounds={isOutOfBounds}
         />
-      ) : (
-        <InputCell
-          type="number"
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={handleBlur}
-        />
-      )}
+      ) : 
+        isOutOfBounds ? (
+          <Tooltip
+            content="Order quantity is not within the order limits."
+            direction="left"
+          >
+            <InputCell
+              type="number"
+              value={inputValue}
+              onChange={handleInputChange}
+              onBlur={handleBlur}
+              $columnWidth={columnWidth}
+              $isOutOfBounds={isOutOfBounds}
+            />
+          </Tooltip>
+        ) : (
+          <InputCell
+            type="number"
+            value={inputValue}
+            onChange={handleInputChange}
+            onBlur={handleBlur}
+            $columnWidth={columnWidth}
+            $isOutOfBounds={isOutOfBounds}
+          />
+        )}
     </>
   );
 };
@@ -135,7 +159,25 @@ const DropdownCell = ({ value, options, onChange }) => {
     </Select>
   );
 };
+
+const OrderLimitsCell = ({ orderLimits, mappingQuantityMultiplier, inventoryItemID, columntype, onClick, columnWidth}) => {
+  const orderLimit = orderLimits?.find(
+    (item) => item.qsrInventoryItemID === inventoryItemID
+  );
+  let minOrderQuantity = 0;
+  let maxOrderQuantity = 0;
+  if (orderLimit) {
+    minOrderQuantity = orderLimit.minOrderQuantity * mappingQuantityMultiplier;
+    maxOrderQuantity = orderLimit.maxOrderQuantity * mappingQuantityMultiplier;
+  }
+  return (
+    <StyledCell columntype={columntype} onClick={onClick} $columnWidth={columnWidth}>{minOrderQuantity}  |  {maxOrderQuantity}</StyledCell>
+  );
+};
+
+
 const TreeNode = ({
+  companyAndUnitData,
   node: initialNode,
   isExpanded,
   onToggleNode,
@@ -143,10 +185,14 @@ const TreeNode = ({
   columnWidths,
   isEditable,
   dataTypes,
-  setQid
+  setQid,
+  orderLimits,
+  setOrderLimits
 }) => {
   const [selectedVendorItems, setSelectedVendorItems] = useState([]);
   const [node, setNode] = useState(initialNode);
+  const [isOrderLimitModalOpen, setIsOrderLimitModalOpen] = useState(false);
+  const [orderLimitModalData, setOrderLimitModalData] = useState({});
   
   useEffect(() => {
     setNode(initialNode);
@@ -165,7 +211,8 @@ const TreeNode = ({
         selectedVendorItems,
         setSelectedVendorItems,
         onEdit,
-        setQid
+        setQid,
+        orderLimits
       );
       if (!updatedNode) {
         throw new Error('Failed to update node');
@@ -206,7 +253,7 @@ const TreeNode = ({
       setSelectedVendorItems,
       onEdit
     );
-  };
+  }; 
 
   const formatPercentage = (value) => {
     if (value && value !== "%" && value !== null && value !== "") {
@@ -232,6 +279,45 @@ const TreeNode = ({
     }
   };
 
+  const openOrderLimitModal = (inventoryItemData, vendorItemData) => {
+    let itemOrderQuantities = orderLimits?.find(
+      (item) => inventoryItemData.qsrInventoryItemID === item.qsrInventoryItemID
+    );
+    if (!itemOrderQuantities) {
+      itemOrderQuantities = {
+        qsrInventoryItemID: inventoryItemData.qsrInventoryItemID,
+        minOrderQuantity: 0,
+        maxOrderQuantity: 0,
+      };
+    }
+    setOrderLimitModalData({
+      inventoryItemData,
+      vendorItemData,
+      itemOrderQuantities,
+    });
+    setIsOrderLimitModalOpen(true);
+  };
+
+  const checkOrderQtyOutOfBounds = (quantity, inventoryItemID, mappingQuantityMultiplier) => {
+    var limits = orderLimits?.find(
+      (item) =>
+        item.qsrInventoryItemID ===
+        inventoryItemID
+    );
+    if (limits && limits.maxOrderQuantity && limits.minOrderQuantity) {
+      const max = limits.maxOrderQuantity * mappingQuantityMultiplier;
+      const min = limits.minOrderQuantity * mappingQuantityMultiplier;
+      if (
+        quantity < min) {
+        return true;
+      } else if (
+        quantity > max && max > 0
+      ) { 
+        return true;
+      } else return false;
+    }
+  };
+
   useEffect(() => {
     const initialSelectedVendorItems = [];
     node.suggestedOrderItem.forEach((childNode, index) => {
@@ -252,13 +338,23 @@ const TreeNode = ({
           </ToggleIcon>
         </StyledCellParent>
       </TableCell>
+      <SetOrderLimitsModal
+        companyAndUnitData={companyAndUnitData}
+        isOpen={isOrderLimitModalOpen}
+        onClose={() => setIsOrderLimitModalOpen(false)}
+        inventoryItemData={orderLimitModalData.inventoryItemData}
+        vendorItemData={orderLimitModalData.vendorItemData}
+        itemOrderQuantities={orderLimitModalData.itemOrderQuantities}
+        setOrderLimits={setOrderLimits}
+        orderLimits={orderLimits}
+      />
       { isExpanded &&
         node.suggestedOrderItem &&
         node.suggestedOrderItem.map((childNode, index) => (
           !childNode.isHidden ? (
-            <TableRow key={index} columnWidths={columnWidths}>
-              <StyledCell>{childNode.invItemDescription}</StyledCell>
-              <StyledCell>
+            <TableRow key={index} >
+              <StyledCell $columnWidth={columnWidths[0]}>{childNode.invItemDescription}</StyledCell>
+              <StyledCell $columnWidth={columnWidths[1]}>
                 {childNode.vendorItems && (
                   <DropdownCell
                     value={selectedVendorItems[index]?.qsrItemID || ""}
@@ -276,9 +372,10 @@ const TreeNode = ({
                         handleEditfield("vendorItemReference", value, index)
                       }
                       DataType={dataTypes[2]}
+                      columnWidth={columnWidths[2]}
                     />
                   ) : (
-                    <StyledCell>
+                    <StyledCell $columnWidth={columnWidths[2]}>
                       {selectedVendorItems[index].vendorItemReference}
                     </StyledCell>
                   )}
@@ -289,9 +386,10 @@ const TreeNode = ({
                         handleEditfield("unitOfMeasure", value, index)
                       }
                       DataType={dataTypes[3]}
+                      columnWidth={columnWidths[3]}
                     />
                   ) : (
-                    <StyledCell>
+                    <StyledCell $columnWidth={columnWidths[3]}>
                       {selectedVendorItems[index].unitOfMeasure}
                     </StyledCell>
                   )}
@@ -302,9 +400,10 @@ const TreeNode = ({
                         handleEditfield("packSize", value, index)
                       }
                       DataType={dataTypes[4]}
+                      columnWidth={columnWidths[4]}
                     />
                   ) : (
-                    <StyledCell>{selectedVendorItems[index].packSize}</StyledCell>
+                    <StyledCell $columnWidth={columnWidths[4]}>{selectedVendorItems[index].packSize}</StyledCell>
                   )}
                   {isEditable[3] ? (
                     <>
@@ -316,10 +415,11 @@ const TreeNode = ({
                         }
                         DataType={dataTypes[5]}
                         style={{ textAlign: "center" }}
+                        columnWidth={columnWidths[5]}
                       />
                     </>
                   ) : (
-                    <StyledCell style={{ textAlign: "center" }}>
+                    <StyledCell style={{ textAlign: "center" }} $columnWidth={columnWidths[5]}>
                       <DollarSign>$</DollarSign>
                       {selectedVendorItems[index].latestInvoicePrice}
                     </StyledCell>
@@ -334,10 +434,11 @@ const TreeNode = ({
                           handleEditfield("safetyFactor", value, index)
                         }
                         DataType={dataTypes[6]}
+                        columnWidth={columnWidths[6]}
                       />
                     </>
                   ) : (
-                    <StyledCell>
+                    <StyledCell $columnWidth={columnWidths[6]}>
                       {selectedVendorItems[index].safetyFactor}
                       <PercentSign>%</PercentSign>
                     </StyledCell>
@@ -352,9 +453,10 @@ const TreeNode = ({
                         handleEditfield("suggestedQty", value, index)
                       }
                       DataType={dataTypes[7]}
+                      columnWidth={columnWidths[7]}
                     />
                   ) : (
-                    <StyledCell columntype={dataTypes[7]}>
+                    <StyledCell columntype={dataTypes[7]} $columnWidth={columnWidths[7]}>
                       {selectedVendorItems[index].suggestedQty}
                     </StyledCell>
                   )}
@@ -365,24 +467,51 @@ const TreeNode = ({
                         handleEditfield("onHandQty", value, index)
                       }
                       DataType={dataTypes[8]}
+                      columnWidth={columnWidths[8]}
                     />
                   ) : (
-                    <StyledCell>{selectedVendorItems[index].onHandQty}</StyledCell>
+                    <StyledCell $columnWidth={columnWidths[8]}>{selectedVendorItems[index].onHandQty}</StyledCell>
                   )}
+                  {
+                    <OrderLimitsCell 
+                      columntype={dataTypes[8]} 
+                      onClick={() => {
+                        const inventoryItemData = {
+                          qsrInventoryItemID: childNode.qsrInventoryItemID,
+                          invItemDescription: childNode.invItemDescription,
+                          invItemMainUOM: childNode.invItemMainUOM,
+                        }    
+                        const selectedVendorItemData = { 
+                          description: selectedVendorItems[index].description,
+                          unitOfMeasure: selectedVendorItems[index].unitOfMeasure,
+                          mappingQuantityMultiplier: selectedVendorItems[index].mappingQuantityMultiplier,
+                        }
+                        openOrderLimitModal(inventoryItemData, selectedVendorItemData);
+                      }}
+                      orderLimits={orderLimits}
+                      mappingQuantityMultiplier={selectedVendorItems[index].mappingQuantityMultiplier}
+                      inventoryItemID={childNode.qsrInventoryItemID}
+                      columnWidth={columnWidths[9]}
+                    />
+                  }
                   {isEditable[7] ? (
                     <EditableCell
-                    value={selectedVendorItems[index].orderQty}
-                      // value={(
-                      //   selectedVendorItems[index].suggestedQty -
-                      //   selectedVendorItems[index].onHandQty
-                      // ).toFixed(2)}
+                      value={selectedVendorItems[index].orderQty}
+                      isOutOfBounds={
+                        checkOrderQtyOutOfBounds(
+                          selectedVendorItems[index].orderQty, 
+                          childNode.qsrInventoryItemID, 
+                          selectedVendorItems[index].mappingQuantityMultiplier
+                        )
+                      }
                       onChange={(value) =>
                         handleEditfield("orderQty", value, index)
                       }
-                      DataType={dataTypes[9]}
+                      DataType={dataTypes[10]}
+                      columnWidth={columnWidths[10]}
                     />
                   ) : (
-                    <StyledCell>
+                    <StyledCell $columnWidth={columnWidths[10]}>
                       {selectedVendorItems[index].orderQty}
                     </StyledCell>
                   )}
@@ -393,10 +522,11 @@ const TreeNode = ({
                       onChange={(value) =>
                         handleEditfield("extendedPrice", value, index)
                       }
-                      DataType={dataTypes[10]}
+                      DataType={dataTypes[11]}
+                      columnWidth={columnWidths[11]}
                     />
                   ) : (
-                    <StyledCell columntype={dataTypes[10]}>
+                    <StyledCell columntype={dataTypes[11]} $columnWidth={columnWidths[11]}>
                       {selectedVendorItems[index].extendedPrice}
                     </StyledCell>
                   )}

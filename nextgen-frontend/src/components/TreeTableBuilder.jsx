@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import TreeNode from "./TreeNode";
+import TreeNode from "./SuggestedOrderTreeNode.jsx";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import PropTypes from "prop-types";
 import Tooltip from "../components/ToolTip.jsx";
@@ -71,7 +71,7 @@ const ButtonAndSearchContainer = styled.div`
 const TableHeader = styled.div`
   width: 100%;
   display: flex;
-  gap: 20px;
+  gap: 10px;
   margin-bottom: 10px;
   padding-bottom: 10px;
   //  min-width:145px;
@@ -84,7 +84,7 @@ const TableHeaderCell = styled.div`
   // height: 44px;
   padding: 10px 0;
   width: 100%;
-  min-width: 145px;
+  min-width: ${(props) => props.$columnWidth || "145px"};
   text-align: ${(props) =>
     props.columntype === "number" || props.columntype === "percent"
       ? "center"
@@ -150,14 +150,19 @@ const CollapseButton = styled.button`
 `;
 
 export default function TreeTable({
+  companyAndUnitData,
   data: initialData,
   setData,
   columnHeaders,
+  headerClassNames,
   dataTypes,
   setQid,
   headerTooltips,
   toolTipDirection,
   onSearch,
+  orderLimits,
+  setOrderLimits,
+  columnWidths
 }) {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [isCollapseActive, setIsCollapseActive] = useState(false);
@@ -236,10 +241,10 @@ export default function TreeTable({
         </ButtonContainer>
         { onSearch ? <SearchBar data={initialData} onSearch={handleSearch} /> : null }
       </ButtonAndSearchContainer>
-      <StyledTable>
+      <StyledTable className="tree-table">
         <TableHeader className="Header">
           {columnHeaders.map((header, index) => (
-            <TableHeaderCell key={index} columntype={dataTypes[index]}>
+            <TableHeaderCell key={index} columntype={dataTypes[index]} $columnWidth={columnWidths[index]} className={headerClassNames[index]}>
               {headerTooltips ? (
                 headerTooltips[index] === "" ? (
                   <div> {header} </div>
@@ -260,6 +265,7 @@ export default function TreeTable({
         </TableHeader>
         {initialData.map((node, index) => (
           <TreeNode
+            companyAndUnitData={companyAndUnitData}
             key={index}
             node={node}
             isExpanded={expandedNodes[node.name]}
@@ -269,6 +275,9 @@ export default function TreeTable({
             isEditable={isEditableArray}
             dataTypes={dataTypes}
             setQid={setQid}
+            orderLimits={orderLimits}
+            setOrderLimits={setOrderLimits}
+            columnWidths={columnWidths}
           />
         ))}
       </StyledTable>
