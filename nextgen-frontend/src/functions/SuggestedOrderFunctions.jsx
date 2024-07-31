@@ -48,11 +48,12 @@ export const handleForecastChange = (
   return updatedForecastData;
 };
 
-export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData) => { 
+export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, orderLimits) => { 
   const updatedSuggestedOrderData = suggestedOrderData.rows.map((detail) => {
     return {
       name: detail.name,
       suggestedOrderItem: detail.suggestedOrderItem.map((inventoryItem) => {
+        var orderLimit = orderLimits.find((orderLimit) => orderLimit.qsrInventoryItemID === inventoryItem.qsrInventoryItemID);
         return {
           ...inventoryItem,
           vendorItems: inventoryItem.vendorItems.map((vendorItem) => {
@@ -74,7 +75,7 @@ export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData) 
                 ) * 1 + (vendorItem.safetyFactor / 100)
               );
             }
-            orderQty = calculateOrderQty(suggestedQty, onHand);
+            orderQty = calculateOrderQty(suggestedQty, onHand, orderLimit);
             extendedPrice = calculateExtendedPrice(orderQty, vendorItem.latestInvoicePrice);
             const updatedVendorItem = {
               ...vendorItem,
@@ -213,7 +214,7 @@ export const handleEdit = async (
         }),
       };
 
-      return returntItem;
+      return returntItem; 
     }
   );
 
@@ -240,11 +241,16 @@ const calculateSuggestedQty = (suggestedQty, safetyFactor) => {
     return formatNumberTwoDecimals(suggestedQty * (1 + safetyFactor / 100));
 }
 
-const calculateOrderQty = (suggestedQty, onHandQty) => {
-    if (onHandQty > suggestedQty) {
+const calculateOrderQty = (suggestedQty, onHandQty, orderLimit = null) => {
+    if (onHandQty > suggestedQty) { 
         return 0;
     }
-    return formatNumberTwoDecimals(suggestedQty - onHandQty);
+    var returnQty = suggestedQty - onHandQty;
+    if (orderLimit) {
+      returnQty = Math.min(returnQty, orderLimit.maxOrderQuantity);
+      returnQty = Math.max(returnQty, orderLimit.minOrderQuantity);
+    }
+    return formatNumberTwoDecimals(returnQty);
 }
 
 const calculateExtendedPrice = (orderQty, latestInvoicePrice) => {
