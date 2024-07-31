@@ -9,6 +9,10 @@ import { FaInfoCircle } from "react-icons/fa";
 
 const InfoIcon = styled(FaInfoCircle)`
   color: ${(props) => props.theme.secondary};
+  width: 10px;
+  position: absolute;
+  left: -12px;
+  top: 0;
 `;
 
 const StyledTable = styled.div`
@@ -71,7 +75,7 @@ const ButtonAndSearchContainer = styled.div`
 const TableHeader = styled.div`
   width: 100%;
   display: flex;
-  gap: 10px;
+  gap: 15px;
   margin-bottom: 10px;
   padding-bottom: 10px;
   //  min-width:145px;
@@ -90,6 +94,16 @@ const TableHeaderCell = styled.div`
       ? "center"
       : "left"};
 `;
+
+const HeaderCellContainer = styled.div`
+  position: relative;
+  width: fit-content;
+  margin: ${(props) =>
+    props.columntype === "number" || props.columntype === "percent"
+      ? "auto"
+      : "none"};
+`;
+
 const CollapseButton = styled.button`
   box-shadow: inset 0 0 0 2px ${(props) => props.theme.primary};
   transition: color 0.25s 0.0833333333s;
@@ -250,11 +264,15 @@ export default function TreeTable({
                   <div> {header} </div>
                 ) : toolTipDirection[index] === "left" ? (
                   <Tooltip content={headerTooltips[index]} direction="left">
-                    <InfoIcon /> {header}
+                    <HeaderCellContainer columntype={dataTypes[index]}> 
+                      {header} <InfoIcon /> 
+                    </HeaderCellContainer>
                   </Tooltip>
                 ) : (
                   <Tooltip content={headerTooltips[index]} direction="left">
-                    {header} <InfoIcon />
+                    <HeaderCellContainer columntype={dataTypes[index]}> 
+                      {header} <InfoIcon /> 
+                    </HeaderCellContainer>
                   </Tooltip>
                 )
               ) : (

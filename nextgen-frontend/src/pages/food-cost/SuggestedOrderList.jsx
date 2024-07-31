@@ -18,11 +18,14 @@ import { useNavigate } from "react-router-dom";
 import { Steps } from "intro.js-react";
 import SuggestedOrderListIntro from "../../assets/introJSSteps/SuggestedOrderListIntro.jsx";
 
-const toolTipDeliveryDate = "Date the order is scheduled to be delivered, If using an integrated vendor, this date come from the vendor otherwise....";
-const toolTipCreatedBy = "User logged on when the order was created.";
-const toolTipCreatedOn = "The system date when the order was orginially created.";
-const toolTipSubmittedOn = "The system date when the order was Submitted.";
-const toolTipOrderStatus = "For NON integrated vendors, the status will display 1.Created, 2.Submitted, 3.Delivered. For integrated vendors, the Order Status will come from the vendor.";
+const toolTipDeliveryDate =
+  "Date the order should be delivered. If using a Suggested Order integrated vendor, this date comes from the vendor otherwise the Delivery Date is populated with the START date of your order span when the order was created.";
+const toolTipCreatedBy = "User logged on when the order was originally created.";
+const toolTipCreatedOn =
+  "The system date and time when the order was originally created.";
+const toolTipSubmittedOn = "The system date and time when the order was Submitted.";
+const toolTipOrderStatus =
+  "For NON Integrated Suggested Order vendors, the status will display “Submitted” if the order Submit action has occurred, otherwise the Order Status will display “Not Submitted” for any order state i.e. created, saved, etc. For integrated vendors, the Order Status will come from the vendor.";
 const toolTipOrderSpan = "Forecasted dates and sales selected for this order.";
 const left = "left";
 
@@ -46,12 +49,13 @@ const SuggestedOrderList = () => {
 
   const [vendorsList, setVendorsList] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState(0);
-  const [selectedVendorName, setselectedVendorName] =
-    useState("All Vendors");
+  const [selectedVendorName, setselectedVendorName] = useState("All Vendors");
   const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
   const [selectedToDate, setSelectedToDate] = useState(new Date());
-  const [selectedFromDate, setSelectedFromDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const [selectedFromDate, setSelectedFromDate] = useState(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  );
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showDateModal, setShowDateModal] = useState(false); // State to manage modal visibility
 
@@ -60,21 +64,68 @@ const SuggestedOrderList = () => {
   const [showSuggestedModal, setShowSuggestedModal] = useState(false);
   const [purchaseOrderID, setPurchaseOrderID] = useState(0);
   const headers = [
-    { key: 'unitName', label: 'Unit Name', cellType: 'string', toolTip: "", toolTipDirection: "" },
-    { key: 'vendorName', label: 'Vendor Name', cellType: 'string', toolTip: "", toolTipDirection: "" },
-    { key: 'deliveryDate', label: 'Delivery Date', cellType: 'date', toolTip: toolTipDeliveryDate, toolTipDirection: left },
-    { key: 'createdByName', label: 'Created By', cellType: 'string', toolTip: toolTipCreatedBy, toolTipDirection: left },
-    { key: 'createdOn', label: 'Created On',cellType: 'dateTime', toolTip: toolTipCreatedOn, toolTipDirection: left },
-    { key: 'submittedOn', label: 'Submitted On', cellType: 'dateTime', toolTip: toolTipSubmittedOn, toolTipDirection: left },
-    { key: 'status', label: 'Order Status', cellType: 'string', toolTip: toolTipOrderStatus, toolTipDirection: left },
-    { key: 'orderSpan', label: 'Order Span', cellType: 'string', toolTip: toolTipOrderSpan, toolTipDirection: left }
+    {
+      key: "unitName",
+      label: "Unit Name",
+      cellType: "string",
+      toolTip: "",
+      toolTipDirection: "",
+    },
+    {
+      key: "vendorName",
+      label: "Vendor Name",
+      cellType: "string",
+      toolTip: "",
+      toolTipDirection: "",
+    },
+    {
+      key: "deliveryDate",
+      label: "Delivery Date",
+      cellType: "date",
+      toolTip: toolTipDeliveryDate,
+      toolTipDirection: left,
+    },
+    {
+      key: "createdByName",
+      label: "Created By",
+      cellType: "string",
+      toolTip: toolTipCreatedBy,
+      toolTipDirection: left,
+    },
+    {
+      key: "createdOn",
+      label: "Created On",
+      cellType: "dateTime",
+      toolTip: toolTipCreatedOn,
+      toolTipDirection: left,
+    },
+    {
+      key: "submittedOn",
+      label: "Submitted On",
+      cellType: "dateTime",
+      toolTip: toolTipSubmittedOn,
+      toolTipDirection: left,
+    },
+    {
+      key: "status",
+      label: "Order Status",
+      cellType: "string",
+      toolTip: toolTipOrderStatus,
+      toolTipDirection: left,
+    },
+    {
+      key: "orderSpan",
+      label: "Order Span",
+      cellType: "string",
+      toolTip: toolTipOrderSpan,
+      toolTipDirection: left,
+    },
   ];
   const [introSteps, setIntroSteps] = useState({
     steps: SuggestedOrderListIntro(),
     initialStep: 0,
-    stepsEnabled: false
+    stepsEnabled: false,
   });
-      
 
   const navigate = useNavigate();
 
@@ -84,24 +135,33 @@ const SuggestedOrderList = () => {
       let parameters = decodeURIComponent(
         window.location.search.replace("?data=", "")
       );
-      if (parameters) parameters = JSON.parse(parameters);
-      parameters ? setCompanyID(parameters.CompanyID) : setCompanyID();
-      parameters ? setAlignmentID(parameters.AlignmentId) : setAlignmentID();
-      parameters ? setUserID(parameters.User_UserID) : setUserID();
-      parameters
-        ? setSelectedUnit(
-            parameters.User_GroupOrUnitAccess || parameters.User_DefaultUnitID
-          )
-        : setSelectedUnit();
-      parameters
-        ? setGroupOrUnitAccessID(parameters.User_GroupOrUnitAccess)
-        : setGroupOrUnitAccessID();
-      parameters ? setIsActive(parameters.UnitID) : setIsActive();
-      if (parameters.User_DefaultUnitID) {
+      if (parameters) {
+        parameters = JSON.parse(parameters);
+        setCompanyID(parameters.CompanyID);
+        setAlignmentID(parameters.AlignmentId);
+        setUserID(parameters.User_UserID);
+        setSelectedUnit(parameters.User_GroupOrUnitAccess || parameters.User_DefaultUnitID);
+        setGroupOrUnitAccessID(parameters.User_GroupOrUnitAccess);
+        localStorage.setItem("companyID", parameters.CompanyID);
+        localStorage.setItem("alignmentID", parameters.AlignmentId);
+        localStorage.setItem("userID", parameters.User_UserID);
+        localStorage.setItem("groupOrUnitAccess", parameters.User_GroupOrUnitAccess);
+        localStorage.setItem("defaultUnit", parameters.User_DefaultUnitID);
         fetchData(
           parameters.CompanyID,
           parameters.AlignmentId,
           parameters.User_GroupOrUnitAccess || parameters.User_DefaultUnitID
+        );
+      } else if (localStorage.getItem("groupOrUnitAccess")) {
+        setCompanyID(parseInt(localStorage.getItem("companyID")));
+        setAlignmentID(parseInt(localStorage.getItem("alignmentID")));
+        setUserID(parseInt(localStorage.getItem("userID")));
+        setSelectedUnit(parseInt(localStorage.getItem("groupOrUnitAccess")));
+        setGroupOrUnitAccessID(parseInt(localStorage.getItem("groupOrUnitAccess")));
+        fetchData(
+          localStorage.getItem("companyID"),
+          localStorage.getItem("alignmentID"),
+          localStorage.getItem("defaultUnit")
         );
       } else {
         console.log("testing mode");
@@ -148,17 +208,26 @@ const SuggestedOrderList = () => {
   };
 
   const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID) => {
-    SuggestedOrderAPI.getOrderList(companyID, alignmentID, memberID ,vendorID, selectedFromDate.toISOString().split('T')[0], selectedToDate.toISOString().split('T')[0])
-    .then((data) => {
-      data?.data?.map((x) => {
-        const formatFromDate = formatDate(x.orderFromDate);
-        const formatToDate = formatDate(x.orderToDate);
-        x.orderSpan = `${formatFromDate} - ${formatToDate}`;
+    SuggestedOrderAPI.getOrderList(
+      companyID,
+      alignmentID,
+      memberID,
+      vendorID,
+      selectedFromDate.toISOString().split("T")[0],
+      selectedToDate.toISOString().split("T")[0]
+    )
+      .then((data) => {
+        data?.data?.map((x) => {
+          const formatFromDate = formatDate(x.orderFromDate);
+          const formatToDate = formatDate(x.orderToDate);
+          x.deliveryDate = formatDate(x.orderFromDate);
+          x.orderSpan = `${formatFromDate} - ${formatToDate}`;
+        });
+        setSuggestedOrders(data);
+      })
+      .catch((error) => {
+        console.error("Error getting orders: ", error);
       });
-      setSuggestedOrders(data);
-    }).catch((error) => {
-      console.error("Error getting orders: ", error);
-    });    
   };
 
   const formatDate = (orderDate) => {
@@ -241,50 +310,115 @@ const SuggestedOrderList = () => {
 
   const handlePDFClick = () => {
     if (!suggestedOrders.data.length) return;
-    const vendorName = (selectedVendor === 0) ? "All Vendors" : selectedVendorName;
+    const vendorName =
+      selectedVendor === 0 ? "All Vendors" : selectedVendorName;
     const pdfData = {
       title: "Suggested Orders",
-      subHeaders: [`${formatDate(selectedFromDate)} - ${formatDate(selectedToDate)}  |  ${selectedUnitName}  |  ${vendorName}`],
+      subHeaders: [
+        `${formatDate(selectedFromDate)} - ${formatDate(
+          selectedToDate
+        )}  |  ${selectedUnitName}  |  ${vendorName}`,
+      ],
       exportType: "pdf",
       pageOrientation: "landscape",
       body: [
         {
           type: "table",
-          widths: ["auto", "auto", "auto", "auto", "auto", "auto", "auto", "auto"],
-          dataTypes: ["string", "string", "date", "string", "string", "string", "string", "string"],
+          widths: [
+            "auto",
+            "auto",
+            "auto",
+            "auto",
+            "auto",
+            "auto",
+            "auto",
+            "auto",
+          ],
+          dataTypes: [
+            "string",
+            "string",
+            "date",
+            "string",
+            "string",
+            "string",
+            "string",
+            "string",
+          ],
           data: {
-            columnHeaders: ["Unit Name", "Vendor Name", "Delivery Date", "Created By", "Created On", "Submitted On", "Order Status", "Order Span"],
-            rows: suggestedOrders.data.map(row => [
+            columnHeaders: [
+              "Unit Name",
+              "Vendor Name",
+              "Delivery Date",
+              "Created By",
+              "Created On",
+              "Submitted On",
+              "Order Status",
+              "Order Span",
+            ],
+            rows: suggestedOrders.data.map((row) => [
               { value: row.unitName, cellType: "", columnName: "Unit Name" },
-              { value: row.vendorName, cellType: "", columnName: "Vendor Name" },
-              { value: row.deliveryDate, cellType: "", columnName: "Delivery Date" },
-              { value: row.createdByName, cellType: "", columnName: "Created By" },
+              {
+                value: row.vendorName,
+                cellType: "",
+                columnName: "Vendor Name",
+              },
+              {
+                value: row.deliveryDate,
+                cellType: "",
+                columnName: "Delivery Date",
+              },
+              {
+                value: row.createdByName,
+                cellType: "",
+                columnName: "Created By",
+              },
               { value: row.createdOn, cellType: "", columnName: "Created On" },
-              { value: row.submittedOn, cellType: "", columnName: "Submitted On" },
+              {
+                value: row.submittedOn,
+                cellType: "",
+                columnName: "Submitted On",
+              },
               { value: row.status, cellType: "", columnName: "Order Status" },
-              { value: row.orderSpan, cellType: "", columnName: "Order Span" }
-            ])
-          }
-        }
-      ]
+              { value: row.orderSpan, cellType: "", columnName: "Order Span" },
+            ]),
+          },
+        },
+      ],
     };
-  
+
     PdfBuilder(pdfData);
   };
-  
 
   const handleCSVClick = () => {
     if (!suggestedOrders.data.length) return;
-  
-    const headers = ["Unit Name", "Vendor Name", "Delivery Date", "Created By", "Created On", "Submitted On", "Order Status", "Order Span"];
-    const csvData = suggestedOrders.data.map(row =>
-      [row.unitName, row.vendorName, row.deliveryDate, row.createdByName, row.createdOn, row.submittedOn, row.status, row.orderSpan].join(",")
+
+    const headers = [
+      "Unit Name",
+      "Vendor Name",
+      "Delivery Date",
+      "Created By",
+      "Created On",
+      "Submitted On",
+      "Order Status",
+      "Order Span",
+    ];
+    const csvData = suggestedOrders.data.map((row) =>
+      [
+        row.unitName,
+        row.vendorName,
+        row.deliveryDate,
+        row.createdByName,
+        row.createdOn,
+        row.submittedOn,
+        row.status,
+        row.orderSpan,
+      ].join(",")
     );
-  
+
     const csvString = [headers.join(","), ...csvData].join("\n");
     const blob = new Blob([csvString], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-  
+
     const tempLink = document.createElement("a");
     tempLink.href = url;
     tempLink.setAttribute("download", "SuggestedOrders.csv");

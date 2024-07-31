@@ -1,7 +1,7 @@
 export default function SuggestedOrderListIntro() {
   return [
     {
-      intro: "<center>Welcome to QSROnline’s Food Management tool, Suggested Order! Let us show you around." +
+      intro: "<center>Welcome to QSROnline’s Suggested Order tool! Let us show you around." +
         "<br><br>Press the enter or arrow keys to advance through the tutorial.</center>"
     },
     {
@@ -11,7 +11,7 @@ export default function SuggestedOrderListIntro() {
     },
     {
       element: '.vendor-selector',
-      intro: "Select the Vendor(s) you want to display in the Suggested Order activity list."   +"<br> -Only Vendors with previous Suggested ORder activity will display data."
+      intro: "Select the Vendor(s) you want to display in the Suggested Order activity list."   +"<br> -Only Vendors with previous Suggested Order activity will display data."
     
     },
     {
@@ -26,12 +26,13 @@ export default function SuggestedOrderListIntro() {
     {
       element: '.add-option',
       intro: "The + (plus) sign icon will create a NEW Suggested Order." 
-        + "<br><br> This pop   up screen will prompt you for the unit #, the Vendor to create a new order and the Order Span dates for the new order."
-        + "Typically, the Order Span Dates start with the next order delivery date and extend through either the day before or day of the following delivery date."
+        + "<br><br> This pop-up screen will prompt you for the unit #, the Vendor to create a new order and the Order Span dates for the new order."
+        + "Typically, the Order Span Dates start with the next order delivery date and extend through either the day before or the day of the following delivery date."
     },
     {
       element: '.paged-table',
-      intro: "-All information is displayed for your selected criteria." +"<br><br> -Tooltips will explain the column element in more detail,  just hover your cursor over the tooltip.”+”<br><br> -The columns on this page are sortable for convenience."
+      intro: "-All information is displayed for your selected criteria." + "<br><br> -Tooltips will explain the column element in more detail,  "
+        + "just hover your cursor over the tooltip.<br><br> -The columns on this page are sortable for convenience. Just click on the column header to sort."
     },
   ]
 }
