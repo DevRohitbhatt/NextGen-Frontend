@@ -4,18 +4,17 @@ import * as Styled from "./styles/SuggestedOrderStyles.jsx";
 import UnitSelector from "../../components/UnitSelector.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import UnitModal from "../../components/UnitModal.jsx";
-import Modal from "../../components/Modal.jsx";
 import MessagePopup from "../../components/MessagePopup.jsx";
 import Table from "../../components/TableBuilder.jsx";
 import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
+import { InventoryItemsAPI } from "../../apis/food-cost/InventoryItemsAPI.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import * as SuggestedOrderFunctions from "../../functions/SuggestedOrderFunctions.jsx";
 import TreeTable from "../../components/TreeTableBuilder.jsx";
 import VendorSelector from "../../components/VendorSelector.jsx";
 import DateSelector from "../../components/DateSelector.jsx";
 import MinimizableContainer from "../../components/MinimizableContainer.jsx";
-import SearchBar from "../../components/SearchBar.jsx";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import SubmitPurchaseOrderModal from "../../components/SubmitPurchaseOrderModal.jsx";
 
 const toolTipForecastedDate = "Forecasted Sales dates selected for this order";
@@ -39,7 +38,8 @@ const toolTipSuggestedQty =
   "(Order Span Forecasted Sales total / 4 week rolling average item dollar yield) * Safety Factor. The Suggested QTY value requires at least one instance of item usage.";
 const toolTipOnHand =
   "Physical count of product on hand when creating your order. The On Hand value entered is deducted from the Suggested QTY to calculate the Order Amount.";
-const toolTipOrderAmount =
+const toolTipOrderLimits = "Minimum and Maximum order quantity limits.";
+  const toolTipOrderAmount =
   "The amount of product to order from your vendor. Suggested Qty - On Hand.";
 const toolTipExtendedPrice = "Order Amount * Current/Last Price.";
 const left = "left";
@@ -56,6 +56,7 @@ const suggestedTableStructure = {
     "Safety Factor",
     "Suggested Qty",
     "On Hand",
+    "Order Limits",
     "Order Amount",
     "Extended Price",
   ],
@@ -71,8 +72,9 @@ const suggestedTableStructure = {
     "number",
     "number",
     "number",
+    "number",
   ],
-  columnWidth: "1fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr",
+  columnWidth: ["160px", "160px", "70px", "80px", "70px", "145px", "80px", "80px", "80px", "80px"],
   rows: [],
   headerTooltips: [
     "",
@@ -84,11 +86,13 @@ const suggestedTableStructure = {
     toolTipSafetyFactor,
     toolTipSuggestedQty,
     toolTipOnHand,
+    toolTipOrderLimits,
     toolTipOrderAmount,
     toolTipExtendedPrice,
   ],
   toolTipDirection: [
     "",
+    right,
     right,
     right,
     right,
@@ -140,6 +144,7 @@ export default function SuggestedOrder() {
   const [suggestedTable, setSuggestedTable] = useState({
     ...suggestedTableStructure,
   });
+  const [orderLimits, setOrderLimits] = useState([]);
   const [filteredSuggestedTable, setFilteredSuggestedTable] = useState({
     ...suggestedTableStructure,
   });
@@ -189,6 +194,7 @@ export default function SuggestedOrder() {
         dates[1],
         suggestedOrderID
       );
+      getOrderLimits(companyID, unit);
     }
     setSaveIsVisible(saveSubmitStatus === 0 ? true : false);
     setSubmitIsVisible(saveSubmitStatus === 0 ? false : true);
@@ -254,12 +260,25 @@ export default function SuggestedOrder() {
       });
   };
 
+  const getOrderLimits = (companyID, unitID) => {
+    InventoryItemsAPI.getInventoryItemsOrderLimits(companyID, unitID)
+      .then((response) => {
+        setOrderLimits(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        toast.error("Error getting Order Limits");
+        setOrderLimits([]);
+      });
+  };
+
   useEffect(() => {
     if (forecastTable.rows.length > 0 && suggestedTable.rows.length > 0) {
       const newSuggestedOrder =
         SuggestedOrderFunctions.calculateSuggestedQuantities(
           forecastTable.rows[forecastTable.rows.length - 1][1].value,
-          suggestedTable
+          suggestedTable,
+          orderLimits
         );
       setSuggestedTable({
         ...suggestedTable,
@@ -388,7 +407,7 @@ export default function SuggestedOrder() {
       title: "Suggested Order",
       subHeaders: [
         `Unit: ${selectedUnitName}`,
-        `Vendor: ${selectedVendorName}`,
+        `Vendor: ${selectedVendorName}`, 
         `Order Span: ${fromDate.toDateString()} - ${toDate.toDateString()}`,
       ],
       pageOrientation: "landscape",
@@ -582,7 +601,7 @@ export default function SuggestedOrder() {
             }),
           };
         });
-        setSuggestedTable({
+        setSuggestedTable({ 
           ...suggestedTable,
           rows: updatedRows,
         });
@@ -868,6 +887,11 @@ export default function SuggestedOrder() {
 
           <Styled.InventoryItemsContainer>
             <TreeTable
+              companyAndUnitData={{
+                companyID: companyID,
+                alignmentID: alignmentID,
+                unitID: selectedUnit,
+              }}
               data={suggestedTable.rows}
               setData={updateSuggestedTable}
               columnHeaders={suggestedTable.columnHeaders}
@@ -876,6 +900,9 @@ export default function SuggestedOrder() {
               headerTooltips={suggestedTable.headerTooltips}
               toolTipDirection={suggestedTable.toolTipDirection}
               onSearch={handleSearch}
+              orderLimits={orderLimits}
+              setOrderLimits={setOrderLimits}
+              columnWidths={suggestedTable.columnWidth}
             />
           </Styled.InventoryItemsContainer>
         </>
