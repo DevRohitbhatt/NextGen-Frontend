@@ -567,78 +567,51 @@ export default function SuggestedOrder() {
       case "DefaultSafetyFactor": {
         setDefaultSafetyFactorTable({
           ...defaultSafetyFactorTable,
-          rows: [
-            [
-              {
-                value: updatedValue,
-                cellType: "percent",
-                columnName: "Default Safety Factor",
-                handleOnChange: {},
-                isInput: true,
-              },
-            ],
-          ],
+          rows: defaultSafetyFactorTable.rows.map((r, index) =>
+            index === row
+              ? r.map((cell) =>
+                  cell.columnName === columnName
+                    ? {
+                        ...cell,
+                        value: updatedValue,
+                      }
+                    : cell
+                )
+              : r
+          ),
         });
-        const updatedRows = suggestedTable.rows.map((category) => {
-          return {
-            ...category,
-            suggestedOrderItem: category.suggestedOrderItem.map((item) => {
+        const updatedRows = suggestedTable.rows.map((category) => ({
+          ...category,
+          suggestedOrderItem: category.suggestedOrderItem.map((item) => ({
+            ...item,
+            vendorItems: item.vendorItems.map((vendorItem) => {
+              const safetyFactor = vendorItem.qsrItemID in saftyFactor
+                ? parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100
+                : updatedValue / 100;
+  
+              const suggestedQty = parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
+              const roundedQty = Math.round(suggestedQty * 100) / 100;
+              const orderQty = (roundedQty - vendorItem.onHandQty).toFixed(2);
+              const extendedPrice = (parseFloat(orderQty) * parseFloat(vendorItem.latestInvoicePrice)).toFixed(2);
+  
               return {
-                ...item,
-                vendorItems: item.vendorItems.map((vendorItem) => {
-                  if (vendorItem.qsrItemID in saftyFactor) {
-                    const safetyFactor =
-                      parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100;
-                    const suggestedQty =
-                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
-                    const roundedQty = Math.round(suggestedQty * 100) / 100;
-                    return {
-                      ...vendorItem,
-                      safetyFactor:
-                        vendorItem.qsrItemID in saftyFactor
-                          ? saftyFactor[vendorItem.qsrItemID]
-                          : updatedValue,
-                      suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
-                      orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (
-                        parseFloat(
-                          (roundedQty - vendorItem.onHandQty).toFixed(2)
-                        ) * parseFloat(vendorItem.latestInvoicePrice)
-                      ).toFixed(2),
-                    };
-                  } else {
-                    const safetyFactor = parseFloat(updatedValue) / 100;
-                    const suggestedQty =
-                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
-                    const roundedQty = Math.round(suggestedQty * 100) / 100;
-
-                    return {
-                      ...vendorItem,
-                      safetyFactor:
-                        vendorItem.qsrItemID in saftyFactor
-                          ? saftyFactor[vendorItem.qsrItemID]
-                          : updatedValue,
-                      suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
-                      orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (
-                        parseFloat(
-                          (roundedQty - vendorItem.onHandQty).toFixed(2)
-                        ) * parseFloat(vendorItem.latestInvoicePrice)
-                      ).toFixed(2),
-                    };
-                  }
-                }),
+                ...vendorItem,
+                safetyFactor: updatedValue,
+                suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
+                orderQty: orderQty,
+                extendedPrice: extendedPrice,
               };
             }),
-          };
-        });
+          })),
+        }));
+  
         setSuggestedTable({
           ...suggestedTable,
           rows: updatedRows,
         });
+  
         break;
       }
-
       case "Forecast": {
         const updatedForecastData =
           SuggestedOrderFunctions.handleForecastChange(
