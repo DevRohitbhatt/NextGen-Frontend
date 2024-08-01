@@ -51,8 +51,9 @@ const SuggestedOrderList = () => {
   const [selectedVendor, setSelectedVendor] = useState(0);
   const [selectedVendorName, setselectedVendorName] = useState("All Vendors");
   const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
-
-  const [selectedToDate, setSelectedToDate] = useState(new Date());
+  const [selectedToDate, setSelectedToDate] = useState(
+    new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+  );
   const [selectedFromDate, setSelectedFromDate] = useState(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   );
@@ -183,7 +184,7 @@ const SuggestedOrderList = () => {
     setIsLoading(true);
     fetchUnits(companyID, alignmentID, selectedUnit);
     fetchVendors(companyID);
-    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, selectedVendor, selectedFromDate, selectedToDate);
     setIsLoading(false);
   };
 
@@ -207,14 +208,14 @@ const SuggestedOrderList = () => {
       });
   };
 
-  const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID) => {
+  const fetchSuggestedOrders = (companyID, alignmentID, memberID, vendorID, fromDate, toDate) => {
     SuggestedOrderAPI.getOrderList(
       companyID,
       alignmentID,
       memberID,
       vendorID,
-      selectedFromDate.toISOString().split("T")[0],
-      selectedToDate.toISOString().split("T")[0]
+      fromDate.toISOString().split("T")[0],
+      toDate.toISOString().split("T")[0]
     )
       .then((data) => {
         data?.data?.map((x) => {
@@ -252,21 +253,21 @@ const SuggestedOrderList = () => {
     setselectedUnitName(unitName);
     setSelectedUnit(unitID);
     setUnitShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, unitID, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, unitID, selectedVendor, selectedFromDate, selectedToDate);
   };
 
   const handleVendorSelection = (vendorName, vendorID) => {
     setselectedVendorName(vendorName);
     setSelectedVendor(vendorID);
     setVendorShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, vendorID);
+    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, vendorID, selectedFromDate, selectedToDate);
   };
 
   const handleDateSelection = (from, to) => {
     setSelectedFromDate(from);
     setSelectedToDate(to);
     setShowDateModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, selectedVendor);
+    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, selectedVendor, from, to);
   };
 
   const handleFromDateChange = (fromDate) => {
