@@ -48,7 +48,58 @@ export const handleForecastChange = (
   return updatedForecastData;
 };
 
-export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, orderLimits) => { 
+export const updateDefaultSafetyFactor = (defaultSafetyFactorTable, setDefaultSafetyFactorTable, suggestedOrderData, setSuggestedOrderData, orderLimits, safetyFactor, forecastTotal) => {
+  const previousSafetyFactor = defaultSafetyFactorTable.rows[0][0].value;
+  const updatedDefaultSafetyFactorRows = defaultSafetyFactorTable.rows.map((row) => {
+    return row.map((cell) => {
+      if (cell.columnName === "Default Safety Factor") {
+        return { ...cell, value: safetyFactor };
+      }
+      return cell;
+    });
+  });
+  console.log("updatedDefaultSafetyFactorRows", updatedDefaultSafetyFactorRows);
+  setDefaultSafetyFactorTable({
+    ...defaultSafetyFactorTable,
+    rows: updatedDefaultSafetyFactorRows,
+  });
+
+  console.log('test', safetyFactor)
+
+  let updatedSuggestedOrderData = 
+    { 
+      rows: suggestedOrderData.rows.map((detail) => {
+      return {
+        ...detail,
+        suggestedOrderItem: detail.suggestedOrderItem.map((inventoryItem) => {
+          return {
+            ...inventoryItem,
+            vendorItems: inventoryItem.vendorItems.map((vendorItem) => {
+              if (vendorItem.safetyFactor === previousSafetyFactor) {
+                return {
+                  ...vendorItem,
+                  safetyFactor: safetyFactor,
+                }
+              }
+              return vendorItem;
+            }),
+          }
+        }),
+      }
+    })
+  };
+
+  updatedSuggestedOrderData = calculateSuggestedQuantities(forecastTotal, updatedSuggestedOrderData, orderLimits, true);
+
+  setSuggestedOrderData({
+    ...suggestedOrderData,
+    rows: updatedSuggestedOrderData,
+  });
+}
+
+
+export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, orderLimits, recalculate = false) => { 
+  console.log("in calculateSuggestedQuantities", suggestedOrderData);
   const updatedSuggestedOrderData = suggestedOrderData.rows.map((detail) => {
     return {
       name: detail.name,
@@ -57,7 +108,7 @@ export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, 
         return {
           ...inventoryItem,
           vendorItems: inventoryItem.vendorItems.map((vendorItem) => {
-            if (vendorItem.suggestedQty !== 0 || vendorItem.onHandQty !== 0 || vendorItem.orderQty !== 0) {
+            if ((vendorItem.suggestedQty !== 0 || vendorItem.onHandQty !== 0 || vendorItem.orderQty !== 0) && !recalculate) {
               var extendedPrice = calculateExtendedPrice(vendorItem.orderQty, vendorItem.latestInvoicePrice);
               return {
                 ...vendorItem,
@@ -69,9 +120,10 @@ export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, 
             var orderQty = vendorItem.orderQty;
             var extendedPrice = 0;
             if (inventoryItem.invItemAvgSalesYieldPerMainUOM > 0) {
+              console.log(forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM * vendorItem.mappingQuantityMultiplier);
               const qty = (
                 (forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM) * vendorItem.mappingQuantityMultiplier
-              ) * 1 + (vendorItem.safetyFactor / 100);
+              ) * (1 + vendorItem.safetyFactor / 100);
               suggestedQty = formatNumberTwoDecimals(qty);
             }
             orderQty = calculateOrderQty(suggestedQty, onHand, orderLimit);

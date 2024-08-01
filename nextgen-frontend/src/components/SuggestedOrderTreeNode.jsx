@@ -319,7 +319,7 @@ const TreeNode = ({
         item.qsrInventoryItemID ===
         inventoryItemID
     );
-    if (limits && limits.maxOrderQuantity && limits.minOrderQuantity) {
+    if (limits) {
       const max = limits.maxOrderQuantity * mappingQuantityMultiplier;
       const min = limits.minOrderQuantity * mappingQuantityMultiplier;
       if (

@@ -22,8 +22,11 @@ const CalendarModal = ({
   isDateRange,
   handleDateSelection,
 }) => {
+  const [initialFromDate, setInitialFromDate] = useState(selectedFromDate);
+  const [initialToDate, setInitialToDate] = useState(selectedToDate);
+  const [localFromDate, setLocalFromDate] = useState(selectedFromDate);
+  const [localToDate, setLocalToDate] = useState(selectedToDate);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [CalendarTable, setCalendarTable] = useState({
     columnHeaders: ["Period", "From", "To"],
@@ -34,8 +37,17 @@ const CalendarModal = ({
   });
 
   useEffect(() => {
+    if (modalOpen) {
+      setInitialFromDate(selectedFromDate);
+      setInitialToDate(selectedToDate);
+      setLocalFromDate(selectedFromDate);
+      setLocalToDate(selectedToDate);
+    }
+  }, [modalOpen, selectedFromDate, selectedToDate]);
+
+  useEffect(() => {
     buildCalendarTable(selectedYear);
-  }, []);
+  }, [selectedYear]);
 
   const buildCalendarTable = (year) => {
     const rows = [];
@@ -73,13 +85,13 @@ const CalendarModal = ({
     buildCalendarTable(newYear);
   };
 
-  const handleCloseModal = () => {
-    handleClose();
-  };
-
   const handleInputChange = (date) => {
-    setSelectedDate(date);
-    handleDateSelection(date, date);
+    if (isDateRange) {
+      setLocalFromDate(date);
+      setLocalToDate(date);
+    } else {
+      setLocalFromDate(date);
+    }
   };
 
   const toggleCalendar = () => {
@@ -88,8 +100,17 @@ const CalendarModal = ({
 
   const handleOkButtonClick = () => {
     if (isDateRange) {
-      handleDateSelection(selectedFromDate, selectedToDate);
+      handleDateSelection(localFromDate, localToDate);
+    } else {
+      handleDateSelection(localFromDate, localFromDate);
     }
+    handleClose();
+  };
+
+  const handleCloseModal = () => {
+    // Reset the dates to their initial values on cancel
+    setLocalFromDate(initialFromDate);
+    setLocalToDate(initialToDate);
     handleClose();
   };
 
@@ -97,9 +118,7 @@ const CalendarModal = ({
     <>
       {modalOpen && (
         <Styled.ModalDialog>
-          <Styled.ModalOverlay
-            $isDateRange={isDateRange}
-          >
+          <Styled.ModalOverlay $isDateRange={isDateRange}>
             <Styled.ModalContent className="modal-content">
               <ModalHeader>
                 {isDateRange ? (
@@ -112,14 +131,12 @@ const CalendarModal = ({
                 </Styled.CloseButton>
               </ModalHeader>
             </Styled.ModalContent>
-            <Styled.ModalBody
-              className={isDateRange ? "daterangeBody" : "dateBody"}
-            >
+            <Styled.ModalBody className={isDateRange ? "daterangeBody" : "dateBody"}>
               {!isDateRange ? (
                 <div className="SingleCalendar">
                   <Calendar
                     onChange={handleInputChange}
-                    value={selectedDate}
+                    value={localFromDate}
                     onClickDay={toggleCalendar}
                   />
                 </div>
@@ -129,15 +146,15 @@ const CalendarModal = ({
                     <div className="fromdiv">
                       <Styled.Label>From:</Styled.Label>
                       <CalendarFromSelector
-                        handleDateChange={handleFromDateChange}
-                        selectedFromDate={selectedFromDate}
+                        handleDateChange={(date) => setLocalFromDate(date)}
+                        selectedFromDate={localFromDate}
                       />
                     </div>
                     <div className="Todiv">
                       <Styled.Label>To:</Styled.Label>
                       <CalendarToSelector
-                        handleDateChange={handleToDateChange}
-                        selectedToDate={selectedToDate}
+                        handleDateChange={(date) => setLocalToDate(date)}
+                        selectedToDate={localToDate}
                       />
                     </div>
                     <div className="yeardiv">
@@ -166,7 +183,7 @@ const CalendarModal = ({
               <Styled.FooterButton onClick={handleOkButtonClick}>
                 Ok
               </Styled.FooterButton>
-              <Styled.FooterButton onClick={handleClose}>
+              <Styled.FooterButton onClick={handleCloseModal}>
                 Cancel
               </Styled.FooterButton>
             </Styled.ModalFooter>
@@ -181,7 +198,6 @@ CalendarModal.propTypes = {
   handleClose: PropTypes.func,
   selectedFromDate: PropTypes.instanceOf(Date),
   selectedToDate: PropTypes.instanceOf(Date),
-  selectedYear: PropTypes.number,
   handleFromDateChange: PropTypes.func,
   handleToDateChange: PropTypes.func,
   modalOpen: PropTypes.bool,

@@ -79,7 +79,7 @@ const DateRangePicker = ({ selectedDates, onDateChange, title }) => {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  }, [dates, selectedDates]);
 
   const handleClickOutside = (event) => {
     if (
@@ -108,6 +108,7 @@ const DateRangePicker = ({ selectedDates, onDateChange, title }) => {
                 handleDateChange(1, activeStartDate)
               }
               onClickMonth={() => textBoxRef.current.focus()}
+              minDate={today} // Set the minimum date to today
             />
           </div>
         )}

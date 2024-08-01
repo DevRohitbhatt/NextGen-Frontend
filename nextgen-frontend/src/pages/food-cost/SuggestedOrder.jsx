@@ -39,7 +39,8 @@ const toolTipSuggestedQty =
   "(Order Span Forecasted Sales total / 4 week rolling average item dollar yield) * Safety Factor. The Suggested QTY value requires at least one instance of item usage.";
 const toolTipOnHand =
   "Physical count of product on hand when creating your order. The On Hand value entered is deducted from the Suggested QTY to calculate the Order Amount.";
-const toolTipOrderLimits = "You can set a MINIMUM and MAXIMUM order limit amounts by item to aid in determining proper order levels. Any order limit amount set will carry forward to your next Suggested Order. Order limit amounts will be flagged, but editable.";
+const toolTipOrderLimits =
+  "You can set a MINIMUM and MAXIMUM order limit amounts by item to aid in determining proper order levels. Any order limit amount set will carry forward to your next Suggested Order. Order limit amounts will be flagged, but editable.";
 const toolTipOrderAmount =
   "The amount of product to order from your vendor. Suggested Qty - On Hand. The Order Amount is rounded to nearest whole value to avoid fractional order amounts submitted to your vendor.";
 const toolTipExtendedPrice = "Order Amount * Current/Last Price.";
@@ -565,80 +566,18 @@ export default function SuggestedOrder() {
 
     switch (tableName) {
       case "DefaultSafetyFactor": {
-        setDefaultSafetyFactorTable({
-          ...defaultSafetyFactorTable,
-          rows: [
-            [
-              {
-                value: updatedValue,
-                cellType: "percent",
-                columnName: "Default Safety Factor",
-                handleOnChange: {},
-                isInput: true,
-              },
-            ],
-          ],
-        });
-        const updatedRows = suggestedTable.rows.map((category) => {
-          return {
-            ...category,
-            suggestedOrderItem: category.suggestedOrderItem.map((item) => {
-              return {
-                ...item,
-                vendorItems: item.vendorItems.map((vendorItem) => {
-                  if (vendorItem.qsrItemID in saftyFactor) {
-                    const safetyFactor =
-                      parseFloat(saftyFactor[vendorItem.qsrItemID]) / 100;
-                    const suggestedQty =
-                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
-                    const roundedQty = Math.round(suggestedQty * 100) / 100;
-                    return {
-                      ...vendorItem,
-                      safetyFactor:
-                        vendorItem.qsrItemID in saftyFactor
-                          ? saftyFactor[vendorItem.qsrItemID]
-                          : updatedValue,
-                      suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
-                      orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (
-                        parseFloat(
-                          (roundedQty - vendorItem.onHandQty).toFixed(2)
-                        ) * parseFloat(vendorItem.latestInvoicePrice)
-                      ).toFixed(2),
-                    };
-                  } else {
-                    const safetyFactor = parseFloat(updatedValue) / 100;
-                    const suggestedQty =
-                      parseFloat(vendorItem.suggestedQty) * (1 + safetyFactor);
-                    const roundedQty = Math.round(suggestedQty * 100) / 100;
+        SuggestedOrderFunctions.updateDefaultSafetyFactor(
+          defaultSafetyFactorTable,
+          setDefaultSafetyFactorTable,
+          suggestedTable,
+          setSuggestedTable,
+          orderLimits,
+          updatedValue,
+          forecastTable.rows[forecastTable.rows.length - 1][1].value
+        );
 
-                    return {
-                      ...vendorItem,
-                      safetyFactor:
-                        vendorItem.qsrItemID in saftyFactor
-                          ? saftyFactor[vendorItem.qsrItemID]
-                          : updatedValue,
-                      suggestedQty: isNaN(roundedQty) ? 0 : roundedQty,
-                      orderQty: (roundedQty - vendorItem.onHandQty).toFixed(2),
-                      extendedPrice: (
-                        parseFloat(
-                          (roundedQty - vendorItem.onHandQty).toFixed(2)
-                        ) * parseFloat(vendorItem.latestInvoicePrice)
-                      ).toFixed(2),
-                    };
-                  }
-                }),
-              };
-            }),
-          };
-        });
-        setSuggestedTable({
-          ...suggestedTable,
-          rows: updatedRows,
-        });
         break;
       }
-
       case "Forecast": {
         const updatedForecastData =
           SuggestedOrderFunctions.handleForecastChange(
