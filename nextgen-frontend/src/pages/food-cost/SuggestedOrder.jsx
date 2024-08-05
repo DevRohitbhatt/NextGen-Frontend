@@ -310,7 +310,8 @@ export default function SuggestedOrder() {
         SuggestedOrderFunctions.calculateSuggestedQuantities(
           forecastTable.rows[forecastTable.rows.length - 1][1].value,
           suggestedTable,
-          orderLimits
+          orderLimits,
+          true
         );
       setSuggestedTable({
         ...suggestedTable,
