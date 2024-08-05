@@ -3,10 +3,10 @@ import { defineCancelApiObject } from "../configs/axiosUtils.jsx";
 import order from "../../tempData/OrderData.json";
 
 export const SuggestedOrderAPI = {
-  getOrderItem: async function (companyID,unitID,vendorId,orderFromDate,orderToDate,suggestedOrderId,cancel = false) {
+  getOrderItem: async function (companyID,unitID,vendorId,orderFromDate,orderToDate,suggestedOrderId,purchaseHistoryDaysBack=null,cancel = false) {
     const response = await api.request({
       method: "GET",
-      url: `/api/suggestedorder/getvendorinventoryitems?companyId=${companyID}&unitId=${unitID}&vendorId=${vendorId}&orderFromDate=${orderFromDate}&orderToDate=${orderToDate}&suggestedOrderId=${suggestedOrderId}`,
+      url: `/api/suggestedorder/getvendorinventoryitems?companyId=${companyID}&unitId=${unitID}&vendorId=${vendorId}&orderFromDate=${orderFromDate}&orderToDate=${orderToDate}&suggestedOrderId=${suggestedOrderId}&${purchaseHistoryDaysBack ? `purchaseHistoryDaysBack=${purchaseHistoryDaysBack}` : ""}`,
       companyID,
       unitID,
       vendorId,

@@ -29,7 +29,7 @@ function SearchBar({ list, onSearch }) {
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value);
-    onSearch(event.target.value);
+    // onSearch(event.target.value);
     if (event.target.value === "") {
       setPlaceholder("");
     } else {

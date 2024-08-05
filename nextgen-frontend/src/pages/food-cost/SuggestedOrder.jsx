@@ -18,6 +18,10 @@ import { toast } from "react-toastify";
 import SubmitPurchaseOrderModal from "../../components/SubmitPurchaseOrderModal.jsx";
 import { Steps } from "intro.js-react";
 import SuggestedOrderIntro from "../../assets/introJSSteps/SuggestedOrderIntro.jsx";
+import TableModal from "../../components/TableModal.jsx";
+import Modal from "../../components/Modal.jsx";
+import TableComponent from "../../components/SimpleTable.jsx";
+import SearchBar from "../../components/SearchBar.jsx";
 
 const toolTipForecastedDate = "Forecasted Sales dates selected for this order";
 const toolTipForecastedAmt =
@@ -152,14 +156,12 @@ export default function SuggestedOrder() {
   const [unitsList, setUnitsList] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(unit);
   const [selectedUnitName, setSelectedUnitName] = useState(unitName);
-  const [vendorsList, setVendorsList] = useState([]);
   const [selectedVendorName, setSelectedVendorName] = useState(vendorName);
   const [selectedVendor, setSelectedVendor] = useState(vendorID);
   const [showModal, setShowModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [companyID, setCompanyID] = useState(company);
   const [alignmentID, setAlignmentID] = useState(null);
-  const [groupOrUnitAccess, setGroupOrUnitAccess] = useState(groupOrUnit);
   const [selectedDates, setSelectedDates] = useState([new Date(), new Date()]);
   const [fromDate, setFromDate] = useState(dates[0]);
   const [toDate, setToDate] = useState(dates[1]);
@@ -167,15 +169,10 @@ export default function SuggestedOrder() {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [suggestedOrderID, setSuggestedOrderID] = useState(orderID || 0);
-  const [suggestedOrder, setsuggestedOrder] = useState({});
   const [suggestedTable, setSuggestedTable] = useState({
     ...suggestedTableStructure,
   });
   const [orderLimits, setOrderLimits] = useState([]);
-  const [filteredSuggestedTable, setFilteredSuggestedTable] = useState({
-    ...suggestedTableStructure,
-  });
-  const [isVisible, setVisible] = useState(false);
   const [saveIsVisible, setSaveIsVisible] = useState(false);
   const [submitIsVisible, setSubmitIsVisible] = useState(false);
   const [userID, setUserID] = useState(user);
@@ -190,6 +187,22 @@ export default function SuggestedOrder() {
     headerTooltips: [toolTipForecastedDate, toolTipForecastedAmt, ""],
     toolTipDirection: [right, right, ""],
   });
+  const [addItemModal, setAddItemModal] = useState({
+    isOpen: false,
+    title: "Add a new item",
+    tableHeaders: [
+      { key: "departmentSubdepartment", label: "Department/SubDepartment" },
+      { key: "qsrInventoryItemID", label: "Inventory Item ID" },
+      { key: "invItemDescription", label: "Inventory Description" },
+      {
+        key: "vendorItemDescription",
+        label: "Item Description",
+        cellType: "dropdown",
+      },
+    ],
+    onRowClick: () => {},
+  });
+  const [addItemModalData, setAddItemModalData] = useState([]);
 
   const [saftyFactor, setSaftyFactor] = useState({});
   const toastId = useRef(null);
@@ -219,6 +232,14 @@ export default function SuggestedOrder() {
     setSelectedDates(dates);
     if (unit && vendorID && vendorName && dates) {
       getOrderItem(
+        companyID,
+        unit,
+        selectedVendor,
+        dates[0],
+        dates[1],
+        suggestedOrderID
+      );
+      fillAddItemModalTable(
         companyID,
         unit,
         selectedVendor,
@@ -269,6 +290,7 @@ export default function SuggestedOrder() {
           ...suggestedTable,
           rows: response.data.suggestedOrderDetails,
         });
+        //ToDo move this logic to use kalens new enpoint call
         setDefaultSafetyFactorTable({
           ...defaultSafetyFactorTable,
           rows: [
@@ -292,6 +314,173 @@ export default function SuggestedOrder() {
       });
   };
 
+  const fillAddItemModalTable = (companyID, unitID, vendorID, fromDate, toDate ) => {
+    SuggestedOrderAPI.getOrderItem(
+      companyID,
+      unitID,
+      vendorID,
+      formatDate(fromDate),
+      formatDate(toDate),
+      0,
+      -1
+    )
+      .then((response) => {
+        console.log("add Items", response.data);
+        const itemData = response.data.suggestedOrderDetails.flatMap((node) => {
+          const department = node.name;
+          return node.suggestedOrderItem.map((item) => {
+            return {
+              departmentSubdepartment: department,
+              qsrInventoryItemID: item.qsrInventoryItemID,
+              invItemDescription: item.invItemDescription,
+              vendorItemDescription: {
+                options: item.vendorItems.map((inventoryItem) => ({
+                  value: inventoryItem.description,
+                  isSelected: inventoryItem.isSelected,
+                })),
+                onChange: (e, row) => {
+                  updateVendorItemDescription(e, row);
+                },
+              },
+              department: item.department,
+              subDepartment: item.subDepartment,
+              equivalentToQSRInventoryItemID:
+                item.equivalentToQSRInventoryItemID,
+              equivalentCaseFactor: item.equivalentCaseFactor,
+              invItemAvgSalesYieldPerMainUOM:
+                item.invItemAvgSalesYieldPerMainUOM,
+              invItemEstUsageQuantity: item.invItemEstUsageQuantity,
+              invItemOnHandQuantity: item.invItemOnHandQuantity,
+              invItemMainUOM: item.invItemMainUOM,
+              vendorItems: item.vendorItems,
+            };
+          });
+        });
+        console.log(itemData);
+        if (!itemData || itemData.length === 0) {
+          return;
+        }
+        setAddItemModalData(itemData);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        toast.error("Error getting all Inventory Items");
+        setAddItemModalData([]);
+      });
+  };
+
+  // useEffect(() => {
+  //   if (suggestedTable.rows.length > 0  && addItemModalData.length > 0) {
+  //     const updatedAddItemModalData = disableAddItemsThatAreAlreadySelected(addItemModalData);
+  //     setAddItemModalData(updatedAddItemModalData);
+  //   }
+  // }, [suggestedTable, addItemModalData]);
+
+  const disableAddItemsThatAreAlreadySelected = (addModalData) => {
+    const lookUpTable = new Map(suggestedTable.rows.flatMap((node) => {
+      return node.suggestedOrderItem.map((item) => {
+        return [item.qsrInventoryItemID, item];
+      });
+    }));
+
+    const updatedModalData = addModalData.map((item) => {
+      if (lookUpTable.has(item.qsrInventoryItemID)) {
+        return {
+          ...item,
+          disabled: true,
+        };
+      } else {
+        return {
+          ...item,
+          disabled: false,
+        };
+      }
+    });
+    console.log(updatedModalData);
+
+    return updatedModalData;
+  };
+
+  const updateVendorItemDescription = (e, row) => {
+    console.log(addItemModalData);
+
+    if (!addItemModalData || addItemModalData.length === 0) {
+      return;
+    }
+
+    setAddItemModalData((prev) =>
+      prev.map((item) =>
+        item.qsrInventoryItemID === row.qsrInventoryItemID
+          ? {
+              ...item,
+              vendorItemDescription: {
+                options: item.vendorItemDescription.options.map((option) =>
+                  option.value === e.target.value
+                    ? { value: option.value, isSelected: true }
+                    : { value: option.value, isSelected: false }
+                ),
+              },
+            }
+          : item
+      )
+    );
+  };
+
+  const onAddItemModalRowClick = (row) => {
+    console.log(row);
+    setAddItemModalData((prev) =>
+      prev.map((item) =>
+        item.qsrInventoryItemID === row.qsrInventoryItemID
+          ? {
+              ...item,
+              isActive: item?.isActive && !item?.disabled ? !item.isActive : true,
+            }
+          : {
+              ...item,
+              isActive: false,
+            }
+      )
+    );
+  };
+
+  const checkIfItemMatchesSearch = (searchValue, item) => {
+    console.log(item);
+    let match = false;
+    item.vendorItems.forEach((vendorItem) => {
+      if (
+        vendorItem.description.toLowerCase().includes(searchValue.toLowerCase())
+      ) {
+        match = true;
+      }
+    });
+    item.invItemDescription.toLowerCase().includes(searchValue.toLowerCase()) &&
+      (match = true);
+    return match;
+  };
+
+  const handleAddItemSearch = (searchValue) => {
+    console.log(searchValue);
+    console.log(addItemModalData);
+    setAddItemModalData((prev) =>
+      prev.map((item) => {
+        return {
+          ...item,
+          display: checkIfItemMatchesSearch(searchValue, item),
+        };
+      })
+    );
+  };
+
+  const showAddItemModal = () => {
+    console.log(addItemModal);
+    setAddItemModal((prev) => ({ ...prev, isOpen: true }));
+  };
+
+  const closeAddItemModal = () => {
+    console.log(addItemModalData);
+    setAddItemModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
   const getOrderLimits = (companyID, unitID) => {
     InventoryItemsAPI.getInventoryItemsOrderLimits(companyID, unitID)
       .then((response) => {
@@ -305,12 +494,14 @@ export default function SuggestedOrder() {
   };
 
   useEffect(() => {
+    console.log("test");
     if (forecastTable.rows.length > 0 && suggestedTable.rows.length > 0) {
       const newSuggestedOrder =
         SuggestedOrderFunctions.calculateSuggestedQuantities(
           forecastTable.rows[forecastTable.rows.length - 1][1].value,
           suggestedTable,
-          orderLimits
+          orderLimits,
+          true
         );
       setSuggestedTable({
         ...suggestedTable,
@@ -890,8 +1081,22 @@ export default function SuggestedOrder() {
               orderLimits={orderLimits}
               setOrderLimits={setOrderLimits}
               columnWidths={suggestedTable.columnWidth}
+              handleAddNewItem={showAddItemModal}
             />
           </Styled.InventoryItemsContainer>
+          <Modal
+            isOpen={addItemModal.isOpen}
+            onClose={closeAddItemModal}
+            title={addItemModal.title}
+          >
+            <SearchBar onSearch={handleAddItemSearch} />
+            <TableComponent
+              data={addItemModalData}
+              headers={addItemModal.tableHeaders}
+              onRowClick={onAddItemModalRowClick}
+              isPaginated={false}
+            />
+          </Modal>
         </>
       )}
     </Styled.PageContainer>

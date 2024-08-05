@@ -62,10 +62,41 @@ DateCell.propTypes = {
   value: PropTypes.number.isRequired
 };
 
+const DropdownCell = ({
+  cellIndex,
+  value,
+  row
+}) => {
+
+  const options = value.options;
+  const selected = options.find((option) => option.isSelected).value;
+
+  // Create a wrapped onChange function that captures the row parameter
+  const handleChange = (e) => {
+    if (value.onChange) {
+      value.onChange(e, row);
+    }
+  };
+
+  return (
+    <TableCell key={cellIndex}>
+      <select defaultValue={selected} onChange={handleChange} onClick={(e) => { e.stopPropagation(); }}>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.value}
+          </option>
+        ))}
+      </select>
+    </TableCell>
+  );
+};
+
+
 export default function Cell({
   cellIndex,
   value,
-  cellType
+  cellType,
+  row
 }) {
   if (cellType === "dateTime") {
     return DateTimeCell({
@@ -76,6 +107,12 @@ export default function Cell({
     return DateCell({
       cellIndex,
       value
+    });
+  } else if (cellType === "dropdown") {
+    return DropdownCell({
+      cellIndex,
+      value,
+      row
     });
   } else return <TableCell key={cellIndex}>{value}</TableCell>;
 }

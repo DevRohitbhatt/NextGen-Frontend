@@ -161,6 +161,9 @@ const CollapseButton = styled.button`
     color: ${(props) => props.theme.white};
     background: ${(props) => props.theme.primary};
   }
+  &:focus {
+    outline: none;
+  }
 `;
 
 export default function TreeTable({
@@ -176,7 +179,8 @@ export default function TreeTable({
   onSearch,
   orderLimits,
   setOrderLimits,
-  columnWidths
+  columnWidths,
+  handleAddNewItem = null,
 }) {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [isCollapseActive, setIsCollapseActive] = useState(false);
@@ -252,6 +256,11 @@ export default function TreeTable({
           <CollapseButton isActive={isExpandActive} onClick={handleExpandAll}>
             Expand All <MdKeyboardArrowUp />
           </CollapseButton>
+          {handleAddNewItem === null ? null : (
+            <CollapseButton onClick={handleAddNewItem} isActive={true}>
+              Add New Item
+            </CollapseButton>
+          )}
         </ButtonContainer>
         { onSearch ? <SearchBar data={initialData} onSearch={handleSearch} /> : null }
       </ButtonAndSearchContainer>
