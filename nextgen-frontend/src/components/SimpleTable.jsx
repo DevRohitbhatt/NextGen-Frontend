@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from "prop-types";
 import Row from './SimpleTableRow';
@@ -50,12 +50,6 @@ const Table = styled.table`
 
   tbody {
     max-height: 50vh;
-
-    tr {
-      &:hover {
-        background-color: #f9f9f9;
-      }
-    }
   
   }
 `;
@@ -102,15 +96,23 @@ const PaginationInfo = styled.span`
   margin: 0 10px;
 `;
 
-const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 10, 20] }) => {
+const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 10, 20], isPaginated=true }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(itemsPerPageOptions[0]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [tableData, setTableData] = useState(data);
+
+  useEffect(() => {
+    if (!data || data.length === 0) {
+      return;
+    }
+    setTableData(data);
+  }, [data]);
 
   // Sort data based on the column header clicked
   const sortedData = () => {
     if (sortConfig.key) {
-      const sorted = [...data].sort((a, b) => {
+      const sorted = [...tableData].sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
@@ -121,7 +123,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
       });
       return sorted;
     }
-    return data;
+    return tableData;
   };
 
   // Handle column header click to change sorting
@@ -145,9 +147,9 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
   };
 
   // Calculate total pages
-  const totalPages = Math.ceil(data?.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, data?.length);
+  const totalPages = Math.ceil(tableData?.length / itemsPerPage);
+  const startIndex = isPaginated ? (currentPage - 1) * itemsPerPage : 0;
+  const endIndex = isPaginated ? Math.min(startIndex + itemsPerPage, tableData?.length) : tableData?.length;
 
   const handleRowClick = (selectedRow) => {
     onRowClick(selectedRow);
@@ -193,26 +195,28 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
           ))}
         </tbody>
       </Table>
-      <PagingContainer>
-        <PageButton onClick={() => handlePageChange(1)} disabled={currentPage === 1}>
-          First
-        </PageButton>
-        <PageButton onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-          Prev
-        </PageButton>
-        <PaginationInfo>Page {currentPage} of {totalPages}</PaginationInfo>
-        <PageButton onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-          Next
-        </PageButton>
-        <PageButton onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>
-          Last
-        </PageButton>
-        <PageSizeSelect value={itemsPerPage} onChange={handlePageSizeChange}>
-          {itemsPerPageOptions.map((option, index) => (
-            <option key={index} value={option}>{option} per page</option>
-          ))}
-        </PageSizeSelect>
-      </PagingContainer>
+      { !isPaginated ? null : (
+        <PagingContainer>
+          <PageButton onClick={() => handlePageChange(1)} disabled={currentPage === 1}>
+            First
+          </PageButton>
+          <PageButton onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+            Prev
+          </PageButton>
+          <PaginationInfo>Page {currentPage} of {totalPages}</PaginationInfo>
+          <PageButton onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+            Next
+          </PageButton>
+          <PageButton onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>
+            Last
+          </PageButton>
+          <PageSizeSelect value={itemsPerPage} onChange={handlePageSizeChange}>
+            {itemsPerPageOptions.map((option, index) => (
+              <option key={index} value={option}>{option} per page</option>
+            ))}
+          </PageSizeSelect>
+        </PagingContainer>
+      )}
     </TableWrapper>
   );
 };

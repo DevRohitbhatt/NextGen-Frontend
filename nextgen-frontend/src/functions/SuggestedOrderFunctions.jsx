@@ -58,13 +58,10 @@ export const updateDefaultSafetyFactor = (defaultSafetyFactorTable, setDefaultSa
       return cell;
     });
   });
-  console.log("updatedDefaultSafetyFactorRows", updatedDefaultSafetyFactorRows);
   setDefaultSafetyFactorTable({
     ...defaultSafetyFactorTable,
     rows: updatedDefaultSafetyFactorRows,
   });
-
-  console.log('test', safetyFactor)
 
   let updatedSuggestedOrderData = 
     { 
@@ -99,7 +96,6 @@ export const updateDefaultSafetyFactor = (defaultSafetyFactorTable, setDefaultSa
 
 
 export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, orderLimits, recalculate = false) => { 
-  console.log("in calculateSuggestedQuantities", suggestedOrderData);
   const updatedSuggestedOrderData = suggestedOrderData.rows.map((detail) => {
     return {
       name: detail.name,
@@ -120,7 +116,6 @@ export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, 
             var orderQty = vendorItem.orderQty;
             var extendedPrice = 0;
             if (inventoryItem.invItemAvgSalesYieldPerMainUOM > 0) {
-              console.log(forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM * vendorItem.mappingQuantityMultiplier);
               const qty = (
                 (forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM) * vendorItem.mappingQuantityMultiplier
               ) * (1 + vendorItem.safetyFactor / 100);

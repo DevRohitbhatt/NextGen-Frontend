@@ -80,6 +80,28 @@ export const InventoryItemsContainer = styled.div`
   margin-top: 27px;
 `;
 
+export const AddItemModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px;
+`;
 
+export const ModalFooter = styled.div`
+  display: flex;
+  justify-content: end;
+  margin: 20px;
+`;
 
+export const AddNewItemButton = styled.button`
+  all: unset;
+  padding: 10px 20px;
+  border-radius: 30px;
+  background-color: ${(props) => props.theme.primary};
+  color: #fff;
+  cursor: pointer;
 
+  &:hover {
+    background-color: ${(props) => props.theme.secondary};
+  }
+`;
