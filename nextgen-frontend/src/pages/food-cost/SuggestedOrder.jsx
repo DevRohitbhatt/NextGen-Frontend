@@ -18,7 +18,6 @@ import { toast } from "react-toastify";
 import SubmitPurchaseOrderModal from "../../components/SubmitPurchaseOrderModal.jsx";
 import { Steps } from "intro.js-react";
 import SuggestedOrderIntro from "../../assets/introJSSteps/SuggestedOrderIntro.jsx";
-import TableModal from "../../components/TableModal.jsx";
 import Modal from "../../components/Modal.jsx";
 import TableComponent from "../../components/SimpleTable.jsx";
 import SearchBar from "../../components/SearchBar.jsx";
