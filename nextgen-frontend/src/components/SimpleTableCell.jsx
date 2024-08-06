@@ -6,6 +6,30 @@ const TableCell = styled.td`
   padding: 8px;
 `;
 
+const Select = styled.select`
+  all: unset;
+  padding: 8px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 5px;
+
+  option {
+    background-color: white;
+    color: black;
+  }
+
+  &:hover {
+    background-color: ${(props) => props.theme.secondary};
+    color: white;
+  }
+
+  &:focus {
+    background-color: ${(props) => props.theme.secondary};
+    color: white;
+  }
+`;
+
 const DateTimeCell = ({
   cellIndex,
   value
@@ -62,10 +86,41 @@ DateCell.propTypes = {
   value: PropTypes.number.isRequired
 };
 
+const DropdownCell = ({
+  cellIndex,
+  value,
+  row
+}) => {
+
+  const options = value.options;
+  const selected = options.find((option) => option.isSelected).value;
+
+  // Create a wrapped onChange function that captures the row parameter
+  const handleChange = (e) => {
+    if (value.onChange) {
+      value.onChange(e, row);
+    }
+  };
+
+  return (
+    <TableCell key={cellIndex}>
+      <Select defaultValue={selected} onChange={handleChange} onClick={(e) => { e.stopPropagation(); }}>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.value}
+          </option>
+        ))}
+      </Select>
+    </TableCell>
+  );
+};
+
+
 export default function Cell({
   cellIndex,
   value,
-  cellType
+  cellType,
+  row
 }) {
   if (cellType === "dateTime") {
     return DateTimeCell({
@@ -76,6 +131,12 @@ export default function Cell({
     return DateCell({
       cellIndex,
       value
+    });
+  } else if (cellType === "dropdown") {
+    return DropdownCell({
+      cellIndex,
+      value,
+      row
     });
   } else return <TableCell key={cellIndex}>{value}</TableCell>;
 }

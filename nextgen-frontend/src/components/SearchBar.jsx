@@ -29,7 +29,7 @@ function SearchBar({ list, onSearch }) {
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value);
-    onSearch(event.target.value);
+    // onSearch(event.target.value);
     if (event.target.value === "") {
       setPlaceholder("");
     } else {
@@ -44,6 +44,12 @@ function SearchBar({ list, onSearch }) {
       setPlaceholder("Search...");
     }
   };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      onSearch(event.target.value);
+    }
+  };
   
   return (
     <Input
@@ -53,6 +59,7 @@ function SearchBar({ list, onSearch }) {
       onChange={handleChange}
       onClick={handleChange}
       onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
     />
   );
 }
