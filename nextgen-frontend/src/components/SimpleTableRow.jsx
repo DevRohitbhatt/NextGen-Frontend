@@ -30,7 +30,7 @@ const ClickableRow = ({headers, item, onItemClick
   return (
     <>
       {display ? (
-        <TableRow onClick={handleRowClick} style={{ cursor: 'pointer' }} $isActive={item?.isActive || false} $isDisabled={item.disabled || false}>
+        <TableRow onClick={handleRowClick} style={{ cursor: 'pointer' }} $isActive={item?.isActive || false} $isDisabled={item.disabled || false} >
           {headers.map((header, cellIndex) => (
             <Cell
               key={cellIndex}

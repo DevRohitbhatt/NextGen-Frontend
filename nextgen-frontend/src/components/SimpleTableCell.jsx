@@ -6,6 +6,30 @@ const TableCell = styled.td`
   padding: 8px;
 `;
 
+const Select = styled.select`
+  all: unset;
+  padding: 8px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 5px;
+
+  option {
+    background-color: white;
+    color: black;
+  }
+
+  &:hover {
+    background-color: ${(props) => props.theme.secondary};
+    color: white;
+  }
+
+  &:focus {
+    background-color: ${(props) => props.theme.secondary};
+    color: white;
+  }
+`;
+
 const DateTimeCell = ({
   cellIndex,
   value
@@ -80,13 +104,13 @@ const DropdownCell = ({
 
   return (
     <TableCell key={cellIndex}>
-      <select defaultValue={selected} onChange={handleChange} onClick={(e) => { e.stopPropagation(); }}>
+      <Select defaultValue={selected} onChange={handleChange} onClick={(e) => { e.stopPropagation(); }}>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.value}
           </option>
         ))}
-      </select>
+      </Select>
     </TableCell>
   );
 };

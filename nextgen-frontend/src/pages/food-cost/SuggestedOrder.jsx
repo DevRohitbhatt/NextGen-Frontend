@@ -190,6 +190,8 @@ export default function SuggestedOrder() {
   const [addItemModal, setAddItemModal] = useState({
     isOpen: false,
     title: "Add a new item",
+    isSuggestedTableLoaded: false,
+    isAddItemModalDataLoaded: false,
     tableHeaders: [
       { key: "departmentSubdepartment", label: "Department/SubDepartment" },
       { key: "qsrInventoryItemID", label: "Inventory Item ID" },
@@ -286,11 +288,11 @@ export default function SuggestedOrder() {
         }
         buildForecastTable(response.data.forecastedData);
         setSaveSubmitStatus(response.data.suggestedOrderID);
+        setSuggestedOrderID(response.data.suggestedOrderID);
         setSuggestedTable({
           ...suggestedTable,
           rows: response.data.suggestedOrderDetails,
         });
-        //ToDo move this logic to use kalens new enpoint call
         setDefaultSafetyFactorTable({
           ...defaultSafetyFactorTable,
           rows: [
@@ -306,6 +308,10 @@ export default function SuggestedOrder() {
           ],
         });
         setIsLoading(false);
+        setAddItemModal((prev) => ({
+          ...prev,
+          isSuggestedTableLoaded: true,
+        }));
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -325,7 +331,6 @@ export default function SuggestedOrder() {
       -1
     )
       .then((response) => {
-        console.log("add Items", response.data);
         const itemData = response.data.suggestedOrderDetails.flatMap((node) => {
           const department = node.name;
           return node.suggestedOrderItem.map((item) => {
@@ -356,11 +361,14 @@ export default function SuggestedOrder() {
             };
           });
         });
-        console.log(itemData);
         if (!itemData || itemData.length === 0) {
           return;
         }
         setAddItemModalData(itemData);
+        setAddItemModal((prev) => ({
+          ...prev,
+          isAddItemModalDataLoaded: true,
+        }));
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -369,12 +377,12 @@ export default function SuggestedOrder() {
       });
   };
 
-  // useEffect(() => {
-  //   if (suggestedTable.rows.length > 0  && addItemModalData.length > 0) {
-  //     const updatedAddItemModalData = disableAddItemsThatAreAlreadySelected(addItemModalData);
-  //     setAddItemModalData(updatedAddItemModalData);
-  //   }
-  // }, [suggestedTable, addItemModalData]);
+  useEffect(() => {
+    if (addItemModal.isAddItemModalDataLoaded && addItemModal.isSuggestedTableLoaded) {
+      const updatedAddItemModalData = disableAddItemsThatAreAlreadySelected(addItemModalData);
+      setAddItemModalData(updatedAddItemModalData);
+    }
+  }, [addItemModal, suggestedTable.rows]);
 
   const disableAddItemsThatAreAlreadySelected = (addModalData) => {
     const lookUpTable = new Map(suggestedTable.rows.flatMap((node) => {
@@ -388,22 +396,21 @@ export default function SuggestedOrder() {
         return {
           ...item,
           disabled: true,
+          tooltip: "This Item is already on your order"
         };
       } else {
         return {
           ...item,
           disabled: false,
+          tooltip: ""
         };
       }
     });
-    console.log(updatedModalData);
 
     return updatedModalData;
   };
 
   const updateVendorItemDescription = (e, row) => {
-    console.log(addItemModalData);
-
     if (!addItemModalData || addItemModalData.length === 0) {
       return;
     }
@@ -427,24 +434,93 @@ export default function SuggestedOrder() {
   };
 
   const onAddItemModalRowClick = (row) => {
-    console.log(row);
     setAddItemModalData((prev) =>
-      prev.map((item) =>
-        item.qsrInventoryItemID === row.qsrInventoryItemID
-          ? {
+      prev.map((item) => {
+        if (item.qsrInventoryItemID === row.qsrInventoryItemID) {
+          if (item.disabled) {
+            toast.error("This item is already on your order");
+          }
+          return {
               ...item,
               isActive: item?.isActive && !item?.disabled ? !item.isActive : true,
             }
-          : {
+          } else {
+            return {
               ...item,
               isActive: false,
             }
+          }
+        }
       )
     );
   };
 
+  const handleAddNewItem = () => {
+    const itemToAdd = addItemModalData.find((item) => item.isActive);
+  
+    if (!itemToAdd) {
+      toast.error("Please select an item to add");
+      return;
+    }
+  
+    setSuggestedTable((prev) => {
+      const newRows = [...prev.rows];
+      let nodeIndex = newRows.findIndex((node) => node.name === itemToAdd.departmentSubdepartment);
+  
+      if (nodeIndex !== -1) {
+        newRows[nodeIndex] = {
+          ...newRows[nodeIndex],
+          suggestedOrderItem: [
+            ...newRows[nodeIndex].suggestedOrderItem,
+            {
+              department: itemToAdd.department,
+              subDepartment: itemToAdd.subDepartment,
+              qsrInventoryItemID: itemToAdd.qsrInventoryItemID,
+              invItemDescription: itemToAdd.invItemDescription,
+              vendorItems: itemToAdd.vendorItems,
+              equivalentToQSRInventoryItemID: itemToAdd.equivalentToQSRInventoryItemID,
+              equivalentCaseFactor: itemToAdd.equivalentCaseFactor,
+              invItemAvgSalesYieldPerMainUOM: itemToAdd.invItemAvgSalesYieldPerMainUOM,
+              invItemEstUsageQuantity: itemToAdd.invItemEstUsageQuantity,
+              invItemOnHandQuantity: itemToAdd.invItemOnHandQuantity,
+              invItemMainUOM: itemToAdd.invItemMainUOM,
+            },
+          ],
+        };
+      } else {
+        newRows.push({
+          name: itemToAdd.departmentSubdepartment,
+          suggestedOrderItem: [
+            {
+              qsrInventoryItemID: itemToAdd.qsrInventoryItemID,
+              invItemDescription: itemToAdd.invItemDescription,
+              vendorItems: itemToAdd.vendorItems,
+              department: itemToAdd.department,
+              subDepartment: itemToAdd.subDepartment,
+              equivalentToQSRInventoryItemID: itemToAdd.equivalentToQSRInventoryItemID,
+              equivalentCaseFactor: itemToAdd.equivalentCaseFactor,
+              invItemAvgSalesYieldPerMainUOM: itemToAdd.invItemAvgSalesYieldPerMainUOM,
+              invItemEstUsageQuantity: itemToAdd.invItemEstUsageQuantity,
+              invItemOnHandQuantity: itemToAdd.invItemOnHandQuantity,
+              invItemMainUOM: itemToAdd.invItemMainUOM,
+            },
+          ],
+        });
+      }
+  
+      return {
+        ...prev,
+        rows: newRows,
+      };
+    });
+    setAddItemModal((prev) => ({
+      ...prev,
+      isOpen: false,
+    }));
+  };
+  
+
   const checkIfItemMatchesSearch = (searchValue, item) => {
-    console.log(item);
     let match = false;
     item.vendorItems.forEach((vendorItem) => {
       if (
@@ -850,7 +926,7 @@ export default function SuggestedOrder() {
 
   function handleSave() {
     const Data = {
-      suggestedOrderID: 0,
+      suggestedOrderID: suggestedOrderID,
       purchaseOrderID: 0,
       companyID: companyID,
       unitID: selectedUnit,
@@ -1089,13 +1165,21 @@ export default function SuggestedOrder() {
             onClose={closeAddItemModal}
             title={addItemModal.title}
           >
-            <SearchBar onSearch={handleAddItemSearch} />
+            <Styled.AddItemModalHeader>
+              <h3>Select an item from the list below</h3>
+              <SearchBar onSearch={handleAddItemSearch} />
+            </Styled.AddItemModalHeader>
             <TableComponent
               data={addItemModalData}
               headers={addItemModal.tableHeaders}
               onRowClick={onAddItemModalRowClick}
               isPaginated={false}
             />
+            <Styled.ModalFooter>
+              <Styled.AddNewItemButton onClick={handleAddNewItem}>
+                Add Item 
+              </Styled.AddNewItemButton>
+            </Styled.ModalFooter>
           </Modal>
         </>
       )}
