@@ -4,7 +4,7 @@ import styled,{css} from "styled-components";
 
 const TableCell = styled.div`
   position: relative;
-  font-size: 14px;
+  font-size: 1em;
   justify-content: ${(props) =>
     props.columntype === "number" ? "center" : "left"};
   border-bottom: 1px solid ${(props) => props.theme.lightGrey};

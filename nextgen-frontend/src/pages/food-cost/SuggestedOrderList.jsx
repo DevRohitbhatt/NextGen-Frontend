@@ -267,16 +267,20 @@ const SuggestedOrderList = () => {
   };
 
   const filterSuggestedOrders = (vendorList) => {
+    console.log(vendorList);
     if (vendorList.length === 0) {
       setFilteredOrders(suggestedOrders);
       return;
     }
 
     const vendorListLookup = vendorList.map((vendor) => vendor.id);
+    console.log(vendorListLookup);
+    console.log(suggestedOrders);
     let filteredOrders = suggestedOrders.data.filter((order) => {
       return vendorListLookup.includes(order.vendorID);
     });
-    setFilteredOrders((Prev) => ({ ...Prev, data: filteredOrders }));
+    console.log(filteredOrders);
+    setFilteredOrders({ data: filteredOrders });
   };
 
   const handleDateSelection = (from, to) => {
@@ -326,7 +330,7 @@ const SuggestedOrderList = () => {
   };
 
   const handlePDFClick = () => {
-    if (!suggestedOrders.data.length) return;
+    if (!filteredOrders.data.length) return;
     const vendorName =
       selectedVendor === 0 ? "All Vendors" : selectedVendorName;
     const pdfData = {
@@ -372,7 +376,7 @@ const SuggestedOrderList = () => {
               "Order Status",
               "Order Span",
             ],
-            rows: suggestedOrders.data.map((row) => [
+            rows: filteredOrders.data.map((row) => [
               { value: row.unitName, cellType: "", columnName: "Unit Name" },
               {
                 value: row.vendorName,
@@ -407,7 +411,7 @@ const SuggestedOrderList = () => {
   };
 
   const handleCSVClick = () => {
-    if (!suggestedOrders.data.length) return;
+    if (!filteredOrders.data.length) return;
 
     const headers = [
       "Unit Name",
@@ -419,7 +423,7 @@ const SuggestedOrderList = () => {
       "Order Status",
       "Order Span",
     ];
-    const csvData = suggestedOrders.data.map((row) =>
+    const csvData = filteredOrders.data.map((row) =>
       [
         row.unitName,
         row.vendorName,

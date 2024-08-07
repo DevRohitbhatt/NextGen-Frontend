@@ -534,8 +534,6 @@ export default function SuggestedOrder() {
   };
 
   const handleAddItemSearch = (searchValue) => {
-    console.log(searchValue);
-    console.log(addItemModalData);
     setAddItemModalData((prev) =>
       prev.map((item) => {
         return {
@@ -547,12 +545,10 @@ export default function SuggestedOrder() {
   };
 
   const showAddItemModal = () => {
-    console.log(addItemModal);
     setAddItemModal((prev) => ({ ...prev, isOpen: true }));
   };
 
   const closeAddItemModal = () => {
-    console.log(addItemModalData);
     setAddItemModal((prev) => ({ ...prev, isOpen: false }));
   };
 
@@ -569,7 +565,6 @@ export default function SuggestedOrder() {
   };
 
   useEffect(() => {
-    console.log("test");
     if (forecastTable.rows.length > 0 && suggestedTable.rows.length > 0) {
       const newSuggestedOrder =
         SuggestedOrderFunctions.calculateSuggestedQuantities(

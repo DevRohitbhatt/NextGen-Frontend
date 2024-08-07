@@ -103,7 +103,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
   const [tableData, setTableData] = useState(data);
 
   useEffect(() => {
-    if (!data || data.length === 0) {
+    if (!data) {
       return;
     }
     setTableData(data);

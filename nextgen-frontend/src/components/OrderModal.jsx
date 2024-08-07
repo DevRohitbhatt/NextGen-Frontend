@@ -142,6 +142,7 @@ const LeftSection = styled.div`
   font-size: 12px;
 `;
 const Titles = styled.span`
+  display: flex;
   font-weight: bold;
   width: 50%;
   font-weight: 700;
@@ -315,8 +316,8 @@ const OrderModal = ({
                 </Rows>
                 <Rows>
                 <Titles>Order Span Dates
-                <Tooltip content={toolTipText} direction="left">
-                   <InfoIcon />
+                  <Tooltip content={toolTipText} direction="left">
+                    <InfoIcon />
                   </Tooltip>
                 </Titles>
                   <DateRangePicker
