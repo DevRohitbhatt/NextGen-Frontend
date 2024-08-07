@@ -15,7 +15,6 @@ import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import { useNavigate } from "react-router-dom";
-import { Prev } from "react-bootstrap/esm/PageItem.js";
 
 const SuggestedOrderList = () => {
   const [groupOrUnitAccessID, setGroupOrUnitAccessID] = useState();
@@ -194,7 +193,7 @@ const SuggestedOrderList = () => {
       setFilteredOrders(suggestedOrders);
       return;
     }
-    
+
     const vendorListLookup = vendorList.map((vendor) => vendor.id);
     let filteredOrders = suggestedOrders.data.filter((order) => {
       return vendorListLookup.includes(order.vendorID);
