@@ -80,60 +80,28 @@ export const InventoryItemsContainer = styled.div`
   margin-top: 27px;
 `;
 
-export const SubmitModalContainer = styled.div`
+export const AddItemModalHeader = styled.div`
   display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-top: 27px;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px;
 `;
 
-export const SubmitModalBody = styled.div`
-  padding: 0px 14px;
-`;
-
-export const SubmitModalText = styled.div`
-  margin-bottom: 20px;
-`;
-
-export const SubmitModalButtonContainer = styled.div`
+export const ModalFooter = styled.div`
   display: flex;
-  justify-content: center;
-  gap: 11px;
-  padding: 0.75rem;
+  justify-content: end;
+  margin: 20px;
 `;
 
-export const PDFButton = styled.button`
+export const AddNewItemButton = styled.button`
   all: unset;
-  margin-left: 10px;
   padding: 10px 20px;
-  border-radius: 15px;
-  border: 2px solid ${(props) => props.theme.primary};
-  color: ${(props) => props.theme.primary};
-  position: relative;
+  border-radius: 30px;
+  background-color: ${(props) => props.theme.primary};
+  color: #fff;
   cursor: pointer;
 
   &:hover {
-    background-color: ${(props) => props.theme.primary};
-    border: 2px solid ${(props) => props.theme.primary};
-    color: white;
+    background-color: ${(props) => props.theme.secondary};
   }
 `;
-
-export const CSVButton = styled.button`
-  all: unset;
-  margin-left: 10px;
-  padding: 10px 20px;
-  border-radius: 15px;
-  border: 2px solid ${(props) => props.theme.primary};
-  color: ${(props) => props.theme.primary};
-  position: relative;
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${(props) => props.theme.primary};
-    border: 2px solid ${(props) => props.theme.primary};
-    color: white;
-  }
-`;
-
-

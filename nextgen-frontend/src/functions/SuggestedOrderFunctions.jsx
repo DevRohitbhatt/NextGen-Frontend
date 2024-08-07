@@ -48,26 +48,80 @@ export const handleForecastChange = (
   return updatedForecastData;
 };
 
-export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData) => { 
+export const updateDefaultSafetyFactor = (defaultSafetyFactorTable, setDefaultSafetyFactorTable, suggestedOrderData, setSuggestedOrderData, orderLimits, safetyFactor, forecastTotal) => {
+  const previousSafetyFactor = defaultSafetyFactorTable.rows[0][0].value;
+  const updatedDefaultSafetyFactorRows = defaultSafetyFactorTable.rows.map((row) => {
+    return row.map((cell) => {
+      if (cell.columnName === "Default Safety Factor") {
+        return { ...cell, value: safetyFactor };
+      }
+      return cell;
+    });
+  });
+  setDefaultSafetyFactorTable({
+    ...defaultSafetyFactorTable,
+    rows: updatedDefaultSafetyFactorRows,
+  });
+
+  let updatedSuggestedOrderData = 
+    { 
+      rows: suggestedOrderData.rows.map((detail) => {
+      return {
+        ...detail,
+        suggestedOrderItem: detail.suggestedOrderItem.map((inventoryItem) => {
+          return {
+            ...inventoryItem,
+            vendorItems: inventoryItem.vendorItems.map((vendorItem) => {
+              if (vendorItem.safetyFactor === previousSafetyFactor) {
+                return {
+                  ...vendorItem,
+                  safetyFactor: safetyFactor,
+                }
+              }
+              return vendorItem;
+            }),
+          }
+        }),
+      }
+    })
+  };
+
+  updatedSuggestedOrderData = calculateSuggestedQuantities(forecastTotal, updatedSuggestedOrderData, orderLimits, true);
+
+  setSuggestedOrderData({
+    ...suggestedOrderData,
+    rows: updatedSuggestedOrderData,
+  });
+}
+
+
+export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, orderLimits, recalculate = false) => { 
   const updatedSuggestedOrderData = suggestedOrderData.rows.map((detail) => {
     return {
       name: detail.name,
       suggestedOrderItem: detail.suggestedOrderItem.map((inventoryItem) => {
+        var orderLimit = orderLimits.find((orderLimit) => orderLimit.qsrInventoryItemID === inventoryItem.qsrInventoryItemID);
         return {
           ...inventoryItem,
           vendorItems: inventoryItem.vendorItems.map((vendorItem) => {
+            if ((vendorItem.suggestedQty !== 0 || vendorItem.onHandQty !== 0 || vendorItem.orderQty !== 0) && !recalculate) {
+              var extendedPrice = calculateExtendedPrice(vendorItem.orderQty, vendorItem.latestInvoicePrice);
+              return {
+                ...vendorItem,
+                extendedPrice: extendedPrice,
+              }
+            }
             var suggestedQty = vendorItem.suggestedQty;
             var onHand = vendorItem.onHandQty;
             var orderQty = vendorItem.orderQty;
             var extendedPrice = 0;
             if (inventoryItem.invItemAvgSalesYieldPerMainUOM > 0) {
-              suggestedQty = Math.ceil(
-                (
-                  (forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM) * vendorItem.mappingQuantityMultiplier
-                ) * 1 + (vendorItem.safetyFactor / 100)
-              );
+              const qty = (
+                (forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM) * vendorItem.mappingQuantityMultiplier
+              ) * (1 + vendorItem.safetyFactor / 100);
+              suggestedQty = formatNumberTwoDecimals(qty);
             }
-            orderQty = calculateOrderQty(suggestedQty, onHand);
+            orderQty = calculateOrderQty(suggestedQty, onHand, orderLimit);
             extendedPrice = calculateExtendedPrice(orderQty, vendorItem.latestInvoicePrice);
             const updatedVendorItem = {
               ...vendorItem,
@@ -133,7 +187,6 @@ export const handleEdit = async (
   onEdit,
   setQid
 ) => {
-  // Update the selectedVendorItems state for the specific index
   const updatedItems = selectedVendorItems.map((item, idx) => {
     if (idx !== index) return item;
 
@@ -207,7 +260,7 @@ export const handleEdit = async (
         }),
       };
 
-      return returntItem;
+      return returntItem; 
     }
   );
 
@@ -234,11 +287,16 @@ const calculateSuggestedQty = (suggestedQty, safetyFactor) => {
     return formatNumberTwoDecimals(suggestedQty * (1 + safetyFactor / 100));
 }
 
-const calculateOrderQty = (suggestedQty, onHandQty) => {
-    if (onHandQty > suggestedQty) {
+const calculateOrderQty = (suggestedQty, onHandQty, orderLimit = null) => {
+    if (onHandQty > suggestedQty) { 
         return 0;
     }
-    return formatNumberTwoDecimals(suggestedQty - onHandQty);
+    var returnQty = suggestedQty - onHandQty;
+    if (orderLimit) {
+      returnQty = Math.min(returnQty, orderLimit.maxOrderQuantity);
+      returnQty = Math.max(returnQty, orderLimit.minOrderQuantity);
+    }
+    return Math.round(returnQty);
 }
 
 const calculateExtendedPrice = (orderQty, latestInvoicePrice) => {
@@ -269,39 +327,34 @@ export const submitSuggestedOrderPDF =(suggestedOrderData) => {
 
 const formatExportArray = (data) => {
   var returnArray = [];
-  data.rows.map((detail) => {
-    detail.suggestedOrderItem.map((inventoryItem) => {
-      const selectedVendorItem = inventoryItem.vendorItems.find((vendorItem) => vendorItem.isSelected);
-      if (selectedVendorItem.orderQty > 0) {
-        returnArray.push([
-          {
-            value: selectedVendorItem.description,
-            cellType: "",
-            columnName: "Item Description",
-          },
-          {
-            value: selectedVendorItem.vendorItemReference,
-            cellType: "",
-            columnName: "Item Ref",
-          },
-          {
-            value: selectedVendorItem.unitOfMeasure,
-            cellType: "",
-            columnName: "Order Unit",
-          },
-          {
-            value: selectedVendorItem.packSize,
-            cellType: "",
-            columnName: "Pack Size",
-          },
-          {
-            value: selectedVendorItem.orderQty,
-            cellType: "",
-            columnName: "Order Amount",
-          }
-        ]);
+  data.map((detail) => {
+    returnArray.push([
+      {
+        value: detail.vendorItemDescription,
+        cellType: "",
+        columnName: "Item Description",
+      },
+      {
+        value: detail.vendorItemReference,
+        cellType: "",
+        columnName: "Item Ref",
+      },
+      {
+        value: detail.vendorItemUOM,
+        cellType: "",
+        columnName: "Order Unit",
+      },
+      {
+        value: detail.vendorItemPackSize,
+        cellType: "",
+        columnName: "Pack Size",
+      },
+      {
+        value: detail.quantity,
+        cellType: "",
+        columnName: "Order Amount",
       }
-    });
+    ]);
   });
   return returnArray;
 };
@@ -317,3 +370,25 @@ export const submitSuggestedOrderCSV = (suggestedOrderData, filename) => {
   tempLink.setAttribute("download", filename + ".csv");
   tempLink.click();
 }
+
+export const onSearch = (searchTerm, data, setFilteredData, setExpandedNodes) => {
+  const updatedExpandedNodes = {};
+  const filteredData = data.rows.map((node) => {
+    const updatedSuggestedOrderItem = node.suggestedOrderItem.map((item) => {
+      let isHidden = false;
+      if (
+        item.invItemDescription
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      ) {
+        updatedExpandedNodes[node.name] = true;
+      } else {
+        isHidden = true;
+      }
+      return { ...item, isHidden: isHidden };
+    });
+    return { ...node, suggestedOrderItem: updatedSuggestedOrderItem };
+  });
+  setExpandedNodes(updatedExpandedNodes);
+  setFilteredData({ ...data, rows: filteredData });
+};

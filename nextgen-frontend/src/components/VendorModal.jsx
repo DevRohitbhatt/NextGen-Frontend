@@ -81,7 +81,7 @@ const VendorModal = ({
       setSelectedVendorName(selectedVenderList[0].name);
     } else {
       setSelectedVendor(0);
-      setSelectedVendorName("No Vendor Selected");
+      setSelectedVendorName("All Vendors");
     }
   }
 

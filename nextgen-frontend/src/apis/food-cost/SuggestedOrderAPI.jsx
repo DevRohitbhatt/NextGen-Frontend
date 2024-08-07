@@ -3,10 +3,10 @@ import { defineCancelApiObject } from "../configs/axiosUtils.jsx";
 import order from "../../tempData/OrderData.json";
 
 export const SuggestedOrderAPI = {
-  getOrderItem: async function (companyID,unitID,vendorId,orderFromDate,orderToDate,suggestedOrderId,cancel = false) {
+  getOrderItem: async function (companyID,unitID,vendorId,orderFromDate,orderToDate,suggestedOrderId,purchaseHistoryDaysBack=null,cancel = false) {
     const response = await api.request({
       method: "GET",
-      url: `/api/suggestedorder/getvendorinventoryitems?companyId=${companyID}&unitId=${unitID}&vendorId=${vendorId}&orderFromDate=${orderFromDate}&orderToDate=${orderToDate}&suggestedOrderId=${suggestedOrderId}`,
+      url: `/api/suggestedorder/getvendorinventoryitems?companyId=${companyID}&unitId=${unitID}&vendorId=${vendorId}&orderFromDate=${orderFromDate}&orderToDate=${orderToDate}&suggestedOrderId=${suggestedOrderId}&${purchaseHistoryDaysBack ? `purchaseHistoryDaysBack=${purchaseHistoryDaysBack}` : ""}`,
       companyID,
       unitID,
       vendorId,
@@ -17,10 +17,10 @@ export const SuggestedOrderAPI = {
     return response.data;
   },
   getOrderList: async function (companyID, alignmentID, memberID, vendorID, fromDate, toDate,  cancel = false) {
-    const response = await api.request({
+    const response = await api.request({  
       method: "GET",
       url: `/api/order/GetOrderList?companyId=${companyID}&alignmentId=${alignmentID}&memberId=${memberID}&vendorID=${vendorID}&fromDate=${fromDate}&toDate=${toDate}`,
-      signal: cancel ? cancelApiObject[this.getbyid.name].handleRequestCancellation().signal : undefined,
+      signal: cancel ? cancelApiObject[this.getOrderList.name].handleRequestCancellation().signal : undefined,
     });
 
     return response.data;
@@ -36,7 +36,7 @@ export const SuggestedOrderAPI = {
   save: async function (data, cancel = false) {
     const response = await api.request({
       method: "POST",
-      url: `/api/suggestedorder/savesuggestedorder`,
+      url: `/api/suggestedorder/savesuggestedorder?companyID=${data.companyID}`,
       data,
       signal: cancel
         ? cancelApiObject[this.save.name].handleRequestCancellation().signal
@@ -47,7 +47,7 @@ export const SuggestedOrderAPI = {
   submit: async function (data, cancel = false) {
     const response = await api.request({
       method: "POST",
-      url: `/api/suggestedorder/submitsuggestedorderheader`,
+      url: `/api/suggestedorder/submitsuggestedorderheader?companyID=${data.companyID}`,
       data,
       signal: cancel
         ? cancelApiObject[this.submit.name].handleRequestCancellation().signal
