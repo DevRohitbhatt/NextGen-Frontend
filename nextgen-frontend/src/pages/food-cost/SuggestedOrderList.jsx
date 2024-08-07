@@ -15,6 +15,7 @@ import { SuggestedOrderAPI } from "../../apis/food-cost/SuggestedOrderAPI.jsx";
 import ExportOptions from "../../components/ExportOptions.jsx";
 import PdfBuilder from "../../components/PdfBuilder.jsx";
 import { useNavigate } from "react-router-dom";
+import { Prev } from "react-bootstrap/esm/PageItem.js";
 
 const SuggestedOrderList = () => {
   const [groupOrUnitAccessID, setGroupOrUnitAccessID] = useState();
@@ -38,6 +39,7 @@ const SuggestedOrderList = () => {
   const [selectedVendor, setSelectedVendor] = useState(0);
   const [selectedVendorName, setselectedVendorName] =
     useState("No Vendor Selected");
+  const [selectedVendorList, setSelectedVendorList] = useState([]);
   const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
   const [selectedToDate, setSelectedToDate] = useState(new Date());
@@ -46,6 +48,7 @@ const SuggestedOrderList = () => {
   const [showDateModal, setShowDateModal] = useState(false); // State to manage modal visibility
 
   const [suggestedOrders, setSuggestedOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [showCreateOrderModal, setCreateOrderShowModal] = useState(false);
   const [showSuggestedModal, setShowSuggestedModal] = useState(false);
   const [purchaseOrderID, setPurchaseOrderID] = useState(0);
@@ -147,6 +150,7 @@ const SuggestedOrderList = () => {
           x.orderSpan = `${formatFromDate} - ${formatToDate}`;
         });
         setSuggestedOrders(data);
+        setFilteredOrders(data);
       })
       .catch((error) => {
         console.error("Error getting orders: ", error);
@@ -178,11 +182,24 @@ const SuggestedOrderList = () => {
     fetchSuggestedOrders(companyID, alignmentID, unitID, selectedVendor);
   };
 
-  const handleVendorSelection = (vendorList) => {
-    setselectedVendorName(vendorName);
-    setSelectedVendor(vendorID);
+  const handleVendorSelection = (selectedVendorName, vendorList) => {
+    setselectedVendorName(selectedVendorName);
+    setSelectedVendorList(vendorList);
     setVendorShowModal(false);
-    fetchSuggestedOrders(companyID, alignmentID, selectedUnit, vendorID);
+    filterSuggestedOrders(vendorList);
+  };
+
+  const filterSuggestedOrders = (vendorList) => {
+    if (vendorList.length === 0) {
+      setFilteredOrders(suggestedOrders);
+      return;
+    }
+    
+    const vendorListLookup = vendorList.map((vendor) => vendor.id);
+    let filteredOrders = suggestedOrders.data.filter((order) => {
+      return vendorListLookup.includes(order.vendorID);
+    });
+    setFilteredOrders((Prev) => ({ ...Prev, data: filteredOrders }));
   };
 
   const handleDateSelection = (from, to) => {
@@ -342,7 +359,7 @@ const SuggestedOrderList = () => {
           />
           <Styled.VendorOrdersContainer>
             <Table
-              data={suggestedOrders?.data}
+              data={filteredOrders?.data}
               headers={headers}
               onRowClick={handleRowItemClick}
             />

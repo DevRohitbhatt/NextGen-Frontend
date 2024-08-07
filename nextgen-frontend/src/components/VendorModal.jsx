@@ -274,7 +274,7 @@ const VendorModal = ({
 
   const handleOkButtonClick = () => {
     if (isMultiVendor) {
-      handleVendorSelection(selectedVendors);
+      handleVendorSelection(selectedVendorName, selectedVendors);
     } else {
       handleVendorSelection(selectedVendorName, selectedVendor);
     }
