@@ -952,12 +952,13 @@ export default function SuggestedOrder() {
       autoClose: false,
     });
     SuggestedOrderAPI.save(Data)
-      .then(() => {
+      .then((response) => {
         setSaveIsVisible(false);
         setSubmitIsVisible(true);
         setSaveSubmitStatus(1);
         toast.success("Suggested Order Saved successfully");
         toast.update(toastId.current, { autoClose: 500 });
+        setSuggestedOrderID(response.data);
       })
       .catch((error) => {
         toast.error("Failed to Save Suggested Order");
