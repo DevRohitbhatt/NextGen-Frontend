@@ -40,16 +40,15 @@ const Icon = styled.div`
   display: flex;
   align-items: center;
   font-size: 35px;
-  color: #364790;
+  color: ${(props) => props.theme.primary};
   cursor: pointer;
 `;
 
 const YearSelector = ({ selectedYear, onChange }) => {
   const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
-
-const selectRef = useRef(null);
-const handleYearChange = (e) => onChange(parseInt(e.target.value));
-const handleIconClick = () => selectRef.current.click();
+  const selectRef = useRef(null);
+  const handleYearChange = (e) => onChange(parseInt(e.target.value));
+  const handleIconClick = () => selectRef.current.click();
 
   return (
     <Wrapper>
@@ -61,7 +60,7 @@ const handleIconClick = () => selectRef.current.click();
       </CustomSelect>
       <SelectOverlay
         ref={selectRef}
-        value={selectedYear}
+        defaultValue={selectedYear}
         onChange={handleYearChange}
       >
         {years.map((year) => (

@@ -19,19 +19,21 @@
     "exceljs": "^4.4.0",
     "framer-motion": "^11.0.20",
     "intro.js-react": "^1.0.0",
-    "pdfmake": "^0.2.9",
+    "pdfmake": "^0.2.10",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^2.10.1",
     "react-calendar": "^4.8.0",
     "react-date-range": "^2.0.0-alpha.4",
+    "react-datepicker": "^6.8.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
     "react-router-dom": "^6.22.1",
     "react-toastify": "^10.0.5",
-    "styled-components": "^6.1.8"
+    "styled-components": "^6.1.8",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@rollup/plugin-json": "^6.1.0",

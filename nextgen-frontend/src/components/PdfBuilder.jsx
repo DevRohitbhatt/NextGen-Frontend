@@ -12,7 +12,7 @@ pdfMake.fonts = {
 };
 
 const createTable = (tableInfo) => {
-  const title = { text: "", style: "subheader" };
+  const title = { text: "", style: "tableTitle" };
   if (tableInfo.title) title.text = tableInfo.title;
   const table = {
     table: {
@@ -47,10 +47,10 @@ const getCellValue = (cell, dataType) => {
   if (Array.isArray(cell.value)) {
     return cell.value.find((option) => option.isSelected).option;
   } else if (dataType === "currency") {
-    return cell.value.toLocaleString("en-US", {
+    return cell.value ? cell.value.toLocaleString("en-US", {
       style: "currency",
       currency: "USD",
-    });
+    }) : "";
   } else if (dataType === "currency rounded") {
     const roundedValue = Math.round(cell.value);
     return "$" + roundedValue.toLocaleString("en-US");
@@ -65,6 +65,11 @@ export default function PdfBuilder(data) {
   const content = [];
   let columns = [];
   content.push({ text: data.title, style: "header" });
+  if (data.subHeaders) {
+    data.subHeaders.map((subHeader) => {
+      content.push({ text: subHeader, style: "subheader" });
+    });
+  }
   data.body.map((section) => {
     if (section.type !== "table/Column" && columns.length > 0) {
       content.push({ columns: columns });
@@ -82,6 +87,7 @@ export default function PdfBuilder(data) {
   });
 
   const docDefinition = {
+    pageOrientation: data.pageOrientation || "portrait",
     content: content,
     ...(data.exportType === "pdf" && { pageMargins: [20, 20, 20, 20] }),
     styles: {
@@ -90,7 +96,12 @@ export default function PdfBuilder(data) {
         bold: true,
       },
       subheader: {
-        fontSize: 14,
+        fontSize: 12,
+        bold: true,
+        margin: [0, 5, 0, 0],
+      },
+      tableTitle: {
+        fontSize: 12,
         bold: true,
         margin: [0, 10, 0, 5],
       },
@@ -110,4 +121,5 @@ export default function PdfBuilder(data) {
   else if (data.exportType === "print") {
     pdfMake.createPdf(docDefinition).print();
   }
+
 }

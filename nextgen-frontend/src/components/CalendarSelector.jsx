@@ -3,6 +3,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import styled from "styled-components";
 import { AiFillDownSquare } from "react-icons/ai";
+import { CalendarContainer } from "./styles/ReactCalendarStyles";
 
 const InputBoxWrapper = styled.div`
   position: relative;
@@ -26,12 +27,12 @@ const Icon = styled.div`
   display: flex;
   align-items: center;
   font-size: 35px;
-  color: #364790;
+  color: ${(props) => props.theme.primary};
 `;
 
-export const CalendarToSelector = ({ handleDateChange }) => {
+export const CalendarToSelector = ({ handleDateChange, selectedToDate }) => {
   const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(selectedToDate || new Date());
   const inputRef = useRef(null);
   const calendarRef = useRef(null);
 
@@ -84,20 +85,22 @@ export const CalendarToSelector = ({ handleDateChange }) => {
 
       {showCalendar && (
          <div ref={calendarRef}>
-        <Calendar
-          onChange={handleInputChange}
-          value={selectedDate}
-          onClickDay={toggleCalendar}
-        />
+          <CalendarContainer>
+            <Calendar
+              onChange={handleInputChange}
+              value={selectedDate}
+              onClickDay={toggleCalendar}
+            />
+          </CalendarContainer>
         </div>
       )}
     </InputBoxWrapper>
   );
 };
 
-export const CalendarFromSelector = ({ handleDateChange }) => {
+export const CalendarFromSelector = ({ handleDateChange, selectedFromDate }) => {
   const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(selectedFromDate || new Date());
   const inputRef = useRef(null);
   const calendarRef = useRef(null);
 

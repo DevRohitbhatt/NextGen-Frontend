@@ -19,33 +19,57 @@ const Label = styled.div`
 const DateValue = styled.div`
   white-space: nowrap;
   border-radius: 20px;
-  border: 2px solid ${(props) => props.theme.lightGrey};
+  border: 2px solid ${(props) => props.isEditable ? props.theme.lightGrey : `#D3D3D3`};
+  background-color: ${(props) => props.isEditable ? `none` : props.theme.lightGrey};
   text-align: center;
   padding: 10px 30px;
 
   &:hover {
-    border: 2px solid ${(props) => props.theme.primary};
+    border: 2px solid ${(props) => props.isEditable ? props.theme.primary : `#D3D3D3`};
   }
 `;
+
+// const DateSelector = ({ ToDate, FromDate, onClick, isDateRange }) => {
+//   return (
+//     <DateContainer onClick={onClick}>
+//       <Label>Select Date</Label>
+//       <DateValue>
+//         {isDateRange
+//           ? `${FromDate.toLocaleDateString()} - ${ToDate.toLocaleDateString()}`
+//           : FromDate.toLocaleDateString()}
+//       </DateValue>
+//     </DateContainer>
+//   );
+// };
 
 DateSelector.propTypes = {
   ToDate: PropTypes.instanceOf(Date),
   FromDate: PropTypes.instanceOf(Date),
-  isDateRange:PropTypes.bool
+  isDateRange: PropTypes.bool,
+  isEdtitable: PropTypes.bool,
+  onClick: PropTypes.func,
 };
 
-export default function DateSelector({ ToDate,FromDate ,onClick,isDateRange=false}) {
+export default function DateSelector({ toDate, fromDate, onClick, isDateRange=false, isEditable=true }) {
   return (
     <>
     {!isDateRange ? (
-          <DateContainer onClick={onClick} className="date-selector">
-          <Label>Select Date</Label>
-          <DateValue>{FromDate.toLocaleDateString()}</DateValue>
+          <DateContainer onClick={isEditable ? onClick : () => {}} className="date-selector">
+          {isEditable ? (
+            <Label>Select Date</Label>
+          ) : (
+            <Label>Date</Label>
+          )}
+          <DateValue isEditable={isEditable}>{fromDate?.toLocaleDateString()}</DateValue>
         </DateContainer>
       ) : (
-     <DateContainer onClick={onClick} className="date-selector">
-      <Label>Select Date</Label>
-      <DateValue>{FromDate.toLocaleDateString() +" - "+ ToDate.toLocaleDateString()}</DateValue>
+     <DateContainer onClick={isEditable ? onClick : () => {}} className="date-selector">
+      {isEditable ? (
+        <Label>Select Date</Label>
+      ) : (
+        <Label>Date Range</Label>
+      )}
+      <DateValue isEditable={isEditable}>{fromDate?.toLocaleDateString() +" - "+ toDate?.toLocaleDateString()}</DateValue>
     </DateContainer>
       )}
     </>

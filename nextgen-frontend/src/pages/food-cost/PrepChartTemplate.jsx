@@ -638,15 +638,14 @@ if(position)
             onClick={handleUnitSelectorClick}
             companyID={companyID}
             alignmentID={alignmentID}
-            unitName={selectedUnitName}
-            setUnitName={setSelectedUnitName}
-            unitID={selectedUnit}
-            label="Select Unit"
+            memberName={selectedUnitName}
+            setMemberName={setSelectedUnitName}
+            memberID={selectedUnit}
           />
           <UnitModal
             unitData={unitData}
-            unitID={selectedUnit}
-            unitName={selectedUnitName}
+            memberID={selectedUnit}
+            memberName={selectedUnitName}
             show={showModal}
             handleClose={() => {
               setShowModal(false);
