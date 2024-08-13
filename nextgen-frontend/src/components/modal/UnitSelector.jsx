@@ -1,0 +1,83 @@
+import { useEffect } from 'react';
+import { getCall } from '../../apis/network';
+
+export default function UnitSelector({
+	onClick,
+	companyID,
+	alignmentID,
+	memberName,
+	setMemberName,
+	memberID,
+	isEditable = true,
+	includeAreas = false,
+	formVersion = false,
+	isInvalid = false,
+}) {
+	useEffect(() => {
+		const fetchUnitList = async () => {
+			try {
+				const getData = {
+					url: 'unitsAndArea',
+					urlParams: {
+						companyID: companyID,
+						alignmentID: alignmentID,
+						memberID: memberID,
+					},
+				};
+
+				const result = await getCall(getData);
+				if (result.data.areas.length > 0 && includeAreas) {
+					const areaName = result.data.areas.find((area) => area.areaID === memberID).areaName;
+					if (areaName) {
+						setMemberName(areaName);
+						return;
+					}
+				}
+				if (result.data.units.length > 0) {
+					const unitName = result.data.units.find((unit) => unit.unitID === memberID).unitName;
+					if (unitName) {
+						setMemberName(unitName);
+						return;
+					}
+				}
+			} catch (error) {
+				setMemberName('No unit selected');
+			}
+		};
+		if (companyID && alignmentID && memberID) fetchUnitList();
+	}, [memberID]);
+
+	return (
+		<>
+			{formVersion ? (
+				<div className='w-full rounded-md cursor-pointer unit-selector' onClick={onClick}>
+					<div
+						className={`px-6 py-3 text-center rounded-md text-nowrap border-2 hover:border-primary border-solid ${
+							isInvalid ? 'border-[#e74c3c]' : ''
+						}`}
+					>
+						{memberName}
+					</div>
+				</div>
+			) : (
+				<div
+					onClick={isEditable ? onClick : () => {}}
+					className='flex flex-col justify-center rounded-3xl unit-selector'
+				>
+					{isEditable ? (
+						<h3 className='mb-1 ml-2 text-xl font-bold text-nowrap'>Select Unit(s)</h3>
+					) : (
+						<h3 className='mb-1 ml-2 text-xl font-bold text-nowrap'>Units</h3>
+					)}
+					<div
+						className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
+							isEditable ? ' hover:border-primary' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
+						}`}
+					>
+						{memberName}
+					</div>
+				</div>
+			)}
+		</>
+	);
+}
