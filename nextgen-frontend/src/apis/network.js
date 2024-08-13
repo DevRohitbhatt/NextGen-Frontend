@@ -2,6 +2,31 @@ import api from './configs/axiosConfig';
 import { defineCancelApiObject } from './configs/axiosUtils';
 import urlConfig from './urlConfig';
 
+//Cache object to store API responses
+const cache = {};
+
+const getCacheKey = (url, params) => {
+	if (!params) return url;
+	return `${url}:${JSON.stringify(params)}`;
+};
+
+const setCache = (key, data, ttl = 300000) => {
+	cache[key] = {
+		data,
+		expiry: Date.now() + ttl,
+	};
+};
+
+const getCache = (key) => {
+	const cacheData = cache[key];
+	if (!cacheData) return null;
+	if (cacheData.expiry < Date.now()) {
+		delete cache[key];
+		return null;
+	}
+	return cacheData.data;
+};
+
 // function to make post call
 export const postCall = async (postData = {}) => {
 	let url = '';
@@ -65,11 +90,19 @@ export const getCall = async (getData = {}) => {
 		}
 	}
 
+	// Check if the response is already cached
+	const cacheKey = getCacheKey(url, getData.urlParams);
+	const cachedResponse = getCache(cacheKey);
+	if (cachedResponse) return cachedResponse;
+
 	const response = await api.request({
 		method: 'GET',
 		url: url,
 		signal: getData.cancel ? cancelApiObject[getData.url].handleRequestCancellation().signal : undefined,
 	});
+
+	// Cache the response
+	setCache(cacheKey, response.data, 3600000);
 
 	return response.data;
 };
