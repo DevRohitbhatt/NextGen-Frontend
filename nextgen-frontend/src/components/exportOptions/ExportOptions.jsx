@@ -48,7 +48,7 @@ export default function ExportOptions(props) {
 	];
 
 	return (
-		<div className='flex justify-end w-full space-x-3 export-options'>
+		<div className='flex w-full space-x-3 export-options'>
 			{buttonsConfig.map((btn, index) => (
 				<ExportButton
 					key={index}

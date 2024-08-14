@@ -8,8 +8,9 @@ const InventoryTransferReport = () => {
 	const [companyID, setCompanyID] = useState(1021);
 	const [alignmentID, setAlignmentID] = useState(1110);
 	const [memberID, setMemberID] = useState(5199);
-	const [unitsList, setUnitsList] = useState([]);
+	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 
+	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
@@ -32,7 +33,7 @@ const InventoryTransferReport = () => {
 	const [reportType, setReportType] = useState('Detail');
 	const dropdownOptions = [{ name: 'Detail' }, { name: 'Unit Summary' }];
 
-	//IntroJS variables
+	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
 		steps: inventoryTransferReport(),
 		initialStep: 0,
@@ -67,12 +68,13 @@ const InventoryTransferReport = () => {
 		}
 	}, []);
 
+	// Fetching Units and Areas
 	const fetchData = async (companyID, alignmentID, memberID) => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
-				url: 'getAreaUnitByAlignmentMember',
+				url: 'unitsAndArea',
 				urlParams: {
 					companyID: companyID,
 					alignmentID: alignmentID,
@@ -81,7 +83,7 @@ const InventoryTransferReport = () => {
 			};
 
 			const result = await getCall(getData);
-			setUnitsList(result.data);
+			setUnitsAndAreasList(result.data);
 
 			setIsLoading(false);
 		} catch (error) {
@@ -90,10 +92,6 @@ const InventoryTransferReport = () => {
 			setErrorMessage('There was an issue loading your units, please try again later.');
 			console.error('Error getting units: ', error);
 		}
-	};
-
-	const handleIntroJSStart = () => {
-		setIntroSteps({ ...introSteps, stepsEnabled: true });
 	};
 
 	const handleUnitSelection = (unitName, unitID) => {
@@ -118,7 +116,7 @@ const InventoryTransferReport = () => {
 			/>
 			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Inventory Transfer Report</h2>
 
-			<header className='flex py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+			<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 				<div className='flex items-center space-x-3 '>
 					<UnitSelector
 						companyID={companyID}
@@ -153,14 +151,14 @@ const InventoryTransferReport = () => {
 						includePDF={true}
 						includeCSV={true}
 						includeHelp={true}
-						handleHelpClick={handleIntroJSStart}
+						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 					/>
 				</div>
 			</header>
 
 			<div>
 				<UnitModal
-					unitData={unitsList}
+					unitData={unitsAndAreasList}
 					memberID={selectedUnit}
 					memberName={selectedUnitName}
 					show={showModal}

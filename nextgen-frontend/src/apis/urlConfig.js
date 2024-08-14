@@ -23,8 +23,6 @@ const urlConfig = {
 	savePrepChartTemplate: '/api/prepcharttemplate/save',
 	getPrepChartTemplateInventoryList: '/api/prepcharttemplate/getinventorylist',
 
-	getAreaUnitByAlignmentMember: 'api/common/GetAreaUnitsByAlignmentMember',
-
 	//reports apis
 	inventoryTransferReportData: 'api/foodcost/GetInventoryTransferReportData',
 	hourlySales: 'api/sales/GetSalesHourlyReportData',

@@ -16,7 +16,7 @@ const App = () => {
 					<ToastContainer />
 					<div className='App'>
 						<Routes>
-							<Route path='/InventoryTransferReport' index element={<InventoryTransferReport />} />
+							<Route path='/' index element={<InventoryTransferReport />} />
 						</Routes>
 					</div>
 				</DndProvider>
