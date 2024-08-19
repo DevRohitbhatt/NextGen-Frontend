@@ -3,11 +3,11 @@ import { getCall } from '../../apis/network';
 
 export default function UnitSelector({
 	onClick,
-	companyID,
-	alignmentID,
+	companyId,
+	alignmentId,
 	memberName,
 	setMemberName,
-	memberID,
+	memberId,
 	isEditable = true,
 	includeAreas = false,
 	formVersion = false,
@@ -19,22 +19,22 @@ export default function UnitSelector({
 				const getData = {
 					url: 'unitsAndArea',
 					urlParams: {
-						companyID: companyID,
-						alignmentID: alignmentID,
-						memberID: memberID,
+						companyId: companyId,
+						alignmentId: alignmentId,
+						memberId: memberId,
 					},
 				};
 
 				const result = await getCall(getData);
 				if (result.data.areas.length > 0 && includeAreas) {
-					const areaName = result.data.areas.find((area) => area.areaID === memberID).areaName;
+					const areaName = result.data.areas.find((area) => area.areaID === memberId).areaName;
 					if (areaName) {
 						setMemberName(areaName);
 						return;
 					}
 				}
 				if (result.data.units.length > 0) {
-					const unitName = result.data.units.find((unit) => unit.unitID === memberID).unitName;
+					const unitName = result.data.units.find((unit) => unit.unitID === memberId).unitName;
 					if (unitName) {
 						setMemberName(unitName);
 						return;
@@ -44,8 +44,8 @@ export default function UnitSelector({
 				setMemberName('No unit selected');
 			}
 		};
-		if (companyID && alignmentID && memberID) fetchUnitList();
-	}, [memberID]);
+		if (companyId && alignmentId && memberId) fetchUnitList();
+	}, [memberId]);
 
 	return (
 		<>

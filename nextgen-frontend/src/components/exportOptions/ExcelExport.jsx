@@ -27,7 +27,9 @@ const addTable = (worksheet, table, index, lastColumn, lastRow) => {
 		tableHeaderCell.value = table.name;
 		tableHeaderCell.font = { bold: true, size: 14 };
 		worksheet.mergeCells(
-			`${String.fromCharCode(64 + startColumn)}${startRow}:${String.fromCharCode(64 + lastColumn)}${startRow}`
+			`${String.fromCharCode(64 + startColumn)}${startRow}:${String.fromCharCode(
+				64 + startColumn + table.columns.length - 1
+			)}${startRow}`
 		);
 	}
 
@@ -41,11 +43,11 @@ const addTable = (worksheet, table, index, lastColumn, lastRow) => {
 			theme: 'TableStyleMedium9',
 			showRowStripes: true,
 		},
-		columns: table.columns,
+		columns: table.columns.map((col) => ({ name: col.name, filterButton: true })),
 		rows: tableData,
 	});
 
-	updatedLastRow = startRow + headerRowOffset; // Update updatedLastRow to the row number after the table
+	updatedLastRow = startRow + headerRowOffset + tableData.length; // Update updatedLastRow to the row number after the table
 	return { lastColumn: startColumn + table.columns.length - 1, lastRow: updatedLastRow };
 };
 

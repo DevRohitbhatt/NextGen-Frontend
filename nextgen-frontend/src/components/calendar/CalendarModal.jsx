@@ -112,21 +112,26 @@ const CalendarModal = ({
 	return (
 		<>
 			{modalOpen && (
-				<Styled.ModalDialog>
-					<Styled.ModalOverlay $isDateRange={isDateRange}>
-						<Styled.ModalContent className='modal-content'>
-							<ModalHeader>
-								{isDateRange ? (
-									<h4>Select a business period or Date Range</h4>
-								) : (
-									<h4>Select a business Date</h4>
-								)}
-								<Styled.CloseButton onClick={handleCloseModal}>
-									<FaTimes className='close' />
-								</Styled.CloseButton>
-							</ModalHeader>
-						</Styled.ModalContent>
-						<Styled.ModalBody className={isDateRange ? 'daterangeBody' : 'dateBody'}>
+				<div className='fixed bg-[#00000073] w-full h-dvh left-0 top-0 z-10'>
+					<div
+						className={`fixed w-[500px] bg-white rounded-lg shadow-lg overflow-hidden left-1/3 top-[6%]  ${
+							isDateRange ? '' : 'w-96'
+						}`}
+					>
+						<div className='flex items-center justify-between px-4 py-2 text-white bg-primary'>
+							{isDateRange ? (
+								<h4>Select a business period or Date Range</h4>
+							) : (
+								<h4>Select a business Date</h4>
+							)}
+							<button
+								className='p-1 text-white bg-transparent border-[0.25px] border-white border-solid rounded-none cursor-pointer hover:bg-white hover:text-primary focus:outline-none'
+								onClick={handleCloseModal}
+							>
+								<FaTimes className='close' />
+							</button>
+						</div>
+						<div className='px-3'>
 							{!isDateRange ? (
 								<div className='SingleCalendar'>
 									<Calendar
@@ -170,13 +175,13 @@ const CalendarModal = ({
 									</div>
 								</>
 							)}
-						</Styled.ModalBody>
+						</div>
 						<Styled.ModalFooter>
 							<Styled.FooterButton onClick={handleOkButtonClick}>Ok</Styled.FooterButton>
 							<Styled.FooterButton onClick={handleCloseModal}>Cancel</Styled.FooterButton>
 						</Styled.ModalFooter>
-					</Styled.ModalOverlay>
-				</Styled.ModalDialog>
+					</div>
+				</div>
 			)}
 		</>
 	);

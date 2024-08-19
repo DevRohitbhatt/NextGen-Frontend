@@ -23,8 +23,9 @@ const urlConfig = {
 	savePrepChartTemplate: '/api/prepcharttemplate/save',
 	getPrepChartTemplateInventoryList: '/api/prepcharttemplate/getinventorylist',
 
-	//reports apis
-	inventoryTransferReportData: 'api/foodcost/GetInventoryTransferReportData',
+	//food cost apis
+	inventoryTransferReportData: 'api/foodcost/getInventoryTransferReportData',
+
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	labor: 'api/labor/GetEmployeeInformation',
 };

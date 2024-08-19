@@ -104,6 +104,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 		if (!data) {
 			return;
 		}
+
 		setTableData(data);
 	}, [data]);
 
