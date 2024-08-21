@@ -14,6 +14,7 @@ const Container = styled.div`
 	box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
 	align-items: center;
 	justify-content: center;
+	overflow-y: ${(props) => (props.$scrollable ? 'scroll' : 'none')};
 `;
 const Table = styled.div`
 	border-radius: 30px;
@@ -23,8 +24,6 @@ const Table = styled.div`
 	grid-template-columns: ${(props) => (props.columnwidths ? props.columnwidths : 'auto')};
 	grid-auto-rows: auto;
 	align-items: center;
-
-	overflow-y: ${(props) => (props.$scrollable ? 'scroll' : 'none')};
 
 	&::-webkit-scrollbar {
 		/* background: #ffffff; */
@@ -138,14 +137,8 @@ export default function TableBuilder({
 		}
 	};
 	return (
-		<Container width={width} height={height}>
-			<Table
-				width={width}
-				height={height}
-				className={className}
-				$scrollable={scrollable}
-				columnwidths={columnwidths}
-			>
+		<Container width={width} height={height} $scrollable={scrollable}>
+			<Table width={width} height={height} className={className} columnwidths={columnwidths}>
 				{usetablerows ? (
 					<TableHeader columnwidths={columnwidths}>
 						{columnHeaders.map((header, index) => (

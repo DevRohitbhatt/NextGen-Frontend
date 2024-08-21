@@ -1,34 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import styled from 'styled-components';
 import { AiFillDownSquare } from 'react-icons/ai';
 import { CalendarContainer } from '../styles/ReactCalendarStyles';
-
-const InputBoxWrapper = styled.div`
-	position: relative;
-`;
-
-const InputBox = styled.input`
-	width: calc(100% - 30px);
-	height: 27px;
-	background: #e6e7e8;
-	border: none;
-	padding-left: 7px;
-	color: #000;
-	font-weight: 500;
-	font-size: 14px;
-`;
-const Icon = styled.div`
-	position: absolute;
-	top: 0;
-	right: 0;
-	height: 100%;
-	display: flex;
-	align-items: center;
-	font-size: 35px;
-	color: ${(props) => props.theme.primary};
-`;
 
 const CalendarSelector = ({ handleDateChange, date }) => {
 	const [showCalendar, setShowCalendar] = useState(false);
@@ -71,17 +45,21 @@ const CalendarSelector = ({ handleDateChange, date }) => {
 	};
 
 	return (
-		<InputBoxWrapper>
-			<InputBox
+		<div className='relative'>
+			<input
+				className='w-full h-7 bg-[#e6e7e8] border-none pl-2 text-black font-semibold text-sm focus:outline-none'
 				type='text'
 				onFocus={toggleCalendar}
 				value={selectedDate.toLocaleDateString()}
 				readOnly
 				ref={inputRef}
 			/>
-			<Icon onClick={handleIconClick}>
+			<div
+				className='absolute top-0 flex items-center h-full text-4xl -right-1 text-primary'
+				onClick={handleIconClick}
+			>
 				<AiFillDownSquare />
-			</Icon>
+			</div>
 
 			{showCalendar && (
 				<div ref={calendarRef}>
@@ -90,7 +68,7 @@ const CalendarSelector = ({ handleDateChange, date }) => {
 					</CalendarContainer>
 				</div>
 			)}
-		</InputBoxWrapper>
+		</div>
 	);
 };
 

@@ -20,17 +20,17 @@ export { default as ExcelExport } from './exportOptions/ExcelExport';
 export { default as ExportOptions } from './exportOptions/ExportOptions';
 
 //Modal components
-export { default as Modal } from './modal/Modal';
-export { default as ModalSearchBar } from './modal/ModalSearchBar';
-export { default as OrderModal } from './modal/OrderModal';
-export { default as PurchaseOrderModal } from './modal/PurchaseOrderModal';
-export { default as SubmitPurchaseOrderModal } from './modal/SubmitPurchaseOrderModal';
-export { default as SetOrderLimitsModal } from './modal/SetOrderLimitsModal';
-export { default as UnitModal } from './modal/UnitModal';
-export { default as UnitSelector } from './modal/UnitSelector';
-export { default as VendorModal } from './modal/VendorModal';
-export { default as SearchVendor } from './modal/SearchVendor';
-export { default as VendorSelector } from './modal/VendorSelector';
+export { default as Modal } from './common/Modal';
+export { default as ModalSearchBar } from './common/ModalSearchBar';
+export { default as OrderModal } from './orders/OrderModal';
+export { default as PurchaseOrderModal } from './orders/PurchaseOrderModal';
+export { default as SubmitPurchaseOrderModal } from './orders/SubmitPurchaseOrderModal';
+export { default as SetOrderLimitsModal } from './orders/SetOrderLimitsModal';
+export { default as UnitModal } from './units/UnitModal';
+export { default as UnitSelector } from './units/UnitSelector';
+export { default as VendorModal } from './vendors/VendorModal';
+export { default as SearchVendor } from './vendors/SearchVendor';
+export { default as VendorSelector } from './vendors/VendorSelector';
 
 // table components
 export { default as SimpleTable } from './table/SimpleTable';

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Modal from './Modal';
 import styled from 'styled-components';
 import { getCall } from '../../apis/network.js';
-import { SimpleTable as Table } from '../index.js';
+import { Modal, SimpleTable as Table } from '../index.js';
 
 const PurchaseOrderModalContent = styled.div`
 	padding: 20px;

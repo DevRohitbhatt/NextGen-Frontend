@@ -15,9 +15,9 @@ import {
 import exportToExcel from '../../components/exportOptions/ExcelExport';
 
 const InventoryTransferReport = () => {
-	const [companyId, setCompanyId] = useState(1021);
-	const [alignmentId, setAlignmentId] = useState(1110);
-	const [memberId, setMemberId] = useState(5199);
+	const [companyId, setCompanyId] = useState();
+	const [alignmentId, setAlignmentId] = useState();
+	const [memberId, setMemberId] = useState();
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 	const [inventoryTransferReportData, setInventoryTransferReportData] = useState([]);
 
@@ -25,7 +25,7 @@ const InventoryTransferReport = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Suggested Order, please try again later.'
+		'There was an error trying to load the Inventory Transfer Report, please try again later.'
 	);
 
 	//selected unit state variables
@@ -97,7 +97,7 @@ const InventoryTransferReport = () => {
 		{
 			key: 'transferValue',
 			label: 'Transfer Value',
-			cellType: 'integer',
+			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
 		},
@@ -124,21 +124,21 @@ const InventoryTransferReport = () => {
 				setAlignmentId(1110);
 				setMemberId(5199);
 				setSelectedUnit(0);
-				fetchData();
+				fetchData(1021, 1110, 5199);
 			}
 		} else {
 			setErrorMessage('There was an issue loading your orders, please try again later.');
 		}
 	}, []);
 
-	const fetchData = async () => {
+	const fetchData = async (companyId, alignmentId, selectedUnit) => {
 		setIsLoading(true);
-		await Promise.all([fetchUnits()]);
+		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
 		setIsLoading(false);
 	};
 
 	// Fetching Units and Areas
-	const fetchUnits = async () => {
+	const fetchUnits = async (companyId, alignmentId, memberId) => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -355,6 +355,7 @@ const InventoryTransferReport = () => {
 		tempLink.click();
 	};
 
+	// Function to handle the Excel export
 	const handleExcelClick = () => {
 		if (!inventoryTransferReportData?.data) return;
 
@@ -387,7 +388,7 @@ const InventoryTransferReport = () => {
 					<UnitSelector
 						companyId={companyId}
 						alignmentId={alignmentId}
-						memberId={memberId}
+						memberId={selectedUnit}
 						memberName={selectedUnitName}
 						includeAreas={true}
 						setMemberName={setselectedUnitName}

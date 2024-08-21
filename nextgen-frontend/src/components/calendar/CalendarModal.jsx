@@ -131,39 +131,37 @@ const CalendarModal = ({
 								<FaTimes className='close' />
 							</button>
 						</div>
-						<div className='px-3'>
+						<div className='px-4'>
 							{!isDateRange ? (
-								<div className='SingleCalendar'>
-									<Calendar
-										onChange={handleInputChange}
-										value={localFromDate}
-										onClickDay={toggleCalendar}
-									/>
-								</div>
+								<Calendar
+									onChange={handleInputChange}
+									value={localFromDate}
+									onClickDay={toggleCalendar}
+								/>
 							) : (
 								<>
-									<Styled.CalendarTop>
-										<div className='fromdiv'>
-											<Styled.Label>From:</Styled.Label>
+									<div className='flex'>
+										<div>
+											<span className='text-xs font-bold'>From:</span>
 											<CalendarSelector
 												handleDateChange={(date) => setLocalFromDate(date)}
 												selectedFromDate={localFromDate}
 											/>
 										</div>
-										<div className='Todiv'>
-											<Styled.Label>To:</Styled.Label>
+										<div>
+											<span className='text-xs font-bold'>To:</span>
 											<CalendarSelector
 												handleDateChange={(date) => setLocalToDate(date)}
 												selectedToDate={localToDate}
 											/>
 										</div>
 										<div className='yeardiv'>
-											<Styled.Label>Show Periods For Year:</Styled.Label>
+											<span className='text-xs font-bold'>Show Periods For Year:</span>
 											<YearSelector selectedYear={selectedYear} onChange={handleYearChange} />
 										</div>
-									</Styled.CalendarTop>
+									</div>
 
-									<div className='MainCalendarTable'>
+									<div className=''>
 										<Table
 											columnHeaders={CalendarTable.columnHeaders}
 											columnwidths={CalendarTable.columnWidths}
@@ -171,6 +169,8 @@ const CalendarModal = ({
 											rows={CalendarTable.rows}
 											width={CalendarTable.width}
 											className='CalendarTable'
+											height={'300px'}
+											scrollable={true}
 										/>
 									</div>
 								</>

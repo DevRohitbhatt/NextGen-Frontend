@@ -1,4 +1,4 @@
-export default function inventoryTransferReport() {
+export default function employeeInformation() {
 	return [
 		{
 			intro:
@@ -12,20 +12,12 @@ export default function inventoryTransferReport() {
 				'<br> -You may select any Unit(s) or Area you have permissions to.',
 		},
 		{
-			element: '.date-selector',
-			intro: '-Select the date, or date range, you wish to display Inventory Transfer Report',
-		},
-		{
 			element: '.dropdown-selector',
-			intro: 'You can select the type of report you want to view. Whether it is a summary or detailed report.',
-		},
-		{
-			element: '.run-button',
-			intro: 'Click the Run button to generate the report based on the selected criteria.',
+			intro: '-Select the view you like to display Employee Information: All, Active, Terminated, New Hires, or Birthdays.',
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Inventory Transfer Report to either .CSV, .XLSX or .PDF format. The ? icon will launch this guided tour.',
+			intro: 'You can export the Inventory Transfer Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.paged-table',

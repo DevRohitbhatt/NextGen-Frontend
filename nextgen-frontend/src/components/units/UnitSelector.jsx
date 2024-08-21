@@ -30,6 +30,7 @@ export default function UnitSelector({
 					const areaName = result.data.areas.find((area) => area.areaID === memberId).areaName;
 					if (areaName) {
 						setMemberName(areaName);
+
 						return;
 					}
 				}

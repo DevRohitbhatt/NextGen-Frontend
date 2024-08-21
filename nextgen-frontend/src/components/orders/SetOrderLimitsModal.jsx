@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import Modal from './Modal';
+import { Modal } from '../index';
 import { toast } from 'react-toastify';
 import { deleteCall, postCall } from '../../apis/network';
 
