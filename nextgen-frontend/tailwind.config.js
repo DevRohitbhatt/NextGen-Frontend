@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import tailwindScrollbar from 'tailwind-scrollbar';
+
 export default {
 	content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
 	theme: {
@@ -8,8 +10,10 @@ export default {
 			},
 			colors: {
 				primary: '#36479D',
+				secondary: '#e6e7eb',
 			},
 		},
 	},
-	plugins: [],
+
+	plugins: [tailwindScrollbar({ nocompatible: true })],
 };

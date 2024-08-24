@@ -10,6 +10,7 @@ import SuggestedOrder from './pages/food-cost/SuggestedOrder/SuggestedOrder.jsx'
 import SuggestedOrderList from './pages/food-cost/SuggestedOrder/SuggestedOrderList.jsx';
 import PrepChart from './pages/food-cost/PrepChart/PrepChart';
 import PrepChartTemplate from './pages/food-cost/PrepChart/PrepChartTemplate';
+import VoidsReport from './pages/sales/VoidsReport.jsx';
 
 const App = () => {
 	const selectedTheme = themes.default;
@@ -27,6 +28,7 @@ const App = () => {
 							<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
 							<Route path='/inventoryTransferReport' index element={<InventoryTransferReport />} />
 							<Route path='/employeeInformation' element={<EmployeeInformation />} />
+							<Route path='/voids' element={<VoidsReport />} />
 						</Routes>
 					</div>
 				</DndProvider>

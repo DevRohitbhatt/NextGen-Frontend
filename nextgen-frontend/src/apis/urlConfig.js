@@ -26,7 +26,9 @@ const urlConfig = {
 	//food cost apis
 	inventoryTransferReportData: 'api/foodcost/getInventoryTransferReportData',
 
+	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
+	voids: 'api/sales/getVoidsReportData',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',

@@ -220,6 +220,8 @@ export default function TreeTable({
 		onSearch(searchTerm, setExpandedNodes);
 	};
 
+	console.log('data', initialData);
+
 	const isEditableArray = [false, false, false, false, true, false, true, true, false, false];
 	return (
 		<>

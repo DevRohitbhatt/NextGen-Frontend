@@ -1,115 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Tooltip, SimpleTableRow as Row } from '../index.js';
 import { FaInfoCircle } from 'react-icons/fa';
-
-const InfoIcon = styled(FaInfoCircle)`
-	color: ${(props) => props.theme.secondary};
-`;
-
-const TableWrapper = styled.div`
-	margin: 20px;
-	padding-right: 5px;
-	max-height: 60vh;
-	overflow-y: auto;
-
-	&::-webkit-scrollbar {
-		margin-left: 5px;
-		background: #ffffff;
-		width: 15px;
-		height: 15px;
-		cursor: pointer;
-		border-radius: 10px;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: ${(props) => props.theme.primary};
-		border-radius: 30px;
-		padding: 18px !important;
-		border: 2px solid #fff;
-		cursor: pointer;
-	}
-
-	&::-webkit-scrollbar-thumb:hover {
-		background: ${(props) => props.theme.secondary};
-	}
-`;
-
-const Table = styled.table`
-	width: 100%;
-	border-collapse: collapse;
-
-	thead {
-		background-color: #fff;
-		position: sticky;
-		top: 0;
-		border-bottom: 1px solid #ddd;
-	}
-
-	tbody {
-		max-height: 50vh;
-	}
-`;
-
-const TableHeader = styled.th`
-	padding: 8px;
-	border-bottom: 1px solid #ddd;
-	cursor: pointer;
-	text-align: left;
-`;
-
-const TableRow = styled.tr`
-	border-bottom: 1px solid #ddd;
-	&:last-child {
-		border-bottom: none;
-	}
-`;
-
-const PagingContainer = styled.div`
-	margin-top: 20px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-`;
-
-const PageButton = styled.button`
-	margin: 0 5px;
-	padding: 5px 10px;
-	border: 1px solid #ddd;
-	background-color: ${({ isActive }) => (isActive ? '#ccc' : '#fff')};
-	cursor: pointer;
-
-	&:hover {
-		background-color: #f2f2f2;
-	}
-`;
-
-const PageSizeSelect = styled.select`
-	margin-left: 10px;
-	padding: 5px 10px;
-`;
-
-const PaginationInfo = styled.span`
-	margin: 0 10px;
-`;
 
 const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 10, 20], isPaginated = true }) => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage, setItemsPerPage] = useState(itemsPerPageOptions[0]);
 	const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 	const [tableData, setTableData] = useState(data);
+	const [filters, setFilters] = useState(() => headers.reduce((acc, header) => ({ ...acc, [header.key]: '' }), {}));
+	const [filteredData, setFilteredData] = useState(data);
 
 	useEffect(() => {
-		if (!data) {
-			return;
-		}
+		if (data) {
+			let filtered = data;
 
-		setTableData(data);
-	}, [data]);
+			// Apply filters
+			Object.keys(filters).forEach((key) => {
+				if (filters[key]) {
+					filtered = filtered.filter((item) =>
+						item[key]?.toString().toLowerCase().includes(filters[key].toLowerCase())
+					);
+				}
+			});
+
+			setFilteredData(filtered);
+		}
+	}, [data, filters]);
+
+	const handleFilterChange = (key, value) => {
+		setFilters((prevFilters) => ({
+			...prevFilters,
+			[key]: value,
+		}));
+	};
 
 	// Sort data based on the column header clicked
 	const sortedData = () => {
+		let sortableData = [...filteredData];
+
 		if (sortConfig.key) {
 			const sorted = [...tableData].sort((a, b) => {
 				if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -122,7 +51,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 			});
 			return sorted;
 		}
-		return tableData;
+		return sortableData;
 	};
 
 	// Handle column header click to change sorting
@@ -155,71 +84,112 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 	};
 
 	return (
-		<TableWrapper>
-			<Table className='paged-table'>
-				<thead>
-					<tr>
-						{headers.map((header, index) => (
-							<TableHeader key={index} onClick={() => handleSort(header.key)}>
-								{header.toolTipDirection === '' || !header.toolTipDirection ? (
-									header.label
-								) : header.toolTipDirection === 'left' ? (
-									<Tooltip content={header.toolTip} direction='left'>
-										<InfoIcon /> {header.label}
-									</Tooltip>
-								) : (
-									<Tooltip content={header.toolTip} direction='right'>
-										{header.label} <InfoIcon />
-									</Tooltip>
-								)}{' '}
-								{sortConfig.key === header.key && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-							</TableHeader>
-						))}
-					</tr>
-				</thead>
-				<tbody>
-					{sortedData()?.length === 0 || !sortedData()?.length ? (
-						<TableRow>
-							<td colSpan={headers.length} style={{ textAlign: 'center' }}>
-								No data found for the given parameters.
-							</td>
-						</TableRow>
-					) : (
-						sortedData()
-							?.slice(startIndex, endIndex)
-							.map((row, rowIndex) => (
-								<Row headers={headers} key={rowIndex} item={row} onItemClick={handleRowClick} />
-							))
-					)}
-				</tbody>
-			</Table>
+		<div>
+			<div className='m-5 pr-1 max-h-[60vh] overflow-x-auto scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-primary scrollbar-track-secondary'>
+				<table className='w-full border-collapse table-fixed'>
+					<thead className='sticky top-0 bg-white border-b border-gray-300'>
+						<tr className=''>
+							{headers.map((header, index) => (
+								<React.Fragment key={index}>
+									<th
+										className='p-2 text-left border-b border-gray-300 cursor-pointer w-36 '
+										onClick={() => handleSort(header.key)}
+									>
+										{header.toolTipDirection === '' || !header.toolTipDirection ? (
+											header.label
+										) : header.toolTipDirection === 'left' ? (
+											<Tooltip content={header.toolTip} direction='left'>
+												<FaInfoCircle className='inline text-primary' /> {header.label}
+											</Tooltip>
+										) : (
+											<Tooltip content={header.toolTip} direction='right'>
+												{header.label} <FaInfoCircle className='inline text-secondary' />
+											</Tooltip>
+										)}{' '}
+										{sortConfig.key === header.key && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+									</th>
+								</React.Fragment>
+							))}
+						</tr>
+						<tr>
+							{headers.map((header, index) => (
+								<React.Fragment key={index}>
+									<th className='p-2 border-b border-gray-300'>
+										<input
+											type='text'
+											className='box-border w-full p-1 border-2 border-gray-300 border-solid hover:border-primary focus:border-primary focus:outline-none'
+											value={filters[header.key] || ''}
+											onChange={(e) => handleFilterChange(header.key, e.target.value)}
+										/>
+									</th>
+								</React.Fragment>
+							))}
+						</tr>
+					</thead>
+					<tbody className='max-h-[50vh]'>
+						{sortedData()?.length === 0 || !sortedData()?.length ? (
+							<tr>
+								<td colSpan={headers.length} className='py-4 text-center'>
+									No data found for the given parameters.
+								</td>
+							</tr>
+						) : (
+							sortedData()
+								?.slice(startIndex, endIndex)
+								.map((row, rowIndex) => (
+									<Row headers={headers} key={rowIndex} item={row} onItemClick={handleRowClick} />
+								))
+						)}
+					</tbody>
+				</table>
+			</div>
 			{!isPaginated ? null : (
-				<PagingContainer>
-					<PageButton onClick={() => handlePageChange(1)} disabled={currentPage === 1}>
+				<div className='flex items-center justify-center mt-5'>
+					<button
+						className='px-3 py-1 mx-1 bg-white border border-gray-300 hover:bg-gray-200 disabled:bg-gray-100'
+						onClick={() => handlePageChange(1)}
+						disabled={currentPage === 1}
+					>
 						First
-					</PageButton>
-					<PageButton onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+					</button>
+					<button
+						className='px-3 py-1 mx-1 bg-white border border-gray-300 hover:bg-gray-200 disabled:bg-gray-100'
+						onClick={() => handlePageChange(currentPage - 1)}
+						disabled={currentPage === 1}
+					>
 						Prev
-					</PageButton>
-					<PaginationInfo>
+					</button>
+					<span className='mx-2'>
 						Page {currentPage} of {totalPages}
-					</PaginationInfo>
-					<PageButton onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+					</span>
+					<button
+						className='px-3 py-1 mx-1 bg-white border border-gray-300 hover:bg-gray-200 disabled:bg-gray-100'
+						onClick={() => handlePageChange(currentPage + 1)}
+						disabled={currentPage === totalPages}
+					>
 						Next
-					</PageButton>
-					<PageButton onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>
+					</button>
+					<button
+						className='px-3 py-1 mx-1 bg-white border border-gray-300 hover:bg-gray-200 disabled:bg-gray-100'
+						onClick={() => handlePageChange(totalPages)}
+						disabled={currentPage === totalPages}
+					>
 						Last
-					</PageButton>
-					<PageSizeSelect value={itemsPerPage} onChange={handlePageSizeChange}>
+					</button>
+					<select
+						className='px-3 py-1 ml-2 border border-gray-300'
+						value={itemsPerPage}
+						onChange={handlePageSizeChange}
+					>
 						{itemsPerPageOptions.map((option, index) => (
 							<option key={index} value={option}>
 								{option} per page
 							</option>
 						))}
-					</PageSizeSelect>
-				</PagingContainer>
+					</select>
+				</div>
 			)}
-		</TableWrapper>
+		</div>
 	);
 };
 

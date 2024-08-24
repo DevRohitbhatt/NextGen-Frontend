@@ -49,6 +49,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '150px', // Minimum width of the column
+			maxWidth: '250px', // Maximum width of the column
 		},
 		{
 			key: 'employeeId',
@@ -56,6 +58,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '120px',
+			maxWidth: '180px',
 		},
 		{
 			key: 'uniqueId',
@@ -63,6 +67,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '130px',
+			maxWidth: '200px',
 		},
 		{
 			key: 'lastName',
@@ -70,13 +76,17 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '150px',
+			maxWidth: '200px',
 		},
 		{
 			key: 'firstName',
-			label: 'firstName',
+			label: 'First Name',
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '150px',
+			maxWidth: '200px',
 		},
 		{
 			key: 'middleName',
@@ -84,6 +94,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '150px',
+			maxWidth: '200px',
 		},
 		{
 			key: 'payRate',
@@ -91,6 +103,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '100px',
+			maxWidth: '150px',
 		},
 		{
 			key: 'address',
@@ -98,6 +112,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '200px',
+			maxWidth: '300px',
 		},
 		{
 			key: 'address2',
@@ -105,6 +121,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '200px',
+			maxWidth: '300px',
 		},
 		{
 			key: 'city',
@@ -112,6 +130,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '120px',
+			maxWidth: '180px',
 		},
 		{
 			key: 'state',
@@ -119,6 +139,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '100px',
+			maxWidth: '150px',
 		},
 		{
 			key: 'zip',
@@ -126,6 +148,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '100px',
+			maxWidth: '120px',
 		},
 		{
 			key: 'phone',
@@ -133,6 +157,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '150px',
+			maxWidth: '200px',
 		},
 		{
 			key: 'maritalStatus',
@@ -140,6 +166,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '150px',
+			maxWidth: '200px',
 		},
 		{
 			key: 'dependants',
@@ -147,6 +175,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '150px',
+			maxWidth: '200px',
 		},
 		{
 			key: 'gender',
@@ -154,6 +184,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '100px',
+			maxWidth: '150px',
 		},
 		{
 			key: 'phantomEmployee',
@@ -161,6 +193,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '150px',
+			maxWidth: '200px',
 		},
 		{
 			key: 'cellPhone',
@@ -168,6 +202,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '150px',
+			maxWidth: '200px',
 		},
 		{
 			key: 'email',
@@ -175,6 +211,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '200px',
+			maxWidth: '300px',
 		},
 		{
 			key: 'payrollID',
@@ -182,6 +220,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '120px',
+			maxWidth: '180px',
 		},
 		{
 			key: 'birthDate',
@@ -189,6 +229,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '120px',
+			maxWidth: '180px',
 		},
 		{
 			key: 'startDate',
@@ -196,6 +238,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '120px',
+			maxWidth: '180px',
 		},
 		{
 			key: 'termDate',
@@ -203,6 +247,8 @@ const EmployeeInformation = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			minWidth: '120px',
+			maxWidth: '180px',
 		},
 	];
 
@@ -384,7 +430,7 @@ const EmployeeInformation = () => {
 		if (!filteredEmployeeInformationData?.data) return;
 
 		const pdfData = {
-			title: '`Employee Information Report | ${view}`',
+			title: `Employee Information Report | ${view}`,
 			subHeaders: [new Date().toLocaleDateString()],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',

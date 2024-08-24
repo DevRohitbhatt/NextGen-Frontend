@@ -131,11 +131,32 @@ export default function PrepChart() {
 				setErrorMessage('No Unit Selected, Please select a unit.');
 				setIsError(true);
 				setIsLoading(false);
+				dispatch(setCompanyID(1021));
+				setAlignmentID(1110);
+				getUnits(1021, 1110, 5199);
 			}
 		} else {
 			getPrepChart(1021, 51, new Date());
 		}
 	}, []);
+
+	const getUnits = async (companyId, alignmentId, userId) => {
+		try {
+			const getData = {
+				url: 'unitsAndArea',
+				urlParams: {
+					companyId: companyId,
+					alignmentId: alignmentId,
+					memberId: userId,
+				},
+			};
+
+			const result = await getCall(getData);
+			dispatch(setUnitsList(result.data));
+		} catch (error) {
+			console.error('Error getting units: ', error);
+		}
+	};
 
 	const getPrepChart = async (companyID, unitID, date) => {
 		setIsLoading(true);
@@ -207,24 +228,6 @@ export default function PrepChart() {
 				],
 			],
 		});
-	};
-
-	const getUnits = async (companyId, alignmentId, userId) => {
-		try {
-			const getData = {
-				url: 'unitsAndAreas',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					userId: userId,
-				},
-			};
-
-			const result = await getCall(getData);
-			dispatch(setUnitsList(result.data));
-		} catch (error) {
-			console.error('Error getting units: ', error);
-		}
 	};
 
 	useEffect(() => {
@@ -638,12 +641,12 @@ export default function PrepChart() {
 			url: 'savePrepChartDetail',
 			urlParams: {
 				companyID: companyID,
-				prepChart: prepChart,
 			},
+			bodyData: prepChart,
 		};
 
 		try {
-			const result = await postCall(postData);
+			await postCall(postData);
 			toast.success('Prep Chart saved successfully');
 			toast.update(toastId.current, { autoClose: 500 });
 		} catch (error) {
