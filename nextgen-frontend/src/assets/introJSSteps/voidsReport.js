@@ -1,8 +1,8 @@
-export default function employeeInformation() {
+export default function inventoryTransferReport() {
 	return [
 		{
 			intro:
-				'<center>Welcome to QSROnline’s Employee Information Report tool! Let us show you around.' +
+				'<center>Welcome to QSROnline’s Voids Report tool! Let us show you around.' +
 				'<br><br>Press the enter or arrow keys to advance through the tutorial.</center>',
 		},
 		{
@@ -12,12 +12,20 @@ export default function employeeInformation() {
 				'<br> -You may select any Unit(s) or Area you have permissions to.',
 		},
 		{
+			element: '.date-selector',
+			intro: '-Select the date, or date range, you wish to display Voids Report',
+		},
+		{
 			element: '.dropdown-selector',
-			intro: '-Select the view you like to display Employee Information: All, Active, Terminated, New Hires, or Birthdays.',
+			intro: 'You can select the type of report you want to view. Whether it is a summary or detailed report.',
+		},
+		{
+			element: '.run-button',
+			intro: 'Click the Run button to generate the report based on the selected criteria.',
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Employee Information Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
+			intro: 'You can export the Voids Report to either .CSV, .XLSX or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.paged-table',

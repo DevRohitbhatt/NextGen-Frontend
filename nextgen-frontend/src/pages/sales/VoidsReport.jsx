@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import inventoryTransferReport from '../../assets/introJSSteps/inventoryTransferReport';
@@ -9,74 +9,13 @@ import {
 	UnitModal,
 	ExportOptions,
 	DateSelector,
-	TreeTable,
 	PdfBuilder,
 } from '../../components';
+import { createColumnHelper } from '@tanstack/react-table';
 import exportToExcel from '../../components/exportOptions/ExcelExport';
+import TableHOC from '../../components/table/TableHOC';
 
-const voidsTableStructure = {
-	columnHeaders: [
-		'Unit ID',
-		'Date',
-		'Hours',
-		'Minutes',
-		'Void Reasons',
-		'Employee',
-		'Manager',
-		'Description',
-		'POS Check ID',
-		'Table Name',
-		'Revenue ID',
-		'Price',
-		'Tenders',
-	],
-	classNames: [
-		'unit-id',
-		'date',
-		'hours',
-		'minutes',
-		'void-reasons',
-		'employee',
-		'manager',
-		'description',
-		'pos-check-id',
-		'table-name',
-		'revenue-id',
-		'price',
-		'tenders',
-	],
-	dataTypes: [
-		'number',
-		'date',
-		'number',
-		'number',
-		'string',
-		'string',
-		'string',
-		'string',
-		'number',
-		'string',
-		'number',
-		'number',
-		'string',
-	],
-	columnWidth: [
-		'100px', // Unit ID
-		'120px', // Date
-		'80px', // Hours
-		'80px', // Minutes
-		'150px', // Void Reasons
-		'150px', // Employee
-		'150px', // Manager
-		'200px', // Description
-		'120px', // POS Check ID
-		'140px', // Table Name
-		'100px', // Revenue ID
-		'100px', // Price
-		'150px', // Tenders
-	],
-	rows: [],
-};
+const columnHelper = createColumnHelper();
 
 const VoidsReport = () => {
 	const [companyId, setCompanyId] = useState();
@@ -104,13 +43,9 @@ const VoidsReport = () => {
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
-	const [voidsTable, setVoidsTable] = useState({
-		...voidsTableStructure,
-	});
-
 	//dropdown variables
-	const [filter, setFilter] = useState('');
-	const dropdownOptions = [{ name: 'Detail' }, { name: 'Unit Summary' }];
+	const [filter, setFilter] = useState('0');
+	const dropdownOptions = Array.from({ length: 24 }, (_, index) => ({ name: (index + 1).toString() }));
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -118,6 +53,93 @@ const VoidsReport = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
+
+	// columns for tableHOC
+	const columns = useMemo(
+		() => [
+			columnHelper.accessor('unitId', {
+				id: 'unitId',
+				header: 'Unit ID',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('date', {
+				id: 'date',
+				header: 'Date',
+				cell: ({ getValue }) => {
+					const date = new Date(getValue());
+					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+					return formattedDate;
+				},
+				dataType: 'date',
+			}),
+			columnHelper.accessor('hours', {
+				id: 'hours',
+				header: 'Hours',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('minutes', {
+				id: 'minutes',
+				header: 'Minutes',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('voidReasons', {
+				id: 'voidReasons',
+				header: 'Void Reasons',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('employee', {
+				id: 'employee',
+				header: 'Employee',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('manager', {
+				id: 'manager',
+				header: 'Manager',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('description', {
+				id: 'description',
+				header: 'Description',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('posCheckId', {
+				id: 'posCheckId',
+				header: 'POS Check ID',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('tableName', {
+				id: 'tableName',
+				header: 'Table Name',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('revenueId', {
+				id: 'revenueId',
+				header: 'Revenue ID',
+				footer: ({ table }) =>
+					`Count: ${table.getCoreRowModel().rows.reduce((acc, row) => acc + row.subRows.length, 0)}`,
+				dataType: 'number',
+			}),
+			columnHelper.accessor('price', {
+				id: 'price',
+				header: 'Price',
+				footer: ({ table }) =>
+					`$${table
+						.getCoreRowModel()
+						.rows.reduce(
+							(acc, row) => acc + row.subRows.reduce((acc, curr) => acc + curr.original.price, 0),
+							0
+						)
+						.toFixed(2)}`,
+				dataType: 'number',
+			}),
+			columnHelper.accessor('tenders', {
+				id: 'tenders',
+				header: 'Tenders',
+				dataType: 'string',
+			}),
+		],
+		[]
+	);
 
 	useEffect(() => {
 		// Fetch initial data
@@ -149,10 +171,7 @@ const VoidsReport = () => {
 
 	const fetchData = async (companyId, alignmentId, selectedUnit) => {
 		setIsLoading(true);
-		await Promise.all([
-			fetchUnits(companyId, alignmentId, selectedUnit),
-			handleVoidsReport(companyId, alignmentId),
-		]);
+		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
 		setIsLoading(false);
 	};
 
@@ -172,7 +191,6 @@ const VoidsReport = () => {
 
 			const result = await getCall(getData);
 			setUnitsAndAreasList(result.data);
-
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -183,7 +201,7 @@ const VoidsReport = () => {
 	};
 
 	// Function to get the voids report
-	const handleVoidsReport = async (companyId, alignmentId) => {
+	const handleVoidsReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -192,18 +210,14 @@ const VoidsReport = () => {
 				urlParams: {
 					companyId: companyId,
 					alignmentId: alignmentId,
-					memberId: 51,
+					memberId: selectedUnit,
 					fromDate: selectedFromDate.toISOString().split('T')[0],
 					toDate: selectedToDate.toISOString().split('T')[0],
 				},
 			};
 
 			const result = await getCall(getData);
-			setVoidsReportData(result);
-			setVoidsTable({
-				...voidsTable,
-				rows: result.data[0].voids,
-			});
+			setVoidsReportData(result.data);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -225,13 +239,21 @@ const VoidsReport = () => {
 		setShowDateModal(false);
 	};
 
-	const updateVoidsTable = () => {
-		console.log('update');
+	const handleFilterByHour = (hour) => {
+		setFilter(hour);
 	};
 
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
-		if (!voidsReportData?.data) return;
+		if (!columns || columns.length === 0) {
+			console.error('Columns are not defined or empty');
+			return;
+		}
+
+		if (!voidsReportData || voidsReportData.length === 0) {
+			console.error('Voids report data is not defined or empty');
+			return;
+		}
 
 		const pdfData = {
 			title: 'Voids Report',
@@ -240,33 +262,45 @@ const VoidsReport = () => {
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
-			body: [
-				{
-					type: 'table',
-					widths: headers.map(() => 'auto'),
-					dataTypes: headers.map((header) => header.cellType),
-					data: {
-						columnHeaders: headers.map((header) => header.label),
-						rows: voidsReportData.data.map((row) =>
-							headers.map((header) => ({
-								value: row[header.key],
-								cellType: header.cellType,
-								columnName: header.label,
-							}))
-						),
-					},
-				},
-			],
+			body: buildPDFBody(),
 		};
 
 		PdfBuilder(pdfData);
 	};
 
+	const buildPDFBody = () => {
+		const body = voidsReportData.map((row) => {
+			const unit = unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId);
+			const title = unit ? unit.unitName : '';
+			return {
+				type: 'table',
+				title: title,
+				widths: new Array(columns.length).fill('auto'),
+				dataTypes: columns.map((column) => column.dataType),
+				data: formatPDFData(row.voids),
+			};
+		});
+
+		return body;
+	};
+
+	const formatPDFData = (data) => {
+		return {
+			columnHeaders: columns.map((column) => column.header),
+			rows: data.map((row) =>
+				columns.map((column) => ({
+					value: row[column.id],
+					cellType: '',
+					columnName: column.id,
+				}))
+			),
+		};
+	};
+
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
-		if (!voidsReportData?.data) return;
-		const csvHeaders = headers.map((header) => header.label);
-		const csvData = voidsReportData.data.map((row) => [headers.map((header) => row[header.key])].join(','));
+		const csvHeaders = columns.map((column) => column.header);
+		const csvData = voidsReportData.flatMap((row) => row.voids.map((voidRow) => Object.values(voidRow).join(',')));
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
 		const url = window.URL.createObjectURL(blob);
@@ -278,13 +312,11 @@ const VoidsReport = () => {
 
 	// Function to handle the Excel export
 	const handleExcelClick = () => {
-		if (!voidsReportData?.data) return;
-
 		const data = [
 			{
 				name: 'Voids Report',
-				columns: headers.map((header) => ({ name: header.label, filterButton: true })),
-				data: voidsReportData.data.map((row) => headers.map((header) => row[header.key])),
+				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
+				data: voidsReportData.flatMap((row) => row.voids.map((voidRow) => Object.values(voidRow))),
 			},
 		];
 
@@ -294,6 +326,8 @@ const VoidsReport = () => {
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
+
+	const Table = TableHOC(columns, voidsReportData, false);
 
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -321,6 +355,29 @@ const VoidsReport = () => {
 						isDateRange={true}
 						onClick={() => setShowDateModal(true)}
 					/>
+					<div className=''>
+						<span className='text-xl font-bold '>Filter By Hour</span>
+						<div className='flex '>
+							<div className='flex items-center '>
+								<span className='font-bold '>From: </span>
+								<Dropdown
+									options={dropdownOptions}
+									title=''
+									selectedOption={filter}
+									onOptionChange={handleFilterByHour}
+								/>
+							</div>
+							<div className='flex items-center '>
+								<span className='font-bold '>To: </span>
+								<Dropdown
+									options={dropdownOptions}
+									title=''
+									selectedOption={filter}
+									onOptionChange={handleFilterByHour}
+								/>
+							</div>
+						</div>
+					</div>
 					<div className='run-button' onClick={handleVoidsReport}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 							Run
@@ -346,21 +403,7 @@ const VoidsReport = () => {
 			) : isError ? (
 				<div>{errorMessage}</div>
 			) : (
-				<div>
-					<TreeTable
-						companyAndUnitData={{
-							companyID: companyId,
-							alignmentID: alignmentId,
-							unitID: selectedUnit,
-						}}
-						columnHeaders={voidsTable.columnHeaders}
-						headerClassNames={voidsTable.classNames}
-						dataTypes={voidsTable.dataTypes}
-						columnWidths={voidsTable.columnWidth}
-						data={voidsTable.rows}
-						setData={updateVoidsTable}
-					/>
-				</div>
+				voidsReportData.length > 0 && <div className='paged-table'>{Table}</div>
 			)}
 
 			<div>

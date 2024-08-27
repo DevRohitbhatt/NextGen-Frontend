@@ -441,17 +441,129 @@ const EmployeeInformation = () => {
 					dataTypes: headers.map((header) => header.cellType),
 					data: {
 						columnHeaders: headers.map((header) => header.label),
-						rows: filteredEmployeeInformationData.data.map((row) =>
-							headers.map((header) => ({
-								value: row[header.key],
-								cellType: header.cellType,
-								columnName: header.label,
-							}))
-						),
+						rows: filteredEmployeeInformationData.data.map((row) => [
+							{
+								value: row.unitName,
+								cellType: '',
+								columnName: 'Unit Name',
+							},
+							{
+								value: row.employeeId,
+								cellType: '',
+								columnName: 'Employee ID',
+							},
+							{
+								value: row.uniqueId,
+								cellType: '',
+								columnName: 'Unique ID',
+							},
+							{
+								value: row.lastName,
+								cellType: '',
+								columnName: 'Last Name',
+							},
+							{
+								value: row.firstName,
+								cellType: '',
+								columnName: 'First Name',
+							},
+							{
+								value: row.middleName,
+								cellType: '',
+								columnName: 'Middle Name',
+							},
+							{
+								value: row.payRate,
+								cellType: '',
+								columnName: 'Pay Rate',
+							},
+							{
+								value: row.address,
+								cellType: '',
+								columnName: 'Address',
+							},
+							{
+								value: row.address2,
+								cellType: '',
+								columnName: 'Address 2',
+							},
+							{
+								value: row.city,
+								cellType: '',
+								columnName: 'City',
+							},
+							{
+								value: row.state,
+								cellType: '',
+								columnName: 'State',
+							},
+							{
+								value: row.zip,
+								cellType: '',
+								columnName: 'Zip',
+							},
+							{
+								value: row.phone,
+								cellType: '',
+								columnName: 'Phone',
+							},
+							{
+								value: row.maritalStatus,
+								cellType: '',
+								columnName: 'Marital Status',
+							},
+							{
+								value: row.dependants,
+								cellType: '',
+								columnName: 'Dependants',
+							},
+							{
+								value: row.gender,
+								cellType: '',
+								columnName: 'Gender',
+							},
+							{
+								value: row.phantomEmployee,
+								cellType: '',
+								columnName: 'Phantom Employee',
+							},
+							{
+								value: row.cellPhone,
+								cellType: '',
+								columnName: 'Cell Phone',
+							},
+							{
+								value: row.email,
+								cellType: '',
+								columnName: 'Email',
+							},
+							{
+								value: row.payrollID,
+								cellType: '',
+								columnName: 'Payroll ID',
+							},
+							{
+								value: row.birthDate,
+								cellType: '',
+								columnName: 'Birth Date',
+							},
+							{
+								value: row.startDate,
+								cellType: '',
+								columnName: 'Start Date',
+							},
+							{
+								value: row.termDate,
+								cellType: '',
+								columnName: 'Term Date',
+							},
+						]),
 					},
 				},
 			],
 		};
+
+		console.log('pdfData', pdfData);
 
 		PdfBuilder(pdfData);
 	};
@@ -522,7 +634,12 @@ const EmployeeInformation = () => {
 			) : (
 				filteredEmployeeInformationData?.data && (
 					<div>
-						<Table data={filteredEmployeeInformationData?.data} headers={headers} onRowClick={() => {}} />
+						<Table
+							data={filteredEmployeeInformationData?.data}
+							headers={headers}
+							onRowClick={() => {}}
+							isPaginated={false}
+						/>
 					</div>
 				)
 			)}
