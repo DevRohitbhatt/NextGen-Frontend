@@ -25,6 +25,7 @@ const urlConfig = {
 
 	//food cost apis
 	inventoryTransferReportData: 'api/foodcost/getInventoryTransferReportData',
+	InventoryWeeksOnHand: 'api/foodcost/getInventoryWeeksOnHandReportData',
 
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
@@ -32,5 +33,6 @@ const urlConfig = {
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
+	labourByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
 };
 export default urlConfig;

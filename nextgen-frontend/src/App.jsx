@@ -11,6 +11,8 @@ import SuggestedOrderList from './pages/food-cost/SuggestedOrder/SuggestedOrderL
 import PrepChart from './pages/food-cost/PrepChart/PrepChart';
 import PrepChartTemplate from './pages/food-cost/PrepChart/PrepChartTemplate';
 import VoidsReport from './pages/sales/VoidsReport.jsx';
+import LaborByPayPeriod from './pages/labour/LaborByPayPeriod.jsx';
+import InventoryWeeksOnHand from './pages/food-cost/InventoryWeeksOnHand.jsx';
 
 const App = () => {
 	const selectedTheme = themes.default;
@@ -26,9 +28,14 @@ const App = () => {
 							<Route path='/PrepChartTemplate' element={<PrepChartTemplate />} />
 							<Route path='/SuggestedOrderList' element={<SuggestedOrderList />} />
 							<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
-							<Route path='/inventoryTransferReport' index element={<InventoryTransferReport />} />
-							<Route path='/employeeInformation' element={<EmployeeInformation />} />
-							<Route path='/voids' element={<VoidsReport />} />
+							{/* Food Cost */}
+							<Route path='/InventoryTransferReport' index element={<InventoryTransferReport />} />
+							<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
+							{/* Sales */}
+							<Route path='/Voids' element={<VoidsReport />} />
+							{/* Labour */}
+							<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
+							<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
 						</Routes>
 					</div>
 				</DndProvider>

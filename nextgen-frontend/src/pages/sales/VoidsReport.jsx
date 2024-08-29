@@ -23,6 +23,7 @@ const VoidsReport = () => {
 	const [memberId, setMemberId] = useState();
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 	const [voidsReportData, setVoidsReportData] = useState([]);
+	const [filteredVoidsReportData, setFilteredVoidsReportData] = useState([]);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +45,8 @@ const VoidsReport = () => {
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
-	const [filter, setFilter] = useState('0');
+	const [fromFilter, setFromFilter] = useState(0);
+	const [toFilter, setToFilter] = useState(0);
 	const dropdownOptions = Array.from({ length: 24 }, (_, index) => ({ name: (index + 1).toString() }));
 
 	//IntroJS variables for the help steps
@@ -72,38 +74,38 @@ const VoidsReport = () => {
 				},
 				dataType: 'date',
 			}),
-			columnHelper.accessor('hours', {
-				id: 'hours',
-				header: 'Hours',
+			columnHelper.accessor('hour', {
+				id: 'hour',
+				header: 'Hour',
 				dataType: 'number',
 			}),
-			columnHelper.accessor('minutes', {
-				id: 'minutes',
-				header: 'Minutes',
+			columnHelper.accessor('minute', {
+				id: 'minute',
+				header: 'Minute',
 				dataType: 'number',
 			}),
-			columnHelper.accessor('voidReasons', {
-				id: 'voidReasons',
-				header: 'Void Reasons',
+			columnHelper.accessor('voidReason', {
+				id: 'voidReason',
+				header: 'Void Reason',
 				dataType: 'string',
 			}),
-			columnHelper.accessor('employee', {
-				id: 'employee',
+			columnHelper.accessor('employeeName', {
+				id: 'employeeName',
 				header: 'Employee',
 				dataType: 'string',
 			}),
-			columnHelper.accessor('manager', {
-				id: 'manager',
+			columnHelper.accessor('managerName', {
+				id: 'managerName',
 				header: 'Manager',
 				dataType: 'string',
 			}),
-			columnHelper.accessor('description', {
-				id: 'description',
+			columnHelper.accessor('fullDescription', {
+				id: 'fullDescription',
 				header: 'Description',
 				dataType: 'string',
 			}),
-			columnHelper.accessor('posCheckId', {
-				id: 'posCheckId',
+			columnHelper.accessor('checkId', {
+				id: 'checkId',
 				header: 'POS Check ID',
 				dataType: 'number',
 			}),
@@ -112,8 +114,8 @@ const VoidsReport = () => {
 				header: 'Table Name',
 				dataType: 'string',
 			}),
-			columnHelper.accessor('revenueId', {
-				id: 'revenueId',
+			columnHelper.accessor('revenueID', {
+				id: 'revenueID',
 				header: 'Revenue ID',
 				footer: ({ table }) =>
 					`Count: ${table.getCoreRowModel().rows.reduce((acc, row) => acc + row.subRows.length, 0)}`,
@@ -132,8 +134,8 @@ const VoidsReport = () => {
 						.toFixed(2)}`,
 				dataType: 'number',
 			}),
-			columnHelper.accessor('tenders', {
-				id: 'tenders',
+			columnHelper.accessor('tendersUsed', {
+				id: 'tendersUsed',
 				header: 'Tenders',
 				dataType: 'string',
 			}),
@@ -175,6 +177,8 @@ const VoidsReport = () => {
 		setIsLoading(false);
 	};
 
+	const Table = TableHOC(columns, filteredVoidsReportData, false);
+
 	// Fetching Units and Areas
 	const fetchUnits = async (companyId, alignmentId, memberId) => {
 		try {
@@ -205,6 +209,8 @@ const VoidsReport = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
+			setFromFilter(0);
+			setToFilter(0);
 			const getData = {
 				url: 'voids',
 				urlParams: {
@@ -217,7 +223,19 @@ const VoidsReport = () => {
 			};
 
 			const result = await getCall(getData);
-			setVoidsReportData(result.data);
+			const newData = {
+				...result,
+				data: result.data.map((row) => ({
+					...row,
+					subrows: row.voids,
+				})),
+			};
+
+			setVoidsReportData(newData.data);
+
+			setFilteredVoidsReportData(newData.data);
+			console.log('newData', newData);
+
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -227,20 +245,44 @@ const VoidsReport = () => {
 		}
 	};
 
+	// Function to handle the unit selection
 	const handleUnitSelection = (unitName, unitID) => {
 		setselectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setUnitShowModal(false);
 	};
 
+	// Function to handle the date selection
 	const handleDateSelection = (from, to) => {
 		setSelectedFromDate(from);
 		setSelectedToDate(to);
 		setShowDateModal(false);
 	};
 
-	const handleFilterByHour = (hour) => {
-		setFilter(hour);
+	// Function to handle the hour filter
+	const handleFromByHour = (hour) => {
+		setFromFilter(hour);
+
+		const filteredData = voidsReportData.map((row) => ({
+			...row,
+			// Filter the voids by the selected hour
+			subrows: row.subrows.filter((subRow) => +subRow.hour >= hour && +subRow.hour <= toFilter),
+		}));
+
+		setFilteredVoidsReportData(filteredData);
+	};
+
+	// Function to handle the hour filter
+	const handleToByHour = (hour) => {
+		setToFilter(hour);
+
+		const filteredData = voidsReportData.map((row) => ({
+			...row,
+			// Filter the voids by the selected hour
+			subrows: row.subrows.filter((subRow) => +subRow.hour <= hour && +subRow.hour >= fromFilter),
+		}));
+
+		setFilteredVoidsReportData(filteredData);
 	};
 
 	// Function to handle the PDF export
@@ -327,8 +369,6 @@ const VoidsReport = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = TableHOC(columns, voidsReportData, false);
-
 	return (
 		<div className='w-[85%] mx-auto'>
 			<Steps
@@ -363,8 +403,8 @@ const VoidsReport = () => {
 								<Dropdown
 									options={dropdownOptions}
 									title=''
-									selectedOption={filter}
-									onOptionChange={handleFilterByHour}
+									selectedOption={fromFilter}
+									onOptionChange={handleFromByHour}
 								/>
 							</div>
 							<div className='flex items-center '>
@@ -372,8 +412,8 @@ const VoidsReport = () => {
 								<Dropdown
 									options={dropdownOptions}
 									title=''
-									selectedOption={filter}
-									onOptionChange={handleFilterByHour}
+									selectedOption={toFilter}
+									onOptionChange={handleToByHour}
 								/>
 							</div>
 						</div>
@@ -403,7 +443,7 @@ const VoidsReport = () => {
 			) : isError ? (
 				<div>{errorMessage}</div>
 			) : (
-				voidsReportData.length > 0 && <div className='paged-table'>{Table}</div>
+				filteredVoidsReportData.length > 0 && <div className='paged-table'>{Table}</div>
 			)}
 
 			<div>

@@ -1,17 +1,15 @@
-import { FaSortAlphaUp, FaSortAlphaDownAlt } from 'react-icons/fa';
+import { useState } from 'react';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 import {
 	useReactTable,
 	getCoreRowModel,
-	flexRender,
-	getFilteredRowModel,
-	getSortedRowModel,
 	getPaginationRowModel,
+	getFilteredRowModel,
 	getExpandedRowModel,
+	flexRender,
 } from '@tanstack/react-table';
-import { useState } from 'react';
 
-const TableHOC = (columns, data, isPaginated = true) => {
+function TableHOC2(columns, data, isPaginated = true) {
 	const [expanded, setExpanded] = useState({});
 
 	const table = useReactTable({
@@ -21,12 +19,13 @@ const TableHOC = (columns, data, isPaginated = true) => {
 			expanded,
 		},
 		onExpandedChange: setExpanded,
-		getSubRows: (row) => row.subrows,
+		getSubRows: (row) => row.subRows,
 		getCoreRowModel: getCoreRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		getSortedRowModel: getSortedRowModel(),
 		...(isPaginated && { getPaginationRowModel: getPaginationRowModel() }),
+		getFilteredRowModel: getFilteredRowModel(),
 		getExpandedRowModel: getExpandedRowModel(),
+		filterFromLeafRows: true,
+		maxLeafRowFilterDepth: 1,
 		debugTable: true,
 	});
 
@@ -55,77 +54,47 @@ const TableHOC = (columns, data, isPaginated = true) => {
 			</div>
 
 			{/* table */}
-			<div className=' pr-1 max-h-[60vh] overflow-auto scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-primary scrollbar-track-secondary'>
-				<table className='w-full border-collapse table-auto '>
+			<div className='pr-1 max-h-[60vh] overflow-scroll scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-primary scrollbar-track-secondary'>
+				<table className='w-full border-collapse table-fixed '>
 					<thead className='sticky top-0 w-full bg-white border-b-2 border-solid border-primary'>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => (
-									<th
-										key={header.id}
-										className='px-2 py-4 text-left border-b border-gray-300 cursor-pointer'
-										style={{ width: header.getSize() }}
-										colSpan={header.colSpan}
-									>
-										<div
-											{...{
-												className: header.column.getCanSort()
-													? 'cursor-pointer flex gap-1 items-center '
-													: '',
-												onClick: header.column.getToggleSortingHandler(),
-											}}
+								{headerGroup.headers.map((header) => {
+									return (
+										<th
+											key={header.id}
+											colSpan={header.colSpan}
+											className='px-2 py-4 text-left border-b border-gray-300 cursor-pointer'
+											style={{ width: header.getSize() }}
 										>
-											{flexRender(header.column.columnDef.header, header.getContext())}
-											{{ asc: <FaSortAlphaUp />, desc: <FaSortAlphaDownAlt /> }[
-												header.column.getIsSorted()
-											] ?? null}
-										</div>
-									</th>
-								))}
+											{header.isPlaceholder ? null : (
+												<div>
+													{flexRender(header.column.columnDef.header, header.getContext())}
+												</div>
+											)}
+										</th>
+									);
+								})}
 							</tr>
 						))}
 					</thead>
 					<tbody>
-						{table.getRowModel().rows.map((row) => (
-							<>
-								{row.getCanExpand() && (
-									<tr
-										onClick={row.getToggleExpandedHandler()}
-										className='text-sm font-bold uppercase cursor-pointer'
-									>
-										<td
-											className='p-2 border-b border-solid border-secondary'
-											colSpan={table.getAllColumns().length}
-										>
-											<div className='flex items-center gap-2'>
-												{row.getIsExpanded() ? <IoIosArrowUp /> : <IoIosArrowDown />}
-												Unit: {row.original.unitId} (Count : {row.subRows.length}, $
-												{row.subRows
-													.reduce((acc, curr) => acc + curr.original.price, 0)
-													.toFixed(2)}
-												)
-											</div>
-										</td>
-									</tr>
-								)}
-								{row.getIsExpanded() &&
-									row.subRows.map((subRow) => (
-										<tr
-											key={subRow.id}
-											className='text-sm font-semibold border-b hover:bg-gray-100'
-										>
-											{subRow.getVisibleCells().map((cell) => (
-												<td key={cell.id} className='p-2 '>
-													{flexRender(cell.column.columnDef.cell, cell.getContext())}
-												</td>
-											))}
-										</tr>
-									))}
-							</>
-						))}
+						{table.getRowModel().rows.map((row) => {
+							return (
+								<tr key={row.id} className='h-12 text-sm font-normal border-b hover:bg-gray-100'>
+									{row.getVisibleCells().map((cell) => {
+										return (
+											<td key={cell.id}>
+												{flexRender(cell.column.columnDef.cell, cell.getContext())}
+											</td>
+										);
+									})}
+								</tr>
+							);
+						})}
 					</tbody>
 
-					<tfoot className='sticky bottom-0 '>
+					{/* <tfoot className='sticky bottom-0 '>
 						{table.getFooterGroups().map((footerGroup) => (
 							<>
 								<tr className='bg-white' key={footerGroup.id}>
@@ -142,9 +111,10 @@ const TableHOC = (columns, data, isPaginated = true) => {
 								</tr>
 							</>
 						))}
-					</tfoot>
+					</tfoot> */}
 				</table>
 			</div>
+			<div className='h-2' />
 			{/* pagination */}
 			{isPaginated && (
 				<div className='flex items-center justify-center px-4 py-3 border-t-[1px]'>
@@ -206,6 +176,6 @@ const TableHOC = (columns, data, isPaginated = true) => {
 			)}
 		</div>
 	);
-};
+}
 
-export default TableHOC;
+export default TableHOC2;
