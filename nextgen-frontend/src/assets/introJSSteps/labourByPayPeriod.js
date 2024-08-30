@@ -1,8 +1,8 @@
-export default function voidsReport() {
+export default function laborByPayPeriod() {
 	return [
 		{
 			intro:
-				'<center>Welcome to QSROnline’s Voids Report tool! Let us show you around.' +
+				'<center>Welcome to QSROnline’s Labor By Pay Period Report tool! Let us show you around.' +
 				'<br><br>Press the enter or arrow keys to advance through the tutorial.</center>',
 		},
 		{
@@ -13,11 +13,7 @@ export default function voidsReport() {
 		},
 		{
 			element: '.date-selector',
-			intro: '-Select the date, or date range, you wish to display Voids Report',
-		},
-		{
-			element: '.filterByHour-selector',
-			intro: '-Select the Hours by which you want to filter the report by the hours.',
+			intro: '-Select the date, or date range, you wish to display Labor By Pay Period Report',
 		},
 		{
 			element: '.run-button',
@@ -25,7 +21,7 @@ export default function voidsReport() {
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Voids Report to either .CSV, .XLSX or .PDF format. The ? icon will launch this guided tour.',
+			intro: 'You can export the Labor By Pay Period Report to either .CSV, .XLSX or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.paged-table',

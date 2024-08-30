@@ -110,10 +110,7 @@ const TableHOC = (columns, data, isPaginated = true) => {
 								)}
 								{row.getIsExpanded() &&
 									row.subRows.map((subRow) => (
-										<tr
-											key={subRow.id}
-											className='text-sm font-semibold border-b hover:bg-gray-100'
-										>
+										<tr key={subRow.id} className='text-sm border-b hover:bg-gray-100'>
 											{subRow.getVisibleCells().map((cell) => (
 												<td key={cell.id} className='p-2 '>
 													{flexRender(cell.column.columnDef.cell, cell.getContext())}

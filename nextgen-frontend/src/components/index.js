@@ -13,21 +13,25 @@ export { default as MinimizableContainer } from './common/MinimizableContainer';
 export { default as Tooltip } from './common/ToolTip';
 export { default as DraggableInventoryItem } from './common/DraggableInventoryItem';
 export { default as SearchBar } from './common/SearchBar';
+export { default as Modal } from './common/Modal';
+export { default as ModalSearchBar } from './common/ModalSearchBar';
 
 // ExportOptions components
 export { default as PdfBuilder } from './exportOptions/PdfBuilder';
 export { default as ExcelExport } from './exportOptions/ExcelExport';
 export { default as ExportOptions } from './exportOptions/ExportOptions';
 
-//Modal components
-export { default as Modal } from './common/Modal';
-export { default as ModalSearchBar } from './common/ModalSearchBar';
+// Order components
 export { default as OrderModal } from './orders/OrderModal';
 export { default as PurchaseOrderModal } from './orders/PurchaseOrderModal';
 export { default as SubmitPurchaseOrderModal } from './orders/SubmitPurchaseOrderModal';
 export { default as SetOrderLimitsModal } from './orders/SetOrderLimitsModal';
+
+//Unit components
 export { default as UnitModal } from './units/UnitModal';
 export { default as UnitSelector } from './units/UnitSelector';
+
+// Vendor components
 export { default as VendorModal } from './vendors/VendorModal';
 export { default as SearchVendor } from './vendors/SearchVendor';
 export { default as VendorSelector } from './vendors/VendorSelector';
@@ -40,3 +44,5 @@ export { default as TableBuilder } from './table/TableBuilder';
 export { default as TableCell } from './table/TableCell';
 export { default as TreeNode } from './table/TreeNode';
 export { default as TreeTable } from './table/TreeTableBuilder';
+export { default as TableHOC } from './table/TableHOC';
+export { default as TableHOC2 } from './table/TableHOC2';

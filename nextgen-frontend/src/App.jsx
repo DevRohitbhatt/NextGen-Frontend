@@ -4,15 +4,18 @@ import { ThemeProvider } from 'styled-components';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ToastContainer } from 'react-toastify';
-import InventoryTransferReport from './pages/food-cost/InventoryTransferReport.jsx';
-import EmployeeInformation from './pages/labour/EmployeeInformation.jsx';
-import SuggestedOrder from './pages/food-cost/SuggestedOrder/SuggestedOrder.jsx';
-import SuggestedOrderList from './pages/food-cost/SuggestedOrder/SuggestedOrderList.jsx';
-import PrepChart from './pages/food-cost/PrepChart/PrepChart';
-import PrepChartTemplate from './pages/food-cost/PrepChart/PrepChartTemplate';
-import VoidsReport from './pages/sales/VoidsReport.jsx';
-import LaborByPayPeriod from './pages/labour/LaborByPayPeriod.jsx';
-import InventoryWeeksOnHand from './pages/food-cost/InventoryWeeksOnHand.jsx';
+import {
+	PrepChart,
+	PrepChartTemplate,
+	SuggestedOrderList,
+	SuggestedOrder,
+	InventoryTransfer,
+	InventoryWeeksOnHand,
+	EmployeeInformation,
+	LaborByPayPeriod,
+	Voids,
+} from './pages';
+import { Suspense } from 'react';
 
 const App = () => {
 	const selectedTheme = themes.default;
@@ -23,20 +26,26 @@ const App = () => {
 				<DndProvider backend={HTML5Backend}>
 					<ToastContainer />
 					<div className='App'>
-						<Routes>
-							<Route path='/' element={<PrepChart />} />
-							<Route path='/PrepChartTemplate' element={<PrepChartTemplate />} />
-							<Route path='/SuggestedOrderList' element={<SuggestedOrderList />} />
-							<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
-							{/* Food Cost */}
-							<Route path='/InventoryTransferReport' index element={<InventoryTransferReport />} />
-							<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
-							{/* Sales */}
-							<Route path='/Voids' element={<VoidsReport />} />
-							{/* Labour */}
-							<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
-							<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
-						</Routes>
+						<Suspense
+							fallback={<div className='w-full m-auto text-2xl font-medium text-center '>Loading...</div>}
+						>
+							<Routes>
+								<Route path='/' element={<PrepChart />} />
+								<Route path='/PrepChartTemplate' element={<PrepChartTemplate />} />
+								<Route path='/SuggestedOrderList' element={<SuggestedOrderList />} />
+								<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
+								{/* Food Cost */}
+								<Route path='/InventoryTransfer' index element={<InventoryTransfer />} />
+								<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
+
+								{/* Sales */}
+								<Route path='/Voids' element={<Voids />} />
+
+								{/* Labour */}
+								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
+								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
+							</Routes>
+						</Suspense>
 					</div>
 				</DndProvider>
 			</ThemeProvider>

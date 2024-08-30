@@ -1,20 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
-import inventoryTransferReport from '../../assets/introJSSteps/inventoryTransferReport';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
-	Dropdown,
 	UnitSelector,
 	CalendarModal,
 	UnitModal,
 	ExportOptions,
 	DateSelector,
 	PdfBuilder,
+	ExcelExport as exportToExcel,
+	TableHOC2,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
-import exportToExcel from '../../components/exportOptions/ExcelExport';
-import TableHOC2 from '../../components/table/TableHOC2';
+import laborByPayPeriod from '../../assets/introJSSteps/labourByPayPeriod';
 
 const columnHelper = createColumnHelper();
 
@@ -29,7 +28,7 @@ const LaborByPayPeriod = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Inventory Transfer Report, please try again later.'
+		'There was an error trying to load the Labor By Pay Period Report, please try again later.'
 	);
 
 	//selected unit state variables
@@ -46,7 +45,7 @@ const LaborByPayPeriod = () => {
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
-		steps: inventoryTransferReport(),
+		steps: laborByPayPeriod(),
 		initialStep: 0,
 		stepsEnabled: false,
 	});
@@ -116,19 +115,21 @@ const LaborByPayPeriod = () => {
 				header: 'Regular Hours',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
-						const sum = row.subRows.reduce((acc, subrow) => {
-							if (subrow.getCanExpand()) {
-								return (
-									acc +
-									subrow.subRows.reduce(
-										(subAcc, subSubrow) => subAcc + subSubrow.original.regHours,
-										0
-									)
-								);
-							} else {
-								return acc + subrow.original.regHours;
-							}
-						}, 0);
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce(
+											(subAcc, subSubrow) => subAcc + subSubrow.original.regHours,
+											0
+										)
+									);
+								} else {
+									return acc + subrow.original.regHours;
+								}
+							}, 0)
+							.toFixed(2);
 						return sum;
 					} else {
 						return getValue();
@@ -141,19 +142,21 @@ const LaborByPayPeriod = () => {
 				header: 'Overtime Hours',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
-						const sum = row.subRows.reduce((acc, subrow) => {
-							if (subrow.getCanExpand()) {
-								return (
-									acc +
-									subrow.subRows.reduce(
-										(subAcc, subSubrow) => subAcc + subSubrow.original.overHours,
-										0
-									)
-								);
-							} else {
-								return acc + subrow.original.overHours;
-							}
-						}, 0);
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce(
+											(subAcc, subSubrow) => subAcc + subSubrow.original.overHours,
+											0
+										)
+									);
+								} else {
+									return acc + subrow.original.overHours;
+								}
+							}, 0)
+							.toFixed(2);
 						return sum;
 					} else {
 						return getValue();
@@ -176,19 +179,21 @@ const LaborByPayPeriod = () => {
 				header: 'Pre-Tax Ticket Sales',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
-						const sum = row.subRows.reduce((acc, subrow) => {
-							if (subrow.getCanExpand()) {
-								return (
-									acc +
-									subrow.subRows.reduce(
-										(subAcc, subSubrow) => subAcc + subSubrow.original.preTaxTicketSales,
-										0
-									)
-								);
-							} else {
-								return acc + subrow.original.preTaxTicketSales;
-							}
-						}, 0);
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce(
+											(subAcc, subSubrow) => subAcc + subSubrow.original.preTaxTicketSales,
+											0
+										)
+									);
+								} else {
+									return acc + subrow.original.preTaxTicketSales;
+								}
+							}, 0)
+							.toFixed(2);
 						return sum;
 					} else {
 						return getValue();
@@ -201,19 +206,21 @@ const LaborByPayPeriod = () => {
 				header: 'Declared Tips %',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
-						const sum = row.subRows.reduce((acc, subrow) => {
-							if (subrow.getCanExpand()) {
-								return (
-									acc +
-									subrow.subRows.reduce(
-										(subAcc, subSubrow) => subAcc + subSubrow.original.declaredTipsPct,
-										0
-									)
-								);
-							} else {
-								return acc + subrow.original.declaredTipsPct;
-							}
-						}, 0);
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce(
+											(subAcc, subSubrow) => subAcc + subSubrow.original.declaredTipsPct,
+											0
+										)
+									);
+								} else {
+									return acc + subrow.original.declaredTipsPct;
+								}
+							}, 0)
+							.toFixed(2);
 						return sum;
 					} else {
 						return getValue();
@@ -226,16 +233,21 @@ const LaborByPayPeriod = () => {
 				header: 'Regular Pay',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
-						const sum = row.subRows.reduce((acc, subrow) => {
-							if (subrow.getCanExpand()) {
-								return (
-									acc +
-									subrow.subRows.reduce((subAcc, subSubrow) => subAcc + subSubrow.original.regPay, 0)
-								);
-							} else {
-								return acc + subrow.original.regPay;
-							}
-						}, 0);
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce(
+											(subAcc, subSubrow) => subAcc + subSubrow.original.regPay,
+											0
+										)
+									);
+								} else {
+									return acc + subrow.original.regPay;
+								}
+							}, 0)
+							.toFixed(2);
 						return sum;
 					} else {
 						return getValue();
@@ -307,7 +319,7 @@ const LaborByPayPeriod = () => {
 	};
 
 	// Function to get the voids report
-	const handleVoidsReport = async () => {
+	const handleLaborByPayPeriod = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -344,21 +356,13 @@ const LaborByPayPeriod = () => {
 				})),
 			}));
 
-			// // Removing the old keys
-			// newData.forEach((unit) => {
-			// 	delete unit.employeeLaborModels;
-			// 	unit.subRows.forEach((employee) => {
-			// 		delete employee.laborByPayPeriods;
-			// 	});
-			// });
-
 			setLaborByPayPeriodData(newData);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting voids report data: ', error);
+			console.error('Error getting Labor By Pay Period Report data: ', error);
 		}
 	};
 
@@ -375,58 +379,106 @@ const LaborByPayPeriod = () => {
 	};
 
 	// Function to handle the PDF export
-	// const handlePDFClick = () => {
-	// 	if (!columns || columns.length === 0) {
-	// 		console.error('Columns are not defined or empty');
-	// 		return;
-	// 	}
+	const handlePDFClick = () => {
+		if (!columns || columns.length === 0) {
+			console.error('Columns are not defined or empty');
+			return;
+		}
 
-	// 	if (!voidsReportData || voidsReportData.length === 0) {
-	// 		console.error('Voids report data is not defined or empty');
-	// 		return;
-	// 	}
+		if (!laborByPayPeriodData || laborByPayPeriodData.length === 0) {
+			console.error('Voids report data is not defined or empty');
+			return;
+		}
 
-	// 	const pdfData = {
-	// 		title: 'Voids Report',
-	// 		subHeaders: [
-	// 			`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
-	// 		],
-	// 		exportType: 'pdf',
-	// 		pageOrientation: 'landscape',
-	// 		body: buildPDFBody(),
-	// 	};
+		const pdfData = {
+			title: 'Labor By Pay Period Report',
+			subHeaders: [
+				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
+			],
+			exportType: 'pdf',
+			pageOrientation: 'landscape',
+			body: buildPDFBody(),
+		};
 
-	// 	PdfBuilder(pdfData);
-	// };
+		PdfBuilder(pdfData);
+	};
 
-	// const buildPDFBody = () => {
-	// 	const body = voidsReportData.map((row) => {
-	// 		const unit = unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId);
-	// 		const title = unit ? unit.unitName : '';
-	// 		return {
-	// 			type: 'table',
-	// 			title: title,
-	// 			widths: new Array(columns.length).fill('auto'),
-	// 			dataTypes: columns.map((column) => column.dataType),
-	// 			data: formatPDFData(row.voids),
-	// 		};
-	// 	});
+	const buildPDFBody = () => {
+		const body = laborByPayPeriodData.map((row) => {
+			const unit = unitsAndAreasList?.units?.find((unit) => unit.unitName === row.unitName);
+			const title = unit ? unit.unitName : '';
+			return {
+				type: 'table',
+				title: title,
+				widths: [
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+				],
+				dataTypes: [
+					'number',
+					'string',
+					'date',
+					'number',
+					'string',
+					'number',
+					'number',
+					'number',
+					'number',
+					'number',
+					'number',
+					'number',
+				],
+				data: formatPDFData(row.subRows),
+			};
+		});
 
-	// 	return body;
-	// };
+		return body;
+	};
 
-	// const formatPDFData = (data) => {
-	// 	return {
-	// 		columnHeaders: columns.map((column) => column.header),
-	// 		rows: data.map((row) =>
-	// 			columns.map((column) => ({
-	// 				value: row[column.id],
-	// 				cellType: '',
-	// 				columnName: column.id,
-	// 			}))
-	// 		),
-	// 	};
-	// };
+	const formatPDFData = (data) => {
+		return {
+			columnHeaders: [
+				'Employee ID',
+				'Full Name',
+				'Date',
+				'Job Code',
+				'Job Description',
+				'Regular Hours',
+				'Overtime Hours',
+				'Rate',
+				'Declared Tips',
+				'Pre-Tax Ticket Sales',
+				'Declared Tips %',
+				'Regular Pay',
+			],
+			rows: data.flatMap((row) =>
+				row.subRows.map((subRow) => [
+					{ value: row.employeeId, cellType: 'number', columnName: 'Employee ID' },
+					{ value: `${row.firstName} ${row.lastName}`, cellType: 'string', columnName: 'Full Name' },
+					{ value: subRow.date, cellType: 'date', columnName: 'Date' },
+					{ value: subRow.jobCode, cellType: 'number', columnName: 'Job Code' },
+					{ value: subRow.jobDesc, cellType: 'string', columnName: 'Job Description' },
+					{ value: subRow.regHours, cellType: 'number', columnName: 'Regular Hours' },
+					{ value: subRow.overHours, cellType: 'number', columnName: 'Overtime Hours' },
+					{ value: subRow.rate, cellType: 'number', columnName: 'Rate' },
+					{ value: subRow.declaredTips, cellType: 'number', columnName: 'Declared Tips' },
+					{ value: subRow.preTaxTicketSales, cellType: 'number', columnName: 'Pre-Tax Ticket Sales' },
+					{ value: subRow.declaredTipsPct, cellType: 'number', columnName: 'Declared Tips %' },
+					{ value: subRow.regPay, cellType: 'number', columnName: 'Regular Pay' },
+				])
+			),
+		};
+	};
 
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
@@ -466,21 +518,55 @@ const LaborByPayPeriod = () => {
 	};
 
 	// // Function to handle the Excel export
-	// const handleExcelClick = () => {
-	// 	const data = [
-	// 		{
-	// 			name: 'Voids Report',
-	// 			columns: columns.map((column) => ({ name: column.header, filterButton: true })),
-	// 			data: voidsReportData.flatMap((row) => row.voids.map((voidRow) => Object.values(voidRow))),
-	// 		},
-	// 	];
+	const handleExcelClick = () => {
+		const data = [
+			{
+				name: 'Labor By Pay Period Report',
+				columns: [
+					{ name: 'Unit Name', filter: 'text' },
+					{ name: 'First Name', filter: 'text' },
+					{ name: 'Last Name', filter: 'text' },
+					{ name: 'Employee ID', filter: 'text' },
+					{ name: 'Date', filter: 'text' },
+					{ name: 'Job Code', filter: 'text' },
+					{ name: 'Job Description', filter: 'text' },
+					{ name: 'Regular Hours', filter: 'text' },
+					{ name: 'Overtime Hours', filter: 'text' },
+					{ name: 'Rate', filter: 'text' },
+					{ name: 'Declared Tips', filter: 'text' },
+					{ name: 'Pre-Tax Ticket Sales', filter: 'text' },
+					{ name: 'Declared Tips %', filter: 'text' },
+					{ name: 'Regular Pay', filter: 'text' },
+				],
+				data: laborByPayPeriodData.flatMap((unit) =>
+					unit.subRows.flatMap((employee) =>
+						employee.subRows.map((period) => ({
+							unitName: unit.unitName,
+							firstName: employee.firstName,
+							lastName: employee.lastName,
+							employeeId: employee.employeeId,
+							date: period.date,
+							jobCode: period.jobCode,
+							jobDesc: period.jobDesc,
+							regHoursPeriod: period.regHours,
+							overHours: period.overHours,
+							rate: period.rate,
+							declaredTips: period.declaredTips,
+							preTaxTicketSales: period.preTaxTicketSales,
+							declaredTipsPct: period.declaredTipsPct,
+							regPay: period.regPay,
+						}))
+					)
+				),
+			},
+		];
 
-	// 	const filename = 'voidsReport';
-	// 	const spreadSheetTitle = 'Voids Report';
-	// 	const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const filename = 'laborByPayPeriodReport';
+		const spreadSheetTitle = 'Labor By Pay Period Report';
+		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
 
-	// 	exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
-	// };
+		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
+	};
 
 	const Table = TableHOC2(columns, laborByPayPeriodData, false);
 
@@ -493,7 +579,7 @@ const LaborByPayPeriod = () => {
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
 			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Labor By Pay Period</h2>
-			<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 				<div className='flex items-center space-x-3 '>
 					<UnitSelector
 						companyId={companyId}
@@ -511,7 +597,7 @@ const LaborByPayPeriod = () => {
 						onClick={() => setShowDateModal(true)}
 					/>
 
-					<div className='run-button' onClick={handleVoidsReport}>
+					<div className='run-button' onClick={handleLaborByPayPeriod}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 							Run
 						</div>
@@ -520,11 +606,11 @@ const LaborByPayPeriod = () => {
 				<div>
 					<ExportOptions
 						includePDF={true}
-						//handlePDFClick={handlePDFClick}
+						handlePDFClick={handlePDFClick}
 						includeCSV={true}
 						handleCSVClick={handleCSVClick}
 						includeExcel={true}
-						//handleExcelClick={handleExcelClick}
+						handleExcelClick={handleExcelClick}
 						includeHelp={true}
 						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 					/>

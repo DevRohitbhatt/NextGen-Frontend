@@ -2,8 +2,15 @@ import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import employeeInformation from '../../assets/introJSSteps/employeeInformation';
-import { Dropdown, UnitSelector, UnitModal, ExportOptions, SimpleTable as Table, PdfBuilder } from '../../components';
-import exportToExcel from '../../components/exportOptions/ExcelExport';
+import {
+	Dropdown,
+	UnitSelector,
+	UnitModal,
+	ExportOptions,
+	ExcelExport as exportToExcel,
+	SimpleTable as Table,
+	PdfBuilder,
+} from '../../components';
 
 const EmployeeInformation = () => {
 	const [companyId, setCompanyId] = useState();
@@ -350,7 +357,7 @@ const EmployeeInformation = () => {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your employee information, please try again later.');
-			console.error('Error getting employee information: ', error);
+			console.error('Error getting employee information report data: ', error);
 		}
 	};
 

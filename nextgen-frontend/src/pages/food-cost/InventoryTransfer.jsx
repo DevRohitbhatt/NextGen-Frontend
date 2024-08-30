@@ -9,12 +9,12 @@ import {
 	UnitModal,
 	ExportOptions,
 	DateSelector,
+	ExcelExport as exportToExcel,
 	SimpleTable as Table,
 	PdfBuilder,
 } from '../../components';
-import exportToExcel from '../../components/exportOptions/ExcelExport';
 
-const InventoryTransferReport = () => {
+const InventoryTransfer = () => {
 	const [companyId, setCompanyId] = useState();
 	const [alignmentId, setAlignmentId] = useState();
 	const [memberId, setMemberId] = useState();
@@ -466,4 +466,4 @@ const InventoryTransferReport = () => {
 	);
 };
 
-export default InventoryTransferReport;
+export default InventoryTransfer;

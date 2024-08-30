@@ -2,8 +2,14 @@ import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import inventoryWeekOnHand from '../../assets/introJSSteps/inventoryWeeksOnHand.js';
-import { Dropdown, UnitSelector, UnitModal, ExportOptions, SimpleTable as Table, PdfBuilder } from '../../components';
-import exportToExcel from '../../components/exportOptions/ExcelExport';
+import {
+	Dropdown,
+	UnitSelector,
+	UnitModal,
+	ExportOptions,
+	ExcelExport as exportToExcel,
+	SimpleTable as Table,
+} from '../../components';
 
 const InventoryWeeksOnHand = () => {
 	const [companyId, setCompanyId] = useState();

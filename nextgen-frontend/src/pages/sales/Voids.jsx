@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
-import inventoryTransferReport from '../../assets/introJSSteps/inventoryTransferReport';
+import voidsReport from '../../assets/introJSSteps/voidsReport';
 import {
 	Dropdown,
 	UnitSelector,
@@ -10,14 +10,14 @@ import {
 	ExportOptions,
 	DateSelector,
 	PdfBuilder,
+	ExcelExport as exportToExcel,
+	TableHOC,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
-import exportToExcel from '../../components/exportOptions/ExcelExport';
-import TableHOC from '../../components/table/TableHOC';
 
 const columnHelper = createColumnHelper();
 
-const VoidsReport = () => {
+const Voids = () => {
 	const [companyId, setCompanyId] = useState();
 	const [alignmentId, setAlignmentId] = useState();
 	const [memberId, setMemberId] = useState();
@@ -51,7 +51,7 @@ const VoidsReport = () => {
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
-		steps: inventoryTransferReport(),
+		steps: voidsReport(),
 		initialStep: 0,
 		stepsEnabled: false,
 	});
@@ -232,10 +232,7 @@ const VoidsReport = () => {
 			};
 
 			setVoidsReportData(newData.data);
-
 			setFilteredVoidsReportData(newData.data);
-			console.log('newData', newData);
-
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -395,7 +392,7 @@ const VoidsReport = () => {
 						isDateRange={true}
 						onClick={() => setShowDateModal(true)}
 					/>
-					<div className=''>
+					<div className='filterByHour-selector'>
 						<span className='text-xl font-bold '>Filter By Hour</span>
 						<div className='flex '>
 							<div className='flex items-center '>
@@ -473,4 +470,4 @@ const VoidsReport = () => {
 	);
 };
 
-export default VoidsReport;
+export default Voids;
