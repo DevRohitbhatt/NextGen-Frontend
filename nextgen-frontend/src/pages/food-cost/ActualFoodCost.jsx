@@ -236,7 +236,6 @@ const ActualFoodCost = () => {
 			};
 	
 			const result = await getCall(getData);
-			console.log("Result: ", JSON.stringify(result));
 	
 			const newData = result.data.map((department) => ({
 				department: department.department,
@@ -294,8 +293,10 @@ const ActualFoodCost = () => {
 			return;
 		}
 
+     console.log("actualFoodCostData",actualFoodCostData);
+
 		const pdfData = {
-			title: 'Labor By Pay Period Report',
+			title: 'Actual Food Cost Report',
 			subHeaders: [
 				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
 			],
@@ -327,12 +328,20 @@ const ActualFoodCost = () => {
 					'auto',
 					'auto',
 					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto'
 				],
 				dataTypes: [
-					'number',
 					'string',
-					'date',
-					'number',
+					'string',
 					'string',
 					'number',
 					'number',
@@ -341,6 +350,18 @@ const ActualFoodCost = () => {
 					'number',
 					'number',
 					'number',
+					'number',
+					'number',
+                    'number',
+					'number',
+					'number',
+					'number',
+					'number',
+					'number',
+					'number',
+					'number',
+					'string',
+					'string'
 				],
 				data: formatPDFData(row.subRows),
 			};
@@ -352,33 +373,53 @@ const ActualFoodCost = () => {
 	const formatPDFData = (data) => {
 		return {
 			columnHeaders: [
-				'Employee ID',
-				'Full Name',
-				'Date',
-				'Job Code',
-				'Job Description',
-				'Regular Hours',
-				'Overtime Hours',
-				'Rate',
-				'Declared Tips',
-				'Pre-Tax Ticket Sales',
-				'Declared Tips %',
-				'Regular Pay',
+				'Department',
+				'Sub Department',
+				'Description',
+				'UOM',
+				'Beg #',
+				'Beg $',
+				'Pur #',
+				'Pur $',
+				'Trans In#',
+				'Trans In $',
+                'Trans Out#',
+                'Trans Out $',
+                'End #',
+                'End $',
+				'Actual Usage #',
+                'Actual Usage $',
+				'Actual Usage %',
+                'Waste #',
+                'Waste $',
+				'Waste %',
+				'Comparison Name',
+                'Comparison Sales'
 			],
 			rows: data.flatMap((row) =>
 				row.subRows.map((subRow) => [
-					{ value: row.employeeId, cellType: 'number', columnName: 'Employee ID' },
-					{ value: `${row.firstName} ${row.lastName}`, cellType: 'string', columnName: 'Full Name' },
-					{ value: subRow.date, cellType: 'date', columnName: 'Date' },
-					{ value: subRow.jobCode, cellType: 'number', columnName: 'Job Code' },
-					{ value: subRow.jobDesc, cellType: 'string', columnName: 'Job Description' },
-					{ value: subRow.regHours, cellType: 'number', columnName: 'Regular Hours' },
-					{ value: subRow.overHours, cellType: 'number', columnName: 'Overtime Hours' },
-					{ value: subRow.rate, cellType: 'number', columnName: 'Rate' },
-					{ value: subRow.declaredTips, cellType: 'number', columnName: 'Declared Tips' },
-					{ value: subRow.preTaxTicketSales, cellType: 'number', columnName: 'Pre-Tax Ticket Sales' },
-					{ value: subRow.declaredTipsPct, cellType: 'number', columnName: 'Declared Tips %' },
-					{ value: subRow.regPay, cellType: 'number', columnName: 'Regular Pay' },
+					{ value: row.department, cellType: 'string', columnName: 'Department' },
+					{ value: row.subDepartment , cellType: 'string', columnName: 'Sub Department' },
+					{ value: subRow.description, cellType: 'string', columnName: 'Description' },
+					{ value: subRow.unit, cellType: 'string', columnName: 'UOM' },
+					{ value: subRow.begNumber, cellType: 'number', columnName: 'Beg #' },
+					{ value: subRow.begDollar, cellType: 'number', columnName: 'Beg $' },
+					{ value: subRow.purNumber, cellType: 'number', columnName: 'Pur #' },
+					{ value: subRow.purDollar, cellType: 'number', columnName: 'Pur $' },
+					{ value: subRow.trInNumber, cellType: 'number', columnName: 'Trans In#' },
+					{ value: subRow.trInDollar, cellType: 'number', columnName: 'Trans In $' },
+					{ value: subRow.trOutDollar, cellType: 'number', columnName: 'Trans Out #' },
+					{ value: subRow.trOutDollar, cellType: 'number', columnName: 'Trans Out $' },
+					{ value: subRow.endNumber, cellType: 'number', columnName: 'End #' },
+					{ value: subRow.endDollar, cellType: 'number', columnName: 'End $' },
+					{ value: subRow.useNumber, cellType: 'number', columnName: 'Actual Usage #' },
+					{ value: subRow.useDollar, cellType: 'number', columnName: 'Actual Usage $' },
+					{ value: subRow.salesNet, cellType: 'number', columnName: 'Actual Usage %' },
+					{ value: subRow.usePct, cellType: 'number', columnName: 'Waste #' },
+					{ value: subRow.wasteNumber, cellType: 'number', columnName: 'Waste $' },
+					{ value: subRow.wasteDollar, cellType: 'number', columnName: 'Waste %' },
+					{ value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
+					{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' }
 				])
 			),
 		};
@@ -386,42 +427,59 @@ const ActualFoodCost = () => {
 
 	// // Function to handle the Excel export
 	const handleExcelClick = () => {
+		console.log("actualFoodCostData",actualFoodCostData);
+		
 		const data = [
 			{
 				name: 'Actual Food Cost Report',
 				columns: [
-					{ name: 'Unit Name', filter: 'text' },
-					{ name: 'First Name', filter: 'text' },
-					{ name: 'Last Name', filter: 'text' },
-					{ name: 'Employee ID', filter: 'text' },
-					{ name: 'Date', filter: 'text' },
-					{ name: 'Job Code', filter: 'text' },
-					{ name: 'Job Description', filter: 'text' },
-					{ name: 'Regular Hours', filter: 'text' },
-					{ name: 'Overtime Hours', filter: 'text' },
-					{ name: 'Rate', filter: 'text' },
-					{ name: 'Declared Tips', filter: 'text' },
-					{ name: 'Pre-Tax Ticket Sales', filter: 'text' },
-					{ name: 'Declared Tips %', filter: 'text' },
-					{ name: 'Regular Pay', filter: 'text' },
+					{ name: 'Department', filter: 'text' },
+					{ name: 'Sub Department', filter: 'text' },
+					{ name: 'Description', filter: 'text' },
+					{ name: 'Beg #', filter: 'text' },
+					{ name: 'Beg $', filter: 'text' },
+					{ name: 'Pur #', filter: 'text' },
+					{ name: 'Pur $', filter: 'text' },
+					{ name: 'Trans In#', filter: 'text' },
+					{ name: 'Trans In $', filter: 'text' },
+					{ name: 'Trans Out #', filter: 'text' },
+					{ name: 'Trans Out $', filter: 'text' },
+					{ name: 'End #', filter: 'text' },
+					{ name: 'End $', filter: 'text' },
+					{ name: 'Actual Usage #', filter: 'text' },
+					{ name: 'Actual Usage $', filter: 'text' },
+					{ name: 'Actual Usage %', filter: 'text' },
+					{ name: 'Waste #', filter: 'text' },
+					{ name: 'Waste $', filter: 'text' },
+					{ name: 'Waste %', filter: 'text' },
+					{ name: 'Comparison Name', filter: 'text' },
+					{ name: 'Comparison Sales', filter: 'text' }
+
 				],
 				data: actualFoodCostData.flatMap((unit) =>
 					unit.subRows.flatMap((employee) =>
 						employee.subRows.map((period) => ({
-							unitName: unit.unitName,
-							firstName: employee.firstName,
-							lastName: employee.lastName,
-							employeeId: employee.employeeId,
-							date: period.date,
-							jobCode: period.jobCode,
-							jobDesc: period.jobDesc,
-							regHoursPeriod: period.regHours,
-							overHours: period.overHours,
-							rate: period.rate,
-							declaredTips: period.declaredTips,
-							preTaxTicketSales: period.preTaxTicketSales,
-							declaredTipsPct: period.declaredTipsPct,
-							regPay: period.regPay,
+							department: period.department,
+							subDepartment: period.subDepartment,
+							description: period.description,
+							begNumber: period.begNumber,
+							begDollar: period.begDollar,
+							purNumber: period.purNumber,
+							purDollar: period.purDollar,
+							trInNumber: period.trInNumber,
+							trInDollar: period.trInDollar,
+							trOutNumber: period.trOutNumber,
+							trOutDollar: period.trOutDollar,
+							endDollar: period.endDollar,
+							useNumber: period.useNumber,
+							useDollar:period.useDollar,
+							salesNet: period.salesNet,
+							usePct: period.usePct,
+                            wasteNumber: period.wasteNumber,
+                            wasteDollar: period.wasteDollar,
+                            wastePct: period.wastePct,
+                            comparisonName: period.comparisonName,
+							comparisonSales: period.comparisonSales
 						}))
 					)
 				),
