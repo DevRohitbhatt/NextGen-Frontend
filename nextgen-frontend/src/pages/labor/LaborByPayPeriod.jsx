@@ -11,6 +11,7 @@ import {
 	PdfBuilder,
 	ExcelExport as exportToExcel,
 	TableHOC2,
+	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import laborByPayPeriod from '../../assets/introJSSteps/labourByPayPeriod';
@@ -23,7 +24,7 @@ const LaborByPayPeriod = () => {
 	const [memberId, setMemberId] = useState();
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 	const [laborByPayPeriodData, setLaborByPayPeriodData] = useState([]);
-
+	const [isTableRendered, setIsTableRendered] = useState(true);
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
@@ -43,6 +44,10 @@ const LaborByPayPeriod = () => {
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
+	//dropdown variables
+	const [view, setView] = useState('Units');
+	const dropdownOptions = [{ name: 'Units' }, { name: 'Employees' }, { name: 'Employee Details' }];
+
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
 		steps: laborByPayPeriod(),
@@ -59,7 +64,6 @@ const LaborByPayPeriod = () => {
 					row.getCanExpand() ? (
 						<div
 							{...{
-								onClick: row.getToggleExpandedHandler(),
 								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
 								className: 'inline-block',
 							}}
@@ -323,6 +327,7 @@ const LaborByPayPeriod = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
+			setIsTableRendered(false);
 			const getData = {
 				url: 'labourByPayPeriod',
 				urlParams: {
@@ -357,6 +362,7 @@ const LaborByPayPeriod = () => {
 			}));
 
 			setLaborByPayPeriodData(newData);
+
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -376,6 +382,10 @@ const LaborByPayPeriod = () => {
 		setSelectedFromDate(from);
 		setSelectedToDate(to);
 		setShowDateModal(false);
+	};
+
+	const handleViewChange = (option) => {
+		setView(option);
 	};
 
 	// Function to handle the PDF export
@@ -568,7 +578,7 @@ const LaborByPayPeriod = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = TableHOC2(columns, laborByPayPeriodData, false);
+	const Table = TableHOC2(columns, laborByPayPeriodData, false, false, view, isTableRendered, setIsTableRendered);
 
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -596,7 +606,14 @@ const LaborByPayPeriod = () => {
 						isDateRange={true}
 						onClick={() => setShowDateModal(true)}
 					/>
-
+					<div className='w-52'>
+						<Dropdown
+							title='Expand View'
+							options={dropdownOptions}
+							selectedOption={view}
+							onOptionChange={handleViewChange}
+						/>
+					</div>
 					<div className='run-button' onClick={handleLaborByPayPeriod}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 							Run

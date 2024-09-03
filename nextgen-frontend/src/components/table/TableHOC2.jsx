@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { FaSortAlphaUp, FaSortAlphaDownAlt } from 'react-icons/fa';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 import {
 	useReactTable,
@@ -6,12 +7,13 @@ import {
 	getPaginationRowModel,
 	getFilteredRowModel,
 	getExpandedRowModel,
+	getSortedRowModel,
 	flexRender,
 } from '@tanstack/react-table';
+import useTableView from '../../hooks/useTableView';
 
-function TableHOC2(columns, data, isPaginated = true) {
+function TableHOC2(columns, data, isPaginated = false, isFooter = false, view, isTableRendered, setIsTableRendered) {
 	const [expanded, setExpanded] = useState({});
-
 	const table = useReactTable({
 		data,
 		columns,
@@ -23,11 +25,21 @@ function TableHOC2(columns, data, isPaginated = true) {
 		getCoreRowModel: getCoreRowModel(),
 		...(isPaginated && { getPaginationRowModel: getPaginationRowModel() }),
 		getFilteredRowModel: getFilteredRowModel(),
+		getSortedRowModel: getSortedRowModel(),
 		getExpandedRowModel: getExpandedRowModel(),
-		filterFromLeafRows: true,
-		maxLeafRowFilterDepth: 1,
+		//filterFromLeafRows: true,
+		//maxLeafRowFilterDepth: 1,
 		debugTable: true,
 	});
+
+	useTableView(table, view, isTableRendered);
+
+	//Set isTableRendered to true after the table has rendered once
+	useEffect(() => {
+		if (table.getRowModel().rows.length > 0 && !isTableRendered) {
+			setIsTableRendered(true);
+		}
+	}, [table.getRowModel().rows.length, isTableRendered]);
 
 	return (
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-10 p-3'>
@@ -68,8 +80,18 @@ function TableHOC2(columns, data, isPaginated = true) {
 											style={{ width: header.getSize() }}
 										>
 											{header.isPlaceholder ? null : (
-												<div>
+												<div
+													{...{
+														className: header.column.getCanSort()
+															? 'cursor-pointer flex gap-1 items-center '
+															: '',
+														onClick: header.column.getToggleSortingHandler(),
+													}}
+												>
 													{flexRender(header.column.columnDef.header, header.getContext())}
+													{{ asc: <FaSortAlphaUp />, desc: <FaSortAlphaDownAlt /> }[
+														header.column.getIsSorted()
+													] ?? null}
 												</div>
 											)}
 										</th>
@@ -81,7 +103,13 @@ function TableHOC2(columns, data, isPaginated = true) {
 					<tbody>
 						{table.getRowModel().rows.map((row) => {
 							return (
-								<tr key={row.id} className='h-12 text-sm font-normal border-b hover:bg-gray-100'>
+								<tr
+									key={row.id}
+									className={`h-12 text-sm font-normal border-b hover:bg-gray-100 ${
+										row.getCanExpand ? 'cursor-pointer' : 'cursor-text'
+									}`}
+									onClick={row.getCanExpand ? row.getToggleExpandedHandler() : null}
+								>
 									{row.getVisibleCells().map((cell) => {
 										return (
 											<td key={cell.id}>
@@ -94,24 +122,26 @@ function TableHOC2(columns, data, isPaginated = true) {
 						})}
 					</tbody>
 
-					{/* <tfoot className='sticky bottom-0 '>
-						{table.getFooterGroups().map((footerGroup) => (
-							<>
-								<tr className='bg-white' key={footerGroup.id}>
-									{footerGroup.headers.map((footer) => (
-										<td
-											key={footer.id}
-											className='px-2 py-4 text-left border-b border-gray-300 cursor-pointer'
-											style={{ width: footer.getSize() }}
-											colSpan={footer.colSpan}
-										>
-											{flexRender(footer.column.columnDef.footer, footer.getContext())}
-										</td>
-									))}
-								</tr>
-							</>
-						))}
-					</tfoot> */}
+					{isFooter && (
+						<tfoot className='sticky bottom-0 '>
+							{table.getFooterGroups().map((footerGroup) => (
+								<>
+									<tr className='bg-white' key={footerGroup.id}>
+										{footerGroup.headers.map((footer) => (
+											<td
+												key={footer.id}
+												className='px-2 py-4 text-left border-b border-gray-300 cursor-pointer'
+												style={{ width: footer.getSize() }}
+												colSpan={footer.colSpan}
+											>
+												{flexRender(footer.column.columnDef.footer, footer.getContext())}
+											</td>
+										))}
+									</tr>
+								</>
+							))}
+						</tfoot>
+					)}
 				</table>
 			</div>
 			<div className='h-2' />
