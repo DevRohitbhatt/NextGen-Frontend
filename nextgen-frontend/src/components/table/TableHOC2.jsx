@@ -12,7 +12,16 @@ import {
 } from '@tanstack/react-table';
 import useTableView from '../../hooks/useTableView';
 
-function TableHOC2(columns, data, isPaginated = false, isFooter = false, view, isTableRendered, setIsTableRendered) {
+function TableHOC2({
+	columns,
+	data,
+	isPaginated = false,
+	isFooter = false,
+	view,
+	isTableRendered,
+	setIsTableRendered,
+	expandCollapseButtons = false,
+}) {
 	const [expanded, setExpanded] = useState({});
 	const table = useReactTable({
 		data,
@@ -36,34 +45,36 @@ function TableHOC2(columns, data, isPaginated = false, isFooter = false, view, i
 
 	//Set isTableRendered to true after the table has rendered once
 	useEffect(() => {
-		if (table.getRowModel().rows.length > 0 && !isTableRendered) {
+		if (table.getRowModel().rows.length > 0 && !isTableRendered && setIsTableRendered) {
 			setIsTableRendered(true);
 		}
-	}, [table.getRowModel().rows.length, isTableRendered]);
+	}, [table.getRowModel().rows.length, isTableRendered, setIsTableRendered]);
 
 	return (
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-10 p-3'>
 			{/* expand/collapse all button */}
-			<div className='flex items-center my-4 space-x-4'>
-				<button
-					onClick={() => table.toggleAllRowsExpanded(false)}
-					className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-						table.getIsAllRowsExpanded() ? 'text-primary bg-secondary' : 'bg-primary text-white'
-					}`}
-				>
-					Collapse All
-					<IoIosArrowDown />
-				</button>
-				<button
-					onClick={() => table.toggleAllRowsExpanded(true)}
-					className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-						table.getIsAllRowsExpanded() ? 'bg-primary text-white' : 'text-primary bg-secondary'
-					}`}
-				>
-					Expand All
-					<IoIosArrowUp />
-				</button>
-			</div>
+			{expandCollapseButtons && (
+				<div className='flex items-center my-4 space-x-4'>
+					<button
+						onClick={() => table.toggleAllRowsExpanded(false)}
+						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+							table.getIsAllRowsExpanded() ? 'text-primary bg-secondary' : 'bg-primary text-white'
+						}`}
+					>
+						Collapse All
+						<IoIosArrowDown />
+					</button>
+					<button
+						onClick={() => table.toggleAllRowsExpanded(true)}
+						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+							table.getIsAllRowsExpanded() ? 'bg-primary text-white' : 'text-primary bg-secondary'
+						}`}
+					>
+						Expand All
+						<IoIosArrowUp />
+					</button>
+				</div>
+			)}
 
 			{/* table */}
 			<div className='pr-1 max-h-[60vh] overflow-scroll scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-primary scrollbar-track-secondary'>
@@ -106,9 +117,9 @@ function TableHOC2(columns, data, isPaginated = false, isFooter = false, view, i
 								<tr
 									key={row.id}
 									className={`h-12 text-sm font-normal border-b hover:bg-gray-100 ${
-										row.getCanExpand ? 'cursor-pointer' : 'cursor-text'
+										row.getCanExpand() ? 'cursor-pointer' : 'cursor-default'
 									}`}
-									onClick={row.getCanExpand ? row.getToggleExpandedHandler() : null}
+									onClick={row.getCanExpand() ? row.getToggleExpandedHandler() : null}
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (

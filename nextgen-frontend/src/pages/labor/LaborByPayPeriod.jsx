@@ -578,7 +578,15 @@ const LaborByPayPeriod = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = TableHOC2(columns, laborByPayPeriodData, false, false, view, isTableRendered, setIsTableRendered);
+	const Table = (
+		<TableHOC2
+			columns={columns}
+			data={laborByPayPeriodData}
+			view={view}
+			isTableRendered={isTableRendered}
+			setIsTableRendered={setIsTableRendered}
+		/>
+	);
 
 	return (
 		<div className='w-[85%] mx-auto'>

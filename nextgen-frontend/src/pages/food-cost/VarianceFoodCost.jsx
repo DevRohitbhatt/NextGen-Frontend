@@ -24,6 +24,7 @@ const VarianceFoodCost = () => {
 	const [memberId, setMemberId] = useState();
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 	const [varianceFoodCostData, setVarianceFoodCostData] = useState([]);
+	const [isTableRendered, setIsTableRendered] = useState(true);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
@@ -46,7 +47,9 @@ const VarianceFoodCost = () => {
 
 	//dropdown variables
 	const [countType, setCountType] = useState('Weekly');
-	const dropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
+	const countDropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
+	// const [viewTotal, setViewTotal] = useState('Department');
+	// const ViewDropdownOptions = [{ name: 'Department' }, { name: 'Sub-Department' }, { name: 'Inventory Item' }];
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -126,7 +129,7 @@ const VarianceFoodCost = () => {
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -146,20 +149,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -179,20 +187,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -212,20 +225,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -245,20 +263,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -278,20 +301,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -311,20 +339,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -344,20 +377,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -377,20 +415,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -410,20 +453,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -443,20 +491,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -476,20 +529,25 @@ const VarianceFoodCost = () => {
 												subAcc +
 												subSubrow.subRows.reduce(
 													(subsubAcc, subsubsubrow) =>
-														subsubAcc + Number(subsubsubrow.original.actualNumber),
+														subsubAcc +
+														(subsubsubrow.original.actualNumber
+															? Number(subsubsubrow.original.actualNumber)
+															: 0),
 													0
 												),
 											0
 										)
 									);
 								} else {
-									return acc + Number(subrow.original.actualNumber);
+									return (
+										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+									);
 								}
 							}, 0)
 							.toFixed(2);
 						return sum;
 					} else {
-						return getValue().toFixed(2);
+						return (getValue() ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -571,6 +629,7 @@ const VarianceFoodCost = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
+			setIsTableRendered(false);
 			const getData = {
 				url: 'varianceFoodCost',
 				urlParams: {
@@ -827,7 +886,7 @@ const VarianceFoodCost = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = TableHOC2(columns, varianceFoodCostData);
+	const Table = <TableHOC2 columns={columns} data={varianceFoodCostData} />;
 
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -858,13 +917,20 @@ const VarianceFoodCost = () => {
 
 					<div className='w-36'>
 						<Dropdown
-							options={dropdownOptions}
+							options={countDropdownOptions}
 							title='Count Type'
 							selectedOption={countType}
 							onOptionChange={(option) => setCountType(option)}
 						/>
 					</div>
-
+					{/* <div className='w-52'>
+						<Dropdown
+							title='View Total By'
+							options={ViewDropdownOptions}
+							selectedOption={viewTotal}
+							onOptionChange={(option) => setViewTotal(option)}
+						/>
+					</div> */}
 					<div className='run-button' onClick={handleLaborByPayPeriod}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 							Run

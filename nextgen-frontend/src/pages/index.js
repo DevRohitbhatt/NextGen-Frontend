@@ -8,6 +8,7 @@ const SuggestedOrderList = lazy(() => import('./food-cost/SuggestedOrder/Suggest
 const InventoryTransfer = lazy(() => import('./food-cost/InventoryTransfer'));
 const InventoryWeeksOnHand = lazy(() => import('./food-cost/InventoryWeeksOnHand'));
 const VarianceFoodCost = lazy(() => import('./food-cost/VarianceFoodCost'));
+const Invoices = lazy(() => import('./food-cost/Invoices'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
@@ -27,4 +28,5 @@ export {
 	LaborByPayPeriod,
 	Voids,
 	VarianceFoodCost,
+	Invoices,
 };
