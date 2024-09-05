@@ -16,6 +16,7 @@ import {
 	Voids,
 	VarianceFoodCost,
 	Invoices,
+	Countsheets,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -41,6 +42,7 @@ const App = () => {
 								<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
 								<Route path='/VarianceFoodCost' index element={<VarianceFoodCost />} />
 								<Route path='/Invoices' element={<Invoices />} />
+								<Route path='/Countsheets' element={<Countsheets />} />
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />

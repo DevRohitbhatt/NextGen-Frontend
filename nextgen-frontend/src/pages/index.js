@@ -9,6 +9,7 @@ const InventoryTransfer = lazy(() => import('./food-cost/InventoryTransfer'));
 const InventoryWeeksOnHand = lazy(() => import('./food-cost/InventoryWeeksOnHand'));
 const VarianceFoodCost = lazy(() => import('./food-cost/VarianceFoodCost'));
 const Invoices = lazy(() => import('./food-cost/Invoices'));
+const Countsheets = lazy(() => import('./food-cost/Countsheets'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
@@ -29,4 +30,5 @@ export {
 	Voids,
 	VarianceFoodCost,
 	Invoices,
+	Countsheets,
 };

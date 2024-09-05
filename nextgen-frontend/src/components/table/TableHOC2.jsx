@@ -15,6 +15,7 @@ import useTableView from '../../hooks/useTableView';
 function TableHOC2({
 	columns,
 	data,
+	isHeader = true,
 	isPaginated = false,
 	isFooter = false,
 	view,
@@ -79,38 +80,43 @@ function TableHOC2({
 			{/* table */}
 			<div className='pr-1 max-h-[60vh] overflow-scroll scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-primary scrollbar-track-secondary'>
 				<table className='w-full border-collapse table-fixed '>
-					<thead className='sticky top-0 w-full bg-white border-b-2 border-solid border-primary'>
-						{table.getHeaderGroups().map((headerGroup) => (
-							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => {
-									return (
-										<th
-											key={header.id}
-											colSpan={header.colSpan}
-											className='px-2 py-4 text-left border-b border-gray-300 cursor-pointer'
-											style={{ width: header.getSize() }}
-										>
-											{header.isPlaceholder ? null : (
-												<div
-													{...{
-														className: header.column.getCanSort()
-															? 'cursor-pointer flex gap-1 items-center '
-															: '',
-														onClick: header.column.getToggleSortingHandler(),
-													}}
-												>
-													{flexRender(header.column.columnDef.header, header.getContext())}
-													{{ asc: <FaSortAlphaUp />, desc: <FaSortAlphaDownAlt /> }[
-														header.column.getIsSorted()
-													] ?? null}
-												</div>
-											)}
-										</th>
-									);
-								})}
-							</tr>
-						))}
-					</thead>
+					{isHeader && (
+						<thead className='sticky top-0 w-full bg-white border-b-2 border-solid border-primary'>
+							{table.getHeaderGroups().map((headerGroup) => (
+								<tr key={headerGroup.id}>
+									{headerGroup.headers.map((header) => {
+										return (
+											<th
+												key={header.id}
+												colSpan={header.colSpan}
+												className='px-2 py-4 text-left border-b border-gray-300 cursor-pointer'
+												style={{ width: header.getSize() }}
+											>
+												{header.isPlaceholder ? null : (
+													<div
+														{...{
+															className: header.column.getCanSort()
+																? 'cursor-pointer flex gap-1 items-center '
+																: '',
+															onClick: header.column.getToggleSortingHandler(),
+														}}
+													>
+														{flexRender(
+															header.column.columnDef.header,
+															header.getContext()
+														)}
+														{{ asc: <FaSortAlphaUp />, desc: <FaSortAlphaDownAlt /> }[
+															header.column.getIsSorted()
+														] ?? null}
+													</div>
+												)}
+											</th>
+										);
+									})}
+								</tr>
+							))}
+						</thead>
+					)}
 					<tbody>
 						{table.getRowModel().rows.map((row) => {
 							return (

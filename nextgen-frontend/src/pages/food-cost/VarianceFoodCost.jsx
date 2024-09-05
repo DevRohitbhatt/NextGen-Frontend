@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	UnitSelector,
@@ -25,6 +26,9 @@ const VarianceFoodCost = () => {
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 	const [varianceFoodCostData, setVarianceFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
+	const [showMoreModel, setShowMoreModel] = useState(false);
+
+	const navigate = useNavigate();
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
@@ -707,6 +711,42 @@ const VarianceFoodCost = () => {
 		setShowDateModal(false);
 	};
 
+	const handleBeginnerCountsheet = async () => {
+		try {
+			const getData = {
+				url: 'getCountsheets',
+				urlParams: {
+					companyID: companyId,
+					alignmentID: alignmentId,
+					memberID: selectedUnit,
+					fromDate: selectedFromDate.toISOString().split('T')[0],
+					toDate: selectedToDate.toISOString().split('T')[0],
+				},
+			};
+
+			const result = await getCall(getData);
+			console.log('Countsheet data: ', result.data);
+
+			const minCountsheet = result.data.reduce((minCountsheet, countsheet) => {
+				if (
+					!minCountsheet ||
+					countsheet.dateTime < minCountsheet.dateTime ||
+					(countsheet.dateTime === minCountsheet.dateTime &&
+						countsheet.saveDateTime > minCountsheet.saveDateTime)
+				) {
+					minCountsheet = countsheet;
+				}
+				return minCountsheet;
+			}, null);
+
+			console.log('Min countsheet: ', minCountsheet);
+
+			navigate('/Countsheets', { state: { companyId: companyId, countsheet: minCountsheet } });
+		} catch (error) {
+			console.error('Error getting Countsheet data: ', error);
+		}
+	};
+
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
 		if (!columns || columns.length === 0) {
@@ -936,6 +976,20 @@ const VarianceFoodCost = () => {
 							Run
 						</div>
 					</div>
+					<button className='relative' onClick={() => setShowMoreModel(!showMoreModel)}>
+						more..
+						{showMoreModel && (
+							<ul className='absolute left-0 w-56 p-4 mt-2 space-y-3 text-left rounded-lg top-full bg-secondary'>
+								<li
+									onClick={handleBeginnerCountsheet}
+									className='p-2 hover:bg-primary hover:text-white'
+								>
+									Beginning Countsheet
+								</li>
+								<li className='p-2 hover:bg-primary hover:text-white'>Ending Countsheet</li>
+							</ul>
+						)}
+					</button>
 				</div>
 				<div>
 					<ExportOptions

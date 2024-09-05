@@ -29,6 +29,8 @@ const urlConfig = {
 	varianceFoodCost: 'api/foodcost/getVarianceFoodCostReportData',
 	invoiceReport: '/api/foodcost/getInvoiceReportData',
 	invoiceSearchReport: 'api/foodcost/GetInvoiceSearchReportData',
+	getCountsheets: 'api/foodcost/GetCountSheets',
+	countsheetDetails: 'api/foodcost/GetCountsheetDetails',
 
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
