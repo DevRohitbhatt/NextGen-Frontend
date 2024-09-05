@@ -14,8 +14,14 @@ import {
 	EmployeeInformation,
 	LaborByPayPeriod,
 	Voids,
+<<<<<<< HEAD
 	ActualFoodCost
 	
+=======
+	VarianceFoodCost,
+	Invoices,
+	Countsheets,
+>>>>>>> origin/Variance-Food-Cost-Report
 } from './pages';
 import { Suspense } from 'react';
 
@@ -39,7 +45,13 @@ const App = () => {
 								{/* Food Cost */}
 								<Route path='/InventoryTransfer' index element={<InventoryTransfer />} />
 								<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
+<<<<<<< HEAD
 								<Route path='/ActualFoodCost' index element={<ActualFoodCost />} />
+=======
+								<Route path='/VarianceFoodCost' index element={<VarianceFoodCost />} />
+								<Route path='/Invoices' element={<Invoices />} />
+								<Route path='/Countsheets' element={<Countsheets />} />
+>>>>>>> origin/Variance-Food-Cost-Report
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />

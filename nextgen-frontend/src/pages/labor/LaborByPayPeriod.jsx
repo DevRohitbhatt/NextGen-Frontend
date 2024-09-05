@@ -64,7 +64,6 @@ const LaborByPayPeriod = () => {
 					row.getCanExpand() ? (
 						<div
 							{...{
-								onClick: row.getToggleExpandedHandler(),
 								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
 								className: 'inline-block',
 							}}
@@ -579,7 +578,19 @@ const LaborByPayPeriod = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
+<<<<<<< HEAD
 	const Table = TableHOC2(columns, laborByPayPeriodData, false, view, isTableRendered, setIsTableRendered);
+=======
+	const Table = (
+		<TableHOC2
+			columns={columns}
+			data={laborByPayPeriodData}
+			view={view}
+			isTableRendered={isTableRendered}
+			setIsTableRendered={setIsTableRendered}
+		/>
+	);
+>>>>>>> origin/Variance-Food-Cost-Report
 
 	return (
 		<div className='w-[85%] mx-auto'>
