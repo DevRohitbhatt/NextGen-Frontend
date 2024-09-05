@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-import { useState, useEffect, useRef } from 'react';
-=======
 import { useState, useEffect } from 'react';
 import { FaSortAlphaUp, FaSortAlphaDownAlt } from 'react-icons/fa';
->>>>>>> origin/Variance-Food-Cost-Report
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 import {
 	useReactTable,
@@ -16,9 +12,6 @@ import {
 } from '@tanstack/react-table';
 import useTableView from '../../hooks/useTableView';
 
-<<<<<<< HEAD
-function TableHOC2(columns, data, isPaginated = true, view, isTableRendered, setIsTableRendered) {
-=======
 function TableHOC2({
 	columns,
 	data,
@@ -30,7 +23,6 @@ function TableHOC2({
 	setIsTableRendered,
 	expandCollapseButtons = false,
 }) {
->>>>>>> origin/Variance-Food-Cost-Report
 	const [expanded, setExpanded] = useState({});
 	const table = useReactTable({
 		data,
@@ -50,38 +42,6 @@ function TableHOC2({
 		debugTable: true,
 	});
 
-<<<<<<< HEAD
-	const expandParentRowsOnly = () => {
-		const expandedState = {};
-		table.getRowModel().rows.forEach((row) => {
-			// Expand only parent rows that have subRows
-			if (row.depth === 0 && row.subRows.length > 0) {
-				console.log('Employees view');
-				expandedState[row.id] = true;
-			}
-		});
-		table.setExpanded(expandedState);
-	};
-
-	useEffect(() => {
-		if (isTableRendered) {
-			if (view === 'Employees') {
-				expandParentRowsOnly();
-			} else if (view === 'Employee Details') {
-				table.toggleAllRowsExpanded(true);
-			} else if (view === 'Units') {
-				table.toggleAllRowsExpanded(false);
-			}
-		}
-	}, [isTableRendered]);
-
-	// Set isTableRendered to true after the table has rendered once
-	useEffect(() => {
-		if (table.getRowModel().rows.length > 0 && !isTableRendered) {
-			setIsTableRendered(true);
-		}
-	}, [table.getRowModel().rows.length, isTableRendered]);
-=======
 	useTableView(table, view, isTableRendered);
 
 	//Set isTableRendered to true after the table has rendered once
@@ -90,7 +50,6 @@ function TableHOC2({
 			setIsTableRendered(true);
 		}
 	}, [table.getRowModel().rows.length, isTableRendered, setIsTableRendered]);
->>>>>>> origin/Variance-Food-Cost-Report
 
 	return (
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-10 p-3'>

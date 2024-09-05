@@ -15,6 +15,8 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import ActualFoodCosts from '../../assets/introJSSteps/ActualFoodCost';
+import { data } from 'autoprefixer';
+import { Link, useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
@@ -31,7 +33,7 @@ const ActualFoodCost = () => {
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Actual Food Cost Report, please try again later.'
 	);
-
+	const navigate = useNavigate();
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
@@ -511,8 +513,60 @@ const ActualFoodCost = () => {
 		};
 	}, []);
 	
-	const Table = TableHOC2(columns, actualFoodCostData, false, viewby, isTableRendered, setIsTableRendered);
+	const Table = <TableHOC2
+	columns={columns}
+	data={actualFoodCostData}
+	view={viewby}
+	isTableRendered={isTableRendered}
+	setIsTableRendered={setIsTableRendered}
+	//columns, actualFoodCostData, false, viewby, isTableRendered, setIsTableRendered)
+	/>
 
+	const handleCountsheet = async (fromDate, toDate, isEnding = false) => {
+        try {
+            const getData = {
+                url: 'getCountsheets',
+                urlParams: {
+                    companyID: companyId,
+                    alignmentID: alignmentId,
+                    memberID: selectedUnit,
+                    fromDate: fromDate.toISOString().split('T')[0],
+                    toDate: toDate.toISOString().split('T')[0],
+                },
+            };
+
+            const result = await getCall(getData);
+            console.log('Countsheet data: ', result.data);
+
+            const countsheet = result.data.reduce((selectedCountsheet, countsheet) => {
+                if (isEnding) {
+                    // Find the latest countsheet for Ending Countsheet
+                    if (
+                        !selectedCountsheet ||
+                        countsheet.dateTime > selectedCountsheet.dateTime ||
+                        (countsheet.dateTime === selectedCountsheet.dateTime &&
+                            countsheet.saveDateTime > selectedCountsheet.saveDateTime)
+                    ) {
+                        selectedCountsheet = countsheet;
+                    }
+                } else {
+                    // Find the earliest countsheet for Beginning Countsheet
+                    if (!selectedCountsheet || countsheet.dateTime < selectedCountsheet.dateTime || (countsheet.dateTime === selectedCountsheet.dateTime &&
+                            countsheet.saveDateTime > selectedCountsheet.saveDateTime)) 
+					{
+                        selectedCountsheet = countsheet;
+                    }
+                }
+                return selectedCountsheet;
+            }, null);
+
+            console.log('Selected countsheet: ', countsheet);
+
+            navigate('/Countsheets', { state: { companyId: companyId, countsheet: countsheet } });
+        } catch (error) {
+            console.error('Error getting Countsheet data: ', error);
+        }
+    };
 	
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -582,21 +636,27 @@ const ActualFoodCost = () => {
 					selectedOption={viewby}
 					onOptionChange={handleTotalViewChange}
 				/>
-			<span onClick={togglePopup} style={{ cursor: 'pointer',marginTop: '47px' }}> More....</span>
+			<span onClick={togglePopup} className='cursor-pointer mt-[47px]' > More....</span>
 			{isPopupVisible && (
 				<div className='more-container' ref={popupRef} >
-				<div className="option" style={{ marginBottom: '8px',width:'258px' }}>
-					<button style={{ width: '100%' }}>Show/Hide Departments</button>
+				<div className="option mb-2 w-[258px]" >
+					<button className='w-[100%]' >Show/Hide Departments</button>
 				</div>
-				<div className="option" style={{ marginBottom: '8px',width:'258px' }}>
-					<button  onClick={() => { window.open('/ActualFoodCountsheet', '_blank'); setIsPopupVisible(false);}} 
-					style={{ width: '100%' }}>View Beginning Countsheet</button>
+				<div className="option mb-2 w-[258px]" >
+					<button className='w-[100%]'   onClick={() => {
+                                handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
+                                setIsPopupVisible(false);
+                            }}
+					>View Beginning Countsheet</button>
 				</div>
-				<div className="option" style={{ marginBottom: '8px',width:'258px' }}>
-					<button style={{ width: '100%' }}>View Ending Countsheet</button>
+				<div className="option mb-2 w-[258px]">
+					<button className='w-[100%]'    onClick={() => {
+                                handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
+                                setIsPopupVisible(false);
+                            }}  >View Ending Countsheet</button>
 				</div>
 				<div className="option">
-					<button style={{ width: '100%' }}>View Purchases</button>
+					<button className='w-[100%]' >View Purchases</button>
 				</div>
 			</div>
 			)}
@@ -605,10 +665,7 @@ const ActualFoodCost = () => {
 
 		{actualFoodCostData.length > 0 && <div className='paged-table'>{Table}</div>}
 	</>
-)}
-
-
-			<div>
+)}		<div>
 				<UnitModal
 					unitData={unitsAndAreasList}
 					memberID={selectedUnit}
