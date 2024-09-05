@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState,useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
@@ -50,6 +50,7 @@ const ActualFoodCost = () => {
 	const dropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }];
 	const [viewby, setViewBy] = useState('Department');
 	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
+	const [isPopupVisible, setIsPopupVisible] = useState(false);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -57,7 +58,7 @@ const ActualFoodCost = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
-
+	const popupRef = useRef(null);
 	const viewMap = {
 		'Weekly': 'WE',
 		'Daily': 'DA',
@@ -424,6 +425,10 @@ const ActualFoodCost = () => {
 			),
 		};
 	};
+	const togglePopup = () => {
+		setIsPopupVisible(!isPopupVisible);
+  }
+	
 
 	// // Function to handle the Excel export
 	const handleExcelClick = () => {
@@ -493,8 +498,22 @@ const ActualFoodCost = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
+	const handleClickOutside = (event) => {
+		if (popupRef.current && !popupRef.current.contains(event.target)) {
+	setIsPopupVisible(false);
+		}
+	};
+	
+	useEffect(() => {
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+  document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
+	
 	const Table = TableHOC2(columns, actualFoodCostData, false, viewby, isTableRendered, setIsTableRendered);
 
+	
 	return (
 		<div className='w-[85%] mx-auto'>
 			<Steps
@@ -556,14 +575,32 @@ const ActualFoodCost = () => {
 ) : (
 	<>
 		{actualFoodCostData.length > 0 && (
-			<div className='w-52'>
+			<div className='w-52 display-flex'>
 				<Dropdown
 					title='Expand View'
 					options={viewOptions}
 					selectedOption={viewby}
 					onOptionChange={handleTotalViewChange}
 				/>
+			<span onClick={togglePopup} style={{ cursor: 'pointer',marginTop: '47px' }}> More....</span>
+			{isPopupVisible && (
+				<div className='more-container' ref={popupRef} >
+				<div className="option" style={{ marginBottom: '8px',width:'258px' }}>
+					<button style={{ width: '100%' }}>Show/Hide Departments</button>
+				</div>
+				<div className="option" style={{ marginBottom: '8px',width:'258px' }}>
+					<button  onClick={() => { window.open('/ActualFoodCountsheet', '_blank'); setIsPopupVisible(false);}} 
+					style={{ width: '100%' }}>View Beginning Countsheet</button>
+				</div>
+				<div className="option" style={{ marginBottom: '8px',width:'258px' }}>
+					<button style={{ width: '100%' }}>View Ending Countsheet</button>
+				</div>
+				<div className="option">
+					<button style={{ width: '100%' }}>View Purchases</button>
+				</div>
 			</div>
+			)}
+		</div>
 		)}
 
 		{actualFoodCostData.length > 0 && <div className='paged-table'>{Table}</div>}
