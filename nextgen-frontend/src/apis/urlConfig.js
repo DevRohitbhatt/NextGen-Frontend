@@ -26,6 +26,7 @@ const urlConfig = {
 	//food cost apis
 	inventoryTransferReportData: 'api/foodcost/getInventoryTransferReportData',
 	InventoryWeeksOnHand: 'api/foodcost/getInventoryWeeksOnHandReportData',
+	ActualFoodCost:'api/foodcost/getActualFoodCostReportData',
 	varianceFoodCost: 'api/foodcost/getVarianceFoodCostReportData',
 	invoiceReport: '/api/foodcost/getInvoiceReportData',
 	invoiceSearchReport: 'api/foodcost/GetInvoiceSearchReportData',
