@@ -77,6 +77,15 @@ const Countsheets = () => {
 					row.getCanExpand()
 						? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
 						: getValue(),
+				footer: ({ table }) =>
+					`Total Inventory Value: $${table
+						.getCoreRowModel()
+						.rows.reduce(
+							(acc, row) =>
+								acc + row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0),
+							0
+						)
+						.toFixed(2)}`,
 			}),
 		],
 		[]
@@ -192,7 +201,15 @@ const Countsheets = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, countsheet?.name);
 	};
 
-	const Table = <TableHOC2 columns={columns} data={countsheetDetails} isHeader={false} />;
+	const Table = (
+		<TableHOC2
+			columns={columns}
+			data={countsheetDetails}
+			isHeader={false}
+			isFooter={true}
+			expandCollapseButtons={true}
+		/>
+	);
 
 	return (
 		<div className='w-[85%] mx-auto'>

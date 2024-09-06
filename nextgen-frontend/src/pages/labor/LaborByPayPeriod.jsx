@@ -578,9 +578,6 @@ const LaborByPayPeriod = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-<<<<<<< HEAD
-	const Table = TableHOC2(columns, laborByPayPeriodData, false, view, isTableRendered, setIsTableRendered);
-=======
 	const Table = (
 		<TableHOC2
 			columns={columns}
@@ -588,9 +585,9 @@ const LaborByPayPeriod = () => {
 			view={view}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
+			expandCollapseButtons={true}
 		/>
 	);
->>>>>>> origin/Variance-Food-Cost-Report
 
 	return (
 		<div className='w-[85%] mx-auto'>

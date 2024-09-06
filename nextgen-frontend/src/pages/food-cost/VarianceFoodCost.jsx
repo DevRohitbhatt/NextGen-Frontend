@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	UnitSelector,
@@ -26,7 +26,6 @@ const VarianceFoodCost = () => {
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 	const [varianceFoodCostData, setVarianceFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
-	const [showMoreModel, setShowMoreModel] = useState(false);
 
 	const navigate = useNavigate();
 
@@ -52,8 +51,10 @@ const VarianceFoodCost = () => {
 	//dropdown variables
 	const [countType, setCountType] = useState('Weekly');
 	const countDropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
-	// const [viewTotal, setViewTotal] = useState('Department');
-	// const ViewDropdownOptions = [{ name: 'Department' }, { name: 'Sub-Department' }, { name: 'Inventory Item' }];
+	const [viewby, setViewBy] = useState('Department');
+	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
+	const [isPopupVisible, setIsPopupVisible] = useState(false);
+	const popupRef = useRef(null);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -711,7 +712,7 @@ const VarianceFoodCost = () => {
 		setShowDateModal(false);
 	};
 
-	const handleBeginnerCountsheet = async () => {
+	const handleCountsheet = async (isEnding = false) => {
 		try {
 			const getData = {
 				url: 'getCountsheets',
@@ -725,21 +726,33 @@ const VarianceFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
-			console.log('Countsheet data: ', result.data);
 
-			const minCountsheet = result.data.reduce((minCountsheet, countsheet) => {
-				if (
-					!minCountsheet ||
-					countsheet.dateTime < minCountsheet.dateTime ||
-					(countsheet.dateTime === minCountsheet.dateTime &&
-						countsheet.saveDateTime > minCountsheet.saveDateTime)
-				) {
-					minCountsheet = countsheet;
+			const countsheet = result.data.reduce((selectedCountsheet, countsheet) => {
+				if (isEnding) {
+					// Find the latest countsheet for Ending Countsheet
+					if (
+						!selectedCountsheet ||
+						countsheet.dateTime > selectedCountsheet.dateTime ||
+						(countsheet.dateTime === selectedCountsheet.dateTime &&
+							countsheet.saveDateTime > selectedCountsheet.saveDateTime)
+					) {
+						selectedCountsheet = countsheet;
+					}
+				} else {
+					// Find the earliest countsheet for Beginning Countsheet
+					if (
+						!selectedCountsheet ||
+						countsheet.dateTime < selectedCountsheet.dateTime ||
+						(countsheet.dateTime === selectedCountsheet.dateTime &&
+							countsheet.saveDateTime > selectedCountsheet.saveDateTime)
+					) {
+						selectedCountsheet = countsheet;
+					}
 				}
-				return minCountsheet;
+				return selectedCountsheet;
 			}, null);
 
-			navigate('/Countsheets', { state: { companyId: companyId, countsheet: minCountsheet } });
+			navigate('/Countsheets', { state: { companyId: companyId, countsheet: countsheet } });
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
 		}
@@ -924,7 +937,28 @@ const VarianceFoodCost = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC2 columns={columns} data={varianceFoodCostData} />;
+	const handleClickOutside = (event) => {
+		if (popupRef.current && !popupRef.current.contains(event.target)) {
+			setIsPopupVisible(false);
+		}
+	};
+
+	useEffect(() => {
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
+
+	const Table = (
+		<TableHOC2
+			columns={columns}
+			data={varianceFoodCostData}
+			view={viewby}
+			isTableRendered={isTableRendered}
+			setIsTableRendered={setIsTableRendered}
+		/>
+	);
 
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -961,33 +995,11 @@ const VarianceFoodCost = () => {
 							onOptionChange={(option) => setCountType(option)}
 						/>
 					</div>
-					{/* <div className='w-52'>
-						<Dropdown
-							title='View Total By'
-							options={ViewDropdownOptions}
-							selectedOption={viewTotal}
-							onOptionChange={(option) => setViewTotal(option)}
-						/>
-					</div> */}
 					<div className='run-button' onClick={handleLaborByPayPeriod}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 							Run
 						</div>
 					</div>
-					<button className='relative' onClick={() => setShowMoreModel(!showMoreModel)}>
-						more..
-						{showMoreModel && (
-							<ul className='absolute left-0 w-56 p-4 mt-2 space-y-3 text-left rounded-lg top-full bg-secondary'>
-								<li
-									onClick={handleBeginnerCountsheet}
-									className='p-2 hover:bg-primary hover:text-white'
-								>
-									Beginning Countsheet
-								</li>
-								<li className='p-2 hover:bg-primary hover:text-white'>Ending Countsheet</li>
-							</ul>
-						)}
-					</button>
 				</div>
 				<div>
 					<ExportOptions
@@ -1006,7 +1018,59 @@ const VarianceFoodCost = () => {
 			) : isError ? (
 				<div>{errorMessage}</div>
 			) : (
-				varianceFoodCostData.length > 0 && <div className='paged-table'>{Table}</div>
+				<>
+					{varianceFoodCostData.length > 0 && (
+						<div className='w-52 display-flex'>
+							<Dropdown
+								title='Expand View'
+								options={viewOptions}
+								selectedOption={viewby}
+								onOptionChange={(option) => setViewBy(option)}
+							/>
+							<span
+								onClick={() => setIsPopupVisible(!isPopupVisible)}
+								className='cursor-pointer mt-[47px]'
+							>
+								{' '}
+								More....
+							</span>
+							{isPopupVisible && (
+								<div className='more-container' ref={popupRef}>
+									<div className='option mb-2 w-[258px]'>
+										<button className='w-[100%]'>Show/Hide Departments</button>
+									</div>
+									<div className='option mb-2 w-[258px]'>
+										<button
+											className='w-[100%]'
+											onClick={() => {
+												handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
+												setIsPopupVisible(false);
+											}}
+										>
+											View Beginning Countsheet
+										</button>
+									</div>
+									<div className='option mb-2 w-[258px]'>
+										<button
+											className='w-[100%]'
+											onClick={() => {
+												handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
+												setIsPopupVisible(false);
+											}}
+										>
+											View Ending Countsheet
+										</button>
+									</div>
+									<div className='option'>
+										<button className='w-[100%]'>View Purchases</button>
+									</div>
+								</div>
+							)}
+						</div>
+					)}
+
+					{varianceFoodCostData.length > 0 && <div className='paged-table'>{Table}</div>}
+				</>
 			)}
 
 			<div>
