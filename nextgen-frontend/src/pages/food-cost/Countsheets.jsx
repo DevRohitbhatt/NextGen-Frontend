@@ -104,8 +104,6 @@ const Countsheets = () => {
 
 			const result = await getCall(getData);
 
-			console.log('result', result);
-
 			const newData = result.data.map((item) => ({
 				groupName: item.groupName,
 				subRows: item.countSheetDetailModels.map((subItem) => ({
@@ -115,8 +113,6 @@ const Countsheets = () => {
 				})),
 			}));
 
-			console.log(newData);
-
 			setCountsheetDetails(newData);
 			setIsLoading(false);
 		} catch (error) {
@@ -125,14 +121,69 @@ const Countsheets = () => {
 		}
 	};
 
+	// Function to handle the PDF export
+	const handlePrintClick = () => {
+		if (!columns || columns.length === 0) {
+			console.error('Columns are not defined or empty');
+			return;
+		}
+
+		if (!countsheetDetails || countsheetDetails.length === 0) {
+			console.error('Voids report data is not defined or empty');
+			return;
+		}
+
+		const pdfData = {
+			title: 'Countsheet',
+			subHeaders: [
+				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${
+					countsheet?.name
+				}`,
+			],
+			exportType: 'print',
+			pageOrientation: 'portrait',
+			body: buildPDFBody(),
+		};
+
+		PdfBuilder(pdfData);
+	};
+
+	const buildPDFBody = () => {
+		const body = countsheetDetails.map((row) => {
+			const title = row.groupName;
+			return {
+				type: 'table',
+				title: title,
+				widths: new Array(columns.length - 1).fill('auto'),
+				dataTypes: columns.slice(1).map((column) => column.dataType),
+				data: formatPDFData(row.subRows),
+			};
+		});
+
+		return body;
+	};
+
+	const formatPDFData = (data) => {
+		return {
+			columnHeaders: ['Description', 'Count Description', 'Line Item Cost'],
+			rows: data.map((row) =>
+				columns.slice(1).map((column) => ({
+					value: row[column.id],
+					cellType: '',
+					columnName: column.id,
+				}))
+			),
+		};
+	};
+
 	const handleExcelClick = () => {
-		const data = [
-			{
-				name: 'Countsheets',
-				columns: columns.map((column) => ({ name: column.id, filterButton: true })),
-				data: countsheetDetails.flatMap((row) => row.subRows.map((subRow) => Object.values(subRow))),
-			},
-		];
+		const data = countsheetDetails.map((row) => ({
+			name: row.groupName,
+			columns: columns.slice(1).map((column) => ({ name: column.id, filterButton: true })),
+			data: row.subRows.map((subRow) => columns.slice(1).map((column) => subRow[column.id])),
+		}));
+
+		console.log('data', data);
 
 		const filename = 'Countsheets';
 		const spreadSheetTitle = 'Countsheets';
@@ -168,6 +219,7 @@ const Countsheets = () => {
 						includeExcel={true}
 						handleExcelClick={handleExcelClick}
 						includePrint={true}
+						handlePrintClick={handlePrintClick}
 						includeHelp={true}
 						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 					/>

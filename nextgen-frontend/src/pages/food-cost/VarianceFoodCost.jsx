@@ -739,8 +739,6 @@ const VarianceFoodCost = () => {
 				return minCountsheet;
 			}, null);
 
-			console.log('Min countsheet: ', minCountsheet);
-
 			navigate('/Countsheets', { state: { companyId: companyId, countsheet: minCountsheet } });
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
@@ -760,7 +758,7 @@ const VarianceFoodCost = () => {
 		}
 
 		const pdfData = {
-			title: 'Labor By Pay Period Report',
+			title: 'Variance Food Cost Report',
 			subHeaders: [
 				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
 			],
