@@ -3,19 +3,8 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useLocation } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import {
-	UnitSelector,
-	CalendarModal,
-	UnitModal,
-	ExportOptions,
-	DateSelector,
-	PdfBuilder,
-	ExcelExport as exportToExcel,
-	TableHOC2,
-	Dropdown,
-} from '../../components';
+import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC2 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
-import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
 
 const columnHelper = createColumnHelper();
 
@@ -28,20 +17,12 @@ const Countsheets = () => {
 		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
 	);
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
-	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Variance Food Cost Report, please try again later.'
 	);
-
-	//IntroJS variables for the help steps
-	const [introSteps, setIntroSteps] = useState({
-		steps: varianceFoodCost(),
-		initialStep: 0,
-		stepsEnabled: false,
-	});
 
 	const columns = useMemo(
 		() => [
@@ -92,7 +73,6 @@ const Countsheets = () => {
 	);
 
 	useEffect(() => {
-		console.log(location.state.countsheet);
 		setCountsheet(location.state.countsheet);
 
 		fetchCountsheetDetails();
@@ -106,8 +86,7 @@ const Countsheets = () => {
 				url: 'countsheetDetails',
 				urlParams: {
 					companyId: location.state.companyId,
-					// countsheetID: location.state.countsheet?.inventoryCountSheetID,
-					countsheetID: '603513',
+					countsheetID: location.state.countsheet?.inventoryCountSheetID,
 				},
 			};
 
@@ -144,11 +123,7 @@ const Countsheets = () => {
 
 		const pdfData = {
 			title: 'Countsheet',
-			subHeaders: [
-				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${
-					countsheet?.name
-				}`,
-			],
+			subHeaders: [`${countsheet?.dateTime} | ${countsheet?.name}`],
 			exportType: 'print',
 			pageOrientation: 'portrait',
 			body: buildPDFBody(),
@@ -196,7 +171,7 @@ const Countsheets = () => {
 
 		const filename = 'Countsheets';
 		const spreadSheetTitle = 'Countsheets';
-		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const date = countsheet?.dateTime;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, countsheet?.name);
 	};
@@ -213,12 +188,6 @@ const Countsheets = () => {
 
 	return (
 		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
 			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>{countsheet?.name}</h2>
 			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 				<div className=''>
@@ -227,7 +196,9 @@ const Countsheets = () => {
 						<span>{countsheet?.saveDateTime?.split('T')[0]}</span>
 					</div>
 					<div className='mt-5'>
-						<h3>Last saved by {countsheet?.userName} - 09/04/24 09:50</h3>
+						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${
+							countsheet?.saveDateTime?.split('T')[1]
+						}`}</h3>
 						<span className='underline cursor-pointer'>Click to insert comment</span>
 					</div>
 				</div>
@@ -237,8 +208,6 @@ const Countsheets = () => {
 						handleExcelClick={handleExcelClick}
 						includePrint={true}
 						handlePrintClick={handlePrintClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 					/>
 				</div>
 			</header>

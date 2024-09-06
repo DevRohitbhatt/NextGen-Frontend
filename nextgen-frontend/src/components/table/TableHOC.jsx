@@ -27,7 +27,7 @@ const TableHOC = (columns, data, isPaginated = true) => {
 		getSortedRowModel: getSortedRowModel(),
 		...(isPaginated && { getPaginationRowModel: getPaginationRowModel() }),
 		getExpandedRowModel: getExpandedRowModel(),
-		debugTable: true,
+		debugTable: false,
 	});
 
 	return (
