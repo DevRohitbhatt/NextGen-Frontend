@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState,useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
@@ -62,23 +62,22 @@ const ActualFoodCost = () => {
 	});
 	const popupRef = useRef(null);
 	const viewMap = {
-		'Weekly': 'WE',
-		'Daily': 'DA',
-		'Monthly': 'MO',
-		'Shift': 'SH'
-	};
-	
-	const handleViewChange = (option) => {	
-		setView(option);	
-		setCountType(viewMap[option] || '');
-	};
-	const handleTotalViewChange = (option) => {	
-		setViewBy(option);	
+		Weekly: 'WE',
+		Daily: 'DA',
+		Monthly: 'MO',
+		Shift: 'SH',
 	};
 
-	useEffect(() => {
-	}, [countType]); 
-	
+	const handleViewChange = (option) => {
+		setView(option);
+		setCountType(viewMap[option] || '');
+	};
+	const handleTotalViewChange = (option) => {
+		setViewBy(option);
+	};
+
+	useEffect(() => {}, [countType]);
+
 	// columns for tableHOC
 	const columns = useMemo(
 		() => [
@@ -98,7 +97,6 @@ const ActualFoodCost = () => {
 							) : (
 								<CiSquarePlus className='text-[20px]' />
 							)}
-							
 						</div>
 					) : null,
 				size: '80',
@@ -139,13 +137,13 @@ const ActualFoodCost = () => {
 				header: 'waste $',
 				dataType: 'number',
 			}),
-			
+
 			// columnHelper.accessor('wasteNumber', {
 			// 	id: 'wasteNumber',
 			// 	header: 'Waste Number',
 			// 	dataType: 'number',
 			// }),
-		
+
 			columnHelper.accessor('comparisonName', {
 				id: 'comparisonName',
 				header: 'Comparison Name',
@@ -159,7 +157,6 @@ const ActualFoodCost = () => {
 		],
 		[]
 	);
-	
 
 	useEffect(() => {
 		// Fetch initial data
@@ -225,21 +222,21 @@ const ActualFoodCost = () => {
 			setIsLoading(true);
 			setIsError(false);
 			setIsTableRendered(false);
-	
+
 			const getData = {
 				url: 'ActualFoodCost',
 				urlParams: {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: 51,
-					fromDate: selectedFromDate.toISOString().split('T')[0],
-					toDate: selectedToDate.toISOString().split('T')[0],
-					countType: countType
+					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
+					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					countType: countType,
 				},
 			};
-	
+
 			const result = await getCall(getData);
-	
+
 			const newData = result.data.map((department) => ({
 				department: department.department,
 				subRows: department.subDepartments.map((subDept) => ({
@@ -258,8 +255,8 @@ const ActualFoodCost = () => {
 						wasteNumber: cost.wasteNumber,
 						comparisonName: cost.comparisonName,
 						comparisonSales: cost.comparisonSales,
-					}))
-				}))
+					})),
+				})),
 			}));
 
 			setActualFoodCostData(newData);
@@ -271,7 +268,6 @@ const ActualFoodCost = () => {
 			console.error('Error getting Labor By Pay Period Report data: ', error);
 		}
 	};
-	
 
 	const handleUnitSelection = (unitName, unitID) => {
 		setselectedUnitName(unitName);
@@ -296,7 +292,7 @@ const ActualFoodCost = () => {
 			return;
 		}
 
-     console.log("actualFoodCostData",actualFoodCostData);
+		console.log('actualFoodCostData', actualFoodCostData);
 
 		const pdfData = {
 			title: 'Actual Food Cost Report',
@@ -340,7 +336,7 @@ const ActualFoodCost = () => {
 					'auto',
 					'auto',
 					'auto',
-					'auto'
+					'auto',
 				],
 				dataTypes: [
 					'string',
@@ -355,7 +351,7 @@ const ActualFoodCost = () => {
 					'number',
 					'number',
 					'number',
-                    'number',
+					'number',
 					'number',
 					'number',
 					'number',
@@ -364,7 +360,7 @@ const ActualFoodCost = () => {
 					'number',
 					'number',
 					'string',
-					'string'
+					'string',
 				],
 				data: formatPDFData(row.subRows),
 			};
@@ -386,23 +382,23 @@ const ActualFoodCost = () => {
 				'Pur $',
 				'Trans In#',
 				'Trans In $',
-                'Trans Out#',
-                'Trans Out $',
-                'End #',
-                'End $',
+				'Trans Out#',
+				'Trans Out $',
+				'End #',
+				'End $',
 				'Actual Usage #',
-                'Actual Usage $',
+				'Actual Usage $',
 				'Actual Usage %',
-                'Waste #',
-                'Waste $',
+				'Waste #',
+				'Waste $',
 				'Waste %',
 				'Comparison Name',
-                'Comparison Sales'
+				'Comparison Sales',
 			],
 			rows: data.flatMap((row) =>
 				row.subRows.map((subRow) => [
 					{ value: row.department, cellType: 'string', columnName: 'Department' },
-					{ value: row.subDepartment , cellType: 'string', columnName: 'Sub Department' },
+					{ value: row.subDepartment, cellType: 'string', columnName: 'Sub Department' },
 					{ value: subRow.description, cellType: 'string', columnName: 'Description' },
 					{ value: subRow.unit, cellType: 'string', columnName: 'UOM' },
 					{ value: subRow.begNumber, cellType: 'number', columnName: 'Beg #' },
@@ -422,20 +418,19 @@ const ActualFoodCost = () => {
 					{ value: subRow.wasteNumber, cellType: 'number', columnName: 'Waste $' },
 					{ value: subRow.wasteDollar, cellType: 'number', columnName: 'Waste %' },
 					{ value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
-					{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' }
+					{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
 				])
 			),
 		};
 	};
 	const togglePopup = () => {
 		setIsPopupVisible(!isPopupVisible);
-  }
-	
+	};
 
 	// // Function to handle the Excel export
 	const handleExcelClick = () => {
-		console.log("actualFoodCostData",actualFoodCostData);
-		
+		console.log('actualFoodCostData', actualFoodCostData);
+
 		const data = [
 			{
 				name: 'Actual Food Cost Report',
@@ -460,8 +455,7 @@ const ActualFoodCost = () => {
 					{ name: 'Waste $', filter: 'text' },
 					{ name: 'Waste %', filter: 'text' },
 					{ name: 'Comparison Name', filter: 'text' },
-					{ name: 'Comparison Sales', filter: 'text' }
-
+					{ name: 'Comparison Sales', filter: 'text' },
 				],
 				data: actualFoodCostData.flatMap((unit) =>
 					unit.subRows.flatMap((employee) =>
@@ -479,14 +473,14 @@ const ActualFoodCost = () => {
 							trOutDollar: period.trOutDollar,
 							endDollar: period.endDollar,
 							useNumber: period.useNumber,
-							useDollar:period.useDollar,
+							useDollar: period.useDollar,
 							salesNet: period.salesNet,
 							usePct: period.usePct,
-                            wasteNumber: period.wasteNumber,
-                            wasteDollar: period.wasteDollar,
-                            wastePct: period.wastePct,
-                            comparisonName: period.comparisonName,
-							comparisonSales: period.comparisonSales
+							wasteNumber: period.wasteNumber,
+							wasteDollar: period.wasteDollar,
+							wastePct: period.wastePct,
+							comparisonName: period.comparisonName,
+							comparisonSales: period.comparisonSales,
 						}))
 					)
 				),
@@ -502,72 +496,73 @@ const ActualFoodCost = () => {
 
 	const handleClickOutside = (event) => {
 		if (popupRef.current && !popupRef.current.contains(event.target)) {
-	setIsPopupVisible(false);
+			setIsPopupVisible(false);
 		}
 	};
-	
+
 	useEffect(() => {
 		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
-  document.removeEventListener('mousedown', handleClickOutside);
+			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, []);
-	
-	const Table = <TableHOC2
-	columns={columns}
-	data={actualFoodCostData}
-	view={viewby}
-	isTableRendered={isTableRendered}
-	setIsTableRendered={setIsTableRendered}
-	//columns, actualFoodCostData, false, viewby, isTableRendered, setIsTableRendered)
-	/>
+
+	const Table = (
+		<TableHOC2
+			columns={columns}
+			data={actualFoodCostData}
+			view={viewby}
+			isTableRendered={isTableRendered}
+			setIsTableRendered={setIsTableRendered}
+			//columns, actualFoodCostData, false, viewby, isTableRendered, setIsTableRendered)
+		/>
+	);
 
 	const handleCountsheet = async (fromDate, toDate, isEnding = false) => {
-        try {
-            const getData = {
-                url: 'getCountsheets',
-                urlParams: {
-                    companyID: companyId,
-                    alignmentID: alignmentId,
-                    memberID: selectedUnit,
-                    fromDate: fromDate.toISOString().split('T')[0],
-                    toDate: toDate.toISOString().split('T')[0],
-                },
-            };
+		try {
+			const getData = {
+				url: 'getCountsheets',
+				urlParams: {
+					companyID: companyId,
+					alignmentID: alignmentId,
+					memberID: selectedUnit,
+					fromDate: fromDate.toLocaleDateString('en-CA'),
+					toDate: toDate.toLocaleDateString('en-CA'),
+				},
+			};
 
-            const result = await getCall(getData);
-            console.log('Countsheet data: ', result.data);
+			const result = await getCall(getData);
+			console.log('Countsheet data: ', result.data);
 
-            const countsheet = result.data.reduce((selectedCountsheet, countsheet) => {
-                if (isEnding) {
-                    // Find the latest countsheet for Ending Countsheet
-                    if (
-                        !selectedCountsheet ||
-                        countsheet.dateTime > selectedCountsheet.dateTime ||
-                        (countsheet.dateTime === selectedCountsheet.dateTime &&
-                            countsheet.saveDateTime > selectedCountsheet.saveDateTime)
-                    ) {
-                        selectedCountsheet = countsheet;
-                    }
-                } else {
-                    // Find the earliest countsheet for Beginning Countsheet
-                    if (!selectedCountsheet || countsheet.dateTime < selectedCountsheet.dateTime || (countsheet.dateTime === selectedCountsheet.dateTime &&
-                            countsheet.saveDateTime > selectedCountsheet.saveDateTime)) 
-					{
-                        selectedCountsheet = countsheet;
-                    }
-                }
-                return selectedCountsheet;
-            }, null);
+			const countsheet = result.data.reduce((selectedCountsheet, countsheet) => {
+				if (isEnding) {
+					// Find the latest countsheet for Ending Countsheet
+					if (
+						(!selectedCountsheet || countsheet.dateTime > selectedCountsheet.dateTime) &&
+						countsheet.countType === countType
+					) {
+						selectedCountsheet = countsheet;
+					}
+				} else {
+					// Find the earliest countsheet for Beginning Countsheet
+					if (
+						!selectedCountsheet ||
+						(countsheet.dateTime < selectedCountsheet.dateTime && countsheet.countType === countType)
+					) {
+						selectedCountsheet = countsheet;
+					}
+				}
+				return selectedCountsheet;
+			}, null);
 
-            console.log('Selected countsheet: ', countsheet);
+			console.log('Selected countsheet: ', countsheet);
 
-            navigate('/Countsheets', { state: { companyId: companyId, countsheet: countsheet } });
-        } catch (error) {
-            console.error('Error getting Countsheet data: ', error);
-        }
-    };
-	
+			navigate('/Countsheets', { state: { companyId: companyId, countsheet: countsheet } });
+		} catch (error) {
+			console.error('Error getting Countsheet data: ', error);
+		}
+	};
+
 	return (
 		<div className='w-[85%] mx-auto'>
 			<Steps
@@ -602,7 +597,7 @@ const ActualFoodCost = () => {
 						isDateRange={true}
 						onClick={() => setShowDateModal(true)}
 					/>
-					
+
 					<div className='run-button' onClick={handleRun}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 							Run
@@ -621,51 +616,63 @@ const ActualFoodCost = () => {
 					/>
 				</div>
 			</header>
-
 			{isLoading ? (
-	<div>Loading...</div>
-) : isError ? (
-	<div>{errorMessage}</div>
-) : (
-	<>
-		{actualFoodCostData.length > 0 && (
-			<div className='w-52 display-flex'>
-				<Dropdown
-					title='Expand View'
-					options={viewOptions}
-					selectedOption={viewby}
-					onOptionChange={handleTotalViewChange}
-				/>
-			<span onClick={togglePopup} className='cursor-pointer mt-[47px]' > More....</span>
-			{isPopupVisible && (
-				<div className='more-container' ref={popupRef} >
-				<div className="option mb-2 w-[258px]" >
-					<button className='w-[100%]' >Show/Hide Departments</button>
-				</div>
-				<div className="option mb-2 w-[258px]" >
-					<button className='w-[100%]'   onClick={() => {
-                                handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
-                                setIsPopupVisible(false);
-                            }}
-					>View Beginning Countsheet</button>
-				</div>
-				<div className="option mb-2 w-[258px]">
-					<button className='w-[100%]'    onClick={() => {
-                                handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
-                                setIsPopupVisible(false);
-                            }}  >View Ending Countsheet</button>
-				</div>
-				<div className="option">
-					<button className='w-[100%]' >View Purchases</button>
-				</div>
-			</div>
-			)}
-		</div>
-		)}
+				<div>Loading...</div>
+			) : isError ? (
+				<div>{errorMessage}</div>
+			) : (
+				<>
+					{actualFoodCostData.length > 0 && (
+						<div className='w-52 display-flex'>
+							<Dropdown
+								title='Expand View'
+								options={viewOptions}
+								selectedOption={viewby}
+								onOptionChange={handleTotalViewChange}
+							/>
+							<span onClick={togglePopup} className='cursor-pointer mt-[47px]'>
+								{' '}
+								More....
+							</span>
+							{isPopupVisible && (
+								<div className='more-container' ref={popupRef}>
+									<div className='option mb-2 w-[258px]'>
+										<button className='w-[100%]'>Show/Hide Departments</button>
+									</div>
+									<div className='option mb-2 w-[258px]'>
+										<button
+											className='w-[100%]'
+											onClick={() => {
+												handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
+												setIsPopupVisible(false);
+											}}
+										>
+											View Beginning Countsheet
+										</button>
+									</div>
+									<div className='option mb-2 w-[258px]'>
+										<button
+											className='w-[100%]'
+											onClick={() => {
+												handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
+												setIsPopupVisible(false);
+											}}
+										>
+											View Ending Countsheet
+										</button>
+									</div>
+									<div className='option'>
+										<button className='w-[100%]'>View Purchases</button>
+									</div>
+								</div>
+							)}
+						</div>
+					)}
 
-		{actualFoodCostData.length > 0 && <div className='paged-table'>{Table}</div>}
-	</>
-)}		<div>
+					{actualFoodCostData.length > 0 && <div className='paged-table'>{Table}</div>}
+				</>
+			)}{' '}
+			<div>
 				<UnitModal
 					unitData={unitsAndAreasList}
 					memberID={selectedUnit}

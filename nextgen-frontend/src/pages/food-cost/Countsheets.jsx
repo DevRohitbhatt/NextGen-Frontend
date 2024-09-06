@@ -188,12 +188,25 @@ const Countsheets = () => {
 
 	return (
 		<div className='w-[85%] mx-auto'>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>{countsheet?.name}</h2>
+			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>
+				{`${countsheet?.name} --
+				${
+					countsheet?.countType === 'WE'
+						? 'Weekly'
+						: countsheet?.countType === 'DA'
+						? 'Daily'
+						: countsheet?.countType === 'MO'
+						? 'Monthly'
+						: countsheet?.countType === 'SH'
+						? 'Shift'
+						: ''
+				} Countsheet`}
+			</h2>
 			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 				<div className=''>
 					<div className='flex gap-1'>
 						<h3>Date:</h3>
-						<span>{countsheet?.saveDateTime?.split('T')[0]}</span>
+						<span>{countsheet?.dateTime}</span>
 					</div>
 					<div className='mt-5'>
 						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${

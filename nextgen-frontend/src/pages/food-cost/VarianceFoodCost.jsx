@@ -49,12 +49,20 @@ const VarianceFoodCost = () => {
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
+	const [view, setView] = useState('Weekly');
 	const [countType, setCountType] = useState('Weekly');
 	const countDropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
 	const [viewby, setViewBy] = useState('Department');
 	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
 	const [isPopupVisible, setIsPopupVisible] = useState(false);
 	const popupRef = useRef(null);
+
+	const viewMap = {
+		Weekly: 'WE',
+		Monthly: 'MO',
+		Daily: 'DA',
+		Shift: 'SH',
+	};
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -641,18 +649,9 @@ const VarianceFoodCost = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toISOString().split('T')[0],
-					toDate: selectedToDate.toISOString().split('T')[0],
-					countType:
-						countType === 'Weekly'
-							? 'WE'
-							: countType === 'Monthly'
-							? 'MO'
-							: countType === 'Daily'
-							? 'DA'
-							: countType === 'Shift'
-							? 'SH'
-							: countType,
+					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
+					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					countType: countType,
 				},
 			};
 
@@ -712,6 +711,11 @@ const VarianceFoodCost = () => {
 		setShowDateModal(false);
 	};
 
+	const handleCountType = (option) => {
+		setView(option);
+		setCountType(viewMap[option]);
+	};
+
 	const handleCountsheet = async (isEnding = false) => {
 		try {
 			const getData = {
@@ -720,8 +724,8 @@ const VarianceFoodCost = () => {
 					companyID: companyId,
 					alignmentID: alignmentId,
 					memberID: selectedUnit,
-					fromDate: selectedFromDate.toISOString().split('T')[0],
-					toDate: selectedToDate.toISOString().split('T')[0],
+					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
+					toDate: selectedToDate.toLocaleDateString('en-CA'),
 				},
 			};
 
@@ -731,10 +735,8 @@ const VarianceFoodCost = () => {
 				if (isEnding) {
 					// Find the latest countsheet for Ending Countsheet
 					if (
-						!selectedCountsheet ||
-						countsheet.dateTime > selectedCountsheet.dateTime ||
-						(countsheet.dateTime === selectedCountsheet.dateTime &&
-							countsheet.saveDateTime > selectedCountsheet.saveDateTime)
+						(!selectedCountsheet || countsheet.dateTime > selectedCountsheet.dateTime) &&
+						countsheet.countType === countType
 					) {
 						selectedCountsheet = countsheet;
 					}
@@ -742,9 +744,7 @@ const VarianceFoodCost = () => {
 					// Find the earliest countsheet for Beginning Countsheet
 					if (
 						!selectedCountsheet ||
-						countsheet.dateTime < selectedCountsheet.dateTime ||
-						(countsheet.dateTime === selectedCountsheet.dateTime &&
-							countsheet.saveDateTime > selectedCountsheet.saveDateTime)
+						(countsheet.dateTime < selectedCountsheet.dateTime && countsheet.countType === countType)
 					) {
 						selectedCountsheet = countsheet;
 					}
@@ -991,8 +991,8 @@ const VarianceFoodCost = () => {
 						<Dropdown
 							options={countDropdownOptions}
 							title='Count Type'
-							selectedOption={countType}
-							onOptionChange={(option) => setCountType(option)}
+							selectedOption={view}
+							onOptionChange={handleCountType}
 						/>
 					</div>
 					<div className='run-button' onClick={handleLaborByPayPeriod}>
@@ -1043,7 +1043,7 @@ const VarianceFoodCost = () => {
 										<button
 											className='w-[100%]'
 											onClick={() => {
-												handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
+												handleCountsheet(); // For Beginning Countsheet
 												setIsPopupVisible(false);
 											}}
 										>
@@ -1054,7 +1054,7 @@ const VarianceFoodCost = () => {
 										<button
 											className='w-[100%]'
 											onClick={() => {
-												handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
+												handleCountsheet(true); // For Ending Countsheet
 												setIsPopupVisible(false);
 											}}
 										>
