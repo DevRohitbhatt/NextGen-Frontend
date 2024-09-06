@@ -50,7 +50,7 @@ const VarianceFoodCost = () => {
 
 	//dropdown variables
 	const [view, setView] = useState('Weekly');
-	const [countType, setCountType] = useState('Weekly');
+	const [countType, setCountType] = useState('WE');
 	const countDropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
 	const [viewby, setViewBy] = useState('Department');
 	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
