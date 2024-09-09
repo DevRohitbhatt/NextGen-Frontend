@@ -532,7 +532,6 @@ const ActualFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
-			console.log('Countsheet data: ', result.data);
 
 			const countsheet = result.data.reduce((selectedCountsheet, countsheet) => {
 				if (isEnding) {
@@ -555,9 +554,7 @@ const ActualFoodCost = () => {
 				return selectedCountsheet;
 			}, null);
 
-			console.log('Selected countsheet: ', countsheet);
-
-			navigate('/Countsheets', { state: { companyId: companyId, countsheet: countsheet } });
+			navigate('/CountsheetDesigner', { state: { companyId: companyId, countsheet: countsheet } });
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
 		}

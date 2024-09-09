@@ -8,7 +8,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 const columnHelper = createColumnHelper();
 
-const Countsheets = () => {
+const CountsheetDesigner = () => {
 	const location = useLocation();
 	const [countsheet, setCountsheet] = useState({});
 	const [countsheetDetails, setCountsheetDetails] = useState([]);
@@ -236,4 +236,4 @@ const Countsheets = () => {
 	);
 };
 
-export default Countsheets;
+export default CountsheetDesigner;
