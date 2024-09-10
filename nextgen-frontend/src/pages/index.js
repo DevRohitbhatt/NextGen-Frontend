@@ -11,6 +11,7 @@ const ActualFoodCost = lazy(() => import('./food-cost/ActualFoodCost'));
 const VarianceFoodCost = lazy(() => import('./food-cost/VarianceFoodCost'));
 const Invoices = lazy(() => import('./food-cost/Invoices'));
 const CountsheetDesigner = lazy(() => import('./food-cost/CountsheetDesigner'));
+const Purchase = lazy(() => import('./food-cost/PurchaseAnalysis'));
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
 
@@ -32,4 +33,5 @@ export {
 	VarianceFoodCost,
 	Invoices,
 	CountsheetDesigner,
+	Purchase
 };

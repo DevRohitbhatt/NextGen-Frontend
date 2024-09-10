@@ -32,7 +32,7 @@ const urlConfig = {
 	invoiceSearchReport: 'api/foodcost/GetInvoiceSearchReportData',
 	getCountsheets: 'api/foodcost/GetCountSheets',
 	countsheetDetails: 'api/foodcost/GetCountsheetDetails',
-
+	PurchaseAnalysis: 'api/foodcost/getPurchaseAnalysisData',
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
