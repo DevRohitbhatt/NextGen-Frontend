@@ -108,38 +108,14 @@ const LaborByPayPeriod = () => {
 				id: 'jobCode',
 				header: 'Job Code',
 				dataType: 'number',
-			}),
-			columnHelper.accessor('jobDesc', {
-				id: 'jobDesc',
-				header: 'Job Description',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('regHours', {
-				id: 'regHours',
-				header: 'Regular Hours',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) => subAcc + subSubrow.original.regHours,
-											0
-										)
-									);
-								} else {
-									return acc + subrow.original.regHours;
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
+						const value = row.subRows.map((subrow) => subrow.original.jobCode);
+						return value[0];
 					} else {
 						return getValue();
 					}
 				},
-				dataType: 'number',
 			}),
 			columnHelper.accessor('overHours', {
 				id: 'overHours',
@@ -207,7 +183,7 @@ const LaborByPayPeriod = () => {
 			}),
 			columnHelper.accessor('declaredTipsPct', {
 				id: 'declaredTipsPct',
-				header: 'Declared Tips %',
+				header: 'Tips %',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
 						const sum = row.subRows
@@ -234,7 +210,7 @@ const LaborByPayPeriod = () => {
 			}),
 			columnHelper.accessor('regPay', {
 				id: 'regPay',
-				header: 'Regular Pay',
+				header: 'Total Pay',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
 						const sum = row.subRows
@@ -334,8 +310,8 @@ const LaborByPayPeriod = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toISOString().split('T')[0],
-					toDate: selectedToDate.toISOString().split('T')[0],
+					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
+					toDate: selectedToDate.toLocaleDateString('en-CA'),
 				},
 			};
 

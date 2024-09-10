@@ -59,7 +59,7 @@ const InventoryWeeksOnHand = () => {
 		},
 		{
 			key: 'inventoryItemName',
-			label: 'Inventory Item Name',
+			label: 'Inventory Item',
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
@@ -95,7 +95,7 @@ const InventoryWeeksOnHand = () => {
 		},
 		{
 			key: 'caseUnitOfMeasureName',
-			label: 'Case Unit Of Measure Name',
+			label: 'UOM',
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
@@ -104,7 +104,7 @@ const InventoryWeeksOnHand = () => {
 		},
 		{
 			key: 'casesOnHandAtLastCount',
-			label: 'Cases On Hand At Last Count',
+			label: 'On Hand At Last Count',
 			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
@@ -149,7 +149,7 @@ const InventoryWeeksOnHand = () => {
 		},
 		{
 			key: 'casesAddedSinceLastCount',
-			label: 'Cases Added Since Last Count',
+			label: 'Added Since Last Count',
 			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
@@ -158,7 +158,7 @@ const InventoryWeeksOnHand = () => {
 		},
 		{
 			key: 'casesUsedEstimate',
-			label: 'Cases Used Estimate',
+			label: 'Used Estimate',
 			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
@@ -167,7 +167,7 @@ const InventoryWeeksOnHand = () => {
 		},
 		{
 			key: 'estimatedCasesOnHandNow',
-			label: 'Estimated Cases On Hand Now',
+			label: 'Estimated Cases On Hand',
 			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
@@ -176,7 +176,7 @@ const InventoryWeeksOnHand = () => {
 		},
 		{
 			key: 'estimatedValueOnHandNow',
-			label: 'Estimated Value On Hand Now',
+			label: 'Estimated $ On Hand Now',
 			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
@@ -185,12 +185,21 @@ const InventoryWeeksOnHand = () => {
 		},
 		{
 			key: 'averageCasesUsedPerWeek',
-			label: 'Average Cases Used Per Week',
+			label: 'Average Used Per Week',
 			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
 			minWidth: '100px',
 			maxWidth: '150px',
+		},
+		{
+			key: 'averageValueUsedPerWeek',
+			label: 'Average $ Used Per Week',
+			cellType: 'number',
+			toolTip: '',
+			toolTipDirection: '',
+			minWidth: '200px',
+			maxWidth: '300px',
 		},
 		{
 			key: 'salesYieldWeeklyAverage',
@@ -209,15 +218,6 @@ const InventoryWeeksOnHand = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
-		},
-		{
-			key: 'averageValueUsedPerWeek',
-			label: 'Average Value Used Per Week',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '200px',
-			maxWidth: '300px',
 		},
 	];
 

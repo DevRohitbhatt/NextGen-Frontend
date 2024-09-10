@@ -37,7 +37,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title }) => {
 				</span>
 			</div>
 			{isOpen && (
-				<ul className='absolute top-full left-0 text-nowrap max-h-[350px] overflow-y-scroll list-none bg-white rounded-md shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] z-10 mt-2'>
+				<ul className='absolute top-full left-0 text-nowrap max-h-[350px] overflow-y-scroll list-none bg-white rounded-md shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] z-10 mt-2 w-full'>
 					{options.map((option, index) => (
 						<li
 							className='cursor-pointer hover:bg-[#f0f0f0] px-5 py-2'

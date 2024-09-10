@@ -69,7 +69,7 @@ const EmployeeInformation = () => {
 			maxWidth: '180px',
 		},
 		{
-			key: 'uniqueId',
+			key: 'ssn',
 			label: 'Unique ID',
 			cellType: 'string',
 			toolTip: '',
@@ -184,15 +184,6 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
-		},
-		{
-			key: 'gender',
-			label: 'Gender',
-			cellType: 'string',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '100px',
-			maxWidth: '150px',
 		},
 		{
 			key: 'phantomEmployee',

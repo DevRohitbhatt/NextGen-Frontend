@@ -780,6 +780,8 @@ const VarianceFoodCost = () => {
 			body: buildPDFBody(),
 		};
 
+		console.log('pdfData', pdfData);
+
 		PdfBuilder(pdfData);
 	};
 
@@ -855,7 +857,7 @@ const VarianceFoodCost = () => {
 			rows: data.flatMap((row) =>
 				row.subRows.flatMap((subRow) =>
 					subRow.subRows.map((subSubRow) => [
-						{ value: subRow.subDepartment, cellType: 'number', columnName: 'Sub Department' },
+						{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
 						{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
 						{ value: subSubRow.actualNumber, cellType: 'number', columnName: 'Actual #' },
 						{ value: subSubRow.actualDollar, cellType: 'number', columnName: 'Actual $' },

@@ -235,6 +235,12 @@ const Invoices = () => {
 		}
 	};
 
+	useEffect(() => {
+		if (selectedUnit && selectedVendor && selectedFromDate && selectedToDate) {
+			handleInvoiceReport();
+		}
+	}, [selectedUnit, selectedVendor, selectedFromDate, selectedToDate]);
+
 	// Function to handle the unit selection
 	const handleUnitSelection = (unitName, unitID) => {
 		setselectedUnitName(unitName);
@@ -453,12 +459,6 @@ const Invoices = () => {
 								isDateRange={true}
 								onClick={() => setShowDateModal(true)}
 							/>
-
-							<div className='run-button' onClick={handleInvoiceReport}>
-								<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-									Run
-								</div>
-							</div>
 						</div>
 					) : (
 						<div className='mt-2'>

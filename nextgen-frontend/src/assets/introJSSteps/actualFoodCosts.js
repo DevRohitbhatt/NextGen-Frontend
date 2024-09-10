@@ -2,7 +2,7 @@ export default function ActualFoodCosts() {
 	return [
 		{
 			intro:
-				'<center>Welcome to QSROnline’s Labor By Pay Period Report tool! Let us show you around.' +
+				'<center>Welcome to QSROnline’s Actual Food Cost Report tool! Let us show you around.' +
 				'<br><br>Press the enter or arrow keys to advance through the tutorial.</center>',
 		},
 		{
@@ -12,13 +12,12 @@ export default function ActualFoodCosts() {
 				'<br> -You may select any Unit(s) or Area you have permissions to.',
 		},
 		{
-			element: '.w-52',
-			intro:
-				'Count Type',
+			element: '.date-selector',
+			intro: '-Select the date, or date range, you wish to display Actual Food Cost Report Report',
 		},
 		{
-			element: '.date-selector',
-			intro: '-Select the date, or date range, you wish to display Labor By Pay Period Report',
+			element: '.dropdown-selector',
+			intro: 'You can select the Actual Food Cost Report based on the following options: Weeks, Days, Months, or Shifts.',
 		},
 		{
 			element: '.run-button',
@@ -26,7 +25,7 @@ export default function ActualFoodCosts() {
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Labor By Pay Period Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
+			intro: 'You can export the Actual Food Cost Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.paged-table',
@@ -37,4 +36,3 @@ export default function ActualFoodCosts() {
 		},
 	];
 }
-

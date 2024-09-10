@@ -39,7 +39,7 @@ function TableHOC2({
 		getExpandedRowModel: getExpandedRowModel(),
 		//filterFromLeafRows: true,
 		//maxLeafRowFilterDepth: 1,
-		debugTable: false,
+		debugTable: true,
 	});
 
 	useTableView(table, view, isTableRendered);

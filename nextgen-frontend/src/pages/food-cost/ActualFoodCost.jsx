@@ -14,9 +14,8 @@ import {
 	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
-import ActualFoodCosts from '../../assets/introJSSteps/ActualFoodCost';
-import { data } from 'autoprefixer';
-import { Link, useNavigate } from 'react-router-dom';
+import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
+import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
@@ -56,7 +55,7 @@ const ActualFoodCost = () => {
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
-		steps: ActualFoodCosts(),
+		steps: actualFoodCosts(),
 		initialStep: 0,
 		stepsEnabled: false,
 	});
@@ -78,7 +77,6 @@ const ActualFoodCost = () => {
 
 	useEffect(() => {}, [countType]);
 
-	// columns for tableHOC
 	const columns = useMemo(
 		() => [
 			columnHelper.display({
@@ -87,7 +85,6 @@ const ActualFoodCost = () => {
 					row.getCanExpand() ? (
 						<div
 							{...{
-								onClick: row.getToggleExpandedHandler(),
 								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
 								className: 'inline-block',
 							}}
@@ -105,45 +102,483 @@ const ActualFoodCost = () => {
 				id: 'department',
 				header: 'Department',
 				dataType: 'string',
-				size: '250',
 			}),
-			columnHelper.accessor('begNumber', {
-				id: 'begNumber',
+			columnHelper.accessor('subDepartment', {
+				id: 'subDepartment',
+				header: 'Sub Department',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('description', {
+				id: 'description',
+				header: 'Description',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('countDisplayUnitName', {
+				id: 'countDisplayUnitName',
+				header: 'UOM',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('begCountDisplayUnits', {
+				id: 'begCountDisplayUnits',
+				header: 'Beg #',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('begCountCost', {
+				id: 'begCountCost',
 				header: 'Beg $',
 				dataType: 'number',
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.begCountCost
+																? Number(subsubsubrow.original.begCountCost)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.begCountCost
+														? Number(subSubrow.original.begCountCost)
+														: 0)
+												);
+											}
+										}, 0)
+									);
+								} else {
+									return (
+										acc + (subrow.original.begCountCost ? Number(subrow.original.begCountCost) : 0)
+									);
+								}
+							}, 0)
+							.toFixed(2);
+						return sum;
+					} else {
+						return (getValue() ?? 0).toFixed(2);
+					}
+				},
 			}),
-			columnHelper.accessor('trInNumber', {
-				id: 'trInNumber',
+			columnHelper.accessor('purchaseDisplayUnits', {
+				id: 'purchaseDisplayUnits',
+				header: 'Pur #',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('purchaseCost', {
+				id: 'purchaseCost',
+				header: 'Pur $',
+				dataType: 'number',
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.purchaseCost
+																? Number(subsubsubrow.original.purchaseCost)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.purchaseCost
+														? Number(subSubrow.original.purchaseCost)
+														: 0)
+												);
+											}
+										}, 0)
+									);
+								} else {
+									return (
+										acc + (subrow.original.purchaseCost ? Number(subrow.original.purchaseCost) : 0)
+									);
+								}
+							}, 0)
+							.toFixed(2);
+						return sum;
+					} else {
+						return (getValue() ?? 0).toFixed(2);
+					}
+				},
+			}),
+			columnHelper.accessor('iTinCountDisplayUnits', {
+				id: 'iTinCountDisplayUnits',
+				header: 'Trans In #',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('iTinCountCost', {
+				id: 'iTinCountCost',
 				header: 'Trans In $',
 				dataType: 'number',
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.iTinCountCost
+																? Number(subsubsubrow.original.iTinCountCost)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.iTinCountCost
+														? Number(subSubrow.original.iTinCountCost)
+														: 0)
+												);
+											}
+										}, 0)
+									);
+								} else {
+									return (
+										acc +
+										(subrow.original.iTinCountCost ? Number(subrow.original.iTinCountCost) : 0)
+									);
+								}
+							}, 0)
+							.toFixed(2);
+						return sum;
+					} else {
+						return (getValue() ?? 0).toFixed(2);
+					}
+				},
 			}),
-			columnHelper.accessor('trOutDollar', {
-				id: 'trOutDollar',
+			columnHelper.accessor('iToutCountDisplayUnits', {
+				id: 'iToutCountDisplayUnits',
+				header: 'Trans Out #',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('iToutCountCost', {
+				id: 'iToutCountCost',
 				header: 'Trans Out $',
 				dataType: 'number',
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.iToutCountCost
+																? Number(subsubsubrow.original.iToutCountCost)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.iToutCountCost
+														? Number(subSubrow.original.iToutCountCost)
+														: 0)
+												);
+											}
+										}, 0)
+									);
+								} else {
+									return (
+										acc +
+										(subrow.original.iToutCountCost ? Number(subrow.original.iToutCountCost) : 0)
+									);
+								}
+							}, 0)
+							.toFixed(2);
+						return sum;
+					} else {
+						return (getValue() ?? 0).toFixed(2);
+					}
+				},
 			}),
-			columnHelper.accessor('endDollar', {
-				id: 'endDollar',
+			columnHelper.accessor('endCountDisplayUnits', {
+				id: 'endCountDisplayUnits',
+				header: 'End #',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('endCountCost', {
+				id: 'endCountCost',
 				header: 'End $',
 				dataType: 'number',
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.endCountCost
+																? Number(subsubsubrow.original.endCountCost)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.endCountCost
+														? Number(subSubrow.original.endCountCost)
+														: 0)
+												);
+											}
+										}, 0)
+									);
+								} else {
+									return (
+										acc + (subrow.original.endCountCost ? Number(subrow.original.endCountCost) : 0)
+									);
+								}
+							}, 0)
+							.toFixed(2);
+						return sum;
+					} else {
+						return (getValue() ?? 0).toFixed(2);
+					}
+				},
 			}),
-			columnHelper.accessor('useDollar', {
-				id: 'useDollar',
-				header: 'Actual Uses $',
+			columnHelper.accessor('usageCountDisplayUnits', {
+				id: 'usageCountDisplayUnits',
+				header: 'Actual Usage #',
 				dataType: 'number',
 			}),
-			columnHelper.accessor('wasteDollar', {
-				id: 'wasteDollar',
-				header: 'waste $',
+			columnHelper.accessor('usageCost', {
+				id: 'usageCost',
+				header: 'Actual Usage $',
+				dataType: 'number',
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.usageCost
+																? Number(subsubsubrow.original.usageCost)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.usageCost
+														? Number(subSubrow.original.usageCost)
+														: 0)
+												);
+											}
+										}, 0)
+									);
+								} else {
+									return acc + (subrow.original.usageCost ? Number(subrow.original.usageCost) : 0);
+								}
+							}, 0)
+							.toFixed(2);
+						return sum;
+					} else {
+						return (getValue() ?? 0).toFixed(2);
+					}
+				},
+			}),
+			columnHelper.accessor('usageCostPct', {
+				id: 'usageCostPct',
+				header: 'Actual Usage %',
+				dataType: 'number',
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.usageCostPct
+																? Number(subsubsubrow.original.usageCostPct * 100)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.usageCostPct
+														? Number(subSubrow.original.usageCostPct * 100)
+														: 0)
+												);
+											}
+										}, 0)
+									);
+								} else {
+									return (
+										acc +
+										(subrow.original.usageCostPct ? Number(subrow.original.usageCostPct * 100) : 0)
+									);
+								}
+							}, 0)
+							.toFixed(2);
+						return sum;
+					} else {
+						return (getValue() ?? 0).toFixed(2);
+					}
+				},
+			}),
+			columnHelper.accessor('wasteCountDisplayUnits', {
+				id: 'wasteCountDisplayUnits',
+				header: 'Waste #',
 				dataType: 'number',
 			}),
-
-			// columnHelper.accessor('wasteNumber', {
-			// 	id: 'wasteNumber',
-			// 	header: 'Waste Number',
-			// 	dataType: 'number',
-			// }),
-
+			columnHelper.accessor('wasteCountCost', {
+				id: 'wasteCountCost',
+				header: 'Waste $',
+				dataType: 'number',
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.wasteCountCost
+																? Number(subsubsubrow.original.wasteCountCost)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.wasteCountCost
+														? Number(subSubrow.original.wasteCountCost)
+														: 0)
+												);
+											}
+										}, 0)
+									);
+								} else {
+									return (
+										acc +
+										(subrow.original.wasteCountCost ? Number(subrow.original.wasteCountCost) : 0)
+									);
+								}
+							}, 0)
+							.toFixed(2);
+						return sum;
+					} else {
+						return (getValue() ?? 0).toFixed(2);
+					}
+				},
+			}),
+			columnHelper.accessor('wasteCountCost', {
+				id: 'wasteCountCost',
+				header: 'Waste $',
+				dataType: 'number',
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const sum = row.subRows
+							.reduce((acc, subrow) => {
+								if (subrow.getCanExpand()) {
+									return (
+										acc +
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.wasteCountCost
+																? Number(subsubsubrow.original.wasteCountCost)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.wasteCountCost
+														? Number(subSubrow.original.wasteCountCost)
+														: 0)
+												);
+											}
+										}, 0)
+									);
+								} else {
+									return (
+										acc +
+										(subrow.original.wasteCountCost ? Number(subrow.original.wasteCountCost) : 0)
+									);
+								}
+							}, 0)
+							.toFixed(2);
+						return sum;
+					} else {
+						return (getValue() ?? 0).toFixed(2);
+					}
+				},
+			}),
 			columnHelper.accessor('comparisonName', {
 				id: 'comparisonName',
 				header: 'Comparison Name',
@@ -237,27 +672,56 @@ const ActualFoodCost = () => {
 
 			const result = await getCall(getData);
 
-			const newData = result.data.map((department) => ({
-				department: department.department,
-				subRows: department.subDepartments.map((subDept) => ({
-					subDepartment: subDept.subDepartment,
-					subRows: subDept.actualFoodCosts.map((cost) => ({
-						department: cost.department,
-						description: cost.description,
-						begDollar: cost.begDollar,
-						purDollar: cost.purDollar,
-						trInDollar: cost.trInDollar,
-						trOutDollar: cost.trOutDollar,
-						endDollar: cost.endDollar,
-						useDollar: cost.useDollar,
-						salesNet: cost.salesNet,
-						wasteDollar: cost.wasteDollar,
-						wasteNumber: cost.wasteNumber,
-						comparisonName: cost.comparisonName,
-						comparisonSales: cost.comparisonSales,
+			const newData = [
+				{
+					department: 'Total',
+					subRows: result.data.map((department) => ({
+						department: department.department,
+						comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
+						comparisonSales: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonSales || 0,
+						subRows: department.subDepartments.map((subDepartment) => ({
+							subDepartment: subDepartment.subDepartment,
+							comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
+							comparisonSales: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonSales || 0,
+							subRows: subDepartment.actualFoodCosts.map((foodCost) => ({
+								description: foodCost.description,
+								caseUnitName: foodCost.caseUnitName,
+								countDisplayUnitName: foodCost.countDisplayUnitName,
+								begCountDisplayUnits: foodCost.begCountDisplayUnits,
+								begCountCases: foodCost.begCountCases,
+								begCountCost: foodCost.begCountCost,
+								purchaseCases: foodCost.purchaseCases,
+								purchaseDisplayUnits: foodCost.purchaseDisplayUnits,
+								purchaseCost: foodCost.purchaseCost,
+								iTinCountDisplayUnits: foodCost.iTinCountDisplayUnits,
+								iTinCountCases: foodCost.iTinCountCases,
+								iTinCountCost: foodCost.iTinCountCost,
+								iToutCountDisplayUnits: foodCost.iToutCountDisplayUnits,
+								iToutCountCases: foodCost.iToutCountCases,
+								iToutCountCost: foodCost.iToutCountCost,
+								wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
+								wasteCountCases: foodCost.wasteCountCases,
+								wasteCountCost: foodCost.wasteCountCost,
+								wasteCostPct: foodCost.wasteCountCost / foodCost.comparisonSales,
+								endCountDisplayUnits: foodCost.endCountDisplayUnits,
+								endCountCases: foodCost.endCountCases,
+								endCountCost: foodCost.endCountCost,
+								usageCases: foodCost.usageCases,
+								usageCountDisplayUnits: foodCost.usageCountDisplayUnits,
+								usageCost: foodCost.usageCost,
+								usageCostPct: foodCost.usageCostPct,
+								salesNet: foodCost.salesNet,
+								comparisonName: foodCost.comparisonName,
+								comparisonSales: foodCost.comparisonSales,
+								yieldPerCase: foodCost.yieldPerCase,
+								yieldPerCountDisplayUnit: foodCost.yieldPerCountDisplayUnit,
+							})),
+						})),
 					})),
-				})),
-			}));
+				},
+			];
+
+			console.log('newData', newData);
 
 			setActualFoodCostData(newData);
 			setIsLoading(false);
@@ -292,8 +756,6 @@ const ActualFoodCost = () => {
 			return;
 		}
 
-		console.log('actualFoodCostData', actualFoodCostData);
-
 		const pdfData = {
 			title: 'Actual Food Cost Report',
 			subHeaders: [
@@ -309,14 +771,10 @@ const ActualFoodCost = () => {
 
 	const buildPDFBody = () => {
 		const body = actualFoodCostData.map((row) => {
-			const unit = unitsAndAreasList?.units?.find((unit) => unit.unitName === row.unitName);
-			const title = unit ? unit.unitName : '';
 			return {
 				type: 'table',
-				title: title,
+				title: row.department,
 				widths: [
-					'auto',
-					'auto',
 					'auto',
 					'auto',
 					'auto',
@@ -342,8 +800,7 @@ const ActualFoodCost = () => {
 					'string',
 					'string',
 					'string',
-					'number',
-					'number',
+					'string',
 					'number',
 					'number',
 					'number',
@@ -360,7 +817,7 @@ const ActualFoodCost = () => {
 					'number',
 					'number',
 					'string',
-					'string',
+					'number',
 				],
 				data: formatPDFData(row.subRows),
 			};
@@ -372,7 +829,6 @@ const ActualFoodCost = () => {
 	const formatPDFData = (data) => {
 		return {
 			columnHeaders: [
-				'Department',
 				'Sub Department',
 				'Description',
 				'UOM',
@@ -391,35 +847,34 @@ const ActualFoodCost = () => {
 				'Actual Usage %',
 				'Waste #',
 				'Waste $',
-				'Waste %',
 				'Comparison Name',
 				'Comparison Sales',
 			],
 			rows: data.flatMap((row) =>
-				row.subRows.map((subRow) => [
-					{ value: row.department, cellType: 'string', columnName: 'Department' },
-					{ value: row.subDepartment, cellType: 'string', columnName: 'Sub Department' },
-					{ value: subRow.description, cellType: 'string', columnName: 'Description' },
-					{ value: subRow.unit, cellType: 'string', columnName: 'UOM' },
-					{ value: subRow.begNumber, cellType: 'number', columnName: 'Beg #' },
-					{ value: subRow.begDollar, cellType: 'number', columnName: 'Beg $' },
-					{ value: subRow.purNumber, cellType: 'number', columnName: 'Pur #' },
-					{ value: subRow.purDollar, cellType: 'number', columnName: 'Pur $' },
-					{ value: subRow.trInNumber, cellType: 'number', columnName: 'Trans In#' },
-					{ value: subRow.trInDollar, cellType: 'number', columnName: 'Trans In $' },
-					{ value: subRow.trOutDollar, cellType: 'number', columnName: 'Trans Out #' },
-					{ value: subRow.trOutDollar, cellType: 'number', columnName: 'Trans Out $' },
-					{ value: subRow.endNumber, cellType: 'number', columnName: 'End #' },
-					{ value: subRow.endDollar, cellType: 'number', columnName: 'End $' },
-					{ value: subRow.useNumber, cellType: 'number', columnName: 'Actual Usage #' },
-					{ value: subRow.useDollar, cellType: 'number', columnName: 'Actual Usage $' },
-					{ value: subRow.salesNet, cellType: 'number', columnName: 'Actual Usage %' },
-					{ value: subRow.usePct, cellType: 'number', columnName: 'Waste #' },
-					{ value: subRow.wasteNumber, cellType: 'number', columnName: 'Waste $' },
-					{ value: subRow.wasteDollar, cellType: 'number', columnName: 'Waste %' },
-					{ value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
-					{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
-				])
+				row.subRows.flatMap((subRow) =>
+					subRow.subRows.map((subSubRow) => [
+						{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
+						{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
+						{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'UOM' },
+						{ value: subSubRow.begCountDisplayUnits, cellType: 'number', columnName: 'Beg #' },
+						{ value: subSubRow.begCountCost, cellType: 'number', columnName: 'Beg $' },
+						{ value: subSubRow.purchaseDisplayUnits, cellType: 'number', columnName: 'Pur #' },
+						{ value: subSubRow.purchaseCost, cellType: 'number', columnName: 'Pur $' },
+						{ value: subSubRow.iTinCountDisplayUnits, cellType: 'number', columnName: 'Trans In#' },
+						{ value: subSubRow.iTinCountCost, cellType: 'number', columnName: 'Trans In $' },
+						{ value: subSubRow.iToutCountDisplayUnits, cellType: 'number', columnName: 'Trans Out #' },
+						{ value: subSubRow.iToutCountCost, cellType: 'number', columnName: 'Trans Out $' },
+						{ value: subSubRow.endCountDisplayUnits, cellType: 'number', columnName: 'End #' },
+						{ value: subSubRow.endCountCost, cellType: 'number', columnName: 'End $' },
+						{ value: subSubRow.usageCountDisplayUnits, cellType: 'number', columnName: 'Actual Usage #' },
+						{ value: subSubRow.usageCost, cellType: 'number', columnName: 'Actual Usage $' },
+						{ value: subSubRow.usageCostPct, cellType: 'number', columnName: 'Actual Usage %' },
+						{ value: subSubRow.wasteCountDisplayUnits, cellType: 'number', columnName: 'Waste #' },
+						{ value: subSubRow.wasteCountCost, cellType: 'number', columnName: 'Waste $' },
+						{ value: subSubRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
+						{ value: subSubRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
+					])
+				)
 			),
 		};
 	};
@@ -438,6 +893,7 @@ const ActualFoodCost = () => {
 					{ name: 'Department', filter: 'text' },
 					{ name: 'Sub Department', filter: 'text' },
 					{ name: 'Description', filter: 'text' },
+					{ name: 'UOM', filter: 'text' },
 					{ name: 'Beg #', filter: 'text' },
 					{ name: 'Beg $', filter: 'text' },
 					{ name: 'Pur #', filter: 'text' },
@@ -453,35 +909,36 @@ const ActualFoodCost = () => {
 					{ name: 'Actual Usage %', filter: 'text' },
 					{ name: 'Waste #', filter: 'text' },
 					{ name: 'Waste $', filter: 'text' },
-					{ name: 'Waste %', filter: 'text' },
 					{ name: 'Comparison Name', filter: 'text' },
 					{ name: 'Comparison Sales', filter: 'text' },
 				],
-				data: actualFoodCostData.flatMap((unit) =>
-					unit.subRows.flatMap((employee) =>
-						employee.subRows.map((period) => ({
-							department: period.department,
-							subDepartment: period.subDepartment,
-							description: period.description,
-							begNumber: period.begNumber,
-							begDollar: period.begDollar,
-							purNumber: period.purNumber,
-							purDollar: period.purDollar,
-							trInNumber: period.trInNumber,
-							trInDollar: period.trInDollar,
-							trOutNumber: period.trOutNumber,
-							trOutDollar: period.trOutDollar,
-							endDollar: period.endDollar,
-							useNumber: period.useNumber,
-							useDollar: period.useDollar,
-							salesNet: period.salesNet,
-							usePct: period.usePct,
-							wasteNumber: period.wasteNumber,
-							wasteDollar: period.wasteDollar,
-							wastePct: period.wastePct,
-							comparisonName: period.comparisonName,
-							comparisonSales: period.comparisonSales,
-						}))
+				data: actualFoodCostData.flatMap((row) =>
+					row.subRows.flatMap((department) =>
+						department.subRows.flatMap((subDepartment) =>
+							subDepartment.subRows.map((item) => ({
+								department: department.department,
+								subDepartment: subDepartment.subDepartment,
+								description: item.description,
+								UOM: item.countDisplayUnitName,
+								begNumber: item.begCountDisplayUnits,
+								begDollar: item.begCountCost,
+								purNumber: item.purchaseDisplayUnits,
+								purDollar: item.purchaseCost,
+								trInNumber: item.iTinCountDisplayUnits,
+								trInDollar: item.iTinCountCost,
+								trOutNumber: item.iToutCountDisplayUnits,
+								trOutDollar: item.iToutCountCost,
+								endDollar: item.endCountDisplayUnits,
+								useNumber: item.endCountCost,
+								useDollar: item.usageCountDisplayUnits,
+								salesNet: item.usageCost,
+								usePct: item.usageCostPct,
+								wasteNumber: item.wasteCountDisplayUnits,
+								wasteDollar: item.wasteCountCost,
+								comparisonName: item.comparisonName,
+								comparisonSales: item.comparisonSales,
+							}))
+						)
 					)
 				),
 			},
@@ -514,7 +971,6 @@ const ActualFoodCost = () => {
 			view={viewby}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
-			//columns, actualFoodCostData, false, viewby, isTableRendered, setIsTableRendered)
 		/>
 	);
 
@@ -580,7 +1036,13 @@ const ActualFoodCost = () => {
 						setMemberName={setselectedUnitName}
 						onClick={() => setUnitShowModal(true)}
 					/>
-					<div className='w-52'>
+					<DateSelector
+						toDate={selectedToDate}
+						fromDate={selectedFromDate}
+						isDateRange={true}
+						onClick={() => setShowDateModal(true)}
+					/>
+					<div className='w-36'>
 						<Dropdown
 							title='Count Type'
 							options={dropdownOptions}
@@ -588,12 +1050,6 @@ const ActualFoodCost = () => {
 							onOptionChange={handleViewChange}
 						/>
 					</div>
-					<DateSelector
-						toDate={selectedToDate}
-						fromDate={selectedFromDate}
-						isDateRange={true}
-						onClick={() => setShowDateModal(true)}
-					/>
 
 					<div className='run-button' onClick={handleRun}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>

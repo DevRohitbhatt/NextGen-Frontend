@@ -117,7 +117,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 									<th className='p-2 border-b border-gray-300'>
 										<input
 											type='text'
-											className='box-border w-full p-1 border-2 border-gray-300 border-solid hover:border-primary focus:border-primary focus:outline-none'
+											className='box-border w-full p-1 font-normal border-2 border-gray-300 border-solid hover:border-primary focus:border-primary focus:outline-none'
 											value={filters[header.key] || ''}
 											onChange={(e) => handleFilterChange(header.key, e.target.value)}
 										/>

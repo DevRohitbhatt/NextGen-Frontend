@@ -213,7 +213,7 @@ const InventoryTransfer = () => {
 				{
 					key: 'transferTime',
 					label: 'Transfer Time',
-					cellType: 'date',
+					cellType: 'dateTime',
 					toolTip: '',
 					toolTipDirection: '',
 				},
