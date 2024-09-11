@@ -12,12 +12,12 @@ import {
 	ExcelExport as exportToExcel,
 	TableHOC2,
 	Dropdown,
-    VendorSelector,
-    VendorModal
+	VendorSelector,
+	VendorModal,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import PurchaseAnalysi from '../../assets/introJSSteps/PurchaseAnalysis';
-import {useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
@@ -25,9 +25,8 @@ const PurchaseAnalysis = () => {
 	const [companyId, setCompanyId] = useState();
 	const [alignmentId, setAlignmentId] = useState();
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
-    const [vendorsList, setVendorsList] = useState([]);
+	const [vendorsList, setVendorsList] = useState([]);
 	const [purchasetData, setPurchaseData] = useState([]);
-	const [isTableRendered, setIsTableRendered] = useState(true);
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
@@ -39,12 +38,11 @@ const PurchaseAnalysis = () => {
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
-	
-    //selected vendor state variables
+
+	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
 	const [selectedVendorName, setselectedVendorName] = useState('All Vendors');
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
-
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -54,19 +52,19 @@ const PurchaseAnalysis = () => {
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
-	const [view, setView] = useState('None');
-	const viewOptions = [
-        { name: 'Unit - GLCode' },
-        { name: 'Unit - Department' }, 
-        { name: 'Unit - Inventory Item' },
-        { name: 'Unit - Vendor Item - Inventory Item'},
-        { name: 'Unit - Vendor- Invoice' },
-        { name: 'Vendor - GLCode' },
-        { name: 'Vendor - Department' }        
-        ];
+	// const [view, setView] = useState('None');
+	// const viewOptions = [
+	//     { name: 'Unit - GLCode' },
+	//     { name: 'Unit - Department' },
+	//     { name: 'Unit - Inventory Item' },
+	//     { name: 'Unit - Vendor Item - Inventory Item'},
+	//     { name: 'Unit - Vendor- Invoice' },
+	//     { name: 'Vendor - GLCode' },
+	//     { name: 'Vendor - Department' }
+	//     ];
 
-    //location for state
-    const location = useLocation();
+	//location for state
+	const location = useLocation();
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -74,121 +72,103 @@ const PurchaseAnalysis = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
-	
-	const handleTotalViewChange = (option) => {
-		setView(option);
-	};
 
+	// const handleTotalViewChange = (option) => {
+	// 	setView(option);
+	// };
 
 	// columns for tableHOC
 	const columns = useMemo(
-        () => [
-          columnHelper.display({
-            id: "actions",
-            cell: ({ row }) =>
-              row.getCanExpand() ? (
-                <div
-                  {...{
-                    onClick: row.getToggleExpandedHandler(),
-                    style: {
-                      cursor: "pointer",
-                      paddingLeft: `${row.depth * 2}rem`,
-                    },
-                    className: "inline-block",
-                  }}
-                >
-                  {row.getIsExpanded() ? (
-                    <CiSquareMinus className="text-[20px]" />
-                  ) : (
-                    <CiSquarePlus className="text-[20px]" />
-                  )}
-                </div>
-              ) : null,
-            size: "80",
-          }),
-          columnHelper.accessor("department", {
-            id: "department",
-            header: "Department",
-            dataType: "string",
-            size: "200",
-          }),
-          columnHelper.accessor("unitId", {
-            id: "unitId",
-            header: "Unit ID",
-            dataType: "string",
-            size: "150",
-          }),
-          columnHelper.accessor("date", {
-            id: "date",
-            header: "Date",
-            dataType: "string", // Adjust if you format the date differently
-            size: "150",
-          }),
-          columnHelper.accessor("name", {
-            id: "vendorName",
-            header: "Vendor Name",
-            dataType: "string",
-            size: "200",
-          }),
-          columnHelper.accessor("vendorInvoiceReference", {
-            id: "vendorInvoiceReference",
-            header: "Invoice Ref.",
-            dataType: "string",
-            size: "150",
-          }),
-          columnHelper.accessor("totalAmountIncludingTax", {
-            id: "totalAmountIncludingTax",
-            header: "Total Amount ($)",
-            dataType: "number",
-            size: "150",
-          }),
-         
-          columnHelper.accessor("inventoryItemDescription", {
-            id: "description",
-            header: "Description",
-            dataType: "string",
-            size: "250",
-          }),
-          columnHelper.accessor("quantity", {
-            id: "quantity",
-            header: "Quantity",
-            dataType: "number",
-            size: "100",
-          }),
-          columnHelper.accessor("price", {
-            id: "price",
-            header: "Price ($)",
-            dataType: "number",
-            size: "100",
-          }),
-          columnHelper.accessor("taxAmount", {
-            id: "taxAmount",
-            header: "Tax Amount ($)",
-            dataType: "number",
-            size: "150",
-          }),
-          columnHelper.accessor("extPrice", {
-            id: "extPrice",
-            header: "Extended Price ($)",
-            dataType: "number",
-            size: "150",
-          }),
-          columnHelper.accessor("companyGLCode", {
-            id: "companyGLCode",
-            header: "Company GL Code",
-            dataType: "string",
-            size: "200",
-          }),
-          columnHelper.accessor("companyName", {
-            id: "companyName",
-            header: "Company Name",
-            dataType: "string",
-            size: "200",
-          }),
-        ],
-        []
-      );
-      
+		() => [
+			columnHelper.accessor('unitName', {
+				id: 'unitName',
+				header: 'Unit',
+				dataType: 'string',
+				size: '150',
+			}),
+			columnHelper.accessor('date', {
+				id: 'date',
+				header: 'Date',
+				cell: ({ getValue }) => {
+					if (!getValue()) return '';
+					const date = new Date(getValue());
+					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+					return formattedDate;
+				},
+				dataType: 'date', // Adjust if you format the date differently
+			}),
+			columnHelper.accessor('name', {
+				id: 'name',
+				header: 'Vendor',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('vendorInvoiceReference', {
+				id: 'vendorInvoiceReference',
+				header: 'Invoice Ref #',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('totalAmountIncludingTax', {
+				id: 'totalAmountIncludingTax',
+				header: 'Invoice Total',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('companyGLCode', {
+				id: 'companyGLCode',
+				header: 'GL Code',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('quantity', {
+				id: 'quantity',
+				header: 'Item Quantity',
+				footer: ({ table }) => (
+					<div className='font-bold text-center'>
+						{parseInt(table.getCoreRowModel().rows.reduce((acc, row) => acc + row.original.quantity, 0))}
+					</div>
+				),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('price', {
+				id: 'price',
+				header: 'Item Price',
+				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('taxAmount', {
+				id: 'taxAmount',
+				header: 'Item Tax',
+				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('extPrice', {
+				id: 'extPrice',
+				header: 'Item Total',
+				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
+				footer: ({ table }) => (
+					<div className='font-bold text-center'>
+						$
+						{table
+							.getCoreRowModel()
+							.rows.reduce((acc, row) => acc + row.original.extPrice, 0)
+							.toFixed(2)}
+					</div>
+				),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('department', {
+				id: 'department',
+				header: 'Department',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('inventoryItemDescription', {
+				id: 'inventoryItemDescription',
+				header: 'Inventory Item',
+				dataType: 'string',
+				size: '200',
+			}),
+		],
+		[]
+	);
+
 	useEffect(() => {
 		// Fetch initial data
 		if (!selectedUnit) {
@@ -215,10 +195,11 @@ const PurchaseAnalysis = () => {
 		}
 	}, []);
 
-
-    useEffect(() => {
-		fetchPurchaseDetails();
-	}, []);
+	useEffect(() => {
+		if (location.state) {
+			fetchPurchaseDetails();
+		}
+	}, [location.state]);
 
 	const fetchPurchaseDetails = async () => {
 		try {
@@ -232,34 +213,13 @@ const PurchaseAnalysis = () => {
 					memberID: location.state?.memberID,
 					fromDate: location.state?.fromDate,
 					toDate: location.state?.toDate,
-					vendorId:location.state?.vendorId
+					vendorId: location.state?.vendorId,
 				},
 			};
 
 			const result = await getCall(getData);
 
-			const newData = result.data.map((item) => ({
-                department: item.department,  // Assuming department is part of `item`
-                subRows: [
-                  {
-                    department: item.department,
-                    unitId: item.unitId,
-                    date: new Date(item.date).toLocaleDateString("en-CA"),
-                    vendorName: item.name,
-                    vendorInvoiceReference: item.vendorInvoiceReference,
-                    totalAmountIncludingTax: item.totalAmountIncludingTax,
-                    description: item.inventoryItemDescription,
-                    quantity: item.quantity,
-                    price: item.price,
-                    taxAmount: item.taxAmount,
-                    extPrice: item.extPrice,
-                    companyGLCode: item.companyGLCode,
-                    companyName: item.companyName || "N/A",  // Handle null companyName
-                  }
-                ]
-              }));
-
-			setPurchaseData(newData);
+			setPurchaseData(result.data);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -298,7 +258,7 @@ const PurchaseAnalysis = () => {
 		}
 	};
 
-    // This function fetches the vendors.
+	// This function fetches the vendors.
 	const fetchVendors = async (companyID) => {
 		try {
 			setIsError(false);
@@ -323,7 +283,6 @@ const PurchaseAnalysis = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setIsTableRendered(false);
 
 			const getData = {
 				url: 'PurchaseAnalysis',
@@ -333,33 +292,16 @@ const PurchaseAnalysis = () => {
 					memberId: selectedUnit,
 					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
 					toDate: selectedToDate.toLocaleDateString('en-CA'),
-					vendorId:selectedVendor
+					vendorId: selectedVendor,
 				},
 			};
 
 			const result = await getCall(getData);
 
 			const newData = result.data.map((item) => ({
-                department: item.department,  // Assuming department is part of `item`
-                subRows: [
-                  {
-                    department: item.department,
-                    unitId: item.unitId,
-                    date: new Date(item.date).toLocaleDateString("en-CA"),
-                    vendorName: item.name,
-                    vendorInvoiceReference: item.vendorInvoiceReference,
-                    totalAmountIncludingTax: item.totalAmountIncludingTax,
-                    description: item.inventoryItemDescription,
-                    quantity: item.quantity,
-                    price: item.price,
-                    taxAmount: item.taxAmount,
-                    extPrice: item.extPrice,
-                    companyGLCode: item.companyGLCode,
-                    companyName: item.companyName || "N/A",  // Handle null companyName
-                  }
-                ]
-              }));
-              
+				...item,
+				unitName: unitsAndAreasList.units.find((unit) => unit.unitID === parseInt(item.unitId))?.unitName,
+			}));
 
 			setPurchaseData(newData);
 			setIsLoading(false);
@@ -367,7 +309,7 @@ const PurchaseAnalysis = () => {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting Labor By Pay Period Report data: ', error);
+			console.error('Error getting Purchase Analysis Report data: ', error);
 		}
 	};
 
@@ -383,190 +325,62 @@ const PurchaseAnalysis = () => {
 		setShowDateModal(false);
 	};
 
-    const handleVendorSelection = (selectedVendorName, vendorList) => {
+	const handleVendorSelection = (selectedVendorName, vendorList) => {
 		setselectedVendorName(selectedVendorName);
 		setSelectedVendor(vendorList[0].id);
 		setVendorShowModal(false);
 	};
 
-
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
-		if (!columns || columns.length === 0) {
-			console.error('Columns are not defined or empty');
-			return;
-		}
-
-		if (!purchasetData || purchasetData.length === 0) {
-			console.error('Purchase report data is not defined or empty');
-			return;
-		}
-
 		const pdfData = {
 			title: 'Purchase Analysis Report',
 			subHeaders: [
-				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
+				`Unit:${selectedUnitName} | Vendor:${selectedVendorName} | Date Range:${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
-			body: buildPDFBody(),
+			body: [
+				{
+					type: 'table',
+					widths: new Array(columns.length).fill('auto'),
+					dataTypes: columns.map((column) => column.dataType),
+					data: {
+						columnHeaders: columns.map((column) => column.header),
+						rows: purchasetData.map((row) =>
+							columns.map((column) => ({
+								value: row[column.id],
+								cellType: column.dataType,
+								columnName: column.header,
+							}))
+						),
+					},
+				},
+			],
 		};
 
 		PdfBuilder(pdfData);
 	};
 
-	const buildPDFBody = () => {
-        const body = purchasetData.map((row) => {
-          // Find the unit name corresponding to the row's unit
-          const unit = unitsAndAreasList?.units?.find(
-            (unit) => unit.unitName === row.unitName
-          );
-          const title = unit ? unit.unitName : "";
-      
-          return {
-            type: "table",
-            title: title,
-            widths: [
-              "auto", "auto", "auto", "auto", "auto", "auto", "auto", "auto", "auto",
-              "auto","auto"
-            ], // Adjust widths based on number of columns
-            dataTypes: [
-              "string", "string", "string", "string", "string", "number", "string", 
-              "number", "number", "number", "number"
-            ], // Data types aligned with the table columns
-            data: formatPDFData(row.subRows), // Apply formatPDFData to subRows
-          };
-        });
-      
-        return body;
-      };
-      
-
-      const formatPDFData = (data) => {
-        return {
-          columnHeaders: [
-            "Department",
-            "Unit ID",
-            "Date",
-            "Vendor",
-            "Invoice Ref #",
-            "Invoice Total",
-            "GL Code",
-            "Item Quantity",
-            "Item Price",
-            "Item Tax",
-            "Item Totalt",
-          ],
-          rows: data.map((row) => [
-            {
-                value: row.department,
-                cellType: "string",
-            },
-            {
-              value: row.unitId,
-              cellType: "string",
-            },
-            {
-              value: new Date(row.date).toLocaleDateString('en-CA'),
-              cellType: "string",
-            },
-            {
-              value: row.vendorName,
-              cellType: "string",
-            },
-            {
-              value: row.vendorInvoiceReference,
-              cellType: "string",
-            },
-            {
-              value: row.totalAmountIncludingTax,
-              cellType: "number",
-            },
-            {
-                value: row.companyGLCode,
-                cellType: "string",
-            },
-            {
-              value: row.quantity,
-              cellType: "number",
-            },
-            {
-              value: row.price,
-              cellType: "number",
-            },
-            {
-              value: row.taxAmount,
-              cellType: "number",
-            },
-            {
-              value: row.extPrice,
-              cellType: "number",
-            },
-          ]),
-        };
-      };
-      
-	
-
 	// // Function to handle the Excel export
-	
-    const handleExcelClick = () => {
-       
-        const data = [
-          {
-            name: "Purchase Analysis Report",
-            columns: [
-              { name: "Department", filter: "text" },
-              { name: "Unit ID", filter: "text" },
-              { name: "Date", filter: "text" },
-              { name: "Vendor", filter: "text" },
-              { name: "Vendor Invoice Reference", filter: "text" },
-              { name: "Total Amount (Tax Included)", filter: "text" },
-              { name: "Description", filter: "text" },
-              { name: "Quantity", filter: "number" },
-              { name: "Price", filter: "number" },
-              { name: "Tax Amount", filter: "number" },
-              { name: "Extended Price", filter: "number" },
-              { name: "Company GL Code", filter: "text" },
-              { name: "Company Name", filter: "text" },
-            ],
-            data: purchasetData.flatMap((item) =>
-              item.subRows.map((subItem) => ({
-                department: item.department,
-                unitId: subItem.unitId,
-                date: new Date(subItem.date).toLocaleDateString("en-CA"),
-                vendor: subItem.vendorName,
-                vendorInvoiceReference: subItem.vendorInvoiceReference,
-                totalAmountIncludingTax: subItem.totalAmountIncludingTax,
-                description: subItem.description,
-                quantity: subItem.quantity,
-                price: subItem.price,
-                taxAmount: subItem.taxAmount,
-                extPrice: subItem.extPrice,
-                companyGLCode: subItem.companyGLCode,
-                companyName: subItem.companyName || "N/A", // Handle null values
-              }))
-            ),
-          },
-        ];
-      
-        const filename = `PurchaseAnalysisReport_${selectedFromDate.toLocaleDateString("en-CA")}`;
-        const spreadSheetTitle = "Purchase Analysis Report";
-        const date = `${selectedFromDate.toLocaleDateString("en-CA")} - ${selectedToDate.toLocaleDateString("en-CA")}`;
-        exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
-      };
-      
 
-	const Table = (
-		<TableHOC2
-			columns={columns}
-			data={purchasetData}
-			view={view}
-			isTableRendered={isTableRendered}
-			setIsTableRendered={setIsTableRendered}
-            expandCollapseButtons={true}
-		/>
-	);
+	const handleExcelClick = () => {
+		const data = [
+			{
+				name: `Vendor:${selectedVendorName}`,
+				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
+				data: purchasetData.map((row) => columns.map((column) => row[column.id])),
+			},
+		];
+
+		const filename = 'PurchaseAnalysis';
+		const spreadSheetTitle = 'Purchase Analysis Report';
+		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+
+		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
+	};
+
+	const Table = <TableHOC2 columns={columns} data={purchasetData} isPaginated={true} isFooter={true} />;
 
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -594,12 +408,12 @@ const PurchaseAnalysis = () => {
 						isDateRange={true}
 						onClick={() => setShowDateModal(true)}
 					/>
-                    <VendorSelector
-								vendorID={selectedVendor}
-								vendorName={selectedVendorName}
-								setVendorName={setselectedVendorName}
-								onClick={() => setVendorShowModal(true)}
-							/>
+					<VendorSelector
+						vendorID={selectedVendor}
+						vendorName={selectedVendorName}
+						setVendorName={setselectedVendorName}
+						onClick={() => setVendorShowModal(true)}
+					/>
 
 					<div className='run-button' onClick={handleRun}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
@@ -625,7 +439,7 @@ const PurchaseAnalysis = () => {
 				<div>{errorMessage}</div>
 			) : (
 				<>
-					{purchasetData.length > 0 && (
+					{/* {purchasetData.length > 0 && (
 						<div className='w-52 display-flex'>
 							<Dropdown
 								title='Group By'
@@ -634,7 +448,7 @@ const PurchaseAnalysis = () => {
 								onOptionChange={handleTotalViewChange}
 							/>
 						</div>
-					)}
+					)} */}
 
 					{purchasetData.length > 0 && <div className='paged-table'>{Table}</div>}
 				</>
@@ -651,8 +465,8 @@ const PurchaseAnalysis = () => {
 					}}
 					handleUnitSelection={handleUnitSelection}
 				/>
-                
-                <VendorModal
+
+				<VendorModal
 					vendorData={vendorsList}
 					vendorID={selectedVendor}
 					vendorName={selectedVendorName}

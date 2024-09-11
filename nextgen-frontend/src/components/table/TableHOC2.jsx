@@ -89,7 +89,7 @@ function TableHOC2({
 											<th
 												key={header.id}
 												colSpan={header.colSpan}
-												className='px-2 py-4 text-left border-b border-gray-300 cursor-pointer'
+												className='px-2 py-4 text-right border-b border-gray-300 cursor-pointer'
 												style={{ width: header.getSize() }}
 											>
 												{header.isPlaceholder ? null : (
@@ -100,6 +100,7 @@ function TableHOC2({
 																: '',
 															onClick: header.column.getToggleSortingHandler(),
 														}}
+														style={{ justifyContent: 'center' }}
 													>
 														{flexRender(
 															header.column.columnDef.header,
@@ -129,7 +130,7 @@ function TableHOC2({
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (
-											<td key={cell.id}>
+											<td key={cell.id} className='px-2 text-center'>
 												{flexRender(cell.column.columnDef.cell, cell.getContext())}
 											</td>
 										);
