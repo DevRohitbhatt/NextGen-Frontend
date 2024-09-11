@@ -108,43 +108,15 @@ const VarianceFoodCost = () => {
 				header: 'Description',
 				dataType: 'string',
 			}),
+			columnHelper.accessor('countDisplayUnitName', {
+				id: 'countDisplayUnitName',
+				header: 'UOM',
+				dataType: 'string',
+			}),
 			columnHelper.accessor('actualNumber', {
 				id: 'actualNumber',
 				header: 'Actual #',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
-									);
-								} else {
-									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
 			}),
 			columnHelper.accessor('actualDollar', {
 				id: 'actualDollar',
@@ -157,23 +129,32 @@ const VarianceFoodCost = () => {
 								if (subrow.getCanExpand()) {
 									return (
 										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.actualDollar
+																? Number(subsubsubrow.original.actualDollar)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.actualDollar
+														? Number(subSubrow.original.actualDollar)
+														: 0)
+												);
+											}
+										}, 0)
 									);
 								} else {
 									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+										acc + (subrow.original.actualDollar ? Number(subrow.original.actualDollar) : 0)
 									);
 								}
 							}, 0)
@@ -195,30 +176,39 @@ const VarianceFoodCost = () => {
 								if (subrow.getCanExpand()) {
 									return (
 										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.actualPct
+																? Number(subsubsubrow.original.actualPct * 100)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.actualPct
+														? Number(subSubrow.original.actualPct * 100)
+														: 0)
+												);
+											}
+										}, 0)
 									);
 								} else {
 									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+										acc + (subrow.original.actualPct ? Number(subrow.original.actualPct * 100) : 0)
 									);
 								}
 							}, 0)
 							.toFixed(2);
-						return sum;
+						return `${sum}%`;
 					} else {
-						return (getValue() ?? 0).toFixed(2);
+						return `${(getValue() ?? 0).toFixed(2)}%`;
 					}
 				},
 			}),
@@ -226,39 +216,6 @@ const VarianceFoodCost = () => {
 				id: 'idealNumber',
 				header: 'Ideal #',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
-									);
-								} else {
-									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
 			}),
 			columnHelper.accessor('idealDollar', {
 				id: 'idealDollar',
@@ -271,23 +228,32 @@ const VarianceFoodCost = () => {
 								if (subrow.getCanExpand()) {
 									return (
 										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.idealDollar
+																? Number(subsubsubrow.original.idealDollar)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.idealDollar
+														? Number(subSubrow.original.idealDollar)
+														: 0)
+												);
+											}
+										}, 0)
 									);
 								} else {
 									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+										acc + (subrow.original.idealDollar ? Number(subrow.original.idealDollar) : 0)
 									);
 								}
 							}, 0)
@@ -309,30 +275,37 @@ const VarianceFoodCost = () => {
 								if (subrow.getCanExpand()) {
 									return (
 										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.idealPct
+																? Number(subsubsubrow.original.idealPct)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.idealPct
+														? Number(subSubrow.original.idealPct)
+														: 0)
+												);
+											}
+										}, 0)
 									);
 								} else {
-									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
-									);
+									return acc + (subrow.original.idealPct ? Number(subrow.original.idealPct) : 0);
 								}
 							}, 0)
 							.toFixed(2);
-						return sum;
+						return `${sum}%`;
 					} else {
-						return (getValue() ?? 0).toFixed(2);
+						return `${(getValue() ?? 0).toFixed(2)}%`;
 					}
 				},
 			}),
@@ -340,39 +313,6 @@ const VarianceFoodCost = () => {
 				id: 'varianceNumber',
 				header: 'Variance #',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
-									);
-								} else {
-									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
 			}),
 			columnHelper.accessor('varianceDollar', {
 				id: 'varianceDollar',
@@ -385,23 +325,33 @@ const VarianceFoodCost = () => {
 								if (subrow.getCanExpand()) {
 									return (
 										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.varianceDollar
+																? Number(subsubsubrow.original.varianceDollar)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.varianceDollar
+														? Number(subSubrow.original.varianceDollar)
+														: 0)
+												);
+											}
+										}, 0)
 									);
 								} else {
 									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+										acc +
+										(subrow.original.varianceDollar ? Number(subrow.original.varianceDollar) : 0)
 									);
 								}
 							}, 0)
@@ -423,30 +373,39 @@ const VarianceFoodCost = () => {
 								if (subrow.getCanExpand()) {
 									return (
 										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.variancePct
+																? Number(subsubsubrow.original.variancePct)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.variancePct
+														? Number(subSubrow.original.variancePct)
+														: 0)
+												);
+											}
+										}, 0)
 									);
 								} else {
 									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+										acc + (subrow.original.variancePct ? Number(subrow.original.variancePct) : 0)
 									);
 								}
 							}, 0)
 							.toFixed(2);
-						return sum;
+						return `${sum}%`;
 					} else {
-						return (getValue() ?? 0).toFixed(2);
+						return `${(getValue() ?? 0).toFixed(2)}%`;
 					}
 				},
 			}),
@@ -454,39 +413,6 @@ const VarianceFoodCost = () => {
 				id: 'wasteNumber',
 				header: 'Waste #',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
-									);
-								} else {
-									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
 			}),
 			columnHelper.accessor('wasteDollar', {
 				id: 'wasteDollar',
@@ -499,23 +425,32 @@ const VarianceFoodCost = () => {
 								if (subrow.getCanExpand()) {
 									return (
 										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.wasteDollar
+																? Number(subsubsubrow.original.wasteDollar)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.wasteDollar
+														? Number(subSubrow.original.wasteDollar)
+														: 0)
+												);
+											}
+										}, 0)
 									);
 								} else {
 									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
+										acc + (subrow.original.wasteDollar ? Number(subrow.original.wasteDollar) : 0)
 									);
 								}
 							}, 0)
@@ -537,30 +472,37 @@ const VarianceFoodCost = () => {
 								if (subrow.getCanExpand()) {
 									return (
 										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) =>
-												subAcc +
-												subSubrow.subRows.reduce(
-													(subsubAcc, subsubsubrow) =>
-														subsubAcc +
-														(subsubsubrow.original.actualNumber
-															? Number(subsubsubrow.original.actualNumber)
-															: 0),
-													0
-												),
-											0
-										)
+										subrow.subRows.reduce((subAcc, subSubrow) => {
+											if (subSubrow.getCanExpand()) {
+												return (
+													subAcc +
+													subSubrow.subRows.reduce(
+														(subsubAcc, subsubsubrow) =>
+															subsubAcc +
+															(subsubsubrow.original.wastePct
+																? Number(subsubsubrow.original.wastePct)
+																: 0),
+														0
+													)
+												);
+											} else {
+												return (
+													subAcc +
+													(subSubrow.original.wastePct
+														? Number(subSubrow.original.wastePct)
+														: 0)
+												);
+											}
+										}, 0)
 									);
 								} else {
-									return (
-										acc + (subrow.original.actualNumber ? Number(subrow.original.actualNumber) : 0)
-									);
+									return acc + (subrow.original.wastePct ? Number(subrow.original.wastePct) : 0);
 								}
 							}, 0)
 							.toFixed(2);
-						return sum;
+						return `${sum}%`;
 					} else {
-						return (getValue() ?? 0).toFixed(2);
+						return `${(getValue() ?? 0).toFixed(2)}%`;
 					}
 				},
 			}),
@@ -661,28 +603,29 @@ const VarianceFoodCost = () => {
 					department: 'Total',
 					subRows: result.data.map((department) => ({
 						department: department.department,
-						comparisonName: department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonName || '',
+						comparisonName:
+							department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonName || 'Net Sales',
 						comparisonSales: department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonSales || 0,
 						subRows: department.subDepartments.map((subDepartment) => ({
 							subDepartment: subDepartment.subDepartment,
-							comparisonName:
-								department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonName || '',
+							comparisonName: 'Net Sales',
 							comparisonSales:
 								department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonSales || 0,
 							subRows: subDepartment.varianceFoodCostModels.map((foodCost) => ({
 								description: foodCost.description,
-								actualNumber: foodCost.actualNumber,
-								actualDollar: foodCost.actualDollar,
-								actualPct: foodCost.actualPct,
-								idealNumber: foodCost.idealNumber,
-								idealDollar: foodCost.idealDollar,
-								idealPct: foodCost.idealPct,
-								varianceNumber: foodCost.varianceNumber,
-								varianceDollar: foodCost.varianceDollar,
-								variancePct: foodCost.variancePct,
-								wasteNumber: foodCost.wasteNumber,
-								wasteDollar: foodCost.wasteDollar,
-								wastePct: foodCost.wastePct,
+								countDisplayUnitName: foodCost.countDisplayUnitName,
+								actualNumber: foodCost.actualQuant,
+								actualDollar: foodCost.actualCost,
+								actualPct: foodCost.actualCostPct,
+								idealNumber: foodCost.idealQuant,
+								idealDollar: foodCost.idealCost,
+								idealPct: (foodCost.idealCost / foodCost.salesNet) * 100,
+								varianceNumber: foodCost.varianceQuant,
+								varianceDollar: foodCost.varianceCost,
+								variancePct: (foodCost.varianceCost / foodCost.salesNet) * 100,
+								wasteNumber: foodCost.wasteCountCases,
+								wasteDollar: foodCost.wasteCountCost,
+								wastePct: (foodCost.wasteCountCost / foodCost.salesNet) * 100,
 							})),
 						})),
 					})),
@@ -807,8 +750,10 @@ const VarianceFoodCost = () => {
 					'auto',
 					'auto',
 					'auto',
+					'auto',
 				],
 				dataTypes: [
+					'string',
 					'string',
 					'string',
 					'number',
@@ -839,6 +784,7 @@ const VarianceFoodCost = () => {
 			columnHeaders: [
 				'Sub Department',
 				'Description',
+				'UOM',
 				'Actual #',
 				'Actual $',
 				'Actual %',
@@ -859,18 +805,23 @@ const VarianceFoodCost = () => {
 					subRow.subRows.map((subSubRow) => [
 						{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
 						{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
+						{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'Description' },
 						{ value: subSubRow.actualNumber, cellType: 'number', columnName: 'Actual #' },
 						{ value: subSubRow.actualDollar, cellType: 'number', columnName: 'Actual $' },
-						{ value: subSubRow.actualPct, cellType: 'number', columnName: 'Actual %' },
+						{ value: Number(subSubRow.actualPct).toFixed(2), cellType: 'number', columnName: 'Actual %' },
 						{ value: subSubRow.idealNumber, cellType: 'number', columnName: 'Ideal #' },
 						{ value: subSubRow.idealDollar, cellType: 'number', columnName: 'Ideal $' },
-						{ value: subSubRow.idealPct, cellType: 'number', columnName: 'Ideal %' },
+						{ value: Number(subSubRow.idealPct).toFixed(2), cellType: 'number', columnName: 'Ideal %' },
 						{ value: subSubRow.varianceNumber, cellType: 'number', columnName: 'Variance #' },
 						{ value: subSubRow.varianceDollar, cellType: 'number', columnName: 'Variance $' },
-						{ value: subSubRow.variancePct, cellType: 'number', columnName: 'Variance %' },
+						{
+							value: Number(subSubRow.variancePct).toFixed(2),
+							cellType: 'number',
+							columnName: 'Variance %',
+						},
 						{ value: subSubRow.wasteNumber, cellType: 'number', columnName: 'Waste #' },
 						{ value: subSubRow.wasteDollar, cellType: 'number', columnName: 'Waste $' },
-						{ value: subSubRow.wastePct, cellType: 'number', columnName: 'Waste %' },
+						{ value: Number(subSubRow.wastePct).toFixed(2), cellType: 'number', columnName: 'Waste %' },
 						{ value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
 						{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
 					])
@@ -888,6 +839,7 @@ const VarianceFoodCost = () => {
 					{ name: 'Department', filter: 'text' },
 					{ name: 'Sub Department', filter: 'text' },
 					{ name: 'Description', filter: 'text' },
+					{ name: 'UOM', filter: 'text' },
 					{ name: 'Actual #', filter: 'number' },
 					{ name: 'Actual $', filter: 'number' },
 					{ name: 'Actual %', filter: 'number' },
@@ -911,6 +863,7 @@ const VarianceFoodCost = () => {
 								Department: department.department,
 								'Sub Department': subDepartment.subDepartment,
 								Description: item.description,
+								UOM: item.countDisplayUnitName,
 								'Actual #': item.actualNumber,
 								'Actual $': item.actualDollar,
 								'Actual %': item.actualPct,

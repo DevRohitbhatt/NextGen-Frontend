@@ -531,9 +531,9 @@ const ActualFoodCost = () => {
 					}
 				},
 			}),
-			columnHelper.accessor('wasteCountCost', {
-				id: 'wasteCountCost',
-				header: 'Waste $',
+			columnHelper.accessor('wasteCostPct', {
+				id: 'wasteCostPct',
+				header: 'Waste %',
 				dataType: 'number',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
@@ -549,8 +549,8 @@ const ActualFoodCost = () => {
 													subSubrow.subRows.reduce(
 														(subsubAcc, subsubsubrow) =>
 															subsubAcc +
-															(subsubsubrow.original.wasteCountCost
-																? Number(subsubsubrow.original.wasteCountCost)
+															(subsubsubrow.original.wasteCostPct
+																? Number(subsubsubrow.original.wasteCostPct)
 																: 0),
 														0
 													)
@@ -558,8 +558,8 @@ const ActualFoodCost = () => {
 											} else {
 												return (
 													subAcc +
-													(subSubrow.original.wasteCountCost
-														? Number(subSubrow.original.wasteCountCost)
+													(subSubrow.original.wasteCostPct
+														? Number(subSubrow.original.wasteCostPct)
 														: 0)
 												);
 											}
@@ -567,15 +567,14 @@ const ActualFoodCost = () => {
 									);
 								} else {
 									return (
-										acc +
-										(subrow.original.wasteCountCost ? Number(subrow.original.wasteCountCost) : 0)
+										acc + (subrow.original.wasteCostPct ? Number(subrow.original.wasteCostPct) : 0)
 									);
 								}
 							}, 0)
 							.toFixed(2);
-						return sum;
+						return `${sum}%`;
 					} else {
-						return (getValue() ?? 0).toFixed(2);
+						return `${(getValue() ?? 0).toFixed(2)}%`;
 					}
 				},
 			}),
@@ -702,7 +701,7 @@ const ActualFoodCost = () => {
 								wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
 								wasteCountCases: foodCost.wasteCountCases,
 								wasteCountCost: foodCost.wasteCountCost,
-								wasteCostPct: foodCost.wasteCountCost / foodCost.comparisonSales,
+								wasteCostPct: (foodCost.wasteCountCost / foodCost.salesNet) * 100,
 								endCountDisplayUnits: foodCost.endCountDisplayUnits,
 								endCountCases: foodCost.endCountCases,
 								endCountCost: foodCost.endCountCost,
@@ -795,12 +794,14 @@ const ActualFoodCost = () => {
 					'auto',
 					'auto',
 					'auto',
+					'auto',
 				],
 				dataTypes: [
 					'string',
 					'string',
 					'string',
 					'string',
+					'number',
 					'number',
 					'number',
 					'number',
@@ -847,6 +848,7 @@ const ActualFoodCost = () => {
 				'Actual Usage %',
 				'Waste #',
 				'Waste $',
+				'Waste %',
 				'Comparison Name',
 				'Comparison Sales',
 			],
@@ -856,21 +858,46 @@ const ActualFoodCost = () => {
 						{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
 						{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
 						{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'UOM' },
-						{ value: subSubRow.begCountDisplayUnits, cellType: 'number', columnName: 'Beg #' },
+						{
+							value: Number(subSubRow.begCountDisplayUnits).toFixed(2),
+							cellType: 'number',
+							columnName: 'Beg #',
+						},
 						{ value: subSubRow.begCountCost, cellType: 'number', columnName: 'Beg $' },
 						{ value: subSubRow.purchaseDisplayUnits, cellType: 'number', columnName: 'Pur #' },
 						{ value: subSubRow.purchaseCost, cellType: 'number', columnName: 'Pur $' },
-						{ value: subSubRow.iTinCountDisplayUnits, cellType: 'number', columnName: 'Trans In#' },
+						{
+							value: Number(subSubRow.iTinCountDisplayUnits).toFixed(2),
+							cellType: 'number',
+							columnName: 'Trans In#',
+						},
 						{ value: subSubRow.iTinCountCost, cellType: 'number', columnName: 'Trans In $' },
 						{ value: subSubRow.iToutCountDisplayUnits, cellType: 'number', columnName: 'Trans Out #' },
 						{ value: subSubRow.iToutCountCost, cellType: 'number', columnName: 'Trans Out $' },
-						{ value: subSubRow.endCountDisplayUnits, cellType: 'number', columnName: 'End #' },
+						{
+							value: Number(subSubRow.endCountDisplayUnits).toFixed(2),
+							cellType: 'number',
+							columnName: 'End #',
+						},
 						{ value: subSubRow.endCountCost, cellType: 'number', columnName: 'End $' },
-						{ value: subSubRow.usageCountDisplayUnits, cellType: 'number', columnName: 'Actual Usage #' },
+						{
+							value: Number(subSubRow.usageCountDisplayUnits).toFixed(2),
+							cellType: 'number',
+							columnName: 'Actual Usage #',
+						},
 						{ value: subSubRow.usageCost, cellType: 'number', columnName: 'Actual Usage $' },
-						{ value: subSubRow.usageCostPct, cellType: 'number', columnName: 'Actual Usage %' },
-						{ value: subSubRow.wasteCountDisplayUnits, cellType: 'number', columnName: 'Waste #' },
+						{
+							value: Number(subSubRow.usageCostPct).toFixed(2),
+							cellType: 'number',
+							columnName: 'Actual Usage %',
+						},
+						{
+							value: Number(subSubRow.wasteCountDisplayUnits).toFixed(2),
+							cellType: 'number',
+							columnName: 'Waste #',
+						},
 						{ value: subSubRow.wasteCountCost, cellType: 'number', columnName: 'Waste $' },
+						{ value: Number(subSubRow.wasteCostPct).toFixed(2), cellType: 'number', columnName: 'Waste %' },
 						{ value: subSubRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
 						{ value: subSubRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
 					])
@@ -909,6 +936,7 @@ const ActualFoodCost = () => {
 					{ name: 'Actual Usage %', filter: 'text' },
 					{ name: 'Waste #', filter: 'text' },
 					{ name: 'Waste $', filter: 'text' },
+					{ name: 'Waste %', filter: 'text' },
 					{ name: 'Comparison Name', filter: 'text' },
 					{ name: 'Comparison Sales', filter: 'text' },
 				],
@@ -935,6 +963,7 @@ const ActualFoodCost = () => {
 								usePct: item.usageCostPct,
 								wasteNumber: item.wasteCountDisplayUnits,
 								wasteDollar: item.wasteCountCost,
+								wasteCostPct: item.wasteCostPct,
 								comparisonName: item.comparisonName,
 								comparisonSales: item.comparisonSales,
 							}))
