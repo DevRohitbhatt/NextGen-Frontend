@@ -662,7 +662,7 @@ const ActualFoodCost = () => {
 				urlParams: {
 					companyId: companyId,
 					alignmentId: alignmentId,
-					memberId: 51,
+					memberId:selectedUnit,
 					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
 					toDate: selectedToDate.toLocaleDateString('en-CA'),
 					countType: countType,
@@ -1044,6 +1044,36 @@ const ActualFoodCost = () => {
 			console.error('Error getting Countsheet data: ', error);
 		}
 	};
+	
+	const handleViewPurchase = async (fromDate, toDate) => {
+		try {
+			const getData = {
+				url: 'PurchaseAnalysis',
+				urlParams: {
+					companyID: companyId,
+					alignmentID: alignmentId,
+					memberID: selectedUnit,
+					fromDate: fromDate.toLocaleDateString('en-CA'),
+					toDate: toDate.toLocaleDateString('en-CA'),
+					vendorId:3
+				},
+			};
+
+			const result = await getCall(getData);
+
+			navigate('/Purchase', { state: {
+					companyId: companyId, 
+					alignmentID: alignmentId,
+					memberID: selectedUnit,
+					fromDate: fromDate.toLocaleDateString('en-CA'),
+					toDate: toDate.toLocaleDateString('en-CA'),
+					vendorId:3,
+					purchaseData: result 
+				} });
+		} catch (error) {
+			console.error('Error getting Countsheet data: ', error);
+		}
+	};
 
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -1144,7 +1174,10 @@ const ActualFoodCost = () => {
 										</button>
 									</div>
 									<div className='option'>
-										<button className='w-[100%]'>View Purchases</button>
+										<button className='w-[100%]' onClick={() => {
+												handleViewPurchase(selectedToDate, selectedToDate, true); // For Ending Countsheet
+												setIsPopupVisible(false);
+											}} >View Purchases</button>
 									</div>
 								</div>
 							)}

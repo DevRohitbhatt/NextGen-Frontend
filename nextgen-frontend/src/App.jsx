@@ -19,6 +19,7 @@ import {
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
+	Purchase
 } from './pages';
 import { Suspense } from 'react';
 
@@ -47,6 +48,7 @@ const App = () => {
 								<Route path='/Invoices' element={<Invoices />} />
 								<Route path='/Countsheets' element={<Countsheets />} />
 								<Route path='/CountsheetDesigner' element={<CountsheetDesigner />} />
+								<Route path='/Purchase' element={<Purchase />} />
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
