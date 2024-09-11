@@ -236,7 +236,7 @@ const Invoices = () => {
 	};
 
 	useEffect(() => {
-		if (selectedUnit && selectedVendor && selectedFromDate && selectedToDate) {
+		if (selectedUnit) {
 			handleInvoiceReport();
 		}
 	}, [selectedUnit, selectedVendor, selectedFromDate, selectedToDate]);

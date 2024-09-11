@@ -59,11 +59,6 @@ const Voids = () => {
 	// columns for tableHOC
 	const columns = useMemo(
 		() => [
-			columnHelper.accessor('unitId', {
-				id: 'unitId',
-				header: 'Unit ID',
-				dataType: 'number',
-			}),
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
@@ -104,8 +99,8 @@ const Voids = () => {
 				header: 'Description',
 				dataType: 'string',
 			}),
-			columnHelper.accessor('checkId', {
-				id: 'checkId',
+			columnHelper.accessor('posCheckId', {
+				id: 'posCheckId',
 				header: 'POS Check ID',
 				dataType: 'number',
 			}),
@@ -227,7 +222,22 @@ const Voids = () => {
 				...result,
 				data: result.data.map((row) => ({
 					...row,
-					subrows: row.voids,
+					subrows: row.voids.map((item) => ({
+						unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
+						date: item.date,
+						hour: item.hour,
+						minute: item.minute,
+						voidReason: item.voidReason,
+						employeeName: item.employeeName,
+						managerName: item.managerName,
+						fullDescription: item.fullDescription,
+						posCheckId: item.posCheckId,
+						tableName: item.tableName,
+						revenueID: item.revenueID,
+						price: item.price,
+						tendersUsed: item.tendersUsed,
+					})),
+					unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
 				})),
 			};
 
@@ -338,8 +348,25 @@ const Voids = () => {
 
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
-		const csvHeaders = columns.map((column) => column.header);
-		const csvData = voidsReportData.flatMap((row) => row.voids.map((voidRow) => Object.values(voidRow).join(',')));
+		const csvHeaders = [
+			'Unit Name',
+			'Date',
+			'Hour',
+			'Minute',
+			'Void Reason',
+			'Employee',
+			'Manager',
+			'Description',
+			'POS Check ID',
+			'Table Name',
+			'Revenue ID',
+			'Price',
+			'Tenders',
+		];
+		const csvData = voidsReportData.flatMap((row) =>
+			row.subrows.map((voidRow) => Object.values(voidRow).join(','))
+		);
+
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
 		const url = window.URL.createObjectURL(blob);
@@ -354,8 +381,22 @@ const Voids = () => {
 		const data = [
 			{
 				name: 'Voids Report',
-				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
-				data: voidsReportData.flatMap((row) => row.voids.map((voidRow) => Object.values(voidRow))),
+				columns: [
+					{ name: 'Unit Name', filterButton: true },
+					{ name: 'Date', filterButton: true },
+					{ name: 'Hour', filterButton: true },
+					{ name: 'Minute', filterButton: true },
+					{ name: 'Void Reason', filterButton: true },
+					{ name: 'Employee', filterButton: true },
+					{ name: 'Manager', filterButton: true },
+					{ name: 'Description', filterButton: true },
+					{ name: 'POS Check ID', filterButton: true },
+					{ name: 'Table Name', filterButton: true },
+					{ name: 'Revenue ID', filterButton: true },
+					{ name: 'Price', filterButton: true },
+					{ name: 'Tenders', filterButton: true },
+				],
+				data: voidsReportData.flatMap((row) => row.subrows.map((voidRow) => Object.values(voidRow))),
 			},
 		];
 

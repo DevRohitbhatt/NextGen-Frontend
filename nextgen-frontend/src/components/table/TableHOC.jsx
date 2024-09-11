@@ -99,7 +99,7 @@ const TableHOC = (columns, data, isPaginated = true) => {
 										>
 											<div className='flex items-center gap-2'>
 												{row.getIsExpanded() ? <IoIosArrowUp /> : <IoIosArrowDown />}
-												Unit: {row.original.unitId} (Count : {row.subRows.length}, $
+												UnitName: {row.original.unitName} (Count : {row.subRows.length}, $
 												{row.subRows
 													.reduce((acc, curr) => acc + curr.original.price, 0)
 													.toFixed(2)}

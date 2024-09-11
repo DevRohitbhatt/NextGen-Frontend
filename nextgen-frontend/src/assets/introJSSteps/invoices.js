@@ -20,10 +20,6 @@ export default function invoices() {
 			intro: '-Select the date, or date range, you wish to display Invoices',
 		},
 		{
-			element: '.run-button',
-			intro: 'Click the Run button to generate the report based on the selected criteria.',
-		},
-		{
 			element: '.export-options',
 			intro: 'You can export the Invoices to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
 		},

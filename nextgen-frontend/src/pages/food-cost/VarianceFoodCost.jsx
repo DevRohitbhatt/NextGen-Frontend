@@ -580,7 +580,7 @@ const VarianceFoodCost = () => {
 	};
 
 	// Function to get the voids report
-	const handleLaborByPayPeriod = async () => {
+	const handleVarianceFoodCost = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -950,7 +950,7 @@ const VarianceFoodCost = () => {
 							onOptionChange={handleCountType}
 						/>
 					</div>
-					<div className='run-button' onClick={handleLaborByPayPeriod}>
+					<div className='run-button' onClick={handleVarianceFoodCost}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 							Run
 						</div>
