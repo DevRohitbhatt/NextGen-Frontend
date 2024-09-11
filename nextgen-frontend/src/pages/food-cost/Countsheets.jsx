@@ -221,13 +221,20 @@ const Countsheets = () => {
 			};
 
 			const result = await getCall(getData);
-			// result.data.map((data) => )
 
 			setCountsheetData(result.data);
-			const newData = result.data.map((data) => ({
-				...data,
-				companyId: companyId,
-			}));
+			const newData = result.data
+				.filter((data) => data.inventoryCountSheetID > 0)
+				.map((data) => ({
+					...data,
+					companyId: companyId,
+					transferUnit: unitsAndAreasList.units.find(
+						(unit) => unit.unitID === parseInt(data.transferDestUnitID)
+					)?.unitName,
+				}));
+
+			console.log('newData', newData);
+
 			setFilteredCountsheetData(newData);
 			setView('All');
 			setIsLoading(false);

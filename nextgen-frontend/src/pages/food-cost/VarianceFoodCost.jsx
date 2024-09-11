@@ -701,6 +701,38 @@ const VarianceFoodCost = () => {
 		}
 	};
 
+	const handleViewPurchase = async (fromDate, toDate) => {
+		try {
+			const getData = {
+				url: 'PurchaseAnalysis',
+				urlParams: {
+					companyID: companyId,
+					alignmentID: alignmentId,
+					memberID: selectedUnit,
+					fromDate: fromDate.toLocaleDateString('en-CA'),
+					toDate: toDate.toLocaleDateString('en-CA'),
+					vendorId: 3,
+				},
+			};
+
+			const result = await getCall(getData);
+
+			navigate('/Purchase', {
+				state: {
+					companyId: companyId,
+					alignmentID: alignmentId,
+					memberID: selectedUnit,
+					fromDate: fromDate.toLocaleDateString('en-CA'),
+					toDate: toDate.toLocaleDateString('en-CA'),
+					vendorId: 3,
+					purchaseData: result,
+				},
+			});
+		} catch (error) {
+			console.error('Error getting Countsheet data: ', error);
+		}
+	};
+
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
 		if (!columns || columns.length === 0) {
@@ -1017,7 +1049,15 @@ const VarianceFoodCost = () => {
 										</button>
 									</div>
 									<div className='option'>
-										<button className='w-[100%]'>View Purchases</button>
+										<button
+											className='w-[100%]'
+											onClick={() => {
+												handleViewPurchase(selectedToDate, selectedToDate, true); // For view Purchase
+												setIsPopupVisible(false);
+											}}
+										>
+											View Purchases
+										</button>
 									</div>
 								</div>
 							)}
