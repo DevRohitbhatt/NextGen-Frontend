@@ -23,6 +23,7 @@ const VarianceFoodCost = () => {
 	const [companyId, setCompanyId] = useState();
 	const [alignmentId, setAlignmentId] = useState();
 	const [memberId, setMemberId] = useState();
+	const [vendorsList, setVendorsList] = useState([]);
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 	const [varianceFoodCostData, setVarianceFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
@@ -550,7 +551,7 @@ const VarianceFoodCost = () => {
 
 	const fetchData = async (companyId, alignmentId, selectedUnit) => {
 		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
+		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit), fetchVendors(companyId)]);
 		setIsLoading(false);
 	};
 
@@ -576,6 +577,26 @@ const VarianceFoodCost = () => {
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your units, please try again later.');
 			console.error('Error getting units: ', error);
+		}
+	};
+
+	// This function fetches the vendors.
+	const fetchVendors = async (companyID) => {
+		try {
+			setIsError(false);
+			const getData = {
+				url: 'vendors',
+				urlParams: {
+					companyID: companyID,
+				},
+			};
+
+			const result = await getCall(getData);
+			setVendorsList(result);
+		} catch (error) {
+			setIsError(true);
+			setErrorMessage('There was an issue loading your vendors, please try again later.');
+			console.error('Error getting vendors: ', error);
 		}
 	};
 
@@ -725,6 +746,7 @@ const VarianceFoodCost = () => {
 					fromDate: fromDate.toLocaleDateString('en-CA'),
 					toDate: toDate.toLocaleDateString('en-CA'),
 					vendorId: 3,
+					vendorList: vendorsList,
 					purchaseData: result,
 				},
 			});
@@ -1052,7 +1074,7 @@ const VarianceFoodCost = () => {
 										<button
 											className='w-[100%]'
 											onClick={() => {
-												handleViewPurchase(selectedToDate, selectedToDate, true); // For view Purchase
+												handleViewPurchase(selectedFromDate, selectedToDate, true); // For view Purchase
 												setIsPopupVisible(false);
 											}}
 										>

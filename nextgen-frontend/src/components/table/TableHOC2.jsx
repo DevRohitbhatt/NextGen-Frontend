@@ -22,6 +22,8 @@ function TableHOC2({
 	isTableRendered,
 	setIsTableRendered,
 	expandCollapseButtons = false,
+	headerPosition = 'center',
+	dataPosition = 'text-center',
 }) {
 	const [expanded, setExpanded] = useState({});
 	const table = useReactTable({
@@ -39,7 +41,7 @@ function TableHOC2({
 		getExpandedRowModel: getExpandedRowModel(),
 		//filterFromLeafRows: true,
 		//maxLeafRowFilterDepth: 1,
-		debugTable: true,
+		debugTable: false,
 	});
 
 	useTableView(table, view, isTableRendered);
@@ -100,7 +102,7 @@ function TableHOC2({
 																: '',
 															onClick: header.column.getToggleSortingHandler(),
 														}}
-														style={{ justifyContent: 'center' }}
+														style={{ justifyContent: headerPosition }}
 													>
 														{flexRender(
 															header.column.columnDef.header,
@@ -130,7 +132,7 @@ function TableHOC2({
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (
-											<td key={cell.id} className='px-2 text-center'>
+											<td key={cell.id} className={`px-2 ${dataPosition}`}>
 												{flexRender(cell.column.columnDef.cell, cell.getContext())}
 											</td>
 										);

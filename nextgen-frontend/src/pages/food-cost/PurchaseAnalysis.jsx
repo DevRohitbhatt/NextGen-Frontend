@@ -199,7 +199,7 @@ const PurchaseAnalysis = () => {
 		if (location.state) {
 			fetchPurchaseDetails();
 		}
-	}, [location.state]);
+	}, []);
 
 	const fetchPurchaseDetails = async () => {
 		try {
@@ -216,6 +216,13 @@ const PurchaseAnalysis = () => {
 					vendorId: location.state?.vendorId,
 				},
 			};
+
+			setSelectedUnit(location.state?.memberID);
+			setSelectedVendor(location.state?.vendorId);
+			setselectedVendorName(
+				location.state.vendorList?.data.find((vendor) => vendor.vendorID === location.state?.vendorId)
+					?.vendorName
+			);
 
 			const result = await getCall(getData);
 

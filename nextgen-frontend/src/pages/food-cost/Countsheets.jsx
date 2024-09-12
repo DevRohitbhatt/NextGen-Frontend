@@ -81,12 +81,13 @@ const Countsheets = () => {
 			columnHelper.accessor('unitId', {
 				id: 'unitId',
 				header: 'Unit',
-				size: 60,
+				cell: ({ getValue }) => unitsAndAreasList.units.find((unit) => unit.unitID === getValue()).unitName,
+				size: 300,
 			}),
 			columnHelper.accessor('countType', {
 				id: 'countType',
 				header: 'Type',
-				cell: ({ getValue }) => {
+				cell: ({ getValue, row }) => {
 					return getValue() === 'DA'
 						? 'Daily'
 						: getValue() === 'WE'
@@ -96,10 +97,14 @@ const Countsheets = () => {
 						: getValue() === 'WA'
 						? 'Waste'
 						: getValue() === 'IT'
-						? `Transfer `
+						? `Transfer ${parseInt(row.original.transferDestUnitID) === selectedUnit ? 'from' : 'to'} ${
+								parseInt(row.original.transferDestUnitID) === selectedUnit
+									? row.original.name
+									: row.original.transferUnit
+						  }`
 						: 'none';
 				},
-				size: 60,
+				size: 300,
 			}),
 			columnHelper.accessor('dateTime', {
 				id: 'dateTime',
@@ -135,6 +140,7 @@ const Countsheets = () => {
 				id: 'totalLineItemCost',
 				header: 'Total Inventory Value',
 				cell: ({ getValue }) => getValue()?.toFixed(2),
+				size: 200,
 			}),
 		],
 		[]
@@ -222,7 +228,6 @@ const Countsheets = () => {
 
 			const result = await getCall(getData);
 
-			setCountsheetData(result.data);
 			const newData = result.data
 				.filter((data) => data.inventoryCountSheetID > 0)
 				.map((data) => ({
@@ -233,8 +238,7 @@ const Countsheets = () => {
 					)?.unitName,
 				}));
 
-			console.log('newData', newData);
-
+			setCountsheetData(newData);
 			setFilteredCountsheetData(newData);
 			setView('All');
 			setIsLoading(false);
@@ -276,7 +280,15 @@ const Countsheets = () => {
 		}
 	};
 
-	const Table = <TableHOC2 columns={columns} data={filteredCountsheetData} isHeader={true} />;
+	const Table = (
+		<TableHOC2
+			columns={columns}
+			data={filteredCountsheetData}
+			isHeader={true}
+			headerPosition='flex-start'
+			dataPosition='text-left'
+		/>
+	);
 
 	return (
 		<div className='w-[85%] mx-auto'>
