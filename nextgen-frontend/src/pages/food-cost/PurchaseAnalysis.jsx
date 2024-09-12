@@ -218,15 +218,18 @@ const PurchaseAnalysis = () => {
 			};
 
 			setSelectedUnit(location.state?.memberID);
-			setSelectedVendor(location.state?.vendorId);
-			setselectedVendorName(
-				location.state.vendorList?.data.find((vendor) => vendor.vendorID === location.state?.vendorId)
-					?.vendorName
-			);
+
+			console.log('location.state: ', location.state);
 
 			const result = await getCall(getData);
 
-			setPurchaseData(result.data);
+			const newData = result.data.map((item) => ({
+				...item,
+				unitName: location.state.unitsAndAreasList?.units.find((unit) => unit.unitID === parseInt(item.unitId))
+					?.unitName,
+			}));
+
+			setPurchaseData(newData);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
