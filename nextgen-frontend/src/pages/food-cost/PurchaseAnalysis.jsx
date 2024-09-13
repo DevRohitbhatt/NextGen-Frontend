@@ -173,7 +173,6 @@ const PurchaseAnalysis = () => {
 			columnHelper.accessor('inventoryItemDescription', {
 				id: 'inventoryItemDescription',
 				header: 'Inventory Item',
-				cell: ({ getValue, row }) => (getValue() ? `${row.original.qsrInventoryItemID} - ${getValue()}` : ''),
 				dataType: 'string',
 				size: '300',
 			}),
@@ -230,8 +229,6 @@ const PurchaseAnalysis = () => {
 			};
 
 			setSelectedUnit(location.state?.memberID);
-
-			console.log('location.state: ', location.state);
 
 			const result = await getCall(getData);
 
@@ -323,6 +320,7 @@ const PurchaseAnalysis = () => {
 			const newData = result.data.map((item) => ({
 				...item,
 				unitName: unitsAndAreasList.units.find((unit) => unit.unitID === parseInt(item.unitId))?.unitName,
+				inventoryItemDescription: `${item.qsrInventoryItemID} - ${item.inventoryItemDescription}`,
 			}));
 
 			setPurchaseData(newData);
