@@ -81,7 +81,7 @@ const Countsheets = () => {
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
 				header: 'Unit',
-				size: 300,
+				size: 150,
 			}),
 			columnHelper.accessor('countType', {
 				id: 'countType',
