@@ -73,10 +73,6 @@ const PurchaseAnalysis = () => {
 		stepsEnabled: false,
 	});
 
-	// const handleTotalViewChange = (option) => {
-	// 	setView(option);
-	// };
-
 	// columns for tableHOC
 	const columns = useMemo(
 		() => [
@@ -95,12 +91,14 @@ const PurchaseAnalysis = () => {
 					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
 					return formattedDate;
 				},
-				dataType: 'date', // Adjust if you format the date differently
+				dataType: 'date',
+				size: 100,
 			}),
 			columnHelper.accessor('name', {
 				id: 'name',
 				header: 'Vendor',
 				dataType: 'string',
+				size: 100,
 			}),
 			columnHelper.accessor('vendorInvoiceReference', {
 				id: 'vendorInvoiceReference',
@@ -110,6 +108,7 @@ const PurchaseAnalysis = () => {
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Invoice Total',
+				cell: ({ getValue }) => (getValue() ? `${getValue().toFixed(2)}` : ''),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('companyGLCode', {
@@ -117,9 +116,16 @@ const PurchaseAnalysis = () => {
 				header: 'GL Code',
 				dataType: 'string',
 			}),
+			columnHelper.accessor('vendorItemDescription', {
+				id: 'vendorItemDescription',
+				header: 'Vendor Item',
+				dataType: 'string',
+				size: 200,
+			}),
 			columnHelper.accessor('quantity', {
 				id: 'quantity',
 				header: 'Item Quantity',
+				cell: ({ getValue }) => <div className='text-center'>{getValue() ?? 0}</div>,
 				footer: ({ table }) => (
 					<div className='font-bold text-center'>
 						{parseInt(table.getCoreRowModel().rows.reduce((acc, row) => acc + row.original.quantity, 0))}
@@ -144,7 +150,7 @@ const PurchaseAnalysis = () => {
 				header: 'Item Total',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				footer: ({ table }) => (
-					<div className='font-bold text-center'>
+					<div className='font-bold text-start'>
 						$
 						{table
 							.getCoreRowModel()
@@ -159,11 +165,17 @@ const PurchaseAnalysis = () => {
 				header: 'Department',
 				dataType: 'string',
 			}),
+			columnHelper.accessor('subdepartment', {
+				id: 'subdepartment',
+				header: 'Sub Department',
+				dataType: 'string',
+			}),
 			columnHelper.accessor('inventoryItemDescription', {
 				id: 'inventoryItemDescription',
 				header: 'Inventory Item',
+				cell: ({ getValue, row }) => (getValue() ? `${row.original.qsrInventoryItemID} - ${getValue()}` : ''),
 				dataType: 'string',
-				size: '200',
+				size: '300',
 			}),
 		],
 		[]
@@ -372,8 +384,7 @@ const PurchaseAnalysis = () => {
 		PdfBuilder(pdfData);
 	};
 
-	// // Function to handle the Excel export
-
+	// Function to handle the Excel export
 	const handleExcelClick = () => {
 		const data = [
 			{
@@ -390,7 +401,16 @@ const PurchaseAnalysis = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC2 columns={columns} data={purchasetData} isPaginated={true} isFooter={true} />;
+	const Table = (
+		<TableHOC2
+			columns={columns}
+			data={purchasetData}
+			isPaginated={true}
+			isFooter={true}
+			headerPosition='flex-start'
+			dataPosition='text-start'
+		/>
+	);
 
 	return (
 		<div className='w-[85%] mx-auto'>
