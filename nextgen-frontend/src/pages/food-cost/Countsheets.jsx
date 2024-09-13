@@ -78,10 +78,9 @@ const Countsheets = () => {
 				),
 				size: 60,
 			}),
-			columnHelper.accessor('unitId', {
-				id: 'unitId',
+			columnHelper.accessor('unitName', {
+				id: 'unitName',
 				header: 'Unit',
-				cell: ({ getValue }) => unitsAndAreasList.units?.find((unit) => unit.unitID === getValue()).unitName,
 				size: 300,
 			}),
 			columnHelper.accessor('countType', {
@@ -135,7 +134,7 @@ const Countsheets = () => {
 			columnHelper.accessor('totalLineItemCost', {
 				id: 'totalLineItemCost',
 				header: 'Total Inventory Value',
-				cell: ({ getValue }) => getValue()?.toFixed(2),
+				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
 				size: 200,
 			}),
 		],
@@ -229,6 +228,9 @@ const Countsheets = () => {
 				.map((data) => ({
 					...data,
 					companyId: companyId,
+					unitName: unitsAndAreasList.units.find(
+						(unit) => unit.unitID === parseInt(data.unitId)
+				  )?.unitName,
 					transfer: `Transfer ${
 						data.unitId === selectedUnit
 							? data.transferDestUnitID === 0
