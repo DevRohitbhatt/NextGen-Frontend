@@ -55,9 +55,11 @@ const CountsheetDesigner = () => {
 			columnHelper.accessor('lineItemCost', {
 				id: 'lineItemCost',
 				cell: ({ row, getValue }) =>
-					row.getCanExpand()
-						? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
-						: getValue(),
+					`$${
+						row.getCanExpand()
+							? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
+							: getValue()
+					}`,
 				footer: ({ table }) =>
 					`Total Inventory Value: $${table
 						.getCoreRowModel()
