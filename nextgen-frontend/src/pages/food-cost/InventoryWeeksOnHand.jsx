@@ -17,6 +17,7 @@ const InventoryWeeksOnHand = () => {
 	const [memberId, setMemberId] = useState();
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 	const [inventoryWeeksOnHandReportData, setInventoryWeeksOnHandReportData] = useState([]);
+	const [total, setTotal] = useState(0);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
@@ -301,11 +302,9 @@ const InventoryWeeksOnHand = () => {
 				})),
 			};
 
-			const total = newData.data.reduce((acc, item) => acc + item.averageValueUsedPerWeek, 0);
+			const total = result.data.reduce((acc, item) => acc + item.estimatedValueOnHandNow, 0);
 
-			console.log('total', total);
-
-			console.log('newData', newData);
+			setTotal(total);
 
 			setInventoryWeeksOnHandReportData(newData);
 			setIsLoading(false);
@@ -448,7 +447,7 @@ const InventoryWeeksOnHand = () => {
 						</div>
 					</div>
 				</div>
-				<div>
+				<div className='flex items-center gap-10'>
 					<ExportOptions
 						includePDF={false}
 						//handlePDFClick={handlePDFClick}
@@ -468,7 +467,8 @@ const InventoryWeeksOnHand = () => {
 				<div>{errorMessage}</div>
 			) : (
 				inventoryWeeksOnHandReportData?.data && (
-					<div>
+					<div className='mt-4'>
+						{total > 0 && <div className='text-2xl font-bold min-w-fit'>{`Total $: ${total}`}</div>}
 						<Table
 							data={inventoryWeeksOnHandReportData?.data}
 							headers={headers}
