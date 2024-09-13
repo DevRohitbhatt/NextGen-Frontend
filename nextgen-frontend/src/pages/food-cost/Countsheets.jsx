@@ -81,7 +81,7 @@ const Countsheets = () => {
 			columnHelper.accessor('unitId', {
 				id: 'unitId',
 				header: 'Unit',
-				cell: ({ getValue }) => unitsAndAreasList.units.find((unit) => unit.unitID === getValue()).unitName,
+				cell: ({ getValue }) => unitsAndAreasList.units?.find((unit) => unit.unitID === getValue()).unitName,
 				size: 300,
 			}),
 			columnHelper.accessor('countType', {
@@ -97,11 +97,7 @@ const Countsheets = () => {
 						: getValue() === 'WA'
 						? 'Waste'
 						: getValue() === 'IT'
-						? `Transfer ${parseInt(row.original.transferDestUnitID) === selectedUnit ? 'from' : 'to'} ${
-								parseInt(row.original.transferDestUnitID) === selectedUnit
-									? row.original.name
-									: row.original.transferUnit
-						  }`
+						? `${row.original.transfer}`
 						: 'none';
 				},
 				size: 300,
@@ -233,9 +229,16 @@ const Countsheets = () => {
 				.map((data) => ({
 					...data,
 					companyId: companyId,
-					transferUnit: unitsAndAreasList.units.find(
-						(unit) => unit.unitID === parseInt(data.transferDestUnitID)
-					)?.unitName,
+					transfer: `Transfer ${
+						data.unitId === selectedUnit
+							? data.transferDestUnitID === 0
+								? 'to ???'
+								: 'to ' +
+								  unitsAndAreasList.units.find(
+										(unit) => unit.unitID === parseInt(data.transferDestUnitID)
+								  )?.unitName
+							: 'from ' + data.name
+					}`,
 				}));
 
 			setCountsheetData(newData);
@@ -316,17 +319,14 @@ const Countsheets = () => {
 						isDateRange={true}
 						onClick={() => setShowDateModal(true)}
 					/>
-					<Dropdown
-						title='Type'
-						options={countDropdownOptions}
-						selectedOption={view}
-						onOptionChange={handleCountType}
-					/>
-					{/* <div className='run-button' onClick={handleCountsheet}>
-						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-							Run
-						</div>
-					</div> */}
+					<div className='w-28'>
+						<Dropdown
+							title='Type'
+							options={countDropdownOptions}
+							selectedOption={view}
+							onOptionChange={handleCountType}
+						/>
+					</div>
 				</div>
 			</header>
 

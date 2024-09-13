@@ -215,6 +215,7 @@ const VarianceFoodCost = () => {
 			columnHelper.accessor('idealNumber', {
 				id: 'idealNumber',
 				header: 'Ideal #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('idealDollar', {
@@ -312,6 +313,7 @@ const VarianceFoodCost = () => {
 			columnHelper.accessor('varianceNumber', {
 				id: 'varianceNumber',
 				header: 'Variance #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('varianceDollar', {
@@ -412,6 +414,7 @@ const VarianceFoodCost = () => {
 			columnHelper.accessor('wasteNumber', {
 				id: 'wasteNumber',
 				header: 'Waste #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('wasteDollar', {

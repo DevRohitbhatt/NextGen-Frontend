@@ -64,7 +64,7 @@ const InventoryWeeksOnHand = () => {
 			toolTip: '',
 			toolTipDirection: '',
 			minWidth: '120px',
-			maxWidth: '180px',
+			maxWidth: '100px',
 		},
 		{
 			key: 'department',
@@ -294,8 +294,20 @@ const InventoryWeeksOnHand = () => {
 
 			const result = await getCall(getData);
 
-			console.log(result);
-			setInventoryWeeksOnHandReportData(result);
+			const newData = {
+				data: result.data.map((item) => ({
+					...item,
+					inventoryItemName: `${item.qsrInventoryItemID} - ${item.inventoryItemName}`,
+				})),
+			};
+
+			const total = newData.data.reduce((acc, item) => acc + item.averageValueUsedPerWeek, 0);
+
+			console.log('total', total);
+
+			console.log('newData', newData);
+
+			setInventoryWeeksOnHandReportData(newData);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
