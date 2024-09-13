@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
 
-const Dropdown = ({ options, selectedOption, onOptionChange, title }) => {
+const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable = true }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const dropdownRef = useRef(null);
 
@@ -28,8 +28,12 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title }) => {
 		<div className='relative flex flex-col justify-center m-1 dropdown-selector rounded-3xl' ref={dropdownRef}>
 			<h3 className='mb-1 ml-2 text-xl font-bold text-nowrap'>{title}</h3>
 			<div
-				className='flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-primary active:border-primary'
-				onClick={() => setIsOpen(!isOpen)}
+				className={`flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid  text-nowrap rounded-3xl  ${
+					isEditable
+						? ' hover:border-primary active:border-primary cursor-pointer'
+						: 'border-secondary bg-secondary hover:border-secondary'
+				}`}
+				onClick={isEditable ? () => setIsOpen(!isOpen) : undefined}
 			>
 				{selectedOption}
 				<span className={`ml-2 transition ease-linear delay-300 transform `}>

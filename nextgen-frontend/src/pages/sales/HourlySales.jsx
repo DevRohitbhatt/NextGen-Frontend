@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
-import voidsReport from '../../assets/introJSSteps/voidsReport';
+import hourlySales from '../../assets/introJSSteps/hourlySales';
 import {
 	Dropdown,
 	UnitSelector,
@@ -45,11 +45,30 @@ const HourlySales = () => {
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
-	const dropdownOptions = Array.from({ length: 24 }, (_, index) => ({ name: (index + 1).toString() }));
+	const [reportType, setReportType] = useState('Hour and Day');
+	const [salesType, setSalesType] = useState('Net Sales');
+	const [DOWType, setDOWType] = useState('All');
+	const [viewBy, setViewBy] = useState('Hour');
+	const [isSalesEditable, setIsSalesEditable] = useState(true);
+	const [isDOWEditable, setIsDOWEditable] = useState(false);
+	const [isViewByEditable, setIsViewByEditable] = useState(true);
+	const reportTypeOptions = [{ name: 'Hour and Day' }, { name: 'Unit' }, { name: 'Unit, Hour and Day' }];
+	const salesTypeOptions = [{ name: 'Net Sales' }, { name: 'Gross Sales' }, { name: 'Transaction' }];
+	const DOWTypeOptions = [
+		{ name: 'All' },
+		{ name: 'Monday' },
+		{ name: 'Tuesday' },
+		{ name: 'Wednesday' },
+		{ name: 'Thursday' },
+		{ name: 'Friday' },
+		{ name: 'Saturday' },
+		{ name: 'Sunday' },
+	];
+	const [viewByOptions, setViewByOptions] = useState([]);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
-		steps: voidsReport(),
+		steps: hourlySales(),
 		initialStep: 0,
 		stepsEnabled: false,
 	});
@@ -263,6 +282,27 @@ const HourlySales = () => {
 		setShowDateModal(false);
 	};
 
+	const handleReportTypeChange = (option) => {
+		setReportType(option);
+		if (option === 'Hour and Day') {
+			setIsSalesEditable(true);
+			setIsDOWEditable(false);
+			setIsViewByEditable(true);
+			setViewBy('Hour');
+			setViewByOptions([{ name: 'Hour' }, { name: 'Half-Hour' }, { name: 'Qtr-Hour' }]);
+		} else if (option === 'Unit') {
+			setIsSalesEditable(true);
+			setIsDOWEditable(true);
+			setIsViewByEditable(true);
+			setViewBy('Sum');
+			setViewByOptions([{ name: 'Sum' }, { name: 'Avg' }]);
+		} else if (option === 'Unit, Hour and Day') {
+			setIsSalesEditable(false);
+			setIsDOWEditable(false);
+			setIsViewByEditable(false);
+		}
+	};
+
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
 		if (!columns || columns.length === 0) {
@@ -315,36 +355,6 @@ const HourlySales = () => {
 				}))
 			),
 		};
-	};
-
-	// Function to handle the CSV export
-	const handleCSVClick = () => {
-		const csvHeaders = [
-			'Unit Name',
-			'Date',
-			'Hour',
-			'Minute',
-			'Void Reason',
-			'Employee',
-			'Manager',
-			'Description',
-			'POS Check ID',
-			'Table Name',
-			'Revenue ID',
-			'Price',
-			'Tenders',
-		];
-		const csvData = hourlySalesData.flatMap((row) =>
-			row.subrows.map((voidRow) => Object.values(voidRow).join(','))
-		);
-
-		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
-		const blob = new Blob([csvString], { type: 'text/csv' });
-		const url = window.URL.createObjectURL(blob);
-		const tempLink = document.createElement('a');
-		tempLink.href = url;
-		tempLink.setAttribute('download', 'voids.csv');
-		tempLink.click();
 	};
 
 	// Function to handle the Excel export
@@ -404,8 +414,40 @@ const HourlySales = () => {
 						isDateRange={true}
 						onClick={() => setShowDateModal(true)}
 					/>
-					<div>
-						<Dropdown />
+					<div className='w-56 reportType-selector'>
+						<Dropdown
+							title='Report Type'
+							options={reportTypeOptions}
+							selectedOption={reportType}
+							onOptionChange={handleReportTypeChange}
+						/>
+					</div>
+					<div className='w-40 salesType-selector'>
+						<Dropdown
+							title='Sales Type'
+							options={salesTypeOptions}
+							selectedOption={salesType}
+							onOptionChange={(option) => setSalesType(option)}
+							isEditable={isSalesEditable}
+						/>
+					</div>
+					<div className='w-36 DOWType-selector'>
+						<Dropdown
+							title='DOW'
+							options={DOWTypeOptions}
+							selectedOption={DOWType}
+							onOptionChange={(option) => setDOWType(option)}
+							isEditable={isDOWEditable}
+						/>
+					</div>
+					<div className='w-36 viewType-selector'>
+						<Dropdown
+							title='View By'
+							options={viewByOptions}
+							selectedOption={viewBy}
+							onOptionChange={(option) => setViewBy(option)}
+							isEditable={isViewByEditable}
+						/>
 					</div>
 					<div className='run-button' onClick={handleHourlySales}>
 						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
@@ -417,8 +459,6 @@ const HourlySales = () => {
 					<ExportOptions
 						includePDF={true}
 						handlePDFClick={handlePDFClick}
-						includeCSV={true}
-						handleCSVClick={handleCSVClick}
 						includeExcel={true}
 						handleExcelClick={handleExcelClick}
 						includeHelp={true}
