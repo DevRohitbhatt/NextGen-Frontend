@@ -173,6 +173,22 @@ const HourlySales = () => {
 							: salesType === 'Gross Sales'
 							? 'SalesGross'
 							: 'Transactions',
+					DOW:
+						DOWType === 'All'
+							? '1234567'
+							: DOWType === 'Sunday'
+							? 1
+							: DOWType === 'Monday'
+							? 2
+							: DOWType === 'Tuesday'
+							? 3
+							: DOWType === 'Wednesday'
+							? 4
+							: DOWType === 'Thursday'
+							? 5
+							: DOWType === 'Friday'
+							? 6
+							: 7,
 				},
 			};
 
@@ -214,7 +230,7 @@ const HourlySales = () => {
 
 			// Dynamically generate columns based on the received data
 			const generatedColumns = [
-				// Conditionally add Unit Name column only if reportType is not 'Hour and Day'
+				// Conditionally add Hour column only if reportType is not 'Hour and Day'
 				...(reportType === 'Hour and Day'
 					? [
 							columnHelper.accessor('Hour', {
