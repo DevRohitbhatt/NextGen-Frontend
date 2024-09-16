@@ -19,7 +19,8 @@ import {
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
-	Purchase
+	Purchase,
+	MenuItemsSold
 } from './pages';
 import { Suspense } from 'react';
 
@@ -52,6 +53,7 @@ const App = () => {
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
+								<Route path='/MenuItemsSold' element={<MenuItemsSold />} />
 
 								{/* Labour */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />

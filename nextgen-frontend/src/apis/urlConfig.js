@@ -36,6 +36,9 @@ const urlConfig = {
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
+	MenuItemSoldSummaryReport:'api/sales/getMenuItemSoldSummaryReportData',
+	MenuItemSoldUnitReport:'api/sales/getMenuItemSoldUnitReportData',
+	MenuItemSoldSellersReport:'api/sales/getMenuItemSoldTopSellersReportData',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',

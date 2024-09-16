@@ -15,6 +15,7 @@ const CountsheetDesigner = lazy(() => import('./food-cost/CountsheetDesigner'));
 const Purchase = lazy(() => import('./food-cost/PurchaseAnalysis'));
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
+const MenuItemsSold = lazy(() => import('./sales/MenuItemsSold'));
 
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
@@ -35,5 +36,6 @@ export {
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
-	Purchase
+	Purchase,
+	MenuItemsSold
 };
