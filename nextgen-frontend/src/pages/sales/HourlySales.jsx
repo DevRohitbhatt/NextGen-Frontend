@@ -11,9 +11,10 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC,
+	TableHOC2,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
+import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
@@ -23,7 +24,8 @@ const HourlySales = () => {
 	const [memberId, setMemberId] = useState();
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
 	const [hourlySalesData, setHourlySalesData] = useState([]);
-	const [filteredVoidsReportData, setFilteredVoidsReportData] = useState([]);
+	const [renderCount, setRenderCount] = useState(0); // Controls re-render
+	const [columns, setColumns] = useState([]);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
@@ -64,7 +66,7 @@ const HourlySales = () => {
 		{ name: 'Saturday' },
 		{ name: 'Sunday' },
 	];
-	const [viewByOptions, setViewByOptions] = useState([]);
+	const [viewByOptions, setViewByOptions] = useState([{ name: 'Hour' }, { name: 'Half-Hour' }, { name: 'Qtr-Hour' }]);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -72,88 +74,6 @@ const HourlySales = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
-
-	// columns for tableHOC
-	const columns = useMemo(
-		() => [
-			columnHelper.accessor('date', {
-				id: 'date',
-				header: 'Date',
-				cell: ({ getValue }) => {
-					const date = new Date(getValue());
-					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-					return formattedDate;
-				},
-				dataType: 'date',
-			}),
-			columnHelper.accessor('hour', {
-				id: 'hour',
-				header: 'Hour',
-				dataType: 'number',
-			}),
-			columnHelper.accessor('minute', {
-				id: 'minute',
-				header: 'Minute',
-				dataType: 'number',
-			}),
-			columnHelper.accessor('voidReason', {
-				id: 'voidReason',
-				header: 'Void Reason',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('employeeName', {
-				id: 'employeeName',
-				header: 'Employee',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('managerName', {
-				id: 'managerName',
-				header: 'Manager',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('fullDescription', {
-				id: 'fullDescription',
-				header: 'Description',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('posCheckId', {
-				id: 'posCheckId',
-				header: 'POS Check ID',
-				dataType: 'number',
-			}),
-			columnHelper.accessor('tableName', {
-				id: 'tableName',
-				header: 'Table Name',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('revenueID', {
-				id: 'revenueID',
-				header: 'Revenue ID',
-				footer: ({ table }) =>
-					`Count: ${table.getCoreRowModel().rows.reduce((acc, row) => acc + row.subRows.length, 0)}`,
-				dataType: 'number',
-			}),
-			columnHelper.accessor('price', {
-				id: 'price',
-				header: 'Price',
-				footer: ({ table }) =>
-					`$${table
-						.getCoreRowModel()
-						.rows.reduce(
-							(acc, row) => acc + row.subRows.reduce((acc, curr) => acc + curr.original.price, 0),
-							0
-						)
-						.toFixed(2)}`,
-				dataType: 'number',
-			}),
-			columnHelper.accessor('tendersUsed', {
-				id: 'tendersUsed',
-				header: 'Tenders',
-				dataType: 'string',
-			}),
-		],
-		[]
-	);
 
 	useEffect(() => {
 		// Fetch initial data
@@ -183,13 +103,19 @@ const HourlySales = () => {
 		}
 	}, []);
 
+	// Effect to trigger re-render after the table is first formed
+	useEffect(() => {
+		if (renderCount === 0) {
+			// This will re-render the component once after the initial render
+			setRenderCount(1);
+		}
+	}, [renderCount]);
+
 	const fetchData = async (companyId, alignmentId, selectedUnit) => {
 		setIsLoading(true);
 		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
 		setIsLoading(false);
 	};
-
-	const Table = TableHOC(columns, filteredVoidsReportData, false);
 
 	// Fetching Units and Areas
 	const fetchUnits = async (companyId, alignmentId, memberId) => {
@@ -228,37 +154,148 @@ const HourlySales = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toISOString().split('T')[0],
-					toDate: selectedToDate.toISOString().split('T')[0],
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					reportType: reportType === 'Hour and Day' ? 1 : reportType === 'Unit' ? 2 : 3,
+					sumType:
+						viewBy === 'Hour'
+							? 'HOUR'
+							: viewBy === 'Half-Hour'
+							? 'HALF-HOUR'
+							: viewBy === 'Qtr-Hour'
+							? 'QTR-HOUR'
+							: viewBy === 'Sum'
+							? 'SUM'
+							: 'AVG',
+					salesType:
+						salesType === 'Net Sales'
+							? 'SalesNet'
+							: salesType === 'Gross Sales'
+							? 'SalesGross'
+							: 'Transactions',
 				},
 			};
 
 			const result = await getCall(getData);
-			const newData = {
-				...result,
-				data: result.data.map((row) => ({
-					...row,
-					subrows: row.voids.map((item) => ({
-						unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
-						date: item.date,
-						hour: item.hour,
-						minute: item.minute,
-						voidReason: item.voidReason,
-						employeeName: item.employeeName,
-						managerName: item.managerName,
-						fullDescription: item.fullDescription,
-						posCheckId: item.posCheckId,
-						tableName: item.tableName,
-						revenueID: item.revenueID,
-						price: item.price,
-						tendersUsed: item.tendersUsed,
-					})),
-					unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
-				})),
-			};
 
-			setHourlySalesData(newData.data);
-			setFilteredVoidsReportData(newData.data);
+			const newData = result.data.map((data) => ({
+				...data,
+				Date: new Date(data.Date).toLocaleDateString('en-CA'),
+				HoursSales: 12,
+			}));
+
+			// Define readable hour labels
+			const hourLabels = [
+				'12 AM',
+				'1 AM',
+				'2 AM',
+				'3 AM',
+				'4 AM',
+				'5 AM',
+				'6 AM',
+				'7 AM',
+				'8 AM',
+				'9 AM',
+				'10 AM',
+				'11 AM',
+				'12 PM',
+				'1 PM',
+				'2 PM',
+				'3 PM',
+				'4 PM',
+				'5 PM',
+				'6 PM',
+				'7 PM',
+				'8 PM',
+				'9 PM',
+				'10 PM',
+				'11 PM',
+			];
+
+			// Dynamically generate columns based on the received data
+			const generatedColumns = [
+				// Conditionally add Unit Name column only if reportType is not 'Hour and Day'
+				...(reportType === 'Hour and Day'
+					? [
+							columnHelper.accessor('Hour', {
+								id: 'Hour',
+								header: 'Hour',
+								footer: 'Summary:',
+							}),
+					  ]
+					: []),
+				// Conditionally add Unit Name column only if reportType is not 'Hour and Day'
+				...(reportType !== 'Hour and Day'
+					? [
+							columnHelper.accessor('UnitName', {
+								id: 'UnitName',
+								header: 'Unit Name',
+								footer: reportType === 'Unit, Hour and Day' ? null : 'Summary:',
+							}),
+					  ]
+					: []),
+
+				// Conditionally add the Date and HoursSales column only if reportType is 'Unit, Hour and Day'
+				...(reportType === 'Unit, Hour and Day'
+					? [
+							columnHelper.accessor('Date', {
+								id: 'Date',
+								header: 'Date',
+							}),
+							columnHelper.accessor('HoursSales', {
+								id: 'HoursSales',
+								header: 'Hours w/Sales',
+							}),
+					  ]
+					: []),
+
+				columnHelper.accessor('Total', {
+					id: 'Total',
+					header: 'Total',
+					footer: ({ table }) =>
+						reportType === 'Unit, Hour and Day' ? null : (
+							<div className='text-center'>
+								{`$ ${table
+									.getRowModel()
+									.rows.reduce((acc, row) => acc + row.original.Total, 0)
+									.toFixed(2)}`}
+							</div>
+						),
+				}),
+				...Object.keys(newData[0] || {})
+					.filter((key) => !['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour'].includes(key))
+					.filter((key) =>
+						reportType !== 'Hour and Day' ? key.startsWith('Hour') || key.startsWith('SalesYN') : !null
+					) // Filter hour and SalesYN keys
+					.map((item) =>
+						columnHelper.accessor(item, {
+							id: item,
+							header: item.startsWith('SalesYN')
+								? `Sales YN${item.replace('SalesYN', '')}`
+								: item.startsWith('Hour')
+								? hourLabels[parseInt(item.replace('Hour', ''), 10)]
+								: /\d{2}\/\d{2}\/\d{4}/.test(item)
+								? item.replace(/\//g, '-')
+								: item,
+							dataType: 'number',
+							cell: ({ getValue }) => (getValue() === null ? 0 : getValue() === '00' ? 0 : getValue()),
+							footer: ({ table }) =>
+								reportType !== 'Hour and Day' ? null : item === 'Mins' ? (
+									''
+								) : (
+									<div className='text-center'>
+										{`${salesType !== 'Transaction' ? '$' : ''} ${table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original[item], 0)
+											.toFixed(2)}`}
+									</div>
+								),
+						})
+					),
+			];
+
+			setColumns(generatedColumns);
+			setHourlySalesData(newData);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -303,91 +340,58 @@ const HourlySales = () => {
 		}
 	};
 
-	// Function to handle the PDF export
+	//  Function to handle the PDF export
 	const handlePDFClick = () => {
-		if (!columns || columns.length === 0) {
-			console.error('Columns are not defined or empty');
-			return;
-		}
-
-		if (!hourlySalesData || hourlySalesData.length === 0) {
-			console.error('Voids report data is not defined or empty');
-			return;
-		}
+		if (hourlySalesData.length === 0) return;
 
 		const pdfData = {
-			title: 'Voids Report',
+			title: 'Hourly Sales',
 			subHeaders: [
-				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
+				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedFromDate, 'mm-dd-yyyy')}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
-			body: buildPDFBody(),
+			body: [
+				{
+					type: 'table',
+					widths: columns.map(() => 'auto'),
+					data: {
+						columnHeaders: columns.map((column) => column.header),
+						rows: hourlySalesData.map((row) =>
+							columns.map((column) => ({
+								value: row[column.id],
+								cellType: '',
+								columnName: column.header,
+							}))
+						),
+					},
+				},
+			],
 		};
 
 		PdfBuilder(pdfData);
 	};
 
-	const buildPDFBody = () => {
-		const body = hourlySalesData.map((row) => {
-			const unit = unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId);
-			const title = unit ? unit.unitName : '';
-			return {
-				type: 'table',
-				title: title,
-				widths: new Array(columns.length).fill('auto'),
-				dataTypes: columns.map((column) => column.dataType),
-				data: formatPDFData(row.voids),
-			};
-		});
-
-		return body;
-	};
-
-	const formatPDFData = (data) => {
-		return {
-			columnHeaders: columns.map((column) => column.header),
-			rows: data.map((row) =>
-				columns.map((column) => ({
-					value: row[column.id],
-					cellType: '',
-					columnName: column.id,
-				}))
-			),
-		};
-	};
-
 	// Function to handle the Excel export
 	const handleExcelClick = () => {
+		if (hourlySalesData.length === 0) return;
+
 		const data = [
 			{
-				name: 'Voids Report',
-				columns: [
-					{ name: 'Unit Name', filterButton: true },
-					{ name: 'Date', filterButton: true },
-					{ name: 'Hour', filterButton: true },
-					{ name: 'Minute', filterButton: true },
-					{ name: 'Void Reason', filterButton: true },
-					{ name: 'Employee', filterButton: true },
-					{ name: 'Manager', filterButton: true },
-					{ name: 'Description', filterButton: true },
-					{ name: 'POS Check ID', filterButton: true },
-					{ name: 'Table Name', filterButton: true },
-					{ name: 'Revenue ID', filterButton: true },
-					{ name: 'Price', filterButton: true },
-					{ name: 'Tenders', filterButton: true },
-				],
-				data: hourlySalesData.flatMap((row) => row.subrows.map((voidRow) => Object.values(voidRow))),
+				name: '',
+				columns: columns.map((column) => ({ name: column.header })),
+				data: hourlySalesData.map((subRow) => columns.map((column) => subRow[column.id])),
 			},
 		];
 
-		const filename = 'voidsReport';
-		const spreadSheetTitle = 'Voids Report';
-		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const filename = 'hourlySales';
+		const spreadSheetTitle = 'Hourly Sales';
+		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedFromDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
+	const Table = <TableHOC2 columns={columns} data={hourlySalesData} isFooter={true} />;
 	return (
 		<div className='w-[85%] mx-auto'>
 			<Steps
@@ -472,7 +476,7 @@ const HourlySales = () => {
 			) : isError ? (
 				<div>{errorMessage}</div>
 			) : (
-				filteredVoidsReportData.length > 0 && <div className='paged-table'>{Table}</div>
+				hourlySalesData.length > 0 && <div className='paged-table'>{Table}</div>
 			)}
 
 			<div>

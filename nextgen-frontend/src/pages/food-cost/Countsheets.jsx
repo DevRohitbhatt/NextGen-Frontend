@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import voidsReport from '../../assets/introJSSteps/voidsReport';
 import { Dropdown, UnitSelector, CalendarModal, UnitModal, DateSelector, TableHOC2 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
+import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
@@ -217,8 +218,8 @@ const Countsheets = () => {
 					companyID: companyId,
 					alignmentID: alignmentId,
 					memberID: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 				},
 			};
 

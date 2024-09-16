@@ -15,6 +15,7 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import laborByPayPeriod from '../../assets/introJSSteps/labourByPayPeriod';
+import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
@@ -310,8 +311,8 @@ const LaborByPayPeriod = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 				},
 			};
 
@@ -379,7 +380,10 @@ const LaborByPayPeriod = () => {
 		const pdfData = {
 			title: 'Labor By Pay Period Report',
 			subHeaders: [
-				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
+				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} - ${dateFormat(
+					selectedToDate,
+					'mm-dd-yyyy'
+				)} | ${selectedUnitName}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
@@ -468,27 +472,36 @@ const LaborByPayPeriod = () => {
 
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
-		const csvHeaders = columns.map((column) => column.header);
+		const csvHeaders = [
+			'Unit Name',
+			'Employee ID',
+			'First Name',
+			'Last Name',
+			'Date',
+			'Job Code',
+			'Overtime Hours',
+			'Rate',
+			'Declared Tips',
+			'Pre-Tax Ticket Sales',
+			'Tips %',
+			'Total Pay',
+		];
 		const csvData = laborByPayPeriodData.flatMap((unit) =>
 			unit.subRows.flatMap((employee) =>
 				employee.subRows.map((period) =>
 					[
 						unit.unitName, // Parent row data (unit)
+						employee.employeeId,
 						employee.firstName, // First level subrow data (employee)
 						employee.lastName,
-						employee.employeeId,
-						employee.regHours, // Sum of regHours for the employee
 						period.date, // Second level subrow data (period)
 						period.jobCode,
-						period.jobDesc,
-						period.regHours, // regHours for the specific period
 						period.overHours,
 						period.rate,
 						period.declaredTips,
 						period.preTaxTicketSales,
 						period.declaredTipsPct,
 						period.regPay,
-						period.employeeId, // Retained employeeId for each period
 					].join(',')
 				)
 			)
@@ -499,7 +512,7 @@ const LaborByPayPeriod = () => {
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
 		tempLink.href = url;
-		tempLink.setAttribute('download', 'voids.csv');
+		tempLink.setAttribute('download', 'labourBYPayPeriod.csv');
 		tempLink.click();
 	};
 
@@ -549,7 +562,7 @@ const LaborByPayPeriod = () => {
 
 		const filename = 'laborByPayPeriodReport';
 		const spreadSheetTitle = 'Labor By Pay Period Report';
-		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} - ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};

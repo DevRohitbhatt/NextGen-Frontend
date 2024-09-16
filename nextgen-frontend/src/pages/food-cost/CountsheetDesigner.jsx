@@ -169,8 +169,6 @@ const CountsheetDesigner = () => {
 			data: row.subRows.map((subRow) => columns.slice(1).map((column) => subRow[column.id])),
 		}));
 
-		console.log('data', data);
-
 		const filename = 'Countsheets';
 		const spreadSheetTitle = 'Countsheets';
 		const date = countsheet?.dateTime;
