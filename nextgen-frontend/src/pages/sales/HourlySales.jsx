@@ -194,11 +194,51 @@ const HourlySales = () => {
 
 			const result = await getCall(getData);
 
-			const newData = result.data.map((data) => ({
-				...data,
-				Date: new Date(data.Date).toLocaleDateString('en-CA'),
-				HoursSales: 12,
-			}));
+			const newData = result.data.map((data) => {
+				const updatedData = {
+					...data,
+					Date: new Date(data.Date).toLocaleDateString('en-CA'),
+				};
+
+				Object.keys(data).forEach((key) => {
+					if (/^\d{2}\/\d{2}\/\d{4}$/.test(key)) {
+						let currentDate = new Date(selectedFromDate);
+						while (currentDate <= selectedToDate) {
+							const formattedDate = dateFormat(currentDate, 'mm/dd/yyyy');
+							updatedData[formattedDate] = data[formattedDate] || 0;
+							currentDate.setDate(currentDate.getDate() + 1); // Increment the date
+						}
+					}
+				});
+
+				updatedData.HoursSales =
+					data.SalesYN01 +
+					data.SalesYN02 +
+					data.SalesYN03 +
+					data.SalesYN04 +
+					data.SalesYN05 +
+					data.SalesYN06 +
+					data.SalesYN07 +
+					data.SalesYN08 +
+					data.SalesYN09 +
+					data.SalesYN10 +
+					data.SalesYN11 +
+					data.SalesYN12 +
+					data.SalesYN13 +
+					data.SalesYN14 +
+					data.SalesYN15 +
+					data.SalesYN16 +
+					data.SalesYN17 +
+					data.SalesYN18 +
+					data.SalesYN19 +
+					data.SalesYN20 +
+					data.SalesYN21 +
+					data.SalesYN22 +
+					data.SalesYN23 +
+					data.SalesYN24;
+
+				return updatedData;
+			});
 
 			// Define readable hour labels
 			const hourLabels = [
