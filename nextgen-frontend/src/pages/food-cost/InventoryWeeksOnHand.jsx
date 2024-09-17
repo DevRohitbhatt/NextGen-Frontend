@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import inventoryWeekOnHand from '../../assets/introJSSteps/inventoryWeeksOnHand.js';
@@ -8,8 +8,11 @@ import {
 	UnitModal,
 	ExportOptions,
 	ExcelExport as exportToExcel,
-	SimpleTable as Table,
+	TableHOC2,
 } from '../../components';
+import { createColumnHelper } from '@tanstack/react-table';
+
+const columnHelper = createColumnHelper();
 
 const InventoryWeeksOnHand = () => {
 	const [companyId, setCompanyId] = useState();
@@ -48,179 +51,127 @@ const InventoryWeeksOnHand = () => {
 		stepsEnabled: false,
 	});
 
-	const headers = [
-		{
-			key: 'unitName',
-			label: 'Unit Name',
-			cellType: 'string',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '150px', // Minimum width of the column
-			maxWidth: '250px', // Maximum width of the column
-		},
-		{
-			key: 'inventoryItemName',
-			label: 'Inventory Item',
-			cellType: 'string',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '120px',
-			maxWidth: '100px',
-		},
-		{
-			key: 'department',
-			label: 'Department',
-			cellType: 'string',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '130px',
-			maxWidth: '200px',
-		},
-		{
-			key: 'subDepartment',
-			label: 'Sub Department',
-			cellType: 'string',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '150px',
-			maxWidth: '200px',
-		},
-		{
-			key: 'latestCountDate',
-			label: 'Latest Count Date',
-			cellType: 'string',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '150px',
-			maxWidth: '200px',
-		},
-		{
-			key: 'caseUnitOfMeasureName',
-			label: 'UOM',
-			cellType: 'string',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '150px',
-			maxWidth: '200px',
-		},
-		{
-			key: 'casesOnHandAtLastCount',
-			label: 'On Hand At Last Count',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '100px',
-			maxWidth: '150px',
-		},
-		{
-			key: 'casesPurchasedSinceLastCount',
-			label: 'Cases Purchased Since Last Count',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '200px',
-			maxWidth: '300px',
-		},
-		{
-			key: 'casesTransferredInSinceLastCount',
-			label: 'Cases Transferred In Since Last Count',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '200px',
-			maxWidth: '300px',
-		},
-		{
-			key: 'casesTransferredOutSinceLastCount',
-			label: 'Cases Transferred Out Since Last Count',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '120px',
-			maxWidth: '180px',
-		},
-		{
-			key: 'casesWastedSinceLastCount',
-			label: 'Cases Wasted Since Last Count',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '100px',
-			maxWidth: '150px',
-		},
-		{
-			key: 'casesAddedSinceLastCount',
-			label: 'Added Since Last Count',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '100px',
-			maxWidth: '120px',
-		},
-		{
-			key: 'casesUsedEstimate',
-			label: 'Used Estimate',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '150px',
-			maxWidth: '200px',
-		},
-		{
-			key: 'estimatedCasesOnHandNow',
-			label: 'Estimated Cases On Hand',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '150px',
-			maxWidth: '200px',
-		},
-		{
-			key: 'estimatedValueOnHandNow',
-			label: 'Estimated $ On Hand Now',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '150px',
-			maxWidth: '200px',
-		},
-		{
-			key: 'averageCasesUsedPerWeek',
-			label: 'Average Used Per Week',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '100px',
-			maxWidth: '150px',
-		},
-		{
-			key: 'averageValueUsedPerWeek',
-			label: 'Average $ Used Per Week',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '200px',
-			maxWidth: '300px',
-		},
-		{
-			key: 'salesYieldWeeklyAverage',
-			label: 'Sales Yield Weekly Average',
-			cellType: 'string',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '150px',
-			maxWidth: '200px',
-		},
-		{
-			key: 'inventoryWeeksOnHandNow',
-			label: 'Inventory Weeks On Hand Now',
-			cellType: 'number',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '150px',
-			maxWidth: '200px',
-		},
-	];
+	const columns = useMemo(
+		() => [
+			columnHelper.accessor('unitName', {
+				id: 'unitName',
+				header: 'Unit Name',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('inventoryItemName', {
+				id: 'inventoryItemName',
+				header: 'Inventory Item',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('department', {
+				id: 'department',
+				header: 'Department',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('subDepartment', {
+				id: 'subDepartment',
+				header: 'Sub Department',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('latestCountDate', {
+				id: 'latestCountDate',
+				header: 'Latest Count Date',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('caseUnitOfMeasureName', {
+				id: 'caseUnitOfMeasureName',
+				header: 'UOM',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('casesOnHandAtLastCount', {
+				id: 'casesOnHandAtLastCount',
+				header: 'On Hand At Last Count',
+				cell: ({ getValue }) => getValue().toFixed(2),
+				dataType: 'number',
+				footer: ({ table }) => (
+					<div className='font-bold text-center'>
+						{`Total = ${table
+							.getCoreRowModel()
+							.rows.reduce((acc, row) => acc + row.original.casesOnHandAtLastCount, 0)
+							.toFixed(2)}`}
+					</div>
+				),
+			}),
+			columnHelper.accessor('casesPurchasedSinceLastCount', {
+				id: 'casesPurchasedSinceLastCount',
+				header: 'Cases Purchased Since Last Count',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('casesTransferredInSinceLastCount', {
+				id: 'casesTransferredInSinceLastCount',
+				header: 'Cases Transferred In Since Last Count',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('casesTransferredOutSinceLastCount', {
+				id: 'casesTransferredOutSinceLastCount',
+				header: 'Cases Transferred Out Since Last Count',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('casesWastedSinceLastCount', {
+				id: 'casesWastedSinceLastCount',
+				header: 'Cases Wasted Since Last Count',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('casesAddedSinceLastCount', {
+				id: 'casesAddedSinceLastCount',
+				header: 'Added Since Last Count',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('casesUsedEstimate', {
+				id: 'casesUsedEstimate',
+				header: 'Used Estimate',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('estimatedCasesOnHandNow', {
+				id: 'estimatedCasesOnHandNow',
+				header: 'Estimated Cases On Hand',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('estimatedValueOnHandNow', {
+				id: 'estimatedValueOnHandNow',
+				header: 'Estimated $ On Hand Now',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('averageCasesUsedPerWeek', {
+				id: 'averageCasesUsedPerWeek',
+				header: 'Average Used Per Week',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('averageValueUsedPerWeek', {
+				id: 'averageValueUsedPerWeek',
+				header: 'Average $ Used Per Week',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('salesYieldWeeklyAverage', {
+				id: 'salesYieldWeeklyAverage',
+				header: 'Sales Yield Weekly Average',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'string',
+			}),
+			columnHelper.accessor('inventoryWeeksOnHandNow', {
+				id: 'inventoryWeeksOnHandNow',
+				header: 'Inventory Weeks On Hand Now',
+				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				dataType: 'number',
+			}),
+		],
+		[]
+	);
 
 	useEffect(() => {
 		// Fetch initial data
@@ -302,11 +253,11 @@ const InventoryWeeksOnHand = () => {
 				})),
 			};
 
-			const total = result.data.reduce((acc, item) => acc + item.estimatedValueOnHandNow, 0);
+			const total = result.data.reduce((acc, item) => acc + item.estimatedValueOnHandNow, 0).toFixed(2);
 
 			setTotal(total);
 
-			setInventoryWeeksOnHandReportData(newData);
+			setInventoryWeeksOnHandReportData(newData.data);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -360,15 +311,15 @@ const InventoryWeeksOnHand = () => {
 	// 		body: [
 	// 			{
 	// 				type: 'table',
-	// 				widths: headers.map(() => 'auto'),
-	// 				dataTypes: headers.map((header) => header.cellType),
+	// 				widths: columns.map(() => 'auto'),
+	// 				dataTypes: columns.map((column) => column.dataType),
 	// 				data: {
-	// 					columnHeaders: headers.map((header) => header.label),
+	// 					columnHeaders: columns.map((column) => column.header),
 	// 					rows: inventoryWeeksOnHandReportData.data.map((row) =>
-	// 						headers.map((header) => ({
-	// 							value: row[header.key],
-	// 							cellType: header.cellType,
-	// 							columnName: header.label,
+	// 						columns.map((column) => ({
+	// 							value: row[column.id],
+	// 							cellType: column.dataType,
+	// 							columnName: column.header,
 	// 						}))
 	// 					),
 	// 				},
@@ -381,10 +332,10 @@ const InventoryWeeksOnHand = () => {
 
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
-		if (!inventoryWeeksOnHandReportData?.data) return;
-		const csvHeaders = headers.map((header) => header.label);
-		const csvData = inventoryWeeksOnHandReportData.data.map((row) =>
-			[headers.map((header) => row[header.key])].join(',')
+		if (inventoryWeeksOnHandReportData.length === 0) return;
+		const csvHeaders = columns.map((column) => column.header);
+		const csvData = inventoryWeeksOnHandReportData.map((row) =>
+			[columns.map((column) => row[column.id])].join(',')
 		);
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
@@ -397,13 +348,13 @@ const InventoryWeeksOnHand = () => {
 
 	// // Function to handle the Excel export
 	const handleExcelClick = () => {
-		if (!inventoryWeeksOnHandReportData?.data) return;
+		if (inventoryWeeksOnHandReportData === 0) return;
 
 		const data = [
 			{
 				name: `Inventory Weeks On Hand | ${usage}`,
-				columns: headers.map((header) => ({ name: header.label, filterButton: true })),
-				data: inventoryWeeksOnHandReportData.data.map((row) => headers.map((header) => row[header.key])),
+				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
+				data: inventoryWeeksOnHandReportData.map((row) => columns.map((column) => row[column.id])),
 			},
 		];
 
@@ -413,6 +364,10 @@ const InventoryWeeksOnHand = () => {
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
+
+	const Table = (
+		<TableHOC2 columns={columns} data={inventoryWeeksOnHandReportData} isPaginated={true} isFooter={true} />
+	);
 
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -466,15 +421,10 @@ const InventoryWeeksOnHand = () => {
 			) : isError ? (
 				<div>{errorMessage}</div>
 			) : (
-				inventoryWeeksOnHandReportData?.data && (
+				inventoryWeeksOnHandReportData.length > 0 && (
 					<div className='mt-4'>
 						{total > 0 && <div className='text-2xl font-bold min-w-fit'>{`Total $: ${total}`}</div>}
-						<Table
-							data={inventoryWeeksOnHandReportData?.data}
-							headers={headers}
-							onRowClick={() => {}}
-							isPaginated={false}
-						/>
+						{Table}
 					</div>
 				)
 			)}
