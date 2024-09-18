@@ -11,6 +11,7 @@ import {
 	flexRender,
 } from '@tanstack/react-table';
 import useTableView from '../../hooks/useTableView';
+import ColumnFilter from './ColumnFilter';
 
 function TableHOC2({
 	columns,
@@ -22,22 +23,28 @@ function TableHOC2({
 	isTableRendered,
 	setIsTableRendered,
 	expandCollapseButtons = false,
+	enableColumnFilters = false,
 	headerPosition = 'center',
 	dataPosition = 'text-center',
 }) {
 	const [expanded, setExpanded] = useState({});
+	const [columnFilters, setColumnFilters] = useState([]);
 	const table = useReactTable({
 		data,
 		columns,
+		filterFns: {},
 		state: {
 			expanded,
+			columnFilters,
 		},
+		enableColumnFilters: enableColumnFilters,
+		onColumnFiltersChange: setColumnFilters,
 		onExpandedChange: setExpanded,
 		getSubRows: (row) => row.subRows,
 		getCoreRowModel: getCoreRowModel(),
-		...(isPaginated && { getPaginationRowModel: getPaginationRowModel() }),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),
+		...(isPaginated && { getPaginationRowModel: getPaginationRowModel() }),
 		getExpandedRowModel: getExpandedRowModel(),
 		//filterFromLeafRows: true,
 		//maxLeafRowFilterDepth: 1,
@@ -85,38 +92,63 @@ function TableHOC2({
 					{isHeader && (
 						<thead className='sticky top-0 w-full bg-white border-b-2 border-solid border-primary'>
 							{table.getHeaderGroups().map((headerGroup) => (
-								<tr key={headerGroup.id}>
-									{headerGroup.headers.map((header) => {
-										return (
-											<th
-												key={header.id}
-												colSpan={header.colSpan}
-												className='px-2 py-4 text-right border-b border-gray-300 cursor-pointer'
-												style={{ width: header.getSize() }}
-											>
-												{header.isPlaceholder ? null : (
-													<div
-														{...{
-															className: header.column.getCanSort()
-																? 'cursor-pointer flex gap-1 items-center '
-																: '',
-															onClick: header.column.getToggleSortingHandler(),
-														}}
-														style={{ justifyContent: headerPosition }}
-													>
-														{flexRender(
-															header.column.columnDef.header,
-															header.getContext()
-														)}
-														{{ asc: <FaSortAlphaUp />, desc: <FaSortAlphaDownAlt /> }[
-															header.column.getIsSorted()
-														] ?? null}
-													</div>
-												)}
-											</th>
-										);
-									})}
-								</tr>
+								<>
+									<tr key={headerGroup.id}>
+										{headerGroup.headers.map((header) => {
+											return (
+												<th
+													key={header.id}
+													colSpan={header.colSpan}
+													className='px-2 py-4'
+													style={{ width: header.getSize() }}
+												>
+													{header.isPlaceholder ? null : (
+														<div
+															{...{
+																className: header.column.getCanSort()
+																	? 'cursor-pointer flex gap-1 items-center '
+																	: '',
+																onClick: header.column.getToggleSortingHandler(),
+															}}
+															style={{ justifyContent: headerPosition }}
+														>
+															{flexRender(
+																header.column.columnDef.header,
+																header.getContext()
+															)}
+															{{
+																asc: <FaSortAlphaUp />,
+																desc: <FaSortAlphaDownAlt />,
+															}[header.column.getIsSorted()] ?? null}
+														</div>
+													)}
+												</th>
+											);
+										})}
+									</tr>
+									<tr key={headerGroup.id}>
+										{headerGroup.headers.map((header) => {
+											return (
+												<th
+													key={header.id}
+													colSpan={header.colSpan}
+													className='px-2 pb-4 text-right border-b border-gray-300 cursor-pointer'
+													style={{ width: header.getSize() }}
+												>
+													{header.isPlaceholder ? null : (
+														<>
+															{header.column.getCanFilter() ? (
+																<div>
+																	<ColumnFilter column={header.column} />
+																</div>
+															) : null}
+														</>
+													)}
+												</th>
+											);
+										})}
+									</tr>
+								</>
 							))}
 						</thead>
 					)}

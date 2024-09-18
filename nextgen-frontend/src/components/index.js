@@ -15,6 +15,7 @@ export { default as DraggableInventoryItem } from './common/DraggableInventoryIt
 export { default as SearchBar } from './common/SearchBar';
 export { default as Modal } from './common/Modal';
 export { default as ModalSearchBar } from './common/ModalSearchBar';
+export { default as Loader } from './common/Loader';
 
 // ExportOptions components
 export { default as PdfBuilder } from './exportOptions/PdfBuilder';
