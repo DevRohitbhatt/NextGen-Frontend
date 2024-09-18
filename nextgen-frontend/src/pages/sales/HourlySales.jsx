@@ -442,7 +442,7 @@ const HourlySales = () => {
 
 		const filename = 'hourlySales';
 		const spreadSheetTitle = 'Hourly Sales';
-		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedFromDate, 'mm-dd-yyyy')}`;
+		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
