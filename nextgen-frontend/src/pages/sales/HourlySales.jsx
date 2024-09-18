@@ -4,6 +4,7 @@ import { Steps } from 'intro.js-react';
 import hourlySales from '../../assets/introJSSteps/hourlySales';
 import {
 	Dropdown,
+	Loader,
 	UnitSelector,
 	CalendarModal,
 	UnitModal,
@@ -357,7 +358,7 @@ const HourlySales = () => {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting voids report data: ', error);
+			console.error('Error getting Hourly Sales data: ', error);
 		}
 	};
 
@@ -403,7 +404,7 @@ const HourlySales = () => {
 		const pdfData = {
 			title: 'Hourly Sales',
 			subHeaders: [
-				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedFromDate, 'mm-dd-yyyy')}`,
+				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
@@ -449,116 +450,125 @@ const HourlySales = () => {
 
 	const Table = <TableHOC2 columns={columns} data={hourlySalesData} isFooter={true} />;
 	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Hourly Sales</h2>
-			<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div className='flex items-center space-x-3 '>
-					<UnitSelector
-						companyId={companyId}
-						alignmentId={alignmentId}
-						memberId={selectedUnit}
-						memberName={selectedUnitName}
-						includeAreas={true}
-						setMemberName={setselectedUnitName}
-						onClick={() => setUnitShowModal(true)}
-					/>
-					<DateSelector
-						toDate={selectedToDate}
-						fromDate={selectedFromDate}
-						isDateRange={true}
-						onClick={() => setShowDateModal(true)}
-					/>
-					<div className='w-56 reportType-selector'>
-						<Dropdown
-							title='Report Type'
-							options={reportTypeOptions}
-							selectedOption={reportType}
-							onOptionChange={handleReportTypeChange}
+		<>
+			<Loader loading={isLoading} />
+			<div className='w-[85%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Hourly Sales</h2>
+				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+					<div className='flex items-center space-x-3 '>
+						<UnitSelector
+							companyId={companyId}
+							alignmentId={alignmentId}
+							memberId={selectedUnit}
+							memberName={selectedUnitName}
+							includeAreas={true}
+							setMemberName={setselectedUnitName}
+							onClick={() => setUnitShowModal(true)}
 						/>
-					</div>
-					<div className='w-40 salesType-selector'>
-						<Dropdown
-							title='Sales Type'
-							options={salesTypeOptions}
-							selectedOption={salesType}
-							onOptionChange={(option) => setSalesType(option)}
-							isEditable={isSalesEditable}
+						<DateSelector
+							toDate={selectedToDate}
+							fromDate={selectedFromDate}
+							isDateRange={true}
+							onClick={() => setShowDateModal(true)}
 						/>
-					</div>
-					<div className='w-36 DOWType-selector'>
-						<Dropdown
-							title='DOW'
-							options={DOWTypeOptions}
-							selectedOption={DOWType}
-							onOptionChange={(option) => setDOWType(option)}
-							isEditable={isDOWEditable}
-						/>
-					</div>
-					<div className='w-36 viewType-selector'>
-						<Dropdown
-							title='View By'
-							options={viewByOptions}
-							selectedOption={viewBy}
-							onOptionChange={(option) => setViewBy(option)}
-							isEditable={isViewByEditable}
-						/>
-					</div>
-					<div className='run-button' onClick={handleHourlySales}>
-						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-							Run
+						<div className='w-56 reportType-selector'>
+							<Dropdown
+								title='Report Type'
+								options={reportTypeOptions}
+								selectedOption={reportType}
+								onOptionChange={handleReportTypeChange}
+							/>
+						</div>
+						<div className='w-40 salesType-selector'>
+							<Dropdown
+								title='Sales Type'
+								options={salesTypeOptions}
+								selectedOption={salesType}
+								onOptionChange={(option) => setSalesType(option)}
+								isEditable={isSalesEditable}
+							/>
+						</div>
+						<div className='w-36 DOWType-selector'>
+							<Dropdown
+								title='DOW'
+								options={DOWTypeOptions}
+								selectedOption={DOWType}
+								onOptionChange={(option) => setDOWType(option)}
+								isEditable={isDOWEditable}
+							/>
+						</div>
+						<div className='w-36 viewType-selector'>
+							<Dropdown
+								title='View By'
+								options={viewByOptions}
+								selectedOption={viewBy}
+								onOptionChange={(option) => setViewBy(option)}
+								isEditable={isViewByEditable}
+							/>
+						</div>
+						<div className='run-button' onClick={handleHourlySales}>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+								Run
+							</div>
 						</div>
 					</div>
-				</div>
+					<div>
+						<ExportOptions
+							includePDF={true}
+							handlePDFClick={handlePDFClick}
+							includeExcel={true}
+							handleExcelClick={handleExcelClick}
+							includeHelp={true}
+							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+						/>
+					</div>
+				</header>
+
+				{/* Display the table if there is no error and the data is not loading */}
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : (
+					!isLoading &&
+					(hourlySalesData.length > 0 ? (
+						<div className='paged-table'>{Table}</div>
+					) : !selectedUnit ? (
+						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+					) : (
+						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+					))
+				)}
+
 				<div>
-					<ExportOptions
-						includePDF={true}
-						handlePDFClick={handlePDFClick}
-						includeExcel={true}
-						handleExcelClick={handleExcelClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+					<CalendarModal
+						handleClose={() => setShowDateModal(false)}
+						modalOpen={showDateModal}
+						isDateRange={true}
+						handleDateSelection={handleDateSelection}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
 					/>
 				</div>
-			</header>
-
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				hourlySalesData.length > 0 && <div className='paged-table'>{Table}</div>
-			)}
-
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
 			</div>
-		</div>
+		</>
 	);
 };
 
