@@ -883,8 +883,6 @@ const ActualFoodCost = () => {
 			),
 		};
 
-		console.log('rows', newData);
-
 		return newData;
 	};
 

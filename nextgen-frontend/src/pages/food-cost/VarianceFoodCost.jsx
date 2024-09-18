@@ -768,58 +768,60 @@ const VarianceFoodCost = () => {
 	};
 
 	const buildPDFBody = () => {
-		const body = varianceFoodCostData.flatMap((row) => {
-			return {
-				type: 'table',
-				title: row.department,
-				widths: [
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-				],
-				dataTypes: [
-					'string',
-					'string',
-					'string',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-				],
-				data: formatPDFData(row.subRows),
-			};
-		});
-
+		let body = [];
+		varianceFoodCostData.flatMap((row) => [
+			(body = row.subRows.flatMap((subRow) => {
+				return {
+					type: 'table',
+					title: subRow.department,
+					widths: [
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+					],
+					dataTypes: [
+						'string',
+						'string',
+						'string',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+					],
+					data: formatPDFData(subRow),
+				};
+			})),
+		]);
 		return body;
 	};
 
 	const formatPDFData = (data) => {
-		return {
+		const newData = {
 			columnHeaders: [
 				'Sub Department',
 				'Description',
@@ -839,34 +841,34 @@ const VarianceFoodCost = () => {
 				'Comparison Name',
 				'Comparison Sales',
 			],
-			rows: data.flatMap((row) =>
-				row.subRows.flatMap((subRow) =>
-					subRow.subRows.map((subSubRow) => [
-						{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
-						{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
-						{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'Description' },
-						{ value: subSubRow.actualNumber, cellType: 'number', columnName: 'Actual #' },
-						{ value: subSubRow.actualDollar, cellType: 'number', columnName: 'Actual $' },
-						{ value: Number(subSubRow.actualPct).toFixed(2), cellType: 'number', columnName: 'Actual %' },
-						{ value: subSubRow.idealNumber, cellType: 'number', columnName: 'Ideal #' },
-						{ value: subSubRow.idealDollar, cellType: 'number', columnName: 'Ideal $' },
-						{ value: Number(subSubRow.idealPct).toFixed(2), cellType: 'number', columnName: 'Ideal %' },
-						{ value: subSubRow.varianceNumber, cellType: 'number', columnName: 'Variance #' },
-						{ value: subSubRow.varianceDollar, cellType: 'number', columnName: 'Variance $' },
-						{
-							value: Number(subSubRow.variancePct).toFixed(2),
-							cellType: 'number',
-							columnName: 'Variance %',
-						},
-						{ value: subSubRow.wasteNumber, cellType: 'number', columnName: 'Waste #' },
-						{ value: subSubRow.wasteDollar, cellType: 'number', columnName: 'Waste $' },
-						{ value: Number(subSubRow.wastePct).toFixed(2), cellType: 'number', columnName: 'Waste %' },
-						{ value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
-						{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
-					])
-				)
+			rows: data.subRows.flatMap((subRow) =>
+				subRow.subRows.map((subSubRow) => [
+					{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
+					{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
+					{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'Description' },
+					{ value: subSubRow.actualNumber, cellType: 'number', columnName: 'Actual #' },
+					{ value: subSubRow.actualDollar, cellType: 'number', columnName: 'Actual $' },
+					{ value: Number(subSubRow.actualPct).toFixed(2), cellType: 'number', columnName: 'Actual %' },
+					{ value: subSubRow.idealNumber, cellType: 'number', columnName: 'Ideal #' },
+					{ value: subSubRow.idealDollar, cellType: 'number', columnName: 'Ideal $' },
+					{ value: Number(subSubRow.idealPct).toFixed(2), cellType: 'number', columnName: 'Ideal %' },
+					{ value: subSubRow.varianceNumber, cellType: 'number', columnName: 'Variance #' },
+					{ value: subSubRow.varianceDollar, cellType: 'number', columnName: 'Variance $' },
+					{
+						value: Number(subSubRow.variancePct).toFixed(2),
+						cellType: 'number',
+						columnName: 'Variance %',
+					},
+					{ value: subSubRow.wasteNumber, cellType: 'number', columnName: 'Waste #' },
+					{ value: subSubRow.wasteDollar, cellType: 'number', columnName: 'Waste $' },
+					{ value: Number(subSubRow.wastePct).toFixed(2), cellType: 'number', columnName: 'Waste %' },
+					{ value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
+					{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
+				])
 			),
 		};
+
+		return newData;
 	};
 
 	// Function to handle the Excel export
