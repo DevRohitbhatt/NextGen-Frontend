@@ -12,6 +12,8 @@ import {
   ExcelExport as exportToExcel,
   TableHOC2,
   Dropdown,
+  Menu,
+  MenuModal
 } from "../../components";
 import { createColumnHelper } from "@tanstack/react-table";
 import actualFoodCosts from "../../assets/introJSSteps/actualFoodCosts";
@@ -26,6 +28,9 @@ const MenuItemsSold = () => {
   const [menuItemSoldData, setMenuItemSoldData] = useState([]);
   const [isTableRendered, setIsTableRendered] = useState(true);
 
+  //Menu Items 
+  const [menuItemList, setMenuItemList] = useState([]);
+
   //loading and error state variables
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -37,6 +42,12 @@ const MenuItemsSold = () => {
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setselectedUnitName] = useState("No Unit Selected");
   const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+
+  //selected menu items
+    //selected unit state variables
+	const [selectedMenu, setSelectedMenu] = useState();
+	const [selectedMenuName, setselectedMenuName] = useState("No Menu Selected");
+	const [showMenuModal, setShowMenuModal] = useState(false); // State to manage modal visibility
 
   //calendar state variables
   const [selectedFromDate, setSelectedFromDate] = useState(
@@ -51,6 +62,9 @@ const MenuItemsSold = () => {
   const [view, setView] = useState("summary"); // Default to "summary"
   const [viewValue, setViewValue] = useState(0);
   const [salesType, setSalesType] = useState("SalesNet"); // Default to "Net"
+  const [activeTab, setActiveTab] = useState("ItemsSoldTotals");
+  const [item, setItem] = useState("Menu");
+  const [itemValue, setItemValue] = useState(0);
 
   //IntroJS variables for the help steps
   const [introSteps, setIntroSteps] = useState({
@@ -87,6 +101,8 @@ const MenuItemsSold = () => {
     summary: 0,
     byUnit: 1,
     topSellers: 2,
+    Menu: 0,
+    Inventory: 1,
   };
 
   const handleViewWeekChange = (option) => {
@@ -99,6 +115,12 @@ const MenuItemsSold = () => {
     setView(option);
     const value = viewValueMap[option] || 0; // Default to 0 if option is not found
     setViewValue(value);
+  };
+
+  const handleItemChange = (option) => {
+    setItem(option);
+    const value = viewValueMap[option] || 0; // Default to 0 if option is not found
+    setItemValue(value);
   };
 
   const handleSalesChange = (option) => {
@@ -208,7 +230,7 @@ const MenuItemsSold = () => {
 
   const fetchData = async (companyId, alignmentId, selectedUnit) => {
     setIsLoading(true);
-    await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
+    await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit),fetchMenu(companyId)]);
     setIsLoading(false);
   };
 
@@ -228,6 +250,34 @@ const MenuItemsSold = () => {
 
       const result = await getCall(getData);
       setUnitsAndAreasList(result.data);
+      setIsLoading(false);
+    } catch (error) {
+      setIsError(true);
+      setIsLoading(false);
+      setErrorMessage(
+        "There was an issue loading your units, please try again later."
+      );
+      console.error("Error getting units: ", error);
+    }
+  };
+
+  // Fetching Menu
+  const fetchMenu = async (companyId) => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      const getData = {
+        url: "MenuItemsByCompanyID",
+        urlParams: {
+          companyId: companyId,
+        },
+      };
+
+      const result = await getCall(getData);
+	  
+ 	console.log("Menu1", result);
+
+      setMenuItemList(result.data);
       setIsLoading(false);
     } catch (error) {
       setIsError(true);
@@ -315,6 +365,12 @@ const MenuItemsSold = () => {
     setselectedUnitName(unitName);
     setSelectedUnit(unitID);
     setUnitShowModal(false);
+  };
+
+  const handleMenuSelection = (itemID,menuName) => {
+    setselectedMenuName(menuName);
+    setSelectedMenu(itemID);
+    setShowMenuModal(false);
   };
 
   const handleDateSelection = (from, to) => {
@@ -449,7 +505,7 @@ const MenuItemsSold = () => {
 
   // Function to handle the Excel export
   const handleExcelClick = () => {
-       // Define the data structure for the Excel export
+    // Define the data structure for the Excel export
     const data = [
       {
         name: "Menu Items Sold",
@@ -507,9 +563,54 @@ const MenuItemsSold = () => {
         onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
       />
       <h2 className="mt-4 mb-10 text-3xl font-semibold capitalize">
-        Menu Items Sold
+        {" "}
+        Menu Items Sold{" "}
       </h2>
-      <header className="space-y-3 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)]">
+      {/* Tabs Section */}
+      <header className="space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center">
+        <div className="flex items-center py-2 space-x-6">
+          <button
+            className={`py-2 px-4 ${
+              activeTab === "ItemsSoldTotals"
+                ? "border-l-4 border-r-4 border-t-4 border-primary text-primary"
+                : "border-b-4 border-gray-200"
+            }`}
+            onClick={() => setActiveTab("ItemsSoldTotals")}
+          >
+            Items Sold Totals
+          </button>
+          <button
+            className={`py-2 px-4 ${
+              activeTab === "ItemsSoldByEmployee"
+                ? "border-l-4 border-r-4 border-t-4 border-primary text-primary"
+                : "border-b-4 border-gray-200"
+            }`}
+            onClick={() => setActiveTab("ItemsSoldByEmployee")}
+          >
+            Items Sold By Employee
+          </button>
+          <button
+            className={`py-2 px-4 ${
+              activeTab === "ItemsSoldByHour"
+                ? "border-l-4 border-r-4 border-t-4 border-primary text-primary"
+                : "border-b-4 border-gray-200"
+            }`}
+            onClick={() => setActiveTab("ItemsSoldByHour")}
+          >
+            Items Sold By Hour
+          </button>
+          <button
+            className={`py-2 px-4 ${
+              activeTab === "ItemsSoldWithModifiers"
+                ? "border-l-4 border-r-4 border-t-4 border-primary text-primary"
+                : "border-b-4 border-gray-200"
+            }`}
+            onClick={() => setActiveTab("ItemsSoldWithModifiers")}
+          >
+            Items Sold With Modifiers
+          </button>
+        </div>
+
         <div className="flex items-center justify-between space-x-3">
           <div className="flex items-center space-x-3">
             <UnitSelector
@@ -556,59 +657,120 @@ const MenuItemsSold = () => {
             />
           </div>
         </div>
-        <div className="flex">
-          <div>
-            <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
-              View
-            </label>
-            <div className="p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary">
-              <div className="flex flex-row space-x-6">
-                <div className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    id="summary"
-                    name="reportType"
-                    value="summary"
-                    checked={view === "summary"}
-                    onChange={() => handleViewChange("summary")}
-                    className="cursor-pointer checkbox-radio"
-                  />
-                  <label htmlFor="summary" className="ml-2">
-                    Summary
-                  </label>
-                </div>
-                <div className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    id="byUnit"
-                    name="reportType"
-                    value="byUnit"
-                    checked={view === "byUnit"}
-                    onChange={() => handleViewChange("byUnit")}
-                    className="cursor-pointer checkbox-radio"
-                  />
-                  <label htmlFor="byUnit" className="ml-2">
-                    By Unit
-                  </label>
-                </div>
-                <div className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    id="topSellers"
-                    name="reportType"
-                    value="topSellers"
-                    checked={view === "topSellers"}
-                    onChange={() => handleViewChange("topSellers")}
-                    className="checkbox-radio"
-                  />
-                  <label htmlFor="topSellers" className="ml-2">
-                    Top Sellers
-                  </label>
+        <div className="flex mt-2">
+          {activeTab === "ItemsSoldTotals" && (
+            <>
+              <div className="mt-2">
+                <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
+                  View
+                </label>
+                <div className="p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary">
+                  <div className="flex flex-row space-x-6">
+                    <div className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        id="summary"
+                        name="reportType"
+                        value="summary"
+                        checked={view === "summary"}
+                        onChange={() => handleViewChange("summary")}
+                        className="cursor-pointer checkbox-radio"
+                      />
+                      <label htmlFor="summary" className="ml-2">
+                        Summary
+                      </label>
+                    </div>
+                    <div className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        id="byUnit"
+                        name="reportType"
+                        value="byUnit"
+                        checked={view === "byUnit"}
+                        onChange={() => handleViewChange("byUnit")}
+                        className="cursor-pointer checkbox-radio"
+                      />
+                      <label htmlFor="byUnit" className="ml-2">
+                        By Unit
+                      </label>
+                    </div>
+                    <div className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        id="topSellers"
+                        name="reportType"
+                        value="topSellers"
+                        checked={view === "topSellers"}
+                        onChange={() => handleViewChange("topSellers")}
+                        className="checkbox-radio"
+                      />
+                      <label htmlFor="topSellers" className="ml-2">
+                        Top Sellers
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div className="pl-2">
+            </>
+          )}
+          {activeTab === "ItemsSoldByEmployee" && (
+            <>
+              <div className="mt-2">
+                <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
+                  Select Item Type
+                </label>
+                <div className="p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary">
+                  <div className="flex flex-row space-x-6">
+                    <div className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        id="Menu"
+                        name="itemType"
+                        value="Menu"
+                        checked={item === "Menu"}
+                        onChange={() => handleItemChange("Menu")}
+                        className="cursor-pointer checkbox-radio"
+                      />
+                      <label htmlFor="Menu" className="ml-2">
+                        Menu
+                      </label>
+                    </div>
+                    <div className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        id="Inventory"
+                        name="ItemType"
+                        value="Inventory"
+                        checked={item === "Inventory"}
+                        onChange={() => handleItemChange("Inventory")}
+                        className="cursor-pointer checkbox-radio"
+                      />
+                      <label htmlFor="Inventory" className="ml-2">
+                        Inventory
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 ml-2">
+                <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
+                  Menu Items
+                </label>
+                <div className="flex flex-row space-x-6">
+                  <div className="flex items-center cursor-pointer">
+                    <Menu
+                      companyId={companyId}
+                      menuId={selectedUnit}
+                      menuName={selectedMenuName}
+                      setMenuName={setselectedUnitName}
+                      onClick={() => setShowMenuModal(true)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          <div className="pl-2 mt-2">
             <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
               Sales
             </label>
@@ -669,6 +831,14 @@ const MenuItemsSold = () => {
             setUnitShowModal(false);
           }}
           handleUnitSelection={handleUnitSelection}
+        />
+        <MenuModal
+          menuData={menuItemList}
+          show={showMenuModal}
+          handleClose={() => {
+            setShowMenuModal(false);
+          }}
+          handleMenuSelection={handleMenuSelection}
         />
         <CalendarModal
           handleClose={() => setShowDateModal(false)}

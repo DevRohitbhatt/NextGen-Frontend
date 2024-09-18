@@ -43,5 +43,8 @@ const urlConfig = {
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
 	labourByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
+
+	//Menu item
+	MenuItemsByCompanyID: 'api/menus/getMenuItemsByCompanyID',
 };
 export default urlConfig;

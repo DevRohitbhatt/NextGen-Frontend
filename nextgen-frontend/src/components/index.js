@@ -46,3 +46,7 @@ export { default as TreeNode } from './table/TreeNode';
 export { default as TreeTable } from './table/TreeTableBuilder';
 export { default as TableHOC } from './table/TableHOC';
 export { default as TableHOC2 } from './table/TableHOC2';
+
+//menu components
+export { default as Menu } from './menu/Menu';
+export { default as MenuModal} from './menu/MenuModal';
