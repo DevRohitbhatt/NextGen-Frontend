@@ -119,7 +119,7 @@ const CountsheetDesigner = () => {
 		}
 
 		if (!countsheetDetails || countsheetDetails.length === 0) {
-			console.error('Voids report data is not defined or empty');
+			console.error('Countsheet data is not defined or empty');
 			return;
 		}
 

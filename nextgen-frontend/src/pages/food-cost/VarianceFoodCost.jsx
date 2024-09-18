@@ -4,6 +4,7 @@ import { Steps } from 'intro.js-react';
 import { useNavigate } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
+	Loader,
 	UnitSelector,
 	CalendarModal,
 	UnitModal,
@@ -15,6 +16,7 @@ import {
 	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
+import dateFormat from 'dateformat';
 import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
 
 const columnHelper = createColumnHelper();
@@ -594,8 +596,8 @@ const VarianceFoodCost = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					countType: countType,
 				},
 			};
@@ -670,8 +672,8 @@ const VarianceFoodCost = () => {
 					companyID: companyId,
 					alignmentID: alignmentId,
 					memberID: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 				},
 			};
 
@@ -745,21 +747,22 @@ const VarianceFoodCost = () => {
 		}
 
 		if (!varianceFoodCostData || varianceFoodCostData.length === 0) {
-			console.error('Variance Food COst report data is not defined or empty');
+			console.error('Variance Food Cost report data is not defined or empty');
 			return;
 		}
 
 		const pdfData = {
 			title: 'Variance Food Cost Report',
 			subHeaders: [
-				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
+				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
+					selectedToDate,
+					'mm-dd-yyyy'
+				)} | ${selectedUnitName}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
 			body: buildPDFBody(),
 		};
-
-		console.log('pdfData', pdfData);
 
 		PdfBuilder(pdfData);
 	};
@@ -923,7 +926,7 @@ const VarianceFoodCost = () => {
 
 		const filename = 'varianceFoodCost';
 		const spreadSheetTitle = 'Variance Food Cost Report';
-		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
@@ -952,150 +955,158 @@ const VarianceFoodCost = () => {
 	);
 
 	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Variance Food Cost</h2>
-			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div className='flex items-center space-x-3 '>
-					<UnitSelector
-						companyId={companyId}
-						alignmentId={alignmentId}
-						memberId={selectedUnit}
-						memberName={selectedUnitName}
-						includeAreas={true}
-						setMemberName={setselectedUnitName}
-						onClick={() => setUnitShowModal(true)}
-					/>
-					<DateSelector
-						toDate={selectedToDate}
-						fromDate={selectedFromDate}
-						isDateRange={true}
-						onClick={() => setShowDateModal(true)}
-					/>
+		<>
+			<Loader loading={isLoading} />
+			<div className='w-[85%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Variance Food Cost</h2>
+				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+					<div className='flex items-center space-x-3 '>
+						<UnitSelector
+							companyId={companyId}
+							alignmentId={alignmentId}
+							memberId={selectedUnit}
+							memberName={selectedUnitName}
+							includeAreas={true}
+							setMemberName={setselectedUnitName}
+							onClick={() => setUnitShowModal(true)}
+						/>
+						<DateSelector
+							toDate={selectedToDate}
+							fromDate={selectedFromDate}
+							isDateRange={true}
+							onClick={() => setShowDateModal(true)}
+						/>
 
-					<div className='w-36'>
-						<Dropdown
-							options={countDropdownOptions}
-							title='Count Type'
-							selectedOption={view}
-							onOptionChange={handleCountType}
+						<div className='w-36'>
+							<Dropdown
+								options={countDropdownOptions}
+								title='Count Type'
+								selectedOption={view}
+								onOptionChange={handleCountType}
+							/>
+						</div>
+						<div className='run-button' onClick={handleVarianceFoodCost}>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+								Run
+							</div>
+						</div>
+					</div>
+					<div>
+						<ExportOptions
+							includePDF={true}
+							handlePDFClick={handlePDFClick}
+							includeExcel={true}
+							handleExcelClick={handleExcelClick}
+							includeHelp={true}
+							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 						/>
 					</div>
-					<div className='run-button' onClick={handleVarianceFoodCost}>
-						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-							Run
-						</div>
-					</div>
-				</div>
+				</header>
+
+				{/* Display the table if there is no error and the data is not loading */}
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : (
+					<>
+						{varianceFoodCostData.length > 0 && (
+							<div className='w-52 display-flex'>
+								<Dropdown
+									title='Expand View'
+									options={viewOptions}
+									selectedOption={viewby}
+									onOptionChange={(option) => setViewBy(option)}
+								/>
+								<span
+									onClick={() => setIsPopupVisible(!isPopupVisible)}
+									className='cursor-pointer mt-[47px]'
+								>
+									{' '}
+									More....
+								</span>
+								{isPopupVisible && (
+									<div className='more-container' ref={popupRef}>
+										<div className='option mb-2 w-[258px]'>
+											<button className='w-[100%]'>Show/Hide Departments</button>
+										</div>
+										<div className='option mb-2 w-[258px]'>
+											<button
+												className='w-[100%]'
+												onClick={() => {
+													handleCountsheet(); // For Beginning Countsheet
+													setIsPopupVisible(false);
+												}}
+											>
+												View Beginning Countsheet
+											</button>
+										</div>
+										<div className='option mb-2 w-[258px]'>
+											<button
+												className='w-[100%]'
+												onClick={() => {
+													handleCountsheet(true); // For Ending Countsheet
+													setIsPopupVisible(false);
+												}}
+											>
+												View Ending Countsheet
+											</button>
+										</div>
+										<div className='option'>
+											<button
+												className='w-[100%]'
+												onClick={() => {
+													handleViewPurchase(selectedFromDate, selectedToDate, true); // For view Purchase
+													setIsPopupVisible(false);
+												}}
+											>
+												View Purchases
+											</button>
+										</div>
+									</div>
+								)}
+							</div>
+						)}
+
+						{!isLoading &&
+							(varianceFoodCostData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</>
+				)}
 				<div>
-					<ExportOptions
-						includePDF={true}
-						handlePDFClick={handlePDFClick}
-						includeExcel={true}
-						handleExcelClick={handleExcelClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+					<CalendarModal
+						handleClose={() => setShowDateModal(false)}
+						modalOpen={showDateModal}
+						isDateRange={true}
+						handleDateSelection={handleDateSelection}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
 					/>
 				</div>
-			</header>
-
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				<>
-					{varianceFoodCostData.length > 0 && (
-						<div className='w-52 display-flex'>
-							<Dropdown
-								title='Expand View'
-								options={viewOptions}
-								selectedOption={viewby}
-								onOptionChange={(option) => setViewBy(option)}
-							/>
-							<span
-								onClick={() => setIsPopupVisible(!isPopupVisible)}
-								className='cursor-pointer mt-[47px]'
-							>
-								{' '}
-								More....
-							</span>
-							{isPopupVisible && (
-								<div className='more-container' ref={popupRef}>
-									<div className='option mb-2 w-[258px]'>
-										<button className='w-[100%]'>Show/Hide Departments</button>
-									</div>
-									<div className='option mb-2 w-[258px]'>
-										<button
-											className='w-[100%]'
-											onClick={() => {
-												handleCountsheet(); // For Beginning Countsheet
-												setIsPopupVisible(false);
-											}}
-										>
-											View Beginning Countsheet
-										</button>
-									</div>
-									<div className='option mb-2 w-[258px]'>
-										<button
-											className='w-[100%]'
-											onClick={() => {
-												handleCountsheet(true); // For Ending Countsheet
-												setIsPopupVisible(false);
-											}}
-										>
-											View Ending Countsheet
-										</button>
-									</div>
-									<div className='option'>
-										<button
-											className='w-[100%]'
-											onClick={() => {
-												handleViewPurchase(selectedFromDate, selectedToDate, true); // For view Purchase
-												setIsPopupVisible(false);
-											}}
-										>
-											View Purchases
-										</button>
-									</div>
-								</div>
-							)}
-						</div>
-					)}
-
-					{varianceFoodCostData.length > 0 && <div className='paged-table'>{Table}</div>}
-				</>
-			)}
-
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
 			</div>
-		</div>
+		</>
 	);
 };
 

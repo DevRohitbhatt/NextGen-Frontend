@@ -4,6 +4,7 @@ import { ThemeProvider } from 'styled-components';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ToastContainer } from 'react-toastify';
+import { Loader } from './components/index.js';
 import {
 	PrepChart,
 	PrepChartTemplate,
@@ -19,7 +20,7 @@ import {
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
-	Purchase
+	Purchase,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -33,7 +34,11 @@ const App = () => {
 					<ToastContainer />
 					<div className='App'>
 						<Suspense
-							fallback={<div className='w-full m-auto text-2xl font-medium text-center '>Loading...</div>}
+							fallback={
+								<div className='w-full m-auto text-2xl font-medium text-center '>
+									<Loader loading={true} />
+								</div>
+							}
 						>
 							<Routes>
 								<Route path='/' element={<PrepChart />} />

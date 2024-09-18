@@ -4,6 +4,7 @@ import { Steps } from 'intro.js-react';
 import invoices from '../../assets/introJSSteps/invoices';
 import {
 	UnitSelector,
+	Loader,
 	VendorSelector,
 	CalendarModal,
 	VendorModal,
@@ -15,6 +16,7 @@ import {
 	TableHOC2,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
+import dateFormat from 'dateformat';
 import { PiMagnifyingGlassBold } from 'react-icons/pi';
 import { MdEdit } from 'react-icons/md';
 
@@ -210,8 +212,8 @@ const Invoices = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toISOString().split('T')[0],
-					toDate: selectedToDate.toISOString().split('T')[0],
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					vendorId: selectedVendor,
 				},
 			};
@@ -231,7 +233,7 @@ const Invoices = () => {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting voids report data: ', error);
+			console.error('Error getting Invoice data: ', error);
 		}
 	};
 
@@ -298,7 +300,10 @@ const Invoices = () => {
 			const pdfData = {
 				title: 'Invoices',
 				subHeaders: [
-					`Unit:${selectedUnitName} | Vendor:${selectedVendorName} | Date Range:${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`,
+					`Unit:${selectedUnitName} | Vendor:${selectedVendorName} | Date Range:${dateFormat(
+						selectedFromDate,
+						'mm-dd-yyyy'
+					)} - ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
 				],
 				exportType: 'pdf',
 				pageOrientation: 'portrait',
@@ -366,7 +371,10 @@ const Invoices = () => {
 				},
 			];
 
-			const filename = `Inv_${selectedUnitName}_${selectedVendorName}_${selectedFromDate.toLocaleDateString()}-${selectedToDate.toLocaleDateString()}`;
+			const filename = `Inv_${selectedUnitName}_${selectedVendorName}_${dateFormat(
+				selectedFromDate,
+				'mm-dd-yyyy'
+			)}-${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 			const spreadSheetTitle = 'Invoices';
 			const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
 
@@ -390,147 +398,154 @@ const Invoices = () => {
 		}
 	};
 
-	const Table = isBrowseInvoicesClicked ? (
-		invoiceReportData.length === 0 ? (
-			<div className='mx-auto mt-5 text-lg w-fit'>No Invoices Found</div>
+	const Table =
+		!isLoading &&
+		(isBrowseInvoicesClicked ? (
+			invoiceReportData.length === 0 ? (
+				<div className='mx-auto mt-5 text-lg w-fit'>No Invoices Found</div>
+			) : (
+				<TableHOC2 columns={columns} data={invoiceReportData} isPaginated={true} />
+			)
+		) : searchKey.length === 0 ? (
+			<div className='mx-auto mt-5 text-lg w-fit'>Enter invoice reference or total for searching</div>
+		) : searchKey.length < 3 ? (
+			<div className='mx-auto mt-5 text-lg w-fit'>
+				Invoice reference or total should be minimum of 3 characters
+			</div>
+		) : searchInvoiceData.length === 0 ? (
+			<div className='mx-auto mt-5 text-lg w-fit'>{`No invoices found where Invoice Reference or Total that contains '${searchKey}'`}</div>
 		) : (
-			<TableHOC2 columns={columns} data={invoiceReportData} isPaginated={true} />
-		)
-	) : searchKey.length === 0 ? (
-		<div className='mx-auto mt-5 text-lg w-fit'>Enter invoice reference or total for searching</div>
-	) : searchKey.length < 3 ? (
-		<div className='mx-auto mt-5 text-lg w-fit'>Invoice reference or total should be minimum of 3 characters</div>
-	) : searchInvoiceData.length === 0 ? (
-		<div className='mx-auto mt-5 text-lg w-fit'>{`No invoices found where Invoice Reference or Total that contains '${searchKey}'`}</div>
-	) : (
-		<TableHOC2 columns={columns} data={searchInvoiceData} />
-	);
+			<TableHOC2 columns={columns} data={searchInvoiceData} />
+		));
 
 	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Invoices</h2>
+		<>
+			<Loader loading={isLoading} />
+			<div className='w-[85%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Invoices</h2>
 
-			<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div>
-					<div className='flex gap-2'>
-						<button
-							className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-								isBrowseInvoicesClicked ? 'bg-primary text-white' : 'text-primary bg-secondary'
-							}`}
-							onClick={() => setIsBrowseInvoicesClicked(true)}
-						>
-							Browse Invoices
-						</button>
-						<button
-							className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-								isBrowseInvoicesClicked ? 'text-primary bg-secondary' : 'bg-primary text-white'
-							}`}
-							onClick={() => setIsBrowseInvoicesClicked(false)}
-						>
-							Search Invoices
-						</button>
+				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+					<div>
+						<div className='flex gap-2'>
+							<button
+								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+									isBrowseInvoicesClicked ? 'bg-primary text-white' : 'text-primary bg-secondary'
+								}`}
+								onClick={() => setIsBrowseInvoicesClicked(true)}
+							>
+								Browse Invoices
+							</button>
+							<button
+								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+									isBrowseInvoicesClicked ? 'text-primary bg-secondary' : 'bg-primary text-white'
+								}`}
+								onClick={() => setIsBrowseInvoicesClicked(false)}
+							>
+								Search Invoices
+							</button>
+						</div>
+						{isBrowseInvoicesClicked ? (
+							<div className='flex items-center space-x-3'>
+								<UnitSelector
+									companyId={companyId}
+									alignmentId={alignmentId}
+									memberId={selectedUnit}
+									memberName={selectedUnitName}
+									includeAreas={true}
+									setMemberName={setselectedUnitName}
+									onClick={() => setUnitShowModal(true)}
+								/>
+								<VendorSelector
+									vendorID={selectedVendor}
+									vendorName={selectedVendorName}
+									setVendorName={setselectedVendorName}
+									onClick={() => setVendorShowModal(true)}
+								/>
+								<DateSelector
+									toDate={selectedToDate}
+									fromDate={selectedFromDate}
+									isDateRange={true}
+									onClick={() => setShowDateModal(true)}
+								/>
+							</div>
+						) : (
+							<div className='mt-2'>
+								<p className='font-medium'>
+									Search by Invoice Reference or Total (minimum of 3 characters)
+								</p>
+								<input
+									className='p-2 border-2 rounded-lg border-secondary'
+									type='text'
+									placeholder='Invoice Reference or Total'
+									value={searchKey}
+									onChange={handleSearchKeyChange}
+								/>
+							</div>
+						)}
 					</div>
-					{isBrowseInvoicesClicked ? (
-						<div className='flex items-center space-x-3'>
-							<UnitSelector
-								companyId={companyId}
-								alignmentId={alignmentId}
-								memberId={selectedUnit}
-								memberName={selectedUnitName}
-								includeAreas={true}
-								setMemberName={setselectedUnitName}
-								onClick={() => setUnitShowModal(true)}
-							/>
-							<VendorSelector
-								vendorID={selectedVendor}
-								vendorName={selectedVendorName}
-								setVendorName={setselectedVendorName}
-								onClick={() => setVendorShowModal(true)}
-							/>
-							<DateSelector
-								toDate={selectedToDate}
-								fromDate={selectedFromDate}
-								isDateRange={true}
-								onClick={() => setShowDateModal(true)}
-							/>
-						</div>
-					) : (
-						<div className='mt-2'>
-							<p className='font-medium'>
-								Search by Invoice Reference or Total (minimum of 3 characters)
-							</p>
-							<input
-								className='p-2 border-2 rounded-lg border-secondary'
-								type='text'
-								placeholder='Invoice Reference or Total'
-								value={searchKey}
-								onChange={handleSearchKeyChange}
-							/>
-						</div>
-					)}
-				</div>
+
+					<div>
+						<ExportOptions
+							includePDF={true}
+							handlePDFClick={handlePDFClick}
+							includeExcel={true}
+							handleExcelClick={handleExcelClick}
+							includeHelp={true}
+							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+						/>
+					</div>
+				</header>
+
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : !isLoading && !selectedUnit ? (
+					<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+				) : (
+					<div className='paged-table'>{Table}</div>
+				)}
 
 				<div>
-					<ExportOptions
-						includePDF={true}
-						handlePDFClick={handlePDFClick}
-						includeExcel={true}
-						handleExcelClick={handleExcelClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+					<VendorModal
+						vendorData={vendorsList}
+						vendorID={selectedVendor}
+						vendorName={selectedVendorName}
+						show={showVendorModal}
+						handleClose={() => {
+							setVendorShowModal(false);
+						}}
+						handleVendorSelection={handleVendorSelection}
+						isMultiVendor={true}
+					/>
+					<CalendarModal
+						handleClose={() => setShowDateModal(false)}
+						modalOpen={showDateModal}
+						isDateRange={true}
+						handleDateSelection={handleDateSelection}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
 					/>
 				</div>
-			</header>
-
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				<div className='paged-table'>{Table}</div>
-			)}
-
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
-				<VendorModal
-					vendorData={vendorsList}
-					vendorID={selectedVendor}
-					vendorName={selectedVendorName}
-					show={showVendorModal}
-					handleClose={() => {
-						setVendorShowModal(false);
-					}}
-					handleVendorSelection={handleVendorSelection}
-					isMultiVendor={true}
-				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
 			</div>
-		</div>
+		</>
 	);
 };
 
