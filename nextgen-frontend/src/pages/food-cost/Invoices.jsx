@@ -13,7 +13,7 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC2,
+	TableHOC,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
@@ -404,7 +404,7 @@ const Invoices = () => {
 			invoiceReportData.length === 0 ? (
 				<div className='mx-auto mt-5 text-lg w-fit'>No Invoices Found</div>
 			) : (
-				<TableHOC2 columns={columns} data={invoiceReportData} isPaginated={true} />
+				<TableHOC columns={columns} data={invoiceReportData} isPaginated={true} />
 			)
 		) : searchKey.length === 0 ? (
 			<div className='mx-auto mt-5 text-lg w-fit'>Enter invoice reference or total for searching</div>
@@ -415,7 +415,7 @@ const Invoices = () => {
 		) : searchInvoiceData.length === 0 ? (
 			<div className='mx-auto mt-5 text-lg w-fit'>{`No invoices found where Invoice Reference or Total that contains '${searchKey}'`}</div>
 		) : (
-			<TableHOC2 columns={columns} data={searchInvoiceData} />
+			<TableHOC columns={columns} data={searchInvoiceData} />
 		));
 
 	return (

@@ -16,6 +16,7 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
+import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 
 const columnHelper = createColumnHelper();
 
@@ -64,11 +65,18 @@ const Voids = () => {
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
-				cell: ({ getValue }) => {
-					const date = new Date(getValue());
-					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-					return formattedDate;
-				},
+				cell: ({ getValue, row }) =>
+					row.getCanExpand() ? (
+						<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
+							{row.getIsExpanded() ? <IoIosArrowUp /> : <IoIosArrowDown />}
+							UnitName: {row.original.unitName} (Count : {row.subRows.length}, $
+							{row.subRows.reduce((acc, curr) => acc + curr.original.price, 0).toFixed(2)})
+						</div>
+					) : getValue() ? (
+						dateFormat(getValue(), 'mm-dd-yyyy')
+					) : (
+						''
+					),
 				dataType: 'date',
 			}),
 			columnHelper.accessor('hour', {
@@ -174,8 +182,6 @@ const Voids = () => {
 		setIsLoading(false);
 	};
 
-	const Table = TableHOC(columns, filteredVoidsReportData, false);
-
 	// Fetching Units and Areas
 	const fetchUnits = async (companyId, alignmentId, memberId) => {
 		try {
@@ -224,7 +230,7 @@ const Voids = () => {
 				...result,
 				data: result.data.map((row) => ({
 					...row,
-					subrows: row.voids.map((item) => ({
+					subRows: row.voids.map((item) => ({
 						unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
 						date: item.date,
 						hour: item.hour,
@@ -369,7 +375,7 @@ const Voids = () => {
 			'Tenders',
 		];
 		const csvData = voidsReportData.flatMap((row) =>
-			row.subrows.map((voidRow) => Object.values(voidRow).join(','))
+			row.subRows.map((voidRow) => Object.values(voidRow).join(','))
 		);
 
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
@@ -401,7 +407,7 @@ const Voids = () => {
 					{ name: 'Price', filterButton: true },
 					{ name: 'Tenders', filterButton: true },
 				],
-				data: voidsReportData.flatMap((row) => row.subrows.map((voidRow) => Object.values(voidRow))),
+				data: voidsReportData.flatMap((row) => row.subRows.map((voidRow) => Object.values(voidRow))),
 			},
 		];
 
@@ -411,6 +417,8 @@ const Voids = () => {
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
+
+	const Table = <TableHOC columns={columns} data={filteredVoidsReportData} expandCollapseButtons={true} />;
 
 	return (
 		<>
