@@ -21,6 +21,7 @@ import {
 	Countsheets,
 	CountsheetDesigner,
 	Purchase,
+	LabourAnalysis,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -45,6 +46,7 @@ const App = () => {
 								<Route path='/PrepChartTemplate' element={<PrepChartTemplate />} />
 								<Route path='/SuggestedOrderList' element={<SuggestedOrderList />} />
 								<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
+
 								{/* Food Cost */}
 								<Route path='/InventoryTransfer' index element={<InventoryTransfer />} />
 								<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
@@ -61,6 +63,7 @@ const App = () => {
 								{/* Labour */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
+								<Route path='/LabourAnalysis' element={<LabourAnalysis />} />
 							</Routes>
 						</Suspense>
 					</div>

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
-import voidsReport from '../../assets/introJSSteps/voidsReport';
 import {
 	Dropdown,
 	Loader,
@@ -17,10 +16,11 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
+import labourAnalysis from './../../assets/introJSSteps/labourAnalysis';
 
 const columnHelper = createColumnHelper();
 
-const Voids = () => {
+const LabourAnalysis = () => {
 	const [companyId, setCompanyId] = useState();
 	const [alignmentId, setAlignmentId] = useState();
 	const [memberId, setMemberId] = useState();
@@ -47,14 +47,21 @@ const Voids = () => {
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
-	//dropdown variables
-	const [fromFilter, setFromFilter] = useState(0);
-	const [toFilter, setToFilter] = useState(0);
-	const dropdownOptions = Array.from({ length: 24 }, (_, index) => ({ name: (index + 1).toString() }));
+	//dropdown state variables
+	const [jobDescription, setJobDescription] = useState('All');
+	const jobDescriptionOptions = [
+		{ name: 'All' },
+		{ name: 'Hourly Manager' },
+		{ name: 'Salary Manager' },
+		{ name: 'Shift Supervisor' },
+		{ name: 'Test User' },
+		{ name: 'Request Off' },
+		{ name: 'None' },
+	];
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
-		steps: voidsReport(),
+		steps: labourAnalysis(),
 		initialStep: 0,
 		stepsEnabled: false,
 	});
@@ -212,8 +219,6 @@ const Voids = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setFromFilter(0);
-			setToFilter(0);
 			const getData = {
 				url: 'voids',
 				urlParams: {
@@ -227,11 +232,8 @@ const Voids = () => {
 
 			const result = await getCall(getData);
 			const newData = {
-				...result,
 				data: result.data.map((row) => ({
-					...row,
 					subRows: row.voids.map((item) => ({
-						unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
 						date: item.date,
 						hour: item.hour,
 						minute: item.minute,
@@ -256,7 +258,7 @@ const Voids = () => {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting voids report data: ', error);
+			console.error('Error getting Labour Analysis  data: ', error);
 		}
 	};
 
@@ -274,150 +276,6 @@ const Voids = () => {
 		setShowDateModal(false);
 	};
 
-	// Function to handle the hour filter
-	const handleFromByHour = (hour) => {
-		setFromFilter(hour);
-
-		const filteredData = voidsReportData.map((row) => ({
-			...row,
-			// Filter the voids by the selected hour
-			subrows: row.subrows.filter((subRow) => +subRow.hour >= hour && +subRow.hour <= toFilter),
-		}));
-
-		setFilteredVoidsReportData(filteredData);
-	};
-
-	// Function to handle the hour filter
-	const handleToByHour = (hour) => {
-		setToFilter(hour);
-
-		const filteredData = voidsReportData.map((row) => ({
-			...row,
-			// Filter the voids by the selected hour
-			subrows: row.subrows.filter((subRow) => +subRow.hour <= hour && +subRow.hour >= fromFilter),
-		}));
-
-		setFilteredVoidsReportData(filteredData);
-	};
-
-	// Function to handle the PDF export
-	const handlePDFClick = () => {
-		if (!columns || columns.length === 0) {
-			console.error('Columns are not defined or empty');
-			return;
-		}
-
-		if (!voidsReportData || voidsReportData.length === 0) {
-			console.error('Voids report data is not defined or empty');
-			return;
-		}
-
-		const pdfData = {
-			title: 'Voids Report',
-			subHeaders: [
-				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
-					selectedToDate,
-					'mm-dd-yyyy'
-				)} | ${selectedUnitName}`,
-			],
-			exportType: 'pdf',
-			pageOrientation: 'landscape',
-			body: buildPDFBody(),
-		};
-
-		PdfBuilder(pdfData);
-	};
-
-	const buildPDFBody = () => {
-		const body = voidsReportData.map((row) => {
-			const unit = unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId);
-			const title = unit ? unit.unitName : '';
-			return {
-				type: 'table',
-				title: title,
-				widths: new Array(columns.length).fill('auto'),
-				dataTypes: columns.map((column) => column.dataType),
-				data: formatPDFData(row.voids),
-			};
-		});
-
-		return body;
-	};
-
-	const formatPDFData = (data) => {
-		return {
-			columnHeaders: columns.map((column) => column.header),
-			rows: data.map((row) =>
-				columns.map((column) => ({
-					value: row[column.id],
-					cellType: '',
-					columnName: column.id,
-				}))
-			),
-		};
-	};
-
-	// Function to handle the CSV export
-	const handleCSVClick = () => {
-		const csvHeaders = [
-			'Unit Name',
-			'Date',
-			'Hour',
-			'Minute',
-			'Void Reason',
-			'Employee',
-			'Manager',
-			'Description',
-			'POS Check ID',
-			'Table Name',
-			'Revenue ID',
-			'Price',
-			'Tenders',
-		];
-		const csvData = voidsReportData.flatMap((row) =>
-			row.subRows.map((voidRow) => Object.values(voidRow).join(','))
-		);
-
-		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
-		const blob = new Blob([csvString], { type: 'text/csv' });
-		const url = window.URL.createObjectURL(blob);
-		const tempLink = document.createElement('a');
-		tempLink.href = url;
-		tempLink.setAttribute('download', 'voids.csv');
-		tempLink.click();
-	};
-
-	// Function to handle the Excel export
-	const handleExcelClick = () => {
-		const data = [
-			{
-				name: 'Voids Report',
-				columns: [
-					{ name: 'Unit Name', filterButton: true },
-					{ name: 'Date', filterButton: true },
-					{ name: 'Hour', filterButton: true },
-					{ name: 'Minute', filterButton: true },
-					{ name: 'Void Reason', filterButton: true },
-					{ name: 'Employee', filterButton: true },
-					{ name: 'Manager', filterButton: true },
-					{ name: 'Description', filterButton: true },
-					{ name: 'POS Check ID', filterButton: true },
-					{ name: 'Table Name', filterButton: true },
-					{ name: 'Revenue ID', filterButton: true },
-					{ name: 'Price', filterButton: true },
-					{ name: 'Tenders', filterButton: true },
-				],
-				data: voidsReportData.flatMap((row) => row.subRows.map((voidRow) => Object.values(voidRow))),
-			},
-		];
-
-		const filename = 'voidsReport';
-		const spreadSheetTitle = 'Voids Report';
-		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
-
-		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
-	};
-
 	const Table = <TableHOC2 columns={columns} data={filteredVoidsReportData} expandCollapseButtons={true} />;
 
 	return (
@@ -430,7 +288,7 @@ const Voids = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Voids Report</h2>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Labour Analysis</h2>
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
@@ -448,28 +306,13 @@ const Voids = () => {
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
 						/>
-						<div className='filterByHour-selector'>
-							<span className='text-xl font-bold '>Filter By Hour</span>
-							<div className='flex '>
-								<div className='flex items-center '>
-									<span className='font-bold '>From: </span>
-									<Dropdown
-										options={dropdownOptions}
-										title=''
-										selectedOption={fromFilter}
-										onOptionChange={handleFromByHour}
-									/>
-								</div>
-								<div className='flex items-center '>
-									<span className='font-bold '>To: </span>
-									<Dropdown
-										options={dropdownOptions}
-										title=''
-										selectedOption={toFilter}
-										onOptionChange={handleToByHour}
-									/>
-								</div>
-							</div>
+						<div className='w-48'>
+							<Dropdown
+								title='Job Description'
+								options={jobDescriptionOptions}
+								onOptionChange={(option) => setJobDescription(option)}
+								selectedOption={jobDescription}
+							/>
 						</div>
 						<div className='run-button' onClick={handleVoidsReport}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
@@ -480,11 +323,9 @@ const Voids = () => {
 					<div>
 						<ExportOptions
 							includePDF={true}
-							handlePDFClick={handlePDFClick}
-							includeCSV={true}
-							handleCSVClick={handleCSVClick}
+							//handlePDFClick={handlePDFClick}
 							includeExcel={true}
-							handleExcelClick={handleExcelClick}
+							//handleExcelClick={handleExcelClick}
 							includeHelp={true}
 							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 						/>
@@ -532,4 +373,4 @@ const Voids = () => {
 	);
 };
 
-export default Voids;
+export default LabourAnalysis;

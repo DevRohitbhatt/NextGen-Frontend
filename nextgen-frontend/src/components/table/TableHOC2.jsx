@@ -90,7 +90,7 @@ function TableHOC2({
 			<div className='pr-1 max-h-[60vh] overflow-scroll scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-primary scrollbar-track-secondary'>
 				<table className='w-full border-collapse table-fixed '>
 					{isHeader && (
-						<thead className='sticky top-0 w-full bg-white border-b-2 border-solid border-primary'>
+						<thead className='sticky top-0 z-[2] w-full bg-white outline-2 outline outline-primary'>
 							{table.getHeaderGroups().map((headerGroup) => (
 								<>
 									<tr key={headerGroup.id}>
@@ -152,12 +152,14 @@ function TableHOC2({
 							))}
 						</thead>
 					)}
+
+					{/* body */}
 					<tbody>
 						{table.getRowModel().rows.map((row) => {
 							return (
 								<tr
 									key={row.id}
-									className={`h-12 text-sm font-normal border-b hover:bg-gray-100 ${
+									className={`h-12 text-sm font-normal border-b relative hover:bg-gray-100 ${
 										row.getCanExpand() ? 'cursor-pointer' : 'cursor-default'
 									}`}
 									onClick={row.getCanExpand() ? row.getToggleExpandedHandler() : null}
@@ -174,6 +176,7 @@ function TableHOC2({
 						})}
 					</tbody>
 
+					{/* footer */}
 					{isFooter && (
 						<tfoot className='sticky bottom-0 '>
 							{table.getFooterGroups().map((footerGroup) => (

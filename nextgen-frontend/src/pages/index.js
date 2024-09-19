@@ -13,12 +13,14 @@ const Invoices = lazy(() => import('./food-cost/Invoices'));
 const Countsheets = lazy(() => import('./food-cost/Countsheets'));
 const CountsheetDesigner = lazy(() => import('./food-cost/CountsheetDesigner'));
 const Purchase = lazy(() => import('./food-cost/PurchaseAnalysis'));
+
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
 
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
+const LabourAnalysis = lazy(() => import('./labor/LabourAnalysis'));
 
 export {
 	PrepChart,
@@ -27,13 +29,14 @@ export {
 	SuggestedOrderList,
 	InventoryTransfer,
 	InventoryWeeksOnHand,
-	EmployeeInformation,
-	LaborByPayPeriod,
-	Voids,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
-	Purchase
+	Purchase,
+	Voids,
+	EmployeeInformation,
+	LaborByPayPeriod,
+	LabourAnalysis,
 };
