@@ -46,4 +46,3 @@ export { default as TableCell } from './table/TableCell';
 export { default as TreeNode } from './table/TreeNode';
 export { default as TreeTable } from './table/TreeTableBuilder';
 export { default as TableHOC } from './table/TableHOC';
-export { default as TableHOC2 } from './table/TableHOC2';

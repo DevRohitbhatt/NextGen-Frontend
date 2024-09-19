@@ -10,7 +10,7 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC2,
+	TableHOC,
 	VendorSelector,
 	VendorModal,
 } from '../../components';
@@ -391,7 +391,7 @@ const PurchaseAnalysis = () => {
 	};
 
 	const Table = (
-		<TableHOC2
+		<TableHOC
 			columns={columns}
 			data={purchasetData}
 			isPaginated={true}

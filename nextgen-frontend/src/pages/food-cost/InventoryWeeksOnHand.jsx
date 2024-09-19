@@ -9,7 +9,7 @@ import {
 	UnitModal,
 	ExportOptions,
 	ExcelExport as exportToExcel,
-	TableHOC2,
+	TableHOC,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
@@ -338,7 +338,7 @@ const InventoryWeeksOnHand = () => {
 	};
 
 	const Table = (
-		<TableHOC2 columns={columns} data={inventoryWeeksOnHandReportData} isPaginated={true} isFooter={true} />
+		<TableHOC columns={columns} data={inventoryWeeksOnHandReportData} isPaginated={true} isFooter={true} />
 	);
 
 	return (

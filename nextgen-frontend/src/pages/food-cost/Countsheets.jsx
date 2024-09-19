@@ -3,7 +3,7 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { Link } from 'react-router-dom';
 import voidsReport from '../../assets/introJSSteps/voidsReport';
-import { Dropdown, Loader, UnitSelector, CalendarModal, UnitModal, DateSelector, TableHOC2 } from '../../components';
+import { Dropdown, Loader, UnitSelector, CalendarModal, UnitModal, DateSelector, TableHOC } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 
@@ -285,7 +285,7 @@ const Countsheets = () => {
 	};
 
 	const Table = (
-		<TableHOC2
+		<TableHOC
 			columns={columns}
 			data={filteredCountsheetData}
 			isHeader={true}

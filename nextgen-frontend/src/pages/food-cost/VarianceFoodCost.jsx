@@ -12,7 +12,7 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC2,
+	TableHOC,
 	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -947,7 +947,7 @@ const VarianceFoodCost = () => {
 	}, []);
 
 	const Table = (
-		<TableHOC2
+		<TableHOC
 			columns={columns}
 			data={varianceFoodCostData}
 			view={viewby}
