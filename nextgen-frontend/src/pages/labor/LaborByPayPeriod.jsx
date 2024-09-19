@@ -17,7 +17,6 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import laborByPayPeriod from '../../assets/introJSSteps/labourByPayPeriod';
-import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
@@ -381,11 +380,7 @@ const LaborByPayPeriod = () => {
 		const pdfData = {
 			title: 'Labor By Pay Period Report',
 			subHeaders: [
-<<<<<<< HEAD
-				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} - ${dateFormat(
-=======
 				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
->>>>>>> Reporting-Latest
 					selectedToDate,
 					'mm-dd-yyyy'
 				)} | ${selectedUnitName}`,
@@ -486,11 +481,8 @@ const LaborByPayPeriod = () => {
 			'Last Name',
 			'Date',
 			'Job Code',
-<<<<<<< HEAD
-=======
 			'Job Description',
 			'Regular Hours',
->>>>>>> Reporting-Latest
 			'Overtime Hours',
 			'Rate',
 			'Declared Tips',
@@ -508,11 +500,8 @@ const LaborByPayPeriod = () => {
 						employee.lastName,
 						period.date, // Second level subrow data (period)
 						period.jobCode,
-<<<<<<< HEAD
-=======
 						period.jobDesc,
 						period.regHours,
->>>>>>> Reporting-Latest
 						period.overHours,
 						period.rate,
 						period.declaredTips,
@@ -529,11 +518,7 @@ const LaborByPayPeriod = () => {
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
 		tempLink.href = url;
-<<<<<<< HEAD
-		tempLink.setAttribute('download', 'labourBYPayPeriod.csv');
-=======
 		tempLink.setAttribute('download', 'labourByPayPeriod.csv');
->>>>>>> Reporting-Latest
 		tempLink.click();
 	};
 
@@ -583,11 +568,7 @@ const LaborByPayPeriod = () => {
 
 		const filename = 'laborByPayPeriodReport';
 		const spreadSheetTitle = 'Labor By Pay Period Report';
-<<<<<<< HEAD
-		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} - ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
-=======
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
->>>>>>> Reporting-Latest
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};

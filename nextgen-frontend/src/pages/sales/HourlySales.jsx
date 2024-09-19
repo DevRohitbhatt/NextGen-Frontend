@@ -12,7 +12,7 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC2,
+	TableHOC,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
@@ -448,7 +448,7 @@ const HourlySales = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC2 columns={columns} data={hourlySalesData} isFooter={true} />;
+	const Table = <TableHOC columns={columns} data={hourlySalesData} isFooter={true} />;
 	return (
 		<>
 			<Loader loading={isLoading} />
