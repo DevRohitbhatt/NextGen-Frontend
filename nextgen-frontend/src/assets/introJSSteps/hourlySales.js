@@ -17,20 +17,20 @@ export default function hourlySales() {
 		},
 		{
 			element: '.reportType-selector',
-			intro: 'You can select the Hourly Sales Report based on the following options: "Hour And Day", "Units", or "Unit, Hour and Day".',
+			intro: '-Select the Hourly Sales Report based on the following options: "Hour And Day", "Units", or "Unit, Hour and Day".',
 		},
 		{
 			element: '.salesType-selector',
-			intro: 'You can select the Hourly Sales Report based on the following options: "Net Sales", "Gross Sales", or "Transaction".',
+			intro: '-Select the Hourly Sales Report based on the following options: "Net Sales", "Gross Sales", or "Transaction".',
 		},
 		{
 			element: '.DOWType-selector',
-			intro: 'You can select the Hourly Sales Report based on the Week Days.',
+			intro: '-Select the Hourly Sales Report based on the Week Days.',
 		},
 		{
 			element: '.viewType-selector',
 			intro:
-				'You can select the Hourly Sales Report based on the following options:' +
+				'-Select the Hourly Sales Report based on the following options:' +
 				' <br> For Report Type:Hour and Day => "Hour", "half-hour", or "Qtr-hour".' +
 				' <br> For Report Type:Units => "Sum" or "Avg"',
 		},
