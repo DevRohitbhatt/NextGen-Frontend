@@ -281,7 +281,7 @@ const Voids = () => {
 		const filteredData = voidsReportData.map((row) => ({
 			...row,
 			// Filter the voids by the selected hour
-			subrows: row.subrows.filter((subRow) => +subRow.hour >= hour && +subRow.hour <= toFilter),
+			subRows: row.subRows.filter((subRow) => +subRow.hour >= hour && +subRow.hour <= toFilter),
 		}));
 
 		setFilteredVoidsReportData(filteredData);
@@ -294,7 +294,7 @@ const Voids = () => {
 		const filteredData = voidsReportData.map((row) => ({
 			...row,
 			// Filter the voids by the selected hour
-			subrows: row.subrows.filter((subRow) => +subRow.hour <= hour && +subRow.hour >= fromFilter),
+			subRows: row.subRows.filter((subRow) => +subRow.hour <= hour && +subRow.hour >= fromFilter),
 		}));
 
 		setFilteredVoidsReportData(filteredData);
