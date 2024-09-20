@@ -3,7 +3,7 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useLocation } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC2 } from '../../components';
+import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 
 const columnHelper = createColumnHelper();
@@ -179,7 +179,7 @@ const CountsheetDesigner = () => {
 	};
 
 	const Table = (
-		<TableHOC2
+		<TableHOC
 			columns={columns}
 			data={countsheetDetails}
 			isHeader={false}

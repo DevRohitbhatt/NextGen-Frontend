@@ -418,7 +418,7 @@ const Voids = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC2 columns={columns} data={filteredVoidsReportData} expandCollapseButtons={true} />;
+	const Table = <TableHOC columns={columns} data={filteredVoidsReportData} expandCollapseButtons={true} />;
 
 	return (
 		<>
