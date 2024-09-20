@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
-import voidsReport from '../../assets/introJSSteps/voidsReport';
+import businessSummary from '../../assets/introJSSteps/businessSummary';
 import {
 	Dropdown,
 	Loader,
@@ -48,13 +48,25 @@ const Voids = () => {
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
-	const [fromFilter, setFromFilter] = useState(0);
-	const [toFilter, setToFilter] = useState(0);
-	const dropdownOptions = Array.from({ length: 24 }, (_, index) => ({ name: (index + 1).toString() }));
+	const [DOWType, setDOWType] = useState('All');
+	const [salesType, setSalesType] = useState('Net Sales');
+	const [summaryBy, setSummaryBy] = useState('Day');
+	const summaryByOptions = [{ name: 'Day' }, { name: 'Unit' }];
+	const salesTypeOptions = [{ name: 'Net Sales' }, { name: 'Gross Sales' }];
+	const DOWTypeOptions = [
+		{ name: 'All' },
+		{ name: 'Monday' },
+		{ name: 'Tuesday' },
+		{ name: 'Wednesday' },
+		{ name: 'Thursday' },
+		{ name: 'Friday' },
+		{ name: 'Saturday' },
+		{ name: 'Sunday' },
+	];
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
-		steps: voidsReport(),
+		steps: businessSummary(),
 		initialStep: 0,
 		stepsEnabled: false,
 	});
@@ -208,12 +220,10 @@ const Voids = () => {
 	};
 
 	// Function to get the voids report
-	const handleVoidsReport = async () => {
+	const handleBusinessSummary = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setFromFilter(0);
-			setToFilter(0);
 			const getData = {
 				url: 'voids',
 				urlParams: {
@@ -272,32 +282,6 @@ const Voids = () => {
 		setSelectedFromDate(from);
 		setSelectedToDate(to);
 		setShowDateModal(false);
-	};
-
-	// Function to handle the hour filter
-	const handleFromByHour = (hour) => {
-		setFromFilter(hour);
-
-		const filteredData = voidsReportData.map((row) => ({
-			...row,
-			// Filter the voids by the selected hour
-			subrows: row.subrows.filter((subRow) => +subRow.hour >= hour && +subRow.hour <= toFilter),
-		}));
-
-		setFilteredVoidsReportData(filteredData);
-	};
-
-	// Function to handle the hour filter
-	const handleToByHour = (hour) => {
-		setToFilter(hour);
-
-		const filteredData = voidsReportData.map((row) => ({
-			...row,
-			// Filter the voids by the selected hour
-			subrows: row.subrows.filter((subRow) => +subRow.hour <= hour && +subRow.hour >= fromFilter),
-		}));
-
-		setFilteredVoidsReportData(filteredData);
 	};
 
 	// Function to handle the PDF export
@@ -430,7 +414,7 @@ const Voids = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Voids Report</h2>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Business Summary</h2>
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
@@ -448,30 +432,31 @@ const Voids = () => {
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
 						/>
-						<div className='filterByHour-selector'>
-							<span className='text-xl font-bold '>Filter By Hour</span>
-							<div className='flex '>
-								<div className='flex items-center '>
-									<span className='font-bold '>From: </span>
-									<Dropdown
-										options={dropdownOptions}
-										title=''
-										selectedOption={fromFilter}
-										onOptionChange={handleFromByHour}
-									/>
-								</div>
-								<div className='flex items-center '>
-									<span className='font-bold '>To: </span>
-									<Dropdown
-										options={dropdownOptions}
-										title=''
-										selectedOption={toFilter}
-										onOptionChange={handleToByHour}
-									/>
-								</div>
-							</div>
+						<div className='w-44 DOWType-selector'>
+							<Dropdown
+								title='DOW'
+								options={DOWTypeOptions}
+								selectedOption={DOWType}
+								onOptionChange={(option) => setDOWType(option)}
+							/>
 						</div>
-						<div className='run-button' onClick={handleVoidsReport}>
+						<div className='w-40 salesType-selector'>
+							<Dropdown
+								title='Sales Type'
+								options={salesTypeOptions}
+								selectedOption={salesType}
+								onOptionChange={(option) => setSalesType(option)}
+							/>
+						</div>
+						<div className='w-36 summaryBy-selector'>
+							<Dropdown
+								title='Summary by'
+								options={summaryByOptions}
+								selectedOption={summaryBy}
+								onOptionChange={(option) => setSummaryBy(option)}
+							/>
+						</div>
+						<div className='run-button' onClick={handleBusinessSummary}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
