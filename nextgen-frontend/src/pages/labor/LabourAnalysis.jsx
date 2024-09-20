@@ -11,7 +11,7 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC2,
+	TableHOC,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
@@ -276,7 +276,7 @@ const LabourAnalysis = () => {
 		setShowDateModal(false);
 	};
 
-	const Table = <TableHOC2 columns={columns} data={filteredVoidsReportData} expandCollapseButtons={true} />;
+	const Table = <TableHOC columns={columns} data={filteredVoidsReportData} expandCollapseButtons={true} />;
 
 	return (
 		<>
