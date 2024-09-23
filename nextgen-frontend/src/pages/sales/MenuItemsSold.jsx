@@ -13,7 +13,9 @@ import {
   TableHOC2,
   Dropdown,
   Menu,
-  MenuModal
+  MenuModal,
+  Inventory,
+  InventoryModal,
 } from "../../components";
 import { createColumnHelper } from "@tanstack/react-table";
 import actualFoodCosts from "../../assets/introJSSteps/actualFoodCosts";
@@ -28,8 +30,11 @@ const MenuItemsSold = () => {
   const [menuItemSoldData, setMenuItemSoldData] = useState([]);
   const [isTableRendered, setIsTableRendered] = useState(true);
 
-  //Menu Items 
+  //Menu Items
   const [menuItemList, setMenuItemList] = useState([]);
+
+  //Inventory Items
+  const [inventoryItemList, setInventoryItemList] = useState([]);
 
   //loading and error state variables
   const [isLoading, setIsLoading] = useState(true);
@@ -44,10 +49,16 @@ const MenuItemsSold = () => {
   const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
   //selected menu items
-    //selected unit state variables
-	const [selectedMenu, setSelectedMenu] = useState();
-	const [selectedMenuName, setselectedMenuName] = useState("No Menu Selected");
-	const [showMenuModal, setShowMenuModal] = useState(false); // State to manage modal visibility
+  const [selectedMenu, setSelectedMenu] = useState(0);
+  const [selectedMenuName, setselectedMenuName] = useState("No Menu Selected");
+  const [showMenuModal, setShowMenuModal] = useState(false); // State to manage modal visibility
+
+  //selected Inventory items
+  const [selectedInventory, setSelectedInventory] = useState(0);
+  const [selectedInventoryName, setselectedInventoryName] = useState(
+    "No Inventory Selected"
+  );
+  const [showInventoryModal, setShowInventoryModal] = useState(false); // State to manage modal visibility
 
   //calendar state variables
   const [selectedFromDate, setSelectedFromDate] = useState(
@@ -127,72 +138,199 @@ const MenuItemsSold = () => {
     setSalesType(option);
   };
 
-  const columns = useMemo(
-    () => [
-      columnHelper.display({
-        id: "actions",
-        cell: ({ row }) =>
-          row.getCanExpand() ? (
-            <div
-              {...{
-                style: {
-                  cursor: "pointer",
-                  paddingLeft: `${row.depth * 2}rem`,
-                },
-                className: "inline-block",
-              }}
-            >
-              {row.getIsExpanded() ? (
-                <CiSquareMinus className="text-[20px]" />
-              ) : (
-                <CiSquarePlus className="text-[20px]" />
-              )}
-            </div>
-          ) : null,
-        size: "80",
-      }),
-      columnHelper.accessor("description", {
-        id: "Item",
-        header: "Item",
-        dataType: "string",
-        cell: (info) => info.getValue() || "",
-      }),
-      columnHelper.accessor("unitName", {
-        id: "Unit",
-        header: "Unit",
-        dataType: "string",
-        cell: (info) => info.getValue() || "",
-      }),
-      columnHelper.accessor("quant", {
-        id: "Quantity",
-        header: "Quantity",
-        dataType: "number",
-        cell: (info) => info.getValue() || "",
-      }),
-      columnHelper.accessor("discPrice", {
-        id: "Amount",
-        header: "Amount",
-        dataType: "number",
-        cell: (info) => info.getValue() || "",
-      }),
-      columnHelper.accessor("itemSoldPct", {
-        id: "ItemSold",
-        header: "Item Sold%",
-        dataType: "number",
-        cell: (info) => {
-          const value = info.getValue();
-          return value != null ? `${parseFloat(value).toFixed(2)}%` : "";
-        },
-      }),
-      columnHelper.accessor("quantity_Avg", {
-        id: "AvgItemQunt",
-        header: "Avg Item Quantity",
-        dataType: "number",
-        cell: (info) => info.getValue() || "",
-      }),
-    ],
-    []
-  );
+  const getColumns = (activeTab) => {
+	if (activeTab === "ItemsSoldTotals") {
+	  return [
+		columnHelper.display({
+		  id: "actions",
+		  cell: ({ row }) =>
+			row.getCanExpand() ? (
+			  <div
+				style={{
+				  cursor: "pointer",
+				  paddingLeft: `${row.depth * 2}rem`,
+				}}
+				className="inline-block"
+			  >
+				{row.getIsExpanded() ? (
+				  <CiSquareMinus className="text-[20px]" />
+				) : (
+				  <CiSquarePlus className="text-[20px]" />
+				)}
+			  </div>
+			) : null,
+		  size: "80",
+		}),
+		columnHelper.accessor("description", {
+		  id: "Item",
+		  header: "Item",
+		  dataType: "string",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("unitName", {
+		  id: "Unit",
+		  header: "Unit",
+		  dataType: "string",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("quant", {
+		  id: "Quantity",
+		  header: "Quantity",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("discPrice", {
+		  id: "Amount",
+		  header: "Amount",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("itemSoldPct", {
+		  id: "ItemSold",
+		  header: "Item Sold%",
+		  dataType: "number",
+		  cell: (info) => {
+			const value = info.getValue();
+			return value != null ? `${parseFloat(value).toFixed(2)}%` : "";
+		  },
+		}),
+		columnHelper.accessor("quantity_Avg", {
+		  id: "AvgItemQunt",
+		  header: "Avg Item Quantity",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+	  ];
+	}
+  
+	if (activeTab === "ItemsSoldByEmployee") {
+	  return [
+		columnHelper.display({
+		  id: "actions",
+		  cell: ({ row }) =>
+			row.getCanExpand() ? (
+			  <div
+				style={{
+				  cursor: "pointer",
+				  paddingLeft: `${row.depth * 2}rem`,
+				}}
+				className="inline-block"
+			  >
+				{row.getIsExpanded() ? (
+				  <CiSquareMinus className="text-[20px]" />
+				) : (
+				  <CiSquarePlus className="text-[20px]" />
+				)}
+			  </div>
+			) : null,
+		  size: "80",
+		}),
+		columnHelper.accessor("unitId", {
+		  id: "Unit ID",
+		  header: "Unit ID",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("name", {
+		  id: "Unit Name",
+		  header: "Unit Name",
+		  dataType: "string",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("employeeId", {
+		  id: "Employee ID",
+		  header: "Employee ID",
+		  dataType: "string",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("firstName", {
+		  id: "First Name",
+		  header: "First Name",
+		  dataType: "string",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("lastName", {
+		  id: "Last Name",
+		  header: "Last Name",
+		  dataType: "string",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("grouping1", {
+		  id: "Grouping",
+		  header: "Grouping",
+		  dataType: "string",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("itemId", {
+		  id: "Item ID",
+		  header: "Item ID",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("description", {
+		  id: "Description",
+		  header: "Description",
+		  dataType: "string",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("fullDescription", {
+		  id: "Full Description",
+		  header: "Full Description",
+		  dataType: "string",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("quant", {
+		  id: "Quantity",
+		  header: "Quantity",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("discPrice", {
+		  id: "Discounted Price",
+		  header: "Discounted Price",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("multiplier", {
+		  id: "Multiplier",
+		  header: "Multiplier",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("covers", {
+		  id: "Covers",
+		  header: "Covers",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("employeeCoversPercent", {
+		  id: "Employee Covers %",
+		  header: "Employee Covers %",
+		  dataType: "number",
+		  cell: (info) => {
+			const value = info.getValue();
+			return value != null ? `${parseFloat(value).toFixed(2)}%` : "";
+		  },
+		}),
+		columnHelper.accessor("employeeCovers", {
+		  id: "Employee Covers",
+		  header: "Employee Covers Amount",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+		columnHelper.accessor("hour", {
+		  id: "Hour",
+		  header: "Hour",
+		  dataType: "number",
+		  cell: (info) => info.getValue() || "",
+		}),
+	  ];
+	}
+  
+	// Default return for modifiers or other tabs
+	return [];
+  };
+  
 
   useEffect(() => {
     // Fetch initial data
@@ -230,7 +368,11 @@ const MenuItemsSold = () => {
 
   const fetchData = async (companyId, alignmentId, selectedUnit) => {
     setIsLoading(true);
-    await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit),fetchMenu(companyId)]);
+    await Promise.all([
+      fetchUnits(companyId, alignmentId, selectedUnit),
+      fetchMenu(companyId),
+      fetchInventory(companyId),
+    ]);
     setIsLoading(false);
   };
 
@@ -274,8 +416,6 @@ const MenuItemsSold = () => {
       };
 
       const result = await getCall(getData);
-	  
- 	console.log("Menu1", result);
 
       setMenuItemList(result.data);
       setIsLoading(false);
@@ -283,9 +423,36 @@ const MenuItemsSold = () => {
       setIsError(true);
       setIsLoading(false);
       setErrorMessage(
-        "There was an issue loading your units, please try again later."
+        "There was an issue loading your menu, please try again later."
       );
-      console.error("Error getting units: ", error);
+      console.error("Error getting menus: ", error);
+    }
+  };
+
+  // Fetching Inventory
+  const fetchInventory = async (companyId) => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      const getData = {
+        url: "InventoryByCompanyID",
+        urlParams: {
+          companyId: companyId,
+        },
+      };
+
+      const result = await getCall(getData);
+      console.log("inventory", result);
+
+      setInventoryItemList(result.data);
+      setIsLoading(false);
+    } catch (error) {
+      setIsError(true);
+      setIsLoading(false);
+      setErrorMessage(
+        "There was an issue loading your inventory, please try again later."
+      );
+      console.error("Error getting inventory: ", error);
     }
   };
 
@@ -361,16 +528,227 @@ const MenuItemsSold = () => {
     }
   };
 
+  const handleSoldByEmpRun = async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      setIsTableRendered(false);
+      if (
+        (itemValue === 0 && (!selectedMenu || selectedMenu <= 0)) ||
+        (itemValue === 1 && (!selectedInventory || selectedInventory <= 0))
+      ) {
+        setIsLoading(false);
+        setIsError(true);
+        setErrorMessage(
+          "Please select according to the Item Type you have chosen !"
+        );
+        return false; // Prevent API call
+      }
+      // Define the URL mapping based on viewValue
+      const getData = {
+        url: "MenuItemSoldEmployeeData",
+        urlParams: {
+          companyId: companyId,
+          alignmentId: alignmentId,
+          memberId: selectedUnit,
+          fromDate: selectedFromDate.toLocaleDateString("en-CA"),
+          toDate: selectedToDate.toLocaleDateString("en-CA"),
+          menuItemIds: itemValue===0 ? selectedMenu:0,
+          inventoryItemIds: itemValue===1 ? selectedInventory:0,
+          itemType: itemValue,
+        },
+      };
+      console.log("MenuItem", getData);
+
+      const result = await getCall(getData);
+
+      const newData = result.data.map((item) => ({
+        unitId: item.unitId,
+        unitName: item.name,
+        employeeId: item.employeeId,
+        firstName: item.firstName,
+        lastName: item.lastName,
+        grouping: item.grouping1,
+        itemId: item.itemId,
+        description: item.description,
+        fullDescription: item.fullDescription,
+        quant: item.quant,
+        discPrice: item.discPrice,
+        multiplier: item.multiplier,
+        covers: item.covers,
+        employeeCoversPercent: item.employeeCoversPercent,
+        employeeCovers: item.employeeCovers,
+        hour: item.hour,
+      }));
+
+      setMenuItemSoldData(newData);
+      setIsLoading(false);
+    } catch (error) {
+      setIsError(true);
+      setIsLoading(false);
+      setErrorMessage(
+        "There was an issue loading your data, please try again later."
+      );
+      console.error("Error getting Menu Item Sold Report data: ", error);
+    }
+  };
+
+  const handleSoldByHour = async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      setIsTableRendered(false);
+      if (
+        (itemValue === 0 && (!selectedMenu || selectedMenu <= 0)) ||
+        (itemValue === 1 && (!selectedInventory || selectedInventory <= 0))
+      ) {
+        setIsLoading(false);
+        setIsError(true);
+        setErrorMessage(
+          "Please select according to the Item Type you have chosen !"
+        );
+        return false; // Prevent API call
+      }
+      // Define the URL mapping based on viewValue
+      const getData = {
+        url: "MenuItemSoldHourData",
+        urlParams: {
+          companyId: companyId,
+          alignmentId: alignmentId,
+          memberId: selectedUnit,
+          fromDate: selectedFromDate.toLocaleDateString("en-CA"),
+          toDate: selectedToDate.toLocaleDateString("en-CA"),
+          menuItemIds: itemValue===0 ? selectedMenu:0,
+          inventoryItemIds: itemValue===1 ? selectedInventory:0,
+          itemType: itemValue,
+        },
+      };
+      console.log("MenuItem", getData);
+
+      const result = await getCall(getData);
+
+      const newData = result.data.map((item) => ({
+        unitId: item.unitId,
+        unitName: item.name,
+        employeeId: item.employeeId,
+        firstName: item.firstName,
+        lastName: item.lastName,
+        grouping: item.grouping1,
+        itemId: item.itemId,
+        description: item.description,
+        fullDescription: item.fullDescription,
+        quant: item.quant,
+        discPrice: item.discPrice,
+        multiplier: item.multiplier,
+        covers: item.covers,
+        employeeCoversPercent: item.employeeCoversPercent,
+        employeeCovers: item.employeeCovers,
+        hour: item.hour,
+      }));
+
+      setMenuItemSoldData(newData);
+      setIsLoading(false);
+    } catch (error) {
+      setIsError(true);
+      setIsLoading(false);
+      setErrorMessage(
+        "There was an issue loading your data, please try again later."
+      );
+      console.error("Error getting Menu Item Sold Report data: ", error);
+    }
+  };
+
+  const ItemsSoldWithModifiers = async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      setIsTableRendered(false);
+
+      // Define the URL mapping based on viewValue
+      const getData = {
+        url: "MenuItemSoldModifiersData",
+        urlParams: {
+          companyId: companyId,
+          alignmentId: alignmentId,
+          memberId: selectedUnit,
+          fromDate: selectedFromDate.toLocaleDateString("en-CA"),
+          toDate: selectedToDate.toLocaleDateString("en-CA"),
+          options:
+            view === 0
+              ? "GroupSummary"
+              : view === 1
+              ? "GroupByUnit"
+              : "GroupByUnit",
+          groupBy: view === 0 ? 1 : view === 1 ? 0 : 0,
+        },
+      };
+
+      const result = await getCall(getData);
+
+      const newData = result.data.map((item) => ({
+        itemId: item.itemId,
+        itemFullDescription: item.itemFullDescription,
+        menuItemSoldModifierModels: item.menuItemSoldModifierModels.map(
+          (modifier) => ({
+            unitId: modifier.unitId,
+            unitName: modifier.unitName,
+            itemId: modifier.itemId,
+            modItemID: modifier.modItemID,
+            itemFullDescription: modifier.itemFullDescription,
+            modQuantity: modifier.modQuantity,
+            modItemFrequency: modifier.modItemFrequency,
+            modifierDisplayName: modifier.modifierDisplayName,
+          })
+        ),
+        menuItemSoldModifierUnitReportModels:
+          item.menuItemSoldModifierUnitReportModels.map((unit) => ({
+            unitId: unit.unitId,
+            unitName: unit.unitName,
+            menuItemSoldModifierModels: unit.menuItemSoldModifierModels.map(
+              (modifier) => ({
+                unitId: modifier.unitId,
+                unitName: modifier.unitName,
+                itemId: modifier.itemId,
+                modItemID: modifier.modItemID,
+                itemFullDescription: modifier.itemFullDescription,
+                modQuantity: modifier.modQuantity,
+                modItemFrequency: modifier.modItemFrequency,
+                modifierDisplayName: modifier.modifierDisplayName,
+              })
+            ),
+          })),
+      }));
+
+      setMenuItemSoldData(newData);
+      setIsLoading(false);
+    } catch (error) {
+      setIsError(true);
+      setIsLoading(false);
+      setErrorMessage(
+        "There was an issue loading your data, please try again later."
+      );
+      console.error("Error getting Menu Item Sold Report data: ", error);
+    }
+  };
+
   const handleUnitSelection = (unitName, unitID) => {
     setselectedUnitName(unitName);
     setSelectedUnit(unitID);
     setUnitShowModal(false);
   };
 
-  const handleMenuSelection = (itemID,menuName) => {
+  //Menu item
+  const handleMenuSelection = (MenuID, menuName) => {
+    setSelectedMenu(MenuID);
     setselectedMenuName(menuName);
-    setSelectedMenu(itemID);
     setShowMenuModal(false);
+  };
+
+  //Inventory item
+  const handleInventorySelection = (itemID, Description) => {
+    setSelectedInventory(itemID);
+    setselectedInventoryName(Description);
+    setShowInventoryModal(false);
   };
 
   const handleDateSelection = (from, to) => {
@@ -543,16 +921,68 @@ const MenuItemsSold = () => {
     exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
   };
 
-  const Table = (
-    <TableHOC2
-      columns={columns}
-      data={menuItemSoldData}
-      view={viewWeek}
-      isTableRendered={isTableRendered}
-      setIsTableRendered={setIsTableRendered}
-      expandCollapseButtons={true}
-    />
-  );
+//   const Table = (
+//     <TableHOC2
+//       columns={columns}
+//       data={menuItemSoldData}
+//       view={viewWeek}
+//       isTableRendered={isTableRendered}
+//       setIsTableRendered={setIsTableRendered}
+//       expandCollapseButtons={true}
+//     />
+//   );
+const columns = useMemo(() => getColumns(activeTab), [activeTab]);
+
+const Table = (
+  <TableHOC2
+    columns={columns}
+	data={menuItemSoldData}
+    view={viewWeek}
+    isTableRendered={isTableRendered}
+    setIsTableRendered={setIsTableRendered}
+    expandCollapseButtons={true}
+  />
+);
+
+
+  const handleMenuClick = () => {
+    setShowMenuModal(true);
+  };
+
+  const handleInventoryClick = () => {
+    setShowInventoryModal(true);
+  };
+
+  const componentMap = {
+    Menu: (
+      <Menu
+        companyId={companyId}
+        menuName={selectedMenuName}
+        setMenuName={setselectedMenuName}
+        onClick={handleMenuClick}
+      />
+    ),
+    Inventory: (
+      <Inventory
+        companyId={companyId}
+        InventoryName={selectedInventoryName}
+        setInventoryName={setselectedInventoryName}
+        onClick={handleInventoryClick}
+      />
+    ),
+  };
+
+  const handleRunClick = () => {
+    if (activeTab === "ItemsSoldTotals") {
+      handleRun();
+    } else if (activeTab === "ItemsSoldByEmployee") {
+      handleSoldByEmpRun();
+    } else if (activeTab === "ItemsSoldByHour") {
+      handleSoldByHour();
+    } else {
+      ItemsSoldWithModifiers();
+    }
+  };
 
   return (
     <div className="w-[85%] mx-auto">
@@ -628,15 +1058,18 @@ const MenuItemsSold = () => {
               isDateRange={true}
               onClick={() => setShowDateModal(true)}
             />
-            <div className="w-36">
-              <Dropdown
-                title="Day of the week"
-                options={dropdownOptions}
-                selectedOption={viewWeek}
-                onOptionChange={handleViewWeekChange}
-              />
-            </div>
-            <div className="run-button" onClick={handleRun}>
+            {activeTab !== "ItemsSoldWithModifiers" && (
+              <div className="w-36">
+                <Dropdown
+                  title="Day of the week"
+                  options={dropdownOptions}
+                  selectedOption={viewWeek}
+                  onOptionChange={handleViewWeekChange}
+                />
+              </div>
+            )}
+
+            <div className="run-button" onClick={handleRunClick}>
               <div className="py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7">
                 Run
               </div>
@@ -658,7 +1091,8 @@ const MenuItemsSold = () => {
           </div>
         </div>
         <div className="flex mt-2">
-          {activeTab === "ItemsSoldTotals" && (
+          {(activeTab === "ItemsSoldTotals" ||
+            activeTab === "ItemsSoldWithModifiers") && (
             <>
               <div className="mt-2">
                 <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
@@ -694,26 +1128,29 @@ const MenuItemsSold = () => {
                         By Unit
                       </label>
                     </div>
-                    <div className="flex items-center cursor-pointer">
-                      <input
-                        type="radio"
-                        id="topSellers"
-                        name="reportType"
-                        value="topSellers"
-                        checked={view === "topSellers"}
-                        onChange={() => handleViewChange("topSellers")}
-                        className="checkbox-radio"
-                      />
-                      <label htmlFor="topSellers" className="ml-2">
-                        Top Sellers
-                      </label>
-                    </div>
+                    {activeTab !== "ItemsSoldWithModifiers" && (
+                      <div className="flex items-center cursor-pointer">
+                        <input
+                          type="radio"
+                          id="topSellers"
+                          name="reportType"
+                          value="topSellers"
+                          checked={view === "topSellers"}
+                          onChange={() => handleViewChange("topSellers")}
+                          className="checkbox-radio"
+                        />
+                        <label htmlFor="topSellers" className="ml-2">
+                          Top Sellers
+                        </label>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </>
           )}
-          {activeTab === "ItemsSoldByEmployee" && (
+          {(activeTab === "ItemsSoldByEmployee" ||
+            activeTab === "ItemsSoldByHour") && (
             <>
               <div className="mt-2">
                 <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
@@ -754,59 +1191,56 @@ const MenuItemsSold = () => {
               </div>
               <div className="mt-2 ml-2">
                 <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
-                  Menu Items
+                  {item === "Menu" ? "Menu Items" : "Inventory Items"}
                 </label>
                 <div className="flex flex-row space-x-6">
                   <div className="flex items-center cursor-pointer">
-                    <Menu
-                      companyId={companyId}
-                      menuId={selectedUnit}
-                      menuName={selectedMenuName}
-                      setMenuName={setselectedUnitName}
-                      onClick={() => setShowMenuModal(true)}
-                    />
+                    {componentMap[item === "Menu" ? "Menu" : "Inventory"]}
                   </div>
                 </div>
               </div>
             </>
           )}
-          <div className="pl-2 mt-2">
-            <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
-              Sales
-            </label>
-            <div className="p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary">
-              <div className="flex flex-row space-x-6">
-                <div className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    id="Net"
-                    name="salesType"
-                    value="Net"
-                    checked={salesType === "SalesNet"}
-                    onChange={() => handleSalesChange("SalesNet")}
-                    className="cursor-pointer checkbox-radio"
-                  />
-                  <label htmlFor="Net" className="ml-2">
-                    Net
-                  </label>
-                </div>
-                <div className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    id="Gross"
-                    name="salesType"
-                    value="Gross"
-                    checked={salesType === "SalesGross"}
-                    onChange={() => handleSalesChange("SalesGross")}
-                    className="cursor-pointer checkbox-radio"
-                  />
-                  <label htmlFor="Gross" className="ml-2">
-                    Gross
-                  </label>
+
+          {activeTab !== "ItemsSoldWithModifiers" && (
+            <div className="pl-2 mt-2">
+              <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
+                Sales
+              </label>
+              <div className="p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary">
+                <div className="flex flex-row space-x-6">
+                  <div className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      id="Net"
+                      name="salesType"
+                      value="Net"
+                      checked={salesType === "SalesNet"}
+                      onChange={() => handleSalesChange("SalesNet")}
+                      className="cursor-pointer checkbox-radio"
+                    />
+                    <label htmlFor="Net" className="ml-2">
+                      Net
+                    </label>
+                  </div>
+                  <div className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      id="Gross"
+                      name="salesType"
+                      value="Gross"
+                      checked={salesType === "SalesGross"}
+                      onChange={() => handleSalesChange("SalesGross")}
+                      className="cursor-pointer checkbox-radio"
+                    />
+                    <label htmlFor="Gross" className="ml-2">
+                      Gross
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </header>
       {isLoading ? (
@@ -832,6 +1266,7 @@ const MenuItemsSold = () => {
           }}
           handleUnitSelection={handleUnitSelection}
         />
+
         <MenuModal
           menuData={menuItemList}
           show={showMenuModal}
@@ -839,6 +1274,15 @@ const MenuItemsSold = () => {
             setShowMenuModal(false);
           }}
           handleMenuSelection={handleMenuSelection}
+        />
+
+        <InventoryModal
+          InventoryData={inventoryItemList}
+          show={showInventoryModal}
+          handleClose={() => {
+            setShowInventoryModal(false);
+          }}
+          handleInventorySelection={handleInventorySelection}
         />
         <CalendarModal
           handleClose={() => setShowDateModal(false)}

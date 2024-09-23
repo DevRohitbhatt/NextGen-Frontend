@@ -39,6 +39,9 @@ const urlConfig = {
 	MenuItemSoldSummaryReport:'api/sales/getMenuItemSoldSummaryReportData',
 	MenuItemSoldUnitReport:'api/sales/getMenuItemSoldUnitReportData',
 	MenuItemSoldSellersReport:'api/sales/getMenuItemSoldTopSellersReportData',
+	MenuItemSoldEmployeeData:'api/sales/getMenuItemSoldEmployeeData',
+	MenuItemSoldHourData:'api/sales/getMenuItemSoldHourData',
+	MenuItemSoldModifiersData: 'api/sales/getMenuItemSoldModifiersData',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
@@ -46,5 +49,6 @@ const urlConfig = {
 
 	//Menu item
 	MenuItemsByCompanyID: 'api/menus/getMenuItemsByCompanyID',
+	InventoryByCompanyID: 'api/prepcharttemplate/getinventorylist',
 };
 export default urlConfig;

@@ -50,3 +50,7 @@ export { default as TableHOC2 } from './table/TableHOC2';
 //menu components
 export { default as Menu } from './menu/Menu';
 export { default as MenuModal} from './menu/MenuModal';
+
+// inventory components
+export { default as Inventory} from './Inventory/Inventory';
+export { default as InventoryModal} from './Inventory/InventoryModal'

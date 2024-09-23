@@ -201,3 +201,15 @@ export const MenuHeader = styled.div`
     // padding-bottom: 10px;
     padding-top: 15px;
 `;
+
+export const InventoryHeader = styled.div`
+    position: sticky;
+    top: 0px;
+    background-color: rgb(255, 255, 255);
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 2fr 2fr;
+    font-weight: bold;
+    // padding-bottom: 10px;
+    padding-top: 15px;
+`;
