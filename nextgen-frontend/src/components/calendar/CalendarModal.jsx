@@ -5,7 +5,6 @@ import { FaTimes } from 'react-icons/fa';
 import { ModalHeader } from 'react-bootstrap';
 import { TableBuilder as Table, YearSelector, CalendarSelector } from '../index.js';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 
 const CalendarModal = ({
 	handleClose,
@@ -114,7 +113,7 @@ const CalendarModal = ({
 			{modalOpen && (
 				<div className='fixed bg-[#00000073] w-full h-dvh left-0 top-0 z-10'>
 					<div
-						className={`fixed w-[500px] bg-white rounded-lg shadow-lg overflow-hidden left-1/3 top-[6%]  ${
+						className={`fixed bg-white rounded-lg shadow-lg overflow-hidden left-1/3 top-[6%]  ${
 							isDateRange ? '' : 'w-96'
 						}`}
 					>
@@ -131,12 +130,13 @@ const CalendarModal = ({
 								<FaTimes className='close' />
 							</button>
 						</div>
-						<div className='px-4'>
+						<div className=''>
 							{!isDateRange ? (
 								<Calendar
 									onChange={handleInputChange}
 									value={localFromDate}
 									onClickDay={toggleCalendar}
+									className="tailwind-calendar"
 								/>
 							) : (
 								<>

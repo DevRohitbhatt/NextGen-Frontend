@@ -1,27 +1,4 @@
 import { useState } from "react";
-import styled from "styled-components";
-
-const Input = styled.input`
-  border-radius: 50px;
-  height: 30px;
-  width: 24%;
-  align-items: center;
-  outline: none;
-  border: 1px solid #F0F0F0;
-  padding: 8px 18px;
-  box-shadow: 0px 0px 10px #00000014;
-  display: block;
-  margin: 0 0 0 auto;
-  display: flex;
-  justify-content: start;
-  gap: 40px;
-  align-items: center;
-
-  &:hover {
-    border: 1px solid ${(props) => props.theme.primary};
-    transition: 0.5s;
-  }
-`;
 
 function SearchBar({ list, onSearch }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,7 +29,7 @@ function SearchBar({ list, onSearch }) {
   };
   
   return (
-    <Input
+    <input
       type="text"
       placeholder={placeholder}
       value={searchTerm}
@@ -60,6 +37,7 @@ function SearchBar({ list, onSearch }) {
       onClick={handleChange}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
+      className=" search-bar rounded-full h-[30px] w-[24%] flex items-center outline-none border border-gray-200 p-5 pr-[18px] pl-[18px] shadow-[0_0_10px_rgba(0,0,0,0.08)] my-auto justify-start transition-all hover:border-primary "
     />
   );
 }

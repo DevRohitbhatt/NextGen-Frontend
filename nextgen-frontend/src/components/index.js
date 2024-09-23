@@ -11,7 +11,6 @@ export { default as IntroJS } from './common/IntroJS';
 export { default as MessagePopup } from './common/MessagePopup';
 export { default as MinimizableContainer } from './common/MinimizableContainer';
 export { default as Tooltip } from './common/ToolTip';
-export { default as DraggableInventoryItem } from './common/DraggableInventoryItem';
 export { default as SearchBar } from './common/SearchBar';
 
 // ExportOptions components

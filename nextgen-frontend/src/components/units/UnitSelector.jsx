@@ -66,9 +66,9 @@ export default function UnitSelector({
 					className='flex flex-col justify-center rounded-3xl unit-selector'
 				>
 					{isEditable ? (
-						<h3 className='mb-1 ml-2 text-xl font-bold text-nowrap'>Select Unit(s)</h3>
+						<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>Select Unit(s)</h3>
 					) : (
-						<h3 className='mb-1 ml-2 text-xl font-bold text-nowrap'>Units</h3>
+						<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>Units</h3>
 					)}
 					<div
 						className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
