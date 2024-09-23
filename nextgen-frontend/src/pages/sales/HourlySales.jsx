@@ -406,7 +406,8 @@ const HourlySales = () => {
 			subHeaders: [
 				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
 			],
-			exportType: 'pdf',
+			exportType: 'print',
+			pageSize: 'A2',
 			pageOrientation: 'landscape',
 			body: [
 				{
