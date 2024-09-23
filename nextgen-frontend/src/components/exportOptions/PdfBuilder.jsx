@@ -90,9 +90,11 @@ export default function PdfBuilder(data) {
 	});
 
 	const docDefinition = {
+		pageSize: data.pageSize || 'A4',
 		pageOrientation: data.pageOrientation || 'portrait',
 		content: content,
 		...(data.exportType === 'pdf' && { pageMargins: [20, 20, 20, 20] }),
+
 		styles: {
 			header: {
 				fontSize: 16,
@@ -116,6 +118,9 @@ export default function PdfBuilder(data) {
 			tableCell: {
 				fontSize: 9,
 			},
+		},
+		defaultStyle: {
+			columnGap: 10,
 		},
 	};
 

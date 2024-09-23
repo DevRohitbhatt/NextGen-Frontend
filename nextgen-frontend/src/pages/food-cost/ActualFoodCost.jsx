@@ -227,7 +227,7 @@ const ActualFoodCost = () => {
 			columnHelper.accessor('iTinCountDisplayUnits', {
 				id: 'iTinCountDisplayUnits',
 				header: 'Trans In #',
-				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('iTinCountCost', {
@@ -281,7 +281,7 @@ const ActualFoodCost = () => {
 			columnHelper.accessor('iToutCountDisplayUnits', {
 				id: 'iToutCountDisplayUnits',
 				header: 'Trans Out #',
-				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('iToutCountCost', {
@@ -335,7 +335,7 @@ const ActualFoodCost = () => {
 			columnHelper.accessor('endCountDisplayUnits', {
 				id: 'endCountDisplayUnits',
 				header: 'End #',
-				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('endCountCost', {
@@ -388,7 +388,7 @@ const ActualFoodCost = () => {
 			columnHelper.accessor('usageCountDisplayUnits', {
 				id: 'usageCountDisplayUnits',
 				header: 'Actual Usage #',
-				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('usageCost', {
@@ -707,7 +707,9 @@ const ActualFoodCost = () => {
 								wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
 								wasteCountCases: foodCost.wasteCountCases,
 								wasteCountCost: foodCost.wasteCountCost,
-								wasteCostPct: (foodCost.wasteCountCost / foodCost.salesNet) * 100,
+								wasteCostPct: foodCost.salesNet
+									? (foodCost.wasteCountCost / foodCost.salesNet) * 100
+									: 0,
 								endCountDisplayUnits: foodCost.endCountDisplayUnits,
 								endCountCases: foodCost.endCountCases,
 								endCountCost: foodCost.endCountCost,
