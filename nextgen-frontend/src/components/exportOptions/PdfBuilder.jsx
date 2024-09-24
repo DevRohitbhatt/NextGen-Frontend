@@ -82,6 +82,11 @@ export default function PdfBuilder(data) {
 			const { title, table } = createTable(section);
 			if (title) content.push(title);
 			content.push(table);
+		} else if (section.type === 'table/SeperatePage') {
+			const { title, table } = createTable(section);
+			if (title) content.push(title);
+			content.push(table);
+			content.push({ text: '', pageBreak: 'after' }); // Add a page break after each table
 		} else if (section.type === 'table/Column') {
 			const { title, table } = createTable(section);
 			if (title) content.push(title);
