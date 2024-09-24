@@ -432,7 +432,6 @@ const EmployeeInformation = () => {
 			title: `Employee Information Report | ${view}`,
 			subHeaders: [dateFormat(new Date(), 'mm/dd/yyyy')],
 			exportType: 'pdf',
-			pageSize: 'A3',
 			pageOrientation: 'landscape',
 			body: generateBody(),
 		};
