@@ -406,28 +406,46 @@ const HourlySales = () => {
 			subHeaders: [
 				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
 			],
-			exportType: 'print',
-			pageSize: 'A2',
+			exportType: 'pdf',
 			pageOrientation: 'landscape',
-			body: [
-				{
-					type: 'table',
-					widths: columns.map(() => 'auto'),
+			body: generateBody(),
+		};
+
+		PdfBuilder(pdfData);
+	};
+
+	const generateBody = () => {
+		const rowsPerTable = 28; // Define how many rows you want per table
+		const totalRows = hourlySalesData.length; // Get total number of rows
+		const body = []; // Initialize the body array
+
+		// Loop through the data and create tables
+		for (let i = 0; i < totalRows; i += rowsPerTable) {
+			const chunkedColumns = [];
+			for (let j = 0; j < columns.length; j += 13) {
+				chunkedColumns.push(columns.slice(j, j + 13));
+			}
+			chunkedColumns.forEach((columnChunk) => {
+				body.push({
+					type: 'table/SeperatePage',
+					widths: columnChunk.map(() => 'auto'),
+					dataTypes: columnChunk.map((column) => column.dataType),
 					data: {
-						columnHeaders: columns.map((column) => column.header),
-						rows: hourlySalesData.map((row) =>
-							columns.map((column) => ({
-								value: row[column.id],
+						columnHeaders: columnChunk.map((column) => column.header),
+						rows: hourlySalesData.slice(i, i + rowsPerTable).map((row) =>
+							columnChunk.map((column) => ({
+								value: row[column.id] || '0 ',
 								cellType: '',
 								columnName: column.header,
 							}))
 						),
 					},
-				},
-			],
-		};
+				});
+			});
+		}
 
-		PdfBuilder(pdfData);
+		// Now the `body` array contains all the tables for the report
+		return body;
 	};
 
 	// Function to handle the Excel export

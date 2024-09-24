@@ -446,38 +446,26 @@ const EmployeeInformation = () => {
 
 		// Loop through the data and create tables
 		for (let i = 0; i < totalRows; i += rowsPerTable) {
-			// Create first table for Unit Name, Employee ID, Unique ID, Last Name, First Name, Middle Name, Pay Rate, Address, Address 2, City, State, Zip, Phone
-			body.push({
-				type: 'table/SeperatePage',
-				widths: headers.slice(0, 13).map(() => 'auto'),
-				dataTypes: headers.slice(0, 13).map((header) => header.cellType),
-				data: {
-					columnHeaders: headers.slice(0, 13).map((header) => header.label),
-					rows: filteredEmployeeInformationData.data.slice(i, i + rowsPerTable).map((row) =>
-						headers.slice(0, 13).map((header) => ({
-							value: row[header.key],
-							cellType: '',
-							columnName: header.label,
-						}))
-					),
-				},
-			});
-
-			// Create second table for Marital Status, Dependants, Phantom Employee, Cell Phone, Email, Payroll ID, Birth Date, Start Date, Term Date
-			body.push({
-				type: 'table/SeperatePage',
-				widths: headers.slice(13).map(() => 'auto'),
-				dataTypes: headers.slice(13).map((header) => header.cellType),
-				data: {
-					columnHeaders: headers.slice(13).map((header) => header.label),
-					rows: filteredEmployeeInformationData.data.slice(i, i + rowsPerTable).map((row) =>
-						headers.slice(13).map((header) => ({
-							value: row[header.key],
-							cellType: '',
-							columnName: header.label,
-						}))
-					),
-				},
+			const chunkedColumns = [];
+			for (let j = 0; j < headers.length; j += 13) {
+				chunkedColumns.push(headers.slice(j, j + 13));
+			}
+			chunkedColumns.forEach((columnChunk) => {
+				body.push({
+					type: 'table/SeperatePage',
+					widths: columnChunk.map(() => 'auto'),
+					dataTypes: columnChunk.map((column) => column.dataType),
+					data: {
+						columnHeaders: columnChunk.map((column) => column.label),
+						rows: filteredEmployeeInformationData.data.slice(i, i + rowsPerTable).map((row) =>
+							columnChunk.map((column) => ({
+								value: row[column.key] || '0 ',
+								cellType: '',
+								columnName: column.label,
+							}))
+						),
+					},
+				});
 			});
 		}
 
