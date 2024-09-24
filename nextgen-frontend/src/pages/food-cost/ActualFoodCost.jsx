@@ -3,6 +3,7 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
+	Loader,
 	UnitSelector,
 	CalendarModal,
 	UnitModal,
@@ -10,12 +11,13 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC2,
+	TableHOC,
 	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
 import { useNavigate } from 'react-router-dom';
+import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
@@ -225,6 +227,7 @@ const ActualFoodCost = () => {
 			columnHelper.accessor('iTinCountDisplayUnits', {
 				id: 'iTinCountDisplayUnits',
 				header: 'Trans In #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('iTinCountCost', {
@@ -278,6 +281,7 @@ const ActualFoodCost = () => {
 			columnHelper.accessor('iToutCountDisplayUnits', {
 				id: 'iToutCountDisplayUnits',
 				header: 'Trans Out #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('iToutCountCost', {
@@ -331,6 +335,7 @@ const ActualFoodCost = () => {
 			columnHelper.accessor('endCountDisplayUnits', {
 				id: 'endCountDisplayUnits',
 				header: 'End #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('endCountCost', {
@@ -383,6 +388,7 @@ const ActualFoodCost = () => {
 			columnHelper.accessor('usageCountDisplayUnits', {
 				id: 'usageCountDisplayUnits',
 				header: 'Actual Usage #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('usageCost', {
@@ -474,7 +480,7 @@ const ActualFoodCost = () => {
 							.toFixed(2);
 						return sum;
 					} else {
-						return (getValue() ?? 0).toFixed(2);
+						return (getValue() * 100 ?? 0).toFixed(2);
 					}
 				},
 			}),
@@ -663,8 +669,8 @@ const ActualFoodCost = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					countType: countType,
 				},
 			};
@@ -701,7 +707,9 @@ const ActualFoodCost = () => {
 								wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
 								wasteCountCases: foodCost.wasteCountCases,
 								wasteCountCost: foodCost.wasteCountCost,
-								wasteCostPct: (foodCost.wasteCountCost / foodCost.salesNet) * 100,
+								wasteCostPct: foodCost.salesNet
+									? (foodCost.wasteCountCost / foodCost.salesNet) * 100
+									: 0,
 								endCountDisplayUnits: foodCost.endCountDisplayUnits,
 								endCountCases: foodCost.endCountCases,
 								endCountCost: foodCost.endCountCost,
@@ -720,15 +728,13 @@ const ActualFoodCost = () => {
 				},
 			];
 
-			console.log('newData', newData);
-
 			setActualFoodCostData(newData);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting Labor By Pay Period Report data: ', error);
+			console.error('Error getting Actual Food Cost data: ', error);
 		}
 	};
 
@@ -755,6 +761,8 @@ const ActualFoodCost = () => {
 			return;
 		}
 
+		console.log('actualFoodCostData', actualFoodCostData);
+
 		const pdfData = {
 			title: 'Actual Food Cost Report',
 			subHeaders: [
@@ -769,66 +777,66 @@ const ActualFoodCost = () => {
 	};
 
 	const buildPDFBody = () => {
-		const body = actualFoodCostData.map((row) => {
-			return {
-				type: 'table',
-				title: row.department,
-				widths: [
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-				],
-				dataTypes: [
-					'string',
-					'string',
-					'string',
-					'string',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'string',
-					'number',
-				],
-				data: formatPDFData(row.subRows),
-			};
-		});
+		let body = [];
+		actualFoodCostData.flatMap((row) => [
+			(body = row.subRows.flatMap((subRow) => {
+				return {
+					type: 'table',
+					title: subRow.department,
+					widths: [
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+					],
+					dataTypes: [
+						'string',
+						'string',
+						'string',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'string',
+						'number',
+					],
+					data: formatPDFData(subRow),
+				};
+			})),
+		]);
 
 		return body;
 	};
 
 	const formatPDFData = (data) => {
-		return {
+		const newData = {
 			columnHeaders: [
 				'Sub Department',
 				'Description',
@@ -848,71 +856,44 @@ const ActualFoodCost = () => {
 				'Actual Usage %',
 				'Waste #',
 				'Waste $',
-				'Waste %',
 				'Comparison Name',
 				'Comparison Sales',
 			],
-			rows: data.flatMap((row) =>
-				row.subRows.flatMap((subRow) =>
-					subRow.subRows.map((subSubRow) => [
-						{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
-						{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
-						{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'UOM' },
-						{
-							value: Number(subSubRow.begCountDisplayUnits).toFixed(2),
-							cellType: 'number',
-							columnName: 'Beg #',
-						},
-						{ value: subSubRow.begCountCost, cellType: 'number', columnName: 'Beg $' },
-						{ value: subSubRow.purchaseDisplayUnits, cellType: 'number', columnName: 'Pur #' },
-						{ value: subSubRow.purchaseCost, cellType: 'number', columnName: 'Pur $' },
-						{
-							value: Number(subSubRow.iTinCountDisplayUnits).toFixed(2),
-							cellType: 'number',
-							columnName: 'Trans In#',
-						},
-						{ value: subSubRow.iTinCountCost, cellType: 'number', columnName: 'Trans In $' },
-						{ value: subSubRow.iToutCountDisplayUnits, cellType: 'number', columnName: 'Trans Out #' },
-						{ value: subSubRow.iToutCountCost, cellType: 'number', columnName: 'Trans Out $' },
-						{
-							value: Number(subSubRow.endCountDisplayUnits).toFixed(2),
-							cellType: 'number',
-							columnName: 'End #',
-						},
-						{ value: subSubRow.endCountCost, cellType: 'number', columnName: 'End $' },
-						{
-							value: Number(subSubRow.usageCountDisplayUnits).toFixed(2),
-							cellType: 'number',
-							columnName: 'Actual Usage #',
-						},
-						{ value: subSubRow.usageCost, cellType: 'number', columnName: 'Actual Usage $' },
-						{
-							value: Number(subSubRow.usageCostPct).toFixed(2),
-							cellType: 'number',
-							columnName: 'Actual Usage %',
-						},
-						{
-							value: Number(subSubRow.wasteCountDisplayUnits).toFixed(2),
-							cellType: 'number',
-							columnName: 'Waste #',
-						},
-						{ value: subSubRow.wasteCountCost, cellType: 'number', columnName: 'Waste $' },
-						{ value: Number(subSubRow.wasteCostPct).toFixed(2), cellType: 'number', columnName: 'Waste %' },
-						{ value: subSubRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
-						{ value: subSubRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
-					])
-				)
+			rows: data.subRows.flatMap((subRow) =>
+				subRow.subRows.map((subSubRow) => [
+					{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
+					{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
+					{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'UOM' },
+					{ value: subSubRow.begCountDisplayUnits, cellType: 'number', columnName: 'Beg #' },
+					{ value: subSubRow.begCountCost, cellType: 'number', columnName: 'Beg $' },
+					{ value: subSubRow.purchaseDisplayUnits, cellType: 'number', columnName: 'Pur #' },
+					{ value: subSubRow.purchaseCost, cellType: 'number', columnName: 'Pur $' },
+					{ value: subSubRow.iTinCountDisplayUnits, cellType: 'number', columnName: 'Trans In#' },
+					{ value: subSubRow.iTinCountCost, cellType: 'number', columnName: 'Trans In $' },
+					{ value: subSubRow.iToutCountDisplayUnits, cellType: 'number', columnName: 'Trans Out #' },
+					{ value: subSubRow.iToutCountCost, cellType: 'number', columnName: 'Trans Out $' },
+					{ value: subSubRow.endCountDisplayUnits, cellType: 'number', columnName: 'End #' },
+					{ value: subSubRow.endCountCost, cellType: 'number', columnName: 'End $' },
+					{ value: subSubRow.usageCountDisplayUnits, cellType: 'number', columnName: 'Actual Usage #' },
+					{ value: subSubRow.usageCost, cellType: 'number', columnName: 'Actual Usage $' },
+					{ value: subSubRow.usageCostPct, cellType: 'number', columnName: 'Actual Usage %' },
+					{ value: subSubRow.wasteCountDisplayUnits, cellType: 'number', columnName: 'Waste #' },
+					{ value: subSubRow.wasteCountCost, cellType: 'number', columnName: 'Waste $' },
+					{ value: subSubRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
+					{ value: subSubRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
+				])
 			),
 		};
+
+		return newData;
 	};
+
 	const togglePopup = () => {
 		setIsPopupVisible(!isPopupVisible);
 	};
 
 	// // Function to handle the Excel export
 	const handleExcelClick = () => {
-		console.log('actualFoodCostData', actualFoodCostData);
-
 		const data = [
 			{
 				name: 'Actual Food Cost Report',
@@ -975,7 +956,7 @@ const ActualFoodCost = () => {
 
 		const filename = 'ActualFoodCost';
 		const spreadSheetTitle = 'Actual FoodCost Report';
-		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
@@ -994,7 +975,7 @@ const ActualFoodCost = () => {
 	}, []);
 
 	const Table = (
-		<TableHOC2
+		<TableHOC
 			columns={columns}
 			data={actualFoodCostData}
 			view={viewby}
@@ -1055,7 +1036,7 @@ const ActualFoodCost = () => {
 					memberID: selectedUnit,
 					fromDate: fromDate.toLocaleDateString('en-CA'),
 					toDate: toDate.toLocaleDateString('en-CA'),
-					vendorId: 3,
+					vendorId: 0,
 				},
 			};
 
@@ -1068,7 +1049,8 @@ const ActualFoodCost = () => {
 					memberID: selectedUnit,
 					fromDate: fromDate.toLocaleDateString('en-CA'),
 					toDate: toDate.toLocaleDateString('en-CA'),
-					vendorId: 3,
+					vendorId: 0,
+					unitsAndAreasList: unitsAndAreasList,
 					purchaseData: result,
 				},
 			});
@@ -1078,146 +1060,155 @@ const ActualFoodCost = () => {
 	};
 
 	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Actual Food Cost</h2>
-			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div className='flex items-center space-x-3 '>
-					<UnitSelector
-						companyId={companyId}
-						alignmentId={alignmentId}
-						memberId={selectedUnit}
-						memberName={selectedUnitName}
-						includeAreas={true}
-						setMemberName={setselectedUnitName}
-						onClick={() => setUnitShowModal(true)}
-					/>
-					<DateSelector
-						toDate={selectedToDate}
-						fromDate={selectedFromDate}
-						isDateRange={true}
-						onClick={() => setShowDateModal(true)}
-					/>
-					<div className='w-36'>
-						<Dropdown
-							title='Count Type'
-							options={dropdownOptions}
-							selectedOption={view}
-							onOptionChange={handleViewChange}
+		<>
+			<Loader loading={isLoading} />
+			<div className='w-[85%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Actual Food Cost</h2>
+				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+					<div className='flex items-center space-x-3 '>
+						<UnitSelector
+							companyId={companyId}
+							alignmentId={alignmentId}
+							memberId={selectedUnit}
+							memberName={selectedUnitName}
+							includeAreas={true}
+							setMemberName={setselectedUnitName}
+							onClick={() => setUnitShowModal(true)}
+						/>
+						<DateSelector
+							toDate={selectedToDate}
+							fromDate={selectedFromDate}
+							isDateRange={true}
+							onClick={() => setShowDateModal(true)}
+						/>
+						<div className='w-36'>
+							<Dropdown
+								title='Count Type'
+								options={dropdownOptions}
+								selectedOption={view}
+								onOptionChange={handleViewChange}
+							/>
+						</div>
+
+						<div className='run-button' onClick={handleRun}>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+								Run
+							</div>
+						</div>
+					</div>
+					<div>
+						<ExportOptions
+							includePDF={true}
+							handlePDFClick={handlePDFClick}
+							includeCSV={false}
+							includeExcel={true}
+							handleExcelClick={handleExcelClick}
+							includeHelp={true}
+							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 						/>
 					</div>
+				</header>
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : (
+					<>
+						{actualFoodCostData.length > 0 && (
+							<div className='w-52 display-flex'>
+								<Dropdown
+									title='Expand View'
+									options={viewOptions}
+									selectedOption={viewby}
+									onOptionChange={handleTotalViewChange}
+								/>
+								<span onClick={togglePopup} className='cursor-pointer mt-[47px]'>
+									{' '}
+									More....
+								</span>
+								{isPopupVisible && (
+									<div className='more-container' ref={popupRef}>
+										<div className='option mb-2 w-[258px]'>
+											<button className='w-[100%]'>Show/Hide Departments</button>
+										</div>
+										<div className='option mb-2 w-[258px]'>
+											<button
+												className='w-[100%]'
+												onClick={() => {
+													handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
+													setIsPopupVisible(false);
+												}}
+											>
+												View Beginning Countsheet
+											</button>
+										</div>
+										<div className='option mb-2 w-[258px]'>
+											<button
+												className='w-[100%]'
+												onClick={() => {
+													handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
+													setIsPopupVisible(false);
+												}}
+											>
+												View Ending Countsheet
+											</button>
+										</div>
+										<div className='option'>
+											<button
+												className='w-[100%]'
+												onClick={() => {
+													handleViewPurchase(selectedFromDate, selectedToDate, true); // For View Purchase
+													setIsPopupVisible(false);
+												}}
+											>
+												View Purchases
+											</button>
+										</div>
+									</div>
+								)}
+							</div>
+						)}
 
-					<div className='run-button' onClick={handleRun}>
-						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-							Run
-						</div>
-					</div>
-				</div>
+						{/* Display the table if there is no error and the data is not loading */}
+						{!isLoading &&
+							(actualFoodCostData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</>
+				)}{' '}
 				<div>
-					<ExportOptions
-						includePDF={true}
-						handlePDFClick={handlePDFClick}
-						includeCSV={false}
-						includeExcel={true}
-						handleExcelClick={handleExcelClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+					<CalendarModal
+						handleClose={() => setShowDateModal(false)}
+						modalOpen={showDateModal}
+						isDateRange={true}
+						handleDateSelection={handleDateSelection}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
 					/>
 				</div>
-			</header>
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				<>
-					{actualFoodCostData.length > 0 && (
-						<div className='w-52 display-flex'>
-							<Dropdown
-								title='Expand View'
-								options={viewOptions}
-								selectedOption={viewby}
-								onOptionChange={handleTotalViewChange}
-							/>
-							<span onClick={togglePopup} className='cursor-pointer mt-[47px]'>
-								{' '}
-								More....
-							</span>
-							{isPopupVisible && (
-								<div className='more-container' ref={popupRef}>
-									<div className='option mb-2 w-[258px]'>
-										<button className='w-[100%]'>Show/Hide Departments</button>
-									</div>
-									<div className='option mb-2 w-[258px]'>
-										<button
-											className='w-[100%]'
-											onClick={() => {
-												handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
-												setIsPopupVisible(false);
-											}}
-										>
-											View Beginning Countsheet
-										</button>
-									</div>
-									<div className='option mb-2 w-[258px]'>
-										<button
-											className='w-[100%]'
-											onClick={() => {
-												handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
-												setIsPopupVisible(false);
-											}}
-										>
-											View Ending Countsheet
-										</button>
-									</div>
-									<div className='option'>
-										<button
-											className='w-[100%]'
-											onClick={() => {
-												handleViewPurchase(selectedToDate, selectedToDate, true); // For View Purchase
-												setIsPopupVisible(false);
-											}}
-										>
-											View Purchases
-										</button>
-									</div>
-								</div>
-							)}
-						</div>
-					)}
-
-					{actualFoodCostData.length > 0 && <div className='paged-table'>{Table}</div>}
-				</>
-			)}{' '}
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
 			</div>
-		</div>
+		</>
 	);
 };
 

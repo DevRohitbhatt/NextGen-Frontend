@@ -4,6 +4,7 @@ import { Steps } from 'intro.js-react';
 import { useNavigate } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
+	Loader,
 	UnitSelector,
 	CalendarModal,
 	UnitModal,
@@ -11,10 +12,11 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC2,
+	TableHOC,
 	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
+import dateFormat from 'dateformat';
 import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
 
 const columnHelper = createColumnHelper();
@@ -215,6 +217,7 @@ const VarianceFoodCost = () => {
 			columnHelper.accessor('idealNumber', {
 				id: 'idealNumber',
 				header: 'Ideal #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('idealDollar', {
@@ -312,6 +315,7 @@ const VarianceFoodCost = () => {
 			columnHelper.accessor('varianceNumber', {
 				id: 'varianceNumber',
 				header: 'Variance #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('varianceDollar', {
@@ -412,6 +416,7 @@ const VarianceFoodCost = () => {
 			columnHelper.accessor('wasteNumber', {
 				id: 'wasteNumber',
 				header: 'Waste #',
+				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('wasteDollar', {
@@ -591,8 +596,8 @@ const VarianceFoodCost = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					countType: countType,
 				},
 			};
@@ -619,13 +624,13 @@ const VarianceFoodCost = () => {
 								actualPct: foodCost.actualCostPct,
 								idealNumber: foodCost.idealQuant,
 								idealDollar: foodCost.idealCost,
-								idealPct: (foodCost.idealCost / foodCost.salesNet) * 100,
+								idealPct: foodCost.salesNet ? (foodCost.idealCost / foodCost.salesNet) * 100 : 0,
 								varianceNumber: foodCost.varianceQuant,
 								varianceDollar: foodCost.varianceCost,
-								variancePct: (foodCost.varianceCost / foodCost.salesNet) * 100,
+								variancePct: foodCost.salesNet ? (foodCost.varianceCost / foodCost.salesNet) * 100 : 0,
 								wasteNumber: foodCost.wasteCountCases,
 								wasteDollar: foodCost.wasteCountCost,
-								wastePct: (foodCost.wasteCountCost / foodCost.salesNet) * 100,
+								wastePct: foodCost.salesNet ? (foodCost.wasteCountCost / foodCost.salesNet) * 100 : 0,
 							})),
 						})),
 					})),
@@ -667,8 +672,8 @@ const VarianceFoodCost = () => {
 					companyID: companyId,
 					alignmentID: alignmentId,
 					memberID: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 				},
 			};
 
@@ -711,7 +716,7 @@ const VarianceFoodCost = () => {
 					memberID: selectedUnit,
 					fromDate: fromDate.toLocaleDateString('en-CA'),
 					toDate: toDate.toLocaleDateString('en-CA'),
-					vendorId: 3,
+					vendorId: 0,
 				},
 			};
 
@@ -724,7 +729,8 @@ const VarianceFoodCost = () => {
 					memberID: selectedUnit,
 					fromDate: fromDate.toLocaleDateString('en-CA'),
 					toDate: toDate.toLocaleDateString('en-CA'),
-					vendorId: 3,
+					vendorId: 0,
+					unitsAndAreasList: unitsAndAreasList,
 					purchaseData: result,
 				},
 			});
@@ -741,78 +747,81 @@ const VarianceFoodCost = () => {
 		}
 
 		if (!varianceFoodCostData || varianceFoodCostData.length === 0) {
-			console.error('Variance Food COst report data is not defined or empty');
+			console.error('Variance Food Cost report data is not defined or empty');
 			return;
 		}
 
 		const pdfData = {
 			title: 'Variance Food Cost Report',
 			subHeaders: [
-				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
+				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
+					selectedToDate,
+					'mm-dd-yyyy'
+				)} | ${selectedUnitName}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
 			body: buildPDFBody(),
 		};
 
-		console.log('pdfData', pdfData);
-
 		PdfBuilder(pdfData);
 	};
 
 	const buildPDFBody = () => {
-		const body = varianceFoodCostData.flatMap((row) => {
-			return {
-				type: 'table',
-				title: row.department,
-				widths: [
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-				],
-				dataTypes: [
-					'string',
-					'string',
-					'string',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-				],
-				data: formatPDFData(row.subRows),
-			};
-		});
-
+		let body = [];
+		varianceFoodCostData.flatMap((row) => [
+			(body = row.subRows.flatMap((subRow) => {
+				return {
+					type: 'table',
+					title: subRow.department,
+					widths: [
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+						'auto',
+					],
+					dataTypes: [
+						'string',
+						'string',
+						'string',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+						'number',
+					],
+					data: formatPDFData(subRow),
+				};
+			})),
+		]);
 		return body;
 	};
 
 	const formatPDFData = (data) => {
-		return {
+		const newData = {
 			columnHeaders: [
 				'Sub Department',
 				'Description',
@@ -832,34 +841,34 @@ const VarianceFoodCost = () => {
 				'Comparison Name',
 				'Comparison Sales',
 			],
-			rows: data.flatMap((row) =>
-				row.subRows.flatMap((subRow) =>
-					subRow.subRows.map((subSubRow) => [
-						{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
-						{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
-						{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'Description' },
-						{ value: subSubRow.actualNumber, cellType: 'number', columnName: 'Actual #' },
-						{ value: subSubRow.actualDollar, cellType: 'number', columnName: 'Actual $' },
-						{ value: Number(subSubRow.actualPct).toFixed(2), cellType: 'number', columnName: 'Actual %' },
-						{ value: subSubRow.idealNumber, cellType: 'number', columnName: 'Ideal #' },
-						{ value: subSubRow.idealDollar, cellType: 'number', columnName: 'Ideal $' },
-						{ value: Number(subSubRow.idealPct).toFixed(2), cellType: 'number', columnName: 'Ideal %' },
-						{ value: subSubRow.varianceNumber, cellType: 'number', columnName: 'Variance #' },
-						{ value: subSubRow.varianceDollar, cellType: 'number', columnName: 'Variance $' },
-						{
-							value: Number(subSubRow.variancePct).toFixed(2),
-							cellType: 'number',
-							columnName: 'Variance %',
-						},
-						{ value: subSubRow.wasteNumber, cellType: 'number', columnName: 'Waste #' },
-						{ value: subSubRow.wasteDollar, cellType: 'number', columnName: 'Waste $' },
-						{ value: Number(subSubRow.wastePct).toFixed(2), cellType: 'number', columnName: 'Waste %' },
-						{ value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
-						{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
-					])
-				)
+			rows: data.subRows.flatMap((subRow) =>
+				subRow.subRows.map((subSubRow) => [
+					{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
+					{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
+					{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'Description' },
+					{ value: subSubRow.actualNumber, cellType: 'number', columnName: 'Actual #' },
+					{ value: subSubRow.actualDollar, cellType: 'number', columnName: 'Actual $' },
+					{ value: Number(subSubRow.actualPct).toFixed(2), cellType: 'number', columnName: 'Actual %' },
+					{ value: subSubRow.idealNumber, cellType: 'number', columnName: 'Ideal #' },
+					{ value: subSubRow.idealDollar, cellType: 'number', columnName: 'Ideal $' },
+					{ value: Number(subSubRow.idealPct).toFixed(2), cellType: 'number', columnName: 'Ideal %' },
+					{ value: subSubRow.varianceNumber, cellType: 'number', columnName: 'Variance #' },
+					{ value: subSubRow.varianceDollar, cellType: 'number', columnName: 'Variance $' },
+					{
+						value: Number(subSubRow.variancePct).toFixed(2),
+						cellType: 'number',
+						columnName: 'Variance %',
+					},
+					{ value: subSubRow.wasteNumber, cellType: 'number', columnName: 'Waste #' },
+					{ value: subSubRow.wasteDollar, cellType: 'number', columnName: 'Waste $' },
+					{ value: Number(subSubRow.wastePct).toFixed(2), cellType: 'number', columnName: 'Waste %' },
+					{ value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
+					{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
+				])
 			),
 		};
+
+		return newData;
 	};
 
 	// Function to handle the Excel export
@@ -919,7 +928,7 @@ const VarianceFoodCost = () => {
 
 		const filename = 'varianceFoodCost';
 		const spreadSheetTitle = 'Variance Food Cost Report';
-		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
@@ -938,7 +947,7 @@ const VarianceFoodCost = () => {
 	}, []);
 
 	const Table = (
-		<TableHOC2
+		<TableHOC
 			columns={columns}
 			data={varianceFoodCostData}
 			view={viewby}
@@ -948,150 +957,158 @@ const VarianceFoodCost = () => {
 	);
 
 	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Variance Food Cost</h2>
-			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div className='flex items-center space-x-3 '>
-					<UnitSelector
-						companyId={companyId}
-						alignmentId={alignmentId}
-						memberId={selectedUnit}
-						memberName={selectedUnitName}
-						includeAreas={true}
-						setMemberName={setselectedUnitName}
-						onClick={() => setUnitShowModal(true)}
-					/>
-					<DateSelector
-						toDate={selectedToDate}
-						fromDate={selectedFromDate}
-						isDateRange={true}
-						onClick={() => setShowDateModal(true)}
-					/>
+		<>
+			<Loader loading={isLoading} />
+			<div className='w-[85%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Variance Food Cost</h2>
+				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+					<div className='flex items-center space-x-3 '>
+						<UnitSelector
+							companyId={companyId}
+							alignmentId={alignmentId}
+							memberId={selectedUnit}
+							memberName={selectedUnitName}
+							includeAreas={true}
+							setMemberName={setselectedUnitName}
+							onClick={() => setUnitShowModal(true)}
+						/>
+						<DateSelector
+							toDate={selectedToDate}
+							fromDate={selectedFromDate}
+							isDateRange={true}
+							onClick={() => setShowDateModal(true)}
+						/>
 
-					<div className='w-36'>
-						<Dropdown
-							options={countDropdownOptions}
-							title='Count Type'
-							selectedOption={view}
-							onOptionChange={handleCountType}
+						<div className='w-36'>
+							<Dropdown
+								options={countDropdownOptions}
+								title='Count Type'
+								selectedOption={view}
+								onOptionChange={handleCountType}
+							/>
+						</div>
+						<div className='run-button' onClick={handleVarianceFoodCost}>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+								Run
+							</div>
+						</div>
+					</div>
+					<div>
+						<ExportOptions
+							includePDF={true}
+							handlePDFClick={handlePDFClick}
+							includeExcel={true}
+							handleExcelClick={handleExcelClick}
+							includeHelp={true}
+							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 						/>
 					</div>
-					<div className='run-button' onClick={handleVarianceFoodCost}>
-						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-							Run
-						</div>
-					</div>
-				</div>
+				</header>
+
+				{/* Display the table if there is no error and the data is not loading */}
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : (
+					<>
+						{varianceFoodCostData.length > 0 && (
+							<div className='w-52 display-flex'>
+								<Dropdown
+									title='Expand View'
+									options={viewOptions}
+									selectedOption={viewby}
+									onOptionChange={(option) => setViewBy(option)}
+								/>
+								<span
+									onClick={() => setIsPopupVisible(!isPopupVisible)}
+									className='cursor-pointer mt-[47px]'
+								>
+									{' '}
+									More....
+								</span>
+								{isPopupVisible && (
+									<div className='more-container' ref={popupRef}>
+										<div className='option mb-2 w-[258px]'>
+											<button className='w-[100%]'>Show/Hide Departments</button>
+										</div>
+										<div className='option mb-2 w-[258px]'>
+											<button
+												className='w-[100%]'
+												onClick={() => {
+													handleCountsheet(); // For Beginning Countsheet
+													setIsPopupVisible(false);
+												}}
+											>
+												View Beginning Countsheet
+											</button>
+										</div>
+										<div className='option mb-2 w-[258px]'>
+											<button
+												className='w-[100%]'
+												onClick={() => {
+													handleCountsheet(true); // For Ending Countsheet
+													setIsPopupVisible(false);
+												}}
+											>
+												View Ending Countsheet
+											</button>
+										</div>
+										<div className='option'>
+											<button
+												className='w-[100%]'
+												onClick={() => {
+													handleViewPurchase(selectedFromDate, selectedToDate, true); // For view Purchase
+													setIsPopupVisible(false);
+												}}
+											>
+												View Purchases
+											</button>
+										</div>
+									</div>
+								)}
+							</div>
+						)}
+
+						{!isLoading &&
+							(varianceFoodCostData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</>
+				)}
 				<div>
-					<ExportOptions
-						includePDF={true}
-						handlePDFClick={handlePDFClick}
-						includeExcel={true}
-						handleExcelClick={handleExcelClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+					<CalendarModal
+						handleClose={() => setShowDateModal(false)}
+						modalOpen={showDateModal}
+						isDateRange={true}
+						handleDateSelection={handleDateSelection}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
 					/>
 				</div>
-			</header>
-
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				<>
-					{varianceFoodCostData.length > 0 && (
-						<div className='w-52 display-flex'>
-							<Dropdown
-								title='Expand View'
-								options={viewOptions}
-								selectedOption={viewby}
-								onOptionChange={(option) => setViewBy(option)}
-							/>
-							<span
-								onClick={() => setIsPopupVisible(!isPopupVisible)}
-								className='cursor-pointer mt-[47px]'
-							>
-								{' '}
-								More....
-							</span>
-							{isPopupVisible && (
-								<div className='more-container' ref={popupRef}>
-									<div className='option mb-2 w-[258px]'>
-										<button className='w-[100%]'>Show/Hide Departments</button>
-									</div>
-									<div className='option mb-2 w-[258px]'>
-										<button
-											className='w-[100%]'
-											onClick={() => {
-												handleCountsheet(); // For Beginning Countsheet
-												setIsPopupVisible(false);
-											}}
-										>
-											View Beginning Countsheet
-										</button>
-									</div>
-									<div className='option mb-2 w-[258px]'>
-										<button
-											className='w-[100%]'
-											onClick={() => {
-												handleCountsheet(true); // For Ending Countsheet
-												setIsPopupVisible(false);
-											}}
-										>
-											View Ending Countsheet
-										</button>
-									</div>
-									<div className='option'>
-										<button
-											className='w-[100%]'
-											onClick={() => {
-												handleViewPurchase(selectedToDate, selectedToDate, true); // For view Purchase
-												setIsPopupVisible(false);
-											}}
-										>
-											View Purchases
-										</button>
-									</div>
-								</div>
-							)}
-						</div>
-					)}
-
-					{varianceFoodCostData.length > 0 && <div className='paged-table'>{Table}</div>}
-				</>
-			)}
-
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
 			</div>
-		</div>
+		</>
 	);
 };
 

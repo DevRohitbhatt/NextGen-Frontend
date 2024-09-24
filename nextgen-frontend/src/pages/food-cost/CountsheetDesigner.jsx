@@ -3,7 +3,7 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useLocation } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC2 } from '../../components';
+import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 
 const columnHelper = createColumnHelper();
@@ -55,9 +55,11 @@ const CountsheetDesigner = () => {
 			columnHelper.accessor('lineItemCost', {
 				id: 'lineItemCost',
 				cell: ({ row, getValue }) =>
-					row.getCanExpand()
-						? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
-						: getValue(),
+					`$${
+						row.getCanExpand()
+							? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
+							: getValue()
+					}`,
 				footer: ({ table }) =>
 					`Total Inventory Value: $${table
 						.getCoreRowModel()
@@ -117,7 +119,7 @@ const CountsheetDesigner = () => {
 		}
 
 		if (!countsheetDetails || countsheetDetails.length === 0) {
-			console.error('Voids report data is not defined or empty');
+			console.error('Countsheet data is not defined or empty');
 			return;
 		}
 
@@ -177,7 +179,7 @@ const CountsheetDesigner = () => {
 	};
 
 	const Table = (
-		<TableHOC2
+		<TableHOC
 			columns={columns}
 			data={countsheetDetails}
 			isHeader={false}

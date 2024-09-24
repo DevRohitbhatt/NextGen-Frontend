@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
-import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
+	Loader,
 	UnitSelector,
 	CalendarModal,
 	UnitModal,
@@ -10,14 +10,14 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC2,
-	Dropdown,
+	TableHOC,
 	VendorSelector,
 	VendorModal,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import PurchaseAnalysi from '../../assets/introJSSteps/PurchaseAnalysis';
 import { useLocation } from 'react-router-dom';
+import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
@@ -51,18 +51,6 @@ const PurchaseAnalysis = () => {
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
-	//dropdown variables
-	// const [view, setView] = useState('None');
-	// const viewOptions = [
-	//     { name: 'Unit - GLCode' },
-	//     { name: 'Unit - Department' },
-	//     { name: 'Unit - Inventory Item' },
-	//     { name: 'Unit - Vendor Item - Inventory Item'},
-	//     { name: 'Unit - Vendor- Invoice' },
-	//     { name: 'Vendor - GLCode' },
-	//     { name: 'Vendor - Department' }
-	//     ];
-
 	//location for state
 	const location = useLocation();
 
@@ -72,10 +60,6 @@ const PurchaseAnalysis = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
-
-	// const handleTotalViewChange = (option) => {
-	// 	setView(option);
-	// };
 
 	// columns for tableHOC
 	const columns = useMemo(
@@ -95,12 +79,14 @@ const PurchaseAnalysis = () => {
 					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
 					return formattedDate;
 				},
-				dataType: 'date', // Adjust if you format the date differently
+				dataType: 'date',
+				size: 100,
 			}),
 			columnHelper.accessor('name', {
 				id: 'name',
 				header: 'Vendor',
 				dataType: 'string',
+				size: 100,
 			}),
 			columnHelper.accessor('vendorInvoiceReference', {
 				id: 'vendorInvoiceReference',
@@ -110,6 +96,7 @@ const PurchaseAnalysis = () => {
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Invoice Total',
+				cell: ({ getValue }) => (getValue() ? `${getValue().toFixed(2)}` : ''),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('companyGLCode', {
@@ -117,9 +104,16 @@ const PurchaseAnalysis = () => {
 				header: 'GL Code',
 				dataType: 'string',
 			}),
+			columnHelper.accessor('vendorItemDescription', {
+				id: 'vendorItemDescription',
+				header: 'Vendor Item',
+				dataType: 'string',
+				size: 200,
+			}),
 			columnHelper.accessor('quantity', {
 				id: 'quantity',
 				header: 'Item Quantity',
+				cell: ({ getValue }) => <div className='text-center'>{getValue() ?? 0}</div>,
 				footer: ({ table }) => (
 					<div className='font-bold text-center'>
 						{parseInt(table.getCoreRowModel().rows.reduce((acc, row) => acc + row.original.quantity, 0))}
@@ -144,7 +138,7 @@ const PurchaseAnalysis = () => {
 				header: 'Item Total',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				footer: ({ table }) => (
-					<div className='font-bold text-center'>
+					<div className='font-bold text-start'>
 						$
 						{table
 							.getCoreRowModel()
@@ -159,11 +153,16 @@ const PurchaseAnalysis = () => {
 				header: 'Department',
 				dataType: 'string',
 			}),
+			columnHelper.accessor('subdepartment', {
+				id: 'subdepartment',
+				header: 'Sub Department',
+				dataType: 'string',
+			}),
 			columnHelper.accessor('inventoryItemDescription', {
 				id: 'inventoryItemDescription',
 				header: 'Inventory Item',
 				dataType: 'string',
-				size: '200',
+				size: '300',
 			}),
 		],
 		[]
@@ -199,7 +198,7 @@ const PurchaseAnalysis = () => {
 		if (location.state) {
 			fetchPurchaseDetails();
 		}
-	}, [location.state]);
+	}, []);
 
 	const fetchPurchaseDetails = async () => {
 		try {
@@ -217,9 +216,17 @@ const PurchaseAnalysis = () => {
 				},
 			};
 
+			setSelectedUnit(location.state?.memberID);
+
 			const result = await getCall(getData);
 
-			setPurchaseData(result.data);
+			const newData = result.data.map((item) => ({
+				...item,
+				unitName: location.state.unitsAndAreasList?.units.find((unit) => unit.unitID === parseInt(item.unitId))
+					?.unitName,
+			}));
+
+			setPurchaseData(newData);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -290,8 +297,8 @@ const PurchaseAnalysis = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					vendorId: selectedVendor,
 				},
 			};
@@ -301,6 +308,7 @@ const PurchaseAnalysis = () => {
 			const newData = result.data.map((item) => ({
 				...item,
 				unitName: unitsAndAreasList.units.find((unit) => unit.unitID === parseInt(item.unitId))?.unitName,
+				inventoryItemDescription: `${item.qsrInventoryItemID} - ${item.inventoryItemDescription}`,
 			}));
 
 			setPurchaseData(newData);
@@ -336,7 +344,10 @@ const PurchaseAnalysis = () => {
 		const pdfData = {
 			title: 'Purchase Analysis Report',
 			subHeaders: [
-				`Unit:${selectedUnitName} | Vendor:${selectedVendorName} | Date Range:${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`,
+				`Unit:${selectedUnitName} | Vendor:${selectedVendorName} | Date Range:${dateFormat(
+					selectedFromDate,
+					'mm-dd-yyyy'
+				)} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
@@ -362,8 +373,7 @@ const PurchaseAnalysis = () => {
 		PdfBuilder(pdfData);
 	};
 
-	// // Function to handle the Excel export
-
+	// Function to handle the Excel export
 	const handleExcelClick = () => {
 		const data = [
 			{
@@ -375,120 +385,126 @@ const PurchaseAnalysis = () => {
 
 		const filename = 'PurchaseAnalysis';
 		const spreadSheetTitle = 'Purchase Analysis Report';
-		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC2 columns={columns} data={purchasetData} isPaginated={true} isFooter={true} />;
+	const Table = (
+		<TableHOC
+			columns={columns}
+			data={purchasetData}
+			isPaginated={true}
+			isFooter={true}
+			headerPosition='flex-start'
+			dataPosition='text-start'
+		/>
+	);
 
 	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Purchase Analysis Report</h2>
-			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div className='flex items-center space-x-3 '>
-					<UnitSelector
-						companyId={companyId}
-						alignmentId={alignmentId}
-						memberId={selectedUnit}
-						memberName={selectedUnitName}
-						includeAreas={true}
-						setMemberName={setselectedUnitName}
-						onClick={() => setUnitShowModal(true)}
-					/>
-					<DateSelector
-						toDate={selectedToDate}
-						fromDate={selectedFromDate}
-						isDateRange={true}
-						onClick={() => setShowDateModal(true)}
-					/>
-					<VendorSelector
-						vendorID={selectedVendor}
-						vendorName={selectedVendorName}
-						setVendorName={setselectedVendorName}
-						onClick={() => setVendorShowModal(true)}
-					/>
+		<>
+			<Loader loading={isLoading} />
+			<div className='w-[85%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Purchase Analysis Report</h2>
+				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+					<div className='flex items-center space-x-3 '>
+						<UnitSelector
+							companyId={companyId}
+							alignmentId={alignmentId}
+							memberId={selectedUnit}
+							memberName={selectedUnitName}
+							includeAreas={true}
+							setMemberName={setselectedUnitName}
+							onClick={() => setUnitShowModal(true)}
+						/>
+						<DateSelector
+							toDate={selectedToDate}
+							fromDate={selectedFromDate}
+							isDateRange={true}
+							onClick={() => setShowDateModal(true)}
+						/>
+						<VendorSelector
+							vendorID={selectedVendor}
+							vendorName={selectedVendorName}
+							setVendorName={setselectedVendorName}
+							onClick={() => setVendorShowModal(true)}
+						/>
 
-					<div className='run-button' onClick={handleRun}>
-						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-							Run
+						<div className='run-button' onClick={handleRun}>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+								Run
+							</div>
 						</div>
 					</div>
-				</div>
+					<div>
+						<ExportOptions
+							includePDF={true}
+							handlePDFClick={handlePDFClick}
+							includeCSV={false}
+							includeExcel={true}
+							handleExcelClick={handleExcelClick}
+							includeHelp={true}
+							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+						/>
+					</div>
+				</header>
+
+				{/* Display the table if there is no error and the data is not loading */}
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : (
+					!isLoading &&
+					(purchasetData.length > 0 ? (
+						<div className='paged-table'>{Table}</div>
+					) : !selectedUnit ? (
+						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+					) : (
+						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+					))
+				)}
 				<div>
-					<ExportOptions
-						includePDF={true}
-						handlePDFClick={handlePDFClick}
-						includeCSV={false}
-						includeExcel={true}
-						handleExcelClick={handleExcelClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+
+					<VendorModal
+						vendorData={vendorsList}
+						vendorID={selectedVendor}
+						vendorName={selectedVendorName}
+						show={showVendorModal}
+						handleClose={() => {
+							setVendorShowModal(false);
+						}}
+						handleVendorSelection={handleVendorSelection}
+						isMultiVendor={true}
+					/>
+					<CalendarModal
+						handleClose={() => setShowDateModal(false)}
+						modalOpen={showDateModal}
+						isDateRange={true}
+						handleDateSelection={handleDateSelection}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
 					/>
 				</div>
-			</header>
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				<>
-					{/* {purchasetData.length > 0 && (
-						<div className='w-52 display-flex'>
-							<Dropdown
-								title='Group By'
-								options={viewOptions}
-								selectedOption={view}
-								onOptionChange={handleTotalViewChange}
-							/>
-						</div>
-					)} */}
-
-					{purchasetData.length > 0 && <div className='paged-table'>{Table}</div>}
-				</>
-			)}{' '}
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
-
-				<VendorModal
-					vendorData={vendorsList}
-					vendorID={selectedVendor}
-					vendorName={selectedVendorName}
-					show={showVendorModal}
-					handleClose={() => {
-						setVendorShowModal(false);
-					}}
-					handleVendorSelection={handleVendorSelection}
-					isMultiVendor={true}
-				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
 			</div>
-		</div>
+		</>
 	);
 };
 

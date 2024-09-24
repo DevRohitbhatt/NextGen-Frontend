@@ -11,6 +11,7 @@ export default {
 			colors: {
 				primary: '#36479D',
 				secondary: '#e6e7eb',
+				tooltip: '#508cff',
 			},
 		},
 	},
