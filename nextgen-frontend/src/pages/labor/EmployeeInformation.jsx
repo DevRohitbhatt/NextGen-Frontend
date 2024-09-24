@@ -432,133 +432,57 @@ const EmployeeInformation = () => {
 			title: `Employee Information Report | ${view}`,
 			subHeaders: [dateFormat(new Date(), 'mm/dd/yyyy')],
 			exportType: 'pdf',
-			pageSize: 'A3',
 			pageOrientation: 'landscape',
-			body: [
-				{
-					type: 'table',
-					widths: headers.map(() => 'auto'),
-					dataTypes: headers.map((header) => header.cellType),
-					data: {
-						columnHeaders: headers.map((header) => header.label),
-						rows: filteredEmployeeInformationData.data.map((row) => [
-							{
-								value: row.unitName,
-								cellType: '',
-								columnName: 'Unit Name',
-							},
-							{
-								value: row.employeeId,
-								cellType: '',
-								columnName: 'Employee ID',
-							},
-							{
-								value: row.uniqueId,
-								cellType: '',
-								columnName: 'Unique ID',
-							},
-							{
-								value: row.lastName,
-								cellType: '',
-								columnName: 'Last Name',
-							},
-							{
-								value: row.firstName,
-								cellType: '',
-								columnName: 'First Name',
-							},
-							{
-								value: row.middleName,
-								cellType: '',
-								columnName: 'Middle Name',
-							},
-							{
-								value: row.payRate,
-								cellType: '',
-								columnName: 'Pay Rate',
-							},
-							{
-								value: row.address,
-								cellType: '',
-								columnName: 'Address',
-							},
-							{
-								value: row.address2,
-								cellType: '',
-								columnName: 'Address 2',
-							},
-							{
-								value: row.city,
-								cellType: '',
-								columnName: 'City',
-							},
-							{
-								value: row.state,
-								cellType: '',
-								columnName: 'State',
-							},
-							{
-								value: row.zip,
-								cellType: '',
-								columnName: 'Zip',
-							},
-							{
-								value: row.phone,
-								cellType: '',
-								columnName: 'Phone',
-							},
-							{
-								value: row.maritalStatus,
-								cellType: '',
-								columnName: 'Marital Status',
-							},
-							{
-								value: row.dependants,
-								cellType: '',
-								columnName: 'Dependants',
-							},
-							{
-								value: row.phantomEmployee,
-								cellType: '',
-								columnName: 'Phantom Employee',
-							},
-							{
-								value: row.cellPhone,
-								cellType: '',
-								columnName: 'Cell Phone',
-							},
-							{
-								value: row.email,
-								cellType: '',
-								columnName: 'Email',
-							},
-							{
-								value: row.payrollID,
-								cellType: '',
-								columnName: 'Payroll ID',
-							},
-							{
-								value: row.birthDate,
-								cellType: '',
-								columnName: 'Birth Date',
-							},
-							{
-								value: row.startDate,
-								cellType: '',
-								columnName: 'Start Date',
-							},
-							{
-								value: row.termDate,
-								cellType: '',
-								columnName: 'Term Date',
-							},
-						]),
-					},
-				},
-			],
+			body: generateBody(),
 		};
 
 		PdfBuilder(pdfData);
+	};
+
+	const generateBody = () => {
+		const rowsPerTable = 28; // Define how many rows you want per table
+		const totalRows = filteredEmployeeInformationData.data.length; // Get total number of rows
+		const body = []; // Initialize the body array
+
+		// Loop through the data and create tables
+		for (let i = 0; i < totalRows; i += rowsPerTable) {
+			// Create first table for Unit Name, Employee ID, Unique ID, Last Name, First Name, Middle Name, Pay Rate, Address, Address 2, City, State, Zip, Phone
+			body.push({
+				type: 'table/SeperatePage',
+				widths: headers.slice(0, 13).map(() => 'auto'),
+				dataTypes: headers.slice(0, 13).map((header) => header.cellType),
+				data: {
+					columnHeaders: headers.slice(0, 13).map((header) => header.label),
+					rows: filteredEmployeeInformationData.data.slice(i, i + rowsPerTable).map((row) =>
+						headers.slice(0, 13).map((header) => ({
+							value: row[header.key],
+							cellType: '',
+							columnName: header.label,
+						}))
+					),
+				},
+			});
+
+			// Create second table for Marital Status, Dependants, Phantom Employee, Cell Phone, Email, Payroll ID, Birth Date, Start Date, Term Date
+			body.push({
+				type: 'table/SeperatePage',
+				widths: headers.slice(13).map(() => 'auto'),
+				dataTypes: headers.slice(13).map((header) => header.cellType),
+				data: {
+					columnHeaders: headers.slice(13).map((header) => header.label),
+					rows: filteredEmployeeInformationData.data.slice(i, i + rowsPerTable).map((row) =>
+						headers.slice(13).map((header) => ({
+							value: row[header.key],
+							cellType: '',
+							columnName: header.label,
+						}))
+					),
+				},
+			});
+		}
+
+		// Now the `body` array contains all the tables for the report
+		return body;
 	};
 
 	// Function to handle the Excel export
