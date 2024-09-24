@@ -140,6 +140,16 @@ const MenuItemsSold = () => {
 	const getColumns = (activeTab) => {
 		if (activeTab === 'ItemsSoldTotals') {
 			return [
+        ...(viewValue === 2
+          ? [
+              columnHelper.accessor('Category', {
+                id: 'Category',
+                header: 'Category',
+                dataType: 'string',
+                cell: (info) => info.getValue() || '',
+              }),
+            ]
+          : []),
 				columnHelper.accessor('itemId', {
 					id: 'itemId',
 					header: 'Item',
@@ -556,12 +566,18 @@ const MenuItemsSold = () => {
 						})),
 					})),
 				}));
-			} else {
+			} else if (viewValue === 2) {
 				// Direct binding without additional mapping
-				newData = result.data?.map((category) => ({
-					category: category.category,
-					total: category.total,
-					menuItemSoldTotalsModels: category.menuItemSoldTotalsModels,
+				newData = result.data?.map((item) => ({
+					unitName: item.unitName,
+					Category: item.grouping1,
+					itemId: item.itemId,
+					description: item.description,
+					quant: item.quant,
+					discPrice: item.discPrice,
+					quantity_Avg: item.quantity_Avg,
+					discPrice_Avg: item.discPrice_Avg,
+					itemSoldPct: item.itemSoldPct,
 				}));
 			}
 
@@ -961,7 +977,9 @@ const MenuItemsSold = () => {
 	//       expandCollapseButtons={true}
 	//     />
 	//   );
-	const columns = useMemo(() => getColumns(activeTab), [activeTab]);
+  
+	const columns = useMemo(() => getColumns(activeTab, viewValue), [activeTab, viewValue]);
+
 
 	console.log('menuItemSoldData', menuItemSoldData);
 
@@ -972,7 +990,7 @@ const MenuItemsSold = () => {
 			view={viewWeek}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
-			expandCollapseButtons={true}
+			expandCollapseButtons={viewValue===2 ? false: true}
 			detailOnTop={`${currentSalesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
 				menuItemSoldData[0]?.total?.toFixed(2) || 0
 			}`}
