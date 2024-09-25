@@ -225,42 +225,40 @@ const Voids = () => {
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
-				url: 'voids',
+				url: 'businessSummary',
 				urlParams: {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					DOW:
+						DOWType === 'All'
+							? '1234567'
+							: DOWType === 'Sunday'
+							? 1
+							: DOWType === 'Monday'
+							? 2
+							: DOWType === 'Tuesday'
+							? 3
+							: DOWType === 'Wednesday'
+							? 4
+							: DOWType === 'Thursday'
+							? 5
+							: DOWType === 'Friday'
+							? 6
+							: 7,
+					summaryBy: summaryBy,
+					salesType: salesType === 'Net Sales' ? 'SalesNet' : 'SalesGross',
 				},
 			};
 
 			const result = await getCall(getData);
-			const newData = {
-				...result,
-				data: result.data.map((row) => ({
-					...row,
-					subRows: row.voids.map((item) => ({
-						unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
-						date: item.date,
-						hour: item.hour,
-						minute: item.minute,
-						voidReason: item.voidReason,
-						employeeName: item.employeeName,
-						managerName: item.managerName,
-						fullDescription: item.fullDescription,
-						posCheckId: item.posCheckId,
-						tableName: item.tableName,
-						revenueID: item.revenueID,
-						price: item.price,
-						tendersUsed: item.tendersUsed,
-					})),
-					unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
-				})),
-			};
 
-			setVoidsReportData(newData.data);
-			setFilteredVoidsReportData(newData.data);
+			console.log('result', result);
+
+			setVoidsReportData(result.data);
+			setFilteredVoidsReportData(result.data);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);

@@ -26,16 +26,18 @@ const urlConfig = {
 	//food cost apis
 	inventoryTransferReportData: 'api/foodcost/getInventoryTransferReportData',
 	InventoryWeeksOnHand: 'api/foodcost/getInventoryWeeksOnHandReportData',
-	ActualFoodCost:'api/foodcost/getActualFoodCostReportData',
+	ActualFoodCost: 'api/foodcost/getActualFoodCostReportData',
 	varianceFoodCost: 'api/foodcost/getVarianceFoodCostReportData',
 	invoiceReport: '/api/foodcost/getInvoiceReportData',
 	invoiceSearchReport: 'api/foodcost/GetInvoiceSearchReportData',
 	getCountsheets: 'api/foodcost/GetCountSheets',
 	countsheetDetails: 'api/foodcost/GetCountsheetDetails',
 	PurchaseAnalysis: 'api/foodcost/getPurchaseAnalysisData',
+
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
+	businessSummary: 'api/sales/GetBusinessSummaryReportData',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
