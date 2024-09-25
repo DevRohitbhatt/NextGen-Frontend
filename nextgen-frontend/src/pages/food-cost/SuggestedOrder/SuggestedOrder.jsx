@@ -610,6 +610,7 @@ export default function SuggestedOrder() {
 	}, [editedMessages]);
 
 	const handleCSVClick = () => {
+		const columnHeaders = ['Inventory Description', 'Item Description', 'Item Ref', 'Item Order Unit', 'Pack Size', 'Current/Last Price', 'Safety Factor', 'Suggested Qty', 'On Hand', 'Order Amount', 'Extended Price'];
 		const data = suggestedTable.rows.flatMap((row) =>
 			row.suggestedOrderItem.flatMap((item) =>
 				item.vendorItems
@@ -630,7 +631,7 @@ export default function SuggestedOrder() {
 			)
 		);
 		const csvDataString =
-			suggestedTableStructure.columnHeaders.join(',') + '\n' + data.map((row) => row.join(',')).join('\n');
+			columnHeaders.join(',') + '\n' + data.map((row) => row.join(',')).join('\n');
 		const csvBlob = new Blob([csvDataString], { type: 'text/csv' });
 		const csvURL = window.URL.createObjectURL(csvBlob);
 		const tempLink = document.createElement('a');
@@ -919,156 +920,156 @@ export default function SuggestedOrder() {
 	};
 
 	return (
-		<Styled.PageContainer>
-			<Steps
-				enabled={introJS.stepsEnabled}
-				steps={introJS.steps}
-				initialStep={introJS.initialStep}
-				onExit={() => setIntroJS({ ...introJS, stepsEnabled: false })}
-			/>
-			<Styled.PageTitle>Suggested Order</Styled.PageTitle>
-			<Styled.OptionsRow>
-				<Styled.MessageContainer>
-					{showSuccessPopup && <MessagePopup type='Success' message={successMessage} onClose={handleClose} />}
+<div className="w-[85%] mx-auto">
+  <Steps
+    enabled={introJS.stepsEnabled}
+    steps={introJS.steps}
+    initialStep={introJS.initialStep}
+    onExit={() => setIntroJS({ ...introJS, stepsEnabled: false })}
+  />
 
-					{showErrorPopup && <MessagePopup type='Error' message='Error message' onClose={handleClose} />}
+  <div className=" pageTitle text-2xl leading-tight my-4 text-left">
+    Suggested Order
+  </div>
 
-					{showWarningPopup && (
-						<MessagePopup type='Warning' message='Warning message' onClose={handleClose} />
-					)}
-				</Styled.MessageContainer>
+  <div className=" optionsBar flex justify-between mb-10 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
+    <div>
+      {showSuccessPopup && <MessagePopup type='Success' message={successMessage} onClose={handleClose} />}
+      {showErrorPopup && <MessagePopup type='Error' message='Error message' onClose={handleClose} />}
+      {showWarningPopup && <MessagePopup type='Warning' message='Warning message' onClose={handleClose} />}
+    </div>
 
-				<Styled.DateAndUnitContainer>
-					<UnitSelector
-						companyID={companyID}
-						alignmentID={alignmentID}
-						memberName={selectedUnitName}
-						setMemberName={setSelectedUnitName}
-						memberID={selectedUnit}
-						isEditable={false}
-					/>
-					<VendorSelector
-						vendorName={selectedVendorName}
-						setVendorName={setSelectedVendorName}
-						vendorID={selectedVendor}
-						isEditable={false}
-					/>
-					<DateSelector fromDate={fromDate} toDate={toDate} isDateRange={true} isEditable={false} />
-					<UnitModal
-						unitData={unitsList}
-						memberID={selectedUnit}
-						memberName={selectedUnitName}
-						show={showModal}
-						handleClose={() => {
-							setShowModal(false);
-						}}
-					/>
-				</Styled.DateAndUnitContainer>
+    <div className="flex mx-auto">
+      <UnitSelector
+        companyID={companyID}
+        alignmentID={alignmentID}
+        memberName={selectedUnitName}
+        setMemberName={setSelectedUnitName}
+        memberID={selectedUnit}
+        isEditable={false}
+      />
+      <VendorSelector
+        vendorName={selectedVendorName}
+        setVendorName={setSelectedVendorName}
+        vendorID={selectedVendor}
+        isEditable={false}
+      />
+      <DateSelector fromDate={fromDate} toDate={toDate} isDateRange={true} isEditable={false} />
+      <UnitModal
+        unitData={unitsList}
+        memberID={selectedUnit}
+        memberName={selectedUnitName}
+        show={showModal}
+        handleClose={() => {
+          setShowModal(false);
+        }}
+      />
+    </div>
 
-				<ExportOptions
-					includePDF={true}
-					includeCSV={true}
-					includeSave={true}
-					includeSubmit={true}
-					includeHelp={true}
-					handlePDFClick={handlePDFClick}
-					handleCSVClick={handleCSVClick}
-					handleSaveClick={handleSave}
-					handleSubmitClick={onSubmitClick}
-					handleHelpClick={handleIntroJSStart}
-				/>
-				<SubmitPurchaseOrderModal
-					isOpen={showSubmitModal}
-					onClose={() => setShowSubmitModal(false)}
-					orderData={getSubmitData()}
-					vendorName={selectedVendorName}
-				/>
-			</Styled.OptionsRow>
+    <ExportOptions
+      includePDF={true}
+      includeCSV={true}
+      includeSave={true}
+      includeSubmit={true}
+      includeHelp={true}
+      handlePDFClick={handlePDFClick}
+      handleCSVClick={handleCSVClick}
+      handleSaveClick={handleSave}
+      handleSubmitClick={onSubmitClick}
+      handleHelpClick={handleIntroJSStart}
+    />
+    <SubmitPurchaseOrderModal
+      isOpen={showSubmitModal}
+      onClose={() => setShowSubmitModal(false)}
+      orderData={getSubmitData()}
+      vendorName={selectedVendorName}
+    />
+  </div>
 
-			{isLoading ? (
-				<>
-					<Styled.UnloadedMessage>Loading...</Styled.UnloadedMessage>
-				</>
-			) : isError ? (
-				<Styled.UnloadedMessage>{errorMessage}</Styled.UnloadedMessage>
-			) : (
-				<>
-					<MinimizableContainer
-						title={() => {
-							return <div>Sales Forecast</div>;
-						}}
-					>
-						<Styled.ForeCastAndSafetyFactor>
-							<Table
-								columnHeaders={forecastTable.columnHeaders}
-								dataTypes={forecastTable.dataTypes}
-								columnwidths={forecastTable.columnWidth}
-								rows={forecastTable.rows}
-								width={forecastTable.width}
-								tableName={'Forecast'}
-								handleInputCellChange={handleTableCellChange}
-								isSorting={false}
-								headerTooltips={forecastTable.headerTooltips}
-								toolTipDirection={forecastTable.toolTipDirection}
-								className={'sales-forecast'}
-							/>
+  {isLoading ? (
+    <div className="text-2xl mx-auto w-full text-center">Loading...</div>
+  ) : isError ? (
+    <div className="text-2xl mx-auto w-full text-center">{errorMessage}</div>
+  ) : (
+    <>
+      <MinimizableContainer
+        title={() => <div>Sales Forecast</div>}
+      >
+        <div className=" flex gap-6">
+          <Table
+            columnHeaders={forecastTable.columnHeaders}
+            dataTypes={forecastTable.dataTypes}
+            columnwidths={forecastTable.columnWidth}
+            rows={forecastTable.rows}
+            width={forecastTable.width}
+            tableName={'Forecast'}
+            handleInputCellChange={handleTableCellChange}
+            isSorting={false}
+            headerTooltips={forecastTable.headerTooltips}
+            toolTipDirection={forecastTable.toolTipDirection}
+            className={'sales-forecast'}
+          />
 
-							<Table
-								columnHeaders={defaultSafetyFactorTable.columnHeaders}
-								dataTypes={defaultSafetyFactorTable.dataTypes}
-								columnwidths={defaultSafetyFactorTable.columnWidth}
-								rows={defaultSafetyFactorTable.rows}
-								tableName={'DefaultSafetyFactor'}
-								width={defaultSafetyFactorTable.width}
-								height={defaultSafetyFactorTable.height}
-								handleInputCellChange={handleTableCellChange}
-								isSorting={false}
-								headerTooltips={defaultSafetyFactorTable.headerTooltips}
-								toolTipDirection={defaultSafetyFactorTable.toolTipDirection}
-								className={'default-safety-factor'}
-							/>
-						</Styled.ForeCastAndSafetyFactor>
-					</MinimizableContainer>
+          <Table
+            columnHeaders={defaultSafetyFactorTable.columnHeaders}
+            dataTypes={defaultSafetyFactorTable.dataTypes}
+            columnwidths={defaultSafetyFactorTable.columnWidth}
+            rows={defaultSafetyFactorTable.rows}
+            tableName={'DefaultSafetyFactor'}
+            width={defaultSafetyFactorTable.width}
+            height={defaultSafetyFactorTable.height}
+            handleInputCellChange={handleTableCellChange}
+            isSorting={false}
+            headerTooltips={defaultSafetyFactorTable.headerTooltips}
+            toolTipDirection={defaultSafetyFactorTable.toolTipDirection}
+            className={'default-safety-factor'}
+          />
+        </div>
+      </MinimizableContainer>
 
-					<Styled.InventoryItemsContainer>
-						<TreeTable
-							companyAndUnitData={{
-								companyID: companyID,
-								alignmentID: alignmentID,
-								unitID: selectedUnit,
-							}}
-							data={suggestedTable.rows}
-							setData={updateSuggestedTable}
-							columnHeaders={suggestedTable.columnHeaders}
-							headerClassNames={suggestedTable.classNames}
-							dataTypes={suggestedTable.dataTypes}
-							setQid={setQid}
-							headerTooltips={suggestedTable.headerTooltips}
-							toolTipDirection={suggestedTable.toolTipDirection}
-							onSearch={handleSearch}
-							orderLimits={orderLimits}
-							setOrderLimits={setOrderLimits}
-							columnWidths={suggestedTable.columnWidth}
-							handleAddNewItem={showAddItemModal}
-						/>
-					</Styled.InventoryItemsContainer>
-					<Modal isOpen={addItemModal.isOpen} onClose={closeAddItemModal} title={addItemModal.title}>
-						<Styled.AddItemModalHeader>
-							<h3>Select an item from the list below</h3>
-							<SearchBar onSearch={handleAddItemSearch} />
-						</Styled.AddItemModalHeader>
-						<TableComponent
-							data={addItemModalData}
-							headers={addItemModal.tableHeaders}
-							onRowClick={onAddItemModalRowClick}
-							isPaginated={false}
-						/>
-						<Styled.ModalFooter>
-							<Styled.AddNewItemButton onClick={handleAddNewItem}>Add Item</Styled.AddNewItemButton>
-						</Styled.ModalFooter>
-					</Modal>
-				</>
-			)}
-		</Styled.PageContainer>
+      <div className=" optionsBar my-10 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
+        <TreeTable
+          companyAndUnitData={{
+            companyID: companyID,
+            alignmentID: alignmentID,
+            unitID: selectedUnit,
+          }}
+          data={suggestedTable.rows}
+          setData={updateSuggestedTable}
+          columnHeaders={suggestedTable.columnHeaders}
+          headerClassNames={suggestedTable.classNames}
+          dataTypes={suggestedTable.dataTypes}
+          setQid={setQid}
+          headerTooltips={suggestedTable.headerTooltips}
+          toolTipDirection={suggestedTable.toolTipDirection}
+          onSearch={handleSearch}
+          orderLimits={orderLimits}
+          setOrderLimits={setOrderLimits}
+          columnWidths={suggestedTable.columnWidth}
+          handleAddNewItem={showAddItemModal}
+        />
+      </div>
+
+      <Modal isOpen={addItemModal.isOpen} onClose={closeAddItemModal} title={addItemModal.title}>
+        <div className="flex justify-between items-center">
+          <h3>Select an item from the list below</h3>
+          <SearchBar onSearch={handleAddItemSearch} />
+        </div>
+        <TableComponent
+          data={addItemModalData}
+          headers={addItemModal.tableHeaders}
+          onRowClick={onAddItemModalRowClick}
+          isPaginated={false}
+        />
+        <div className="flex justify-end mx-auto w-full">
+          <button className="ml-2.5 w-15 h-15 rounded-full border-2 border-primary relative cursor-pointer hover:bg-primary hover:text-white" onClick={handleAddNewItem}>
+            Add Item
+          </button>
+        </div>
+      </Modal>
+    </>
+  )}
+</div>
+
 	);
 }

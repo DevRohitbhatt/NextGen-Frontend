@@ -324,14 +324,14 @@ const TreeNode = ({
 	}, [node]);
 	return (
 		<>
-			<TableCell>
-				<StyledCellParent>
-					<ToggleIcon onClick={toggleNode}>
+			<div className={` relative text-sm border-b border-secondary bg-gray-100`}>
+				<div className=' py-1 font-semibold'>
+					<div className=' flex cursor-pointer ' onClick={toggleNode}>
 						{isExpanded ? <SlArrowUpIcon /> : <SlArrowDownIcon />}
 						{node.name}
-					</ToggleIcon>
-				</StyledCellParent>
-			</TableCell>
+					</div>
+				</div>
+			</div>
 			<SetOrderLimitsModal
 				companyAndUnitData={companyAndUnitData}
 				isOpen={isOrderLimitModalOpen}
@@ -346,7 +346,7 @@ const TreeNode = ({
 				node.suggestedOrderItem &&
 				node.suggestedOrderItem.map((childNode, index) =>
 					!childNode.isHidden ? (
-						<TableRow key={index}>
+						<div className=' relative items-center text-sm border-b border-gray-300 py-1 flex justify-center gap-[10px]' key={index}>
 							<StyledCell $columnWidth={columnWidths[0]}>{childNode.invItemDescription}</StyledCell>
 							<StyledCell $columnWidth={columnWidths[1]}>
 								{childNode.vendorItems && (
@@ -511,7 +511,7 @@ const TreeNode = ({
 									)}
 								</>
 							)}
-						</TableRow>
+						</div>
 					) : null
 				)}
 		</>

@@ -63,7 +63,7 @@ export default function UnitSelector({
 			) : (
 				<div
 					onClick={isEditable ? onClick : () => {}}
-					className='flex flex-col justify-center rounded-3xl unit-selector'
+					className='flex flex-col justify-center rounded-3xl mx-1 unit-selector'
 				>
 					{isEditable ? (
 						<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>Select Unit(s)</h3>
@@ -71,8 +71,8 @@ export default function UnitSelector({
 						<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>Units</h3>
 					)}
 					<div
-						className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
-							isEditable ? ' hover:border-primary' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
+						className={`px-6 py-3 text-center capitalize border-2 border-solid  text-nowrap rounded-3xl ${
+							isEditable ? ' hover:border-primary cursor-pointer' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
 						}`}
 					>
 						{memberName}

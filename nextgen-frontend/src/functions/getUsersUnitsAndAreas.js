@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import { getCall } from "../apis/network.js";
 import {
   setUnitsAndAreas,
@@ -33,7 +34,8 @@ export const fetchUnitsAndAreas = async (
 export const SaveUnitsAndAreasToLocalStorage = (
   companyId,
   alignmentId,
-  groupOrUnitAccess
+  groupOrUnitAccess,
+  defaultUnitID
 ) => {
   return async (dispatch) => {
     try {
@@ -48,12 +50,12 @@ export const SaveUnitsAndAreasToLocalStorage = (
       let defaultUnitName = "";
       let groupOrUnitAccessName = "";
       unitsAndAreas.units.forEach((unit) => {
-        if (unit.unitID.toString() === localStorage.getItem("defaultUnitId")) {
+        if (unit.unitID === defaultUnitID) {
           defaultUnitName = unit.unitName;
         }
       });
       unitsAndAreas.areas.forEach((area) => {
-        if (area.areaID === localStorage.getItem("groupOrUnitAccess")) {
+        if (area.areaID === groupOrUnitAccess) {
           groupOrUnitAccessName = area.areaName;
         }
       });

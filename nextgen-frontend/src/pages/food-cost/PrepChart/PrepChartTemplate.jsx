@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { ToastContainer } from "react-toastify";
+import { useSelector } from "react-redux";
 import "react-toastify/dist/ReactToastify.css";
 import { getCall, postCall } from "../../../apis/network";
 import { FaInfoCircle } from "react-icons/fa";
@@ -18,6 +19,10 @@ import {
 } from "../../../components/index.js";
 
 export default function PrepChartTemplate() {
+	const state = useSelector((state) => state.globalState);
+  const companyID = useSelector((state) => state.globalState.companyID);
+  const alignmentID = useSelector((state) => state.globalState.alignmentID);
+  const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
   const [inventoryItems, setInventoryItems] = useState([]);
   const [filteredInventoryItems, setFilteredInventoryItems] = useState([]);
   const [prepChartTemplate, setPrepChartTemplate] = useState({
@@ -28,15 +33,8 @@ export default function PrepChartTemplate() {
 			},
 		],
 	});
-  const [unitsAndAreasList, setUnitsAndAreasList] = useState(
-    JSON.parse(localStorage.getItem("unitsAndAreas"))
-  );
-  const [selectedUnit, setSelectedUnit] = useState(
-    localStorage.getItem("defaultUnitId")
-  );
-  const [selectedUnitName, setSelectedUnitName] = useState(
-    localStorage.getItem("defaultUnitName")
-  );
+  const [selectedUnit, setSelectedUnit] = useState(state.defaultUnitId);
+  const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
   const [showModal, setShowModal] = useState(false);
   const [isSave, setIsSave] = useState(false);
   const [errors, setErrors] = useState({
@@ -45,10 +43,6 @@ export default function PrepChartTemplate() {
 	});
   const [isInventoryLoading, setIsInventoryLoading] = useState(false);
 	const [isPrepChartLoading, setIsPrepChartLoading] = useState(false);
-  const [companyID, setCompanyId] = useState(localStorage.getItem("companyId"));
-  const [alignmentID, setAlignmentId] = useState(
-    localStorage.getItem("alignmentId")
-  );
 	const [introJS, setIntroJS] = useState({
 		steps: introSteps(),
 		initialStep: 0,
@@ -57,9 +51,23 @@ export default function PrepChartTemplate() {
 	const toastId = useRef(null);
 
   useEffect(() => {
-    fetchInventoryList(companyID, selectedUnit);
-		fetchPrepChartTemplate(companyID, selectedUnit);
-  }, []);
+    if (state.defaultUnitId) {
+      setSelectedUnit(state.defaultUnitId);
+    }
+    if (state.defaultUnitName) {
+      setSelectedUnitName(state.defaultUnitName);
+    }
+  }, [
+    state.defaultUnitId,
+    state.defaultUnitName,
+  ]);
+
+  useEffect(() => {
+    if (companyID && state.defaultUnitID) {
+      fetchInventoryList(companyID, state.defaultUnitID);
+      fetchPrepChartTemplate(companyID, state.defaultUnitID);
+    }
+  }, [companyID, state.defaultUnitID]);
 
   useEffect(() => {
     setFilteredInventoryItems(inventoryItems);

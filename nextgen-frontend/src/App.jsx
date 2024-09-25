@@ -7,6 +7,8 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { ToastContainer } from "react-toastify";
 import {
   getParametersFromUrl,
+	storeAndDispatchParameters,
+	loadFromLocalStorage,
 } from "./functions/storageHelpers.js";
 import { useDispatch, useSelector } from "react-redux";
 import { SaveUnitsAndAreasToLocalStorage } from "./functions/getUsersUnitsAndAreas";
@@ -19,58 +21,33 @@ import PrepChartTemplate from "./pages/food-cost/PrepChart/PrepChartTemplate";
 import VoidsReport from "./pages/sales/VoidsReport.jsx";
 import LaborByPayPeriod from "./pages/labour/LaborByPayPeriod.jsx";
 import InventoryWeeksOnHand from "./pages/food-cost/InventoryWeeksOnHand.jsx";
-import { setCompanyID, setCompanyName, setAlignmentID, setDefaultUnitID, setGroupOrUnitAccess, setUserID, setUserType } from "./reducer/slices/globalState.js";
 
 const App = () => {
   const selectedTheme = themes.default;
 	const dispatch = useDispatch();
-	const state = useSelector((state) => state.globalstate);
 
-  useEffect(() => {
-    const parameters = getParametersFromUrl();
-
-    if (parameters) {
-      const {
-        CompanyID,
-        CompanyName,
-        User_UserID,
-        User_Type,
-        User_DefaultUnitID,
-        AlignmentId,
-        User_GroupOrUnitAccess,
-      } = parameters;
-			dispatch(setCompanyID(CompanyID));
-			dispatch(setCompanyName(CompanyName));
-			dispatch(setAlignmentID(AlignmentId));
-			dispatch(setDefaultUnitID(User_DefaultUnitID));
-			dispatch(setGroupOrUnitAccess(User_GroupOrUnitAccess));
-			dispatch(setUserID(User_UserID));
-			dispatch(setUserType(User_Type));
-      dispatch(SaveUnitsAndAreasToLocalStorage(
-        CompanyID,
-        AlignmentId,
-        User_GroupOrUnitAccess
-      ));
-    } else if (state.CompanyID && state.AlignmentID) {
-      dispatch(SaveUnitsAndAreasToLocalStorage(
-        state.CompanyID,
-				state.AlignmentID,
-				state.User_GroupOrUnitAccess
-      ));
-    } else {
-      console.log("testing mode");
-      const defaultState = {
-        companyId: 1021,
-        companyName: "Default Company",
-        userId: 5199,
-        userType: "admin",
-        defaultUnitId: 0,
-        alignmentId: 1110,
-        groupOrUnitAccess: "defaultAccess",
-      };
-      dispatch(SaveUnitsAndAreasToLocalStorage(1021, 1110, 0));
-    }
-  }, []);
+	useEffect(() => {
+		const parameters = getParametersFromUrl();
+	
+		if (localStorage.getItem("CompanyID") !== null) {
+			loadFromLocalStorage(dispatch);  // Load from local storage if available
+		} else if (parameters) {
+			storeAndDispatchParameters(dispatch, parameters);  // Store and dispatch URL parameters
+		} else {
+			console.log("testing mode");
+			const defaultState = {
+				CompanyID: 1021,
+				CompanyName: "Default Company",
+				AlignmentId: 1110,
+				User_UserID: 5199,
+				User_Type: "admin",
+				User_DefaultUnitID: 0,
+				User_GroupOrUnitAccess: "defaultAccess"
+			};
+			storeAndDispatchParameters(dispatch, defaultState);  // Store and dispatch default state
+		}
+	}, [dispatch]);
+	
 
   return (
     <Router>
