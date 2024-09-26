@@ -349,8 +349,6 @@ const MenuItemsSold = () => {
       ];
     }
     if (activeTab === "ItemsSoldByHour") {
-		console.log("itemValue",itemValue);
-		
       return [
         columnHelper.accessor("unit", {
           id: "Unit",
@@ -417,6 +415,56 @@ const MenuItemsSold = () => {
               }),
             ]
           : []),
+      ];
+    }
+    if (activeTab === "ItemsSoldWithModifiers") {
+      return [
+        columnHelper.display({
+          id: "actions",
+          cell: ({ row }) =>
+            row.getCanExpand() ? (
+              <div
+                {...{
+                  style: {
+                    cursor: "pointer",
+                    paddingLeft: `${row.depth * 2}rem`,
+                  },
+                  className: "inline-block",
+                }}
+              >
+                {row.getIsExpanded() ? (
+                  <CiSquareMinus className="text-[20px]" />
+                ) : (
+                  <CiSquarePlus className="text-[20px]" />
+                )}
+              </div>
+            ) : null,
+          size: "80",
+        }),
+        columnHelper.accessor("category", {
+          id: "Modifier Item",
+          header: "Modifier Item",
+          dataType: "string",
+          cell: (info) => info.getValue() || "",
+        }),
+        columnHelper.accessor("modifierDisplayName", {
+          id: "Modifier Item Name",
+          header: "Modifier Item Name",
+          dataType: "string",
+          cell: (info) => info.getValue() || "",
+        }),
+        columnHelper.accessor("quant", {
+          id: "Quantity",
+          header: "Quantity",
+          dataType: "string",
+          cell: (info) => info.getValue() || "",
+        }),
+        columnHelper.accessor("modItemFrequency", {
+          id: "Modifier Usage Frequency",
+          header: "Modifier Usage Frequency",
+          dataType: "string",
+          cell: (info) => info.getValue() || "",
+        }),
       ];
     }
 
@@ -781,50 +829,49 @@ const MenuItemsSold = () => {
           fromDate: selectedFromDate.toLocaleDateString("en-CA"),
           toDate: selectedToDate.toLocaleDateString("en-CA"),
           options:
-            view === 0
+            viewValue === 0
               ? "GroupSummary"
-              : view === 1
+              : viewValue === 1
               ? "GroupByUnit"
               : "GroupByUnit",
-          groupBy: view === 0 ? 1 : view === 1 ? 0 : 0,
+          groupBy: viewValue === 0 ? 1 : viewValue === 1 ? 0 : 0,
         },
       };
 
       const result = await getCall(getData);
 
-      const newData = result.data.map((item) => ({
-        itemId: item.itemId,
-        itemFullDescription: item.itemFullDescription,
-        menuItemSoldModifierModels: item.menuItemSoldModifierModels.map(
-          (modifier) => ({
-            unitId: modifier.unitId,
-            unitName: modifier.unitName,
-            itemId: modifier.itemId,
-            modItemID: modifier.modItemID,
-            itemFullDescription: modifier.itemFullDescription,
-            modQuantity: modifier.modQuantity,
-            modItemFrequency: modifier.modItemFrequency,
-            modifierDisplayName: modifier.modifierDisplayName,
-          })
-        ),
-        menuItemSoldModifierUnitReportModels:
-          item.menuItemSoldModifierUnitReportModels.map((unit) => ({
-            unitId: unit.unitId,
-            unitName: unit.unitName,
-            menuItemSoldModifierModels: unit.menuItemSoldModifierModels.map(
-              (modifier) => ({
-                unitId: modifier.unitId,
-                unitName: modifier.unitName,
-                itemId: modifier.itemId,
-                modItemID: modifier.modItemID,
-                itemFullDescription: modifier.itemFullDescription,
-                modQuantity: modifier.modQuantity,
-                modItemFrequency: modifier.modItemFrequency,
-                modifierDisplayName: modifier.modifierDisplayName,
-              })
-            ),
+      let newData;
+
+      // Conditional mapping based on salesType
+      if (viewValue === 0) {
+        newData = result.data.map((category) => ({
+          category: category.itemFullDescription,
+          //   total: category.total,
+          subRows: category.menuItemSoldModifierModels?.map((item) => ({
+            itemId: item.itemId,
+            modifierDisplayName: item.itemFullDescription,
+            quant: item.quant,
+            modItemFrequency: item.modItemFrequency,
           })),
-      }));
+        }));
+      } else if (viewValue === 1) {
+        newData = result.data.map((category) => ({
+          category: category.itemFullDescription,
+          //   total: category.total,
+          subRows: category.menuItemSoldModifierUnitReportModels.map(
+            (unit) => ({
+              unitName: unit.unitName,
+              subRows: unit.menuItemSoldModifierModels.map((item) => ({
+                unitName: item.unitName,
+                itemId: item.itemId,
+                modifierDisplayName: item.itemFullDescription,
+                modQuantity: item.modQuantity,
+                modItemFrequency: item.modItemFrequency,
+              })),
+            })
+          ),
+        }));
+      }
 
       setMenuItemSoldData(newData);
       setIsLoading(false);
@@ -1040,8 +1087,8 @@ const MenuItemsSold = () => {
   //   );
 
   const columns = useMemo(
-    () => getColumns(activeTab, viewValue,itemValue),
-    [activeTab, viewValue,itemValue]
+    () => getColumns(activeTab, viewValue, itemValue),
+    [activeTab, viewValue, itemValue]
   );
 
   console.log("menuItemSoldData", menuItemSoldData);
