@@ -148,17 +148,15 @@ export default function SubmitPurchaseOrderModal({
       .flatMap((detail) =>
         detail.suggestedOrderItem.flatMap((inventoryItem) => {
           const selectedVendorItem = inventoryItem.vendorItems.find(
-            (vendorItem) => vendorItem?.isSelected
+            (vendorItem) => vendorItem?.isSelected 
           );
-          return selectedVendorItem && selectedVendorItem.orderQty > 0
-            ? {
-                vendorItemDescription: selectedVendorItem.description,
-                vendorItemReference: selectedVendorItem.vendorItemReference,
-                vendorItemUOM: selectedVendorItem.unitOfMeasure,
-                vendorItemPackSize: selectedVendorItem.packSize,
-                quantity: selectedVendorItem.orderQty,
-              }
-            : [];
+          return {
+            vendorItemDescription: selectedVendorItem.description,
+            vendorItemReference: selectedVendorItem.vendorItemReference,
+            vendorItemUOM: selectedVendorItem.unitOfMeasure,
+            vendorItemPackSize: selectedVendorItem.packSize,
+            quantity: selectedVendorItem.orderQty,
+          };
         })
       )
       .sort((a, b) =>
