@@ -696,8 +696,21 @@ export default function SuggestedOrder() {
           ])
       )
     );
+    const columnHeaders = [
+      "Inventory Description",
+      "Item Description",
+      "Item Ref",
+      "Item Order Unit",
+      "Pack Size",
+      "Current/Last Price",
+      "Safety Factor",
+      "Suggested Qty",
+      "On Hand",
+      "Order Amount",
+      "Extended Price",
+    ];
     const csvDataString =
-      suggestedTableStructure.columnHeaders.join(",") +
+      columnHeaders.join(",") +
       "\n" +
       data.map((row) => row.join(",")).join("\n");
     const csvBlob = new Blob([csvDataString], { type: "text/csv" });
@@ -984,7 +997,17 @@ export default function SuggestedOrder() {
       orderToDate: toDate,
       defaultSafetyFactor: defaultSafetyFactor(defaultSafetyFactorTable.rows),
       forecastedData: forecastedData(forecastTable.rows),
-      suggestedOrderDetails: suggestedTable.rows,
+      suggestedOrderDetails: suggestedTable.rows.map((row) => ({
+        name: row.name,
+        suggestedOrderItem: row.suggestedOrderItem
+          .map((item) => ({
+            ...item,
+            vendorItems: item.vendorItems.filter(
+              (vendorItem) => vendorItem.orderQty > 0 && vendorItem.isSelected
+            ),
+          }))
+          .filter((item) => item.vendorItems.length > 0)
+      }))
     };
   }
 
