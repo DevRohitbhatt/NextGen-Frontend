@@ -66,29 +66,31 @@ function TableHOC({
 	return (
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-10 p-3'>
 			{/* expand/collapse all button */}
-			{expandCollapseButtons && (
-				<div className='flex items-center my-4 space-x-4'>
-					<button
-						onClick={() => table.toggleAllRowsExpanded(false)}
-						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-							table.getIsAllRowsExpanded() ? 'text-primary bg-secondary' : 'bg-primary text-white'
-						}`}
-					>
-						Collapse All
-						<IoIosArrowDown />
-					</button>
-					<button
-						onClick={() => table.toggleAllRowsExpanded(true)}
-						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-							table.getIsAllRowsExpanded() ? 'bg-primary text-white' : 'text-primary bg-secondary'
-						}`}
-					>
-						Expand All
-						<IoIosArrowUp />
-					</button>
-					<div className='text-xl font-bold'>{detailOnTop}</div>
-				</div>
-			)}
+			<div className='flex items-center gap-2'>
+				{expandCollapseButtons && (
+					<div className='flex items-center my-4 space-x-4'>
+						<button
+							onClick={() => table.toggleAllRowsExpanded(false)}
+							className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+								table.getIsAllRowsExpanded() ? 'text-primary bg-secondary' : 'bg-primary text-white'
+							}`}
+						>
+							Collapse All
+							<IoIosArrowDown />
+						</button>
+						<button
+							onClick={() => table.toggleAllRowsExpanded(true)}
+							className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+								table.getIsAllRowsExpanded() ? 'bg-primary text-white' : 'text-primary bg-secondary'
+							}`}
+						>
+							Expand All
+							<IoIosArrowUp />
+						</button>
+					</div>
+				)}
+				<div className='text-xl font-bold'>{detailOnTop}</div>
+			</div>
 
 			{/* table */}
 			<div className='pr-1 max-h-[60vh] overflow-scroll scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-primary scrollbar-track-secondary'>
