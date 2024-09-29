@@ -1,27 +1,20 @@
 import { useEffect } from 'react';
 import { getCall } from '../../apis/network';
 
-export default function Menu({
-	onClick,
-	companyId,
-	menuName,
-	setMenuName,
-	menuId
-}) {
+export default function Menu({ onClick, companyId, menuName, setMenuName, menuId }) {
 	useEffect(() => {
-        debugger
 		const fetchUnitList = async () => {
 			try {
 				const getData = {
 					url: 'MenuItemsByCompanyID',
 					urlParams: {
-						companyId: companyId
+						companyId: companyId,
 					},
 				};
 
 				const result = await getCall(getData);
-				console.log("Menu",result);
-                
+				console.log('Menu', result);
+
 				if (result.data.units.length > 0) {
 					const unitName = result.data.units.find((unit) => unit.unitID === menuId).unitName;
 					if (unitName) {
@@ -38,16 +31,13 @@ export default function Menu({
 
 	return (
 		<>
+			<div onClick={onClick} className='flex flex-col justify-center rounded-3xl unit-selector'>
 				<div
-					onClick={onClick}
-					className='flex flex-col justify-center rounded-3xl unit-selector'
+					className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl border-[#D3D3D3] hover:border-[#d3d3d3]`}
 				>
-					<div
-						className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl border-[#D3D3D3] hover:border-[#d3d3d3]`}
-					>
-						{menuName}
-					</div>
+					{menuName}
 				</div>
+			</div>
 		</>
 	);
 }

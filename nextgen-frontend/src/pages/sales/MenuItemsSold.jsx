@@ -137,6 +137,7 @@ const MenuItemsSold = () => {
 
 	const handleSalesChange = (option) => {
 		setSalesType(option);
+		setMenuItemSoldData([]);
 	};
 
 	const handleGroupByUnitChange = (option) => {
@@ -269,43 +270,43 @@ const MenuItemsSold = () => {
 		if (activeTab === 'ItemsSoldByEmployee') {
 			return [
 				columnHelper.accessor('unitName', {
-					id: 'Unit',
+					id: 'unitName',
 					header: 'Unit',
 					dataType: 'number',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('employeeId', {
-					id: 'Employee ID',
+					id: 'employeeId',
 					header: 'Employee ID',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('firstName', {
-					id: 'First Name',
+					id: 'firstName',
 					header: 'First Name',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('lastName', {
-					id: 'Last Name',
+					id: 'lastName',
 					header: 'Last Name',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('MenuItem', {
-					id: 'Menu Item',
+					id: 'MenuItem',
 					header: 'Menu Item',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('Sold', {
-					id: '#Sold',
+					id: 'Sold',
 					header: '#Sold',
 					dataType: 'number',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('discPrice', {
-					id: 'Item Sales',
+					id: 'discPrice',
 					header: 'Item Sales',
 					dataType: 'string',
 					cell: ({ row, getValue }) =>
@@ -314,13 +315,13 @@ const MenuItemsSold = () => {
 							: `$${getValue() !== null && getValue() !== undefined ? getValue().toFixed(2) : '0.00'}`,
 				}),
 				columnHelper.accessor('employeeCovers', {
-					id: 'Total Guests',
+					id: 'employeeCovers',
 					header: 'Total Guests',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('employeeCoversPercent', {
-					id: '% of Guests',
+					id: 'employeeCoversPercent',
 					header: '% of Guests',
 					dataType: 'number',
 					cell: (info) => {
@@ -333,31 +334,31 @@ const MenuItemsSold = () => {
 		if (activeTab === 'ItemsSoldByHour') {
 			return [
 				columnHelper.accessor('unit', {
-					id: 'Unit',
+					id: 'unit',
 					header: 'Unit',
 					dataType: 'number',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('hour', {
-					id: 'Hour',
+					id: 'hour',
 					header: 'Hour',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('MenuItem', {
-					id: 'Menu Item',
+					id: 'MenuItem',
 					header: 'Menu Item',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('Sold', {
-					id: '# Sold',
+					id: 'Sold',
 					header: '# Sold',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('discPrice', {
-					id: 'Item Sales',
+					id: 'discPrice',
 					header: 'Item Sales',
 					dataType: 'string',
 					cell: ({ row, getValue }) =>
@@ -419,11 +420,16 @@ const MenuItemsSold = () => {
 								)}
 								{row.depth === 0 ? (
 									<span>
-										Menu Item Name: {row.original.category} (Quantity Sold = {row.subRows.length})
+										Menu Item Name: {row.original.category} (Quantity Sold ={' '}
+										{viewValue === 1
+											? row.subRows[0].original.totalItemQuantity
+											: row.original.totalItemQuantity}
+										)
 									</span>
 								) : (
 									<span>
-										Unit Name: {row.original.unitName} (Quantity Sold = {row.subRows.length})
+										Unit Name: {row.original.unitName} (Quantity Sold ={' '}
+										{row.original.totalItemQuantity})
 									</span>
 								)}
 							</div>
@@ -615,9 +621,9 @@ const MenuItemsSold = () => {
 						description: item.description,
 						quant: item.quant,
 						discPrice: item.discPrice,
+						itemSoldPct: item.itemSoldPct,
 						quantity_Avg: item.quantity_Avg,
 						discPrice_Avg: item.discPrice_Avg,
-						itemSoldPct: item.itemSoldPct,
 					})),
 				}));
 			} else if (viewValue === 1) {
@@ -697,10 +703,10 @@ const MenuItemsSold = () => {
 
 			const result = await getCall(getData);
 
-			const newData = result.data.map((item) => ({
+			const newData = result.data.menuItemSoldEmployeeModels.map((item) => ({
 				unitName: item.name,
 				employeeId: item.employeeId,
-				total: parseFloat(result.data?.reduce((acc, curr) => acc + curr.discPrice, 0).toFixed(2)),
+				total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
 				firstName: item.firstName,
 				lastName: item.lastName,
 				MenuItem: item.description,
@@ -756,8 +762,9 @@ const MenuItemsSold = () => {
 
 			const result = await getCall(getData);
 
-			const newData = result.data.map((item) => ({
+			const newData = result.data.menuItemSoldEmployeeModels.map((item) => ({
 				unit: item.name,
+				total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
 				hour: item.hour,
 				MenuItem: item.description,
 				Sold: item.quant,
@@ -800,9 +807,10 @@ const MenuItemsSold = () => {
 
 			// Conditional mapping based on salesType
 			if (viewValue === 0) {
-				newData = result.data.map((category) => ({
+				newData = result.data.menuItemSoldModifierReportModels.map((category) => ({
 					category: category.itemFullDescription,
-					//   total: category.total,
+					total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
+					totalItemQuantity: category.menuItemSoldModifierModels[0].totalItemQuantity,
 					subRows: category.menuItemSoldModifierModels?.map((item) => ({
 						itemId: item.itemId,
 						modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
@@ -812,14 +820,16 @@ const MenuItemsSold = () => {
 					})),
 				}));
 			} else if (viewValue === 1) {
-				newData = result.data.map((category) => ({
+				newData = result.data.menuItemSoldModifierReportModels.map((category) => ({
 					category: category.itemFullDescription,
-					//   total: category.total,
+					total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
 					subRows: category.menuItemSoldModifierUnitReportModels.map((unit) => ({
+						totalItemQuantity: unit.menuItemSoldModifierModels[0].totalItemQuantity,
 						unitName: unit.unitName,
 						subRows: unit.menuItemSoldModifierModels.map((item) => ({
 							unitName: item.unitName,
 							itemId: item.itemId,
+							quant: item.modQuantity,
 							modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
 							modifierDisplayName: item.modifierDisplayName,
 							modQuantity: item.modQuantity,
@@ -868,9 +878,6 @@ const MenuItemsSold = () => {
 	const handleTypeChange = (value) => {
 		setActiveTab(value);
 		setMenuItemSoldData([]);
-		setViewValue(0);
-		setSalesType('SalesNet');
-		setViewWeekValue(0);
 	};
 
 	// Function to handle the PDF export
@@ -895,107 +902,413 @@ const MenuItemsSold = () => {
 			body: buildPDFBody(),
 		};
 
+		console.log('pdfData', pdfData);
+
 		PdfBuilder(pdfData);
 	};
 
 	const buildPDFBody = () => {
-		// Map through each row of menuItemSoldData
-		const body = menuItemSoldData.map((row) => {
-			return {
-				type: 'table',
-				title: row.unitName, // Set the department as the title
-				widths: [
-					'auto', // Unit name
-					'auto', // Grouping (category)
-					'auto', // Item ID
-					'auto', // Item description
-					'auto', // Quantity sold
-					'auto', // Discounted price
-					'auto', // Average quantity sold
-					'auto', // Average discounted price
-					'auto', // Percentage of items sold
-				],
-				dataTypes: [
-					'string', // Unit name
-					'string', // Grouping (category)
-					'string', // Item ID
-					'string', // Item description
-					'number', // Quantity sold
-					'number', // Discounted price
-					'number', // Average quantity sold
-					'number', // Average discounted price
-					'number', // Percentage of items sold
-				],
-				data: formatPDFData(row.subRows), // Use a formatter for the subRows data
-			};
-		});
-
-		return body; // Return the constructed body for PDF
+		const body = (() => {
+			switch (activeTab) {
+				case 'ItemsSoldTotals':
+					return viewValue === 2
+						? [
+								{
+									type: 'table',
+									title: 'Items Sold Totals | Top Sellers',
+									widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+									dataTypes: ['string', 'string', 'number', 'number', 'number', 'number', 'number'],
+									data: {
+										columnHeaders: columns.slice(1).map((column) => column.header),
+										rows: menuItemSoldData.map((row) =>
+											columns.slice(1).map((column) => ({
+												value: row[column.id],
+												cellType: column.dataType,
+												columnName: column.header,
+											}))
+										),
+									},
+								},
+						  ]
+						: menuItemSoldData.map((row) => {
+								const title = row.category || '';
+								return {
+									type: 'table',
+									title: title,
+									widths: [
+										'auto',
+										'auto',
+										'auto',
+										'auto',
+										'auto',
+										'auto',
+										'auto',
+										...(viewValue === 1 ? ['auto'] : []),
+									],
+									dataTypes: ['string', 'string', 'number', 'number', 'number', 'number', 'number'],
+									data: formatPDFData(row.subRows),
+								};
+						  });
+				case 'ItemsSoldByEmployee':
+					return [
+						{
+							type: 'table',
+							title: `Items Sold By Employee | ${item}`,
+							widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+							dataTypes: [
+								'string',
+								'string',
+								'string',
+								'string',
+								'string',
+								'number',
+								'number',
+								'number',
+								'number',
+							],
+							data: {
+								columnHeaders: columns.map((column) => column.header),
+								rows: menuItemSoldData.map((row) =>
+									columns.map((column) => ({
+										value: row[column.id],
+										cellType: column.dataType,
+										columnName: column.header,
+									}))
+								),
+							},
+						},
+					];
+				case 'ItemsSoldByHour':
+					return [
+						{
+							type: 'table',
+							title: `Items Sold By Hour | ${item}`,
+							widths: [
+								'auto',
+								'auto',
+								'auto',
+								'auto',
+								'auto',
+								...(itemValue === 1 ? ['auto', 'auto', 'auto', 'auto'] : []),
+							],
+							dataTypes: [
+								'string',
+								'string',
+								'string',
+								'number',
+								'number',
+								...(itemValue === 1 ? ['string', 'number', 'string', 'number'] : []),
+							],
+							data: {
+								columnHeaders: columns.map((column) => column.header),
+								rows: menuItemSoldData.map((row) =>
+									columns.map((column) => ({
+										value: row[column.id],
+										cellType: column.dataType,
+										columnName: column.header,
+									}))
+								),
+							},
+						},
+					];
+				case 'ItemsSoldWithModifiers':
+					return menuItemSoldData.map((category) => ({
+						type: 'table',
+						title: category.category || '',
+						widths: ['auto', ...(viewValue === 1 ? ['auto'] : []), 'auto', 'auto', 'auto'],
+						dataTypes: ['string', ...(viewValue === 1 ? ['string'] : []), 'string', 'number', 'number'],
+						data: formatPDFData(category.subRows),
+					}));
+				default:
+					return [];
+			}
+		})();
+		return body;
 	};
 
 	const formatPDFData = (data) => {
-		return {
-			columnHeaders: [
-				'Unit Name',
-				'Grouping',
-				'Item ID',
-				'Description',
-				'Quantity Sold',
-				'Discounted Price',
-				'Average Quantity Sold',
-				'Average Discounted Price',
-				'Percentage of Items Sold',
-			],
-			rows: data.flatMap((row) =>
-				row.menuItemSoldTotalsModels.map((item) => [
-					{
-						value: item.unitName || 'N/A', // Use "N/A" if unitName is null
-						cellType: 'string',
-						columnName: 'Unit Name',
-					},
-					{
-						value: item.grouping1,
-						cellType: 'string',
-						columnName: 'Grouping',
-					},
-					{
-						value: item.itemId,
-						cellType: 'string',
-						columnName: 'Item ID',
-					},
-					{
-						value: item.description,
-						cellType: 'string',
-						columnName: 'Description',
-					},
-					{
-						value: item.quant,
-						cellType: 'number',
-						columnName: 'Quantity Sold',
-					},
-					{
-						value: item.discPrice,
-						cellType: 'number',
-						columnName: 'Discounted Price',
-					},
-					{
-						value: item.quantity_Avg,
-						cellType: 'number',
-						columnName: 'Average Quantity Sold',
-					},
-					{
-						value: item.discPrice_Avg,
-						cellType: 'number',
-						columnName: 'Average Discounted Price',
-					},
-					{
-						value: Number(item.itemSoldPct).toFixed(2),
-						cellType: 'number',
-						columnName: 'Percentage of Items Sold',
-					},
-				])
-			),
-		};
+		switch (activeTab) {
+			case 'ItemsSoldTotals':
+				return viewValue === 0
+					? {
+							columnHeaders: [
+								'Item ID',
+								'Description',
+								'Quantity',
+								'Amount',
+								'Item Sold %',
+								'Average Item Quantity',
+								'Average Item Amount',
+							],
+							rows: data.map((subRow) => [
+								{ value: subRow.itemId, cellType: 'string', columnName: 'Item ID' },
+								{ value: subRow.description, cellType: 'string', columnName: 'Description' },
+								{ value: subRow.quant, cellType: 'number', columnName: 'Quantity' },
+								{ value: subRow.discPrice, cellType: 'number', columnName: 'Amount' },
+								{ value: subRow.itemSoldPct.toFixed(2), cellType: 'number', columnName: 'Item Sold %' },
+								{ value: subRow.quantity_Avg, cellType: 'number', columnName: 'Average Item Quantity' },
+								{
+									value: subRow.discPrice_Avg.toFixed(2),
+									cellType: 'number',
+									columnName: 'Average Item Amount',
+								},
+							]),
+					  }
+					: viewValue === 1
+					? {
+							columnHeaders: [
+								'Unit Name',
+								'Item ID',
+								'Description',
+								'Quantity',
+								'Amount',
+								'Item Sold %',
+								'Average Item Quantity',
+								'Average Item Amount',
+							],
+							rows: data.flatMap((unit) =>
+								unit.subRows.map((subRow) => [
+									{ value: subRow.unitName, cellType: 'string', columnName: 'Unit Name' },
+									{ value: subRow.itemId, cellType: 'string', columnName: 'Item ID' },
+									{ value: subRow.description, cellType: 'string', columnName: 'Description' },
+									{ value: subRow.quant, cellType: 'number', columnName: 'Quantity' },
+									{ value: subRow.discPrice, cellType: 'number', columnName: 'Amount' },
+									{
+										value: subRow.itemSoldPct.toFixed(2),
+										cellType: 'number',
+										columnName: 'Item Sold %',
+									},
+									{
+										value: subRow.quantity_Avg,
+										cellType: 'number',
+										columnName: 'Average Item Quantity',
+									},
+									{
+										value: subRow.discPrice_Avg.toFixed(2),
+										cellType: 'number',
+										columnName: 'Average Item Amount',
+									},
+								])
+							),
+					  }
+					: null;
+			case 'ItemsSoldWithModifiers':
+				return viewValue === 0
+					? {
+							columnHeaders: [
+								'Modifier Item #',
+								'Modifier Item Name',
+								'Quantity',
+								'Modifier Usage Frequency',
+							],
+							rows: data.map((subRow) => [
+								{ value: subRow.modItemID, cellType: 'string', columnName: 'Modifier Item #' },
+								{
+									value: subRow.modifierDisplayName,
+									cellType: 'string',
+									columnName: 'Modifier Item Name',
+								},
+								{ value: subRow.quant, cellType: 'number', columnName: 'Quantity' },
+								{
+									value: subRow.modItemFrequency.toFixed(2),
+									cellType: 'number',
+									columnName: 'Modifier Usage Frequency',
+								},
+							]),
+					  }
+					: {
+							columnHeaders: [
+								'Unit Name',
+								'Modifier Item #',
+								'Modifier Item Name',
+								'Quantity',
+								'Modifier Usage Frequency',
+							],
+							rows: data.flatMap((unit) =>
+								unit.subRows.map((subRow) => [
+									{ value: subRow.unitName, cellType: 'string', columnName: 'Unit Name' },
+									{ value: subRow.modItemID, cellType: 'string', columnName: 'Modifier Item #' },
+									{
+										value: subRow.modifierDisplayName,
+										cellType: 'string',
+										columnName: 'Modifier Item Name',
+									},
+									{ value: subRow.quant, cellType: 'number', columnName: 'Quantity' },
+									{
+										value: subRow.modItemFrequency.toFixed(2),
+										cellType: 'number',
+										columnName: 'Modifier Usage Frequency',
+									},
+								])
+							),
+					  };
+			default:
+				return [];
+		}
+	};
+
+	// Function to handle the CSV export
+	const handleCSVClick = () => {
+		let csvHeaders = [];
+		let csvData = [];
+
+		switch (activeTab) {
+			case 'ItemsSoldTotals':
+				csvHeaders = [
+					'Category',
+					'Item',
+					'Description',
+					'Quantity',
+					'Amount',
+					'Item Sold %',
+					'Average Item Quantity',
+					'Average Item Amount',
+				];
+				csvData =
+					viewValue === 0
+						? menuItemSoldData.flatMap((row) =>
+								row.subRows.map((subRow) =>
+									[
+										row.category,
+										subRow.itemId,
+										subRow.description,
+										subRow.quant,
+										subRow.discPrice,
+										subRow.itemSoldPct.toFixed(2),
+										subRow.quantity_Avg,
+										subRow.discPrice_Avg.toFixed(2),
+									].join(',')
+								)
+						  )
+						: viewValue === 1
+						? menuItemSoldData.flatMap((category) =>
+								category.subRows.flatMap((unit) =>
+									unit.subRows.map((item) =>
+										[
+											category.category,
+											item.itemId,
+											item.description,
+											item.quant,
+											item.discPrice,
+											item.itemSoldPct.toFixed(2),
+											item.quantity_Avg,
+											item.discPrice_Avg.toFixed(2),
+										].join(',')
+									)
+								)
+						  )
+						: menuItemSoldData.map((item) =>
+								[
+									item.category,
+									item.itemId,
+									item.description,
+									item.quant,
+									item.discPrice,
+									item.itemSoldPct.toFixed(2),
+									item.quantity_Avg,
+									item.discPrice_Avg.toFixed(2),
+								].join(',')
+						  );
+				break;
+			// Add other cases if necessary
+			case 'ItemsSoldByEmployee':
+				csvHeaders = [
+					'Unit Name',
+					'Employee ID',
+					'First Name',
+					'Last Name',
+					'Menu Item',
+					'# Sold',
+					'Item Sales',
+					'Total Guests',
+					'% of Guests',
+				];
+				csvData = menuItemSoldData.flatMap((item) =>
+					[
+						item.unitName,
+						item.employeeId,
+						item.firstName,
+						item.lastName,
+						item.MenuItem,
+						item.Sold,
+						item.discPrice,
+						item.employeeCovers,
+						item.employeeCoversPercent.toFixed(2),
+					].join(',')
+				);
+				break;
+			case 'ItemsSoldByHour':
+				csvHeaders = [
+					'Unit',
+					'Hour',
+					'Menu Item',
+					'# Sold',
+					'Item Sales',
+					...(itemValue === 1 ? ['Case Unit Name', 'Usage Cases', 'Count Name', 'Use Count'] : []),
+				];
+				csvData = menuItemSoldData.flatMap((item) =>
+					[
+						item.unit,
+						item.hour,
+						item.MenuItem,
+						item.Sold,
+						item.discPrice,
+						...(itemValue === 1 ? [item.caseUnitName, item.usageCases, item.countName, item.useCount] : []),
+					].join(',')
+				);
+				break;
+			case 'ItemsSoldWithModifiers':
+				csvHeaders = [
+					'Category',
+					...(viewValue === 1 ? ['Unit Name'] : []),
+					'Modifier Item #',
+					'Modifier Item Name',
+					'Quantity',
+					'Modifier Usage Frequency',
+				];
+				csvData =
+					viewValue === 0
+						? menuItemSoldData.flatMap((category) =>
+								category.subRows.map((item) =>
+									[
+										category.category,
+										item.modItemID,
+										item.modifierDisplayName,
+										item.quant,
+										item.modItemFrequency.toFixed(2),
+									].join(',')
+								)
+						  )
+						: menuItemSoldData.flatMap((category) =>
+								category.subRows.flatMap((unit) =>
+									unit.subRows.map((item) =>
+										[
+											category.category,
+											unit.unitName,
+											item.modItemID,
+											item.modifierDisplayName,
+											item.quant,
+											item.modItemFrequency.toFixed(2),
+										].join(',')
+									)
+								)
+						  );
+				break;
+			default:
+				break;
+		}
+
+		if (csvHeaders.length > 0 && csvData.length > 0) {
+			const csvString = [csvHeaders.join(','), ...csvData].join('\n');
+			const blob = new Blob([csvString], { type: 'text/csv' });
+			const url = window.URL.createObjectURL(blob);
+			const tempLink = document.createElement('a');
+			tempLink.href = url;
+			tempLink.setAttribute('download', 'voids.csv');
+			tempLink.click();
+		} else {
+			console.error('No data available for CSV export');
+		}
 	};
 
 	// Function to handle the Excel export
@@ -1187,7 +1500,7 @@ const MenuItemsSold = () => {
 					? true
 					: false
 			}
-			detailOnTop={`${currentSalesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
+			detailOnTop={`${salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
 				menuItemSoldData[0]?.total?.toFixed(2) || 0
 			}`}
 		/>
@@ -1349,6 +1662,7 @@ const MenuItemsSold = () => {
 							includePDF={true}
 							handlePDFClick={handlePDFClick}
 							includeCSV={true}
+							handleCSVClick={handleCSVClick}
 							includeExcel={true}
 							handleExcelClick={handleExcelClick}
 							includeHelp={true}
