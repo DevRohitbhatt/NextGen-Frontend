@@ -368,29 +368,29 @@ const MenuItemsSold = () => {
 				}),
 				...(itemValue === 1
 					? [
-							columnHelper.accessor('Sold', {
-								id: 'Case Unit Name',
+							columnHelper.accessor('caseUnitName', {
+								id: 'caseUnitName',
 								header: 'Case Unit Name',
 								dataType: 'string',
 								cell: (info) => info.getValue() || '',
 							}),
-							columnHelper.accessor('Sold', {
-								id: 'Usage Cases',
+							columnHelper.accessor('usageCases', {
+								id: 'usageCases',
 								header: 'Usage Cases',
+								dataType: 'string',
+								cell: (info) => `${info.getValue()}%` || '',
+							}),
+							columnHelper.accessor('countDisplayUnitName', {
+								id: 'countDisplayUnitName',
+								header: 'Count Name',
 								dataType: 'string',
 								cell: (info) => info.getValue() || '',
 							}),
-							columnHelper.accessor('Sold', {
-								id: 'Count Name',
-								header: 'Usage Cases',
+							columnHelper.accessor('usageCountDisplayUnits', {
+								id: 'usageCountDisplayUnits',
+								header: 'Usage Count',
 								dataType: 'string',
-								cell: (info) => info.getValue() || '',
-							}),
-							columnHelper.accessor('Sold', {
-								id: 'Use Count',
-								header: 'Use Count',
-								dataType: 'string',
-								cell: (info) => info.getValue() || '',
+								cell: (info) => `${info.getValue()}%` || '',
 							}),
 					  ]
 					: []),
@@ -769,6 +769,10 @@ const MenuItemsSold = () => {
 				MenuItem: item.description,
 				Sold: item.quant,
 				discPrice: item?.discPrice,
+				caseUnitName: item.caseUnitName,
+				usageCases: item.usageCases.toFixed(2),
+				countDisplayUnitName: item.countDisplayUnitName,
+				usageCountDisplayUnits: Number(item.usageCountDisplayUnits).toFixed(2),
 			}));
 
 			setMenuItemSoldData(newData);
@@ -1253,7 +1257,14 @@ const MenuItemsSold = () => {
 						item.MenuItem,
 						item.Sold,
 						item.discPrice,
-						...(itemValue === 1 ? [item.caseUnitName, item.usageCases, item.countName, item.useCount] : []),
+						...(itemValue === 1
+							? [
+									item.caseUnitName,
+									item.usageCases,
+									item.countDisplayUnitName,
+									item.usageCountDisplayUnits,
+							  ]
+							: []),
 					].join(',')
 				);
 				break;
@@ -1304,7 +1315,7 @@ const MenuItemsSold = () => {
 			const url = window.URL.createObjectURL(blob);
 			const tempLink = document.createElement('a');
 			tempLink.href = url;
-			tempLink.setAttribute('download', 'voids.csv');
+			tempLink.setAttribute('download', 'menuItemSold.csv');
 			tempLink.click();
 		} else {
 			console.error('No data available for CSV export');
@@ -1421,6 +1432,14 @@ const MenuItemsSold = () => {
 								{ name: 'Menu Item', filter: 'text' },
 								{ name: '# Sold', filter: 'text' },
 								{ name: 'Item Sales', filter: 'text' },
+								...(itemValue === 1
+									? [
+											{ name: 'Case Unit Name', filter: 'text' },
+											{ name: 'Usage Cases', filter: 'text' },
+											{ name: 'Count Name', filter: 'text' },
+											{ name: 'Use Count', filter: 'text' },
+									  ]
+									: []),
 							],
 							data: menuItemSoldData.flatMap((item) => ({
 								Unit: item.unit,
@@ -1428,6 +1447,14 @@ const MenuItemsSold = () => {
 								'Menu Item': item.MenuItem,
 								'# Sold': item.Sold,
 								'Item Sales': item.discPrice,
+								...(itemValue === 1
+									? {
+											'Case Unit Name': item.caseUnitName,
+											'Usage Cases': item.usageCases,
+											'Count Name': item.countDisplayUnitName,
+											'Use Count': item.usageCountDisplayUnits,
+									  }
+									: {}),
 							})),
 						},
 					];
