@@ -221,12 +221,24 @@ const MenuItemsSold = () => {
 							''
 						),
 				}),
-				columnHelper.accessor('unitName', {
-					id: 'unitName',
-					header: 'Unit',
-					dataType: 'string',
-					cell: (info) => info.getValue() || '',
-				}),
+
+				...(viewValue === 1
+					? [
+							columnHelper.accessor('unitName', {
+								id: 'unitName',
+								header: 'Unit',
+								dataType: 'string',
+								cell: (info) => info.getValue() || '',
+							}),
+					  ]
+					: [
+							columnHelper.accessor('description', {
+								id: 'description',
+								header: 'Description',
+								dataType: 'string',
+								cell: (info) => info.getValue() || '',
+							}),
+					  ]),
 				columnHelper.accessor('quant', {
 					id: 'Quantity',
 					header: 'Quantity',
