@@ -133,6 +133,7 @@ const MenuItemsSold = () => {
 
 	const handleItemChange = (option) => {
 		setItem(option);
+		setMenuItemSoldData([]);
 		const value = viewValueMap[option] || 0; // Default to 0 if option is not found
 		setItemValue(value);
 	};
@@ -287,13 +288,22 @@ const MenuItemsSold = () => {
 					id: 'unitName',
 					header: 'Unit',
 					dataType: 'number',
-					cell: (info) => info.getValue() || '',
-				}),
-				columnHelper.accessor('employeeId', {
-					id: 'employeeId',
-					header: 'Employee ID',
-					dataType: 'string',
-					cell: (info) => info.getValue() || '',
+					cell: ({ getValue, row }) =>
+						itemValue === 0 ? (
+							getValue()
+						) : row.getCanExpand() ? (
+							<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
+								{row.getIsExpanded() ? <CiSquareMinus /> : <CiSquarePlus />}
+								{`Employee ID: ${row.original.employeeId} (Count ${row.subRows.length}, Total Quantity
+								 ${row.subRows.reduce((acc, curr) => acc + curr.original.quant, 0)}) Total Amount ${row.subRows
+									.reduce((acc, curr) => acc + curr.original.discPrice, 0)
+									.toFixed(2)}`}
+							</div>
+						) : getValue() ? (
+							getValue() || ''
+						) : (
+							''
+						),
 				}),
 				columnHelper.accessor('firstName', {
 					id: 'firstName',
@@ -307,14 +317,14 @@ const MenuItemsSold = () => {
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
-				columnHelper.accessor('MenuItem', {
-					id: 'MenuItem',
+				columnHelper.accessor('description', {
+					id: 'description',
 					header: 'Menu Item',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
-				columnHelper.accessor('Sold', {
-					id: 'Sold',
+				columnHelper.accessor('quant', {
+					id: 'quant',
 					header: '#Sold',
 					dataType: 'number',
 					cell: (info) => info.getValue() || '',
@@ -328,6 +338,16 @@ const MenuItemsSold = () => {
 							? ''
 							: `$${getValue() !== null && getValue() !== undefined ? getValue().toFixed(2) : '0.00'}`,
 				}),
+				...(itemValue === 1
+					? [
+							columnHelper.accessor('caseUnitName', {
+								id: 'caseUnitName',
+								header: 'Case Unit',
+								dataType: 'string',
+								cell: (info) => info.getValue() || '',
+							}),
+					  ]
+					: []),
 				columnHelper.accessor('employeeCovers', {
 					id: 'employeeCovers',
 					header: 'Total Guests',
@@ -667,7 +687,7 @@ const MenuItemsSold = () => {
 					discPrice: item.discPrice,
 					quantity_Avg: item.quantity_Avg,
 					discPrice_Avg: item.discPrice_Avg,
-					itemSoldPct: item.itemSoldPct,
+					itemSoldPct: item.itemSoldPct * 100,
 				}));
 			}
 
@@ -713,23 +733,63 @@ const MenuItemsSold = () => {
 
 			const result = await getCall(getData);
 
-			const newData = result.data.menuItemSoldEmployeeModels.map((item) => ({
-				unitName: item.name,
-				employeeId: item.employeeId,
-				total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
-				firstName: item.firstName,
-				lastName: item.lastName,
-				MenuItem: item.description,
-				Sold: item.quant,
-				discPrice: item?.discPrice,
-				fullDescription: item.fullDescription,
-				quant: item.quant,
-				multiplier: item.multiplier,
-				covers: item.covers,
-				employeeCoversPercent: item.employeeCoversPercent,
-				employeeCovers: item.employeeCovers,
-				hour: item.hour,
-			}));
+			const newData =
+				itemValue === 0
+					? result.data.menuItemSoldEmployeeModels.map((item) => ({
+							employeeId: item.employeeId,
+							unitName: item.name,
+							total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
+							firstName: item.firstName,
+							lastName: item.lastName,
+							description: item.description,
+							discPrice: item?.discPrice,
+							fullDescription: item.fullDescription,
+							quant: item.quant,
+							multiplier: item.multiplier,
+							covers: item.covers,
+							employeeCoversPercent: (item.employeeCoversPercent * 100).toFixed(2),
+							employeeCovers: item.employeeCovers,
+							hour: item.hour,
+					  }))
+					: result.data.menuItemSoldEmployeeModels.reduce((acc, item) => {
+							const existingEmployee = acc.find((emp) => emp.employeeId === item.employeeId);
+							const newItem = {
+								unitId: item.unitId,
+								unitName: item.name,
+								employeeId: item.employeeId,
+								firstName: item.firstName,
+								lastName: item.lastName,
+								grouping1: item.grouping1,
+								itemId: item.itemId,
+								description: item.description,
+								fullDescription: item.fullDescription,
+								quant: item.quant,
+								discPrice: item.discPrice,
+								multiplier: item.multiplier,
+								covers: item.covers,
+								employeeCoversPercent: (item.employeeCoversPercent * 100).toFixed(2),
+								employeeCovers: item.employeeCovers,
+								hour: item.hour,
+								caseUnitName: item.caseUnitName,
+								usageCases: item.usageCases,
+								countDisplayUnitName: item.countDisplayUnitName,
+								usageCountDisplayUnits: item.usageCountDisplayUnits,
+							};
+
+							if (existingEmployee) {
+								existingEmployee.subRows.push(newItem);
+							} else {
+								acc.push({
+									employeeId: item.employeeId,
+									total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
+									subRows: [newItem],
+								});
+							}
+
+							return acc;
+					  }, []);
+
+			console.log('newData', newData);
 
 			setMenuItemSoldData(newData);
 			setIsLoading(false);
@@ -965,34 +1025,61 @@ const MenuItemsSold = () => {
 								};
 						  });
 				case 'ItemsSoldByEmployee':
-					return [
-						{
-							type: 'table',
-							title: `Items Sold By Employee | ${item}`,
-							widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
-							dataTypes: [
-								'string',
-								'string',
-								'string',
-								'string',
-								'string',
-								'number',
-								'number',
-								'number',
-								'number',
-							],
-							data: {
-								columnHeaders: columns.map((column) => column.header),
-								rows: menuItemSoldData.map((row) =>
-									columns.map((column) => ({
-										value: row[column.id],
-										cellType: column.dataType,
-										columnName: column.header,
-									}))
-								),
-							},
-						},
-					];
+					return itemValue === 0
+						? [
+								{
+									type: 'table',
+									title: `Items Sold By Employee | ${item}`,
+									widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+									dataTypes: [
+										'string',
+										'string',
+										'string',
+										'string',
+										'number',
+										'number',
+										'number',
+										'number',
+									],
+									data: {
+										columnHeaders: columns.map((column) => column.header),
+										rows: menuItemSoldData.map((row) =>
+											columns.map((column) => ({
+												value: row[column.id],
+												cellType: column.dataType,
+												columnName: column.header,
+											}))
+										),
+									},
+								},
+						  ]
+						: menuItemSoldData.flatMap((row) => ({
+								type: 'table',
+								title: `Employee ID: ${row.employeeId}`,
+								widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+								dataTypes: [
+									'string',
+									'string',
+									'string',
+									'string',
+									'number',
+									'number',
+									'string',
+									'number',
+									'number',
+								],
+								data: {
+									columnHeaders: columns.map((column) => column.header),
+									rows: row.subRows.map((subRow) =>
+										columns.map((column) => ({
+											value: subRow[column.id],
+											cellType: column.dataType,
+											columnName: column.header,
+										}))
+									),
+								},
+						  }));
+
 				case 'ItemsSoldByHour':
 					return [
 						{
@@ -1229,7 +1316,7 @@ const MenuItemsSold = () => {
 			case 'ItemsSoldByEmployee':
 				csvHeaders = [
 					'Unit Name',
-					'Employee ID',
+					...(itemValue === 1 ? ['Employee ID'] : []),
 					'First Name',
 					'Last Name',
 					'Menu Item',
@@ -1238,19 +1325,35 @@ const MenuItemsSold = () => {
 					'Total Guests',
 					'% of Guests',
 				];
-				csvData = menuItemSoldData.flatMap((item) =>
-					[
-						item.unitName,
-						item.employeeId,
-						item.firstName,
-						item.lastName,
-						item.MenuItem,
-						item.Sold,
-						item.discPrice,
-						item.employeeCovers,
-						item.employeeCoversPercent.toFixed(2),
-					].join(',')
-				);
+				csvData =
+					itemValue === 0
+						? menuItemSoldData.flatMap((item) =>
+								[
+									item.unitName,
+									item.firstName,
+									item.lastName,
+									item.description,
+									item.quant,
+									item.discPrice,
+									item.employeeCovers,
+									item.employeeCoversPercent,
+								].join(',')
+						  )
+						: menuItemSoldData.flatMap((item) =>
+								item.subRows.map((subRow) =>
+									[
+										subRow.unitName,
+										subRow.employeeId,
+										subRow.firstName,
+										subRow.lastName,
+										subRow.description,
+										subRow.quant,
+										subRow.discPrice,
+										subRow.covers,
+										subRow.employeeCoversPercent,
+									].join(',')
+								)
+						  );
 				break;
 			case 'ItemsSoldByHour':
 				csvHeaders = [
@@ -1417,17 +1520,32 @@ const MenuItemsSold = () => {
 								{ name: 'Total Guests', filter: 'text' },
 								{ name: '% of Guests', filter: 'text' },
 							],
-							data: menuItemSoldData.flatMap((item) => ({
-								'Unit Name': item.unitName,
-								'Employee ID': item.employeeId,
-								'First Name': item.firstName,
-								'Last Name': item.lastName,
-								'Menu Item': item.MenuItem,
-								'# Sold': item.Sold,
-								'Item Sales': item.discPrice,
-								'Total Guests': item.employeeCovers,
-								'% of Guests': parseFloat(item.employeeCoversPercent).toFixed(2),
-							})),
+							data:
+								itemValue === 0
+									? menuItemSoldData.flatMap((item) => ({
+											'Unit Name': item.unitName,
+											'Employee ID': item.employeeId,
+											'First Name': item.firstName,
+											'Last Name': item.lastName,
+											'Menu Item': item.description,
+											'# Sold': item.quant,
+											'Item Sales': item.discPrice,
+											'Total Guests': item.employeeCovers,
+											'% of Guests': parseFloat(item.employeeCoversPercent).toFixed(2),
+									  }))
+									: menuItemSoldData.flatMap((item) =>
+											item.subRows.flatMap((subRow) => ({
+												'Unit Name': subRow.unitName,
+												'Employee ID': subRow.employeeId,
+												'First Name': subRow.firstName,
+												'Last Name': subRow.lastName,
+												'Menu Item': subRow.description,
+												'# Sold': subRow.quant,
+												'Item Sales': subRow.discPrice,
+												'Total Guests': subRow.employeeCovers,
+												'% of Guests': parseFloat(subRow.employeeCoversPercent).toFixed(2),
+											}))
+									  ),
 						},
 					];
 				case 'ItemsSoldByHour':
