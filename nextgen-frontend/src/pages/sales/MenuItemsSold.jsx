@@ -850,9 +850,9 @@ const MenuItemsSold = () => {
 				Sold: item.quant,
 				discPrice: item?.discPrice,
 				caseUnitName: item.caseUnitName,
-				usageCases: item.usageCases.toFixed(2),
+				usageCases: (item.usageCases * 100).toFixed(2),
 				countDisplayUnitName: item.countDisplayUnitName,
-				usageCountDisplayUnits: Number(item.usageCountDisplayUnits).toFixed(2),
+				usageCountDisplayUnits: (Number(item.usageCountDisplayUnits) * 100).toFixed(2),
 			}));
 
 			setMenuItemSoldData(newData);
