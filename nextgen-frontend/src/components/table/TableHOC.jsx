@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { FaSortAlphaUp, FaSortAlphaDownAlt } from 'react-icons/fa';
+import PropTypes from 'prop-types';
+import { FaSortAlphaUp, FaInfoCircle, FaSortAlphaDownAlt } from 'react-icons/fa';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
+import { Tooltip } from '../index';
 import {
 	useReactTable,
 	getCoreRowModel,
@@ -102,7 +104,35 @@ function TableHOC({
 													className='px-2 py-4'
 													style={{ width: header.getSize() }}
 												>
-													{header.isPlaceholder ? null : (
+													{header.column.columnDef.tooltip ? (
+														<Tooltip
+															content={header.column.columnDef.tooltip}
+															direction='left'
+														>
+															{header.isPlaceholder ? null : (
+																<div
+																	{...{
+																		className: header.column.getCanSort()
+																			? 'cursor-pointer flex gap-1 items-center '
+																			: '',
+																		onClick:
+																			header.column.getToggleSortingHandler(),
+																	}}
+																	style={{ justifyContent: headerPosition }}
+																>
+																	<FaInfoCircle className='text-tooltip' />
+																	{flexRender(
+																		header.column.columnDef.header,
+																		header.getContext()
+																	)}
+																	{{
+																		asc: <FaSortAlphaUp />,
+																		desc: <FaSortAlphaDownAlt />,
+																	}[header.column.getIsSorted()] ?? null}
+																</div>
+															)}
+														</Tooltip>
+													) : header.isPlaceholder ? null : (
 														<div
 															{...{
 																className: header.column.getCanSort()
@@ -262,5 +292,19 @@ function TableHOC({
 		</div>
 	);
 }
+TableHOC.propTypes = {
+	view: PropTypes.object.isRequired,
+	columns: PropTypes.array.isRequired,
+	data: PropTypes.array.isRequired,
+	isHeader: PropTypes.bool,
+	isPaginated: PropTypes.bool,
+	isFooter: PropTypes.bool,
+	isTableRendered: PropTypes.bool,
+	setIsTableRendered: PropTypes.func,
+	expandCollapseButtons: PropTypes.bool,
+	enableColumnFilters: PropTypes.bool,
+	headerPosition: PropTypes.string,
+	dataPosition: PropTypes.string,
+};
 
 export default TableHOC;

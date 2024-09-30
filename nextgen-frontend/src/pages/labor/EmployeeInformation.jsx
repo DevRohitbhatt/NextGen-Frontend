@@ -433,131 +433,44 @@ const EmployeeInformation = () => {
 			subHeaders: [dateFormat(new Date(), 'mm/dd/yyyy')],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
-			body: [
-				{
-					type: 'table',
-					widths: headers.map(() => 'auto'),
-					dataTypes: headers.map((header) => header.cellType),
-					data: {
-						columnHeaders: headers.map((header) => header.label),
-						rows: filteredEmployeeInformationData.data.map((row) => [
-							{
-								value: row.unitName,
-								cellType: '',
-								columnName: 'Unit Name',
-							},
-							{
-								value: row.employeeId,
-								cellType: '',
-								columnName: 'Employee ID',
-							},
-							{
-								value: row.uniqueId,
-								cellType: '',
-								columnName: 'Unique ID',
-							},
-							{
-								value: row.lastName,
-								cellType: '',
-								columnName: 'Last Name',
-							},
-							{
-								value: row.firstName,
-								cellType: '',
-								columnName: 'First Name',
-							},
-							{
-								value: row.middleName,
-								cellType: '',
-								columnName: 'Middle Name',
-							},
-							{
-								value: row.payRate,
-								cellType: '',
-								columnName: 'Pay Rate',
-							},
-							{
-								value: row.address,
-								cellType: '',
-								columnName: 'Address',
-							},
-							{
-								value: row.address2,
-								cellType: '',
-								columnName: 'Address 2',
-							},
-							{
-								value: row.city,
-								cellType: '',
-								columnName: 'City',
-							},
-							{
-								value: row.state,
-								cellType: '',
-								columnName: 'State',
-							},
-							{
-								value: row.zip,
-								cellType: '',
-								columnName: 'Zip',
-							},
-							{
-								value: row.phone,
-								cellType: '',
-								columnName: 'Phone',
-							},
-							{
-								value: row.maritalStatus,
-								cellType: '',
-								columnName: 'Marital Status',
-							},
-							{
-								value: row.dependants,
-								cellType: '',
-								columnName: 'Dependants',
-							},
-							{
-								value: row.phantomEmployee,
-								cellType: '',
-								columnName: 'Phantom Employee',
-							},
-							{
-								value: row.cellPhone,
-								cellType: '',
-								columnName: 'Cell Phone',
-							},
-							{
-								value: row.email,
-								cellType: '',
-								columnName: 'Email',
-							},
-							{
-								value: row.payrollID,
-								cellType: '',
-								columnName: 'Payroll ID',
-							},
-							{
-								value: row.birthDate,
-								cellType: '',
-								columnName: 'Birth Date',
-							},
-							{
-								value: row.startDate,
-								cellType: '',
-								columnName: 'Start Date',
-							},
-							{
-								value: row.termDate,
-								cellType: '',
-								columnName: 'Term Date',
-							},
-						]),
-					},
-				},
-			],
+			body: generateBody(),
 		};
 
 		PdfBuilder(pdfData);
+	};
+
+	const generateBody = () => {
+		const rowsPerTable = 28; // Define how many rows you want per table
+		const totalRows = filteredEmployeeInformationData.data.length; // Get total number of rows
+		const body = []; // Initialize the body array
+
+		// Loop through the data and create tables
+		for (let i = 0; i < totalRows; i += rowsPerTable) {
+			const chunkedColumns = [];
+			for (let j = 0; j < headers.length; j += 13) {
+				chunkedColumns.push(headers.slice(j, j + 13));
+			}
+			chunkedColumns.forEach((columnChunk) => {
+				body.push({
+					type: 'table/SeperatePage',
+					widths: columnChunk.map(() => 'auto'),
+					dataTypes: columnChunk.map((column) => column.dataType),
+					data: {
+						columnHeaders: columnChunk.map((column) => column.label),
+						rows: filteredEmployeeInformationData.data.slice(i, i + rowsPerTable).map((row) =>
+							columnChunk.map((column) => ({
+								value: row[column.key] || '0 ',
+								cellType: '',
+								columnName: column.label,
+							}))
+						),
+					},
+				});
+			});
+		}
+
+		// Now the `body` array contains all the tables for the report
+		return body;
 	};
 
 	// Function to handle the Excel export
