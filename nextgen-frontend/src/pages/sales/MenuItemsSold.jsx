@@ -295,7 +295,7 @@ const MenuItemsSold = () => {
 							<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
 								{row.getIsExpanded() ? <CiSquareMinus /> : <CiSquarePlus />}
 								{`Employee ID: ${row.original.employeeId} (Count ${row.subRows.length}, Total Quantity
-								 ${row.subRows.reduce((acc, curr) => acc + curr.original.quant, 0)} Total Amount ${row.subRows
+								 ${row.subRows.reduce((acc, curr) => acc + curr.original.quant, 0)}, Total Amount ${row.subRows
 									.reduce((acc, curr) => acc + curr.original.discPrice, 0)
 									.toFixed(2)})`}
 							</div>
