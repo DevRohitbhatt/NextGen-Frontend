@@ -16,9 +16,11 @@ import {
 	MenuModal,
 	Inventory,
 	InventoryModal,
+	Loader,
 } from '../../components';
+import dateFormat from 'dateformat';
 import { createColumnHelper } from '@tanstack/react-table';
-import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
+import menuItemSold from '../../assets/introJSSteps/menuItemSold';
 
 const columnHelper = createColumnHelper();
 
@@ -79,7 +81,7 @@ const MenuItemsSold = () => {
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
-		steps: actualFoodCosts(),
+		steps: menuItemSold(),
 		initialStep: 0,
 		stepsEnabled: false,
 	});
@@ -219,9 +221,9 @@ const MenuItemsSold = () => {
 							''
 						),
 				}),
-				columnHelper.accessor('description', {
-					id: 'description',
-					header: 'Description',
+				columnHelper.accessor('unitName', {
+					id: 'unitName',
+					header: 'Unit',
 					dataType: 'string',
 					cell: (info) => info.getValue() || '',
 				}),
@@ -517,7 +519,6 @@ const MenuItemsSold = () => {
 
 			const result = await getCall(getData);
 			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -541,7 +542,6 @@ const MenuItemsSold = () => {
 			const result = await getCall(getData);
 
 			setMenuItemList(result.data);
-			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -563,10 +563,8 @@ const MenuItemsSold = () => {
 			};
 
 			const result = await getCall(getData);
-			console.log('inventory', result);
 
 			setInventoryItemList(result.data);
-			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -596,8 +594,8 @@ const MenuItemsSold = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					groupingId: viewValue,
 					DOW: viewWeekValue,
 					columnName: salesType,
@@ -693,8 +691,8 @@ const MenuItemsSold = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					menuItemIds: itemValue === 0 ? selectedMenu : 0,
 					inventoryItemIds: itemValue === 1 ? selectedInventory : 0,
 					itemType: itemValue,
@@ -752,8 +750,8 @@ const MenuItemsSold = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					menuItemIds: itemValue === 0 ? selectedMenu : 0,
 					inventoryItemIds: itemValue === 1 ? selectedInventory : 0,
 					itemType: itemValue,
@@ -798,8 +796,8 @@ const MenuItemsSold = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
-					fromDate: selectedFromDate.toLocaleDateString('en-CA'),
-					toDate: selectedToDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					options: viewValue === 0 ? 'GroupSummary' : viewValue === 1 ? 'GroupByUnit' : 'GroupByUnit',
 					groupBy: viewValue === 0 ? 1 : viewValue === 1 ? 0 : 0,
 				},
@@ -892,21 +890,22 @@ const MenuItemsSold = () => {
 		}
 
 		if (!menuItemSoldData || menuItemSoldData.length === 0) {
-			console.error('Voids report data is not defined or empty');
+			console.error('Menu Items Sold report data is not defined or empty');
 			return;
 		}
 
 		const pdfData = {
 			title: 'Menu Items Sold',
 			subHeaders: [
-				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
+				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
+					selectedToDate,
+					'mm-dd-yyyy'
+				)} | ${selectedUnitName}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
 			body: buildPDFBody(),
 		};
-
-		console.log('pdfData', pdfData);
 
 		PdfBuilder(pdfData);
 	};
@@ -1508,7 +1507,7 @@ const MenuItemsSold = () => {
 
 		const filename = 'MenuItemSold';
 		const spreadSheetTitle = 'Menu Item Sold Report';
-		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
@@ -1573,326 +1572,336 @@ const MenuItemsSold = () => {
 	};
 
 	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'> Menu Items Sold </h2>
-			{/* Tabs Section */}
-			<header className='space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div className='flex items-center py-2 space-x-6'>
-					<button
-						className={`py-2 px-4 ${
-							activeTab === 'ItemsSoldTotals'
-								? 'border-l-4 border-r-4 border-t-4 border-primary text-primary'
-								: 'border-b-4 border-gray-200'
-						}`}
-						onClick={() => handleTypeChange('ItemsSoldTotals')}
-					>
-						Items Sold Totals
-					</button>
-					<button
-						className={`py-2 px-4 ${
-							activeTab === 'ItemsSoldByEmployee'
-								? 'border-l-4 border-r-4 border-t-4 border-primary text-primary'
-								: 'border-b-4 border-gray-200'
-						}`}
-						onClick={() => handleTypeChange('ItemsSoldByEmployee')}
-					>
-						Items Sold By Employee
-					</button>
-					<button
-						className={`py-2 px-4 ${
-							activeTab === 'ItemsSoldByHour'
-								? 'border-l-4 border-r-4 border-t-4 border-primary text-primary'
-								: 'border-b-4 border-gray-200'
-						}`}
-						onClick={() => handleTypeChange('ItemsSoldByHour')}
-					>
-						Items Sold By Hour
-					</button>
-					<button
-						className={`py-2 px-4 ${
-							activeTab === 'ItemsSoldWithModifiers'
-								? 'border-l-4 border-r-4 border-t-4 border-primary text-primary'
-								: 'border-b-4 border-gray-200'
-						}`}
-						onClick={() => handleTypeChange('ItemsSoldWithModifiers')}
-					>
-						Items Sold With Modifiers
-					</button>
-				</div>
+		<>
+			<Loader loading={isLoading} />
+			<div className='w-[85%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'> Menu Items Sold </h2>
+				{/* Tabs Section */}
+				<header className='space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+					<div className='flex items-center py-2 space-x-6 tab-section'>
+						<button
+							className={`py-2 px-4 ${
+								activeTab === 'ItemsSoldTotals'
+									? 'border-l-4 border-r-4 border-t-4 border-primary text-primary'
+									: 'border-b-4 border-gray-200'
+							}`}
+							onClick={() => handleTypeChange('ItemsSoldTotals')}
+						>
+							Items Sold Totals
+						</button>
+						<button
+							className={`py-2 px-4 ${
+								activeTab === 'ItemsSoldByEmployee'
+									? 'border-l-4 border-r-4 border-t-4 border-primary text-primary'
+									: 'border-b-4 border-gray-200'
+							}`}
+							onClick={() => handleTypeChange('ItemsSoldByEmployee')}
+						>
+							Items Sold By Employee
+						</button>
+						<button
+							className={`py-2 px-4 ${
+								activeTab === 'ItemsSoldByHour'
+									? 'border-l-4 border-r-4 border-t-4 border-primary text-primary'
+									: 'border-b-4 border-gray-200'
+							}`}
+							onClick={() => handleTypeChange('ItemsSoldByHour')}
+						>
+							Items Sold By Hour
+						</button>
+						<button
+							className={`py-2 px-4 ${
+								activeTab === 'ItemsSoldWithModifiers'
+									? 'border-l-4 border-r-4 border-t-4 border-primary text-primary'
+									: 'border-b-4 border-gray-200'
+							}`}
+							onClick={() => handleTypeChange('ItemsSoldWithModifiers')}
+						>
+							Items Sold With Modifiers
+						</button>
+					</div>
 
-				<div className='flex items-center justify-between space-x-3'>
-					<div className='flex items-center space-x-3'>
-						<UnitSelector
-							companyId={companyId}
-							alignmentId={alignmentId}
-							memberId={selectedUnit}
-							memberName={selectedUnitName}
-							includeAreas={true}
-							setMemberName={setselectedUnitName}
-							onClick={() => setUnitShowModal(true)}
-						/>
-						<DateSelector
-							toDate={selectedToDate}
-							fromDate={selectedFromDate}
-							isDateRange={true}
-							onClick={() => setShowDateModal(true)}
-						/>
-						{activeTab === 'ItemsSoldTotals' && (
-							<div className='w-36'>
-								<Dropdown
-									title='Day of the week'
-									options={dropdownOptions}
-									selectedOption={viewWeek}
-									onOptionChange={handleViewWeekChange}
-								/>
-							</div>
-						)}
+					<div className='flex items-center justify-between space-x-3'>
+						<div className='flex items-center space-x-3'>
+							<UnitSelector
+								companyId={companyId}
+								alignmentId={alignmentId}
+								memberId={selectedUnit}
+								memberName={selectedUnitName}
+								includeAreas={true}
+								setMemberName={setselectedUnitName}
+								onClick={() => setUnitShowModal(true)}
+							/>
+							<DateSelector
+								toDate={selectedToDate}
+								fromDate={selectedFromDate}
+								isDateRange={true}
+								onClick={() => setShowDateModal(true)}
+							/>
+							{activeTab === 'ItemsSoldTotals' && (
+								<div className='w-44'>
+									<Dropdown
+										title='Day of the week'
+										options={dropdownOptions}
+										selectedOption={viewWeek}
+										onOptionChange={handleViewWeekChange}
+									/>
+								</div>
+							)}
 
-						{(activeTab === 'ItemsSoldByEmployee' || activeTab === 'ItemsSoldByHour') && (
-							<div className='pl-2 mt-2'>
-								<div className='p-3 checkbox-group hover:border-primary'>
-									<div className='flex flex-row space-x-6'>
-										<div className='flex items-center cursor-pointer'>
-											<input
-												type='checkbox'
-												id='Net'
-												name='byUnit'
-												value='Net'
-												checked={groupUnit === 'byUnit'}
-												onChange={() => handleGroupByUnitChange('byUnit')}
-												className='cursor-pointer checkbox-radio'
-											/>
-											<label htmlFor='byUnit' className='ml-2'>
-												Group By Unit
-											</label>
+							{(activeTab === 'ItemsSoldByEmployee' || activeTab === 'ItemsSoldByHour') && (
+								<div className='pl-2 mt-2'>
+									<div className='p-3 checkbox-group hover:border-primary'>
+										<div className='flex flex-row space-x-6'>
+											<div className='flex items-center cursor-pointer'>
+												<input
+													type='checkbox'
+													id='Net'
+													name='byUnit'
+													value='Net'
+													checked={groupUnit === 'byUnit'}
+													onChange={() => handleGroupByUnitChange('byUnit')}
+													className='cursor-pointer checkbox-radio'
+												/>
+												<label htmlFor='byUnit' className='ml-2'>
+													Group By Unit
+												</label>
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-						)}
+							)}
 
-						<div className='run-button' onClick={handleRunClick}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-								Run
+							<div className='run-button' onClick={handleRunClick}>
+								<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+									Run
+								</div>
 							</div>
 						</div>
-					</div>
 
-					<div>
-						<ExportOptions
-							includePDF={true}
-							handlePDFClick={handlePDFClick}
-							includeCSV={true}
-							handleCSVClick={handleCSVClick}
-							includeExcel={true}
-							handleExcelClick={handleExcelClick}
-							includeHelp={true}
-							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
-						/>
+						<div>
+							<ExportOptions
+								includePDF={true}
+								handlePDFClick={handlePDFClick}
+								includeCSV={true}
+								handleCSVClick={handleCSVClick}
+								includeExcel={true}
+								handleExcelClick={handleExcelClick}
+								includeHelp={true}
+								handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+							/>
+						</div>
 					</div>
-				</div>
-				<div className='flex mt-2'>
-					{(activeTab === 'ItemsSoldTotals' || activeTab === 'ItemsSoldWithModifiers') && (
-						<>
-							<div className='mt-2'>
-								<label className='block ml-2 mb-1 mt-[-12px] text-lg font-semibold'>View</label>
-								<div className='p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary'>
-									<div className='flex flex-row space-x-6'>
-										<div className='flex items-center cursor-pointer'>
-											<input
-												type='radio'
-												id='summary'
-												name='reportType'
-												value='summary'
-												checked={view === 'summary'}
-												onChange={() => handleViewChange('summary')}
-												className='cursor-pointer checkbox-radio'
-											/>
-											<label htmlFor='summary' className='ml-2'>
-												Summary
-											</label>
-										</div>
-										<div className='flex items-center cursor-pointer'>
-											<input
-												type='radio'
-												id='byUnit'
-												name='reportType'
-												value='byUnit'
-												checked={view === 'byUnit'}
-												onChange={() => handleViewChange('byUnit')}
-												className='cursor-pointer checkbox-radio'
-											/>
-											<label htmlFor='byUnit' className='ml-2'>
-												By Unit
-											</label>
-										</div>
-										{activeTab !== 'ItemsSoldWithModifiers' && (
+					<div className='flex mt-2 view-selector'>
+						{(activeTab === 'ItemsSoldTotals' || activeTab === 'ItemsSoldWithModifiers') && (
+							<>
+								<div className='mt-2'>
+									<label className='block ml-2 mb-1 mt-[-12px] text-lg font-semibold'>View</label>
+									<div className='p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary'>
+										<div className='flex flex-row space-x-6'>
 											<div className='flex items-center cursor-pointer'>
 												<input
 													type='radio'
-													id='topSellers'
+													id='summary'
 													name='reportType'
-													value='topSellers'
-													checked={view === 'topSellers'}
-													onChange={() => handleViewChange('topSellers')}
-													className='checkbox-radio'
+													value='summary'
+													checked={view === 'summary'}
+													onChange={() => handleViewChange('summary')}
+													className='cursor-pointer checkbox-radio'
 												/>
-												<label htmlFor='topSellers' className='ml-2'>
-													Top Sellers
+												<label htmlFor='summary' className='ml-2'>
+													Summary
 												</label>
 											</div>
-										)}
+											<div className='flex items-center cursor-pointer'>
+												<input
+													type='radio'
+													id='byUnit'
+													name='reportType'
+													value='byUnit'
+													checked={view === 'byUnit'}
+													onChange={() => handleViewChange('byUnit')}
+													className='cursor-pointer checkbox-radio'
+												/>
+												<label htmlFor='byUnit' className='ml-2'>
+													By Unit
+												</label>
+											</div>
+											{activeTab !== 'ItemsSoldWithModifiers' && (
+												<div className='flex items-center cursor-pointer'>
+													<input
+														type='radio'
+														id='topSellers'
+														name='reportType'
+														value='topSellers'
+														checked={view === 'topSellers'}
+														onChange={() => handleViewChange('topSellers')}
+														className='checkbox-radio'
+													/>
+													<label htmlFor='topSellers' className='ml-2'>
+														Top Sellers
+													</label>
+												</div>
+											)}
+										</div>
 									</div>
 								</div>
-							</div>
-						</>
-					)}
-					{(activeTab === 'ItemsSoldByEmployee' || activeTab === 'ItemsSoldByHour') && (
-						<>
-							<div className='mt-2'>
-								<label className='block ml-2 mb-1 mt-[-12px] text-lg font-semibold'>
-									Select Item Type
-								</label>
+							</>
+						)}
+						{(activeTab === 'ItemsSoldByEmployee' || activeTab === 'ItemsSoldByHour') && (
+							<>
+								<div className='mt-2'>
+									<label className='block ml-2 mb-1 mt-[-12px] text-lg font-semibold'>
+										Select Item Type
+									</label>
+									<div className='p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary'>
+										<div className='flex flex-row space-x-6'>
+											<div className='flex items-center cursor-pointer'>
+												<input
+													type='radio'
+													id='Menu'
+													name='itemType'
+													value='Menu'
+													checked={item === 'Menu'}
+													onChange={() => handleItemChange('Menu')}
+													className='cursor-pointer checkbox-radio'
+												/>
+												<label htmlFor='Menu' className='ml-2'>
+													Menu
+												</label>
+											</div>
+											<div className='flex items-center cursor-pointer'>
+												<input
+													type='radio'
+													id='Inventory'
+													name='ItemType'
+													value='Inventory'
+													checked={item === 'Inventory'}
+													onChange={() => handleItemChange('Inventory')}
+													className='cursor-pointer checkbox-radio'
+												/>
+												<label htmlFor='Inventory' className='ml-2'>
+													Inventory
+												</label>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div className='mt-2 ml-2'>
+									<label className='block ml-2 mb-1 mt-[-12px] text-lg font-semibold'>
+										{item === 'Menu' ? 'Menu Items' : 'Inventory Items'}
+									</label>
+									<div className='flex flex-row space-x-6'>
+										<div className='flex items-center cursor-pointer'>
+											{componentMap[item === 'Menu' ? 'Menu' : 'Inventory']}
+										</div>
+									</div>
+								</div>
+							</>
+						)}
+
+						{activeTab !== 'ItemsSoldWithModifiers' && (
+							<div className='pl-2 mt-2 sale-selector'>
+								<label className='block ml-2 mb-1 mt-[-12px] text-lg font-semibold'>Sales</label>
 								<div className='p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary'>
 									<div className='flex flex-row space-x-6'>
 										<div className='flex items-center cursor-pointer'>
 											<input
 												type='radio'
-												id='Menu'
-												name='itemType'
-												value='Menu'
-												checked={item === 'Menu'}
-												onChange={() => handleItemChange('Menu')}
+												id='Net'
+												name='salesType'
+												value='Net'
+												checked={salesType === 'SalesNet'}
+												onChange={() => handleSalesChange('SalesNet')}
 												className='cursor-pointer checkbox-radio'
 											/>
-											<label htmlFor='Menu' className='ml-2'>
-												Menu
+											<label htmlFor='Net' className='ml-2'>
+												Net
 											</label>
 										</div>
 										<div className='flex items-center cursor-pointer'>
 											<input
 												type='radio'
-												id='Inventory'
-												name='ItemType'
-												value='Inventory'
-												checked={item === 'Inventory'}
-												onChange={() => handleItemChange('Inventory')}
+												id='Gross'
+												name='salesType'
+												value='Gross'
+												checked={salesType === 'SalesGross'}
+												onChange={() => handleSalesChange('SalesGross')}
 												className='cursor-pointer checkbox-radio'
 											/>
-											<label htmlFor='Inventory' className='ml-2'>
-												Inventory
+											<label htmlFor='Gross' className='ml-2'>
+												Gross
 											</label>
 										</div>
 									</div>
 								</div>
 							</div>
-							<div className='mt-2 ml-2'>
-								<label className='block ml-2 mb-1 mt-[-12px] text-lg font-semibold'>
-									{item === 'Menu' ? 'Menu Items' : 'Inventory Items'}
-								</label>
-								<div className='flex flex-row space-x-6'>
-									<div className='flex items-center cursor-pointer'>
-										{componentMap[item === 'Menu' ? 'Menu' : 'Inventory']}
-									</div>
-								</div>
-							</div>
-						</>
-					)}
+						)}
+					</div>
+				</header>
 
-					{activeTab !== 'ItemsSoldWithModifiers' && (
-						<div className='pl-2 mt-2'>
-							<label className='block ml-2 mb-1 mt-[-12px] text-lg font-semibold'>Sales</label>
-							<div className='p-3 border-2 border-gray-300 rounded-[1.5rem] checkbox-group hover:border-primary'>
-								<div className='flex flex-row space-x-6'>
-									<div className='flex items-center cursor-pointer'>
-										<input
-											type='radio'
-											id='Net'
-											name='salesType'
-											value='Net'
-											checked={salesType === 'SalesNet'}
-											onChange={() => handleSalesChange('SalesNet')}
-											className='cursor-pointer checkbox-radio'
-										/>
-										<label htmlFor='Net' className='ml-2'>
-											Net
-										</label>
-									</div>
-									<div className='flex items-center cursor-pointer'>
-										<input
-											type='radio'
-											id='Gross'
-											name='salesType'
-											value='Gross'
-											checked={salesType === 'SalesGross'}
-											onChange={() => handleSalesChange('SalesGross')}
-											className='cursor-pointer checkbox-radio'
-										/>
-										<label htmlFor='Gross' className='ml-2'>
-											Gross
-										</label>
-									</div>
-								</div>
-							</div>
-						</div>
-					)}
+				{/* Display the table if there is no error and the data is not loading */}
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : (
+					!isLoading &&
+					(menuItemSoldData.length > 0 ? (
+						<div className='paged-table'>{Table}</div>
+					) : !selectedUnit ? (
+						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+					) : (
+						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+					))
+				)}
+				<div>
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+
+					<MenuModal
+						menuData={menuItemList}
+						show={showMenuModal}
+						handleClose={() => {
+							setShowMenuModal(false);
+						}}
+						handleMenuSelection={handleMenuSelection}
+					/>
+
+					<InventoryModal
+						InventoryData={inventoryItemList}
+						show={showInventoryModal}
+						handleClose={() => {
+							setShowInventoryModal(false);
+						}}
+						handleInventorySelection={handleInventorySelection}
+					/>
+					<CalendarModal
+						handleClose={() => setShowDateModal(false)}
+						modalOpen={showDateModal}
+						isDateRange={true}
+						handleDateSelection={handleDateSelection}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
+					/>
 				</div>
-			</header>
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				<>{menuItemSoldData.length > 0 && <div className='paged-table'>{Table}</div>}</>
-			)}{' '}
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
-
-				<MenuModal
-					menuData={menuItemList}
-					show={showMenuModal}
-					handleClose={() => {
-						setShowMenuModal(false);
-					}}
-					handleMenuSelection={handleMenuSelection}
-				/>
-
-				<InventoryModal
-					InventoryData={inventoryItemList}
-					show={showInventoryModal}
-					handleClose={() => {
-						setShowInventoryModal(false);
-					}}
-					handleInventorySelection={handleInventorySelection}
-				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
 			</div>
-		</div>
+		</>
 	);
 };
 
