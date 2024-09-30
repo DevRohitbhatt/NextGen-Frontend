@@ -305,6 +305,16 @@ const MenuItemsSold = () => {
 							''
 						),
 				}),
+				...(itemValue === 0
+					? [
+							columnHelper.accessor('employeeId', {
+								id: 'employeeId',
+								header: 'Employee ID',
+								dataType: 'string',
+								cell: (info) => info.getValue() || '',
+							}),
+					  ]
+					: []),
 				columnHelper.accessor('firstName', {
 					id: 'firstName',
 					header: 'First Name',
@@ -1030,8 +1040,9 @@ const MenuItemsSold = () => {
 								{
 									type: 'table',
 									title: `Items Sold By Employee | ${item}`,
-									widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+									widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
 									dataTypes: [
+										'string',
 										'string',
 										'string',
 										'string',
@@ -1316,7 +1327,7 @@ const MenuItemsSold = () => {
 			case 'ItemsSoldByEmployee':
 				csvHeaders = [
 					'Unit Name',
-					...(itemValue === 1 ? ['Employee ID'] : []),
+					'Employee ID',
 					'First Name',
 					'Last Name',
 					'Menu Item',
@@ -1330,6 +1341,7 @@ const MenuItemsSold = () => {
 						? menuItemSoldData.flatMap((item) =>
 								[
 									item.unitName,
+									item.employeeId,
 									item.firstName,
 									item.lastName,
 									item.description,
