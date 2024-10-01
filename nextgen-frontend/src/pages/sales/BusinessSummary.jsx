@@ -16,17 +16,16 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
-import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 
 const columnHelper = createColumnHelper();
 
-const Voids = () => {
+const BusinessSummary = () => {
 	const [companyId, setCompanyId] = useState();
 	const [alignmentId, setAlignmentId] = useState();
 	const [memberId, setMemberId] = useState();
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
-	const [voidsReportData, setVoidsReportData] = useState([]);
-	const [filteredVoidsReportData, setFilteredVoidsReportData] = useState([]);
+	const [businessSummaryData, setBusinessSummaryData] = useState([]);
+	const [columns, setColumns] = useState([]);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
@@ -70,95 +69,6 @@ const Voids = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
-
-	// columns for tableHOC
-	const columns = useMemo(
-		() => [
-			columnHelper.accessor('date', {
-				id: 'date',
-				header: 'Date',
-				cell: ({ getValue, row }) =>
-					row.getCanExpand() ? (
-						<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
-							{row.getIsExpanded() ? <IoIosArrowUp /> : <IoIosArrowDown />}
-							UnitName: {row.original.unitName} (Count : {row.subRows.length}, $
-							{row.subRows.reduce((acc, curr) => acc + curr.original.price, 0).toFixed(2)})
-						</div>
-					) : getValue() ? (
-						dateFormat(getValue(), 'mm-dd-yyyy')
-					) : (
-						''
-					),
-				dataType: 'date',
-			}),
-			columnHelper.accessor('hour', {
-				id: 'hour',
-				header: 'Hour',
-				dataType: 'number',
-			}),
-			columnHelper.accessor('minute', {
-				id: 'minute',
-				header: 'Minute',
-				dataType: 'number',
-			}),
-			columnHelper.accessor('voidReason', {
-				id: 'voidReason',
-				header: 'Void Reason',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('employeeName', {
-				id: 'employeeName',
-				header: 'Employee',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('managerName', {
-				id: 'managerName',
-				header: 'Manager',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('fullDescription', {
-				id: 'fullDescription',
-				header: 'Description',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('posCheckId', {
-				id: 'posCheckId',
-				header: 'POS Check ID',
-				dataType: 'number',
-			}),
-			columnHelper.accessor('tableName', {
-				id: 'tableName',
-				header: 'Table Name',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('revenueID', {
-				id: 'revenueID',
-				header: 'Revenue ID',
-				footer: ({ table }) =>
-					`Count: ${table.getCoreRowModel().rows.reduce((acc, row) => acc + row.subRows.length, 0)}`,
-				dataType: 'number',
-			}),
-			columnHelper.accessor('price', {
-				id: 'price',
-				header: 'Price',
-				footer: ({ table }) =>
-					`$${table
-						.getCoreRowModel()
-						.rows.reduce(
-							(acc, row) => acc + row.subRows.reduce((acc, curr) => acc + curr.original.price, 0),
-							0
-						)
-						.toFixed(2)}`,
-				dataType: 'number',
-			}),
-			columnHelper.accessor('tendersUsed', {
-				id: 'tendersUsed',
-				header: 'Tenders',
-				dataType: 'string',
-			}),
-		],
-		[]
-	);
 
 	useEffect(() => {
 		// Fetch initial data
@@ -255,16 +165,59 @@ const Voids = () => {
 
 			const result = await getCall(getData);
 
-			console.log('result', result);
+			const newData = result.data.map((data) => {
+				const updatedData = {
+					...data,
+					...data.dateValues,
+					total: Number(
+						Object.values(data.dateValues)
+							.reduce((acc, curr) => acc + curr, 0)
+							.toFixed(2)
+					),
+				};
 
-			setVoidsReportData(result.data);
-			setFilteredVoidsReportData(result.data);
+				if (data.description === 'Variable Lbr %' || data.description === 'Food Cost %') {
+					Object.keys(updatedData).forEach((key) => {
+						if (key !== 'description') {
+							updatedData[key] = `${Number(updatedData[key]).toFixed(2)} %`;
+						}
+					});
+				}
+				delete updatedData.dateValues;
+				return updatedData;
+			});
+
+			const generatedColumns = [
+				columnHelper.accessor('description', {
+					id: 'description',
+					header: 'Description',
+				}),
+				columnHelper.accessor('total', {
+					id: 'total',
+					header: 'Total',
+					cell: ({ getValue }) => getValue().toLocaleString('en-US'),
+				}),
+				...Object.keys(newData[0])
+					.filter((key) => !['description', 'total'].includes(key))
+					.map((item) =>
+						columnHelper.accessor(item, {
+							id: item,
+							header: summaryBy === 'Day' ? dateFormat(item, 'dddd mm/dd/yy') : item,
+							dataType: 'number',
+							cell: ({ getValue }) => getValue().toLocaleString('en-US'),
+							size: summaryBy === 'Day' ? 100 : 150,
+						})
+					),
+			];
+
+			setColumns(generatedColumns);
+			setBusinessSummaryData(newData);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting voids report data: ', error);
+			console.error('Error getting business summary report data: ', error);
 		}
 	};
 
@@ -289,13 +242,13 @@ const Voids = () => {
 			return;
 		}
 
-		if (!voidsReportData || voidsReportData.length === 0) {
-			console.error('Voids report data is not defined or empty');
+		if (!businessSummaryData || businessSummaryData.length === 0) {
+			console.error('Business Summary data is not defined or empty');
 			return;
 		}
 
 		const pdfData = {
-			title: 'Voids Report',
+			title: 'Business Summary',
 			subHeaders: [
 				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
 					selectedToDate,
@@ -304,60 +257,60 @@ const Voids = () => {
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
-			body: buildPDFBody(),
+			body: generateBody(),
 		};
 
 		PdfBuilder(pdfData);
 	};
 
-	const buildPDFBody = () => {
-		const body = voidsReportData.map((row) => {
-			const unit = unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId);
-			const title = unit ? unit.unitName : '';
-			return {
-				type: 'table',
-				title: title,
-				widths: new Array(columns.length).fill('auto'),
-				dataTypes: columns.map((column) => column.dataType),
-				data: formatPDFData(row.voids),
-			};
-		});
+	const generateBody = () => {
+		const rowsPerTable = 28; // Define how many rows you want per table
+		const totalRows = businessSummaryData.length; // Get total number of rows
+		const body = []; // Initialize the body array
 
+		// Loop through the data and create tables
+		for (let i = 0; i < totalRows; i += rowsPerTable) {
+			const chunkedColumns = [];
+			for (let j = 0; j < columns.length; j += 13) {
+				chunkedColumns.push(columns.slice(j, j + 13));
+			}
+			chunkedColumns.forEach((columnChunk) => {
+				body.push({
+					type: 'table/SeperatePage',
+					widths: columnChunk.map(() => 'auto'),
+					dataTypes: columnChunk.map((column) => column.dataType),
+					data: {
+						columnHeaders: columnChunk.map((column) => column.header),
+						rows: businessSummaryData.slice(i, i + rowsPerTable).map((row) =>
+							columnChunk.map((column) => ({
+								value:
+									typeof row[column.id] === 'number'
+										? row[column.id].toLocaleString('en-US')
+										: row[column.id],
+								cellType: '',
+								columnName: column.header,
+							}))
+						),
+					},
+				});
+			});
+		}
+
+		// Now the `body` array contains all the tables for the report
 		return body;
-	};
-
-	const formatPDFData = (data) => {
-		return {
-			columnHeaders: columns.map((column) => column.header),
-			rows: data.map((row) =>
-				columns.map((column) => ({
-					value: row[column.id],
-					cellType: '',
-					columnName: column.id,
-				}))
-			),
-		};
 	};
 
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
-		const csvHeaders = [
-			'Unit Name',
-			'Date',
-			'Hour',
-			'Minute',
-			'Void Reason',
-			'Employee',
-			'Manager',
-			'Description',
-			'POS Check ID',
-			'Table Name',
-			'Revenue ID',
-			'Price',
-			'Tenders',
-		];
-		const csvData = voidsReportData.flatMap((row) =>
-			row.subRows.map((voidRow) => Object.values(voidRow).join(','))
+		const csvHeaders = columns.map((column) => column.header);
+		const csvData = businessSummaryData.map((row) =>
+			columns
+				.map((column) =>
+					typeof row[column.id] === 'number'
+						? `"${row[column.id].toLocaleString('en-US')}"`
+						: `"${row[column.id]}"`
+				)
+				.join(',')
 		);
 
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
@@ -365,7 +318,7 @@ const Voids = () => {
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
 		tempLink.href = url;
-		tempLink.setAttribute('download', 'voids.csv');
+		tempLink.setAttribute('download', 'businessSummary.csv');
 		tempLink.click();
 	};
 
@@ -373,34 +326,24 @@ const Voids = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: 'Voids Report',
-				columns: [
-					{ name: 'Unit Name', filterButton: true },
-					{ name: 'Date', filterButton: true },
-					{ name: 'Hour', filterButton: true },
-					{ name: 'Minute', filterButton: true },
-					{ name: 'Void Reason', filterButton: true },
-					{ name: 'Employee', filterButton: true },
-					{ name: 'Manager', filterButton: true },
-					{ name: 'Description', filterButton: true },
-					{ name: 'POS Check ID', filterButton: true },
-					{ name: 'Table Name', filterButton: true },
-					{ name: 'Revenue ID', filterButton: true },
-					{ name: 'Price', filterButton: true },
-					{ name: 'Tenders', filterButton: true },
-				],
-				data: voidsReportData.flatMap((row) => row.subRows.map((voidRow) => Object.values(voidRow))),
+				name: `Business Summary | ${salesType} | ${DOWType} | ${summaryBy}`,
+				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
+				data: businessSummaryData.map((row) =>
+					columns.map((column) =>
+						typeof row[column.id] === 'number' ? row[column.id].toLocaleString('en-US') : row[column.id]
+					)
+				),
 			},
 		];
 
-		const filename = 'voidsReport';
-		const spreadSheetTitle = 'Voids Report';
+		const filename = 'businessSummary';
+		const spreadSheetTitle = 'Business Summary';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={filteredVoidsReportData} expandCollapseButtons={true} />;
+	const Table = <TableHOC columns={columns} data={businessSummaryData} />;
 
 	return (
 		<>
@@ -479,7 +422,7 @@ const Voids = () => {
 					<div>{errorMessage}</div>
 				) : (
 					!isLoading &&
-					(filteredVoidsReportData.length > 0 ? (
+					(businessSummaryData.length > 0 ? (
 						<div className='paged-table'>{Table}</div>
 					) : !selectedUnit ? (
 						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
@@ -516,4 +459,4 @@ const Voids = () => {
 	);
 };
 
-export default Voids;
+export default BusinessSummary;
