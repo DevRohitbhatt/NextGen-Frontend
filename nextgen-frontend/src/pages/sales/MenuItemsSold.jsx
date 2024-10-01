@@ -241,13 +241,13 @@ const MenuItemsSold = () => {
 							}),
 					  ]),
 				columnHelper.accessor('quant', {
-					id: 'Quantity',
+					id: 'quant',
 					header: 'Quantity',
 					dataType: 'number',
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('discPrice', {
-					id: 'Amount',
+					id: 'discPrice',
 					header: 'Amount',
 					dataType: 'number',
 					cell: ({ row, getValue }) =>
@@ -256,7 +256,7 @@ const MenuItemsSold = () => {
 							: `$${getValue() !== null && getValue() !== undefined ? getValue().toFixed(2) : '0.00'}`,
 				}),
 				columnHelper.accessor('itemSoldPct', {
-					id: 'ItemSold',
+					id: 'itemSoldPct',
 					header: 'Item Sold %',
 					dataType: 'number',
 					cell: (info) => {
@@ -265,7 +265,7 @@ const MenuItemsSold = () => {
 					},
 				}),
 				columnHelper.accessor('quantity_Avg', {
-					id: 'AvgItemQunt',
+					id: 'quantity_Avg',
 					header: 'Avg Item Quantity',
 					dataType: 'number',
 					cell: (info) => info.getValue() || '',
@@ -687,9 +687,9 @@ const MenuItemsSold = () => {
 				}));
 			} else if (viewValue === 2) {
 				// Direct binding without additional mapping
-				newData = result.data?.map((item) => ({
+				newData = result.data.menuItemSoldTotalsModels.map((item) => ({
 					unitName: item.unitName,
-					total: parseFloat(result.data?.reduce((acc, curr) => acc + curr.discPrice, 0).toFixed(2)),
+					total: salesType === 'SalesNet' ? result.data.total : result.data.grossTotal,
 					category: item.grouping1,
 					itemId: item.itemId,
 					description: item.description,
@@ -697,7 +697,7 @@ const MenuItemsSold = () => {
 					discPrice: item.discPrice,
 					quantity_Avg: item.quantity_Avg,
 					discPrice_Avg: item.discPrice_Avg,
-					itemSoldPct: item.itemSoldPct * 100,
+					itemSoldPct: item.itemSoldPct.toFixed(2),
 				}));
 			}
 
@@ -1317,7 +1317,7 @@ const MenuItemsSold = () => {
 									item.description,
 									item.quant,
 									item.discPrice,
-									item.itemSoldPct.toFixed(2),
+									item.itemSoldPct,
 									item.quantity_Avg,
 									item.discPrice_Avg.toFixed(2),
 								].join(',')
@@ -1482,9 +1482,9 @@ const MenuItemsSold = () => {
 												Description: item.description,
 												Quantity: item.quant,
 												Amount: item.discPrice,
+												'Item Sold %': Number(item.itemSoldPct).toFixed(2),
 												'Average Item Quantity': item.quantity_Avg,
 												'Average Item Amount': item.discPrice_Avg,
-												'Item Sold %': Number(item.itemSoldPct).toFixed(2),
 											}))
 									  )
 									: viewValue === 1
@@ -1496,9 +1496,9 @@ const MenuItemsSold = () => {
 													Description: item.description,
 													Quantity: item.quant,
 													Amount: item.discPrice,
+													'Item Sold %': Number(item.itemSoldPct).toFixed(2),
 													'Average Item Quantity': item.quantity_Avg,
 													'Average Item Amount': item.discPrice_Avg,
-													'Item Sold %': Number(item.itemSoldPct).toFixed(2),
 												}))
 											)
 									  )
@@ -1508,9 +1508,9 @@ const MenuItemsSold = () => {
 											Description: item.description,
 											Quantity: item.quant,
 											Amount: item.discPrice,
+											'Item Sold %': Number(item.itemSoldPct).toFixed(2),
 											'Average Item Quantity': item.quantity_Avg,
 											'Average Item Amount': item.discPrice_Avg,
-											'Item Sold %': Number(item.itemSoldPct).toFixed(2),
 									  })),
 						},
 					];
