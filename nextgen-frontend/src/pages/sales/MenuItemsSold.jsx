@@ -899,7 +899,7 @@ const MenuItemsSold = () => {
 						itemId: item.itemId,
 						modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
 						modifierDisplayName: item.modifierDisplayName,
-						quant: item.modQuantity,
+						quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
 						modItemFrequency: item.modItemFrequency,
 					})),
 				}));
@@ -913,7 +913,7 @@ const MenuItemsSold = () => {
 						subRows: unit.menuItemSoldModifierModels.map((item) => ({
 							unitName: item.unitName,
 							itemId: item.itemId,
-							quant: item.modQuantity,
+							quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
 							modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
 							modifierDisplayName: item.modifierDisplayName,
 							modQuantity: item.modQuantity,
