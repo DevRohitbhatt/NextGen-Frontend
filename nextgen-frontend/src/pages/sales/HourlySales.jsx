@@ -199,6 +199,7 @@ const HourlySales = () => {
 				const updatedData = {
 					...data,
 					Date: new Date(data.Date).toLocaleDateString('en-CA'),
+					Avg: data.Total / Object.keys(data).filter((key) => /^\d{2}\/\d{2}\/\d{4}$/.test(key)).length,
 				};
 
 				Object.keys(data).forEach((key) => {
@@ -319,8 +320,24 @@ const HourlySales = () => {
 							</div>
 						),
 				}),
+				columnHelper.accessor('Avg', {
+					id: 'Avg',
+					header: 'Avg',
+					cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+					footer: ({ table }) =>
+						reportType === 'Unit, Hour and Day' ? null : (
+							<div className='text-center'>
+								{`$ ${table
+									.getRowModel()
+									.rows.reduce((acc, row) => acc + row.original.Avg, 0)
+									.toFixed(2)}`}
+							</div>
+						),
+				}),
 				...Object.keys(newData[0] || {})
-					.filter((key) => !['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour'].includes(key))
+					.filter(
+						(key) => !['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour', 'Avg'].includes(key)
+					)
 					.filter((key) =>
 						reportType !== 'Hour and Day' ? key.startsWith('Hour') || key.startsWith('SalesYN') : !null
 					) // Filter hour and SalesYN keys
@@ -434,7 +451,10 @@ const HourlySales = () => {
 						columnHeaders: columnChunk.map((column) => column.header),
 						rows: hourlySalesData.slice(i, i + rowsPerTable).map((row) =>
 							columnChunk.map((column) => ({
-								value: row[column.id] || '0 ',
+								value:
+									row[column.id] - Math.floor(row[column.id]) !== 0
+										? row[column.id].toFixed(2)
+										: row[column.id] || '0 ',
 								cellType: '',
 								columnName: column.header,
 							}))
@@ -456,7 +476,13 @@ const HourlySales = () => {
 			{
 				name: '',
 				columns: columns.map((column) => ({ name: column.header })),
-				data: hourlySalesData.map((subRow) => columns.map((column) => subRow[column.id])),
+				data: hourlySalesData.map((subRow) =>
+					columns.map((column) =>
+						subRow[column.id] - Math.floor(subRow[column.id]) !== 0
+							? subRow[column.id].toFixed(2)
+							: subRow[column.id] || '0'
+					)
+				),
 			},
 		];
 
