@@ -61,7 +61,6 @@ export default function PurchaseOrderModal({ show, setShow, handleClose, company
 							vendorItemPackSize: `${item.vendorItemPack}/${item.vendorItemSize}`,
 						};
 					});
-					console.log(data)
 					setPurchaseOrder(data);
 				} catch (error) {
 					console.error('Error getting purchase order details', error);
