@@ -144,7 +144,7 @@ const BusinessSummary = () => {
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					DOW:
 						DOWType === 'All'
-							? '1234567'
+							? 0
 							: DOWType === 'Sunday'
 							? 1
 							: DOWType === 'Monday'
@@ -166,15 +166,26 @@ const BusinessSummary = () => {
 			const result = await getCall(getData);
 
 			const newData = result.data.map((data) => {
-				const updatedData = {
-					...data,
-					...data.dateValues,
-					total: Number(
-						Object.values(data.dateValues)
-							.reduce((acc, curr) => acc + curr, 0)
-							.toFixed(2)
-					),
-				};
+				let updatedData;
+				if (data.description === 'Food Cost %' || data.description === 'Variable Lbr %') {
+					const totalValues = Object.values(data.dateValues).reduce((acc, curr) => acc + curr, 0);
+					const averageValue = (totalValues / Object.values(data.dateValues).length).toFixed(2);
+					updatedData = {
+						...data,
+						...data.dateValues,
+						total: Number(averageValue),
+					};
+				} else {
+					updatedData = {
+						...data,
+						...data.dateValues,
+						total: Number(
+							Object.values(data.dateValues)
+								.reduce((acc, curr) => acc + curr, 0)
+								.toFixed(2)
+						),
+					};
+				}
 
 				if (data.description === 'Variable Lbr %' || data.description === 'Food Cost %') {
 					Object.keys(updatedData).forEach((key) => {
