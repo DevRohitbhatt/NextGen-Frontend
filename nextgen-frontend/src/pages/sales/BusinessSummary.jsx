@@ -197,15 +197,13 @@ const BusinessSummary = () => {
 					const variableLabor = newData.find((item) => item.description === 'Variable Labor');
 					const foodCostPct = newData.find((item) => item.description === 'Food Cost %');
 					const netSales = newData.find((item) => item.description === salesType);
-					console.log('netSales', netSales);
-
 					const transactions = newData.find((item) => item.description === 'Transactions');
 					if (variableLabor && netSales && data.description === 'Variable Lbr %') {
 						data.total = ((variableLabor.total / netSales.total) * 100).toFixed(2) + ' %';
 						Object.keys(data)
 							.filter((key) => !['description', 'total'].includes(key))
 							.forEach((key) => {
-								data[key] = Number(data[key]).toFixed(2) + ' %';
+								data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
 							});
 					} else if (data.description === 'Check Average') {
 						data.total = (netSales.total / transactions.total).toFixed(2);
@@ -218,7 +216,7 @@ const BusinessSummary = () => {
 						Object.keys(data)
 							.filter((key) => !['description', 'total'].includes(key))
 							.forEach((key) => {
-								data[key] = Number(data[key]).toFixed(2) + ' %';
+								data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
 							});
 					}
 				}
@@ -243,7 +241,10 @@ const BusinessSummary = () => {
 							id: item,
 							header: summaryBy === 'Day' ? dateFormat(item, 'dddd mm/dd/yy') : item,
 							dataType: 'number',
-							cell: ({ getValue }) => getValue().toLocaleString('en-US'),
+							cell: ({ getValue }) =>
+								typeof getValue() === 'string' && getValue().includes('%')
+									? getValue()
+									: Number(getValue()).toLocaleString('en-US'),
 							size: summaryBy === 'Day' ? 100 : 150,
 						})
 					),
@@ -323,9 +324,9 @@ const BusinessSummary = () => {
 						rows: businessSummaryData.slice(i, i + rowsPerTable).map((row) =>
 							columnChunk.map((column) => ({
 								value:
-									typeof row[column.id] === 'number'
-										? row[column.id].toLocaleString('en-US')
-										: row[column.id],
+									typeof row[column.id] === 'string' && row[column.id].includes('%')
+										? row[column.id]
+										: Number(row[column.id]).toLocaleString('en-US'),
 								cellType: '',
 								columnName: column.header,
 							}))
@@ -345,9 +346,9 @@ const BusinessSummary = () => {
 		const csvData = businessSummaryData.map((row) =>
 			columns
 				.map((column) =>
-					typeof row[column.id] === 'number'
-						? `"${row[column.id].toLocaleString('en-US')}"`
-						: `"${row[column.id]}"`
+					typeof row[column.id] === 'string' && row[column.id].includes('%')
+						? `"${row[column.id]}"`
+						: `"${Number(row[column.id]).toLocaleString('en-US')}"`
 				)
 				.join(',')
 		);
@@ -369,7 +370,9 @@ const BusinessSummary = () => {
 				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
 				data: businessSummaryData.map((row) =>
 					columns.map((column) =>
-						typeof row[column.id] === 'number' ? row[column.id].toLocaleString('en-US') : row[column.id]
+						typeof row[column.id] === 'string' && row[column.id].includes('%')
+							? row[column.id]
+							: Number(row[column.id]).toLocaleString('en-US')
 					)
 				),
 			},
