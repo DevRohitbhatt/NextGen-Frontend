@@ -32,6 +32,7 @@ const PurchaseOrderModalContent = styled.div`
 
 export default function PurchaseOrderModal({ show, setShow, handleClose, companyID, purchaseOrderID }) {
 	const [purchaseOrder, setPurchaseOrder] = useState(null);
+	const [loading, setLoading] = useState(true);
 	const tableHeaders = [
 		{ key: 'vendorItemDescription', label: 'Item Description', cellType: 'string' },
 		{ key: 'vendorItemReference', label: 'Item Ref', cellType: 'string' },
@@ -43,6 +44,7 @@ export default function PurchaseOrderModal({ show, setShow, handleClose, company
 	useEffect(() => {
 		(async () => {
 			if (show && purchaseOrderID && companyID) {
+				setLoading(true);
 				try {
 					const getData = {
 						url: 'getPurchaseOrderDetails',
@@ -59,10 +61,12 @@ export default function PurchaseOrderModal({ show, setShow, handleClose, company
 							vendorItemPackSize: `${item.vendorItemPack}/${item.vendorItemSize}`,
 						};
 					});
+					console.log(data)
 					setPurchaseOrder(data);
 				} catch (error) {
 					console.error('Error getting purchase order details', error);
 				}
+				setLoading(false);
 			}
 		})();
 	}, [show]);
@@ -70,7 +74,10 @@ export default function PurchaseOrderModal({ show, setShow, handleClose, company
 	return (
 		<Modal isOpen={show} setIsOpen={setShow} onClose={handleClose} title='Purchase Order'>
 			<PurchaseOrderModalContent>
-				<Table headers={tableHeaders} data={purchaseOrder} />
+				{loading ? 
+					<div>Loading...</div> :
+					<Table headers={tableHeaders} data={purchaseOrder} />
+				}
 			</PurchaseOrderModalContent>
 		</Modal>
 	);

@@ -37,7 +37,7 @@ function SearchBar({ list, onSearch }) {
       onClick={handleChange}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      className=" search-bar rounded-full h-[30px] w-[24%] flex items-center outline-none border border-gray-200 p-5 pr-[18px] pl-[18px] shadow-[0_0_10px_rgba(0,0,0,0.08)] my-auto justify-start transition-all hover:border-primary "
+      className=" search-bar rounded-full h-[30px] w-[24%] flex items-center outline-none border border-gray-200 p-5 pr-[18px] pl-[18px] shadow-[0_0_10px_rgba(0,0,0,0.08)] my-auto justify-start transition-all hover:border-[var(--tw-primary)] "
     />
   );
 }

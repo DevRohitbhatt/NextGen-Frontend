@@ -28,7 +28,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title }) => {
 		<div className='relative flex flex-col justify-center m-1 dropdown-selector rounded-3xl' ref={dropdownRef}>
 			<h3 className='mb-1 ml-2 text-xl font-bold text-nowrap'>{title}</h3>
 			<div
-				className='flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-primary active:border-primary'
+				className='flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)]'
 				onClick={() => setIsOpen(!isOpen)}
 			>
 				{selectedOption}

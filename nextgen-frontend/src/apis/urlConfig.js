@@ -1,4 +1,9 @@
 const urlConfig = {
+	//Company apis
+	getCompanySetting: '/api/company/settings/getsetting',
+	getAllCompanySettings: '/api/company/settings/getallsettings',
+
+
 	unitsAndArea: '/api/unitsandareas/getbyid',
 	vendors: '/api/vendor/getvendorsbycompanyid',
 

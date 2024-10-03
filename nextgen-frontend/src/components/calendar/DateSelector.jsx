@@ -15,7 +15,7 @@ export default function DateSelector({ toDate, fromDate, onClick, isDateRange = 
 					)}
 					<div
 						className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl  ${
-							isEditable ? ' hover:border-primary' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
+							isEditable ? ' hover:border-[var(--tw-primary)]' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
 						}`}
 					>
 						{fromDate?.toLocaleDateString()}
@@ -33,7 +33,7 @@ export default function DateSelector({ toDate, fromDate, onClick, isDateRange = 
 					)}
 					<div
 						className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl  ${
-							isEditable ? ' hover:border-primary' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
+							isEditable ? ' hover:border-[var(--tw-primary)]' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
 						}`}
 					>
 						{fromDate?.toLocaleDateString() + ' - ' + toDate?.toLocaleDateString()}

@@ -15,7 +15,7 @@ const YearSelector = ({ selectedYear, onChange }) => {
 				onClick={handleIconClick}
 			>
 				{selectedYear}
-				<div className='absolute top-0 flex items-center h-full text-4xl -right-1 text-primary'>
+				<div className='absolute top-0 flex items-center h-full text-4xl -right-1 text-[var(--tw-primary)]'>
 					<AiFillDownSquare />
 				</div>
 			</div>

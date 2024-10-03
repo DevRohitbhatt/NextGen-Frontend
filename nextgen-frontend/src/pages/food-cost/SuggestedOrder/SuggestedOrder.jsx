@@ -1217,7 +1217,7 @@ export default function SuggestedOrder() {
             />
             <div className="flex justify-end mx-auto w-full">
               <button
-                className="ml-2.5 w-15 h-15 rounded-full border-2 border-primary relative cursor-pointer hover:bg-primary hover:text-white"
+                className="ml-2.5 w-15 h-15 rounded-full border-2 border-[var(--tw-primary)] relative cursor-pointer hover:bg-[var(--tw-primary)] hover:text-white"
                 onClick={handleAddNewItem}
               >
                 Add Item

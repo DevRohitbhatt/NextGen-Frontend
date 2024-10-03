@@ -49,7 +49,7 @@ export default function TableBuilder({
 		<div className={`${className} rounded-2xl p-5 ${scrollable ? 'overflow-y-scroll' : 'overflow-hidden'} shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]`} style={{ width, height }}>
 			<div className={`rounded-2xl ${scrollable ? 'p-3' : 'p-4'} grid`} style={{ gridTemplateColumns: columnwidths }}>
 				{usetablerows ? (
-					<div className="w-full grid mb-2.5 pb-2.5 border-b-2 border-primary">
+					<div className="w-full grid mb-2.5 pb-2.5 border-b-2 border-[var(--tw-primary)]">
 						{columnHeaders.map((header, index) => (
 							<div
 								key={index}
@@ -73,18 +73,18 @@ export default function TableBuilder({
 					columnHeaders.map((header, index) => (
 						<div
 							key={index}
-							className={`font-medium text-md h-11 border-b-2 border-primary ${classnames && classnames.length > index ? classnames[index] : ''} ${dataTypes[index] === 'number' ? 'text-center justify-center' : 'text-left'}`}
+							className={`font-medium text-md h-11 border-b-2 border-[var(--tw-primary)] ${classnames && classnames.length > index ? classnames[index] : ''} ${dataTypes[index] === 'number' ? 'text-center justify-center' : 'text-left'}`}
 						>
 							{headerTooltips ? (
 								headerTooltips[index] === '' ? (
 									<div>{header}</div>
 								) : toolTipDirection[index] === 'left' ? (
 									<Tooltip content={headerTooltips[index]} direction='left' styles={`${dataTypes[index] === 'number' ? 'text-center justify-center' : 'text-left'}`}>
-										<FaInfoCircle className="text-secondary w-4 h-4 flex-shrink-0" /> {header}
+										<FaInfoCircle className="text-[var(--tw-secondary)] w-4 h-4 flex-shrink-0" /> {header}
 									</Tooltip>
 								) : (
 									<Tooltip content={headerTooltips[index]} direction='left'>
-										{header} <InfoIcon className="text-secondary" />
+										{header} <InfoIcon className="text-[var(--tw-secondary)]" />
 									</Tooltip>
 								)
 							) : (

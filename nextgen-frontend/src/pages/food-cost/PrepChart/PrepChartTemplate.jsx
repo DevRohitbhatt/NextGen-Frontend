@@ -379,7 +379,7 @@ export default function PrepChartTemplate() {
               />
             </div>
             <div className=" inventoryItemsTable rounded-2xl px-4 pb-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)] max-h-[90vh] overflow-auto relative">
-              <div className="grid grid-cols-4 border-b-2 border-primary p-1 pt-4 font-semibold sticky top-0 bg-white">
+              <div className="grid grid-cols-4 border-b-2 border-[var(--tw-primary)] p-1 pt-4 font-semibold sticky top-0 bg-white">
                 <div className=" col-span-1 ">Inventory ID</div>
                 <div className=" col-span-3 ">Description</div>
               </div>
@@ -438,7 +438,7 @@ export default function PrepChartTemplate() {
                       return (
                         <div className={`${prepGroup.prepGroupKey} align-middle`}>
                           <Tooltip content={tooltip.today} direction="top">
-                            <FaInfoCircle className="text-secondary m-auto" />{" "}
+                            <FaInfoCircle className="text-[var(--tw-secondary)] m-auto" />{" "}
                             {prepGroup.prepGroupKey}
                           </Tooltip>
                         </div>
@@ -446,7 +446,7 @@ export default function PrepChartTemplate() {
                     }}
                   >
                     <div className=" prepChartTemplateTable mb-10 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
-                      <div className=" grid grid-cols-4 border-b-2 border-primary p-1 font-semibold">
+                      <div className=" grid grid-cols-4 border-b-2 border-[var(--tw-primary)] p-1 font-semibold">
                         <div className=" col-span-1 ">Inventory ID</div>
                         <div className=" col-span-3">Description</div>
                       </div>

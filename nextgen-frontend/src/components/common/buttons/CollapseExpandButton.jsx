@@ -2,7 +2,7 @@ import React from 'react';
 
 const CollapseExpandButton = ({ isActive, onClick, children }) => {
   const baseStyles = "relative mx-auto w-[164px] rounded-none border-2 transition-colors duration-200 focus:outline-none";
-  const activeStyles = isActive ? "bg-primary text-white border-transparent" : "bg-white text-primary border-transparent";
+  const activeStyles = isActive ? "bg-[var(--tw-primary)] text-white border-transparent" : "bg-white text-[var(--tw-primary)] border-transparent";
   
   const hoverStyles = "hover:after:border-white hover:before:border-white hover:after:w-full hover:after:h-full hover:before:w-full hover:before:h-full hover:after:transition-all hover:before:transition-all hover:after:duration-200 hover:before:duration-200";
   

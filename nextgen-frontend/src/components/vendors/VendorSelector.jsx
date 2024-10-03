@@ -18,8 +18,8 @@ export default function VendorSelector({
             className={`whitespace-nowrap rounded-md border-2 px-8 py-2 text-center ${
               isInvalid
                 ? 'border-red-500'
-                : 'border-gray-300'
-            } hover:border-blue-500`}
+                : 'border-gray-200'
+            } hover:border-[var(--tw-primary)]`}
           >
             {vendorName}
           </div>
@@ -34,7 +34,7 @@ export default function VendorSelector({
           </div>
           <div
 						className={`px-6 py-3 text-center capitalize border-2 border-solid  text-nowrap rounded-3xl ${
-							isEditable ? ' hover:border-primary cursor-pointer' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
+							isEditable ? ' hover:border-[var(--tw-primary)] cursor-pointer' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
 						}`}
           >
             {vendorName}

@@ -35,8 +35,8 @@ function TableHOC2(columns, data, isPaginated = true) {
 			<div className='flex items-center my-4 space-x-4'>
 				<button
 					onClick={() => table.toggleAllRowsExpanded(false)}
-					className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-						table.getIsAllRowsExpanded() ? 'text-primary bg-secondary' : 'bg-primary text-white'
+					className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+						table.getIsAllRowsExpanded() ? 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]' : 'bg-[var(--tw-primary)] text-white'
 					}`}
 				>
 					Collapse All
@@ -44,8 +44,8 @@ function TableHOC2(columns, data, isPaginated = true) {
 				</button>
 				<button
 					onClick={() => table.toggleAllRowsExpanded(true)}
-					className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-						table.getIsAllRowsExpanded() ? 'bg-primary text-white' : 'text-primary bg-secondary'
+					className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+						table.getIsAllRowsExpanded() ? 'bg-[var(--tw-primary)] text-white' : 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
 					}`}
 				>
 					Expand All
@@ -54,9 +54,9 @@ function TableHOC2(columns, data, isPaginated = true) {
 			</div>
 
 			{/* table */}
-			<div className='pr-1 max-h-[60vh] overflow-scroll scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-primary scrollbar-track-secondary'>
+			<div className='pr-1 max-h-[60vh] overflow-scroll scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-[var(--tw-primary)] scrollbar-track-[var(--tw-secondary)]'>
 				<table className='w-full border-collapse table-fixed '>
-					<thead className='sticky top-0 w-full bg-white border-b-2 border-solid border-primary'>
+					<thead className='sticky top-0 w-full bg-white border-b-2 border-solid border-[var(--tw-primary)]'>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<tr key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {

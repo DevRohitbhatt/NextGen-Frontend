@@ -716,8 +716,6 @@ export default function PrepChart() {
     setShowDateModal(true);
   };
 
-  // useEffect(() => {}, [selectedToDate, selectedFromDate]); // Run this effect whenever selectedDate changes
-
   const handleRowClick = (startDate, endDate) => {};
   const handleCloseModal = () => {
     setShowDateModal(false);
@@ -726,7 +724,7 @@ export default function PrepChart() {
     setSelectedFromDate(fromDate);
     setSelectedToDate(toDate);
     setShowDateModal(false); // Close the date modal after selection
-    getPrepChart(companyID, selectedUnit, toDate);
+    getPrepChart(companyID, selectedUnit || state.defaultUnitID, toDate);
   };
   const handleUnitSelection = (unitName, unitID) => {
     setSelectedUnitName(unitName);

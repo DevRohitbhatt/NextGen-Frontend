@@ -10,6 +10,8 @@
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	--tw-primary: #364790;
+	--tw-secondary: #508cff;
 }
 
 #root {
@@ -219,27 +221,39 @@ input.Search::placeholder {
 	background: #508bff;
 }
 
-.inventoryItemsTable::-webkit-scrollbar-thumb:hover {
-	@apply bg-secondary;
+.inventoryItemsTable::-webkit-scrollbar-thumb:hover, 
+.CalendarTable::-webkit-scrollbar-thumb:hover,
+.simpleTableContainer::-webkit-scrollbar-thumb:hover {
+	@apply bg-[var(--tw-secondary)];
 }
 
-.inventoryItemsTable::-webkit-scrollbar {
+.inventoryItemsTable::-webkit-scrollbar,
+.CalendarTable::-webkit-scrollbar,
+.simpleTableContainer::-webkit-scrollbar {
 	@apply w-3 cursor-pointer ;
 }
 
-.inventoryItemsTable::-webkit-scrollbar-thumb {
-	@apply bg-primary rounded-full p-4 border-2 border-white cursor-pointer;
+.inventoryItemsTable::-webkit-scrollbar-thumb,
+.CalendarTable::-webkit-scrollbar-thumb,
+.simpleTableContainer::-webkit-scrollbar-thumb {
+	@apply bg-[var(--tw-primary)] rounded-full p-4 border-2 border-white cursor-pointer;
 }
 
-.inventoryItemsTable::-webkit-scrollbar-button:start:decrement {
+.inventoryItemsTable::-webkit-scrollbar-button:start:decrement,
+.CalendarTable::-webkit-scrollbar-button:start:decrement,
+.simpleTableContainer::-webkit-scrollbar-button:start:decrement {
 	@apply h-12 bg-transparent block;
 }
 
-.inventoryItemsTable::-webkit-scrollbar-button:end:increment {
+.inventoryItemsTable::-webkit-scrollbar-button:end:increment,
+.CalendarTable::-webkit-scrollbar-button:end:increment,
+.simpleTableContainer::-webkit-scrollbar-button:end:increment {
 	@apply h-6 bg-transparent block;
 }
 
-.inventoryItemsTable::-webkit-scrollbar-track-piece {
+.inventoryItemsTable::-webkit-scrollbar-track-piece,
+.CalendarTable::-webkit-scrollbar-track-piece,
+.simpleTableContainer::-webkit-scrollbar-track-piece {
 	@apply bg-gray-200 rounded-full;
 }
 
@@ -318,13 +332,16 @@ svg.clearIcone {
 
 /* Override specific react-calendar classes */
 .react-calendar__navigation{
-  @apply text-white bg-primary font-semibold align-middle h-full;
+  @apply text-white bg-[var(--tw-primary)] font-semibold align-middle h-full;
 }
 
 .react-calendar__navigation button {
-	@apply hover:bg-primary hover:text-secondary px-1 m-auto text-xl;
+	@apply hover:bg-[var(--tw-primary)] hover:text-[var(--tw-secondary)]  px-1 m-auto text-xl;
 }
 
+.react-calendar__navigation__arrow {
+	@apply focus:bg-[var(--tw-primary)];
+}
 
 .react-calendar__tile {
   @apply border border-gray-200 p-2 rounded-lg hover:bg-blue-100;
@@ -363,7 +380,8 @@ svg.clearIcone {
   @apply border-none rounded-lg mt-3.5 mb-4 text-gray-900 align-top border-gray-400 p-0 w-full overflow-hidden shadow-none overflow-y-scroll max-h-[50vh];
 }
 
-.react-calendar__navigation button:enabled:hover {
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
   @apply bg-transparent;
 }
 
@@ -384,7 +402,7 @@ button.react-calendar__tile.react-calendar__year-view__months__month,
 }
 
 .react-calendar__tile--hasActive {
-  @apply bg-secondary text-white;
+  @apply bg-[var(--tw-secondary)] text-white;
 }
 
 .react-calendar__tile--now {
@@ -392,7 +410,7 @@ button.react-calendar__tile.react-calendar__year-view__months__month,
 }
 
 .react-calendar__tile--active {
-  @apply !bg-secondary text-white rounded-full;
+  @apply !bg-[var(--tw-secondary)] text-white rounded-full;
 }
 
 

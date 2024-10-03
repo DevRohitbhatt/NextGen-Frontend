@@ -7,17 +7,6 @@ import * as suggestedOrderFunctions from '../../functions/suggestedOrderFunction
 import { toast } from 'react-toastify';
 import { postCall } from '../../apis/network';
 
-const SubmitModalContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	margin-top: 27px;
-`;
-
-const SubmitModalBody = styled.div`
-	padding: 0px 14px;
-`;
-
 const FormRow = styled.div`
 	display: flex;
 	justify-content: space-between;
@@ -28,13 +17,6 @@ const FormRow = styled.div`
 `;
 
 const SubmitModalText = styled.div``;
-
-const UnloadedMessage = styled.div`
-	font-size: 1.5em;
-	margin: auto;
-	width: 100%;
-	text-align: center;
-`;
 
 const SubmitModalButtonContainer = styled.div`
 	display: flex;
@@ -172,6 +154,15 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 			toastId: 'submit-toast',
 		});
 
+		if (orderData.suggestedOrderDetails.length === 0) {
+			toast.update('submit-toast', {
+				render: 'No items to submit',
+				type: 'error',
+				autoClose: 3000,
+			});
+			return;
+		}
+
 		try {
 			const postData = {
 				url: 'submitSuggestedOrder',
@@ -208,15 +199,15 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 
 	return (
 		<Modal isOpen={isOpen} setIsOpen={onClose} onClose={onClose} title='Submit Suggested Order'>
-			<SubmitModalContainer>
-				<SubmitModalBody>
-					<FormRow onClick={updateExportType}>
-						<SubmitModalText>How would you like to submit the Suggested Order?</SubmitModalText>
-						<SubmitModalButtonContainer>
-							<LeftButton $isSelected={isPDFSelected}>PDF</LeftButton>
-							<RightButton $isSelected={isCSVSelected}>CSV</RightButton>
-						</SubmitModalButtonContainer>
-					</FormRow>
+			<div className='flex w-full mt-7'>
+				<div className=" px-4 ">
+					<div className=' flex justify-between m-5 items-center' onClick={updateExportType}>
+						<div>How would you like to submit the Suggested Order?</div>
+						<div className=' flex justify-center '>
+							<div className={` my-auto ml-2 px-3 py-1 rounded-s-full border-2 border-[var(--tw-primary)] text-[var(--tw-primary)] relative cursor-pointer transition-all  ${isPDFSelected && `bg-[var(--tw-primary)] text-white`}`}>PDF</div>
+							<div className={` my-auto px-3 py-1 rounded-e-full border-2 border-[var(--tw-primary)] text-[var(--tw-primary)] relative cursor-pointer transition-all  ${isCSVSelected && `bg-[var(--tw-primary)] text-white`}`}>CSV</div>
+						</div>
+					</div>
 					<FormRow $isDisabled={true}>
 						<SubmitModalText>How would you like to sort the order?</SubmitModalText>
 						<SubmitModalButtonContainer>
@@ -225,16 +216,18 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 						</SubmitModalButtonContainer>
 					</FormRow>
 					{!isPreviewLoaded ? (
-						<UnloadedMessage>Loading Preview</UnloadedMessage>
+						<div className=' text-xl m-auto w-full text-center '>Loading Preview</div>
 					) : (
-						<SimpleTable headers={tableHeaders} data={orderDetails} />
+						<div className=''>
+							<SimpleTable headers={tableHeaders} data={orderDetails} />
+						</div>
 					)}
-					<FormRow>
+					<div className=' flex justify-between m-5 items-center '>
 						<div></div>
 						<SubmitButton onClick={handleSubmit}>Submit</SubmitButton>
-					</FormRow>
-				</SubmitModalBody>
-			</SubmitModalContainer>
+					</div>
+				</div>
+			</div>
 		</Modal>
 	);
 }
