@@ -167,26 +167,20 @@ const BusinessSummary = () => {
 
 			const newData = result.data.map((data) => {
 				let updatedData;
-				if (data.description === 'Food Cost %' || data.description === 'Variable Lbr %') {
-					const totalValues = Object.values(data.dateValues).reduce((acc, curr) => acc + curr, 0);
-					const averageValue = (totalValues / Object.values(data.dateValues).length).toFixed(2);
-					updatedData = {
-						...data,
-						...data.dateValues,
-						total: Number(averageValue),
-					};
-				} else {
-					updatedData = {
-						...data,
-						...data.dateValues,
-						total: Number(
-							Object.values(data.dateValues)
-								.reduce((acc, curr) => acc + curr, 0)
-								.toFixed(2)
-						),
-					};
-				}
 
+				updatedData = {
+					...data,
+					...Object.fromEntries(
+						Object.entries(data.dateValues).map(([key, value]) => [key, value.toFixed(2)])
+					),
+					total: Number(
+						Object.values(data.dateValues)
+							.reduce((acc, curr) => acc + curr, 0)
+							.toFixed(2)
+					),
+				};
+
+				// Format the Variable Labor % and Food Cost %
 				if (data.description === 'Variable Lbr %' || data.description === 'Food Cost %') {
 					Object.keys(updatedData).forEach((key) => {
 						if (key !== 'description') {
@@ -198,6 +192,22 @@ const BusinessSummary = () => {
 				return updatedData;
 			});
 
+			// Calculate the Variable Labor % and Check Average
+			newData.forEach((data) => {
+				if (data.description === 'Variable Lbr %' || data.description === 'Check Average') {
+					const variableLabor = newData.find((item) => item.description === 'Variable Labor');
+					const checkAverage = newData.find((item) => item.description === 'Check Average');
+					const netSales = newData.find((item) => item.description === 'Net Sales');
+					if (variableLabor && netSales) {
+						data.total = ((variableLabor.total / netSales.total) * 100).toFixed(2) + ' %';
+					} else if (checkAverage && netSales) {
+						data.total = ((checkAverage.total / netSales.total) * 100).toFixed(2);
+					}
+				}
+				return data;
+			});
+
+			// Generate the columns for the table
 			const generatedColumns = [
 				columnHelper.accessor('description', {
 					id: 'description',
