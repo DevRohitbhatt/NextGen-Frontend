@@ -324,7 +324,8 @@ const BusinessSummary = () => {
 						rows: businessSummaryData.slice(i, i + rowsPerTable).map((row) =>
 							columnChunk.map((column) => ({
 								value:
-									typeof row[column.id] === 'string' && row[column.id].includes('%')
+									typeof row[column.id] === 'string' &&
+									(row[column.id].includes('%') || column.id === 'description')
 										? row[column.id]
 										: Number(row[column.id]).toLocaleString('en-US'),
 								cellType: '',
@@ -346,7 +347,7 @@ const BusinessSummary = () => {
 		const csvData = businessSummaryData.map((row) =>
 			columns
 				.map((column) =>
-					typeof row[column.id] === 'string' && row[column.id].includes('%')
+					typeof row[column.id] === 'string' && (row[column.id].includes('%') || column.id === 'description')
 						? `"${row[column.id]}"`
 						: `"${Number(row[column.id]).toLocaleString('en-US')}"`
 				)
@@ -370,7 +371,8 @@ const BusinessSummary = () => {
 				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
 				data: businessSummaryData.map((row) =>
 					columns.map((column) =>
-						typeof row[column.id] === 'string' && row[column.id].includes('%')
+						typeof row[column.id] === 'string' &&
+						(row[column.id].includes('%') || column.id === 'description')
 							? row[column.id]
 							: Number(row[column.id]).toLocaleString('en-US')
 					)
