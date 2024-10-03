@@ -39,6 +39,7 @@ const createTable = (tableInfo) => {
 			},
 		},
 	};
+
 	if (title.text === '') return { table };
 	else return { title, table };
 };
@@ -117,6 +118,7 @@ export default function PdfBuilder(data) {
 			},
 		},
 	};
+
 	if (data.exportType === 'pdf') {
 		pdfMake.createPdf(docDefinition).open();
 	} else if (data.exportType === 'print') {

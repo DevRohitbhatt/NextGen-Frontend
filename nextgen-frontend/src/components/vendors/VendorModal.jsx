@@ -28,7 +28,6 @@ const VendorModal = ({
 			setVendorsList(vendorData.data);
 			setSelectedVendorName(vendorName);
 			setSelectedVendor(vendorID);
-			console.log(vendorID);
 			if (vendorID !== 0) {
 				setSelectedVendors([{ id: vendorID, name: vendorName }]);
 			}

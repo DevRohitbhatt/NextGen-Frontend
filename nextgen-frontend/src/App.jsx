@@ -12,15 +12,25 @@ import {
 } from "./functions/storageHelpers.js";
 import { useDispatch, useSelector } from "react-redux";
 import { getCompanyTheme } from "./functions/getCompanyTheme.js";
-import InventoryTransferReport from "./pages/food-cost/InventoryTransferReport.jsx";
-import EmployeeInformation from "./pages/labour/EmployeeInformation.jsx";
-import SuggestedOrder from "./pages/food-cost/SuggestedOrder/SuggestedOrder.jsx";
-import SuggestedOrderList from "./pages/food-cost/SuggestedOrder/SuggestedOrderList.jsx";
-import PrepChart from "./pages/food-cost/PrepChart/PrepChart";
-import PrepChartTemplate from "./pages/food-cost/PrepChart/PrepChartTemplate";
-import VoidsReport from "./pages/sales/VoidsReport.jsx";
-import LaborByPayPeriod from "./pages/labour/LaborByPayPeriod.jsx";
-import InventoryWeeksOnHand from "./pages/food-cost/InventoryWeeksOnHand.jsx";
+import { Loader } from './components/index.js';
+import {
+	PrepChart,
+	PrepChartTemplate,
+	SuggestedOrderList,
+	SuggestedOrder,
+	InventoryTransfer,
+	InventoryWeeksOnHand,
+	EmployeeInformation,
+	LaborByPayPeriod,
+	Voids,
+	ActualFoodCost,
+	VarianceFoodCost,
+	Invoices,
+	Countsheets,
+	CountsheetDesigner,
+	Purchase,
+} from './pages';
+import { Suspense } from 'react';
 
 const App = () => {
   const [selectedTheme, setSelectedTheme] = useState(themes.default);
@@ -79,48 +89,47 @@ const App = () => {
 	}, [dispatch]);
 	
 
-  return (
-    <Router>
-      <ThemeProvider theme={selectedTheme}>
-        <DndProvider backend={HTML5Backend}>
-          <ToastContainer />
-          <div className="App">
-            <Routes>
-              <Route path="/PrepChart" element={<PrepChart />} />
-              <Route
-                path="/PrepChartTemplate"
-                element={<PrepChartTemplate />}
-              />
-              <Route
-                path="/SuggestedOrderList"
-                element={<SuggestedOrderList />}
-              />
-              <Route path="/SuggestedOrder" element={<SuggestedOrder />} />
-              {/* Food Cost */}
-              <Route
-                path="/InventoryTransferReport"
-                index
-                element={<InventoryTransferReport />}
-              />
-              <Route
-                path="/InventoryWeeksOnHand"
-                index
-                element={<InventoryWeeksOnHand />}
-              />
-              {/* Sales */}
-              <Route path="/Voids" element={<VoidsReport />} />
-              {/* Labour */}
-              <Route
-                path="/EmployeeInformation"
-                element={<EmployeeInformation />}
-              />
-              <Route path="/LaborByPayPeriod" element={<LaborByPayPeriod />} />
-            </Routes>
-          </div>
-        </DndProvider>
-      </ThemeProvider>
-    </Router>
-  );
+	return (
+		<Router>
+			<ThemeProvider theme={selectedTheme}>
+				<DndProvider backend={HTML5Backend}>
+					<ToastContainer />
+					<div className='App'>
+						<Suspense
+							fallback={
+								<div className='w-full m-auto text-2xl font-medium text-center '>
+									<Loader loading={true} />
+								</div>
+							}
+						>
+							<Routes>
+								<Route path='/PrepChart' element={<PrepChart />} />
+								<Route path='/PrepChartTemplate' element={<PrepChartTemplate />} />
+								<Route path='/SuggestedOrderList' element={<SuggestedOrderList />} />
+								<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
+								{/* Food Cost */}
+								<Route path='/InventoryTransfer' index element={<InventoryTransfer />} />
+								<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
+								<Route path='/ActualFoodCost' index element={<ActualFoodCost />} />
+								<Route path='/VarianceFoodCost' index element={<VarianceFoodCost />} />
+								<Route path='/Invoices' element={<Invoices />} />
+								<Route path='/Countsheets' element={<Countsheets />} />
+								<Route path='/CountsheetDesigner' element={<CountsheetDesigner />} />
+								<Route path='/Purchase' element={<Purchase />} />
+
+								{/* Sales */}
+								<Route path='/Voids' element={<Voids />} />
+
+								{/* Labour */}
+								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
+								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
+							</Routes>
+						</Suspense>
+					</div>
+				</DndProvider>
+			</ThemeProvider>
+		</Router>
+	);
 };
 
 export default App;

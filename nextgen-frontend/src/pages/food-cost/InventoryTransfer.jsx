@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import dateFormat from 'dateformat';
 import inventoryTransferReport from '../../assets/introJSSteps/inventoryTransferReport';
 import {
 	Dropdown,
+	Loader,
 	UnitSelector,
 	CalendarModal,
 	UnitModal,
 	ExportOptions,
 	DateSelector,
+	ExcelExport as exportToExcel,
 	SimpleTable as Table,
 	PdfBuilder,
 } from '../../components';
-import exportToExcel from '../../components/exportOptions/ExcelExport';
 
-const InventoryTransferReport = () => {
+const InventoryTransfer = () => {
 	const [companyId, setCompanyId] = useState();
 	const [alignmentId, setAlignmentId] = useState();
 	const [memberId, setMemberId] = useState();
@@ -174,8 +176,8 @@ const InventoryTransferReport = () => {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					unitIds: selectedUnit,
-					fromDate: selectedFromDate.toISOString().split('T')[0],
-					toDate: selectedToDate.toISOString().split('T')[0],
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					reportType: reportType,
 				},
 			};
@@ -213,7 +215,7 @@ const InventoryTransferReport = () => {
 				{
 					key: 'transferTime',
 					label: 'Transfer Time',
-					cellType: 'date',
+					cellType: 'dateTime',
 					toolTip: '',
 					toolTipDirection: '',
 				},
@@ -313,7 +315,10 @@ const InventoryTransferReport = () => {
 		const pdfData = {
 			title: 'Inventory Transfer Report',
 			subHeaders: [
-				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
+				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
+					selectedToDate,
+					'mm-dd-yyyy'
+				)} | ${selectedUnitName}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
@@ -369,101 +374,115 @@ const InventoryTransferReport = () => {
 
 		const filename = 'InventoryTransferReport';
 		const spreadSheetTitle = 'Inventory Transfer Report';
-		const date = `${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()}`;
+		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
 	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Inventory Transfer Report</h2>
-			<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div className='flex items-center space-x-3 '>
-					<UnitSelector
-						companyId={companyId}
-						alignmentId={alignmentId}
-						memberId={selectedUnit}
-						memberName={selectedUnitName}
-						includeAreas={true}
-						setMemberName={setselectedUnitName}
-						onClick={() => setUnitShowModal(true)}
-					/>
-					<DateSelector
-						toDate={selectedToDate}
-						fromDate={selectedFromDate}
-						isDateRange={true}
-						onClick={() => setShowDateModal(true)}
-					/>
+		<>
+			<Loader loading={isLoading} />
+			<div className='w-[85%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Inventory Transfer Report</h2>
+				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+					<div className='flex items-center space-x-3 '>
+						<UnitSelector
+							companyId={companyId}
+							alignmentId={alignmentId}
+							memberId={selectedUnit}
+							memberName={selectedUnitName}
+							includeAreas={true}
+							setMemberName={setselectedUnitName}
+							onClick={() => setUnitShowModal(true)}
+						/>
+						<DateSelector
+							toDate={selectedToDate}
+							fromDate={selectedFromDate}
+							isDateRange={true}
+							onClick={() => setShowDateModal(true)}
+						/>
 
-					<Dropdown
-						options={dropdownOptions}
-						title='Report Type'
-						selectedOption={reportType}
-						onOptionChange={(optionValue) => setReportType(optionValue)}
-					/>
-					<div className='run-button' onClick={handleInventoryTransferReport}>
-						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
-							Run
+						<Dropdown
+							options={dropdownOptions}
+							title='Report Type'
+							selectedOption={reportType}
+							onOptionChange={(optionValue) => setReportType(optionValue)}
+						/>
+						<div className='run-button' onClick={handleInventoryTransferReport}>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+								Run
+							</div>
 						</div>
 					</div>
-				</div>
+					<div>
+						<ExportOptions
+							includePDF={true}
+							handlePDFClick={handlePDFClick}
+							includeCSV={true}
+							handleCSVClick={handleCSVClick}
+							includeExcel={true}
+							handleExcelClick={handleExcelClick}
+							includeHelp={true}
+							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+						/>
+					</div>
+				</header>
+
+				{/* Display the table if there is no error and the data is not loading */}
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : (
+					!isLoading && (
+						<>
+							{inventoryTransferReportData?.data ? (
+								<div>
+									<Table
+										data={inventoryTransferReportData.data}
+										headers={headers}
+										onRowClick={() => {}}
+									/>
+								</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							)}
+						</>
+					)
+				)}
+
 				<div>
-					<ExportOptions
-						includePDF={true}
-						handlePDFClick={handlePDFClick}
-						includeCSV={true}
-						handleCSVClick={handleCSVClick}
-						includeExcel={true}
-						handleExcelClick={handleExcelClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+					<CalendarModal
+						handleClose={() => setShowDateModal(false)}
+						modalOpen={showDateModal}
+						isDateRange={true}
+						handleDateSelection={handleDateSelection}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
 					/>
 				</div>
-			</header>
-
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				inventoryTransferReportData?.data && (
-					<div>
-						<Table data={inventoryTransferReportData?.data} headers={headers} onRowClick={() => {}} />
-					</div>
-				)
-			)}
-
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
 			</div>
-		</div>
+		</>
 	);
 };
 
-export default InventoryTransferReport;
+export default InventoryTransfer;

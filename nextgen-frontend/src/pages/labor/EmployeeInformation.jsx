@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import dateFormat from 'dateformat';
 import employeeInformation from '../../assets/introJSSteps/employeeInformation';
-import { Dropdown, UnitSelector, UnitModal, ExportOptions, SimpleTable as Table, PdfBuilder } from '../../components';
-import exportToExcel from '../../components/exportOptions/ExcelExport';
+import {
+	Loader,
+	Dropdown,
+	UnitSelector,
+	UnitModal,
+	ExportOptions,
+	ExcelExport as exportToExcel,
+	SimpleTable as Table,
+	PdfBuilder,
+} from '../../components';
 
 const EmployeeInformation = () => {
 	const [companyId, setCompanyId] = useState();
@@ -62,7 +71,7 @@ const EmployeeInformation = () => {
 			maxWidth: '180px',
 		},
 		{
-			key: 'uniqueId',
+			key: 'ssn',
 			label: 'Unique ID',
 			cellType: 'string',
 			toolTip: '',
@@ -177,15 +186,6 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
-		},
-		{
-			key: 'gender',
-			label: 'Gender',
-			cellType: 'string',
-			toolTip: '',
-			toolTipDirection: '',
-			minWidth: '100px',
-			maxWidth: '150px',
 		},
 		{
 			key: 'phantomEmployee',
@@ -350,7 +350,7 @@ const EmployeeInformation = () => {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your employee information, please try again later.');
-			console.error('Error getting employee information: ', error);
+			console.error('Error getting employee information report data: ', error);
 		}
 	};
 
@@ -391,7 +391,6 @@ const EmployeeInformation = () => {
 							(currentYear === startYear && currentMonth - 1 === startMonth);
 						return isWithinOneMonth;
 					});
-					console.log(filteredData);
 
 					setFilteredEmployeeInformationData({ data: filteredData });
 				}
@@ -431,7 +430,7 @@ const EmployeeInformation = () => {
 
 		const pdfData = {
 			title: `Employee Information Report | ${view}`,
-			subHeaders: [new Date().toLocaleDateString()],
+			subHeaders: [dateFormat(new Date(), 'mm/dd/yyyy')],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
 			body: [
@@ -518,11 +517,6 @@ const EmployeeInformation = () => {
 								columnName: 'Dependants',
 							},
 							{
-								value: row.gender,
-								cellType: '',
-								columnName: 'Gender',
-							},
-							{
 								value: row.phantomEmployee,
 								cellType: '',
 								columnName: 'Phantom Employee',
@@ -563,8 +557,6 @@ const EmployeeInformation = () => {
 			],
 		};
 
-		console.log('pdfData', pdfData);
-
 		PdfBuilder(pdfData);
 	};
 
@@ -582,82 +574,90 @@ const EmployeeInformation = () => {
 
 		const filename = 'Employee Information Report';
 		const spreadSheetTitle = 'Employee Information Report';
-		const date = new Date().toLocaleDateString();
+		const date = dateFormat(new Date(), 'mm/dd/yyyy');
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
 	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Employee Information</h2>
-			<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div className='flex items-center space-x-3 '>
-					<UnitSelector
-						companyId={companyId}
-						alignmentId={alignmentId}
-						memberId={selectedUnit}
-						memberName={selectedUnitName}
-						includeAreas={true}
-						setMemberName={setselectedUnitName}
-						onClick={() => setUnitShowModal(true)}
-					/>
+		<>
+			<Loader loading={isLoading} />
+			<div className='w-[85%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Employee Information</h2>
+				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+					<div className='flex items-center space-x-3 '>
+						<UnitSelector
+							companyId={companyId}
+							alignmentId={alignmentId}
+							memberId={selectedUnit}
+							memberName={selectedUnitName}
+							includeAreas={true}
+							setMemberName={setselectedUnitName}
+							onClick={() => setUnitShowModal(true)}
+						/>
 
-					<Dropdown
-						options={dropdownOptions}
-						title='View'
-						selectedOption={view}
-						onOptionChange={handleViewChange}
-					/>
-				</div>
-				<div>
-					<ExportOptions
-						includePDF={true}
-						handlePDFClick={handlePDFClick}
-						includeExcel={true}
-						handleExcelClick={handleExcelClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
-					/>
-				</div>
-			</header>
-
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				filteredEmployeeInformationData?.data && (
-					<div>
-						<Table
-							data={filteredEmployeeInformationData?.data}
-							headers={headers}
-							onRowClick={() => {}}
-							isPaginated={false}
+						<Dropdown
+							options={dropdownOptions}
+							title='View'
+							selectedOption={view}
+							onOptionChange={handleViewChange}
 						/>
 					</div>
-				)
-			)}
+					<div>
+						<ExportOptions
+							includePDF={true}
+							handlePDFClick={handlePDFClick}
+							includeExcel={true}
+							handleExcelClick={handleExcelClick}
+							includeHelp={true}
+							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+						/>
+					</div>
+				</header>
 
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : (
+					!isLoading && (
+						<>
+							{filteredEmployeeInformationData?.data ? (
+								<div>
+									<Table
+										data={filteredEmployeeInformationData.data}
+										headers={headers}
+										onRowClick={() => {}}
+									/>
+								</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							)}
+						</>
+					)
+				)}
+
+				<div>
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 
