@@ -180,28 +180,43 @@ const BusinessSummary = () => {
 					),
 				};
 
-				// Format the Variable Labor % and Food Cost %
-				if (data.description === 'Variable Lbr %' || data.description === 'Food Cost %') {
-					Object.keys(updatedData).forEach((key) => {
-						if (key !== 'description') {
-							updatedData[key] = `${Number(updatedData[key]).toFixed(2)} %`;
-						}
-					});
-				}
 				delete updatedData.dateValues;
 				return updatedData;
 			});
 
-			// Calculate the Variable Labor % and Check Average
+			// Calculate the total for Variable Labor %, Check Average and Food Cost %
 			newData.forEach((data) => {
-				if (data.description === 'Variable Lbr %' || data.description === 'Check Average') {
+				if (
+					data.description === 'Variable Lbr %' ||
+					data.description === 'Check Average' ||
+					data.description === 'Food Cost %'
+				) {
 					const variableLabor = newData.find((item) => item.description === 'Variable Labor');
-					const checkAverage = newData.find((item) => item.description === 'Check Average');
-					const netSales = newData.find((item) => item.description === 'Net Sales');
-					if (variableLabor && netSales) {
+					const foodCostPct = newData.find((item) => item.description === 'Food Cost %');
+					const netSales = newData.find((item) => item.description === salesType);
+					console.log('netSales', netSales);
+
+					const transactions = newData.find((item) => item.description === 'Transactions');
+					if (variableLabor && netSales && data.description === 'Variable Lbr %') {
 						data.total = ((variableLabor.total / netSales.total) * 100).toFixed(2) + ' %';
-					} else if (checkAverage && netSales) {
-						data.total = ((checkAverage.total / netSales.total) * 100).toFixed(2);
+						Object.keys(data)
+							.filter((key) => !['description', 'total'].includes(key))
+							.forEach((key) => {
+								data[key] = Number(data[key]).toFixed(2) + ' %';
+							});
+					} else if (data.description === 'Check Average') {
+						data.total = (netSales.total / transactions.total).toFixed(2);
+					} else if (foodCostPct && data.description === 'Food Cost %') {
+						data.total =
+							(
+								foodCostPct.total /
+								Object.keys(data).filter((key) => !['description', 'total'].includes(key)).length
+							).toFixed(2) + ' %';
+						Object.keys(data)
+							.filter((key) => !['description', 'total'].includes(key))
+							.forEach((key) => {
+								data[key] = Number(data[key]).toFixed(2) + ' %';
+							});
 					}
 				}
 				return data;
