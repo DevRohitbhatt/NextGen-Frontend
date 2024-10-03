@@ -68,24 +68,40 @@ const App = () => {
 
 	useEffect(() => {
 		const parameters = getParametersFromUrl();
+    let reload = false;
+
+    if (parameters) {
+      if (parameters.CompanyID !== localStorage.getItem("CompanyID")) {
+        reload = true;
+      } else if (parameters.User_UserID !== localStorage.getItem("User_UserID")) {
+        reload = true;
+      } else if (parameters.User_Type !== localStorage.getItem("User_Type")) {
+        reload = true;
+      } else if (parameters.User_DefaultUnitID !== localStorage.getItem("User_DefaultUnitID")) {
+        reload = true;
+      } else if (parameters.User_GroupOrUnitAccess !== localStorage.getItem("User_GroupOrUnitAccess")) {
+        reload = true;
+      }
+    }
 	
-		if (localStorage.getItem("CompanyID") !== null) {
+		if (!reload) {
 			loadFromLocalStorage(dispatch);  // Load from local storage if available
-		} else if (parameters) {
-			storeAndDispatchParameters(dispatch, parameters);  // Store and dispatch URL parameters
 		} else {
-			console.log("testing mode");
-			const defaultState = {
-				CompanyID: 1021,
-				CompanyName: "Default Company",
-				AlignmentId: 1110,
-				User_UserID: 5199,
-				User_Type: "admin",
-				User_DefaultUnitID: 0,
-				User_GroupOrUnitAccess: "defaultAccess"
-			};
-			storeAndDispatchParameters(dispatch, defaultState);  // Store and dispatch default state
-		}
+			storeAndDispatchParameters(dispatch, parameters);  // Store and dispatch URL parameters 
+    }
+		// } else {
+		// 	console.log("testing mode");
+		// 	const defaultState = {
+		// 		CompanyID: 1021,
+		// 		CompanyName: "Default Company",
+		// 		AlignmentId: 1110,
+		// 		User_UserID: 5199,
+		// 		User_Type: "admin",
+		// 		User_DefaultUnitID: 0,
+		// 		User_GroupOrUnitAccess: "defaultAccess"
+		// 	};
+		// 	storeAndDispatchParameters(dispatch, defaultState);  // Store and dispatch default state
+		// }
 	}, [dispatch]);
 	
 
