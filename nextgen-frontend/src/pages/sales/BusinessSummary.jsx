@@ -171,7 +171,10 @@ const BusinessSummary = () => {
 				updatedData = {
 					...data,
 					...Object.fromEntries(
-						Object.entries(data.dateValues).map(([key, value]) => [key, value.toFixed(2)])
+						Object.entries(data.dateValues).map(([key, value]) => [
+							key,
+							Number.isInteger(value) ? value : value.toFixed(2),
+						])
 					),
 					total: Number(
 						Object.values(data.dateValues)
