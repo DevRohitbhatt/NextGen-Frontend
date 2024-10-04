@@ -1,17 +1,13 @@
-import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { themes } from "./assets/themes/Themes.jsx";
-import { ThemeProvider } from "styled-components";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { ToastContainer } from "react-toastify";
-import {
-  getParametersFromUrl,
-	storeAndDispatchParameters,
-	loadFromLocalStorage,
-} from "./functions/storageHelpers.js";
-import { useDispatch, useSelector } from "react-redux";
-import { getCompanyTheme } from "./functions/getCompanyTheme.js";
+import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { themes } from './assets/themes/Themes.jsx';
+import { ThemeProvider } from 'styled-components';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { ToastContainer } from 'react-toastify';
+import { getParametersFromUrl, storeAndDispatchParameters, loadFromLocalStorage } from './functions/storageHelpers.js';
+import { useDispatch, useSelector } from 'react-redux';
+import { getCompanyTheme } from './functions/getCompanyTheme.js';
 import { Loader } from './components/index.js';
 import {
 	PrepChart,
@@ -33,62 +29,62 @@ import {
 import { Suspense } from 'react';
 
 const App = () => {
-  const [selectedTheme, setSelectedTheme] = useState(themes.default);
-  const [primaryColor, setPrimaryColor] = useState("");
-  const [secondaryColor, setSecondaryColor] = useState("");
-  const companyID = useSelector((state) => state.globalState.companyID);
+	const [selectedTheme, setSelectedTheme] = useState(themes.default);
+	const [primaryColor, setPrimaryColor] = useState('');
+	const [secondaryColor, setSecondaryColor] = useState('');
+	const companyID = useSelector((state) => state.globalState.companyID);
 	const dispatch = useDispatch();
 
-  useEffect(() => {
-    const fetchTheme = async () => {
-      if (companyID) {
-        const { primary, secondary } = await getCompanyTheme(companyID);
-        console.log(primary);
-        if (primary && secondary) {
-          setPrimaryColor(primary);
-          setSecondaryColor(secondary);
-        }
-      }
-    };
+	useEffect(() => {
+		const fetchTheme = async () => {
+			if (companyID) {
+				const { primary, secondary } = await getCompanyTheme(companyID);
+				console.log(primary);
+				if (primary && secondary) {
+					setPrimaryColor(primary);
+					setSecondaryColor(secondary);
+				}
+			}
+		};
 
-    fetchTheme();
-  }, [companyID]);
+		fetchTheme();
+	}, [companyID]);
 
-  useEffect(() => {
-    console.log("primaryColor, secondaryColor", primaryColor, secondaryColor);
-    if (primaryColor && secondaryColor) {
-      console.log(primaryColor, secondaryColor);
-      setSelectedTheme((prev) => ({ ...prev, primary: primaryColor, secondary: secondaryColor }));
-      //update tailwind theme in the config file
-      const root = document.documentElement;
-      root.style.setProperty("--tw-primary", primaryColor);
-      root.style.setProperty("--tw-secondary", secondaryColor);
-    }
-  }, [primaryColor, secondaryColor]);
+	useEffect(() => {
+		console.log('primaryColor, secondaryColor', primaryColor, secondaryColor);
+		if (primaryColor && secondaryColor) {
+			console.log(primaryColor, secondaryColor);
+			setSelectedTheme((prev) => ({ ...prev, primary: primaryColor, secondary: secondaryColor }));
+			//update tailwind theme in the config file
+			const root = document.documentElement;
+			root.style.setProperty('--tw-primary', primaryColor);
+			root.style.setProperty('--tw-secondary', secondaryColor);
+		}
+	}, [primaryColor, secondaryColor]);
 
 	useEffect(() => {
 		const parameters = getParametersFromUrl();
-    let reload = false;
+		let reload = false;
 
-    if (parameters) {
-      if (parameters.CompanyID !== localStorage.getItem("CompanyID")) {
-        reload = true;
-      } else if (parameters.User_UserID !== localStorage.getItem("User_UserID")) {
-        reload = true;
-      } else if (parameters.User_Type !== localStorage.getItem("User_Type")) {
-        reload = true;
-      } else if (parameters.User_DefaultUnitID !== localStorage.getItem("User_DefaultUnitID")) {
-        reload = true;
-      } else if (parameters.User_GroupOrUnitAccess !== localStorage.getItem("User_GroupOrUnitAccess")) {
-        reload = true;
-      }
-    }
-	
+		if (parameters) {
+			if (parameters.CompanyID !== localStorage.getItem('CompanyID')) {
+				reload = true;
+			} else if (parameters.User_UserID !== localStorage.getItem('User_UserID')) {
+				reload = true;
+			} else if (parameters.User_Type !== localStorage.getItem('User_Type')) {
+				reload = true;
+			} else if (parameters.User_DefaultUnitID !== localStorage.getItem('User_DefaultUnitID')) {
+				reload = true;
+			} else if (parameters.User_GroupOrUnitAccess !== localStorage.getItem('User_GroupOrUnitAccess')) {
+				reload = true;
+			}
+		}
+
 		if (!reload) {
-			loadFromLocalStorage(dispatch);  // Load from local storage if available
+			loadFromLocalStorage(dispatch); // Load from local storage if available
 		} else {
-			storeAndDispatchParameters(dispatch, parameters);  // Store and dispatch URL parameters 
-    }
+			storeAndDispatchParameters(dispatch, parameters); // Store and dispatch URL parameters
+		}
 		// } else {
 		// 	console.log("testing mode");
 		// 	const defaultState = {
@@ -103,7 +99,6 @@ const App = () => {
 		// 	storeAndDispatchParameters(dispatch, defaultState);  // Store and dispatch default state
 		// }
 	}, [dispatch]);
-	
 
 	return (
 		<Router>
@@ -123,6 +118,7 @@ const App = () => {
 								<Route path='/PrepChartTemplate' element={<PrepChartTemplate />} />
 								<Route path='/SuggestedOrderList' element={<SuggestedOrderList />} />
 								<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
+
 								{/* Food Cost */}
 								<Route path='/InventoryTransfer' index element={<InventoryTransfer />} />
 								<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />

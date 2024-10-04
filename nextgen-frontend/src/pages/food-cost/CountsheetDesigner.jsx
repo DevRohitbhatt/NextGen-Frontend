@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
-import { Steps } from 'intro.js-react';
 import { useLocation } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC } from '../../components';
@@ -12,11 +11,6 @@ const CountsheetDesigner = () => {
 	const location = useLocation();
 	const [countsheet, setCountsheet] = useState({});
 	const [countsheetDetails, setCountsheetDetails] = useState([]);
-
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
 
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { useSelector, useDispatch } from 'react-redux';
 import invoices from '../../assets/introJSSteps/invoices';
+import { setVendorsList } from '../../reducer/slices/globalState';
 import {
 	UnitSelector,
 	Loader,
@@ -23,11 +25,14 @@ import { MdEdit } from 'react-icons/md';
 const columnHelper = createColumnHelper();
 
 const Invoices = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
-	const [vendorsList, setVendorsList] = useState([]);
+	const dispatch = useDispatch();
+	const globalState = useSelector((state) => state.globalState);
+	const companyID = useSelector((state) => state.globalState.companyID);
+	const alignmentID = useSelector((state) => state.globalState.alignmentID);
+	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const vendorsList = useSelector((state) => state.globalState.vendorsList);
+	const groupOrUnitAccessID = useSelector((state) => state.globalState.groupOrUnitAccess);
+
 	const [invoiceReportData, setInvoiceReportData] = useState([]);
 	const [isBrowseInvoicesClicked, setIsBrowseInvoicesClicked] = useState(true);
 	const [searchKey, setSearchKey] = useState('');
@@ -42,12 +47,12 @@ const Invoices = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
-	const [selectedVendorName, setselectedVendorName] = useState('All Vendors');
+	const [selectedVendorName, setSelectedVendorName] = useState('All Vendors');
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -123,62 +128,31 @@ const Invoices = () => {
 	);
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				console.log('testing mode');
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(5199);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
+		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
+			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
+		}
+		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
+			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+		}
+	}, [
+		globalState.defaultUnitID,
+		globalState.groupOrUnitAccess,
+		globalState.defaultUnitName,
+		globalState.groupOrUnitAccessName,
+	]);
+
+	useEffect(() => {
+		if (companyID && alignmentID && (groupOrUnitAccessID || selectedUnit)) {
+			fetchData(companyID, alignmentID, groupOrUnitAccessID || selectedUnit);
 		} else {
 			setErrorMessage('There was an issue loading your orders, please try again later.');
 		}
-	}, []);
+	}, [companyID, alignmentID, groupOrUnitAccessID, selectedUnit]);
 
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
+	const fetchData = async (companyID) => {
 		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit), fetchVendors(companyId)]);
+		await Promise.all([fetchVendors(companyID)]);
 		setIsLoading(false);
-	};
-
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
-		}
 	};
 
 	// This function fetches the vendors.
@@ -193,7 +167,7 @@ const Invoices = () => {
 			};
 
 			const result = await getCall(getData);
-			setVendorsList(result);
+			dispatch(setVendorsList(result));
 		} catch (error) {
 			setIsError(true);
 			setErrorMessage('There was an issue loading your vendors, please try again later.');
@@ -209,8 +183,8 @@ const Invoices = () => {
 			const getData = {
 				url: 'invoiceReport',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -245,13 +219,13 @@ const Invoices = () => {
 
 	// Function to handle the unit selection
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setUnitShowModal(false);
 	};
 
 	const handleVendorSelection = (selectedVendorName, vendorList) => {
-		setselectedVendorName(selectedVendorName);
+		setSelectedVendorName(selectedVendorName);
 		setSelectedVendor(vendorList[0].id);
 		setVendorShowModal(false);
 	};
@@ -272,8 +246,8 @@ const Invoices = () => {
 				const getData = {
 					url: 'invoiceSearchReport',
 					urlParams: {
-						companyId: companyId,
-						alignmentId: alignmentId,
+						companyId: companyID,
+						alignmentId: alignmentID,
 						memberId: selectedUnit,
 						searchKey: e.target.value,
 						userId: 0,
@@ -453,18 +427,18 @@ const Invoices = () => {
 						{isBrowseInvoicesClicked ? (
 							<div className='flex items-center space-x-3'>
 								<UnitSelector
-									companyId={companyId}
-									alignmentId={alignmentId}
-									memberId={selectedUnit}
+									companyID={companyID}
+									alignmentID={alignmentID}
+									memberID={selectedUnit}
 									memberName={selectedUnitName}
 									includeAreas={true}
-									setMemberName={setselectedUnitName}
+									setMemberName={setSelectedUnitName}
 									onClick={() => setUnitShowModal(true)}
 								/>
 								<VendorSelector
 									vendorID={selectedVendor}
 									vendorName={selectedVendorName}
-									setVendorName={setselectedVendorName}
+									setVendorName={setSelectedVendorName}
 									onClick={() => setVendorShowModal(true)}
 								/>
 								<DateSelector
