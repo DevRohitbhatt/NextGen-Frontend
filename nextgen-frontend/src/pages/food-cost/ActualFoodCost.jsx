@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { useSelector } from 'react-redux';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	Loader,
@@ -22,14 +23,16 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const ActualFoodCost = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
+	const globalState = useSelector((state) => state.globalState);
+	const companyID = useSelector((state) => state.globalState.companyID);
+	const alignmentID = useSelector((state) => state.globalState.alignmentID);
+	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+
 	const [actualFoodCostData, setActualFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
+
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Actual Food Cost Report, please try again later.'
@@ -37,7 +40,7 @@ const ActualFoodCost = () => {
 	const navigate = useNavigate();
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -599,62 +602,18 @@ const ActualFoodCost = () => {
 	);
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(51);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
-		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
+			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
 		}
-	}, []);
-
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
-		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
-		setIsLoading(false);
-	};
-
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
+		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
+			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
 		}
-	};
+	}, [
+		globalState.defaultUnitID,
+		globalState.groupOrUnitAccess,
+		globalState.defaultUnitName,
+		globalState.groupOrUnitAccessName,
+	]);
 
 	// Function to get the voids report
 	const handleRun = async () => {
@@ -666,8 +625,8 @@ const ActualFoodCost = () => {
 			const getData = {
 				url: 'ActualFoodCost',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -739,7 +698,7 @@ const ActualFoodCost = () => {
 	};
 
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setUnitShowModal(false);
 	};
@@ -989,8 +948,8 @@ const ActualFoodCost = () => {
 			const getData = {
 				url: 'getCountsheets',
 				urlParams: {
-					companyID: companyId,
-					alignmentID: alignmentId,
+					companyID: companyID,
+					alignmentID: alignmentID,
 					memberID: selectedUnit,
 					fromDate: fromDate.toLocaleDateString('en-CA'),
 					toDate: toDate.toLocaleDateString('en-CA'),
@@ -1020,7 +979,7 @@ const ActualFoodCost = () => {
 				return selectedCountsheet;
 			}, null);
 
-			navigate('/CountsheetDesigner', { state: { companyId: companyId, countsheet: countsheet } });
+			navigate('/CountsheetDesigner', { state: { companyId: companyID, countsheet: countsheet } });
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
 		}
@@ -1031,8 +990,8 @@ const ActualFoodCost = () => {
 			const getData = {
 				url: 'PurchaseAnalysis',
 				urlParams: {
-					companyID: companyId,
-					alignmentID: alignmentId,
+					companyID: companyID,
+					alignmentID: alignmentID,
 					memberID: selectedUnit,
 					fromDate: fromDate.toLocaleDateString('en-CA'),
 					toDate: toDate.toLocaleDateString('en-CA'),
@@ -1044,8 +1003,8 @@ const ActualFoodCost = () => {
 
 			navigate('/Purchase', {
 				state: {
-					companyId: companyId,
-					alignmentID: alignmentId,
+					companyId: companyID,
+					alignmentID: alignmentID,
 					memberID: selectedUnit,
 					fromDate: fromDate.toLocaleDateString('en-CA'),
 					toDate: toDate.toLocaleDateString('en-CA'),
@@ -1073,12 +1032,12 @@ const ActualFoodCost = () => {
 				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
-							companyId={companyId}
-							alignmentId={alignmentId}
-							memberId={selectedUnit}
+							companyId={companyID}
+							alignmentId={alignmentID}
+							memberID={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
-							setMemberName={setselectedUnitName}
+							setMemberName={setSelectedUnitName}
 							onClick={() => setUnitShowModal(true)}
 						/>
 						<DateSelector
@@ -1190,7 +1149,7 @@ const ActualFoodCost = () => {
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
 						show={showModal}
-						includeAreas={true}
+						includeAreas={false}
 						handleClose={() => {
 							setUnitShowModal(false);
 						}}

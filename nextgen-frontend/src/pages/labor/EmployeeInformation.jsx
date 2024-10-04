@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import dateFormat from 'dateformat';
+import { useSelector } from 'react-redux';
 import employeeInformation from '../../assets/introJSSteps/employeeInformation';
 import {
 	Loader,
@@ -15,15 +16,15 @@ import {
 } from '../../components';
 
 const EmployeeInformation = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
+	const state = useSelector((state) => state.globalState);
+	const companyID = useSelector((state) => state.globalState.companyID);
+	const alignmentID = useSelector((state) => state.globalState.alignmentID);
+	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
 	const [employeeInformationData, setEmployeeInformationData] = useState([]);
 	const [filteredEmployeeInformationData, setFilteredEmployeeInformationData] = useState([]);
 
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Employee Information, please try again later.'
@@ -31,7 +32,7 @@ const EmployeeInformation = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//dropdown variables
@@ -253,60 +254,13 @@ const EmployeeInformation = () => {
 	];
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				console.log('testing mode');
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(5199);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
-		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+		if (state.defaultUnitId) {
+			setSelectedUnit(state.defaultUnitId);
 		}
-	}, []);
-
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
-		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
-		setIsLoading(false);
-	};
-
-	// This function fetches the units and areas.
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyID: companyId,
-					alignmentID: alignmentId,
-					memberID: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-		} catch (error) {
-			setIsError(true);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
+		if (state.defaultUnitName) {
+			setSelectedUnitName(state.defaultUnitName);
 		}
-	};
+	}, [state.defaultUnitId, state.defaultUnitName]);
 
 	// Fetching Employee Information
 	const fetchEmployeeInformation = async (companyId, alignmentId, selectedUnit) => {
@@ -355,11 +309,11 @@ const EmployeeInformation = () => {
 	};
 
 	const handleUnitSelection = async (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setUnitShowModal(false);
 		setIsLoading(true);
-		await fetchEmployeeInformation(companyId, alignmentId, unitID);
+		await fetchEmployeeInformation(companyID, alignmentID, unitID);
 		setIsLoading(false);
 	};
 
@@ -593,21 +547,23 @@ const EmployeeInformation = () => {
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
-							companyId={companyId}
-							alignmentId={alignmentId}
+							companyId={companyID}
+							alignmentId={alignmentID}
 							memberId={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
-							setMemberName={setselectedUnitName}
+							setMemberName={setSelectedUnitName}
 							onClick={() => setUnitShowModal(true)}
 						/>
 
-						<Dropdown
-							options={dropdownOptions}
-							title='View'
-							selectedOption={view}
-							onOptionChange={handleViewChange}
-						/>
+						<div className='w-44'>
+							<Dropdown
+								options={dropdownOptions}
+								title='View'
+								selectedOption={view}
+								onOptionChange={handleViewChange}
+							/>
+						</div>
 					</div>
 					<div>
 						<ExportOptions
@@ -649,7 +605,6 @@ const EmployeeInformation = () => {
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
 						show={showModal}
-						includeAreas={true}
 						handleClose={() => {
 							setUnitShowModal(false);
 						}}

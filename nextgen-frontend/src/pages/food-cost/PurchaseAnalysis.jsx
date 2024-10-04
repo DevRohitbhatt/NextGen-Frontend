@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { setVendorsList } from '../../reducer/slices/globalState';
 import {
 	Loader,
 	UnitSelector,
@@ -22,13 +24,17 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const PurchaseAnalysis = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
-	const [vendorsList, setVendorsList] = useState([]);
+	const dispatch = useDispatch();
+	const globalState = useSelector((state) => state.globalState);
+	const companyID = useSelector((state) => state.globalState.companyID);
+	const alignmentID = useSelector((state) => state.globalState.alignmentID);
+	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const vendorsList = useSelector((state) => state.globalState.vendorsList);
+	const groupOrUnitAccessID = useSelector((state) => state.globalState.groupOrUnitAccess);
 	const [purchasetData, setPurchaseData] = useState([]);
+
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Purchase Analysis Report, please try again later.'
@@ -36,12 +42,12 @@ const PurchaseAnalysis = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
-	const [selectedVendorName, setselectedVendorName] = useState('All Vendors');
+	const [selectedVendorName, setSelectedVendorName] = useState('All Vendors');
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -169,30 +175,26 @@ const PurchaseAnalysis = () => {
 	);
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
-		} else {
-			setErrorMessage('There was an issue loading your Purchase report, please try again later.');
+		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
+			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
 		}
-	}, []);
+		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
+			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+		}
+	}, [
+		globalState.defaultUnitID,
+		globalState.groupOrUnitAccess,
+		globalState.defaultUnitName,
+		globalState.groupOrUnitAccessName,
+	]);
+
+	useEffect(() => {
+		if (companyID && alignmentID && (groupOrUnitAccessID || selectedUnit)) {
+			fetchData(companyID, alignmentID, groupOrUnitAccessID || selectedUnit);
+		} else {
+			setErrorMessage('There was an issue loading your orders, please try again later.');
+		}
+	}, [companyID, alignmentID, groupOrUnitAccessID, selectedUnit]);
 
 	useEffect(() => {
 		if (location.state) {
@@ -200,6 +202,33 @@ const PurchaseAnalysis = () => {
 		}
 	}, []);
 
+	const fetchData = async (companyId) => {
+		setIsLoading(true);
+		await Promise.all([fetchVendors(companyId)]);
+		setIsLoading(false);
+	};
+
+	// This function fetches the vendors.
+	const fetchVendors = async (companyID) => {
+		try {
+			setIsError(false);
+			const getData = {
+				url: 'vendors',
+				urlParams: {
+					companyID: companyID,
+				},
+			};
+
+			const result = await getCall(getData);
+			dispatch(setVendorsList(result));
+		} catch (error) {
+			setIsError(true);
+			setErrorMessage('There was an issue loading your vendors, please try again later.');
+			console.error('Error getting vendors: ', error);
+		}
+	};
+
+	// Function to fetch the purchase analysis details
 	const fetchPurchaseDetails = async () => {
 		try {
 			setIsLoading(true);
@@ -207,7 +236,7 @@ const PurchaseAnalysis = () => {
 			const getData = {
 				url: 'PurchaseAnalysis',
 				urlParams: {
-					companyID: location.state?.companyId,
+					companyID: location.state?.companyID,
 					alignmentID: location.state?.alignmentID,
 					memberID: location.state?.memberID,
 					fromDate: location.state?.fromDate,
@@ -234,57 +263,6 @@ const PurchaseAnalysis = () => {
 		}
 	};
 
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
-		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit), fetchVendors(companyId)]);
-		setIsLoading(false);
-	};
-
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
-		}
-	};
-
-	// This function fetches the vendors.
-	const fetchVendors = async (companyID) => {
-		try {
-			setIsError(false);
-			const getData = {
-				url: 'vendors',
-				urlParams: {
-					companyID: companyID,
-				},
-			};
-
-			const result = await getCall(getData);
-			setVendorsList(result);
-		} catch (error) {
-			setIsError(true);
-			setErrorMessage('There was an issue loading your vendors, please try again later.');
-			console.error('Error getting vendors: ', error);
-		}
-	};
-
 	// Function to get the voids report
 	const handleRun = async () => {
 		try {
@@ -294,8 +272,8 @@ const PurchaseAnalysis = () => {
 			const getData = {
 				url: 'PurchaseAnalysis',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyID: companyID,
+					alignmentID: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -322,7 +300,7 @@ const PurchaseAnalysis = () => {
 	};
 
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setUnitShowModal(false);
 	};
@@ -334,7 +312,7 @@ const PurchaseAnalysis = () => {
 	};
 
 	const handleVendorSelection = (selectedVendorName, vendorList) => {
-		setselectedVendorName(selectedVendorName);
+		setSelectedVendorName(selectedVendorName);
 		setSelectedVendor(vendorList[0].id);
 		setVendorShowModal(false);
 	};
@@ -415,12 +393,12 @@ const PurchaseAnalysis = () => {
 				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
-							companyId={companyId}
-							alignmentId={alignmentId}
-							memberId={selectedUnit}
+							companyID={companyID}
+							alignmentID={alignmentID}
+							memberID={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
-							setMemberName={setselectedUnitName}
+							setMemberName={setSelectedUnitName}
 							onClick={() => setUnitShowModal(true)}
 						/>
 						<DateSelector
@@ -432,7 +410,7 @@ const PurchaseAnalysis = () => {
 						<VendorSelector
 							vendorID={selectedVendor}
 							vendorName={selectedVendorName}
-							setVendorName={setselectedVendorName}
+							setVendorName={setSelectedVendorName}
 							onClick={() => setVendorShowModal(true)}
 						/>
 

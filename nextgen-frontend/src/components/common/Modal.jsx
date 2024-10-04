@@ -20,6 +20,7 @@ const ModalContent = styled.div`
     margin: auto;
     border: 1px solid #888;
     width: max-content;
+    max-width: 80%;
     border-radius: 15px;
 `;
 

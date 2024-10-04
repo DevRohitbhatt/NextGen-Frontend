@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Steps, Hints } from "intro.js-react";
 import "intro.js/introjs.css";
 
 export default function IntroJS({ introJS, setIntroJS }) {
-    //Destructure introJS into steps, enabled, so on
 
     const handleIntroStart = () => {
         setIntroJS({ ...introJS, stepsEnabled: true });
@@ -11,11 +10,11 @@ export default function IntroJS({ introJS, setIntroJS }) {
 
     return (
         <Steps
-            enabled={introJS.enabled}
+            enabled={introJS.stepsEnabled}
             steps={introJS.steps}
             initialStep={introJS.initialStep}
             onExit={() => {
-                setIntroJS({ ...introJS, enabled: false });
+                setIntroJS(prevState => ({ ...prevState, stepsEnabled: false }));
             }}
         />
     )

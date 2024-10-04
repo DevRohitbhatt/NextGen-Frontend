@@ -3,97 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { FaArrowDownWideShort, FaArrowUpShortWide } from 'react-icons/fa6';
 import { FaInfoCircle } from 'react-icons/fa';
-import { TableCell as Cell, DraggableInventoryItem, Tooltip } from '../index.js';
-
-const Container = styled.div`
-	width: ${(props) => (props.width ? props.width : 'auto')};
-	height: ${(props) => (props.height ? props.height : 'auto')};
-	border-radius: 30px;
-	padding: 0 20px;
-	// margin-top: 26px;
-	box-shadow: 0px 3px 20px -10px rgba(0, 0, 0, 0.5);
-	align-items: center;
-	justify-content: center;
-	overflow-y: ${(props) => (props.$scrollable ? 'scroll' : 'none')};
-`;
-const Table = styled.div`
-	border-radius: 30px;
-	// margin-top: 26px;
-	padding: ${(props) => (props.$scrollable ? '0 15px 0 0' : '15px')};
-	display: grid;
-	grid-template-columns: ${(props) => (props.columnwidths ? props.columnwidths : 'auto')};
-	grid-auto-rows: auto;
-	align-items: center;
-
-	&::-webkit-scrollbar {
-		/* background: #ffffff; */
-		width: 15px;
-		/* height: 75%;
-    cursor: pointer;
-    border: 14px solid #fff;
-    outline: 0.25px solid #808285;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px; */
-	}
-
-	&::-webkit-scrollbar-track-piece {
-		background: #f1f1f1;
-		border-radius: 30px;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: ${(props) => props.theme.primary};
-		border-radius: 30px;
-		padding: 18px !important;
-		border: 2px solid #fff;
-		cursor: pointer;
-	}
-
-	&::-webkit-scrollbar-thumb:hover {
-		background: ${(props) => props.theme.secondary};
-	}
-
-	&::-webkit-scrollbar-button:start:decrement {
-		height: 94px;
-		display: block;
-		background: transparent;
-	}
-
-	&::-webkit-scrollbar-button:end:increment {
-		height: 20px;
-		display: block;
-		background: transparent;
-	}
-
-	h3 {
-		margin-bottom: 20px;
-		font-size: 1.75em;
-	}
-`;
-
-const TableHeader = styled.div`
-	width: 100%;
-	display: grid;
-	grid-template-columns: 1fr 2.5fr;
-	margin-bottom: 10px;
-	padding-bottom: 10px;
-	border-bottom: 2px solid ${(props) => props.theme.primary};
-`;
-
-const TableHeaderCell = styled.div`
-	font-weight: 500;
-	font-size: 14px;
-	height: 44px;
-	border-bottom: ${(props) => (props.$useTableRows ? 'none' : '2px solid ' + props.theme.primary)};
-	padding: 10px 0;
-	text-align: ${(props) => (props.columntype === 'number' ? 'center' : 'left')};
-	display: ${(props) => (props.$isSorting ? 'flex' : 'block')};
-`;
-
-const IconContainer = styled.div`
-	margin-left: 5px; /* Adjust margin as needed */
-	float: right;
-`;
+import { TableCell as Cell, Tooltip } from '../index.js';
 
 const InfoIcon = styled(FaInfoCircle)`
 	color: ${(props) => props.theme.secondary};
@@ -108,7 +18,6 @@ export default function TableBuilder({
 	tableName,
 	width,
 	height,
-	isDrag = false,
 	usetablerows = false,
 	handleInputCellChange,
 	handleDropdownChange,
@@ -137,74 +46,54 @@ export default function TableBuilder({
 		}
 	};
 	return (
-		<Container width={width} height={height} $scrollable={scrollable}>
-			<Table width={width} height={height} className={className} columnwidths={columnwidths}>
+		<div className={`${className} rounded-2xl p-5 ${scrollable ? 'overflow-y-scroll' : 'overflow-hidden'} shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]`} style={{ width, height }}>
+			<div className={`rounded-2xl ${scrollable ? 'p-3' : 'p-4'} grid`} style={{ gridTemplateColumns: columnwidths }}>
 				{usetablerows ? (
-					<TableHeader columnwidths={columnwidths}>
+					<div className="w-full grid mb-2.5 pb-2.5 border-b-2 border-[var(--tw-primary)]">
 						{columnHeaders.map((header, index) => (
-							<TableHeaderCell
+							<div
 								key={index}
-								columntype={dataTypes[index]}
-								$useTableRows={usetablerows}
-								$isSorting={isSorting}
-								onClick={isSorting && (() => handleSort(index))} // Call handleSort function on header click
-								style={{ cursor: 'pointer' }}
+								className={`font-medium text-sm h-11 ${dataTypes[index] === 'number' ? 'text-center' : 'text-left'} ${isSorting ? 'flex items-center cursor-pointer' : 'block'}`}
+								onClick={isSorting ? () => handleSort(index) : undefined}
 							>
 								{header}
-								{isSorting ? (
-									<IconContainer>
+								{isSorting && (
+									<div className="ml-1 float-right">
 										{sortColumnIndex === index ? (
-											isAscending ? (
-												<FaArrowUpShortWide />
-											) : (
-												<FaArrowDownWideShort />
-											)
+											isAscending ? <FaArrowUpShortWide /> : <FaArrowDownWideShort />
 										) : (
-											<FaArrowDownWideShort /> // Default sorting icon
+											<FaArrowDownWideShort />
 										)}
-									</IconContainer>
-								) : null}
-							</TableHeaderCell>
+									</div>
+								)}
+							</div>
 						))}
-					</TableHeader>
+					</div>
 				) : (
 					columnHeaders.map((header, index) => (
-						<TableHeaderCell
+						<div
 							key={index}
-							columntype={dataTypes[index]}
-							className={classnames && classnames.length > index ? classnames[index] : ''}
+							className={`font-medium text-md h-11 border-b-2 border-[var(--tw-primary)] ${classnames && classnames.length > index ? classnames[index] : ''} ${dataTypes[index] === 'number' ? 'text-center justify-center' : 'text-left'}`}
 						>
 							{headerTooltips ? (
 								headerTooltips[index] === '' ? (
-									<div> {header} </div>
+									<div>{header}</div>
 								) : toolTipDirection[index] === 'left' ? (
-									<Tooltip content={headerTooltips[index]} direction='left'>
-										<InfoIcon /> {header}
+									<Tooltip content={headerTooltips[index]} direction='left' styles={`${dataTypes[index] === 'number' ? 'text-center justify-center' : 'text-left'}`}>
+										<FaInfoCircle className="text-[var(--tw-secondary)] w-4 h-4 flex-shrink-0" /> {header}
 									</Tooltip>
 								) : (
 									<Tooltip content={headerTooltips[index]} direction='left'>
-										{header} <InfoIcon />
+										{header} <InfoIcon className="text-[var(--tw-secondary)]" />
 									</Tooltip>
 								)
 							) : (
 								<div>{header}</div>
 							)}
-						</TableHeaderCell>
+						</div>
 					))
 				)}
 				{rows.map((row, rowIndex) => {
-					if (isDrag) {
-						const key = row.inventoryItemID ? row.inventoryItemID : `fallback_${rowIndex}`;
-						return (
-							<DraggableInventoryItem
-								key={key}
-								rowIndex={row.inventoryItemID}
-								tableName={tableName}
-								description={row.description}
-								inventoryItemID={row.inventoryItemID}
-							/>
-						);
-					}
 					return (
 						row &&
 						row.map((cell, cellIndex) => (
@@ -224,9 +113,10 @@ export default function TableBuilder({
 						))
 					);
 				})}
-			</Table>
-		</Container>
+			</div>
+		</div>
 	);
+	
 }
 
 TableBuilder.propTypes = {
@@ -240,7 +130,6 @@ TableBuilder.propTypes = {
 	height: PropTypes.string,
 	handleInputCellChange: PropTypes.func,
 	handleDropdownChange: PropTypes.func,
-	isDrag: PropTypes.bool,
 	usetablerows: PropTypes.bool,
 	className: PropTypes.string,
 	handleSorting: PropTypes.func,
