@@ -14,6 +14,7 @@ import {
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
+	LaborCICO,
 	Voids,
 	ActualFoodCost,
 	VarianceFoodCost,
@@ -61,6 +62,7 @@ const App = () => {
 								{/* Labour */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
+								<Route path='/LaborCICO' element={<LaborCICO />} />
 							</Routes>
 						</Suspense>
 					</div>
