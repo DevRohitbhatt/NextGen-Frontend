@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import * as Styled from '../styles/DateModalStyles.jsx';
 import { FaTimes } from 'react-icons/fa';
-import { ModalHeader } from 'react-bootstrap';
 import { TableBuilder as Table, YearSelector, CalendarSelector } from '../index.js';
 import Calendar from 'react-calendar';
 
@@ -10,8 +9,6 @@ const CalendarModal = ({
 	handleClose,
 	selectedFromDate,
 	selectedToDate,
-	handleFromDateChange,
-	handleToDateChange,
 	modalOpen,
 	isDateRange,
 	handleDateSelection,
@@ -130,13 +127,13 @@ const CalendarModal = ({
 								<FaTimes className='close' />
 							</button>
 						</div>
-						<div className='mx-auto w-full'>
+						<div className='w-full mx-auto'>
 							{!isDateRange ? (
 								<Calendar
 									onChange={handleInputChange}
 									value={localFromDate}
 									onClickDay={toggleCalendar}
-									className="tailwind-calendar"
+									className='tailwind-calendar'
 								/>
 							) : (
 								<>
@@ -161,7 +158,7 @@ const CalendarModal = ({
 										</div>
 									</div>
 
-									<div className='m-auto w-full px-4'>
+									<div className='w-full px-4 m-auto'>
 										<Table
 											columnHeaders={CalendarTable.columnHeaders}
 											columnwidths={CalendarTable.columnWidths}

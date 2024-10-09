@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Calendar from 'react-calendar';
 import { AiFillDownSquare } from 'react-icons/ai';
-import { CalendarContainer } from '../styles/ReactCalendarStyles';
 
 const CalendarSelector = ({ handleDateChange, date }) => {
 	const [showCalendar, setShowCalendar] = useState(false);

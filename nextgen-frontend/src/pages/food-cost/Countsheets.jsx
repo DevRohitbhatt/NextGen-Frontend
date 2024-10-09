@@ -110,18 +110,8 @@ const Countsheets = () => {
 			}),
 			columnHelper.accessor(
 				(row) => {
-					const date = new Date(row.saveDateTime);
-
-					// Get hours, minutes, and AM/PM
-					const hours = date.getHours() % 12 || 12; // Convert to 12-hour format
-					const minutes = date.getMinutes().toString().padStart(2, '0'); // Ensure two digits
-					const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
-
-					// Format the date as MM/DD/YYYY
-					const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-
 					// Combine formatted date and time
-					return `${row.userName} - ${formattedDate} ${hours}:${minutes} ${ampm}`;
+					return `${row.userName} - ${dateFormat(row.lastEditedDate, 'mm/dd/yyyy hh:MM TT')}`;
 				},
 				{
 					id: 'lastEditedBy',

@@ -91,7 +91,6 @@ const ActualFoodCost = () => {
 						<div
 							{...{
 								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
-								className: 'inline-block',
 							}}
 						>
 							{row.getIsExpanded() ? (
@@ -117,489 +116,185 @@ const ActualFoodCost = () => {
 				id: 'description',
 				header: 'Description',
 				dataType: 'string',
+				size: 300,
 			}),
 			columnHelper.accessor('countDisplayUnitName', {
 				id: 'countDisplayUnitName',
 				header: 'UOM',
 				dataType: 'string',
+				size: 200,
 			}),
 			columnHelper.accessor('begCountDisplayUnits', {
 				id: 'begCountDisplayUnits',
 				header: 'Beg #',
 				dataType: 'number',
+				cell: ({ getValue }) => getValue()?.toFixed(2),
+				size: 90,
 			}),
 			columnHelper.accessor('begCountCost', {
 				id: 'begCountCost',
 				header: 'Beg $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.begCountCost
-																? Number(subsubsubrow.original.begCountCost)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.begCountCost
-														? Number(subSubrow.original.begCountCost)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc + (subrow.original.begCountCost ? Number(subrow.original.begCountCost) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => `$${calculateSum(row, 'begCountCost', getValue)}`,
+				size: 90,
 			}),
 			columnHelper.accessor('purchaseDisplayUnits', {
 				id: 'purchaseDisplayUnits',
 				header: 'Pur #',
 				dataType: 'number',
+				size: 60,
 			}),
 			columnHelper.accessor('purchaseCost', {
 				id: 'purchaseCost',
 				header: 'Pur $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.purchaseCost
-																? Number(subsubsubrow.original.purchaseCost)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.purchaseCost
-														? Number(subSubrow.original.purchaseCost)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc + (subrow.original.purchaseCost ? Number(subrow.original.purchaseCost) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => `$${calculateSum(row, 'purchaseCost', getValue)}`,
+				size: 60,
 			}),
 			columnHelper.accessor('iTinCountDisplayUnits', {
 				id: 'iTinCountDisplayUnits',
 				header: 'Trans In #',
 				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
+				size: 60,
 			}),
 			columnHelper.accessor('iTinCountCost', {
 				id: 'iTinCountCost',
 				header: 'Trans In $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.iTinCountCost
-																? Number(subsubsubrow.original.iTinCountCost)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.iTinCountCost
-														? Number(subSubrow.original.iTinCountCost)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc +
-										(subrow.original.iTinCountCost ? Number(subrow.original.iTinCountCost) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'iTinCountCost', getValue),
+				size: 60,
 			}),
 			columnHelper.accessor('iToutCountDisplayUnits', {
 				id: 'iToutCountDisplayUnits',
 				header: 'Trans Out #',
 				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
+				size: 80,
 			}),
 			columnHelper.accessor('iToutCountCost', {
 				id: 'iToutCountCost',
 				header: 'Trans Out $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.iToutCountCost
-																? Number(subsubsubrow.original.iToutCountCost)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.iToutCountCost
-														? Number(subSubrow.original.iToutCountCost)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc +
-										(subrow.original.iToutCountCost ? Number(subrow.original.iToutCountCost) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'iToutCountCost', getValue),
+				size: 80,
 			}),
 			columnHelper.accessor('endCountDisplayUnits', {
 				id: 'endCountDisplayUnits',
 				header: 'End #',
 				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
+				size: 60,
 			}),
 			columnHelper.accessor('endCountCost', {
 				id: 'endCountCost',
 				header: 'End $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.endCountCost
-																? Number(subsubsubrow.original.endCountCost)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.endCountCost
-														? Number(subSubrow.original.endCountCost)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc + (subrow.original.endCountCost ? Number(subrow.original.endCountCost) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'endCountCost', getValue),
+				size: 60,
 			}),
 			columnHelper.accessor('usageCountDisplayUnits', {
 				id: 'usageCountDisplayUnits',
 				header: 'Actual Usage #',
 				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 				dataType: 'number',
+				size: 80,
 			}),
 			columnHelper.accessor('usageCost', {
 				id: 'usageCost',
 				header: 'Actual Usage $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.usageCost
-																? Number(subsubsubrow.original.usageCost)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.usageCost
-														? Number(subSubrow.original.usageCost)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return acc + (subrow.original.usageCost ? Number(subrow.original.usageCost) : 0);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'usageCost', getValue),
+				size: 80,
 			}),
 			columnHelper.accessor('usageCostPct', {
 				id: 'usageCostPct',
 				header: 'Actual Usage %',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.usageCostPct
-																? Number(subsubsubrow.original.usageCostPct * 100)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.usageCostPct
-														? Number(subSubrow.original.usageCostPct * 100)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc +
-										(subrow.original.usageCostPct ? Number(subrow.original.usageCostPct * 100) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() * 100 ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'usageCostPct', getValue, true),
+				size: 90,
 			}),
 			columnHelper.accessor('wasteCountDisplayUnits', {
 				id: 'wasteCountDisplayUnits',
 				header: 'Waste #',
 				dataType: 'number',
+				size: 80,
 			}),
 			columnHelper.accessor('wasteCountCost', {
 				id: 'wasteCountCost',
 				header: 'Waste $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.wasteCountCost
-																? Number(subsubsubrow.original.wasteCountCost)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.wasteCountCost
-														? Number(subSubrow.original.wasteCountCost)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc +
-										(subrow.original.wasteCountCost ? Number(subrow.original.wasteCountCost) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'wasteCountCost', getValue),
+				size: 80,
 			}),
 			columnHelper.accessor('wasteCostPct', {
 				id: 'wasteCostPct',
 				header: 'Waste %',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.wasteCostPct
-																? Number(subsubsubrow.original.wasteCostPct)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.wasteCostPct
-														? Number(subSubrow.original.wasteCostPct)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc + (subrow.original.wasteCostPct ? Number(subrow.original.wasteCostPct) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return `${sum}%`;
-					} else {
-						return `${(getValue() ?? 0).toFixed(2)}%`;
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'wasteCostPct', getValue, true),
+				size: 90,
 			}),
 			columnHelper.accessor('comparisonName', {
 				id: 'comparisonName',
 				header: 'Comparison Name',
 				dataType: 'string',
+				size: 100,
 			}),
 			columnHelper.accessor('comparisonSales', {
 				id: 'comparisonSales',
 				header: 'Comparison Sales',
 				dataType: 'number',
+				cell: ({ getValue }) => (getValue() !== undefined ? `$${getValue().toFixed(2)}` : ''),
+				size: 100,
 			}),
 		],
 		[]
 	);
+
+	// calculate the sum of the subrows
+	const calculateSum = (row, field, getValue, isPercentage = false) => {
+		if (row.getCanExpand()) {
+			const sum = row.subRows
+				.reduce((acc, subrow) => {
+					if (subrow.getCanExpand()) {
+						return (
+							acc +
+							subrow.subRows.reduce((subAcc, subSubrow) => {
+								if (subSubrow.getCanExpand()) {
+									return (
+										subAcc +
+										subSubrow.subRows.reduce(
+											(subsubAcc, subsubsubrow) =>
+												subsubAcc +
+												(subsubsubrow.original[field]
+													? Number(subsubsubrow.original[field]) * (isPercentage ? 100 : 1)
+													: 0),
+											0
+										)
+									);
+								} else {
+									return (
+										subAcc +
+										(subSubrow.original[field]
+											? Number(subSubrow.original[field]) * (isPercentage ? 100 : 1)
+											: 0)
+									);
+								}
+							}, 0)
+						);
+					} else {
+						return (
+							acc +
+							(subrow.original[field] ? Number(subrow.original[field]) * (isPercentage ? 100 : 1) : 0)
+						);
+					}
+				}, 0)
+				.toFixed(2);
+			return isPercentage ? `${sum}%` : sum;
+		} else {
+			return isPercentage ? `${getValue().toFixed(2)}%` : `$${getValue().toFixed(2)}`;
+		}
+	};
 
 	useEffect(() => {
 		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
@@ -638,7 +333,7 @@ const ActualFoodCost = () => {
 
 			const newData = [
 				{
-					department: 'Total',
+					department: 'TOTAL',
 					subRows: result.data.map((department) => ({
 						department: department.department,
 						comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
@@ -914,7 +609,7 @@ const ActualFoodCost = () => {
 		];
 
 		const filename = 'ActualFoodCost';
-		const spreadSheetTitle = 'Actual FoodCost Report';
+		const spreadSheetTitle = 'Actual Food Cost Report';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
@@ -1021,15 +716,15 @@ const ActualFoodCost = () => {
 	return (
 		<>
 			<Loader loading={isLoading} />
-			<div className='w-[85%] mx-auto'>
+			<div className='w-10/12 mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Actual Food Cost</h2>
-				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Actual Food Cost</h2>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
 							companyId={companyID}
@@ -1056,7 +751,7 @@ const ActualFoodCost = () => {
 						</div>
 
 						<div className='run-button' onClick={handleRun}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

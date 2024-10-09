@@ -74,7 +74,7 @@ const PurchaseAnalysis = () => {
 				id: 'unitName',
 				header: 'Unit',
 				dataType: 'string',
-				size: '150',
+				size: 300,
 			}),
 			columnHelper.accessor('date', {
 				id: 'date',
@@ -98,23 +98,26 @@ const PurchaseAnalysis = () => {
 				id: 'vendorInvoiceReference',
 				header: 'Invoice Ref #',
 				dataType: 'string',
+				size: 120,
 			}),
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Invoice Total',
 				cell: ({ getValue }) => (getValue() ? `${getValue().toFixed(2)}` : ''),
 				dataType: 'number',
+				size: 120,
 			}),
 			columnHelper.accessor('companyGLCode', {
 				id: 'companyGLCode',
 				header: 'GL Code',
 				dataType: 'string',
+				size: 200,
 			}),
 			columnHelper.accessor('vendorItemDescription', {
 				id: 'vendorItemDescription',
 				header: 'Vendor Item',
 				dataType: 'string',
-				size: 200,
+				size: 250,
 			}),
 			columnHelper.accessor('quantity', {
 				id: 'quantity',
@@ -126,18 +129,21 @@ const PurchaseAnalysis = () => {
 					</div>
 				),
 				dataType: 'number',
+				size: 100,
 			}),
 			columnHelper.accessor('price', {
 				id: 'price',
 				header: 'Item Price',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				dataType: 'number',
+				size: 100,
 			}),
 			columnHelper.accessor('taxAmount', {
 				id: 'taxAmount',
 				header: 'Item Tax',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				dataType: 'number',
+				size: 100,
 			}),
 			columnHelper.accessor('extPrice', {
 				id: 'extPrice',
@@ -153,16 +159,19 @@ const PurchaseAnalysis = () => {
 					</div>
 				),
 				dataType: 'number',
+				size: 100,
 			}),
 			columnHelper.accessor('department', {
 				id: 'department',
 				header: 'Department',
 				dataType: 'string',
+				size: 120,
 			}),
 			columnHelper.accessor('subdepartment', {
 				id: 'subdepartment',
 				header: 'Sub Department',
 				dataType: 'string',
+				size: 150,
 			}),
 			columnHelper.accessor('inventoryItemDescription', {
 				id: 'inventoryItemDescription',
@@ -382,15 +391,15 @@ const PurchaseAnalysis = () => {
 	return (
 		<>
 			<Loader loading={isLoading} />
-			<div className='w-[85%] mx-auto'>
+			<div className='w-10/12 mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Purchase Analysis Report</h2>
-				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Purchase Analysis Report</h2>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
 							companyID={companyID}
@@ -415,7 +424,7 @@ const PurchaseAnalysis = () => {
 						/>
 
 						<div className='run-button' onClick={handleRun}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

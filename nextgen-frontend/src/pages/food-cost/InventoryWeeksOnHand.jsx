@@ -66,26 +66,31 @@ const InventoryWeeksOnHand = () => {
 				id: 'inventoryItemName',
 				header: 'Inventory Item',
 				dataType: 'string',
+				size: 400,
 			}),
 			columnHelper.accessor('department', {
 				id: 'department',
 				header: 'Department',
 				dataType: 'string',
+				size: 120,
 			}),
 			columnHelper.accessor('subDepartment', {
 				id: 'subDepartment',
 				header: 'Sub Department',
 				dataType: 'string',
+				size: 150,
 			}),
 			columnHelper.accessor('latestCountDate', {
 				id: 'latestCountDate',
 				header: 'Latest Count Date',
 				dataType: 'string',
+				size: 160,
 			}),
 			columnHelper.accessor('caseUnitOfMeasureName', {
 				id: 'caseUnitOfMeasureName',
 				header: 'UOM',
 				dataType: 'string',
+				size: 150,
 			}),
 			columnHelper.accessor('casesOnHandAtLastCount', {
 				id: 'casesOnHandAtLastCount',
@@ -298,21 +303,28 @@ const InventoryWeeksOnHand = () => {
 	};
 
 	const Table = (
-		<TableHOC columns={columns} data={inventoryWeeksOnHandReportData} isPaginated={true} isFooter={true} />
+		<TableHOC
+			columns={columns}
+			data={inventoryWeeksOnHandReportData}
+			isPaginated={true}
+			isFooter={true}
+			dataPosition='left'
+			headerPosition='left'
+		/>
 	);
 
 	return (
 		<>
 			<Loader loading={isLoading} />
-			<div className='w-[85%] mx-auto'>
+			<div className='w-10/12 mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Inventory Weeks On Hand</h2>
-				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Weeks On Hand</h2>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
 							companyID={companyID}
