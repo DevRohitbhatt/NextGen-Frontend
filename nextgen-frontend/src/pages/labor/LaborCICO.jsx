@@ -267,8 +267,13 @@ const LaborCICO = () => {
 		}
 	};
 
+	// Fetch data only when the "Run" button is clicked
+	const handleRunClick = () => {
+		fetchLaborCICOData(groupBy); // Fetch data based on the current groupBy state
+	};
+
 	// Function to get the voids report
-	const fetchLabourCICOData = async () => {
+	const fetchLaborCICOData = async (groupByOption) => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -281,7 +286,7 @@ const LaborCICO = () => {
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
-					groupBy: groupBy === 'Employee' ? 'Employee' : 'JobDescription',
+					groupBy: groupByOption === 'Employee' ? 'Employee' : 'JobDescription',
 				},
 			};
 
@@ -290,13 +295,13 @@ const LaborCICO = () => {
 			const newData = result.data.map((unit) => ({
 				unitName: unit.unitName,
 				subRows: unit.employees.map((employee) => ({
-					...(groupBy === 'Employee'
+					...(groupByOption === 'Employee'
 						? { employeeID: employee.employeeID, name: `${employee.firstName} ${employee.lastName}` }
 						: { jobDescription: employee.jobDesc }),
 
 					// Conditional subRows logic
 					subRows:
-						groupBy === 'Employee'
+						groupByOption === 'Employee'
 							? employee.employees.map((data) => ({
 									jobDescription: data.jobDesc,
 									totalMinutes: data.minuteTotal,
@@ -322,6 +327,7 @@ const LaborCICO = () => {
 							  ],
 				})),
 			}));
+
 			setLabourCICOData(newData);
 			setIsLoading(false);
 		} catch (error) {
@@ -346,7 +352,7 @@ const LaborCICO = () => {
 
 	const handleGroupByChange = (option) => {
 		setGroupBy(option);
-		setLabourCICOData([]);
+		fetchLaborCICOData(option);
 	};
 
 	// Function to handle the PDF export
@@ -542,6 +548,7 @@ const LaborCICO = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
+	// Detail on top of the table
 	const detailOnTop = (
 		<div className='flex items-center space-x-2 text-base font-normal'>
 			{/* Add any additional details or components you want to display on top */}
@@ -552,6 +559,10 @@ const LaborCICO = () => {
 					selectedOption={viewby}
 					onOptionChange={(option) => setViewBy(option)}
 				/>
+			</div>
+			<div className='text-xl font-bold'>Group By:</div>
+			<div className='w-48 group-by'>
+				<Dropdown options={groupOptions} selectedOption={groupBy} onOptionChange={handleGroupByChange} />
 			</div>
 		</div>
 	);
@@ -596,15 +607,7 @@ const LaborCICO = () => {
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
 						/>
-						<div className='w-48 group-by'>
-							<Dropdown
-								title='Group By'
-								options={groupOptions}
-								selectedOption={groupBy}
-								onOptionChange={handleGroupByChange}
-							/>
-						</div>
-						<div className='run-button' onClick={fetchLabourCICOData}>
+						<div className='run-button' onClick={handleRunClick}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>

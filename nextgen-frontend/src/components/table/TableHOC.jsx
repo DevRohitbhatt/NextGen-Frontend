@@ -191,7 +191,7 @@ function TableHOC({
 						{table.getRowModel().rows.map((row) => {
 							return (
 								<tr
-									key={row.id}
+									key={`${row.id}${row.depth}`}
 									className={`h-12 text-sm font-normal border-b relative hover:bg-gray-100 ${
 										row.getCanExpand() ? 'cursor-pointer' : 'cursor-default'
 									}`}
@@ -296,7 +296,7 @@ function TableHOC({
 	);
 }
 TableHOC.propTypes = {
-	view: PropTypes.object.isRequired,
+	view: PropTypes.oneOfType([PropTypes.object, PropTypes.number]).isRequired,
 	columns: PropTypes.array.isRequired,
 	data: PropTypes.array.isRequired,
 	isHeader: PropTypes.bool,
