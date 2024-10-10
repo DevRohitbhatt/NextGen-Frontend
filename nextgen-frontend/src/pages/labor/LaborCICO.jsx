@@ -12,6 +12,7 @@ import {
 	PdfBuilder,
 	ExcelExport as exportToExcel,
 	TableHOC,
+	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
@@ -24,8 +25,9 @@ const LaborCICO = () => {
 	const [alignmentId, setAlignmentId] = useState();
 	const [memberId, setMemberId] = useState();
 	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
-	const [laborByPayPeriodData, setLaborByPayPeriodData] = useState([]);
+	const [labourCICOData, setLabourCICOData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
+
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
@@ -45,6 +47,25 @@ const LaborCICO = () => {
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
+	const [groupBy, setGroupBy] = useState('Employee');
+	const groupOptions = [{ name: 'Employee' }, { name: 'Job Description' }];
+	const [viewby, setViewBy] = useState('Unit');
+	const viewOptions = useMemo(() => {
+		if (groupBy === 'Job Description') {
+			return [
+				{ name: 'Unit', row: 0 },
+				{ name: 'Job Description', row: 1 },
+				{ name: 'Employees', row: 2 },
+				{ name: 'Employee Details', row: 3 },
+			];
+		}
+		return [
+			{ name: 'Unit', row: 0 },
+			{ name: 'Employees', row: 1 },
+			{ name: 'Employee Details', row: 2 },
+		];
+	}, [groupBy]);
+
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
 		steps: laborCICO(),
@@ -53,8 +74,8 @@ const LaborCICO = () => {
 	});
 
 	// columns for tableHOC
-	const columns = useMemo(
-		() => [
+	const columns = useMemo(() => {
+		const baseColumns = [
 			columnHelper.display({
 				id: 'actions',
 				cell: ({ row }) =>
@@ -80,161 +101,112 @@ const LaborCICO = () => {
 				dataType: 'string',
 				size: '250',
 			}),
-			columnHelper.accessor('employeeId', {
-				id: 'employeeId',
+		];
+
+		const employeeColumns = [
+			columnHelper.accessor('employeeID', {
+				id: 'employeeID',
 				header: 'Employee ID',
 				dataType: 'number',
 			}),
-			columnHelper.accessor((row) => (row.firstName && row.lastName ? `${row.firstName} ${row.lastName}` : ''), {
-				id: 'fullName',
-				header: 'Full Name',
+			columnHelper.accessor('name', {
+				id: 'name',
+				header: 'Name',
 				dataType: 'string',
+			}),
+			columnHelper.accessor('jobDescription', {
+				id: 'jobDescription',
+				header: 'Job Description',
+				dataType: 'string',
+			}),
+		];
+
+		const jobDescriptionColumns = [
+			columnHelper.accessor('jobDescription', {
+				id: 'jobDescription',
+				header: 'Job Description',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('employeeID', {
+				id: 'employeeID',
+				header: 'Employee ID',
+				dataType: 'number',
+			}),
+			columnHelper.accessor('name', {
+				id: 'name',
+				header: 'Name',
+				dataType: 'string',
+			}),
+		];
+
+		const commonColumns = [
+			columnHelper.accessor('totalMinutes', {
+				id: 'totalMinutes',
+				header: 'Total Minutes',
+				cell: ({ row, getValue }) => calculateSum(row, 'totalMinutes', getValue),
+				dataType: 'number',
+			}),
+			columnHelper.accessor('totalHours', {
+				id: 'totalHours',
+				header: 'Total Hours',
+				cell: ({ row, getValue }) => calculateSum(row, 'totalHours', getValue, true),
+				dataType: 'number',
 			}),
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
-				cell: ({ getValue }) => {
-					if (!getValue()) return '';
-					const date = new Date(getValue());
-					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-					return formattedDate;
-				},
 				dataType: 'date',
 			}),
-			columnHelper.accessor('jobCode', {
-				id: 'jobCode',
-				header: 'Job Code',
-				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const value = row.subRows.map((subrow) => subrow.original.jobCode);
-						return value[0];
-					} else {
-						return getValue();
-					}
-				},
+			columnHelper.accessor('timeIn', {
+				id: 'timeIn',
+				header: 'Time In',
+				dataType: 'string',
 			}),
-			columnHelper.accessor('overHours', {
-				id: 'overHours',
-				header: 'Overtime Hours',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) => subAcc + subSubrow.original.overHours,
-											0
-										)
-									);
-								} else {
-									return acc + subrow.original.overHours;
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return getValue();
-					}
-				},
-				dataType: 'number',
+			columnHelper.accessor('timeOut', {
+				id: 'timeOut',
+				header: 'Time Out',
+				dataType: 'string',
 			}),
-			columnHelper.accessor('rate', {
-				id: 'rate',
-				header: 'Rate',
-				dataType: 'number',
+			columnHelper.accessor('invalid', {
+				id: 'invalid',
+				header: 'Invalid',
+				dataType: 'boolean',
 			}),
-			columnHelper.accessor('declaredTips', {
-				id: 'declaredTips',
-				header: 'Declared Tips',
-				dataType: 'number',
-			}),
-			columnHelper.accessor('preTaxTicketSales', {
-				id: 'preTaxTicketSales',
-				header: 'Pre-Tax Ticket Sales',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) => subAcc + subSubrow.original.preTaxTicketSales,
-											0
-										)
-									);
-								} else {
-									return acc + subrow.original.preTaxTicketSales;
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return getValue();
-					}
-				},
-				dataType: 'number',
-			}),
-			columnHelper.accessor('declaredTipsPct', {
-				id: 'declaredTipsPct',
-				header: 'Tips %',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) => subAcc + subSubrow.original.declaredTipsPct,
-											0
-										)
-									);
-								} else {
-									return acc + subrow.original.declaredTipsPct;
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return getValue();
-					}
-				},
-				dataType: 'number',
-			}),
-			columnHelper.accessor('regPay', {
-				id: 'regPay',
-				header: 'Total Pay',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) => subAcc + subSubrow.original.regPay,
-											0
-										)
-									);
-								} else {
-									return acc + subrow.original.regPay;
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return getValue();
-					}
-				},
-				dataType: 'number',
-			}),
-		],
-		[]
-	);
+		];
+
+		return baseColumns.concat(groupBy === 'Employee' ? employeeColumns : jobDescriptionColumns, commonColumns);
+	}, [groupBy]);
+
+	// calculate the sum of the subrows
+	const calculateSum = (row, field, getValue, isDecimal = false) => {
+		if (row.getCanExpand()) {
+			const sum = row.subRows.reduce((acc, subrow) => {
+				if (subrow.getCanExpand()) {
+					return (
+						acc +
+						subrow.subRows.reduce((subAcc, subSubrow) => {
+							if (subSubrow.getCanExpand()) {
+								return (
+									subAcc +
+									subSubrow.subRows.reduce(
+										(subsubAcc, subsubsubrow) => subsubAcc + Number(subsubsubrow.original[field]),
+										0
+									)
+								);
+							} else {
+								return subAcc + Number(subSubrow.original[field]);
+							}
+						}, 0)
+					);
+				} else {
+					return acc + Number(subrow.original[field]);
+				}
+			}, 0);
+			return isDecimal ? sum.toFixed(2) : sum;
+		} else {
+			return getValue();
+		}
+	};
 
 	useEffect(() => {
 		// Fetch initial data
@@ -296,51 +268,67 @@ const LaborCICO = () => {
 	};
 
 	// Function to get the voids report
-	const handleLaborByPayPeriod = async () => {
+	const fetchLabourCICOData = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
 			setIsTableRendered(false);
 			const getData = {
-				url: 'labourByPayPeriod',
+				url: 'labourCICO',
 				urlParams: {
 					companyId: companyId,
 					alignmentId: alignmentId,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					groupBy: groupBy === 'Employee' ? 'Employee' : 'JobDescription',
 				},
 			};
 
 			const result = await getCall(getData);
+
 			const newData = result.data.map((unit) => ({
-				unitName: unit.unitName, // Keep unitName only at this level
-				subRows: unit.employeeLaborModels.map((employee) => ({
-					firstName: employee.firstName,
-					lastName: employee.lastName,
-					employeeId: employee.laborByPayPeriods[0]?.employeeId || null, // Employee ID at this level,
-					subRows: employee.laborByPayPeriods.map((period) => ({
-						date: period.date,
-						jobCode: period.jobCode,
-						jobDesc: period.jobDesc,
-						regHours: period.regHours,
-						overHours: period.overHours,
-						rate: period.rate,
-						declaredTips: period.declaredTips,
-						preTaxTicketSales: period.preTaxTicketSales,
-						declaredTipsPct: period.declaredTipsPct,
-						regPay: period.regPay,
-					})),
+				unitName: unit.unitName,
+				subRows: unit.employees.map((employee) => ({
+					...(groupBy === 'Employee'
+						? { employeeID: employee.employeeID, name: `${employee.firstName} ${employee.lastName}` }
+						: { jobDescription: employee.jobDesc }),
+
+					// Conditional subRows logic
+					subRows:
+						groupBy === 'Employee'
+							? employee.employees.map((data) => ({
+									jobDescription: data.jobDesc,
+									totalMinutes: data.minuteTotal,
+									totalHours: data.hoursTotal?.toFixed(2),
+									date: dateFormat(data.businessDateIn, 'mm-dd-yyyy'),
+									timeIn: dateFormat(data.businessDateIn, 'hh:MM TT'),
+									timeOut: dateFormat(data.businessDateOut, 'hh:MM TT'),
+									invalid: data.invalid,
+							  }))
+							: [
+									{
+										employeeID: employee.employeeID,
+										name: `${employee.firstName} ${employee.lastName}`,
+										subRows: employee.employees.map((data) => ({
+											totalMinutes: data.minuteTotal,
+											totalHours: data.hoursTotal?.toFixed(2),
+											date: dateFormat(data.businessDateIn, 'mm-dd-yyyy'),
+											timeIn: dateFormat(data.businessDateIn, 'hh:MM TT'),
+											timeOut: dateFormat(data.businessDateOut, 'hh:MM TT'),
+											invalid: data.invalid,
+										})),
+									},
+							  ],
 				})),
 			}));
-
-			setLaborByPayPeriodData(newData);
+			setLabourCICOData(newData);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting Labor By Pay Period Report data: ', error);
+			console.error('Error getting Labor Clock In - Clock Out data: ', error);
 		}
 	};
 
@@ -356,6 +344,11 @@ const LaborCICO = () => {
 		setShowDateModal(false);
 	};
 
+	const handleGroupByChange = (option) => {
+		setGroupBy(option);
+		setLabourCICOData([]);
+	};
+
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
 		if (!columns || columns.length === 0) {
@@ -363,13 +356,13 @@ const LaborCICO = () => {
 			return;
 		}
 
-		if (!laborByPayPeriodData || laborByPayPeriodData.length === 0) {
-			console.error('Labour By Pay Period data is not defined or empty');
+		if (!labourCICOData || labourCICOData.length === 0) {
+			console.error('Labor Clock In - Clock Out data is not defined or empty');
 			return;
 		}
 
 		const pdfData = {
-			title: 'Labor By Pay Period Report',
+			title: 'Labor Clock In - Clock Out',
 			subHeaders: [
 				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
 					selectedToDate,
@@ -381,46 +374,18 @@ const LaborCICO = () => {
 			body: buildPDFBody(),
 		};
 
-		console.log('PDF Data:', pdfData);
-
 		PdfBuilder(pdfData);
 	};
 
 	const buildPDFBody = () => {
-		const body = laborByPayPeriodData.map((row) => {
+		const body = labourCICOData.map((row) => {
 			const unit = unitsAndAreasList?.units?.find((unit) => unit.unitName === row.unitName);
 			const title = unit ? unit.unitName : '';
 			return {
 				type: 'table',
 				title: title,
-				widths: [
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-					'auto',
-				],
-				dataTypes: [
-					'number',
-					'string',
-					'date',
-					'number',
-					'string',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-					'number',
-				],
+				widths: columns.slice(2).map((column) => column.size || '*'),
+				dataTypes: columns.slice(2).map((column) => column.dataType),
 				data: formatPDFData(row.subRows),
 			};
 		});
@@ -429,37 +394,46 @@ const LaborCICO = () => {
 	};
 
 	const formatPDFData = (data) => {
+		const createRow = (employeeID, name, jobDescription, subRow) => [
+			{
+				value: employeeID,
+				cellType: 'number',
+				columnName: 'Employee ID',
+			},
+			{ value: name, cellType: 'string', columnName: 'Name' },
+			{ value: jobDescription, cellType: 'string', columnName: 'Job Description' },
+			{ value: subRow.totalMinutes, cellType: 'number', columnName: 'Total Minutes' },
+			{ value: subRow.totalHours, cellType: 'number', columnName: 'Total Hours' },
+			{ value: subRow.date, cellType: 'date', columnName: 'Date' },
+			{ value: subRow.timeIn, cellType: 'string', columnName: 'Time In' },
+			{ value: subRow.timeOut, cellType: 'string', columnName: 'Time Out' },
+			{ value: subRow.invalid, cellType: 'boolean', columnName: 'Invalid' },
+		];
 		return {
 			columnHeaders: [
 				'Employee ID',
-				'Full Name',
-				'Date',
-				'Job Code',
+				'Name',
 				'Job Description',
-				'Regular Hours',
-				'Overtime Hours',
-				'Rate',
-				'Declared Tips',
-				'Pre-Tax Ticket Sales',
-				'Declared Tips %',
-				'Regular Pay',
+				'Total Minutes',
+				'Total Hours',
+				'Date',
+				'Time In',
+				'Time Out',
+				'Invalid',
 			],
-			rows: data.flatMap((row) =>
-				row.subRows.map((subRow) => [
-					{ value: row.employeeId, cellType: 'number', columnName: 'Employee ID' },
-					{ value: `${row.firstName} ${row.lastName}`, cellType: 'string', columnName: 'Full Name' },
-					{ value: subRow.date, cellType: 'date', columnName: 'Date' },
-					{ value: subRow.jobCode, cellType: 'number', columnName: 'Job Code' },
-					{ value: subRow.jobDesc, cellType: 'string', columnName: 'Job Description' },
-					{ value: subRow.regHours, cellType: 'number', columnName: 'Regular Hours' },
-					{ value: subRow.overHours, cellType: 'number', columnName: 'Overtime Hours' },
-					{ value: subRow.rate, cellType: 'number', columnName: 'Rate' },
-					{ value: subRow.declaredTips, cellType: 'number', columnName: 'Declared Tips' },
-					{ value: subRow.preTaxTicketSales, cellType: 'number', columnName: 'Pre-Tax Ticket Sales' },
-					{ value: subRow.declaredTipsPct, cellType: 'number', columnName: 'Declared Tips %' },
-					{ value: subRow.regPay, cellType: 'number', columnName: 'Regular Pay' },
-				])
-			),
+			rows: data.flatMap((row) => {
+				if (groupBy === 'Employee') {
+					return row.subRows.map((subRow) =>
+						createRow(row.employeeID, row.name, subRow.jobDescription, subRow)
+					);
+				} else {
+					return row.subRows.flatMap((subRow) =>
+						subRow.subRows.map((subSubRow) =>
+							createRow(subRow.employeeID, subRow.name, row.jobDescription, subSubRow)
+						)
+					);
+				}
+			}),
 		};
 	};
 
@@ -468,39 +442,46 @@ const LaborCICO = () => {
 		const csvHeaders = [
 			'Unit Name',
 			'Employee ID',
-			'First Name',
-			'Last Name',
-			'Date',
-			'Job Code',
+			'Name',
 			'Job Description',
-			'Regular Hours',
-			'Overtime Hours',
-			'Rate',
-			'Declared Tips',
-			'Pre-Tax Ticket Sales',
-			'Tips %',
-			'Total Pay',
+			'Total Minutes',
+			'Total Hours',
+			'Date',
+			'Time In',
+			'Time Out',
+			'Invalid',
 		];
-		const csvData = laborByPayPeriodData.flatMap((unit) =>
+		const createCsvRow = (unitName, employeeID, name, jobDesc, period) =>
+			[
+				unitName,
+				employeeID,
+				name,
+				jobDesc,
+				period.totalMinutes,
+				period.totalHours,
+				period.date,
+				period.timeIn,
+				period.timeOut,
+				period.invalid,
+			].join(',');
+
+		const csvData = labourCICOData.flatMap((unit) =>
 			unit.subRows.flatMap((employee) =>
-				employee.subRows.map((period) =>
-					[
-						unit.unitName, // Parent row data (unit)
-						employee.employeeId,
-						employee.firstName, // First level subrow data (employee)
-						employee.lastName,
-						period.date, // Second level subrow data (period)
-						period.jobCode,
-						period.jobDesc,
-						period.regHours,
-						period.overHours,
-						period.rate,
-						period.declaredTips,
-						period.preTaxTicketSales,
-						period.declaredTipsPct,
-						period.regPay,
-					].join(',')
-				)
+				employee.subRows.flatMap((period) => {
+					const employeeID = groupBy === 'Employee' ? employee.employeeID : period.employeeID;
+					const name = groupBy === 'Employee' ? employee.name : period.name;
+					const jobDesc = groupBy === 'Employee' ? period.jobDesc : employee.jobDescription;
+
+					if (groupBy === 'Employee') {
+						// Case when grouping by Employee
+						return createCsvRow(unit.unitName, employeeID, name, jobDesc, period);
+					} else {
+						// Case when not grouping by Employee, iterate through subRows of period
+						return period.subRows.map((data) =>
+							createCsvRow(unit.unitName, employeeID, name, jobDesc, data)
+						);
+					}
+				})
 			)
 		);
 
@@ -509,7 +490,7 @@ const LaborCICO = () => {
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
 		tempLink.href = url;
-		tempLink.setAttribute('download', 'labourByPayPeriod.csv');
+		tempLink.setAttribute('download', 'labourCICO.csv');
 		tempLink.click();
 	};
 
@@ -517,60 +498,73 @@ const LaborCICO = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: 'Labor By Pay Period Report',
-				columns: [
-					{ name: 'Unit Name', filter: 'text' },
-					{ name: 'First Name', filter: 'text' },
-					{ name: 'Last Name', filter: 'text' },
-					{ name: 'Employee ID', filter: 'text' },
-					{ name: 'Date', filter: 'text' },
-					{ name: 'Job Code', filter: 'text' },
-					{ name: 'Job Description', filter: 'text' },
-					{ name: 'Regular Hours', filter: 'text' },
-					{ name: 'Overtime Hours', filter: 'text' },
-					{ name: 'Rate', filter: 'text' },
-					{ name: 'Declared Tips', filter: 'text' },
-					{ name: 'Pre-Tax Ticket Sales', filter: 'text' },
-					{ name: 'Declared Tips %', filter: 'text' },
-					{ name: 'Regular Pay', filter: 'text' },
-				],
-				data: laborByPayPeriodData.flatMap((unit) =>
+				name: 'Labor Clock In - Clock Out',
+				columns: columns.slice(1).map((column) => ({ name: column.header, filter: column.dataType })),
+				data: labourCICOData.flatMap((unit) =>
 					unit.subRows.flatMap((employee) =>
-						employee.subRows.map((period) => ({
-							unitName: unit.unitName,
-							firstName: employee.firstName,
-							lastName: employee.lastName,
-							employeeId: employee.employeeId,
-							date: period.date,
-							jobCode: period.jobCode,
-							jobDesc: period.jobDesc,
-							regHoursPeriod: period.regHours,
-							overHours: period.overHours,
-							rate: period.rate,
-							declaredTips: period.declaredTips,
-							preTaxTicketSales: period.preTaxTicketSales,
-							declaredTipsPct: period.declaredTipsPct,
-							regPay: period.regPay,
-						}))
+						groupBy === 'Employee'
+							? employee.subRows.map((period) => ({
+									'Unit Name': unit.unitName,
+									'Employee ID': groupBy === 'Employee' ? employee.employeeID : period.employeeID,
+									Name: groupBy === 'Employee' ? employee.name : period.name,
+									'Job Description':
+										groupBy === 'Employee' ? period.jobDescription : employee.jobDescription,
+									'Total Minutes': period.totalMinutes,
+									'Total Hours': period.totalHours,
+									Date: period.date,
+									'Time In': period.timeIn,
+									'Time Out': period.timeOut,
+									Invalid: period.invalid,
+							  }))
+							: employee.subRows.flatMap((period) =>
+									period.subRows.flatMap((data) => ({
+										'Unit Name': unit.unitName,
+										'Job Description': employee.jobDescription,
+										'Employee ID': period.employeeID,
+										Name: period.name,
+										'Total Minutes': data.totalMinutes,
+										'Total Hours': data.totalHours,
+										Date: data.date,
+										'Time In': data.timeIn,
+										'Time Out': data.timeOut,
+										Invalid: data.invalid,
+									}))
+							  )
 					)
 				),
 			},
 		];
 
-		const filename = 'laborByPayPeriodReport';
-		const spreadSheetTitle = 'Labor By Pay Period Report';
+		const filename = 'laborCICO';
+		const spreadSheetTitle = 'Labor Clock In - Clock Out';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
+	const detailOnTop = (
+		<div className='flex items-center space-x-2 text-base font-normal'>
+			{/* Add any additional details or components you want to display on top */}
+			<div className='text-xl font-bold'>Expand To:</div>
+			<div className='w-52'>
+				<Dropdown
+					options={viewOptions}
+					selectedOption={viewby}
+					onOptionChange={(option) => setViewBy(option)}
+				/>
+			</div>
+		</div>
+	);
+
 	const Table = (
 		<TableHOC
 			columns={columns}
-			data={laborByPayPeriodData}
+			data={labourCICOData}
+			view={viewOptions.find((option) => option.name === viewby)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 			expandCollapseButtons={true}
+			detailOnTop={detailOnTop}
 		/>
 	);
 
@@ -602,7 +596,15 @@ const LaborCICO = () => {
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
 						/>
-						<div className='run-button' onClick={handleLaborByPayPeriod}>
+						<div className='w-48 group-by'>
+							<Dropdown
+								title='Group By'
+								options={groupOptions}
+								selectedOption={groupBy}
+								onOptionChange={handleGroupByChange}
+							/>
+						</div>
+						<div className='run-button' onClick={fetchLabourCICOData}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
@@ -627,7 +629,7 @@ const LaborCICO = () => {
 					<div>{errorMessage}</div>
 				) : (
 					!isLoading &&
-					(laborByPayPeriodData.length > 0 ? (
+					(labourCICOData.length > 0 ? (
 						<div className='paged-table'>{Table}</div>
 					) : !selectedUnit ? (
 						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>

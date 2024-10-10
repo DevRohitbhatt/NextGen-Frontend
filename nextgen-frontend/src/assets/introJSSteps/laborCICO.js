@@ -16,6 +16,10 @@ export default function laborCICO() {
 			intro: '-Select the date, or date range, you wish to display Labor Clock In - Clock Out',
 		},
 		{
+			element: '.group-by',
+			intro: '-Select how you would like to group the data. You may group by Employee, Job Description.',
+		},
+		{
 			element: '.run-button',
 			intro: 'Click the Run button to generate the report based on the selected criteria.',
 		},

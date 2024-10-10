@@ -4,6 +4,10 @@ function useTableView(table, view, isTableRendered) {
 	useEffect(() => {
 		if (isTableRendered) {
 			// Use a timeout or check if the data is available
+			console.log('Table rendered', view);
+			if (typeof view === 'number') {
+				expandParentRowsOnly(table, view);
+			}
 
 			switch (view) {
 				case 'Employees':
@@ -38,6 +42,18 @@ function useTableView(table, view, isTableRendered) {
 					if (subRow.depth === 1) {
 						expandedState[subRow.id] = true;
 						expandedState[row.id] = true;
+					}
+				});
+			} else if (depth === 3) {
+				row.subRows.forEach((subRow) => {
+					if (subRow.depth === 1) {
+						subRow.subRows.forEach((subSubRow) => {
+							if (subSubRow.depth === 2) {
+								expandedState[subSubRow.id] = true;
+								expandedState[subRow.id] = true;
+								expandedState[row.id] = true;
+							}
+						});
 					}
 				});
 			}
