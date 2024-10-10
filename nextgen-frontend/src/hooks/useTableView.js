@@ -4,7 +4,6 @@ function useTableView(table, view, isTableRendered) {
 	useEffect(() => {
 		if (isTableRendered) {
 			// Use a timeout or check if the data is available
-			console.log('Table rendered', view);
 			if (typeof view === 'number') {
 				expandParentRowsOnly(table, view);
 			}

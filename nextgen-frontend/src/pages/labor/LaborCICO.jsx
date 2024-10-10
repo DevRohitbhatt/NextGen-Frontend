@@ -352,6 +352,7 @@ const LaborCICO = () => {
 
 	const handleGroupByChange = (option) => {
 		setGroupBy(option);
+		setViewBy('Unit');
 		fetchLaborCICOData(option);
 	};
 
