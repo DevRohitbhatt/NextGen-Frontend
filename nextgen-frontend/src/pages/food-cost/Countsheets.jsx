@@ -11,10 +11,7 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const Countsheets = () => {
-	const globalState = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const { companyID, alignmentID, unitsAndAreas, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName } = useSelector((state) => state.globalState);
 	const [countsheetData, setCountsheetData] = useState([]);
 	const [filteredCountsheetData, setFilteredCountsheetData] = useState([]);
 
@@ -22,12 +19,12 @@ const Countsheets = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Inventory Transfer Report, please try again later.'
+		'There was an error trying to load the countsheets Report, please try again later.'
 	);
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -83,35 +80,28 @@ const Countsheets = () => {
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
 				header: 'Unit',
-				size: 150,
+				size: 200,
 			}),
 			columnHelper.accessor('countType', {
 				id: 'countType',
 				header: 'Type',
 				cell: ({ getValue, row }) => {
-					return getValue() === 'DA'
-						? 'Daily'
-						: getValue() === 'WE'
-						? 'Weekly'
-						: getValue() === 'MO'
-						? 'Monthly'
-						: getValue() === 'WA'
-						? 'Waste'
-						: getValue() === 'IT'
-						? `${row.original.transfer}`
-						: 'none';
+
+					return getValue() !== 'IT' ? Object.keys(viewMap).find((key) => viewMap[key] === getValue())
+						: `${row.original.transfer}`;
 				},
-				size: 300,
+				size: 200,
 			}),
 			columnHelper.accessor('dateTime', {
 				id: 'dateTime',
 				header: 'Date',
-				size: 100,
+				size: 180,
 			}),
 			columnHelper.accessor(
 				(row) => {
+					const formattedDate = `${row.userName} - ${dateFormat(row.saveDateTime, 'mm/dd/yyyy h:MM TT')}`;
 					// Combine formatted date and time
-					return `${row.userName} - ${dateFormat(row.lastEditedDate, 'mm/dd/yyyy hh:MM TT')}`;
+					return formattedDate;
 				},
 				{
 					id: 'lastEditedBy',
@@ -134,31 +124,31 @@ const Countsheets = () => {
 	);
 
 	useEffect(() => {
-		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
-			console.log(globalState.groupOrUnitAccess, globalState.defaultUnitID);
+		if (groupOrUnitAccess || defaultUnitID) {
+			console.log(groupOrUnitAccess, defaultUnitID);
 
-			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
-			console.log(globalState.groupOrUnitAccessName, globalState.defaultUnitName);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			console.log(groupOrUnitAccessName, defaultUnitName);
 
-			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
 	}, [
-		globalState.defaultUnitID,
-		globalState.groupOrUnitAccess,
-		globalState.defaultUnitName,
-		globalState.groupOrUnitAccessName,
+		defaultUnitID,
+		groupOrUnitAccess,
+		defaultUnitName,
+		groupOrUnitAccessName,
 	]);
 
 	useEffect(() => {
 		if (selectedUnit && selectedFromDate && selectedToDate) {
-			handleCountsheet();
+			getCountsheetData();
 		}
 	}, [selectedUnit, selectedFromDate, selectedToDate]);
 
 	// Function to fetch the countsheet data
-	const handleCountsheet = async () => {
+	const getCountsheetData = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -180,17 +170,16 @@ const Countsheets = () => {
 				.map((data) => ({
 					...data,
 					companyId: companyID,
-					unitName: unitsAndAreasList.units.find((unit) => unit.unitID === parseInt(data.unitId))?.unitName,
-					transfer: `Transfer ${
-						data.unitId === selectedUnit
-							? data.transferDestUnitID === 0
-								? 'to ???'
-								: 'to ' +
-								  unitsAndAreasList.units.find(
-										(unit) => unit.unitID === parseInt(data.transferDestUnitID)
-								  )?.unitName
-							: 'from ' + data.name
-					}`,
+					unitName: unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.unitId))?.unitName,
+					transfer: `Transfer ${data.unitId === selectedUnit
+						? data.transferDestUnitID === 0
+							? 'to ???'
+							: 'to ' +
+							unitsAndAreas.units.find(
+								(unit) => unit.unitID === parseInt(data.transferDestUnitID)
+							)?.unitName
+						: 'from ' + data.name
+						}`,
 				}));
 
 			setCountsheetData(newData);
@@ -220,17 +209,11 @@ const Countsheets = () => {
 
 	// Function to handle the count type selection
 	const handleCountType = (option) => {
+
 		setView(option);
 		if (option === 'All') {
 			setFilteredCountsheetData(countsheetData);
-		} else if (
-			option === 'Daily' ||
-			option === 'Weekly' ||
-			option === 'Monthly' ||
-			option === 'Ordering' ||
-			option === 'Transfer' ||
-			option === 'Waste'
-		) {
+		} else if (viewMap[option]) {
 			setFilteredCountsheetData(countsheetData.filter((data) => data.countType === viewMap[option]));
 		}
 	};
@@ -247,15 +230,15 @@ const Countsheets = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
 			<div className='w-[85%] mx-auto'>
+
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Browse Countsheets</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Browse Countsheets</h2>
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
@@ -288,19 +271,23 @@ const Countsheets = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading &&
-					(countsheetData.length > 0 ? (
-						<div className='paged-table'>{Table}</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						{
+							!isLoading &&
+							(countsheetData.length > 0 ? (
+								<div className='paged-table'>
+									{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</div>
 				)}
-
 				<div>
 					<UnitModal
-						unitData={unitsAndAreasList}
+						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
 						show={showModal}

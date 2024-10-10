@@ -32,7 +32,7 @@ const EmployeeInformation = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//dropdown variables
@@ -61,6 +61,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px', // Minimum width of the column
 			maxWidth: '250px', // Maximum width of the column
+			width : '265px' // fix width
 		},
 		{
 			key: 'employeeId',
@@ -70,6 +71,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width : '120px'
 		},
 		{
 			key: 'ssn',
@@ -79,6 +81,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '130px',
 			maxWidth: '200px',
+			width : '130px'
 		},
 		{
 			key: 'lastName',
@@ -88,6 +91,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width : '150px',
 		},
 		{
 			key: 'firstName',
@@ -97,6 +101,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width : '150px'
 		},
 		{
 			key: 'middleName',
@@ -106,6 +111,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width : '150px',
 		},
 		{
 			key: 'payRate',
@@ -115,6 +121,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '100px',
 			maxWidth: '150px',
+			width : '100px'
 		},
 		{
 			key: 'address',
@@ -124,6 +131,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '200px',
 			maxWidth: '300px',
+			width : '200px',
 		},
 		{
 			key: 'address2',
@@ -133,6 +141,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '200px',
 			maxWidth: '300px',
+			width : '200px'
 		},
 		{
 			key: 'city',
@@ -142,6 +151,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width : '120px'
 		},
 		{
 			key: 'state',
@@ -151,6 +161,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '100px',
 			maxWidth: '150px',
+			width : '140px'
 		},
 		{
 			key: 'zip',
@@ -160,6 +171,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '100px',
 			maxWidth: '120px',
+			width : '100px'
 		},
 		{
 			key: 'phone',
@@ -169,6 +181,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width : '120px'
 		},
 		{
 			key: 'maritalStatus',
@@ -178,6 +191,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width : '150px'
 		},
 		{
 			key: 'dependants',
@@ -187,6 +201,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width : '150px'
 		},
 		{
 			key: 'phantomEmployee',
@@ -196,6 +211,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '150px',
 		},
 		{
 			key: 'cellPhone',
@@ -205,6 +221,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '150px',
 		},
 		{
 			key: 'email',
@@ -214,6 +231,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '200px',
 			maxWidth: '300px',
+			width: '270px'
 		},
 		{
 			key: 'payrollID',
@@ -223,6 +241,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width: '120px',
 		},
 		{
 			key: 'birthDate',
@@ -232,6 +251,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width: '120px',
 		},
 		{
 			key: 'startDate',
@@ -241,6 +261,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width: '120px',
 		},
 		{
 			key: 'termDate',
@@ -250,6 +271,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width : '120px'
 		},
 	];
 
@@ -543,7 +565,7 @@ const EmployeeInformation = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Employee Information</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Employee Information</h2>
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector

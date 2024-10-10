@@ -23,11 +23,7 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const ActualFoodCost = () => {
-	const globalState = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
-
+	const { companyID, alignmentID, unitsAndAreas, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName } = useSelector((state) => state.globalState);
 	const [actualFoodCostData, setActualFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 
@@ -40,7 +36,7 @@ const ActualFoodCost = () => {
 	const navigate = useNavigate();
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -80,7 +76,7 @@ const ActualFoodCost = () => {
 		setViewBy(option);
 	};
 
-	useEffect(() => {}, [countType]);
+	useEffect(() => { }, [countType]);
 
 	const columns = useMemo(
 		() => [
@@ -135,7 +131,7 @@ const ActualFoodCost = () => {
 				id: 'begCountCost',
 				header: 'Beg $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => `$${calculateSum(row, 'begCountCost', getValue)}`,
+				cell: ({ row, getValue }) => `${calculateSum(row, 'begCountCost', getValue)}`,
 				size: 90,
 			}),
 			columnHelper.accessor('purchaseDisplayUnits', {
@@ -148,7 +144,7 @@ const ActualFoodCost = () => {
 				id: 'purchaseCost',
 				header: 'Pur $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => `$${calculateSum(row, 'purchaseCost', getValue)}`,
+				cell: ({ row, getValue }) =>calculateSum(row, 'purchaseCost', getValue),
 				size: 60,
 			}),
 			columnHelper.accessor('iTinCountDisplayUnits', {
@@ -290,24 +286,24 @@ const ActualFoodCost = () => {
 					}
 				}, 0)
 				.toFixed(2);
-			return isPercentage ? `${sum}%` : sum;
+			return isPercentage ? `${sum}%` : `$${sum}`;
 		} else {
-			return isPercentage ? `${getValue().toFixed(2)}%` : `$${getValue().toFixed(2)}`;
+			return isPercentage ? `${getValue()?.toFixed(2)}%` : `$${getValue()?.toFixed(2)}`;
 		}
 	};
 
 	useEffect(() => {
-		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
-			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
-			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
 	}, [
-		globalState.defaultUnitID,
-		globalState.groupOrUnitAccess,
-		globalState.defaultUnitName,
-		globalState.groupOrUnitAccessName,
+		defaultUnitID,
+		groupOrUnitAccess,
+		defaultUnitName,
+		groupOrUnitAccessName,
 	]);
 
 	// Function to get the voids report
@@ -330,59 +326,62 @@ const ActualFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
-
-			const newData = [
-				{
-					department: 'TOTAL',
-					subRows: result.data.map((department) => ({
-						department: department.department,
-						comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
-						comparisonSales: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonSales || 0,
-						subRows: department.subDepartments.map((subDepartment) => ({
-							subDepartment: subDepartment.subDepartment,
+			if (result?.data && result?.data?.length === 0) {
+				setActualFoodCostData([])
+			} else {
+				const newData = [
+					{
+						department: 'TOTAL',
+						subRows: result.data.map((department) => ({
+							department: department.department,
 							comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
 							comparisonSales: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonSales || 0,
-							subRows: subDepartment.actualFoodCosts.map((foodCost) => ({
-								description: foodCost.description,
-								caseUnitName: foodCost.caseUnitName,
-								countDisplayUnitName: foodCost.countDisplayUnitName,
-								begCountDisplayUnits: foodCost.begCountDisplayUnits,
-								begCountCases: foodCost.begCountCases,
-								begCountCost: foodCost.begCountCost,
-								purchaseCases: foodCost.purchaseCases,
-								purchaseDisplayUnits: foodCost.purchaseDisplayUnits,
-								purchaseCost: foodCost.purchaseCost,
-								iTinCountDisplayUnits: foodCost.iTinCountDisplayUnits,
-								iTinCountCases: foodCost.iTinCountCases,
-								iTinCountCost: foodCost.iTinCountCost,
-								iToutCountDisplayUnits: foodCost.iToutCountDisplayUnits,
-								iToutCountCases: foodCost.iToutCountCases,
-								iToutCountCost: foodCost.iToutCountCost,
-								wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
-								wasteCountCases: foodCost.wasteCountCases,
-								wasteCountCost: foodCost.wasteCountCost,
-								wasteCostPct: foodCost.salesNet
-									? (foodCost.wasteCountCost / foodCost.salesNet) * 100
-									: 0,
-								endCountDisplayUnits: foodCost.endCountDisplayUnits,
-								endCountCases: foodCost.endCountCases,
-								endCountCost: foodCost.endCountCost,
-								usageCases: foodCost.usageCases,
-								usageCountDisplayUnits: foodCost.usageCountDisplayUnits,
-								usageCost: foodCost.usageCost,
-								usageCostPct: foodCost.usageCostPct,
-								salesNet: foodCost.salesNet,
-								comparisonName: foodCost.comparisonName,
-								comparisonSales: foodCost.comparisonSales,
-								yieldPerCase: foodCost.yieldPerCase,
-								yieldPerCountDisplayUnit: foodCost.yieldPerCountDisplayUnit,
+							subRows: department.subDepartments.map((subDepartment) => ({
+								subDepartment: subDepartment.subDepartment,
+								comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
+								comparisonSales: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonSales || 0,
+								subRows: subDepartment.actualFoodCosts.map((foodCost) => ({
+									description: foodCost.description,
+									caseUnitName: foodCost.caseUnitName,
+									countDisplayUnitName: foodCost.countDisplayUnitName,
+									begCountDisplayUnits: foodCost.begCountDisplayUnits,
+									begCountCases: foodCost.begCountCases,
+									begCountCost: foodCost.begCountCost,
+									purchaseCases: foodCost.purchaseCases,
+									purchaseDisplayUnits: foodCost.purchaseDisplayUnits,
+									purchaseCost: foodCost.purchaseCost,
+									iTinCountDisplayUnits: foodCost.iTinCountDisplayUnits,
+									iTinCountCases: foodCost.iTinCountCases,
+									iTinCountCost: foodCost.iTinCountCost,
+									iToutCountDisplayUnits: foodCost.iToutCountDisplayUnits,
+									iToutCountCases: foodCost.iToutCountCases,
+									iToutCountCost: foodCost.iToutCountCost,
+									wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
+									wasteCountCases: foodCost.wasteCountCases,
+									wasteCountCost: foodCost.wasteCountCost,
+									wasteCostPct: foodCost.salesNet
+										? (foodCost.wasteCountCost / foodCost.salesNet) * 100
+										: 0,
+									endCountDisplayUnits: foodCost.endCountDisplayUnits,
+									endCountCases: foodCost.endCountCases,
+									endCountCost: foodCost.endCountCost,
+									usageCases: foodCost.usageCases,
+									usageCountDisplayUnits: foodCost.usageCountDisplayUnits,
+									usageCost: foodCost.usageCost,
+									usageCostPct: foodCost.usageCostPct,
+									salesNet: foodCost.salesNet,
+									comparisonName: foodCost.comparisonName,
+									comparisonSales: foodCost.comparisonSales,
+									yieldPerCase: foodCost.yieldPerCase,
+									yieldPerCountDisplayUnit: foodCost.yieldPerCountDisplayUnit,
+								})),
 							})),
 						})),
-					})),
-				},
-			];
+					},
+				];
 
-			setActualFoodCostData(newData);
+				setActualFoodCostData(newData);
+			}
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -652,7 +651,7 @@ const ActualFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
-
+			
 			const countsheet = result.data.reduce((selectedCountsheet, countsheet) => {
 				if (isEnding) {
 					// Find the latest countsheet for Ending Countsheet
@@ -673,7 +672,7 @@ const ActualFoodCost = () => {
 				}
 				return selectedCountsheet;
 			}, null);
-
+			
 			navigate('/CountsheetDesigner', { state: { companyId: companyID, countsheet: countsheet } });
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
@@ -704,7 +703,7 @@ const ActualFoodCost = () => {
 					fromDate: fromDate.toLocaleDateString('en-CA'),
 					toDate: toDate.toLocaleDateString('en-CA'),
 					vendorId: 0,
-					unitsAndAreasList: unitsAndAreasList,
+					unitsAndAreasList: unitsAndAreas,
 					purchaseData: result,
 				},
 			});
@@ -715,8 +714,9 @@ const ActualFoodCost = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
+
 			<div className='w-10/12 mx-auto pageContainer'>
+
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
@@ -773,74 +773,82 @@ const ActualFoodCost = () => {
 				) : (
 					<>
 						{actualFoodCostData.length > 0 && (
-							<div className='w-52 display-flex'>
+							<div className='w-52 flex flex-row items-center space-x-2'>
 								<Dropdown
 									title='Expand View'
 									options={viewOptions}
 									selectedOption={viewby}
 									onOptionChange={handleTotalViewChange}
 								/>
-								<span onClick={togglePopup} className='cursor-pointer mt-[47px]'>
-									{' '}
-									More....
-								</span>
-								{isPopupVisible && (
-									<div className='more-container' ref={popupRef}>
-										<div className='option mb-2 w-[258px]'>
-											<button className='w-[100%]'>Show/Hide Departments</button>
-										</div>
-										<div className='option mb-2 w-[258px]'>
-											<button
-												className='w-[100%]'
-												onClick={() => {
-													handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
-													setIsPopupVisible(false);
-												}}
-											>
-												View Beginning Countsheet
-											</button>
-										</div>
-										<div className='option mb-2 w-[258px]'>
-											<button
-												className='w-[100%]'
-												onClick={() => {
-													handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
-													setIsPopupVisible(false);
-												}}
-											>
-												View Ending Countsheet
-											</button>
-										</div>
-										<div className='option'>
-											<button
-												className='w-[100%]'
-												onClick={() => {
-													handleViewPurchase(selectedFromDate, selectedToDate, true); // For View Purchase
-													setIsPopupVisible(false);
-												}}
-											>
-												View Purchases
-											</button>
-										</div>
+								<div className='flex items-center justify-center w-full  py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
+									<div onClick={togglePopup} className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid' >
+										<span className='cursor-pointer '>
+											{' '}
+											More....
+										</span>
 									</div>
-								)}
+									{isPopupVisible && (
+										<div className='more-container z-9 !mt-[32px]' ref={popupRef}>
+											<div className='option mb-2 w-[258px]'>
+												<button className='w-[100%]'>Show/Hide Departments</button>
+											</div>
+											<div className='option mb-2 w-[258px]'>
+												<button
+													className='w-[100%]'
+													onClick={() => {
+														handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
+														setIsPopupVisible(false);
+													}}
+												>
+													View Beginning Countsheet
+												</button>
+											</div>
+											<div className='option mb-2 w-[258px]'>
+												<button
+													className='w-[100%]'
+													onClick={() => {
+														handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
+														setIsPopupVisible(false);
+													}}
+												>
+													View Ending Countsheet
+												</button>
+											</div>
+											<div className='option'>
+												<button
+													className='w-[100%]'
+													onClick={() => {
+														handleViewPurchase(selectedFromDate, selectedToDate, true); // For View Purchase
+														setIsPopupVisible(false);
+													}}
+												>
+													View Purchases
+												</button>
+											</div>
+										</div>
+									)}
+								</div>
 							</div>
 						)}
 
 						{/* Display the table if there is no error and the data is not loading */}
-						{!isLoading &&
-							(actualFoodCostData.length > 0 ? (
-								<div className='paged-table'>{Table}</div>
-							) : !selectedUnit ? (
-								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-							) : (
-								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-							))}
+						<div className='relative w-full min-h-56'>
+							<Loader loading={isLoading} />
+
+							{!isLoading &&
+								(actualFoodCostData.length > 0 ? (
+									<div className='paged-table'>{Table}</div>
+								) : !selectedUnit ? (
+									<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+								) : (
+									<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+								))}
+						</div>
 					</>
 				)}{' '}
 				<div>
 					<UnitModal
-						unitData={unitsAndAreasList}
+						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
 						show={showModal}

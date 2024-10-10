@@ -67,6 +67,7 @@ const Voids = () => {
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
+				size: '130',
 				cell: ({ getValue, row }) =>
 					row.getCanExpand() ? (
 						<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
@@ -85,11 +86,13 @@ const Voids = () => {
 				id: 'hour',
 				header: 'Hour',
 				dataType: 'number',
+				size: '100',
 			}),
 			columnHelper.accessor('minute', {
 				id: 'minute',
 				header: 'Minute',
 				dataType: 'number',
+				size: '100',
 			}),
 			columnHelper.accessor('voidReason', {
 				id: 'voidReason',
@@ -110,6 +113,7 @@ const Voids = () => {
 				id: 'fullDescription',
 				header: 'Description',
 				dataType: 'string',
+				size: '200',
 			}),
 			columnHelper.accessor('posCheckId', {
 				id: 'posCheckId',
@@ -124,6 +128,7 @@ const Voids = () => {
 			columnHelper.accessor('revenueID', {
 				id: 'revenueID',
 				header: 'Revenue ID',
+				size: '130',
 				footer: ({ table }) =>
 					`Count: ${table.getCoreRowModel().rows.reduce((acc, row) => acc + row.subRows.length, 0)}`,
 				dataType: 'number',
@@ -131,6 +136,7 @@ const Voids = () => {
 			columnHelper.accessor('price', {
 				id: 'price',
 				header: 'Price',
+				size: '100',
 				footer: ({ table }) =>
 					`$${table
 						.getCoreRowModel()
@@ -387,7 +393,7 @@ const Voids = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Voids Report</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Voids Report</h2>
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector

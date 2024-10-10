@@ -18,11 +18,7 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const InventoryWeeksOnHand = () => {
-	const globalState = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
-
+	const { companyID, alignmentID, unitsAndAreas, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName } = useSelector((state) => state.globalState);
 	const [inventoryWeeksOnHandReportData, setInventoryWeeksOnHandReportData] = useState([]);
 	const [total, setTotal] = useState(0);
 
@@ -30,12 +26,12 @@ const InventoryWeeksOnHand = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Employee Information, please try again later.'
+		'There was an error trying to load the Inventory Weeks On Hand report, please try again later.'
 	);
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//dropdown variables
@@ -151,7 +147,7 @@ const InventoryWeeksOnHand = () => {
 			columnHelper.accessor('estimatedValueOnHandNow', {
 				id: 'estimatedValueOnHandNow',
 				header: 'Estimated $ On Hand Now',
-				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				cell: ({ getValue }) => (`$${getValue() !== 0 ? getValue().toFixed(2) : 0}`),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('averageCasesUsedPerWeek', {
@@ -163,7 +159,7 @@ const InventoryWeeksOnHand = () => {
 			columnHelper.accessor('averageValueUsedPerWeek', {
 				id: 'averageValueUsedPerWeek',
 				header: 'Average $ Used Per Week',
-				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				cell: ({ getValue }) => (`$${getValue() !== 0 ? getValue().toFixed(2) : 0}`),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('salesYieldWeeklyAverage', {
@@ -183,17 +179,17 @@ const InventoryWeeksOnHand = () => {
 	);
 
 	useEffect(() => {
-		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
-			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
-			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
 	}, [
-		globalState.defaultUnitID,
-		globalState.groupOrUnitAccess,
-		globalState.defaultUnitName,
-		globalState.groupOrUnitAccessName,
+		defaultUnitID,
+		groupOrUnitAccess,
+		defaultUnitName,
+		groupOrUnitAccessName,
 	]);
 
 	// Fetching Employee Information
@@ -285,7 +281,7 @@ const InventoryWeeksOnHand = () => {
 
 	// // Function to handle the Excel export
 	const handleExcelClick = () => {
-		if (inventoryWeeksOnHandReportData === 0) return;
+		if (inventoryWeeksOnHandReportData.length === 0) return;
 
 		const data = [
 			{
@@ -315,8 +311,9 @@ const InventoryWeeksOnHand = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
+		
 			<div className='w-10/12 mx-auto pageContainer'>
+
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
@@ -366,22 +363,24 @@ const InventoryWeeksOnHand = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading &&
-					(inventoryWeeksOnHandReportData.length > 0 ? (
-						<div className='mt-4'>
-							{total > 0 && <div className='text-2xl font-bold min-w-fit'>{`Total $: ${total}`}</div>}
-							{Table}
-						</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
+					<div className='relative w-full min-h-56'><Loader loading={isLoading} />
+						{!isLoading &&
+							(inventoryWeeksOnHandReportData.length > 0 ? (
+								<div className='mt-4'>
+									{total > 0 && <div className='text-2xl font-bold min-w-fit'>{`Total $: ${total}`}</div>}
+									{Table}
+								</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</div>
 				)}
 
 				<div>
 					<UnitModal
-						unitData={unitsAndAreasList}
+						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
 						show={showModal}

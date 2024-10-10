@@ -38,7 +38,7 @@ const LaborByPayPeriod = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -85,7 +85,7 @@ const LaborByPayPeriod = () => {
 				id: 'unitName',
 				header: 'Unit Name',
 				dataType: 'string',
-				size: '250',
+				size: '200',
 			}),
 			columnHelper.accessor('employeeId', {
 				id: 'employeeId',
@@ -107,11 +107,13 @@ const LaborByPayPeriod = () => {
 					return formattedDate;
 				},
 				dataType: 'date',
+				size: '120',
 			}),
 			columnHelper.accessor('jobCode', {
 				id: 'jobCode',
 				header: 'Job Code',
 				dataType: 'number',
+				size: '100',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
 						const value = row.subRows.map((subrow) => subrow.original.jobCode);
@@ -152,11 +154,13 @@ const LaborByPayPeriod = () => {
 				id: 'rate',
 				header: 'Rate',
 				dataType: 'number',
+				size: '120',
 			}),
 			columnHelper.accessor('declaredTips', {
 				id: 'declaredTips',
 				header: 'Declared Tips',
 				dataType: 'number',
+				size: '120',
 			}),
 			columnHelper.accessor('preTaxTicketSales', {
 				id: 'preTaxTicketSales',
@@ -188,6 +192,7 @@ const LaborByPayPeriod = () => {
 			columnHelper.accessor('declaredTipsPct', {
 				id: 'declaredTipsPct',
 				header: 'Tips %',
+				size: '120',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
 						const sum = row.subRows
@@ -215,6 +220,7 @@ const LaborByPayPeriod = () => {
 			columnHelper.accessor('regPay', {
 				id: 'regPay',
 				header: 'Total Pay',
+				size: '150',
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
 						const sum = row.subRows
@@ -551,7 +557,7 @@ const LaborByPayPeriod = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Labor By Pay Period</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Labor By Pay Period</h2>
 				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector

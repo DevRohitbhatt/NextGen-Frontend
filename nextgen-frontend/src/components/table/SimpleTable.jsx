@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { Tooltip, SimpleTableRow as Row } from '../index.js';
 import { FaInfoCircle } from 'react-icons/fa';
 
-const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 10, 20], isPaginated = true }) => {
+const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 10, 20], isPaginated = true, isFooter = false, footerData = {}}) => {
+
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage, setItemsPerPage] = useState(itemsPerPageOptions[0]);
 	const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -35,21 +36,29 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 		}));
 	};
 
-	const sortedData   = () => {
-    let sortableData = [...filteredData]; 
-    if (sortConfig.key) {
-        sortableData.sort((a, b) => {
-            if (a[sortConfig.key] < b[sortConfig.key]) {
-                return sortConfig.direction === 'asc' ? -1 : 1;
-            }
-            if (a[sortConfig.key] > b[sortConfig.key]) {
-                return sortConfig.direction === 'asc' ? 1 : -1;
-            }
-            return 0;
-        });
-    }
-    return sortableData;
+	const sortedData = () => {
+		let sortableData = [...filteredData];
+		if (sortConfig.key) {
+			sortableData.sort((a, b) => {
+				if (a[sortConfig.key] < b[sortConfig.key]) {
+					return sortConfig.direction === 'asc' ? -1 : 1;
+				}
+				if (a[sortConfig.key] > b[sortConfig.key]) {
+					return sortConfig.direction === 'asc' ? 1 : -1;
+				}
+				return 0;
+			});
+		}
+		return sortableData;
 	};
+
+	const footerSum = () => {
+		const sorte = sortedData().slice(startIndex, endIndex).reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue.extendedPrice), 0);
+
+		return sorte.toFixed(2)
+
+
+	}
 
 	const handleSort = (key) => {
 		let direction = 'asc';
@@ -65,7 +74,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 
 	const handlePageSizeChange = (e) => {
 		setItemsPerPage(parseInt(e.target.value));
-		setCurrentPage(1); 
+		setCurrentPage(1);
 	};
 
 	const totalPages = Math.ceil(tableData?.length / itemsPerPage);
@@ -85,7 +94,8 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 							{headers.map((header, index) => (
 								<React.Fragment key={index}>
 									<th
-										className='gap-3 p-2 text-left border-b border-gray-300 cursor-pointer  '
+										className='gap-3 p-2 text-left border-b border-gray-300 cursor-pointer'
+										style={{width: header?.width ? header?.width : 'auto',}}
 										onClick={() => handleSort(header.key)}
 									>
 										{header.toolTipDirection === '' || !header.toolTipDirection ? (
@@ -96,10 +106,10 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 											</>
 										) : header.toolTipDirection === 'left' ? (
 											<Tooltip content={header.toolTip} direction='left'>
-												<FaInfoCircle className='inline text-[var(--tw-primary)]' /> 
-													{header.label }
-													{" "}
-													{sortConfig.key === header.key && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+												<FaInfoCircle className='inline text-[var(--tw-primary)]' />
+												{header.label}
+												{" "}
+												{sortConfig.key === header.key && (sortConfig.direction === 'asc' ? '↑' : '↓')}
 											</Tooltip>
 										) : (
 											<Tooltip content={header.toolTip} direction='right'>
@@ -132,20 +142,28 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 						{(() => {
 							const sortedDataArray = sortedData();
 							return (sortedDataArray.length === 0 ? (
-									<tr>
-											<td colSpan={headers.length} className='py-4 text-center'>
-													No data found for the given parameters.
-											</td>
-									</tr>
+								<tr>
+									<td colSpan={headers.length} className='py-4 text-center'>
+										No data found for the given parameters.
+									</td>
+								</tr>
 							) : (
-									sortedDataArray
-											.slice(startIndex, endIndex)
-											.map((row, rowIndex) => (
-													<Row headers={headers} key={rowIndex} item={row} onItemClick={handleRowClick} />
-											))
+								sortedDataArray
+									.slice(startIndex, endIndex)
+									.map((row, rowIndex) => (
+										<Row headers={headers} key={rowIndex} item={row} onItemClick={handleRowClick} />
+									))
 							));
 						})()}
 					</tbody>
+					{isFooter && <tfoot className='sticky w-full bg-white border-b border-gray-300 bottom-0' >
+						<tr className="w-full">
+							<td colSpan="5" className='gap-3 p-2 font-bold text-left border-b border-gray-300 cursor-pointer'>{footerData.footerLabel}</td>
+
+							<td className='gap-3 font-bold p-2 text-left border-b border-gray-300 cursor-pointer'>${footerData.footerValue}</td>
+						</tr>
+
+					</tfoot>}
 				</table>
 			</div>
 			{!isPaginated ? null : (

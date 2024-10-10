@@ -25,12 +25,7 @@ const columnHelper = createColumnHelper();
 
 const PurchaseAnalysis = () => {
 	const dispatch = useDispatch();
-	const globalState = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
-	const vendorsList = useSelector((state) => state.globalState.vendorsList);
-	const groupOrUnitAccessID = useSelector((state) => state.globalState.groupOrUnitAccess);
+	const { companyID, alignmentID, unitsAndAreas: unitsAndAreasList, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName, vendorsList } = useSelector((state) => state.globalState);
 	const [purchasetData, setPurchaseData] = useState([]);
 
 	//loading and error state variables
@@ -42,7 +37,7 @@ const PurchaseAnalysis = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//selected vendor state variables
@@ -82,7 +77,8 @@ const PurchaseAnalysis = () => {
 				cell: ({ getValue }) => {
 					if (!getValue()) return '';
 					const date = new Date(getValue());
-					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+					const formattedDate = `${dateFormat(date, 'mm-dd-yyyy')}`;
+				
 					return formattedDate;
 				},
 				dataType: 'date',
@@ -184,26 +180,26 @@ const PurchaseAnalysis = () => {
 	);
 
 	useEffect(() => {
-		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
-			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
-			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
 	}, [
-		globalState.defaultUnitID,
-		globalState.groupOrUnitAccess,
-		globalState.defaultUnitName,
-		globalState.groupOrUnitAccessName,
+		defaultUnitID,
+		groupOrUnitAccess,
+		defaultUnitName,
+		groupOrUnitAccessName,
 	]);
 
 	useEffect(() => {
-		if (companyID && alignmentID && (groupOrUnitAccessID || selectedUnit)) {
-			fetchData(companyID, alignmentID, groupOrUnitAccessID || selectedUnit);
+		if (companyID && alignmentID && (groupOrUnitAccess || selectedUnit)) {
+			fetchData(companyID, alignmentID, groupOrUnitAccess || selectedUnit);
 		} else {
 			setErrorMessage('There was an issue loading your orders, please try again later.');
 		}
-	}, [companyID, alignmentID, groupOrUnitAccessID, selectedUnit]);
+	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
 	useEffect(() => {
 		if (location.state) {
@@ -390,7 +386,7 @@ const PurchaseAnalysis = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
+
 			<div className='w-10/12 mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -446,14 +442,16 @@ const PurchaseAnalysis = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading &&
-					(purchasetData.length > 0 ? (
-						<div className='paged-table'>{Table}</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
+					<div className='relative w-full min-h-56'><Loader loading={isLoading} />
+						{!isLoading &&
+							(purchasetData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</div>
 				)}
 				<div>
 					<UnitModal

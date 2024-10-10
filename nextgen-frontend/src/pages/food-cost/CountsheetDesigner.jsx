@@ -15,8 +15,14 @@ const CountsheetDesigner = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Variance Food Cost Report, please try again later.'
+		'There was an error trying to load the countsheet Report, please try again later.'
 	);
+	const countTypeMap = {
+		WE: 'Weekly',
+		DA: 'Daily',
+		MO: 'Monthly',
+		SH: 'Shift',
+	};
 
 	const columns = useMemo(
 		() => [
@@ -49,10 +55,9 @@ const CountsheetDesigner = () => {
 			columnHelper.accessor('lineItemCost', {
 				id: 'lineItemCost',
 				cell: ({ row, getValue }) =>
-					`$${
-						row.getCanExpand()
-							? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
-							: getValue()
+					`$${row.getCanExpand()
+						? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
+						: getValue()
 					}`,
 				footer: ({ table }) =>
 					`Total Inventory Value: $${table
@@ -186,17 +191,10 @@ const CountsheetDesigner = () => {
 		<div className='w-[85%] mx-auto'>
 			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>
 				{`${countsheet?.name} --
-				${
-					countsheet?.countType === 'WE'
-						? 'Weekly'
-						: countsheet?.countType === 'DA'
-						? 'Daily'
-						: countsheet?.countType === 'MO'
-						? 'Monthly'
-						: countsheet?.countType === 'SH'
-						? 'Shift'
-						: ''
-				} Countsheet`}
+				${countTypeMap[countsheet?.countType]
+					||
+					''
+					} Countsheet`}
 			</h2>
 			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 				<div className=''>
@@ -205,9 +203,8 @@ const CountsheetDesigner = () => {
 						<span>{countsheet?.dateTime}</span>
 					</div>
 					<div className='mt-5'>
-						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${
-							countsheet?.saveDateTime?.split('T')[1]
-						}`}</h3>
+						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${countsheet?.saveDateTime?.split('T')[1]
+							}`}</h3>
 						<span className='underline cursor-pointer'>Click to insert comment</span>
 					</div>
 				</div>

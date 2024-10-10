@@ -23,10 +23,7 @@ import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
 const columnHelper = createColumnHelper();
 
 const VarianceFoodCost = () => {
-	const state = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const { companyID, alignmentID, unitsAndAreas: unitsAndAreasList, defaultUnitID, defaultUnitName } = useSelector((state) => state.globalState);
 	const [varianceFoodCostData, setVarianceFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 
@@ -41,7 +38,7 @@ const VarianceFoodCost = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -263,13 +260,13 @@ const VarianceFoodCost = () => {
 	};
 
 	useEffect(() => {
-		if (state.defaultUnitId) {
-			setSelectedUnit(state.defaultUnitId);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (state.defaultUnitName) {
-			setSelectedUnitName(state.defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [state.defaultUnitId, state.defaultUnitName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	// Function to get the voids report
 	const handleRun = async () => {
@@ -645,8 +642,9 @@ const VarianceFoodCost = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
+
 			<div className='w-10/12 mx-auto pageContainer'>
+
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
@@ -711,64 +709,70 @@ const VarianceFoodCost = () => {
 									selectedOption={viewby}
 									onOptionChange={(option) => setViewBy(option)}
 								/>
-								<span
-									onClick={() => setIsPopupVisible(!isPopupVisible)}
-									className='cursor-pointer mt-[47px]'
-								>
-									{' '}
-									More....
-								</span>
-								{isPopupVisible && (
-									<div className='more-container' ref={popupRef}>
-										<div className='option mb-2 w-[258px]'>
-											<button className='w-[100%]'>Show/Hide Departments</button>
-										</div>
-										<div className='option mb-2 w-[258px]'>
-											<button
-												className='w-[100%]'
-												onClick={() => {
-													handleCountsheet(); // For Beginning Countsheet
-													setIsPopupVisible(false);
-												}}
-											>
-												View Beginning Countsheet
-											</button>
-										</div>
-										<div className='option mb-2 w-[258px]'>
-											<button
-												className='w-[100%]'
-												onClick={() => {
-													handleCountsheet(true); // For Ending Countsheet
-													setIsPopupVisible(false);
-												}}
-											>
-												View Ending Countsheet
-											</button>
-										</div>
-										<div className='option'>
-											<button
-												className='w-[100%]'
-												onClick={() => {
-													handleViewPurchase(selectedFromDate, selectedToDate, true); // For view Purchase
-													setIsPopupVisible(false);
-												}}
-											>
-												View Purchases
-											</button>
-										</div>
+								{/* start  */}
+								<div className='flex items-center justify-center w-full  py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
+									<div 	onClick={() => setIsPopupVisible(!isPopupVisible)}className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid' >
+										<span
+											// onClick={() => setIsPopupVisible(!isPopupVisible)}
+											className='cursor-pointer mt-[47px]'
+										>
+											{' '}
+											More....
+										</span>
 									</div>
-								)}
+									{isPopupVisible && (
+										<div className='more-container !mt-[32px]' ref={popupRef}>
+											<div className='option mb-2 w-[258px]'>
+												<button className='w-[100%]'>Show/Hide Departments</button>
+											</div>
+											<div className='option mb-2 w-[258px]'>
+												<button
+													className='w-[100%]'
+													onClick={() => {
+														handleCountsheet(); // For Beginning Countsheet
+														setIsPopupVisible(false);
+													}}
+												>
+													View Beginning Countsheet
+												</button>
+											</div>
+											<div className='option mb-2 w-[258px]'>
+												<button
+													className='w-[100%]'
+													onClick={() => {
+														handleCountsheet(true); // For Ending Countsheet
+														setIsPopupVisible(false);
+													}}
+												>
+													View Ending Countsheet
+												</button>
+											</div>
+											<div className='option'>
+												<button
+													className='w-[100%]'
+													onClick={() => {
+														handleViewPurchase(selectedFromDate, selectedToDate, true); // For view Purchase
+														setIsPopupVisible(false);
+													}}
+												>
+													View Purchases
+												</button>
+											</div>
+										</div>
+									)}
+								</div>
 							</div>
 						)}
-
-						{!isLoading &&
-							(varianceFoodCostData.length > 0 ? (
-								<div className='paged-table'>{Table}</div>
-							) : !selectedUnit ? (
-								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-							) : (
-								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-							))}
+						<div className='relative w-full min-h-56'><Loader loading={isLoading} />
+							{!isLoading &&
+								(varianceFoodCostData.length > 0 ? (
+									<div className='paged-table'>{Table}</div>
+								) : !selectedUnit ? (
+									<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+								) : (
+									<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+								))}
+						</div>
 					</>
 				)}
 				<div>
@@ -795,6 +799,7 @@ const VarianceFoodCost = () => {
 				</div>
 			</div>
 		</>
+
 	);
 };
 
