@@ -26,7 +26,16 @@ const columnHelper = createColumnHelper();
 
 const Invoices = () => {
 	const dispatch = useDispatch();
-	const { companyID, alignmentID, unitsAndAreas, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName, vendorsList } = useSelector((state) => state.globalState);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+		vendorsList,
+	} = useSelector((state) => state.globalState);
 	const debounceTimer = useRef(null);
 	const [invoiceReportData, setInvoiceReportData] = useState([]);
 	const [isBrowseInvoicesClicked, setIsBrowseInvoicesClicked] = useState(true);
@@ -43,7 +52,7 @@ const Invoices = () => {
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
@@ -134,18 +143,13 @@ const Invoices = () => {
 		if (groupOrUnitAccessName || defaultUnitName) {
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		defaultUnitID,
-		groupOrUnitAccess,
-		defaultUnitName,
-		groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	useEffect(() => {
 		if (companyID && alignmentID && (groupOrUnitAccess || selectedUnit)) {
 			fetchData(companyID, alignmentID, groupOrUnitAccess || selectedUnit);
 		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
 		}
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
@@ -175,7 +179,6 @@ const Invoices = () => {
 		}
 	};
 
-	// Function to get the voids report
 	const fetchInvoiceReport = async () => {
 		try {
 			setIsLoading(true);
@@ -221,7 +224,7 @@ const Invoices = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleVendorSelection = (selectedVendorName, vendorList) => {
@@ -404,7 +407,6 @@ const Invoices = () => {
 
 	return (
 		<>
-
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -418,15 +420,17 @@ const Invoices = () => {
 					<div>
 						<div className='flex gap-2'>
 							<button
-								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${isBrowseInvoicesClicked ? 'bg-primary text-white' : 'text-primary bg-secondary'
-									}`}
+								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+									isBrowseInvoicesClicked ? 'bg-primary text-white' : 'text-primary bg-secondary'
+								}`}
 								onClick={() => setIsBrowseInvoicesClicked(true)}
 							>
 								Browse Invoices
 							</button>
 							<button
-								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${isBrowseInvoicesClicked ? 'text-primary bg-secondary' : 'bg-primary text-white'
-									}`}
+								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+									isBrowseInvoicesClicked ? 'text-primary bg-secondary' : 'bg-primary text-white'
+								}`}
 								onClick={() => setIsBrowseInvoicesClicked(false)}
 							>
 								Search Invoices
@@ -441,7 +445,7 @@ const Invoices = () => {
 									memberName={selectedUnitName}
 									includeAreas={true}
 									setMemberName={setSelectedUnitName}
-									onClick={() => setUnitShowModal(true)}
+									onClick={() => setShowUnitModal(true)}
 								/>
 								<VendorSelector
 									vendorID={selectedVendor}
@@ -489,7 +493,8 @@ const Invoices = () => {
 				) : !isLoading && !selectedUnit ? (
 					<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
 				) : (
-					<div className='relative w-full min-h-56'><Loader loading={isLoading} />
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
 						<div className='paged-table'>{Table}</div>
 					</div>
 				)}
@@ -499,10 +504,10 @@ const Invoices = () => {
 						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>

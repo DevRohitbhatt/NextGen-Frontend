@@ -25,7 +25,16 @@ const columnHelper = createColumnHelper();
 
 const PurchaseAnalysis = () => {
 	const dispatch = useDispatch();
-	const { companyID, alignmentID, unitsAndAreas: unitsAndAreasList, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName, vendorsList } = useSelector((state) => state.globalState);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+		vendorsList,
+	} = useSelector((state) => state.globalState);
 	const [purchasetData, setPurchaseData] = useState([]);
 
 	//loading and error state variables
@@ -38,7 +47,7 @@ const PurchaseAnalysis = () => {
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
@@ -78,7 +87,7 @@ const PurchaseAnalysis = () => {
 					if (!getValue()) return '';
 					const date = new Date(getValue());
 					const formattedDate = `${dateFormat(date, 'mm-dd-yyyy')}`;
-				
+
 					return formattedDate;
 				},
 				dataType: 'date',
@@ -173,7 +182,7 @@ const PurchaseAnalysis = () => {
 				id: 'inventoryItemDescription',
 				header: 'Inventory Item',
 				dataType: 'string',
-				size: '300',
+				size: 300,
 			}),
 		],
 		[]
@@ -186,24 +195,19 @@ const PurchaseAnalysis = () => {
 		if (groupOrUnitAccessName || defaultUnitName) {
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		defaultUnitID,
-		groupOrUnitAccess,
-		defaultUnitName,
-		groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	useEffect(() => {
 		if (companyID && alignmentID && (groupOrUnitAccess || selectedUnit)) {
 			fetchData(companyID, alignmentID, groupOrUnitAccess || selectedUnit);
 		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
 		}
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
 	useEffect(() => {
 		if (location.state) {
-			fetchPurchaseDetails();
+			fetchPurchaseAnalysisReport();
 		}
 	}, []);
 
@@ -233,43 +237,7 @@ const PurchaseAnalysis = () => {
 		}
 	};
 
-	// Function to fetch the purchase analysis details
-	const fetchPurchaseDetails = async () => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'PurchaseAnalysis',
-				urlParams: {
-					companyID: location.state?.companyID,
-					alignmentID: location.state?.alignmentID,
-					memberID: location.state?.memberID,
-					fromDate: location.state?.fromDate,
-					toDate: location.state?.toDate,
-					vendorId: location.state?.vendorId,
-				},
-			};
-
-			setSelectedUnit(location.state?.memberID);
-
-			const result = await getCall(getData);
-
-			const newData = result.data.map((item) => ({
-				...item,
-				unitName: location.state.unitsAndAreasList?.units.find((unit) => unit.unitID === parseInt(item.unitId))
-					?.unitName,
-			}));
-
-			setPurchaseData(newData);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			console.error('Error fetching Purchase Analysis details: ', error);
-		}
-	};
-
-	// Function to get the voids report
-	const handleRun = async () => {
+	const fetchPurchaseAnalysisReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -277,20 +245,26 @@ const PurchaseAnalysis = () => {
 			const getData = {
 				url: 'PurchaseAnalysis',
 				urlParams: {
-					companyID: companyID,
-					alignmentID: alignmentID,
-					memberId: selectedUnit,
-					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
-					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
-					vendorId: selectedVendor,
+					companyID: location.state?.companyID || companyID,
+					alignmentID: location.state?.alignmentID || alignmentID,
+					memberId: location.state?.memberID || selectedUnit,
+					fromDate: location.state?.fromDate || dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: location.state?.toDate || dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					vendorId: location.state?.vendorId || selectedVendor,
 				},
 			};
+
+			if (location.state?.memberID) {
+				setSelectedUnit(location.state.memberID);
+			}
 
 			const result = await getCall(getData);
 
 			const newData = result.data.map((item) => ({
 				...item,
-				unitName: unitsAndAreasList.units.find((unit) => unit.unitID === parseInt(item.unitId))?.unitName,
+				unitName: (location.state?.unitsAndAreasList || unitsAndAreasList)?.units?.find(
+					(unit) => unit.unitID === parseInt(item.unitId)
+				)?.unitName,
 				inventoryItemDescription: `${item.qsrInventoryItemID} - ${item.inventoryItemDescription}`,
 			}));
 
@@ -307,7 +281,7 @@ const PurchaseAnalysis = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleDateSelection = (from, to) => {
@@ -386,7 +360,6 @@ const PurchaseAnalysis = () => {
 
 	return (
 		<>
-
 			<div className='w-10/12 mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -404,7 +377,7 @@ const PurchaseAnalysis = () => {
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -419,7 +392,7 @@ const PurchaseAnalysis = () => {
 							onClick={() => setVendorShowModal(true)}
 						/>
 
-						<div className='run-button' onClick={handleRun}>
+						<div className='run-button' onClick={fetchPurchaseAnalysisReport}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
@@ -442,7 +415,8 @@ const PurchaseAnalysis = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					<div className='relative w-full min-h-56'><Loader loading={isLoading} />
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
 						{!isLoading &&
 							(purchasetData.length > 0 ? (
 								<div className='paged-table'>{Table}</div>
@@ -458,10 +432,10 @@ const PurchaseAnalysis = () => {
 						unitData={unitsAndAreasList}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>

@@ -23,7 +23,15 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const ActualFoodCost = () => {
-	const { companyID, alignmentID, unitsAndAreas, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName } = useSelector((state) => state.globalState);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [actualFoodCostData, setActualFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 
@@ -37,7 +45,7 @@ const ActualFoodCost = () => {
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -52,7 +60,7 @@ const ActualFoodCost = () => {
 	const dropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }];
 	const [viewby, setViewBy] = useState('Department');
 	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
-	const [isPopupVisible, setIsPopupVisible] = useState(false);
+	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -60,7 +68,7 @@ const ActualFoodCost = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
-	const popupRef = useRef(null);
+	const moreOptionsDropdown = useRef(null);
 	const viewMap = {
 		Weekly: 'WE',
 		Daily: 'DA',
@@ -76,7 +84,7 @@ const ActualFoodCost = () => {
 		setViewBy(option);
 	};
 
-	useEffect(() => { }, [countType]);
+	useEffect(() => {}, [countType]);
 
 	const columns = useMemo(
 		() => [
@@ -144,7 +152,7 @@ const ActualFoodCost = () => {
 				id: 'purchaseCost',
 				header: 'Pur $',
 				dataType: 'number',
-				cell: ({ row, getValue }) =>calculateSum(row, 'purchaseCost', getValue),
+				cell: ({ row, getValue }) => calculateSum(row, 'purchaseCost', getValue),
 				size: 60,
 			}),
 			columnHelper.accessor('iTinCountDisplayUnits', {
@@ -299,15 +307,9 @@ const ActualFoodCost = () => {
 		if (groupOrUnitAccessName || defaultUnitName) {
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		defaultUnitID,
-		groupOrUnitAccess,
-		defaultUnitName,
-		groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
-	// Function to get the voids report
-	const handleRun = async () => {
+	const fetchActualFoodCostReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -327,7 +329,7 @@ const ActualFoodCost = () => {
 
 			const result = await getCall(getData);
 			if (result?.data && result?.data?.length === 0) {
-				setActualFoodCostData([])
+				setActualFoodCostData([]);
 			} else {
 				const newData = [
 					{
@@ -394,7 +396,7 @@ const ActualFoodCost = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleDateSelection = (from, to) => {
@@ -542,7 +544,7 @@ const ActualFoodCost = () => {
 	};
 
 	const togglePopup = () => {
-		setIsPopupVisible(!isPopupVisible);
+		setIsDropdownVisible(!isDropdownVisible);
 	};
 
 	// // Function to handle the Excel export
@@ -615,8 +617,8 @@ const ActualFoodCost = () => {
 	};
 
 	const handleClickOutside = (event) => {
-		if (popupRef.current && !popupRef.current.contains(event.target)) {
-			setIsPopupVisible(false);
+		if (moreOptionsDropdown.current && !moreOptionsDropdown.current.contains(event.target)) {
+			setIsDropdownVisible(false);
 		}
 	};
 
@@ -651,7 +653,7 @@ const ActualFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
-			
+
 			const countsheet = result.data.reduce((selectedCountsheet, countsheet) => {
 				if (isEnding) {
 					// Find the latest countsheet for Ending Countsheet
@@ -672,7 +674,7 @@ const ActualFoodCost = () => {
 				}
 				return selectedCountsheet;
 			}, null);
-			
+
 			navigate('/CountsheetDesigner', { state: { companyId: companyID, countsheet: countsheet } });
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
@@ -695,7 +697,7 @@ const ActualFoodCost = () => {
 
 			const result = await getCall(getData);
 
-			navigate('/Purchase', {
+			navigate('/PurchaseAnalysis', {
 				state: {
 					companyId: companyID,
 					alignmentID: alignmentID,
@@ -714,9 +716,7 @@ const ActualFoodCost = () => {
 
 	return (
 		<>
-
 			<div className='w-10/12 mx-auto pageContainer'>
-
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
@@ -733,7 +733,7 @@ const ActualFoodCost = () => {
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -750,7 +750,7 @@ const ActualFoodCost = () => {
 							/>
 						</div>
 
-						<div className='run-button' onClick={handleRun}>
+						<div className='run-button' onClick={fetchActualFoodCostReport}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
@@ -773,42 +773,44 @@ const ActualFoodCost = () => {
 				) : (
 					<>
 						{actualFoodCostData.length > 0 && (
-							<div className='w-52 flex flex-row items-center space-x-2'>
-								<Dropdown
-									title='Expand View'
-									options={viewOptions}
-									selectedOption={viewby}
-									onOptionChange={handleTotalViewChange}
-								/>
-								<div className='flex items-center justify-center w-full  py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
-									<div onClick={togglePopup} className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid' >
-										<span className='cursor-pointer '>
-											{' '}
-											More....
-										</span>
+							<div className='flex flex-row items-center space-x-2 '>
+								<div className='w-48'>
+									<Dropdown
+										title='Expand View'
+										options={viewOptions}
+										selectedOption={viewby}
+										onOptionChange={handleTotalViewChange}
+									/>
+								</div>
+								<div className='flex items-center justify-center w-28  py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
+									<div
+										onClick={togglePopup}
+										className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
+									>
+										<span className='cursor-pointer '> More....</span>
 									</div>
-									{isPopupVisible && (
-										<div className='more-container z-9 !mt-[32px]' ref={popupRef}>
+									{isDropdownVisible && (
+										<div className='more-container z-9 !mt-[32px]' ref={moreOptionsDropdown}>
 											<div className='option mb-2 w-[258px]'>
-												<button className='w-[100%]'>Show/Hide Departments</button>
+												<button className='w-[100%] bg-[#f9f9f9]'>Show/Hide Departments</button>
 											</div>
 											<div className='option mb-2 w-[258px]'>
 												<button
-													className='w-[100%]'
+													className='w-[100%] bg-[#f9f9f9]'
 													onClick={() => {
 														handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
-														setIsPopupVisible(false);
+														setIsDropdownVisible(false);
 													}}
 												>
 													View Beginning Countsheet
 												</button>
 											</div>
-											<div className='option mb-2 w-[258px]'>
+											<div className='option mb-2 w-[258px] bg-[#f9f9f9]'>
 												<button
 													className='w-[100%]'
 													onClick={() => {
 														handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
-														setIsPopupVisible(false);
+														setIsDropdownVisible(false);
 													}}
 												>
 													View Ending Countsheet
@@ -816,10 +818,10 @@ const ActualFoodCost = () => {
 											</div>
 											<div className='option'>
 												<button
-													className='w-[100%]'
+													className='w-[100%] bg-[#f9f9f9]'
 													onClick={() => {
 														handleViewPurchase(selectedFromDate, selectedToDate, true); // For View Purchase
-														setIsPopupVisible(false);
+														setIsDropdownVisible(false);
 													}}
 												>
 													View Purchases
@@ -851,10 +853,10 @@ const ActualFoodCost = () => {
 						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={false}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>

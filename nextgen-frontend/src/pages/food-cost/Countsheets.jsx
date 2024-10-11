@@ -11,7 +11,15 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const Countsheets = () => {
-	const { companyID, alignmentID, unitsAndAreas, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName } = useSelector((state) => state.globalState);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [countsheetData, setCountsheetData] = useState([]);
 	const [filteredCountsheetData, setFilteredCountsheetData] = useState([]);
 
@@ -25,7 +33,7 @@ const Countsheets = () => {
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -86,8 +94,8 @@ const Countsheets = () => {
 				id: 'countType',
 				header: 'Type',
 				cell: ({ getValue, row }) => {
-
-					return getValue() !== 'IT' ? Object.keys(viewMap).find((key) => viewMap[key] === getValue())
+					return getValue() !== 'IT'
+						? Object.keys(viewMap).find((key) => viewMap[key] === getValue())
 						: `${row.original.transfer}`;
 				},
 				size: 200,
@@ -134,12 +142,7 @@ const Countsheets = () => {
 
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		defaultUnitID,
-		groupOrUnitAccess,
-		defaultUnitName,
-		groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	useEffect(() => {
 		if (selectedUnit && selectedFromDate && selectedToDate) {
@@ -171,15 +174,15 @@ const Countsheets = () => {
 					...data,
 					companyId: companyID,
 					unitName: unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.unitId))?.unitName,
-					transfer: `Transfer ${data.unitId === selectedUnit
-						? data.transferDestUnitID === 0
-							? 'to ???'
-							: 'to ' +
-							unitsAndAreas.units.find(
-								(unit) => unit.unitID === parseInt(data.transferDestUnitID)
-							)?.unitName
-						: 'from ' + data.name
-						}`,
+					transfer: `Transfer ${
+						data.unitId === selectedUnit
+							? data.transferDestUnitID === 0
+								? 'to ???'
+								: 'to ' +
+								  unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.transferDestUnitID))
+										?.unitName
+							: 'from ' + data.name
+					}`,
 				}));
 
 			setCountsheetData(newData);
@@ -197,7 +200,7 @@ const Countsheets = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	// Function to handle the date selection
@@ -209,7 +212,6 @@ const Countsheets = () => {
 
 	// Function to handle the count type selection
 	const handleCountType = (option) => {
-
 		setView(option);
 		if (option === 'All') {
 			setFilteredCountsheetData(countsheetData);
@@ -231,7 +233,6 @@ const Countsheets = () => {
 	return (
 		<>
 			<div className='w-[85%] mx-auto'>
-
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
@@ -248,7 +249,7 @@ const Countsheets = () => {
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -273,11 +274,9 @@ const Countsheets = () => {
 				) : (
 					<div className='relative w-full min-h-56'>
 						<Loader loading={isLoading} />
-						{
-							!isLoading &&
+						{!isLoading &&
 							(countsheetData.length > 0 ? (
-								<div className='paged-table'>
-									{Table}</div>
+								<div className='paged-table'>{Table}</div>
 							) : !selectedUnit ? (
 								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
 							) : (
@@ -290,10 +289,10 @@ const Countsheets = () => {
 						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>

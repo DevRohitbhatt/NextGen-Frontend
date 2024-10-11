@@ -23,7 +23,13 @@ import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
 const columnHelper = createColumnHelper();
 
 const VarianceFoodCost = () => {
-	const { companyID, alignmentID, unitsAndAreas: unitsAndAreasList, defaultUnitID, defaultUnitName } = useSelector((state) => state.globalState);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		defaultUnitID,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [varianceFoodCostData, setVarianceFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 
@@ -39,7 +45,7 @@ const VarianceFoodCost = () => {
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [showModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -54,8 +60,8 @@ const VarianceFoodCost = () => {
 	const countDropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
 	const [viewby, setViewBy] = useState('Department');
 	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
-	const [isPopupVisible, setIsPopupVisible] = useState(false);
-	const popupRef = useRef(null);
+	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+	const moreOptionsDropdown = useRef(null);
 
 	const viewMap = {
 		Weekly: 'WE',
@@ -268,8 +274,7 @@ const VarianceFoodCost = () => {
 		}
 	}, [defaultUnitID, defaultUnitName]);
 
-	// Function to get the voids report
-	const handleRun = async () => {
+	const fetchVarianceFoodCost = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -334,7 +339,7 @@ const VarianceFoodCost = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleDateSelection = (from, to) => {
@@ -343,12 +348,12 @@ const VarianceFoodCost = () => {
 		setShowDateModal(false);
 	};
 
-	const handleCountType = (option) => {
+	const handleCountTypeChange = (option) => {
 		setView(option);
 		setCountType(viewMap[option]);
 	};
 
-	const handleCountsheet = async (isEnding = false) => {
+	const fetchCountsheets = async (isEnding = false) => {
 		try {
 			const getData = {
 				url: 'getCountsheets',
@@ -406,7 +411,7 @@ const VarianceFoodCost = () => {
 
 			const result = await getCall(getData);
 
-			navigate('/Purchase', {
+			navigate('/PurchaseAnalysis', {
 				state: {
 					companyID: companyID,
 					alignmentID: alignmentID,
@@ -618,8 +623,8 @@ const VarianceFoodCost = () => {
 	};
 
 	const handleClickOutside = (event) => {
-		if (popupRef.current && !popupRef.current.contains(event.target)) {
-			setIsPopupVisible(false);
+		if (moreOptionsDropdown.current && !moreOptionsDropdown.current.contains(event.target)) {
+			setIsDropdownVisible(false);
 		}
 	};
 
@@ -642,9 +647,7 @@ const VarianceFoodCost = () => {
 
 	return (
 		<>
-
 			<div className='w-10/12 mx-auto pageContainer'>
-
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
@@ -661,7 +664,7 @@ const VarianceFoodCost = () => {
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -675,10 +678,10 @@ const VarianceFoodCost = () => {
 								options={countDropdownOptions}
 								title='Count Type'
 								selectedOption={view}
-								onOptionChange={handleCountType}
+								onOptionChange={handleCountTypeChange}
 							/>
 						</div>
-						<div className='run-button' onClick={handleRun}>
+						<div className='run-button' onClick={fetchVarianceFoodCost}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
@@ -702,16 +705,21 @@ const VarianceFoodCost = () => {
 				) : (
 					<>
 						{varianceFoodCostData.length > 0 && (
-							<div className='w-52 display-flex'>
-								<Dropdown
-									title='Expand View'
-									options={viewOptions}
-									selectedOption={viewby}
-									onOptionChange={(option) => setViewBy(option)}
-								/>
+							<div className='flex flex-row items-center space-x-2'>
+								<div className='w-48'>
+									<Dropdown
+										title='Expand View'
+										options={viewOptions}
+										selectedOption={viewby}
+										onOptionChange={(option) => setViewBy(option)}
+									/>
+								</div>
 								{/* start  */}
-								<div className='flex items-center justify-center w-full  py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
-									<div 	onClick={() => setIsPopupVisible(!isPopupVisible)}className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid' >
+								<div className='flex items-center justify-center w-28 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
+									<div
+										onClick={() => setIsDropdownVisible(!isDropdownVisible)}
+										className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
+									>
 										<span
 											// onClick={() => setIsPopupVisible(!isPopupVisible)}
 											className='cursor-pointer mt-[47px]'
@@ -720,17 +728,17 @@ const VarianceFoodCost = () => {
 											More....
 										</span>
 									</div>
-									{isPopupVisible && (
-										<div className='more-container !mt-[32px]' ref={popupRef}>
+									{isDropdownVisible && (
+										<div className='more-container !mt-[32px]' ref={moreOptionsDropdown}>
 											<div className='option mb-2 w-[258px]'>
-												<button className='w-[100%]'>Show/Hide Departments</button>
+												<button className='w-[100%] bg-[#f9f9f9]'>Show/Hide Departments</button>
 											</div>
 											<div className='option mb-2 w-[258px]'>
 												<button
-													className='w-[100%]'
+													className='w-[100%] bg-[#f9f9f9]'
 													onClick={() => {
-														handleCountsheet(); // For Beginning Countsheet
-														setIsPopupVisible(false);
+														fetchCountsheets(); // For Beginning Countsheet
+														setIsDropdownVisible(false);
 													}}
 												>
 													View Beginning Countsheet
@@ -738,10 +746,10 @@ const VarianceFoodCost = () => {
 											</div>
 											<div className='option mb-2 w-[258px]'>
 												<button
-													className='w-[100%]'
+													className='w-[100%] bg-[#f9f9f9]'
 													onClick={() => {
-														handleCountsheet(true); // For Ending Countsheet
-														setIsPopupVisible(false);
+														fetchCountsheets(true); // For Ending Countsheet
+														setIsDropdownVisible(false);
 													}}
 												>
 													View Ending Countsheet
@@ -749,10 +757,10 @@ const VarianceFoodCost = () => {
 											</div>
 											<div className='option'>
 												<button
-													className='w-[100%]'
+													className='w-[100%] bg-[#f9f9f9]'
 													onClick={() => {
 														handleViewPurchase(selectedFromDate, selectedToDate, true); // For view Purchase
-														setIsPopupVisible(false);
+														setIsDropdownVisible(false);
 													}}
 												>
 													View Purchases
@@ -763,7 +771,8 @@ const VarianceFoodCost = () => {
 								</div>
 							</div>
 						)}
-						<div className='relative w-full min-h-56'><Loader loading={isLoading} />
+						<div className='relative w-full min-h-56'>
+							<Loader loading={isLoading} />
 							{!isLoading &&
 								(varianceFoodCostData.length > 0 ? (
 									<div className='paged-table'>{Table}</div>
@@ -782,7 +791,7 @@ const VarianceFoodCost = () => {
 						memberName={selectedUnitName}
 						show={showModal}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>
@@ -799,7 +808,6 @@ const VarianceFoodCost = () => {
 				</div>
 			</div>
 		</>
-
 	);
 };
 

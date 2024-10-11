@@ -12,7 +12,7 @@ import {
 	getSortedRowModel,
 	flexRender,
 } from '@tanstack/react-table';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import useTableView from '../../hooks/useTableView';
 
 function DndTable({

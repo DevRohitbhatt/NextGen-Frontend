@@ -24,7 +24,7 @@ import {
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
-	Purchase,
+	PurchaseAnalysis,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -127,7 +127,7 @@ const App = () => {
 								<Route path='/Invoices' element={<Invoices />} />
 								<Route path='/Countsheets' element={<Countsheets />} />
 								<Route path='/CountsheetDesigner' element={<CountsheetDesigner />} />
-								<Route path='/Purchase' element={<Purchase />} />
+								<Route path='/PurchaseAnalysis' element={<PurchaseAnalysis />} />
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />

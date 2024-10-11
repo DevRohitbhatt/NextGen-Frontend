@@ -18,7 +18,15 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const InventoryWeeksOnHand = () => {
-	const { companyID, alignmentID, unitsAndAreas, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName } = useSelector((state) => state.globalState);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [inventoryWeeksOnHandReportData, setInventoryWeeksOnHandReportData] = useState([]);
 	const [total, setTotal] = useState(0);
 
@@ -32,7 +40,7 @@ const InventoryWeeksOnHand = () => {
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//dropdown variables
 	const [usage, setUsage] = useState('Last Week Avg - Actual');
@@ -147,7 +155,7 @@ const InventoryWeeksOnHand = () => {
 			columnHelper.accessor('estimatedValueOnHandNow', {
 				id: 'estimatedValueOnHandNow',
 				header: 'Estimated $ On Hand Now',
-				cell: ({ getValue }) => (`$${getValue() !== 0 ? getValue().toFixed(2) : 0}`),
+				cell: ({ getValue }) => `$${getValue() !== 0 ? getValue().toFixed(2) : 0}`,
 				dataType: 'number',
 			}),
 			columnHelper.accessor('averageCasesUsedPerWeek', {
@@ -159,7 +167,7 @@ const InventoryWeeksOnHand = () => {
 			columnHelper.accessor('averageValueUsedPerWeek', {
 				id: 'averageValueUsedPerWeek',
 				header: 'Average $ Used Per Week',
-				cell: ({ getValue }) => (`$${getValue() !== 0 ? getValue().toFixed(2) : 0}`),
+				cell: ({ getValue }) => `$${getValue() !== 0 ? getValue().toFixed(2) : 0}`,
 				dataType: 'number',
 			}),
 			columnHelper.accessor('salesYieldWeeklyAverage', {
@@ -185,14 +193,8 @@ const InventoryWeeksOnHand = () => {
 		if (groupOrUnitAccessName || defaultUnitName) {
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		defaultUnitID,
-		groupOrUnitAccess,
-		defaultUnitName,
-		groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
-	// Fetching Employee Information
 	const fetchInventoryWeeksOnHandReport = async () => {
 		try {
 			setIsError(false);
@@ -236,7 +238,7 @@ const InventoryWeeksOnHand = () => {
 	const handleUnitSelection = async (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	// function	to handle the usage change
@@ -311,9 +313,7 @@ const InventoryWeeksOnHand = () => {
 
 	return (
 		<>
-		
 			<div className='w-10/12 mx-auto pageContainer'>
-
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
@@ -330,7 +330,7 @@ const InventoryWeeksOnHand = () => {
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 
 						<Dropdown
@@ -363,11 +363,14 @@ const InventoryWeeksOnHand = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					<div className='relative w-full min-h-56'><Loader loading={isLoading} />
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
 						{!isLoading &&
 							(inventoryWeeksOnHandReportData.length > 0 ? (
 								<div className='mt-4'>
-									{total > 0 && <div className='text-2xl font-bold min-w-fit'>{`Total $: ${total}`}</div>}
+									{total > 0 && (
+										<div className='text-2xl font-bold min-w-fit'>{`Total $: ${total}`}</div>
+									)}
 									{Table}
 								</div>
 							) : !selectedUnit ? (
@@ -383,10 +386,10 @@ const InventoryWeeksOnHand = () => {
 						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>

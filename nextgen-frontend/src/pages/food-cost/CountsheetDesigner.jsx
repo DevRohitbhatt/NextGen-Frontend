@@ -1,11 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { useLocation } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC, DateSelector } from '../../components';
+import {
+	ExportOptions,
+	PdfBuilder,
+	ExcelExport as exportToExcel,
+	TableHOC,
+	DateSelector,
+	Dropdown,
+} from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import DndTable from '../../components/table/DndTable';
-import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
@@ -13,13 +19,16 @@ const CountsheetDesigner = () => {
 	const location = useLocation();
 	const [countsheet, setCountsheet] = useState({});
 	const [countsheetDetails, setCountsheetDetails] = useState([]);
-	const [showDateModal, setShowDateModal] = useState(false);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+
+	// State variables for loading and error handling
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the countsheet Report, please try again later.'
 	);
+	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+	const moreOptionsDropdown = useRef(null);
+
 	const countTypeMap = {
 		WE: 'Weekly',
 		DA: 'Daily',
@@ -58,9 +67,10 @@ const CountsheetDesigner = () => {
 			columnHelper.accessor('lineItemCost', {
 				id: 'lineItemCost',
 				cell: ({ row, getValue }) =>
-					`$${row.getCanExpand()
-						? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
-						: getValue()
+					`$${
+						row.getCanExpand()
+							? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
+							: getValue()
 					}`,
 				footer: ({ table }) =>
 					`Total Inventory Value: $${table
@@ -104,7 +114,6 @@ const CountsheetDesigner = () => {
 					lineItemCost: subItem.lineItemCost,
 				})),
 			}));
-			// console.log("yoy yoyo",JSON.stringify(newData))
 			setCountsheetDetails(newData);
 			setIsLoading(false);
 		} catch (error) {
@@ -180,6 +189,19 @@ const CountsheetDesigner = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, countsheet?.name);
 	};
 
+	const handleClickOutside = (event) => {
+		if (moreOptionsDropdown.current && !moreOptionsDropdown.current.contains(event.target)) {
+			setIsDropdownVisible(false);
+		}
+	};
+
+	useEffect(() => {
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
+
 	const Table = (
 		<DndTable
 			columns={columns}
@@ -192,29 +214,50 @@ const CountsheetDesigner = () => {
 
 	return (
 		<div className='w-[85%] mx-auto'>
-			<h2 className='pageTitle text-2xl leading-tight my-4 text-left'>
+			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>
 				{`${countsheet?.name} --
-				${countTypeMap[countsheet?.countType]
-					||
-					''
-					} Countsheet`}
+				${countTypeMap[countsheet?.countType] || ''} Countsheet`}
 			</h2>
-			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-				<div className=''>
-					<div className='flex gap-1'>
-						<h3>Date:</h3>
-						<span>{countsheet?.dateTime}</span>
-						<DateSelector
-							toDate={selectedToDate}
-							fromDate={new Date("Sep 30 2024 12:00AM")}
-							isDateRange={false}
-							onClick={() => setShowDateModal(true)}
-						/>
+			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center sticky top-0'>
+				<div className='flex items-center gap-2'>
+					<DateSelector fromDate={new Date(countsheet?.dateTime)} isDateRange={false} isEditable={false} />
+
+					<div className='flex items-center justify-between mt-8  px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)]'>
+						Insert Comment
 					</div>
-					<div className='mt-5'>
-						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${countsheet?.saveDateTime?.split('T')[1]
-							}`}</h3>
-						<span className='underline cursor-pointer'>Click to insert comment</span>
+
+					<div className='relative flex items-center justify-center py-3 mt-8 text-center capitalize cursor-pointer w-28 whitespace-nowrap rounded-3xl '>
+						<div
+							onClick={() => setIsDropdownVisible(!isDropdownVisible)}
+							className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
+						>
+							<span className='cursor-pointer select-none'> More...</span>
+						</div>
+						{isDropdownVisible && (
+							<div
+								className='absolute top-[90%] left-0 rounded-xl text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] z-10 p-2'
+								ref={moreOptionsDropdown}
+							>
+								<div className='mb-2 option '>
+									<button className='w-[100%] bg-[#f9f9f9]'>Pricing Info</button>
+								</div>
+								<div className='mb-2 option '>
+									<button className='w-[100%] bg-[#f9f9f9]'>Countsheet History</button>
+								</div>
+								<div className='mb-2 option'>
+									<button className='w-[100%] bg-[#f9f9f9]'>Copy Counts</button>
+								</div>
+								<div className='mb-2 option'>
+									<button className='w-[100%] bg-[#f9f9f9]'>Delete Countsheet</button>
+								</div>
+							</div>
+						)}
+					</div>
+
+					<div className='mt-8'>
+						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${
+							countsheet?.saveDateTime?.split('T')[1]
+						}`}</h3>
 					</div>
 				</div>
 				<div>

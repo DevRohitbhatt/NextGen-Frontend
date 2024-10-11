@@ -18,7 +18,15 @@ import {
 } from '../../components';
 
 const InventoryTransfer = () => {
-	const { companyID, alignmentID, unitsAndAreas, groupOrUnitAccess, defaultUnitID, groupOrUnitAccessName, defaultUnitName } = useSelector((state) => state.globalState);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [inventoryTransferReportData, setInventoryTransferReportData] = useState([]);
 
 	//loading and error state variables
@@ -31,7 +39,7 @@ const InventoryTransfer = () => {
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -58,7 +66,7 @@ const InventoryTransfer = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
-			width : '260px'
+			width: '260px',
 		},
 		{
 			key: 'toUnit',
@@ -80,7 +88,7 @@ const InventoryTransfer = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
-			width : '150px'
+			width: '150px',
 		},
 		{
 			key: 'inventoryItem',
@@ -102,7 +110,7 @@ const InventoryTransfer = () => {
 			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
-			width : '125px'
+			width: '125px',
 		},
 	]);
 
@@ -113,12 +121,7 @@ const InventoryTransfer = () => {
 		if (groupOrUnitAccessName || defaultUnitName) {
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		defaultUnitID,
-		groupOrUnitAccess,
-		defaultUnitName,
-		groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	// Function to get the inventory transfer report
 	const fetchInventoryTransferReport = async () => {
@@ -159,7 +162,7 @@ const InventoryTransfer = () => {
 					cellType: 'string',
 					toolTip: '',
 					toolTipDirection: '',
-					width : '260px'
+					width: '260px',
 				},
 				{
 					key: 'toUnit',
@@ -181,7 +184,7 @@ const InventoryTransfer = () => {
 					cellType: 'string',
 					toolTip: '',
 					toolTipDirection: '',
-					width : '150px'
+					width: '150px',
 				},
 				{
 					key: 'inventoryItem',
@@ -203,7 +206,7 @@ const InventoryTransfer = () => {
 					cellType: 'integer',
 					toolTip: '',
 					toolTipDirection: '',
-					width : '125px'
+					width: '125px',
 				},
 			]);
 		} else {
@@ -257,7 +260,7 @@ const InventoryTransfer = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleDateSelection = (from, to) => {
@@ -339,7 +342,6 @@ const InventoryTransfer = () => {
 
 	return (
 		<>
-
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -357,7 +359,7 @@ const InventoryTransfer = () => {
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -398,7 +400,8 @@ const InventoryTransfer = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					<div className='relative w-full min-h-56'><Loader loading={isLoading} />
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
 						{!isLoading && (
 							<>
 								{inventoryTransferReportData?.data ? (
@@ -406,7 +409,7 @@ const InventoryTransfer = () => {
 										<Table
 											data={inventoryTransferReportData.data}
 											headers={headers}
-											onRowClick={() => { }}
+											onRowClick={() => {}}
 										/>
 									</div>
 								) : !selectedUnit ? (
@@ -424,10 +427,10 @@ const InventoryTransfer = () => {
 						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>
