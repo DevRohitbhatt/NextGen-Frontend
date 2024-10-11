@@ -2,16 +2,8 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { useLocation } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import {
-	ExportOptions,
-	PdfBuilder,
-	ExcelExport as exportToExcel,
-	TableHOC,
-	DateSelector,
-	Dropdown,
-} from '../../components';
+import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, DndTable } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
-import DndTable from '../../components/table/DndTable';
 
 const columnHelper = createColumnHelper();
 
@@ -114,6 +106,13 @@ const CountsheetDesigner = () => {
 					lineItemCost: subItem.lineItemCost,
 				})),
 			}));
+			newData.forEach((element, index) => {
+				element.id = index + 1;
+				element.total = element.subRows.reduce((acc, subRow) => acc + subRow.lineItemCost, 0).toFixed(2);
+				element.subRows.forEach((el, ind) => {
+					el.id = index + 1 + '' + ind;
+				});
+			});
 			setCountsheetDetails(newData);
 			setIsLoading(false);
 		} catch (error) {
@@ -180,8 +179,6 @@ const CountsheetDesigner = () => {
 			data: row.subRows.map((subRow) => columns.slice(1).map((column) => subRow[column.id])),
 		}));
 
-		console.log('data', data);
-
 		const filename = 'Countsheets';
 		const spreadSheetTitle = 'Countsheets';
 		const date = countsheet?.dateTime;
@@ -203,13 +200,19 @@ const CountsheetDesigner = () => {
 	}, []);
 
 	const Table = (
-		<DndTable
-			columns={columns}
-			data={countsheetDetails}
-			isHeader={false}
-			isFooter={true}
-			expandCollapseButtons={true}
-		/>
+		<>
+			<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3'>
+				<DndTable
+					columns={columns}
+					initialData={countsheetDetails}
+					isHeader={false}
+					isFooter={true}
+					expandCollapseButtons={true}
+					data={countsheetDetails}
+					setData={setCountsheetDetails}
+				/>
+			</div>
+		</>
 	);
 
 	return (
