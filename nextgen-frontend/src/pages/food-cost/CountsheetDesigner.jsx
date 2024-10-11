@@ -104,7 +104,13 @@ const CountsheetDesigner = () => {
 					lineItemCost: subItem.lineItemCost,
 				})),
 			}));
-			// console.log("yoy yoyo",JSON.stringify(newData))
+			newData.forEach((element, index) => {
+				element.id = index + 1
+				element.total = element.subRows.reduce((acc, subRow) => acc + subRow.lineItemCost, 0).toFixed(2)
+				element.subRows.forEach((el, ind) => {
+					el.id = index + 1 + "" + ind
+				})
+			});
 			setCountsheetDetails(newData);
 			setIsLoading(false);
 		} catch (error) {
@@ -171,7 +177,7 @@ const CountsheetDesigner = () => {
 			data: row.subRows.map((subRow) => columns.slice(1).map((column) => subRow[column.id])),
 		}));
 
-		console.log('data', data);
+		
 
 		const filename = 'Countsheets';
 		const spreadSheetTitle = 'Countsheets';
@@ -181,13 +187,26 @@ const CountsheetDesigner = () => {
 	};
 
 	const Table = (
-		<DndTable
-			columns={columns}
-			data={countsheetDetails}
-			isHeader={false}
-			isFooter={true}
-			expandCollapseButtons={true}
-		/>
+		<>
+			<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3'>
+				<DndTable
+					columns={columns}
+					initialData={countsheetDetails}
+					isHeader={false}
+					isFooter={true}
+					expandCollapseButtons={true}
+					data={countsheetDetails} setData={setCountsheetDetails}
+				/>
+			</div>
+			{/* <TableHOC
+				columns={columns}
+				initialData={countsheetDetails}
+				isHeader={false}
+				isFooter={true}
+				expandCollapseButtons={true}
+				data={countsheetDetails} setData={setCountsheetDetails}
+			/> */}
+		</>
 	);
 
 	return (
@@ -204,12 +223,14 @@ const CountsheetDesigner = () => {
 					<div className='flex gap-1'>
 						<h3>Date:</h3>
 						<span>{countsheet?.dateTime}</span>
-						<DateSelector
+
+						{/* <DateSelector
 							toDate={selectedToDate}
-							fromDate={new Date("Sep 30 2024 12:00AM")}
+							// fromDate={dateFormat(new Date(countsheet?.dateTime),"ddd mmm dd yyyy HH:MM:ss o (Z)")}
+							isEditable={false}
 							isDateRange={false}
 							onClick={() => setShowDateModal(true)}
-						/>
+						/> */}
 					</div>
 					<div className='mt-5'>
 						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${countsheet?.saveDateTime?.split('T')[1]

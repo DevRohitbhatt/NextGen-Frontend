@@ -4,7 +4,7 @@ import { Steps } from 'intro.js-react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import voidsReport from '../../assets/introJSSteps/voidsReport';
-import { Dropdown, Loader, UnitSelector, CalendarModal, UnitModal, DateSelector, TableHOC } from '../../components';
+import { Dropdown, Loader, UnitSelector, CalendarModal, UnitModal, DateSelector, TableHOC, Modal } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 
@@ -26,7 +26,8 @@ const Countsheets = () => {
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
-
+	const [showCommentModal, setShowCommentModal] = useState(false)
+	const [commentValue, setCommentValue] = useState("")
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
 		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
@@ -75,7 +76,7 @@ const Countsheets = () => {
 						Open
 					</Link>
 				),
-				size: 60,
+				size: "50",
 			}),
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
@@ -90,7 +91,7 @@ const Countsheets = () => {
 					return getValue() !== 'IT' ? Object.keys(viewMap).find((key) => viewMap[key] === getValue())
 						: `${row.original.transfer}`;
 				},
-				size: 200,
+				size: 150,
 			}),
 			columnHelper.accessor('dateTime', {
 				id: 'dateTime',
@@ -106,18 +107,37 @@ const Countsheets = () => {
 				{
 					id: 'lastEditedBy',
 					header: 'Last Edited By',
-					size: 300,
+					size: 320,
 				}
 			),
 			columnHelper.accessor('comment', {
 				id: 'comment',
 				header: 'Comment',
+				cell: ({ row, getValue }) => {
+					
+					if (getValue() == "") {
+						return ""
+					} else {
+						
+						return <Link
+								// to='/CountsheetDesigner'
+								onClick={() => { setShowCommentModal(!showCommentModal); setCommentValue(getValue()) }}
+								className='underline cursor-pointer'
+								state={{ companyId: row.original.companyId, countsheet: row.original }}
+							>
+								View comment
+							</Link>
+						
+					}
+				}
+				,
+
 			}),
 			columnHelper.accessor('totalLineItemCost', {
 				id: 'totalLineItemCost',
 				header: 'Total Inventory Value',
 				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
-				size: 200,
+				size: "135",
 			}),
 		],
 		[]
@@ -277,7 +297,9 @@ const Countsheets = () => {
 							!isLoading &&
 							(countsheetData.length > 0 ? (
 								<div className='paged-table'>
-									{Table}</div>
+									{Table}
+
+								</div>
 							) : !selectedUnit ? (
 								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
 							) : (
@@ -307,7 +329,23 @@ const Countsheets = () => {
 						selectedFromDate={selectedFromDate}
 						selectedToDate={selectedToDate}
 					/>
+					<Modal
+						isOpen={showCommentModal}
+						title={"Comment"}
+						onClose={() => { setShowCommentModal(!showCommentModal) }}
+					>
+						<div className='w-[300px] h-auto m-[15px]'
+							dangerouslySetInnerHTML={{
+								__html: commentValue
+									.replace(/•/g, '<br/>•') // Add <br/> before each •
+									.replace(/<br\/>/, '')    // Remove the first <br/> so it doesn’t show before the first bullet
+									.replace(/°/g, '<br/>•')
+							}} >
+
+						</div>
+					</Modal>
 				</div>
+
 			</div>
 		</>
 	);
