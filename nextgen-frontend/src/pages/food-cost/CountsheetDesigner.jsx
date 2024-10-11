@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { useLocation } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC } from '../../components';
+import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC, DateSelector } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
+import DndTable from '../../components/table/DndTable';
+import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
@@ -11,7 +13,8 @@ const CountsheetDesigner = () => {
 	const location = useLocation();
 	const [countsheet, setCountsheet] = useState({});
 	const [countsheetDetails, setCountsheetDetails] = useState([]);
-
+	const [showDateModal, setShowDateModal] = useState(false);
+	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
@@ -101,7 +104,7 @@ const CountsheetDesigner = () => {
 					lineItemCost: subItem.lineItemCost,
 				})),
 			}));
-
+			// console.log("yoy yoyo",JSON.stringify(newData))
 			setCountsheetDetails(newData);
 			setIsLoading(false);
 		} catch (error) {
@@ -178,7 +181,7 @@ const CountsheetDesigner = () => {
 	};
 
 	const Table = (
-		<TableHOC
+		<DndTable
 			columns={columns}
 			data={countsheetDetails}
 			isHeader={false}
@@ -189,7 +192,7 @@ const CountsheetDesigner = () => {
 
 	return (
 		<div className='w-[85%] mx-auto'>
-			<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>
+			<h2 className='pageTitle text-2xl leading-tight my-4 text-left'>
 				{`${countsheet?.name} --
 				${countTypeMap[countsheet?.countType]
 					||
@@ -201,6 +204,12 @@ const CountsheetDesigner = () => {
 					<div className='flex gap-1'>
 						<h3>Date:</h3>
 						<span>{countsheet?.dateTime}</span>
+						<DateSelector
+							toDate={selectedToDate}
+							fromDate={new Date("Sep 30 2024 12:00AM")}
+							isDateRange={false}
+							onClick={() => setShowDateModal(true)}
+						/>
 					</div>
 					<div className='mt-5'>
 						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${countsheet?.saveDateTime?.split('T')[1]
