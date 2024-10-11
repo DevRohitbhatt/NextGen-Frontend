@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { useLocation } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, TableHOC, DateSelector } from '../../components';
+import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, DndTable } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
-import DndTable from '../../components/table/DndTable';
-import dateFormat from 'dateformat';
+
 
 const columnHelper = createColumnHelper();
 
@@ -198,14 +197,6 @@ const CountsheetDesigner = () => {
 					data={countsheetDetails} setData={setCountsheetDetails}
 				/>
 			</div>
-			{/* <TableHOC
-				columns={columns}
-				initialData={countsheetDetails}
-				isHeader={false}
-				isFooter={true}
-				expandCollapseButtons={true}
-				data={countsheetDetails} setData={setCountsheetDetails}
-			/> */}
 		</>
 	);
 
@@ -224,13 +215,6 @@ const CountsheetDesigner = () => {
 						<h3>Date:</h3>
 						<span>{countsheet?.dateTime}</span>
 
-						{/* <DateSelector
-							toDate={selectedToDate}
-							// fromDate={dateFormat(new Date(countsheet?.dateTime),"ddd mmm dd yyyy HH:MM:ss o (Z)")}
-							isEditable={false}
-							isDateRange={false}
-							onClick={() => setShowDateModal(true)}
-						/> */}
 					</div>
 					<div className='mt-5'>
 						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${countsheet?.saveDateTime?.split('T')[1]

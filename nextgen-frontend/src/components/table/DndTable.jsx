@@ -20,7 +20,7 @@ import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 function DraggableRow({ id, onClick, children }) {
     const timer = useRef(null);
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  
+
     const style = {
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
         transition,
@@ -61,6 +61,7 @@ function DraggableRow({ id, onClick, children }) {
 function DndTable(props) {
     const [data, setData] = useState(props.data);
     const [expanded, setExpanded] = useState({});
+    const [searchQuery, setSearchQuery] = useState('');
 
     const toggleExpand = (groupId) => {
         setExpanded((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
@@ -116,6 +117,19 @@ function DndTable(props) {
         }
     };
 
+    const handleSearch = (e) => {
+        const query = e.target.value.toLowerCase();
+        setSearchQuery(query);
+
+        const newExpanded = {};
+        data.forEach((group) => {
+            if (group.subRows.some((item) => item.description.toLowerCase().includes(query))) {
+                newExpanded[group.id] = true;
+            }
+        });
+        setExpanded(newExpanded);
+    };
+
     return (
         <DndContext
             sensors={sensors}
@@ -123,60 +137,77 @@ function DndTable(props) {
             onDragEnd={handleDragEnd}
 
         >
-            <div className='flex items-center my-4 space-x-4 '>
-                <button
-                    onClick={() => collapseAll()}
-                    className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${true
-                        ? 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
-                        : 'bg-[var(--tw-primary)] text-white'
-                        }`}
-                >
-                    Collapse All
-                    <IoIosArrowDown />
-                </button>
-                <button
-                    onClick={() => expandAll()}
-                    className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${true
-                        ? 'bg-[var(--tw-primary)] text-white'
-                        : 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
-                        }`}
-                >
-                    Expand All
-                    <IoIosArrowUp />
-                </button>
+            <div className='flex items-center my-4 space-x-4 justify-between'>
+                <div className='flex items-center my-4 space-x-4'>
+                    <button
+                        onClick={() => collapseAll()}
+                        className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${true
+                            ? 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
+                            : 'bg-[var(--tw-primary)] text-white'
+                            }`}
+                    >
+                        Collapse All
+                        <IoIosArrowDown />
+                    </button>
+                    <button
+                        onClick={() => expandAll()}
+                        className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${true
+                            ? 'bg-[var(--tw-primary)] text-white'
+                            : 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
+                            }`}
+                    >
+                        Expand All
+                        <IoIosArrowUp />
+                    </button>
+                </div>
+                <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    placeholder="Search..."
+                    className=" search-bar rounded-full h-[30px] w-[24%] flex items-center outline-none border border-gray-200 p-5 pr-[18px] pl-[18px] shadow-[0_0_10px_rgba(0,0,0,0.08)] my-auto justify-start transition-all hover:border-[var(--tw-primary)] "
+                />
+
             </div>
             <div className="overflow-y-auto max-h-[75vh] border border-gray-300 rounded tableHOC">
                 <SortableContext items={data} strategy={verticalListSortingStrategy}>
                     <table className="min-w-full bg-white border-none ">
 
                         <tbody className='divide-y-2 '>
-                            {data.map((group) => (
-                                <React.Fragment key={group.id}>
-                                    {/* Parent Row */}
-                                    <DraggableRow className='bg-blue-500' id={group.id} onClick={() => [toggleExpand(group.id)]}>
-                                        <td className="px-2  cursor-pointer  flex items-center gap-2 ">
-                                            {expanded[group.id] ? <CiSquareMinus /> : <CiSquarePlus />} {group.groupName}
-                                        </td>
-                                        <td className="px-2  "> {group.total} </td>
-                                    </DraggableRow>
+                            {data.map((group) => {
+                                // Filter subRows based on the search query
+                                const filteredSubRows = group.subRows.filter(item =>
+                                    item.description.toLowerCase().includes(searchQuery)
+                                );
 
-                                    {/* Child Rows */}
-                                    {expanded[group.id] && (
-                                        <SortableContext items={group.subRows} strategy={verticalListSortingStrategy}>
-                                            {group.subRows.map((item) => (
-                                                <DraggableRow key={item.id} id={item.id} onClick={() => { }} >
-                                                    <td className="px-2 w-1/3  pl-10"> {item.description}</td>
-                                                    <td className="px-2 w-1/3 text-center">{item.countDescription}</td>
-                                                    <td className="px-2 w-1/3 text-right">{item.lineItemCost}</td>
-                                                </DraggableRow>
-                                            ))}
-                                        </SortableContext>
-                                    )}
-                                </React.Fragment>
-                            ))}
+                                return (
+                                    <React.Fragment key={group.id}>
+                                        {/* Parent Row */}
+                                        <DraggableRow className='bg-blue-500' id={group.id} onClick={() => [toggleExpand(group.id)]}>
+                                            <td className="px-2  cursor-pointer  flex items-center gap-2 ">
+                                                {expanded[group.id] ? <CiSquareMinus /> : <CiSquarePlus />} {group.groupName}
+                                            </td>
+                                            <td className="px-2  "> {group.total} </td>
+                                        </DraggableRow>
+
+                                        {/* Child Rows */}
+                                        {expanded[group.id] && filteredSubRows.length > 0 && (
+                                            <SortableContext items={group.subRows} strategy={verticalListSortingStrategy}>
+                                                {filteredSubRows.map((item) => (
+                                                    <DraggableRow key={item.id} id={item.id} onClick={() => { }} >
+                                                        <td className="px-2 w-1/3  pl-10"> {item.description}</td>
+                                                        <td className="px-2 w-1/3 text-center">{item.countDescription}</td>
+                                                        <td className="px-2 w-1/3 text-right">{item.lineItemCost}</td>
+                                                    </DraggableRow>
+                                                ))}
+                                            </SortableContext>
+                                        )}
+                                    </React.Fragment>
+                                )
+                            })}
                         </tbody>
                         <div className="bg-gray-100 sticky bottom-0 text-right px-4">
-                           Total inventory value ${data.reduce((total, group) =>
+                            Total inventory value ${data.reduce((total, group) =>
                                 total + group.subRows.reduce((subTotal, item) => subTotal + item.lineItemCost, 0), 0).toFixed(2)}
                         </div>
                     </table>
