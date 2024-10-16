@@ -18,10 +18,15 @@ import {
 } from '../../components';
 
 const InventoryTransfer = () => {
-	const globalState = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [inventoryTransferReportData, setInventoryTransferReportData] = useState([]);
 
 	//loading and error state variables
@@ -33,8 +38,8 @@ const InventoryTransfer = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -61,6 +66,7 @@ const InventoryTransfer = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			width: '260px',
 		},
 		{
 			key: 'toUnit',
@@ -82,6 +88,7 @@ const InventoryTransfer = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			width: '150px',
 		},
 		{
 			key: 'inventoryItem',
@@ -103,25 +110,21 @@ const InventoryTransfer = () => {
 			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
+			width: '125px',
 		},
 	]);
 
 	useEffect(() => {
-		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
-			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
-			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		globalState.defaultUnitID,
-		globalState.groupOrUnitAccess,
-		globalState.defaultUnitName,
-		globalState.groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	// Function to get the inventory transfer report
-	const handleInventoryTransferReport = async () => {
+	const fetchInventoryTransferReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -139,7 +142,7 @@ const InventoryTransfer = () => {
 
 			const result = await getCall(getData);
 			setInventoryTransferReportData(result);
-			handleHeaders();
+			changeHeadersBasedOnReportType();
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -150,7 +153,7 @@ const InventoryTransfer = () => {
 	};
 
 	// Function to handle the headers based on the report type
-	const handleHeaders = () => {
+	const changeHeadersBasedOnReportType = () => {
 		if (reportType === 'Detail') {
 			setHeaders([
 				{
@@ -159,6 +162,7 @@ const InventoryTransfer = () => {
 					cellType: 'string',
 					toolTip: '',
 					toolTipDirection: '',
+					width: '260px',
 				},
 				{
 					key: 'toUnit',
@@ -180,6 +184,7 @@ const InventoryTransfer = () => {
 					cellType: 'string',
 					toolTip: '',
 					toolTipDirection: '',
+					width: '150px',
 				},
 				{
 					key: 'inventoryItem',
@@ -201,6 +206,7 @@ const InventoryTransfer = () => {
 					cellType: 'integer',
 					toolTip: '',
 					toolTipDirection: '',
+					width: '125px',
 				},
 			]);
 		} else {
@@ -254,7 +260,7 @@ const InventoryTransfer = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleDateSelection = (from, to) => {
@@ -336,7 +342,6 @@ const InventoryTransfer = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -344,7 +349,7 @@ const InventoryTransfer = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Inventory Transfer Report</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Transfer Report</h2>
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
@@ -354,7 +359,7 @@ const InventoryTransfer = () => {
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -371,7 +376,7 @@ const InventoryTransfer = () => {
 								onOptionChange={(optionValue) => setReportType(optionValue)}
 							/>
 						</div>
-						<div className='run-button' onClick={handleInventoryTransferReport}>
+						<div className='run-button' onClick={fetchInventoryTransferReport}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
@@ -395,34 +400,37 @@ const InventoryTransfer = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading && (
-						<>
-							{inventoryTransferReportData?.data ? (
-								<div>
-									<Table
-										data={inventoryTransferReportData.data}
-										headers={headers}
-										onRowClick={() => {}}
-									/>
-								</div>
-							) : !selectedUnit ? (
-								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-							) : (
-								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-							)}
-						</>
-					)
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						{!isLoading && (
+							<>
+								{inventoryTransferReportData?.data ? (
+									<div>
+										<Table
+											data={inventoryTransferReportData.data}
+											headers={headers}
+											onRowClick={() => {}}
+										/>
+									</div>
+								) : !selectedUnit ? (
+									<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+								) : (
+									<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+								)}
+							</>
+						)}
+					</div>
 				)}
 
 				<div>
 					<UnitModal
-						unitData={unitsAndAreasList}
+						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>

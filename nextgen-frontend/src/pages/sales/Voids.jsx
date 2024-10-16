@@ -39,8 +39,8 @@ const Voids = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -67,6 +67,7 @@ const Voids = () => {
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
+				size: 130,
 				cell: ({ getValue, row }) =>
 					row.getCanExpand() ? (
 						<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
@@ -85,11 +86,13 @@ const Voids = () => {
 				id: 'hour',
 				header: 'Hour',
 				dataType: 'number',
+				size: 100,
 			}),
 			columnHelper.accessor('minute', {
 				id: 'minute',
 				header: 'Minute',
 				dataType: 'number',
+				size: 100,
 			}),
 			columnHelper.accessor('voidReason', {
 				id: 'voidReason',
@@ -110,6 +113,7 @@ const Voids = () => {
 				id: 'fullDescription',
 				header: 'Description',
 				dataType: 'string',
+				size: 200,
 			}),
 			columnHelper.accessor('posCheckId', {
 				id: 'posCheckId',
@@ -124,6 +128,7 @@ const Voids = () => {
 			columnHelper.accessor('revenueID', {
 				id: 'revenueID',
 				header: 'Revenue ID',
+				size: 130,
 				footer: ({ table }) =>
 					`Count: ${table.getCoreRowModel().rows.reduce((acc, row) => acc + row.subRows.length, 0)}`,
 				dataType: 'number',
@@ -131,6 +136,7 @@ const Voids = () => {
 			columnHelper.accessor('price', {
 				id: 'price',
 				header: 'Price',
+				size: 100,
 				footer: ({ table }) =>
 					`$${table
 						.getCoreRowModel()
@@ -164,8 +170,7 @@ const Voids = () => {
 		globalState.groupOrUnitAccessName,
 	]);
 
-	// Function to get the voids report
-	const handleVoidsReport = async () => {
+	const fetchVoidsReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -221,7 +226,7 @@ const Voids = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	// Function to handle the date selection
@@ -387,7 +392,7 @@ const Voids = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Voids Report</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Voids Report</h2>
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
@@ -397,7 +402,7 @@ const Voids = () => {
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -428,7 +433,7 @@ const Voids = () => {
 								</div>
 							</div>
 						</div>
-						<div className='run-button' onClick={handleVoidsReport}>
+						<div className='run-button' onClick={fetchVoidsReport}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
@@ -466,10 +471,10 @@ const Voids = () => {
 						unitData={unitsAndAreasList}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>
