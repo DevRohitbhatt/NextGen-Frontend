@@ -15,11 +15,13 @@ import {
 	TableHOC,
 	VendorSelector,
 	VendorModal,
+	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import PurchaseAnalysi from '../../assets/introJSSteps/PurchaseAnalysis';
 import { useLocation } from 'react-router-dom';
 import dateFormat from 'dateformat';
+import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 
 const columnHelper = createColumnHelper();
 
@@ -61,6 +63,18 @@ const PurchaseAnalysis = () => {
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
+	const [selectedGroupBy, setSelectedGroupBy] = useState('None');
+	const groupByOptions = [
+		{ name: 'None' },
+		{ name: 'Unit - GLCode' },
+		{ name: 'Unit- Department' },
+		{ name: 'Unit - Inventory Item' },
+		{ name: 'Unit - Vendor Item - Inventory Item' },
+		{ name: 'Unit - Vendor - Invoice' },
+		{ name: 'Vendor - GLCode' },
+		{ name: 'Vendor - Department' },
+	];
+
 	//location for state
 	const location = useLocation();
 
@@ -72,25 +86,21 @@ const PurchaseAnalysis = () => {
 	});
 
 	// columns for tableHOC
-	const columns = useMemo(
+	const memoizedColumns = useMemo(
 		() => [
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
 				header: 'Unit',
 				dataType: 'string',
-				size: 300,
+				size: 200,
+				enableHiding: true,
 			}),
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
-				cell: ({ getValue }) => {
-					if (!getValue()) return '';
-					const date = new Date(getValue());
-					const formattedDate = `${dateFormat(date, 'mm-dd-yyyy')}`;
-
-					return formattedDate;
-				},
+				cell: ({ getValue }) => dateFormat(getValue(), 'mm-dd-yyyy'),
 				dataType: 'date',
+				filterFn: 'includesString',
 				size: 100,
 			}),
 			columnHelper.accessor('name', {
@@ -109,6 +119,7 @@ const PurchaseAnalysis = () => {
 				id: 'totalAmountIncludingTax',
 				header: 'Invoice Total',
 				cell: ({ getValue }) => (getValue() ? `${getValue().toFixed(2)}` : ''),
+				filterFn: 'includesString',
 				dataType: 'number',
 				size: 120,
 			}),
@@ -128,19 +139,21 @@ const PurchaseAnalysis = () => {
 				id: 'quantity',
 				header: 'Item Quantity',
 				cell: ({ getValue }) => <div className='text-center'>{getValue() ?? 0}</div>,
+				dataType: 'number',
+				filterFn: 'includesString',
+				size: 100,
 				footer: ({ table }) => (
 					<div className='font-bold text-center'>
 						{parseInt(table.getCoreRowModel().rows.reduce((acc, row) => acc + row.original.quantity, 0))}
 					</div>
 				),
-				dataType: 'number',
-				size: 100,
 			}),
 			columnHelper.accessor('price', {
 				id: 'price',
 				header: 'Item Price',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				dataType: 'number',
+				filterFn: 'includesString',
 				size: 100,
 			}),
 			columnHelper.accessor('taxAmount', {
@@ -148,6 +161,7 @@ const PurchaseAnalysis = () => {
 				header: 'Item Tax',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				dataType: 'number',
+				filterFn: 'includesString',
 				size: 100,
 			}),
 			columnHelper.accessor('extPrice', {
@@ -164,13 +178,14 @@ const PurchaseAnalysis = () => {
 					</div>
 				),
 				dataType: 'number',
+				filterFn: 'includesString',
 				size: 100,
 			}),
 			columnHelper.accessor('department', {
 				id: 'department',
 				header: 'Department',
 				dataType: 'string',
-				size: 120,
+				size: 150,
 			}),
 			columnHelper.accessor('subdepartment', {
 				id: 'subdepartment',
@@ -187,6 +202,7 @@ const PurchaseAnalysis = () => {
 		],
 		[]
 	);
+	const [columns, setColumns] = useState(memoizedColumns);
 
 	useEffect(() => {
 		if (groupOrUnitAccess || defaultUnitID) {
@@ -296,6 +312,62 @@ const PurchaseAnalysis = () => {
 		setVendorShowModal(false);
 	};
 
+	const handleGroupByChange = (option) => {
+		setSelectedGroupBy(option);
+		const groupByColumns = {
+			None: [],
+			'Unit - GLCode': ['unitName', 'companyGLCode'],
+			'Unit- Department': ['unitName', 'department'],
+			'Unit - Inventory Item': ['unitName', 'inventoryItemDescription'],
+			'Unit - Vendor Item - Inventory Item': ['unitName', 'vendorItemDescription', 'inventoryItemDescription'],
+			'Unit - Vendor - Invoice': ['unitName', 'name', 'vendorInvoiceReference'],
+			'Vendor - GLCode': ['name', 'companyGLCode'],
+			'Vendor - Department': ['name', 'department'],
+		};
+
+		const selectedGroupByColumns = groupByColumns[option] || [];
+		const newColumns = memoizedColumns.map((column) =>
+			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
+		);
+
+		if (option !== 'None') {
+			newColumns.unshift(
+				columnHelper.display({
+					id: 'actions',
+					cell: ({ row }) => {
+						if (!row.getCanExpand()) return null;
+
+						const label =
+							row.depth < selectedGroupByColumns.length
+								? `${columns.find((col) => col.id === selectedGroupByColumns[row.depth])?.header}: ${
+										row.original[selectedGroupByColumns[row.depth]]
+								  }`
+								: '';
+
+						return (
+							<div
+								{...{
+									style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem`, width: '100%' },
+									className: 'flex items-center gap-2 font-bold absolute bg-white inset-0 capitalize',
+								}}
+							>
+								{row.getIsExpanded() ? (
+									<CiSquareMinus className='text-[20px]' />
+								) : (
+									<CiSquarePlus className='text-[20px]' />
+								)}
+								{label}
+							</div>
+						);
+					},
+					size: 80,
+				})
+			);
+		}
+
+		setColumns(newColumns);
+	};
+
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
 		const pdfData = {
@@ -353,6 +425,7 @@ const PurchaseAnalysis = () => {
 			data={purchasetData}
 			isPaginated={true}
 			isFooter={true}
+			enableColumnFilters={true}
 			headerPosition='flex-start'
 			dataPosition='text-start'
 		/>
@@ -391,7 +464,14 @@ const PurchaseAnalysis = () => {
 							setVendorName={setSelectedVendorName}
 							onClick={() => setVendorShowModal(true)}
 						/>
-
+						<div className='min-w-56'>
+							<Dropdown
+								title='Group By'
+								selectedOption={selectedGroupBy}
+								options={groupByOptions}
+								onOptionChange={handleGroupByChange}
+							/>
+						</div>
 						<div className='run-button' onClick={fetchPurchaseAnalysisReport}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
