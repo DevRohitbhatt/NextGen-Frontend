@@ -46,6 +46,8 @@ const PurchaseAnalysis = () => {
 		'There was an error trying to load the Purchase Analysis Report, please try again later.'
 	);
 
+	const [isTableRendered, setIsTableRendered] = useState(false);
+
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
@@ -257,6 +259,7 @@ const PurchaseAnalysis = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
+			setIsTableRendered(false);
 
 			const getData = {
 				url: 'PurchaseAnalysis',
@@ -286,6 +289,7 @@ const PurchaseAnalysis = () => {
 
 			setPurchaseData(newData);
 			setIsLoading(false);
+			setIsTableRendered(true);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -366,6 +370,10 @@ const PurchaseAnalysis = () => {
 		}
 
 		setColumns(newColumns);
+
+		if (isTableRendered) {
+			fetchPurchaseAnalysisReport();
+		}
 	};
 
 	// Function to handle the PDF export

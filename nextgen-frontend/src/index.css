@@ -235,6 +235,14 @@ input.Search::placeholder {
 	@apply w-3 cursor-pointer;
 }
 
+/* For horizontal scrollbars */
+.tableHOC::-webkit-scrollbar:horizontal,
+.inventoryItemsTable::-webkit-scrollbar:horizontal,
+.CalendarTable::-webkit-scrollbar:horizontal,
+.simpleTableContainer::-webkit-scrollbar:horizontal {
+	@apply h-3 cursor-pointer;
+}
+
 .tableHOC::-webkit-scrollbar-thumb,
 .inventoryItemsTable::-webkit-scrollbar-thumb,
 .CalendarTable::-webkit-scrollbar-thumb,

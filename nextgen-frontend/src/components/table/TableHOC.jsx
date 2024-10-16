@@ -138,7 +138,7 @@ function TableHOC({
 												<th
 													key={header.id}
 													colSpan={header.colSpan}
-													className=''
+													className='py-2'
 													style={{
 														minWidth: header.getSize(),
 														width: 'auto',
@@ -244,7 +244,7 @@ function TableHOC({
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (
-											<td key={cell.id} className={`px-2 ${dataPosition} text-nowrap`}>
+											<td key={cell.id} className={`${dataPosition} text-nowrap`}>
 												{cell.getIsGrouped() ? (
 													// If it's a grouped cell, add an expander and row count
 													<div className='flex items-center gap-2'>
