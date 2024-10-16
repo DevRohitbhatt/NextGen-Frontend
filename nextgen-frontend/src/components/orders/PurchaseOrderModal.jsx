@@ -39,6 +39,7 @@ export default function PurchaseOrderModal({ show, setShow, handleClose, company
 		{ key: 'vendorItemUOM', label: 'Order Unit', cellType: 'string' },
 		{ key: 'vendorItemPackSize', label: 'Pack Size', cellType: 'string' },
 		{ key: 'quantity', label: 'Order Amount', cellType: 'string' },
+		{ key: 'extendedPrice', label: 'Extended Price', cellType: 'string' },
 	];
 
 	useEffect(() => {
@@ -56,9 +57,11 @@ export default function PurchaseOrderModal({ show, setShow, handleClose, company
 
 					const result = await getCall(getData);
 					const data = result.data.map((item) => {
+
 						return {
 							...item,
 							vendorItemPackSize: `${item.vendorItemPack}/${item.vendorItemSize}`,
+							extendedPrice: (item.quantity * item.price).toFixed(2),
 						};
 					});
 					setPurchaseOrder(data);
@@ -70,12 +73,21 @@ export default function PurchaseOrderModal({ show, setShow, handleClose, company
 		})();
 	}, [show]);
 
+	const getFooterData = () => {
+		const sum = purchaseOrder.reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue.extendedPrice), 0);
+		return {
+			footerLabel: "Current/Lasst Price Total",
+			footerValue: sum.toFixed(2)
+		}
+	}
+
+
 	return (
 		<Modal isOpen={show} setIsOpen={setShow} onClose={handleClose} title='Purchase Order'>
 			<PurchaseOrderModalContent>
-				{loading ? 
+				{loading ?
 					<div>Loading...</div> :
-					<Table headers={tableHeaders} data={purchaseOrder} />
+					<Table isFooter={true} footerData={getFooterData()} headers={tableHeaders} data={purchaseOrder} />
 				}
 			</PurchaseOrderModalContent>
 		</Modal>
