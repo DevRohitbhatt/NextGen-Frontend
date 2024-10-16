@@ -138,7 +138,7 @@ function TableHOC({
 												<th
 													key={header.id}
 													colSpan={header.colSpan}
-													className=''
+													className='py-2'
 													style={{
 														minWidth: header.getSize(),
 														width: 'auto',
@@ -244,7 +244,7 @@ function TableHOC({
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (
-											<td key={cell.id} className={`px-2 ${dataPosition} text-nowrap`}>
+											<td key={cell.id} className={`${dataPosition} text-nowrap`}>
 												{cell.getIsGrouped() ? (
 													// If it's a grouped cell, add an expander and row count
 													<div className='flex items-center gap-2'>
@@ -265,7 +265,7 @@ function TableHOC({
 
 					{/* footer */}
 					{isFooter && (
-						<tfoot className='sticky bottom-0 bg-white shadow-[0_1px_0_var(--tw-primary)_inset]'>
+						<tfoot className='sticky -bottom-1 bg-white shadow-[0_1px_0_var(--tw-primary)_inset]'>
 							{table.getFooterGroups().map((footerGroup) => (
 								<>
 									<tr className='' key={footerGroup.id}>

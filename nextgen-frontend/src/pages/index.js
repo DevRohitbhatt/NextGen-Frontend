@@ -20,6 +20,7 @@ const Voids = lazy(() => import('./sales/Voids'));
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
+const LabourCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
 
 export {
 	PrepChart,
@@ -30,6 +31,7 @@ export {
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
+	LabourCICOExceptions,
 	Voids,
 	ActualFoodCost,
 	VarianceFoodCost,
