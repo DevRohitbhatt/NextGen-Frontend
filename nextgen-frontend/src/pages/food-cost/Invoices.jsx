@@ -80,48 +80,53 @@ const Invoices = () => {
 						<MdEdit className='cursor-pointer' />
 					</div>
 				),
-				size: '80',
+				size: 50,
 			}),
 			columnHelper.accessor('name', {
 				id: 'name',
 				header: 'Vendor',
 				dataType: 'string',
+				size: 60,
 			}),
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
 				header: 'Unit',
 				dataType: 'string',
+				size: 150,
 			}),
 			columnHelper.accessor('vendorInvoiceReference', {
 				id: 'vendorInvoiceReference',
 				header: 'Invoice Reference',
 				dataType: 'string',
+				size: 80,
 			}),
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
 				cell: ({ getValue }) => {
 					if (!getValue()) return '';
-					const date = new Date(getValue());
-					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-					return formattedDate;
+					return dateFormat(getValue(), 'mm-dd-yyyy');
 				},
 				dataType: 'date',
+				size: 80,
 			}),
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Total',
 				dataType: 'number',
+				size: 60,
 			}),
 			columnHelper.accessor('lastEditedBy', {
 				id: 'lastEditedBy',
 				header: 'Last Edited By',
 				dataType: 'string',
+				size: 80,
 			}),
 			columnHelper.accessor('status', {
 				id: 'status',
 				header: 'Status',
 				dataType: 'string',
+				size: 60,
 			}),
 		],
 		[]
@@ -378,7 +383,13 @@ const Invoices = () => {
 			invoiceReportData.length === 0 ? (
 				<div className='mx-auto mt-5 text-lg w-fit'>No Invoices Found</div>
 			) : (
-				<TableHOC columns={columns} data={invoiceReportData} isPaginated={true} />
+				<TableHOC
+					columns={columns}
+					data={invoiceReportData}
+					isPaginated={true}
+					dataPosition='left'
+					headerPosition='left'
+				/>
 			)
 		) : searchKey.length === 0 ? (
 			<div className='mx-auto mt-5 text-lg w-fit'>Enter invoice reference or total for searching</div>
@@ -402,9 +413,9 @@ const Invoices = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Invoices</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Invoices</h2>
 
-				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div>
 						<div className='flex gap-2'>
 							<button
