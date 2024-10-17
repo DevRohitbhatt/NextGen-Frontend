@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
@@ -197,32 +197,9 @@ const HourlySales = () => {
 			});
 
 			// Define readable hour labels
-			const hourLabels = [
-				'12 AM',
-				'1 AM',
-				'2 AM',
-				'3 AM',
-				'4 AM',
-				'5 AM',
-				'6 AM',
-				'7 AM',
-				'8 AM',
-				'9 AM',
-				'10 AM',
-				'11 AM',
-				'12 PM',
-				'1 PM',
-				'2 PM',
-				'3 PM',
-				'4 PM',
-				'5 PM',
-				'6 PM',
-				'7 PM',
-				'8 PM',
-				'9 PM',
-				'10 PM',
-				'11 PM',
-			];
+			const hourLabels = Array.from({ length: 24 }, (_, i) =>
+				new Date(0, 0, 0, i).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+			);
 
 			// Dynamically generate columns based on the received data
 			const generatedColumns = [
@@ -233,19 +210,16 @@ const HourlySales = () => {
 								id: 'Hour',
 								header: 'Hour',
 								footer: 'Summary:',
+								size: 60,
 							}),
 					  ]
-					: []),
-				// Conditionally add Unit Name column only if reportType is not 'Hour and Day'
-				...(reportType !== 'Hour and Day'
-					? [
+					: [
 							columnHelper.accessor('UnitName', {
 								id: 'UnitName',
 								header: 'Unit Name',
 								footer: reportType === 'Unit, Hour and Day' ? null : 'Summary:',
 							}),
-					  ]
-					: []),
+					  ]),
 
 				// Conditionally add the Date and HoursSales column only if reportType is 'Unit, Hour and Day'
 				...(reportType === 'Unit, Hour and Day'
@@ -264,6 +238,7 @@ const HourlySales = () => {
 				columnHelper.accessor('Total', {
 					id: 'Total',
 					header: 'Total',
+					size: 120,
 					footer: ({ table }) =>
 						reportType === 'Unit, Hour and Day' ? null : (
 							<div className='text-center'>
@@ -278,6 +253,7 @@ const HourlySales = () => {
 					id: 'Avg',
 					header: 'Avg',
 					cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+					size: 120,
 					footer: ({ table }) =>
 						reportType === 'Unit, Hour and Day' ? null : (
 							<div className='text-center'>
@@ -306,6 +282,7 @@ const HourlySales = () => {
 								? item.replace(/\//g, '-')
 								: item,
 							dataType: 'number',
+							size: 120,
 							cell: ({ getValue }) => (getValue() === null ? 0 : getValue() === '00' ? 0 : getValue()),
 							footer: ({ table }) =>
 								reportType !== 'Hour and Day' ? null : item === 'Mins' ? (
@@ -458,60 +435,64 @@ const HourlySales = () => {
 			/>
 			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Hourly Sales</h2>
 			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
-				<div className='flex items-center space-x-3 '>
-					<UnitSelector
-						companyId={companyID}
-						alignmentId={alignmentID}
-						memberId={selectedUnit}
-						memberName={selectedUnitName}
-						includeAreas={true}
-						setMemberName={setSelectedUnitName}
-						onClick={() => setUnitShowModal(true)}
-					/>
-					<DateSelector
-						toDate={selectedToDate}
-						fromDate={selectedFromDate}
-						isDateRange={true}
-						onClick={() => setShowDateModal(true)}
-					/>
-					<div className='w-56 reportType-selector'>
-						<Dropdown
-							title='Report Type'
-							options={reportTypeOptions}
-							selectedOption={reportType}
-							onOptionChange={handleReportTypeChange}
+				<div className='flex flex-col '>
+					<div className='flex items-center gap-1'>
+						<UnitSelector
+							companyId={companyID}
+							alignmentId={alignmentID}
+							memberID={selectedUnit}
+							memberName={selectedUnitName}
+							includeAreas={true}
+							setMemberName={setSelectedUnitName}
+							onClick={() => setUnitShowModal(true)}
 						/>
-					</div>
-					<div className='w-40 salesType-selector'>
-						<Dropdown
-							title='Sales Type'
-							options={salesTypeOptions}
-							selectedOption={salesType}
-							onOptionChange={(option) => setSalesType(option)}
-							isEditable={isSalesEditable}
+						<DateSelector
+							toDate={selectedToDate}
+							fromDate={selectedFromDate}
+							isDateRange={true}
+							onClick={() => setShowDateModal(true)}
 						/>
+						<div className='w-56 reportType-selector'>
+							<Dropdown
+								title='Report Type'
+								options={reportTypeOptions}
+								selectedOption={reportType}
+								onOptionChange={handleReportTypeChange}
+							/>
+						</div>
+						<div className='ml-3 run-button' onClick={fetchHourlySalesReport}>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+								Run
+							</div>
+						</div>
 					</div>
-					<div className='w-36 DOWType-selector'>
-						<Dropdown
-							title='DOW'
-							options={DOWTypeOptions}
-							selectedOption={DOWType}
-							onOptionChange={(option) => setDOWType(option)}
-							isEditable={isDOWEditable}
-						/>
-					</div>
-					<div className='w-36 viewType-selector'>
-						<Dropdown
-							title='View By'
-							options={viewByOptions}
-							selectedOption={viewBy}
-							onOptionChange={(option) => setViewBy(option)}
-							isEditable={isViewByEditable}
-						/>
-					</div>
-					<div className='run-button' onClick={fetchHourlySalesReport}>
-						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-							Run
+					<div className='flex items-center space-x-3'>
+						<div className='w-40 salesType-selector'>
+							<Dropdown
+								title='Sales Type'
+								options={salesTypeOptions}
+								selectedOption={salesType}
+								onOptionChange={(option) => setSalesType(option)}
+								isEditable={isSalesEditable}
+							/>
+						</div>
+						<div className='w-36 DOWType-selector'>
+							<Dropdown
+								title='DOW'
+								options={DOWTypeOptions}
+								selectedOption={DOWType}
+								onOptionChange={(option) => setDOWType(option)}
+								isEditable={isDOWEditable}
+							/>
+						</div>
+						<div className='w-36 viewType-selector'>
+							<Dropdown
+								title='View By'
+								options={viewByOptions}
+								selectedOption={viewBy}
+								onOptionChange={(option) => setViewBy(option)}
+								isEditable={isViewByEditable}
+							/>
 						</div>
 					</div>
 				</div>

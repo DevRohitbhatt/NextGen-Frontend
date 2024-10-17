@@ -1,7 +1,6 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FaSortAlphaUp, FaInfoCircle, FaSortAlphaDownAlt } from 'react-icons/fa';
-import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 import { Tooltip } from '../index';
 import {
