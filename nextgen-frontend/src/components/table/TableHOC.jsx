@@ -1,7 +1,6 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FaSortAlphaUp, FaInfoCircle, FaSortAlphaDownAlt } from 'react-icons/fa';
-import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 import { Tooltip } from '../index';
 import {
@@ -241,19 +240,25 @@ function TableHOC({
 									className={`h-[35px] font-normal border-y relative hover:bg-gray-100 ${
 										row.getCanExpand() ? 'cursor-pointer' : 'cursor-default'
 									}`}
-									onClick={(e)=>{e.stopPropagation(), onCallBack ? onCallBack(row.original) :  row.getCanExpand() ? row.getToggleExpandedHandler() : null}}
+									onClick={(e) => {
+										e.stopPropagation();
+										if (onCallBack) {
+											onCallBack(row.original);
+										} else if (row.getCanExpand()) {
+											row.getToggleExpandedHandler()(e);
+										}
+									}}
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (
-											<td  key={cell.id} className={`${dataPosition} text-nowrap`}>
+											<td key={cell.id} className={`${dataPosition} text-nowrap`}>
 												{cell.getIsGrouped() ? (
 													// If it's a grouped cell, add an expander and row count
 													<div className='flex items-center gap-2'>
 														{flexRender(cell.column.columnDef.cell, cell.getContext())} (
 														{row.subRows.length})
 													</div>
-												) : cell.getIsPlaceholder() ? null : ( // For cells with repeated values, render null
-													// Otherwise, just render the regular cell
+												) : cell.getIsPlaceholder() ? null : (
 													flexRender(cell.column.columnDef.cell, cell.getContext())
 												)}
 											</td>
@@ -364,6 +369,7 @@ TableHOC.propTypes = {
 	enableColumnFilters: PropTypes.bool,
 	headerPosition: PropTypes.string,
 	dataPosition: PropTypes.string,
+	onCallBack: PropTypes.func,
 };
 
 export default TableHOC;

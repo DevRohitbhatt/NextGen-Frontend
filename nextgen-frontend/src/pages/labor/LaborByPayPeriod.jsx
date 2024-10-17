@@ -17,7 +17,7 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
-import laborByPayPeriod from '../../assets/introJSSteps/labourByPayPeriod';
+import laborByPayPeriod from '../../assets/introJSSteps/laborByPayPeriod';
 
 const columnHelper = createColumnHelper();
 
@@ -518,7 +518,7 @@ const LaborByPayPeriod = () => {
 						/>
 					</div>
 					<div className='run-button' onClick={fetchLaborByPayPeriod}>
-						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+						<div className='py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 							Run
 						</div>
 					</div>

@@ -20,8 +20,6 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
-import { PiMagnifyingGlassBold } from 'react-icons/pi';
-import { MdEdit } from 'react-icons/md';
 import { SlEye } from 'react-icons/sl';
 
 const columnHelper = createColumnHelper();
@@ -45,7 +43,7 @@ const Invoices = () => {
 	const [searchInvoiceData, setSearchInvoiceData] = useState([]);
 
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load your Invoices, please try again later.'
@@ -67,7 +65,7 @@ const Invoices = () => {
 	);
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
-	const [showPreviewModal, setShowPreviewModal] = useState(false)
+	const [showPreviewModal, setShowPreviewModal] = useState(false);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -81,8 +79,13 @@ const Invoices = () => {
 		() => [
 			columnHelper.display({
 				id: 'actions',
-				cell: ({row}) => (
-					<div className='flex space-x-2 text-lg' onClick={(e)=>{e.stopPropagation(),setShowPreviewModal(true)}}>
+				cell: () => (
+					<div
+						className='flex space-x-2 text-lg'
+						onClick={(e) => {
+							e.stopPropagation(), setShowPreviewModal(true);
+						}}
+					>
 						<SlEye />
 					</div>
 				),
@@ -272,7 +275,7 @@ const Invoices = () => {
 					setErrorMessage('There was an issue loading your data, please try again later.');
 					console.error('Error getting Invoices data: ', error);
 				}
-			} else if (value === '') {
+			} else if (e.target.value === '') {
 				setIsBrowseInvoicesClicked(true);
 			}
 		}, 500);
@@ -396,7 +399,7 @@ const Invoices = () => {
 					isPaginated={true}
 					dataPosition='left'
 					headerPosition='left'
-					onCallBack={(e)=>{}}
+					onCallBack={(e) => {}}
 				/>
 			)
 		) : searchKey.length === 0 ? (
@@ -525,64 +528,60 @@ const Invoices = () => {
 						setShowPreviewModal(!showPreviewModal);
 					}}
 				>
-					<div className="bg-white w-full max-w-5xl p-6 rounded-lg shadow-lg overflow-auto">
-						
-
-						<div className="my-4">
-							<div className="text-sm">
-								<span className="font-semibold">Unit:</span> 2290 Walmart Missouri City
-								<span className="mx-2 font-semibold">Vendor:</span> Sysco
-								<span className="mx-2 font-semibold">Date:</span> Mon 09/30/2024
-								<span className="mx-2 font-semibold">Invoice Reference:</span> 867060211
-								<span className="mx-2 font-semibold">Total:</span> $2539.40
+					<div className='w-full max-w-5xl p-6 overflow-auto bg-white rounded-lg shadow-lg'>
+						<div className='my-4'>
+							<div className='text-sm'>
+								<span className='font-semibold'>Unit:</span> 2290 Walmart Missouri City
+								<span className='mx-2 font-semibold'>Vendor:</span> Sysco
+								<span className='mx-2 font-semibold'>Date:</span> Mon 09/30/2024
+								<span className='mx-2 font-semibold'>Invoice Reference:</span> 867060211
+								<span className='mx-2 font-semibold'>Total:</span> $2539.40
 							</div>
-							<div className="text-sm mt-1">
-								<span className="font-semibold">Created By:</span> Data Import
-								<span className="mx-2 font-semibold">Last Edited By:</span> Data Import
+							<div className='mt-1 text-sm'>
+								<span className='font-semibold'>Created By:</span> Data Import
+								<span className='mx-2 font-semibold'>Last Edited By:</span> Data Import
 							</div>
 						</div>
 
-						<table className="w-full text-sm border-collapse border border-gray-300">
+						<table className='w-full text-sm border border-collapse border-gray-300'>
 							<thead>
-								<tr className="bg-blue-200 text-left">
-									<th className="border border-gray-300 p-2">Item Ref#</th>
-									<th className="border border-gray-300 p-2">Description</th>
-									<th className="border border-gray-300 p-2">UOM</th>
-									<th className="border border-gray-300 p-2">Pack/Size</th>
-									<th className="border border-gray-300 p-2">Qty</th>
-									<th className="border border-gray-300 p-2">Price</th>
-									<th className="border border-gray-300 p-2">Tax</th>
-									<th className="border border-gray-300 p-2">Line Total</th>
+								<tr className='text-left bg-blue-200'>
+									<th className='p-2 border border-gray-300'>Item Ref#</th>
+									<th className='p-2 border border-gray-300'>Description</th>
+									<th className='p-2 border border-gray-300'>UOM</th>
+									<th className='p-2 border border-gray-300'>Pack/Size</th>
+									<th className='p-2 border border-gray-300'>Qty</th>
+									<th className='p-2 border border-gray-300'>Price</th>
+									<th className='p-2 border border-gray-300'>Tax</th>
+									<th className='p-2 border border-gray-300'>Line Total</th>
 								</tr>
 							</thead>
 							<tbody>
 								{/* Repeat this row for each item */}
-								<tr className="even:bg-gray-50">
-									<td className="border border-gray-300 p-2 text-center">2765127</td>
-									<td className="border border-gray-300 p-2">MIX SMOOTHIE STWBRY PUREE</td>
-									<td className="border border-gray-300 p-2 text-center">CA</td>
-									<td className="border border-gray-300 p-2 text-center">6 / 35OZ</td>
-									<td className="border border-gray-300 p-2 text-center">1</td>
-									<td className="border border-gray-300 p-2 text-center">$35.04</td>
-									<td className="border border-gray-300 p-2 text-center">$0.00</td>
-									<td className="border border-gray-300 p-2 text-center">$35.04</td>
+								<tr className='even:bg-gray-50'>
+									<td className='p-2 text-center border border-gray-300'>2765127</td>
+									<td className='p-2 border border-gray-300'>MIX SMOOTHIE STWBRY PUREE</td>
+									<td className='p-2 text-center border border-gray-300'>CA</td>
+									<td className='p-2 text-center border border-gray-300'>6 / 35OZ</td>
+									<td className='p-2 text-center border border-gray-300'>1</td>
+									<td className='p-2 text-center border border-gray-300'>$35.04</td>
+									<td className='p-2 text-center border border-gray-300'>$0.00</td>
+									<td className='p-2 text-center border border-gray-300'>$35.04</td>
 								</tr>
-								<tr className="even:bg-gray-50">
-									<td className="border border-gray-300 p-2 text-center">5447738</td>
-									<td className="border border-gray-300 p-2">SYRUP COKE ZERO SUGAR 2.5 GAL</td>
-									<td className="border border-gray-300 p-2 text-center">CA</td>
-									<td className="border border-gray-300 p-2 text-center">1 / 2.5GAL</td>
-									<td className="border border-gray-300 p-2 text-center">1</td>
-									<td className="border border-gray-300 p-2 text-center">$54.95</td>
-									<td className="border border-gray-300 p-2 text-center">$0.00</td>
-									<td className="border border-gray-300 p-2 text-center">$54.95</td>
+								<tr className='even:bg-gray-50'>
+									<td className='p-2 text-center border border-gray-300'>5447738</td>
+									<td className='p-2 border border-gray-300'>SYRUP COKE ZERO SUGAR 2.5 GAL</td>
+									<td className='p-2 text-center border border-gray-300'>CA</td>
+									<td className='p-2 text-center border border-gray-300'>1 / 2.5GAL</td>
+									<td className='p-2 text-center border border-gray-300'>1</td>
+									<td className='p-2 text-center border border-gray-300'>$54.95</td>
+									<td className='p-2 text-center border border-gray-300'>$0.00</td>
+									<td className='p-2 text-center border border-gray-300'>$54.95</td>
 								</tr>
 								{/* End of item row */}
 							</tbody>
 						</table>
- 
 					</div>
-
 				</Modal>
 			</div>
 		</>
