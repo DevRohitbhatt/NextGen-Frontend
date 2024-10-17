@@ -80,7 +80,6 @@ const MenuItemsSold = () => {
 	const [view, setView] = useState('summary'); // Default to "summary"
 	const [viewValue, setViewValue] = useState(0);
 	const [salesType, setSalesType] = useState('SalesNet'); // Default to "Net"
-	const [groupUnit, setGroupUnit] = useState('SalesNet'); // Default to "Net"
 	const [currentSalesType, setCurrentSalesType] = useState('SalesNet');
 	const [activeTab, setActiveTab] = useState('ItemsSoldTotals');
 	const [item, setItem] = useState('Menu');
@@ -148,10 +147,6 @@ const MenuItemsSold = () => {
 	const handleSalesChange = (option) => {
 		setSalesType(option);
 		setMenuItemSoldData([]);
-	};
-
-	const handleGroupByUnitChange = (option) => {
-		setGroupUnit(option);
 	};
 
 	const getColumns = (activeTab) => {
