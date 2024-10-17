@@ -1,997 +1,512 @@
-import { useEffect, useState, useRef } from 'react';
-import { useDrop } from 'react-dnd';
-import { useSelector, useDispatch } from 'react-redux';
-import * as Styled from './styles/PrepChartTempStyles.jsx';
-import { FaRegTrashAlt } from 'react-icons/fa';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { getCall, postCall } from '../../../apis/network.js';
-import { Steps } from 'intro.js-react';
-import 'intro.js/introjs.css';
-import { setCompanyID, setAlignmentID } from '../../../reducer/slices/globalState.js';
+import React, { useState, useEffect, useRef } from "react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { ToastContainer } from "react-toastify";
+import { useSelector } from "react-redux";
+import "react-toastify/dist/ReactToastify.css";
+import { getCall, postCall } from "../../../apis/network";
+import { FaInfoCircle } from "react-icons/fa";
+import { tooltip } from "../../../assets/toolTips/prepChartTemplateToolTips.js";
+import { toast } from "react-toastify";
+import introSteps from "../../../assets/introJSSteps/prepChartTemplate.js";
+import IntroJS from "../../../components/common/IntroJS.jsx";
 import {
-	UnitModal,
-	SearchBar,
-	ExportOptions,
-	TableBuilder as Table,
-	UnitSelector,
-	DraggableInventoryItem as InventoryItem,
-	MinimizableContainer,
-	Tooltip,
-} from '../../../components/index.js';
-
-var ItemList = [];
-const placeholder = '  Drop items here';
-const tooltip = {
-	today: 'Items in Today section will use the selected date Forecasted sales to calculate the NEEDED prep or thaw quantity.',
-	tomorrow:
-		'Items in Tomorrow section will use the Today date + Tomorrow date Forecasted sales to calculate the NEEDED prep or thaw quantity',
-	nextDay:
-		'Items in Tomorrow section will use the Today date + Tomorrow date + Next Day Forecasted sales to calculate the NEEDED prep or thaw quantity',
-};
-const prepTableStructure = {
-	columnHeaders: ['Inventory ID', 'Description'],
-	dataTypes: ['string', 'string'],
-	columnWidths: 'auto',
-	rows: [],
-};
+  UnitModal,
+  SearchBar,
+  ExportOptions,
+  UnitSelector,
+  MinimizableContainer,
+  Tooltip,
+} from "../../../components/index.js";
 
 export default function PrepChartTemplate() {
-	const dispatch = useDispatch();
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-
-	const [isLoading, setIsLoading] = useState(false);
-	const [todayItem, setTodayItem] = useState([]);
-	const [TomorrowItem, setTomorrowItem] = useState([]);
-	const [NextDayItem, setNextDayItem] = useState([]);
-	const [MasterTable, setMasterTable] = useState({
-		...prepTableStructure,
-	});
-	const [filteredItem, setFilteredItem] = useState([]);
-	const todayItemRef = useRef(todayItem);
-	const TomorrowItemRef = useRef(TomorrowItem);
-	const NextDayItemmRef = useRef(NextDayItem);
-	const [showModal, setShowModal] = useState(false); // State to manage modal visibility
-	const [sortOrder, setSortOrder] = useState('asc');
-	const [areaID, setAreaID] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
-	const [selectedUnit, setSelectedUnit] = useState();
-	const [isUnitSelected, setIsUnitSelected] = useState(false);
-	const [prepChartTemplateID, setPrepChartTemplateID] = useState();
-	const [isSave, setIsSave] = useState(false);
-	const [unitData, setUnitData] = useState([]);
-	const [saveUnitId, setSaveUnitId] = useState();
-	const [isOverTodays, setIsOverToday] = useState(false);
-	const [isOverTomorrows, setIsOverTomorrow] = useState(false);
-	const [isOverNextDays, setIsOverNextDay] = useState(false);
-	const [isDirection, setIsDirection] = useState();
-	const draggingPos = useRef();
-	const [dragTarget, setDragTarget] = useState(null);
-	const [toDayLength, setToDayLength] = useState(0);
-	const [tommorowLength, setTommorowLength] = useState(0);
-	const [nextDayLength, setNextDayLength] = useState(0);
-	const toastId = useRef(null);
-
-	const [introJS, setIntroJS] = useState({
-		stepsEnabled: false,
-		initialStep: 0,
-		steps: [
+	const state = useSelector((state) => state.globalState);
+  const companyID = useSelector((state) => state.globalState.companyID);
+  const alignmentID = useSelector((state) => state.globalState.alignmentID);
+  const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+  const [inventoryItems, setInventoryItems] = useState([]);
+  const [filteredInventoryItems, setFilteredInventoryItems] = useState([]);
+  const [prepChartTemplate, setPrepChartTemplate] = useState({
+		prepChartTemplate: [
 			{
-				element: '.unit-selector',
-				intro: 'Select a unit to create a Prep & Thaw template. The SAVE icon will allow the administrator to quickly SAVE and assign this particular prep & thaw template to any other unit or group of units. Friendly TIP: Remember to SAVE your template periodically while you build it.',
-			},
-			{
-				element: '.save-option',
-				intro: 'SAVES the current template to this unit with the option to also SAVE (assign) to any other unit or area. Friendly TIP: To save considerable time, construct a temple for a large number of similar units and SAVE to all the like AND somewhat like units. Access the other unit/areas and simply modify and SAVE again. ',
-			},
-			{
-				element: '.search-bar',
-				intro: 'Search inventory items to drag and drop to the Prep & Thaw section(s) desired. Items can be added to any number of sections i.e. TODAY, TOMORROW, NEXT DAY. Items can be placed in any order desired within each section. Friendly TIP: A search for item “chicken” will produce ALL items with “chicken” anywhere in the item description therefore making it easy to drag ALL “chicken” items produced by the search',
-			},
-			{
-				element: '.today-table',
-				intro: 'Items in the TODAY section will use the TODAY forecast to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typical prep items for TODAY’s business. This could include product quantities to prepare OR thaw for use TODAY.',
-			},
-			{
-				element: '.tomorrow-table',
-				intro: 'Items in the TOMORROW section will use the TODAY + TOMORROW forecasts to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typically items requiring a 24-hour thaw period to be ready for use.  This could also include product quantities to prep for a two day period having an adequate  prepared quality shelf life. ',
-			},
-			{
-				element: '.nextday-table',
-				intro: 'Items in the NEXT DAY section will use the TODAY + TOMORROW + NEXT DAY forecasts to calculate the NEEDED prep and/or thaw amount of product to process. Friendly TIP: Items in this section are typical items requiring a 48-hour thaw period to be ready for use. This could also include product quantities to prep for a three day period having an adequate prepared quality shelf life. ',
-			},
-			{
-				element: '.help-option',
-				intro: 'Use the HELP button and select View Tutorial to watch this guided tour any time!',
+				prepGroupKey: 'Loading...',
+				inventoryItemList: [],
 			},
 		],
 	});
+  const [selectedUnit, setSelectedUnit] = useState(state.defaultUnitId);
+  const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+  const [showModal, setShowModal] = useState(false);
+  const [isSave, setIsSave] = useState(false);
+  const [errors, setErrors] = useState({
+		inventory: "",
+		prepChart: "",
+	});
+  const [isInventoryLoading, setIsInventoryLoading] = useState(false);
+	const [isPrepChartLoading, setIsPrepChartLoading] = useState(false);
+	const [introJS, setIntroJS] = useState({
+		steps: introSteps(),
+		initialStep: 0,
+		stepsEnabled: false,
+	});
+	const toastId = useRef(null);
 
-	useEffect(() => {
-		todayItemRef.current = todayItem;
-		TomorrowItemRef.current = TomorrowItem;
-		NextDayItemmRef.current = NextDayItem;
-	}, [todayItem, TomorrowItem, NextDayItem]);
+  useEffect(() => {
+    if (state.defaultUnitId) {
+      setSelectedUnit(state.defaultUnitId);
+    }
+    if (state.defaultUnitName) {
+      setSelectedUnitName(state.defaultUnitName);
+    }
+  }, [
+    state.defaultUnitId,
+    state.defaultUnitName,
+  ]);
 
-	const handleDrop = (index, indexbg, section) => {
-		handleDragEnter(index, indexbg, section);
-	};
+  useEffect(() => {
+    if (companyID && state.defaultUnitID) {
+      fetchInventoryList(companyID, state.defaultUnitID);
+      fetchPrepChartTemplate(companyID, state.defaultUnitID);
+    }
+  }, [companyID, state.defaultUnitID]);
 
-	const handleDragStart = (index, indexbg, section, isDragStart, isReorder) => {
-		draggingPos.current = {
-			index: index,
-			indexbg: indexbg,
-			section: section,
-			isDragStart: isDragStart,
-			isReorder: isReorder,
-			IsSection: section,
-		};
-	};
+  useEffect(() => {
+    setFilteredInventoryItems(inventoryItems);
+  }, [inventoryItems]);
 
-	const handleDragEnter = (index, indexbg, section) => {
-		draggingPos.current.AnotherSection =
-			draggingPos.current.section === draggingPos.current.IsSection ? true : false;
-		if (draggingPos.current?.isReorder && draggingPos.current.AnotherSection) {
-			if (isDirection == 'T') {
-				index > 0 ? index - 2 : '';
-			} else if (isDirection == 'B') {
-				index > 0 ? index-- : '';
-			} else {
-				index > 0 ? index-- : '';
-			}
-		} else if (!draggingPos.current.AnotherSection && draggingPos.current?.isReorder) {
-			index > 0 ? index - 1 : '';
-		}
-
-		if (
-			(index !== draggingPos.current?.index || section !== draggingPos.current?.section) &&
-			draggingPos.current?.isDragStart
-		) {
-			const newItems = getSectionItems(draggingPos.current?.section);
-			if (!draggingPos.current.AnotherSection && draggingPos.current?.isReorder) {
-				const draggedItem = newItems.splice(draggingPos.current?.indexbg, 1)[0];
-
-				newItems.splice(indexbg, 0, draggedItem);
-			} else {
-				const draggedItem = newItems.splice(draggingPos.current?.index, 1)[0];
-
-				newItems.splice(index, 0, draggedItem);
-			}
-
-			// Update the state based on the section
-			switch (draggingPos.current?.section) {
-				case 'today':
-					setTodayItem(newItems);
-					break;
-				case 'tomorrow':
-					setTomorrowItem(newItems);
-					break;
-				case 'nextDay':
-					setNextDayItem(newItems);
-					break;
-				default:
-					break;
-			}
-		}
-		draggingPos.current = { index, indexbg, section };
-	};
-
-	const getSectionItems = (section) => {
-		switch (section) {
-			case 'today':
-				return todayItem;
-			case 'tomorrow':
-				return TomorrowItem;
-			case 'nextDay':
-				return NextDayItem;
-			default:
-				return [];
-		}
-	};
-
-	useEffect(() => {
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) parameters = JSON.parse(parameters);
-			parameters ? dispatch(setCompanyID(parameters.CompanyID)) : dispatch(setCompanyID());
-			parameters ? dispatch(setAlignmentID(parameters.AlignmentId)) : dispatch(setAlignmentID());
-			parameters ? setAreaID(parameters.User_GroupOrUnitAccess) : setAreaID();
-			parameters ? setSelectedUnit(parameters.User_DefaultUnitID) : setSelectedUnit();
-			if (parameters.User_DefaultUnitID) {
-				fetchUnitData(parameters.CompanyID, parameters.AlignmentId, parameters.User_GroupOrUnitAccess);
-				fetchData(parameters.CompanyID, parameters.User_DefaultUnitID);
-				setIsUnitSelected(true);
-			} else {
-				setIsUnitSelected(false);
-				setIsLoading(false);
-			}
-		} else {
-			fetchUnitData(companyID, alignmentID, areaID);
-			fetchData(companyID, selectedUnit); // Call fetchData function on component mount
-		}
-	}, []);
-
-	const fetchData = async (companyID, selectedUnit) => {
+	const fetchInventoryList = async (companyID, unitID) => {
+		setIsInventoryLoading(true);
 		try {
-			setIsLoading(true); // Set loading to true before fetching data
-
-			const getData = {
-				url: 'getPrepChartTemplate',
-				urlParams: {
-					companyID: companyID,
-					selectedUnit: selectedUnit,
-				},
-			};
-
-			const result = await getCall(getData);
-			setPrepChartTemplateID(result.data.prepChartTemplateID);
-			insertData(result.data);
-			setIsLoading(false); // Set loading to false after data is fetched
-		} catch (error) {
-			console.error('Error fetching data:', error);
-			setIsLoading(false); // Set loading to false if there's an error
-		}
-
-		try {
-			setIsLoading(true);
-
 			const getData = {
 				url: 'getPrepChartTemplateInventoryList',
 				urlParams: {
 					companyID: companyID,
+					unitID: unitID,
 				},
 			};
 
 			const result = await getCall(getData);
-			buildPrepMasterTable(result.data);
-			setIsUnitSelected(true);
-			setIsLoading(false);
+
+			if (result.data) {
+				setInventoryItems(
+					result.data.map((item) => {
+						return {
+							...item,
+							uniqueID: `inventoryItems-${item.inventoryItemID}`,
+						};
+					})
+				);
+				setErrors({ ...errors, inventory: '' });
+			}
 		} catch (error) {
-			console.error('Error fetching data:', error);
+			console.error('Error fetching inventory list: ', error);
+			setErrors(prevState => ({ ...prevState, inventory: 'There was an issue loading your inventory list, please try again later.' }));
 		}
+		setIsInventoryLoading(false);
 	};
 
-	const fetchUnitData = async (companyID, alignmentID, areaID) => {
+	const fetchPrepChartTemplate = async (companyID, unitID) => {
+		setIsPrepChartLoading(true);
 		try {
-			setIsLoading(true);
 			const getData = {
-				url: 'unitsAndArea',
+				url: 'getPrepChartTemplate',
 				urlParams: {
 					companyID: companyID,
-					alignmentID: alignmentID,
-					areaID: areaID,
+					unitID: unitID,
+					templatetypeID: 0, //Todo: this will change when we add support for template types.
 				},
 			};
 
 			const result = await getCall(getData);
-			setUnitData(result.data);
-			setIsLoading(false);
+
+			if (!result.data.prepChartTemplate.find((group) => group.prepGroupKey === 'Today')) {
+				result.data.prepChartTemplate.unshift({
+					prepGroupKey: 'Today',
+					inventoryItemList: [],
+				});
+			} else if (!result.data.prepChartTemplate.find((group) => group.prepGroupKey === 'Tomorrow')) {
+				result.data.prepChartTemplate.push({
+					prepGroupKey: 'Tomorrow',
+					inventoryItemList: [],
+				});
+			} else if (!result.data.prepChartTemplate.find((group) => group.prepGroupKey === 'Next Day')) {
+				result.data.prepChartTemplate.push({
+					prepGroupKey: 'Next Day',
+					inventoryItemList: [],
+				});
+			}
+
+			result.data.prepChartTemplate.forEach((group) => {
+				group.inventoryItemList = group.inventoryItemList.map((item) => {
+					return {
+						...item,
+						uniqueID: `${group.prepGroupKey}-${item.inventoryItemID}`,
+					};
+				}
+				);
+				group.uniqueID = group.prepGroupKey;
+			});
+
+			setPrepChartTemplate(result.data);
+			setErrors({ ...errors, prepChart: '' });
 		} catch (error) {
-			console.error('Error fetching data:', error);
+			console.error('Error fetching prep chart template: ', error);
+			setErrors(prevState => ({ ...prevState, prepChart: 'There was an issue loading your prep chart template, please try again later.' }));
 		}
+		setIsPrepChartLoading(false);
 	};
 
-	const insertData = (data) => {
-		if (data.prepChartTemplate.length > 0) {
-			if (data.prepChartTemplate[0]) {
-				setTodayItem(data.prepChartTemplate.find((item) => item.prepGroupKey === 'Today').inventoryItemList);
-			}
-			if (data.prepChartTemplate[1]) {
-				setTomorrowItem(
-					data.prepChartTemplate.find((item) => item.prepGroupKey === 'Tomorrow').inventoryItemList
-				);
-			}
-			if (data.prepChartTemplate[2]) {
-				setNextDayItem(
-					data.prepChartTemplate.find((item) => item.prepGroupKey === 'Next Day').inventoryItemList
-				);
-			}
-		} else {
-			setTodayItem([]);
-			setTomorrowItem([]);
-			setNextDayItem([]);
-		}
-	};
-	const buildPrepMasterTable = (prepChartSection) => {
-		setMasterTable({
-			...prepTableStructure,
-			rows: prepChartSection,
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  };
+
+  const move = (source, destination, droppableSource, droppableDestination) => {
+    const sourceClone = Array.from(source);
+    const destClone = Array.from(destination);
+    const itemBeingMoved = sourceClone[droppableSource.index];
+		console.log(droppableDestination);
+
+    const itemExistsInDestination = destClone.some(
+      (item) => item.inventoryItemID === itemBeingMoved.inventoryItemID
+    );
+
+    if (itemExistsInDestination) {
+      console.log(
+        `Item with ID ${itemBeingMoved.inventoryItemID} already exists in the destination.`
+      );
+			toast.error(`${itemBeingMoved.description} already exists in the destination.`);
+      return {
+        sourceList: sourceClone,
+        destinationList: destClone,
+      };
+    }
+
+    const copiedItem = {
+      ...itemBeingMoved,
+      uniqueID: `${Date.now()}-${Math.random()}`,
+    };
+
+    destClone.splice(droppableDestination.index, 0, copiedItem);
+
+    return {
+      sourceList: sourceClone,
+      destinationList: destClone,
+    };
+  };
+
+  const onDragEnd = (result) => {
+    if (
+      !result.destination ||
+      result.destination.droppableId == "inventoryItems"
+    )
+      return;
+
+    const sourceId = result.source.droppableId;
+    const destinationId = result.destination.droppableId;
+
+    const sourceIsInventory = sourceId === "inventoryItems";
+    const sourceList = sourceIsInventory
+      ? inventoryItems
+      : prepChartTemplate.prepChartTemplate.find(
+          (item) => item.uniqueID === sourceId
+        ).inventoryItemList;
+    const destinationList = prepChartTemplate.prepChartTemplate.find(
+      (item) => item.uniqueID === destinationId
+    ).inventoryItemList;
+
+    if (sourceList === destinationList) {
+      const items = reorder(
+        sourceList,
+        result.source.index,
+        result.destination.index
+      );
+
+      const newPrepChartTemplate = { ...prepChartTemplate };
+      const updatedGroup = newPrepChartTemplate.prepChartTemplate.find(
+        (item) => item.uniqueID === sourceId
+      );
+      updatedGroup.inventoryItemList = items;
+      setPrepChartTemplate(newPrepChartTemplate);
+    } else {
+      const moveResult = move(
+        sourceList,
+        destinationList,
+        result.source,
+        result.destination
+      );
+
+      const newPrepChartTemplate = { ...prepChartTemplate };
+      const destinationGroup = newPrepChartTemplate.prepChartTemplate.find(
+        (item) => item.uniqueID === destinationId
+      );
+      destinationGroup.inventoryItemList = moveResult.destinationList;
+      setPrepChartTemplate(newPrepChartTemplate);
+    }
+  };
+
+  const handleUnitSelection = (unitName, unitID) => {
+    setSelectedUnitName(unitName);
+    setSelectedUnit(unitID);
+    fetchPrepChartTemplate(companyID, unitID);
+    setShowModal(false); // Close the date modal after selection
+  };
+
+  const handleOkButtonClick = (unitID) => {
+    //setSaveUnitId(unitID);
+  };
+
+  const handleSave = () => {
+    setShowModal(true);
+    setIsSave(true);
+  };
+  const handleUnitSaveSelection = (units) => {
+    toastId.current = toast.info('Saving data...', { autoClose: false });
+    submitPrepChartTemplate(units);
+  };
+
+	const submitPrepChartTemplate = async (units) => {
+		const templateToSubmit = prepChartTemplate.prepChartTemplate.map((group) => {
+			return {
+				prepGroupKey: group.prepGroupKey,
+				inventoryItemList: group.inventoryItemList.map((item) => {
+					return {
+						inventoryItemID: item.inventoryItemID,
+						description: item.description,
+					};
+				}),
+			};
 		});
-		ItemList = prepChartSection;
-		setFilteredItem(prepChartSection); // Initially, set filtered rows to all rows
-	};
 
-	const SearchItem = (keyword) => {
-		const filtered = MasterTable.rows.filter(
-			(item) =>
-				(item.description && item.description.toLowerCase().includes(keyword.toLowerCase())) ||
-				(item.inventoryItemID && item.inventoryItemID.toString().toLowerCase().includes(keyword.toLowerCase()))
-		);
-		setFilteredItem(filtered);
-	};
-
-	const [{ isOverToday }, dropToday] = useDrop(() => ({
-		accept: 'content',
-		drop: (item) => DropToday(item.inventoryItemID),
-		collect: (monitor) => ({
-			isOverToday: !!monitor.isOver(),
-		}),
-	}));
-
-	const [{ isOverTomorrow }, dropTomorrow] = useDrop(() => ({
-		accept: 'content',
-		drop: (item) => DropTomorrow(item.inventoryItemID),
-		collect: (monitor) => ({
-			isOverTomorrow: !!monitor.isOver(),
-		}),
-	}));
-
-	const [{ isOverNextDay }, dropNextDay] = useDrop(() => ({
-		accept: 'content',
-		drop: (item) => DropNextDay(item.inventoryItemID),
-		collect: (monitor) => ({
-			isOverNextDay: !!monitor.isOver(),
-		}),
-	}));
-
-	const DropToday = (inventoryItemID) => {
-		const isDuplicate = todayItemRef.current.some((item) => item.inventoryItemID === inventoryItemID);
-		if (!isDuplicate) {
-			const DropToDayItem = ItemList.find((item) => item.inventoryItemID === inventoryItemID);
-			if (DropToDayItem) {
-				setTodayItem((todayItem) => {
-					var TodayItems = [
-						...todayItem.slice(0, draggingPos.current?.index),
-						DropToDayItem,
-						...todayItem.slice(draggingPos.current?.index),
-					];
-					return (TodayItems = Array.from(new Set(TodayItems.map(JSON.stringify)), JSON.parse));
-				});
-			}
-		}
-	};
-
-	const DropTomorrow = (inventoryItemID) => {
-		const isDuplicate = TomorrowItemRef.current.some((item) => item.inventoryItemID === inventoryItemID);
-		if (!isDuplicate) {
-			const DropTomorrowItem = ItemList.find((item) => item.inventoryItemID === inventoryItemID);
-			if (DropTomorrowItem) {
-				setTomorrowItem((TomorrowItem) => {
-					var TomorrowItems = [
-						...TomorrowItem.slice(0, draggingPos.current?.index),
-						DropTomorrowItem,
-						...TomorrowItem.slice(draggingPos.current?.index),
-					];
-					return (TomorrowItems = Array.from(new Set(TomorrowItems.map(JSON.stringify)), JSON.parse));
-				});
-			}
-		}
-	};
-
-	const DropNextDay = (inventoryItemID) => {
-		const isDuplicate = NextDayItemmRef.current.some((item) => item.inventoryItemID === inventoryItemID);
-		if (!isDuplicate) {
-			const DropNextDayItem = ItemList.find((item) => item.inventoryItemID === inventoryItemID);
-			if (DropNextDayItem) {
-				setNextDayItem((NextDayItem) => {
-					var NextDayItems = [
-						...NextDayItem.slice(0, draggingPos.current?.index),
-						DropNextDayItem,
-						...NextDayItem.slice(draggingPos.current?.index),
-					];
-					return (NextDayItems = Array.from(new Set(NextDayItems.map(JSON.stringify)), JSON.parse));
-				});
-			}
-		}
-	};
-
-	const handleUnitSelectorClick = () => {
-		setShowModal(true); // Open the modal when UnitSelector is clicked
-		setIsSave(false);
-	};
-
-	// Function to handle row deletion
-	const handleDelete = (inventoryItemID, day) => {
-		// Determine which list to update based on the 'day' parameter
-		let updatedItems;
-		switch (day) {
-			case 'today':
-				updatedItems = todayItem.filter((item) => item.inventoryItemID !== inventoryItemID);
-				setTodayItem(updatedItems);
-				break;
-			case 'tomorrow':
-				updatedItems = TomorrowItem.filter((item) => item.inventoryItemID !== inventoryItemID);
-				setTomorrowItem(updatedItems);
-				break;
-			case 'nextDay':
-				updatedItems = NextDayItem.filter((item) => item.inventoryItemID !== inventoryItemID);
-				setNextDayItem(updatedItems);
-				break;
-			default:
-				break;
-		}
-	};
-
-	const handleUnitSelection = (unitName, unitID) => {
-		setSelectedUnitName(unitName);
-		setSelectedUnit(unitID);
-		fetchData(companyID, unitID);
-		setShowModal(false); // Close the date modal after selection
-	};
-
-	const handleOkButtonClick = (unitID) => {
-		setSaveUnitId(unitID);
-	};
-
-	const handleSave = () => {
-		setShowModal(true);
-		setIsSave(true);
-	};
-	const handleUnitSaveSelection = (units) => {
-		toastId.current = toast.info('Saving data...', { autoClose: false });
-		constructPrepChartTemplate(units);
-	};
-	const handleSaveButtonClick = () => {};
-
-	const constructPrepChartTemplate = async (units) => {
-		const prepChartTemplate = [
-			{
-				PrepGroupKey: 'Today',
-				InventoryItemList: todayItem,
-			},
-			{
-				PrepGroupKey: 'Tomorrow',
-				InventoryItemList: TomorrowItem,
-			},
-			{
-				PrepGroupKey: 'Next Day',
-				InventoryItemList: NextDayItem,
-			},
-		];
 		const json = {
 			CompanyID: companyID,
 			UnitIDList: units.map((unit) => unit.id),
-			PrepChartTemplateID: prepChartTemplateID,
+			PrepChartTemplateID: prepChartTemplate.prepChartTemplateID,
 			templatetypeID: 0, //Todo: this will change when we add support for template types.
-			PrepChartTemplate: prepChartTemplate,
+			PrepChartTemplate: templateToSubmit,
 		};
-		const jsonData = JSON.stringify(json);
 
 		try {
-			setIsLoading(true);
-
 			const postData = {
 				url: 'savePrepChartTemplate',
 				urlParams: {
 					companyID: companyID,
-					data: jsonData,
 				},
-				bodyData: jsonData,
+				bodyData: json,
 			};
 
 			await postCall(postData);
 			toast.success('Template Saved Successfully');
 			toast.update(toastId.current, { autoClose: 500 });
-			setIsLoading(false);
 		} catch (error) {
 			toast.error('Failed to save template');
 			toast.update(toastId.current, { autoClose: 500 });
 		}
 	};
 
-	const handleSorting = (columnIndex) => {
-		switch (columnIndex) {
-			case 0: // Sort by Inventory ID
-				handleSortByInventoryID();
-				break;
-			case 1: // Sort by Description
-				handleSortByDescription();
-				break;
-			default:
-				break;
-		}
-	};
+  const handleUnitSelectorClick = () => {
+    setShowModal(true);
+    setIsSave(false);
+  };
 
-	// Function to handle sorting by Inventory ID
-	const handleSortByInventoryID = () => {
-		const sortedItems =
-			sortOrder === 'asc'
-				? MasterTable.rows.slice().sort((a, b) => a.inventoryItemID - b.inventoryItemID)
-				: MasterTable.rows.slice().sort((a, b) => b.inventoryItemID - a.inventoryItemID);
+  const SearchItem = (keyword) => {
+    const filtered = inventoryItems.filter(
+      (item) =>
+        (item.description &&
+          item.description.toLowerCase().includes(keyword.toLowerCase())) ||
+        (item.inventoryItemID &&
+          item.inventoryItemID
+            .toString()
+            .toLowerCase()
+            .includes(keyword.toLowerCase()))
+    );
+    setFilteredInventoryItems(filtered);
+  };
 
-		setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-		setFilteredItem(sortedItems);
-	};
-
-	// Function to handle sorting by Description
-	const handleSortByDescription = () => {
-		const sortedItems =
-			sortOrder === 'asc'
-				? MasterTable.rows.slice().sort((a, b) => a.description.localeCompare(b.description))
-				: MasterTable.rows.slice().sort((a, b) => b.description.localeCompare(a.description));
-
-		setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-		setFilteredItem(sortedItems);
-	};
-
-	const handleDropOver = (isDropOver, section, index, position) => {
-		if (position) {
-			if (draggingPos.current.isDragStart) {
-				(draggingPos.current.indexbg = { indexbg: TomorrowItem.length }),
-					(draggingPos.current.section = section);
-			} else {
-				draggingPos.current = {
-					index: index++,
-					indexbg: index,
-					section: section,
-					isDragStart: draggingPos.current.isDragStart,
-				};
-			}
-		} else {
-			if (draggingPos.current.isDragStart) {
-				(draggingPos.current.indexbg = index), (draggingPos.current.section = section);
-			} else {
-				draggingPos.current = {
-					index: draggingPos.current.index,
-					indexbg: draggingPos.current.indexbg,
-					section: section,
-					isDragStart: draggingPos.current.isDragStart,
-				};
-			}
-		}
-		switch (section) {
-			case 'today':
-				setIsOverToday(isDropOver);
-				break;
-			case 'tomorrow':
-				setIsOverTomorrow(isDropOver);
-				break;
-			case 'nextDay':
-				setIsOverNextDay(isDropOver);
-				break;
-			default:
-				break;
-		}
-	};
-
-	const handleIntroStart = () => {
-		setIntroJS({ ...introJS, stepsEnabled: true });
-	};
-
-	const todayTitle = () => {
-		return (
-			<div>
-				<Tooltip content={tooltip.today} direction='top'>
-					<Styled.InfoIcon /> Today
-				</Tooltip>
-			</div>
-		);
-	};
-
-	const tomorrowTitle = () => {
-		return (
-			<div>
-				<Tooltip content={tooltip.tomorrow} direction='top'>
-					<Styled.InfoIcon /> Tomorrow
-				</Tooltip>
-			</div>
-		);
-	};
-
-	const nextDayTitle = () => {
-		return (
-			<div>
-				<Tooltip content={tooltip.nextDay} direction='top'>
-					<Styled.InfoIcon /> Next Day
-				</Tooltip>
-			</div>
-		);
-	};
-
-	return (
-		<Styled.PageContainer>
-			<Steps
-				enabled={introJS.stepsEnabled}
-				steps={introJS.steps}
-				initialStep={0}
-				onExit={() => setIntroJS({ ...introJS, stepsEnabled: false })}
+  return (
+    <div className=" pageContainer w-10/12 mx-auto">
+			<IntroJS
+				introJS={introJS}
+				setIntroJS={setIntroJS}
 			/>
-			<Styled.PageTitle>Prep Chart Template</Styled.PageTitle>
-			<Styled.OptionsRow>
-				<ToastContainer />
-				<Styled.DateAndUnitContainer>
-					<UnitSelector
-						onClick={handleUnitSelectorClick}
-						companyID={companyID}
-						alignmentID={alignmentID}
-						memberName={selectedUnitName}
-						setMemberName={setSelectedUnitName}
-						memberID={selectedUnit}
-					/>
-					<UnitModal
-						unitData={unitData}
-						memberID={selectedUnit}
-						memberName={selectedUnitName}
-						show={showModal}
-						handleClose={() => {
-							setShowModal(false);
-						}}
-						handleUnitSelection={handleUnitSelection}
-						handleSaveButtonClick={!isSave ? handleOkButtonClick : handleSaveButtonClick}
-						handleUnitSaveSelection={handleUnitSaveSelection}
-						isSaveUnit={isSave}
-						isMultiUnit={isSave}
-						includeAreas={isSave}
-					/>
-				</Styled.DateAndUnitContainer>
-				<Styled.SaveOptionsContainer>
-					<ExportOptions
-						includeSave={true}
-						handleSaveClick={handleSave}
-						includeHelp={true}
-						handleHelpClick={handleIntroStart}
-						className='export-options'
-					/>
-				</Styled.SaveOptionsContainer>
-			</Styled.OptionsRow>
-			{isLoading ? (
-				<Styled.UnloadedMessage>Loading...</Styled.UnloadedMessage>
-			) : !isUnitSelected ? (
-				<Styled.UnloadedMessage>No unit selected, Please select a unit.</Styled.UnloadedMessage>
-			) : (
-				<>
-					<div className='container'>
-						<Styled.InventoryItemsContainer>
-							<Styled.InventoryItemsTitle>
-								<Styled.TableHeaderTop>Inventory Items</Styled.TableHeaderTop>
-								<SearchBar list={MasterTable.rows} onSearch={(keyword) => SearchItem(keyword)} />
-							</Styled.InventoryItemsTitle>
-							<Styled.TableLeft className='inventory-items'>
-								<Table
-									columnHeaders={MasterTable.columnHeaders}
-									columnwidths={MasterTable.columnWidths}
-									dataTypes={MasterTable.dataTypes}
-									rows={filteredItem.length > 0 ? filteredItem : [{ description: 'No data found ' }]}
-									isDrag={true}
-									usetablerows={true}
-									className={'Tblleft'}
-									scrollable={true}
-									handleSorting={handleSorting}
-									isSorting={true}
-								/>
-							</Styled.TableLeft>
-						</Styled.InventoryItemsContainer>
-
-						<Styled.TableRight className='drop-tables'>
-							<Styled.RightTblMarg>
-								<MinimizableContainer title={todayTitle}>
-									<Styled.Table className='today-table'>
-										<div
-											className={`drop-board`}
-											ref={dropToday}
-											style={{
-												border: isOverToday ? '1px solid red' : '',
-											}}
-										>
-											<Styled.TableHeaderRight>
-												<Styled.TableHeaderCell>Inventory ID</Styled.TableHeaderCell>
-												<Styled.TableHeaderCell>Description</Styled.TableHeaderCell>
-											</Styled.TableHeaderRight>
-											{todayItem.length > 0 ? '' : placeholder}
-
-											{todayItem.map((item, index) => (
-												<div
-													key={item.inventoryItemID}
-													draggable
-													onDragStart={(e) => {
-														handleDragStart(index, index, 'today', true, true);
-														setDragTarget(e.target);
-													}}
-													onDrop={() => {
-														handleDrop(index, 'today'),
-															handleDropOver(false, 'today', index);
-													}}
-													onDragOver={(e) => {
-														e.preventDefault();
-														draggingPos.current?.isDragStart
-															? ''
-															: (draggingPos.current = {
-																	index,
-																	indexbg: index,
-																	section: 'today',
-																	isDragStart: draggingPos.current?.isDragStart,
-															  });
-
-														const mouseY = e.clientY;
-														const rect = dragTarget.getBoundingClientRect();
-														const top = Math.max(rect.top, 0);
-														const mouseRelativeY = mouseY - top;
-														let dragDirection;
-														dragDirection =
-															mouseRelativeY < todayItem.length / 2 ? 'T' : 'B';
-														setIsDirection(dragDirection);
-														handleDropOver(true, 'today', index);
-													}}
-													onDragLeave={() => handleDropOver(false, 'today', index)}
-													className={
-														index === draggingPos.current?.indexbg
-															? `dragging ${isOverTodays ? 'drop-highlight' : ''}`
-															: ''
-													}
-												>
-													<InventoryItem
-														inventoryItemID={item.inventoryItemID}
-														description={item.description?.trim()}
-														columnIndex={item.inventoryItemID}
-													/>
-													<FaRegTrashAlt
-														className={`delete`}
-														onClick={() => handleDelete(item.inventoryItemID, 'today')}
-													/>
-												</div>
-											))}
-											{todayItem.length > 0 ? (
-												<Styled.AddNewItems
-													onDrop={() => {
-														handleDrop(todayItem.length, 'today'),
-															handleDropOver(false, 'today', todayItem.length, true);
-														setIsOverToday(false);
-													}}
-													onDragOver={(e) => {
-														e.preventDefault();
-														if (!draggingPos.current?.isDragStart) {
-															draggingPos.current = {
-																index: todayItem.length,
-																indexbg: todayItem.length,
-																section: 'today',
-																isDragStart: draggingPos.current?.isDragStart,
-															};
-														}
-														handleDropOver(true, 'today', todayItem.length, true);
-														setIsOverToday(true);
-														setToDayLength(todayItem.length);
-													}}
-													onDragLeave={() => {
-														setToDayLength(0);
-														setIsOverToday(false);
-													}}
-													className={
-														todayItem.length === toDayLength
-															? `dragging ${isOverTodays ? 'drop-highlight' : ''}`
-															: ''
-													}
-												>
-													Drop items here or in the list above
-												</Styled.AddNewItems>
-											) : null}
-										</div>
-									</Styled.Table>
-								</MinimizableContainer>
-							</Styled.RightTblMarg>
-
-							<Styled.RightTblMarg>
-								<MinimizableContainer title={tomorrowTitle}>
-									<Styled.Table className='tomorrow-table'>
-										<div
-											className='drop-board'
-											ref={dropTomorrow}
-											style={{
-												border: isOverTomorrow ? '1px solid red' : '',
-												paddingBottom: TomorrowItem.length > 0 ? '20px' : '0',
-											}}
-										>
-											<Styled.TableHeaderRight>
-												<Styled.TableHeaderCell>Inventory ID </Styled.TableHeaderCell>
-												<Styled.TableHeaderCell>description </Styled.TableHeaderCell>
-											</Styled.TableHeaderRight>
-											{TomorrowItem.length > 0 ? '' : placeholder}
-											{TomorrowItem.map((item, index) => (
-												<div
-													key={item.inventoryItemID}
-													draggable
-													onDragStart={(e) => {
-														handleDragStart(index, index, 'tomorrow', true, true),
-															setDragTarget(e.target);
-													}}
-													onDrop={() => {
-														handleDrop(index, index, 'tomorrow'),
-															handleDropOver(false, 'tomorrow', index);
-													}}
-													onDragOver={(e) => {
-														e.preventDefault();
-
-														draggingPos.current?.isDragStart
-															? ''
-															: (draggingPos.current = {
-																	index,
-																	indexbg: index,
-																	section: 'today',
-																	isDragStart: draggingPos.current?.isDragStart,
-															  });
-
-														const mouseY = e.clientY;
-														const rect = dragTarget.getBoundingClientRect();
-														const top = Math.max(rect.top, 0);
-														const mouseRelativeY = mouseY - top;
-														let dragDirection;
-														dragDirection =
-															mouseRelativeY < TomorrowItem.length / 2 ? 'T' : 'B';
-														setIsDirection(dragDirection);
-														handleDropOver(true, 'tomorrow', index);
-													}}
-													onDragLeave={() => handleDropOver(false, 'tomorrow', index)}
-													className={
-														index === draggingPos.current?.indexbg
-															? `dragging ${isOverTomorrows ? 'drop-highlight' : ''}`
-															: ''
-													}
-												>
-													<InventoryItem
-														inventoryItemID={item.inventoryItemID}
-														description={item.description.trim()}
-														columnIndex={item.inventoryItemID}
-													/>
-													<FaRegTrashAlt
-														className={`delete`}
-														onClick={() => handleDelete(item.inventoryItemID, 'tomorrow')}
-													/>
-												</div>
-											))}
-											{TomorrowItem.length > 0 ? (
-												<Styled.AddNewItems
-													onDrop={() => {
-														handleDrop(TomorrowItem.length, 'tomorrow'),
-															handleDropOver(
-																false,
-																'tomorrow',
-																TomorrowItem.length,
-																true
-															);
-														setIsOverTomorrow(false);
-													}}
-													onDragOver={(e) => {
-														e.preventDefault();
-														if (!draggingPos.current?.isDragStart) {
-															draggingPos.current = {
-																index: TomorrowItem.length,
-																indexbg: TomorrowItem.length,
-																section: 'tomorrow',
-																isDragStart: draggingPos.current?.isDragStart,
-															};
-														}
-														handleDropOver(true, 'tomorrow', TomorrowItem.length, true);
-														setIsOverTomorrow(true);
-														setTommorowLength(TomorrowItem.length);
-													}}
-													onDragLeave={() => {
-														setTommorowLength(0);
-														setIsOverTomorrow(false);
-													}}
-													className={
-														TomorrowItem.length === tommorowLength
-															? `dragging ${isOverTomorrows ? 'drop-highlight' : ''}`
-															: ''
-													}
-												>
-													Drop items here or in the list above
-												</Styled.AddNewItems>
-											) : null}
-										</div>
-									</Styled.Table>
-								</MinimizableContainer>
-							</Styled.RightTblMarg>
-							<Styled.RightTblMarg>
-								<MinimizableContainer title={nextDayTitle}>
-									<Styled.Table className='nextday-table'>
-										<div
-											className='drop-board'
-											ref={dropNextDay}
-											style={{
-												border: isOverNextDay ? '1px solid red' : '',
-												paddingBottom: NextDayItem.length > 0 ? '20px' : '0',
-											}}
-										>
-											<Styled.TableHeaderRight>
-												<Styled.TableHeaderCell>Inventory ID </Styled.TableHeaderCell>
-												<Styled.TableHeaderCell>description </Styled.TableHeaderCell>
-											</Styled.TableHeaderRight>
-											{NextDayItem.length > 0 ? '' : placeholder}
-											{NextDayItem.map((item, index) => (
-												<div
-													key={item.inventoryItemID}
-													draggable
-													onDragStart={(e) => {
-														handleDragStart(index, index, 'nextDay', true, true),
-															setDragTarget(e.target);
-													}}
-													onDrop={() => {
-														handleDrop(index, 'nextDay'),
-															handleDropOver(false, 'nextDay', index);
-													}}
-													onDragOver={(e) => {
-														e.preventDefault();
-														draggingPos.current?.isDragStart
-															? ''
-															: (draggingPos.current = {
-																	index,
-																	indexbg: index,
-																	section: 'today',
-																	isDragStart: draggingPos.current?.isDragStart,
-															  });
-
-														const mouseY = e.clientY;
-														const rect = dragTarget.getBoundingClientRect();
-														const top = Math.max(rect.top, 0);
-														const mouseRelativeY = mouseY - top;
-														let dragDirection;
-														dragDirection =
-															mouseRelativeY < NextDayItem.length / 2 ? 'T' : 'B';
-														setIsDirection(dragDirection);
-														handleDropOver(true, 'nextDay', index);
-													}}
-													onDragLeave={() => {
-														handleDropOver(false, 'nextDay', index);
-													}}
-													className={
-														index === draggingPos.current?.indexbg
-															? `dragging ${isOverNextDays ? 'drop-highlight' : ''}`
-															: ''
-													}
-												>
-													<InventoryItem
-														inventoryItemID={item.inventoryItemID}
-														description={item.description}
-														columnIndex={item.inventoryItemID}
-													/>
-													<FaRegTrashAlt
-														className='delete'
-														onClick={() => handleDelete(item.inventoryItemID, 'nextDay')}
-													/>
-												</div>
-											))}
-											{NextDayItem.length > 0 ? (
-												<Styled.AddNewItems
-													onDrop={() => {
-														handleDrop(NextDayItem.length, 'nextDay'),
-															handleDropOver(false, 'nextDay', NextDayItem.length, true);
-														setIsOverNextDay(false);
-													}}
-													onDragOver={(e) => {
-														e.preventDefault();
-														if (!draggingPos.current?.isDragStart) {
-															draggingPos.current = {
-																index: NextDayItem.length,
-																indexbg: NextDayItem.length,
-																section: 'nextDay',
-																isDragStart: draggingPos.current?.isDragStart,
-															};
-														}
-														handleDropOver(true, 'nextDay', NextDayItem.length, true);
-														setIsOverNextDay(true);
-														setNextDayLength(NextDayItem.length);
-													}}
-													onDragLeave={() => {
-														setNextDayLength(0);
-														setIsOverNextDay(false);
-													}}
-													className={
-														NextDayItem.length === nextDayLength
-															? `dragging ${isOverNextDays ? 'drop-highlight' : ''}`
-															: ''
-													}
-												>
-													Drop items here or in the list above
-												</Styled.AddNewItems>
-											) : null}
-										</div>
-									</Styled.Table>
-								</MinimizableContainer>
-							</Styled.RightTblMarg>
-						</Styled.TableRight>
-					</div>
-				</>
-			)}
-		</Styled.PageContainer>
-	);
+      <div className=" pageTitle text-2xl leading-tight my-4 text-left">
+        Prep Chart Template
+      </div>
+      <div className=" optionsBar flex justify-between mb-10 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
+        <ToastContainer />
+        <div className="flex mx-auto">
+          <UnitSelector
+            onClick={handleUnitSelectorClick}
+            companyID={companyID}
+            alignmentID={alignmentID}
+            memberName={selectedUnitName}
+            setMemberName={setSelectedUnitName}
+            memberID={selectedUnit}
+          />
+          <UnitModal
+            unitData={unitsAndAreasList}
+            memberID={selectedUnit}
+            memberName={selectedUnitName}
+            show={showModal}
+            handleClose={() => setShowModal(false)}
+            handleUnitSelection={handleUnitSelection}
+            handleSaveButtonClick={!isSave ? handleOkButtonClick : () => {}}
+            handleUnitSaveSelection={handleUnitSaveSelection}
+            isSaveUnit={isSave}
+            isMultiUnit={isSave}
+            includeAreas={isSave}
+          />
+        </div>
+        <div className="flex justify-end mx-auto w-full">
+          <ExportOptions
+            includeSave={true}
+            handleSaveClick={handleSave}
+            includeHelp={true}
+						handleHelpClick={() => {setIntroJS({ ...introJS, stepsEnabled: true })}}
+            className="export-options"
+          />
+        </div>
+      </div>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className=" reportContainer w-full flex gap-10">
+          <div className=" inventoryItemsSection w-7/12 sticky top-0 h-[90vh]">
+            <div className="flex justify-between items-center">
+              <div className=" text-2xl my-6">Inventory Items</div>
+              <SearchBar
+                list={inventoryItems.rows}
+                onSearch={(keyword) => SearchItem(keyword)}
+              />
+            </div>
+            <div className=" inventoryItemsTable rounded-2xl px-4 pb-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)] max-h-[90vh] overflow-auto relative">
+              <div className="grid grid-cols-4 border-b-2 border-[var(--tw-primary)] p-1 pt-4 font-semibold sticky top-0 bg-white">
+                <div className=" col-span-1 ">Inventory ID</div>
+                <div className=" col-span-3 ">Description</div>
+              </div>
+							{isInventoryLoading ? (
+								<div className="w-full h-96 flex justify-center items-center">
+									Loading...
+								</div>
+							) : (
+								filteredInventoryItems && filteredInventoryItems.length > 0 && errors.inventory == '' ? (
+									<Droppable droppableId="inventoryItems">
+										{(provided) => (
+											<div {...provided.droppableProps} ref={provided.innerRef}>
+												{filteredInventoryItems.map((item, index) => (
+													<Draggable
+														key={item.uniqueID}
+														draggableId={item.uniqueID}
+														index={index}
+													>
+														{(provided, snapshot) => (
+															<div
+																{...provided.draggableProps}
+																{...provided.dragHandleProps}
+																ref={provided.innerRef}
+																className={`grid grid-cols-4 p-1 border-b border-x-slate-100 ${
+																	snapshot.isDragging ? "opacity-50" : ""
+																}`}
+															>
+																<div className=" col-span-1 ">
+																	{item.inventoryItemID}
+																</div>
+																<div className=" col-span-3 ">
+																	{item.description}
+																</div>
+															</div>
+														)}
+													</Draggable>
+												))}
+												{provided.placeholder}
+											</div>
+										)}
+									</Droppable>
+								) : (
+									<div className="w-full h-96 flex justify-center items-center">
+										{errors.inventory}
+									</div>
+								)
+							)}
+            </div>
+          </div>
+          <div className=" prepChartSection w-5/12">
+            {prepChartTemplate.prepChartTemplate &&
+              prepChartTemplate.prepChartTemplate.map((prepGroup) => (
+                <div key={prepGroup.uniqueID}>
+                  <MinimizableContainer
+                    title={() => {
+                      return (
+                        <div className={`${prepGroup.prepGroupKey} align-middle`}>
+                          <Tooltip content={tooltip.today} direction="top">
+                            <FaInfoCircle className="text-[var(--tw-secondary)] m-auto" />{" "}
+                            {prepGroup.prepGroupKey}
+                          </Tooltip>
+                        </div>
+                      );
+                    }}
+                  >
+                    <div className=" prepChartTemplateTable mb-10 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
+                      <div className=" grid grid-cols-4 border-b-2 border-[var(--tw-primary)] p-1 font-semibold">
+                        <div className=" col-span-1 ">Inventory ID</div>
+                        <div className=" col-span-3">Description</div>
+                      </div>
+											{isPrepChartLoading ? (
+													<div className="w-full h-96 flex justify-center items-center">
+														Loading...
+													</div>
+												) : (
+													<Droppable
+														key={prepGroup.uniqueID}
+														droppableId={prepGroup.uniqueID}
+														className="overflow-hidden"
+													>
+														{(provided, snapshot) => (
+															<div
+																{...provided.droppableProps}
+																ref={provided.innerRef}
+																className={`box-border w-full max-w-full overflow-hidden ${
+																	snapshot.isDraggingOver ? "" : ""
+																}`}
+															>
+																{prepGroup.inventoryItemList.map((item, index) => (
+																	<Draggable
+																		key={item.uniqueID}
+																		draggableId={item.uniqueID}
+																		index={index}
+																	>
+																		{(provided) => (
+																			<div
+																				{...provided.draggableProps}
+																				{...provided.dragHandleProps}
+																				ref={provided.innerRef}
+																				className=" grid grid-cols-4 p-1 border-b border-x-slate-100"
+																			>
+																				<div className=" col-span-1 ">
+																					{item.inventoryItemID}
+																				</div>
+																				<div className=" col-span-3 ">
+																					{item.description}
+																				</div>
+																			</div>
+																		)}
+																	</Draggable>
+																))}
+																{provided.placeholder && (
+																	<div className="w-full h-6 p-1 transition-all">
+																		{!snapshot.isDraggingOver && "Drop here"}
+																	</div>
+																)}
+															</div>
+														)}
+													</Droppable>
+												)}
+                    </div>
+                  </MinimizableContainer>
+                </div>
+              ))}
+          </div>
+        </div>
+      </DragDropContext>
+    </div>
+  );
 }

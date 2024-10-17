@@ -26,7 +26,7 @@ const TooltipTip = styled.div`
   white-space: normal;
 `;
 
-const Tooltip = ({ content, direction, delay, children }) => {
+const Tooltip = ({ content, direction, delay, children, styles = '' }) => {
   let timeout;
   const [active, setActive] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -87,10 +87,10 @@ const Tooltip = ({ content, direction, delay, children }) => {
   );
 
   return (
-    <TooltipWrapper ref={wrapperRef} onMouseEnter={showTip} onMouseLeave={hideTip}>
+    <div className={`flex gap-1 relative ${styles}`} ref={wrapperRef} onMouseEnter={showTip} onMouseLeave={hideTip}>
       {children}
       {active && ReactDOM.createPortal(tooltipElement, document.body)}
-    </TooltipWrapper>
+    </div>
   );
 };
 
