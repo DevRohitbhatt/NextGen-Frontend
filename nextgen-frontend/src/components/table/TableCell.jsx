@@ -1,82 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import styled, { css } from 'styled-components';
+import classNames from 'classnames';
 
-const TableCell = styled.div`
-	position: relative;
-	font-size: 1em;
-	justify-content: ${(props) => (props.columntype === 'number' ? 'center' : 'left')};
-	border-bottom: 1px solid ${(props) => props.theme.lightGrey};
-	padding: 10px 0;
-	overflow: hidden;
-	display: flex;
-	flex-direction: row;
-`;
-
-export const Input = styled.input`
-	border: none;
-	border-radius: 5px;
-	font-size: 1em;
-	text-align: ${(props) => (props.columntype === 'number' ? 'center' : 'left')};
-	overflow: hidden;
-	white-space: nowrap;
-
-	&:focus {
-		outline: none;
-		background-color: ${(props) => props.theme.lightGrey};
-	}
-
-	&:hover {
-		background-color: ${(props) => props.theme.lightGrey};
-	}
-`;
-
-const PercentSign = styled.span`
-	font-size: 1em;
-`;
-
-const DollarSign = styled.span`
-	font-size: 1em;
-`;
-
-const Dropdown = styled.select`
-	width: 100%;
-	border: none;
-	border-radius: 5px;
-	font-size: 1em;
-
-	&:focus {
-		outline: none;
-	}
-
-	&:hover {
-		cursor: pointer;
-		background-color: ${(props) => props.theme.lightGrey};
-	}
-`;
-const bgRow = css`
-	background: #efefef;
-	font-weight: bold;
-	padding-left: 5px;
-	width: auto;
-	border-top: 1px solid #000;
-	border-bottom: 1px solid #000 !important;
-`;
 const PercentageCell = ({ value, row, columnName, tableName, handleInputCellChange, columntype, isInput }) => {
 	const [percentage, setPercentage] = useState(value);
 	const inputRef = useRef(null);
 
 	if (!isInput) {
 		return (
-			<TableCell columntype={columntype}>
+			<div
+				className={classNames(
+					'relative text-sm py-2 overflow-hidden flex flex-row',
+					columntype === 'number' ? 'justify-center' : 'justify-start',
+					'border-b border-gray-300'
+				)}
+			>
 				{value}
-				<PercentSign>%</PercentSign>
-			</TableCell>
+				<span className="text-sm">%</span>
+			</div>
 		);
 	}
 
 	const handleInputChange = (e) => {
-		// Allow only numbers
 		const numericValue = e.target.value.replace(/[^0-9.]/g, '');
 		setPercentage(numericValue);
 	};
@@ -92,27 +37,29 @@ const PercentageCell = ({ value, row, columnName, tableName, handleInputCellChan
 	useEffect(() => {
 		updateInputWidth();
 	}, [percentage]);
+
 	return (
-		<TableCell columntype={columntype}>
-			<Input
+		<div
+			className={classNames(
+				'relative text-sm py-2 overflow-hidden flex flex-row',
+				columntype === 'number' ? 'justify-center' : 'justify-start',
+				'border-b border-gray-300'
+			)}
+		>
+			<input
 				ref={inputRef}
 				value={percentage}
-				columntype={columntype}
 				onChange={handleInputChange}
 				onBlur={(e) => handleInputCellChange(e, row, columnName, tableName)}
-			></Input>
-			<PercentSign>%</PercentSign>
-		</TableCell>
+				className={classNames(
+					'border-none rounded-md text-sm overflow-hidden whitespace-nowrap',
+					columntype === 'number' ? 'text-center' : 'text-left',
+					'focus:outline-none focus:bg-gray-200 hover:bg-gray-200'
+				)}
+			/>
+			<span className="text-sm">%</span>
+		</div>
 	);
-};
-PercentageCell.propTypes = {
-	value: PropTypes.number.isRequired,
-	row: PropTypes.object.isRequired,
-	columnName: PropTypes.string.isRequired,
-	tableName: PropTypes.string.isRequired,
-	handleInputCellChange: PropTypes.func.isRequired,
-	columntype: PropTypes.string.isRequired,
-	isInput: PropTypes.bool.isRequired,
 };
 
 const DollarCell = ({ value, row, columnName, tableName, handleInputCellChange, columntype, isInput, isTotal }) => {
@@ -121,10 +68,17 @@ const DollarCell = ({ value, row, columnName, tableName, handleInputCellChange, 
 
 	if (!isInput) {
 		return (
-			<TableCell className={isTotal ? bgRow : ''} columntype={columntype}>
-				<DollarSign>$</DollarSign>
+			<div
+				className={classNames(
+					'relative text-sm py-2 overflow-hidden flex flex-row',
+					columntype === 'number' ? 'justify-center' : 'justify-start',
+					'border-b border-gray-300',
+					isTotal ? 'bg-gray-200 font-bold px-1 border-t border-b border-black' : ''
+				)}
+			>
+				<span className="text-sm">$</span>
 				{value}
-			</TableCell>
+			</div>
 		);
 	}
 
@@ -143,27 +97,29 @@ const DollarCell = ({ value, row, columnName, tableName, handleInputCellChange, 
 	useEffect(() => {
 		updateInputWidth();
 	}, [dollar]);
+
 	return (
-		<TableCell columntype={columntype}>
-			<DollarSign>$</DollarSign>
-			<Input
+		<div
+			className={classNames(
+				'relative text-sm py-2 overflow-hidden flex flex-row',
+				columntype === 'number' ? 'justify-center' : 'justify-start',
+				'border-b border-gray-300'
+			)}
+		>
+			<span className="text-sm">$</span>
+			<input
 				ref={inputRef}
 				value={dollar}
-				columntype={columntype}
 				onChange={handleInputChange}
 				onBlur={(e) => handleInputCellChange(e, row, columnName, tableName)}
-			></Input>
-		</TableCell>
+				className={classNames(
+					'border-none rounded-md text-sm overflow-hidden whitespace-nowrap',
+					columntype === 'number' ? 'text-center' : 'text-left',
+					'focus:outline-none focus:bg-gray-200 hover:bg-gray-200'
+				)}
+			/>
+		</div>
 	);
-};
-DollarCell.propTypes = {
-	value: PropTypes.number.isRequired,
-	row: PropTypes.object.isRequired,
-	columnName: PropTypes.string.isRequired,
-	tableName: PropTypes.string.isRequired,
-	handleInputCellChange: PropTypes.func.isRequired,
-	columntype: PropTypes.string.isRequired,
-	isInput: PropTypes.bool.isRequired,
 };
 
 export default function Cell({
@@ -180,63 +136,91 @@ export default function Cell({
 }) {
 	if (cellType === 'input') {
 		return (
-			<TableCell columntype={columntype} celltype={cellType} value={value}>
-				<Input
-					type='text'
+			<div
+				className={classNames(
+					'relative text-sm py-2 overflow-hidden flex flex-row',
+					columntype === 'number' ? 'justify-center' : 'justify-start',
+					'border-b border-gray-300'
+				)}
+			>
+				<input
+					type="text"
 					defaultValue={value.toString() !== '0' ? value : ''}
-					columntype={columntype}
 					onBlur={(e) => handleInputCellChange(e, row, columnName, tableName)}
+					className={classNames(
+						'border-none rounded-md text-sm overflow-hidden whitespace-nowrap',
+						columntype === 'number' ? 'text-center' : 'text-left',
+						'focus:outline-none focus:bg-gray-200 hover:bg-gray-200'
+					)}
 				/>
-			</TableCell>
+			</div>
 		);
 	} else if (cellType === 'percent') {
-		return PercentageCell({
-			value,
-			row,
-			columnName,
-			tableName,
-			handleInputCellChange,
-			columntype,
-			isInput,
-		});
+		return (
+			<PercentageCell
+				value={value}
+				row={row}
+				columnName={columnName}
+				tableName={tableName}
+				handleInputCellChange={handleInputCellChange}
+				columntype={columntype}
+				isInput={isInput}
+			/>
+		);
 	} else if (cellType === 'dollar') {
-		return DollarCell({
-			value,
-			row,
-			columnName,
-			tableName,
-			handleInputCellChange,
-			columntype,
-			isInput,
-			isTotal,
-		});
+		return (
+			<DollarCell
+				value={value}
+				row={row}
+				columnName={columnName}
+				tableName={tableName}
+				handleInputCellChange={handleInputCellChange}
+				columntype={columntype}
+				isInput={isInput}
+				isTotal={isTotal}
+			/>
+		);
 	} else if (cellType === 'dropdown') {
-		//find the selected option based on the IsSelected property of the value array
 		let selectedOption = value.find((option) => option.isSelected);
 		if (!selectedOption) {
 			selectedOption = value[0];
 			value[0].isSelected = true;
 		}
 		return (
-			<TableCell columntype={columntype}>
-				<Dropdown
+			<div
+				className={classNames(
+					'relative text-sm py-2 overflow-hidden flex flex-row',
+					columntype === 'number' ? 'justify-center' : 'justify-start',
+					'border-b border-gray-300'
+				)}
+			>
+				<select
 					onChange={(e) => handleDropdownChange(e, row, columnName, tableName)}
 					defaultValue={selectedOption.option}
+					className="w-full border-none rounded-md text-sm focus:outline-none hover:bg-gray-200 cursor-pointer"
 				>
 					{value.map((option, index) => (
 						<option key={index} value={option.prepType}>
 							{option.option}
 						</option>
 					))}
-				</Dropdown>
-			</TableCell>
+				</select>
+			</div>
 		);
-	} else
+	} else {
 		return (
-			<TableCell className={isTotal ? bgRow : ''} columntype={columntype}>
+			<div
+				className={classNames(
+					'relative text-sm py-2 overflow-hidden flex flex-row',
+					columntype === 'number' ? 'justify-center' : 'justify-start',
+					'border-b border-gray-300',
+					isTotal ? 'bg-gray-200 font-bold px-1 border-t border-b border-black' : ''
+				)}
+			>
 				{value}
-			</TableCell>
+			</div>
 		);
+	}
 }
 
 Cell.propTypes = {

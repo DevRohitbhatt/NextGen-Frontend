@@ -11,7 +11,6 @@ export { default as IntroJS } from './common/IntroJS';
 export { default as MessagePopup } from './common/MessagePopup';
 export { default as MinimizableContainer } from './common/MinimizableContainer';
 export { default as Tooltip } from './common/ToolTip';
-export { default as DraggableInventoryItem } from './common/DraggableInventoryItem';
 export { default as SearchBar } from './common/SearchBar';
 export { default as Modal } from './common/Modal';
 export { default as ModalSearchBar } from './common/ModalSearchBar';
@@ -54,3 +53,4 @@ export { default as MenuModal } from './menu/MenuModal';
 // inventory components
 export { default as Inventory } from './Inventory/Inventory';
 export { default as InventoryModal } from './Inventory/InventoryModal';
+export { default as DndTable } from './table/DndTable';

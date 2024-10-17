@@ -6,12 +6,11 @@ const ColumnFilter = ({ column }) => {
 	return (
 		<DebouncedInput
 			className='box-border w-full p-1 font-normal border-2 border-gray-300 border-solid hover:border-primary focus:border-primary focus:outline-none'
-			onChange={(value) => column.setFilterValue(value)}
+			onChange={(value) => column.setFilterValue(value)} // Custom handler for "contains" logic
 			placeholder={`Search...`}
-			type='text'
+			type='text' // Ensure it's treated as text for "contains" logic
 			value={columnFilterValue ?? ''}
 		/>
-		// See faceted column filters example for datalist search suggestions
 	);
 };
 

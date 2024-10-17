@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { useSelector } from 'react-redux';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	UnitSelector,
@@ -25,10 +26,16 @@ import menuItemSold from '../../assets/introJSSteps/menuItemSold';
 const columnHelper = createColumnHelper();
 
 const MenuItemsSold = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
+
 	const [menuItemSoldData, setMenuItemSoldData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 
@@ -39,7 +46,7 @@ const MenuItemsSold = () => {
 	const [inventoryItemList, setInventoryItemList] = useState([]);
 
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Menu Items Sold, please try again later.'
@@ -47,7 +54,7 @@ const MenuItemsSold = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//selected menu items
@@ -156,6 +163,7 @@ const MenuItemsSold = () => {
 								id: 'category',
 								header: 'Category',
 								dataType: 'string',
+								size: 60,
 								cell: (info) => info.getValue() || '',
 							}),
 					  ]
@@ -244,6 +252,7 @@ const MenuItemsSold = () => {
 					id: 'quant',
 					header: 'Quantity',
 					dataType: 'number',
+					size: 60,
 					cell: (info) => info.getValue() || '',
 				}),
 				columnHelper.accessor('discPrice', {
@@ -259,6 +268,7 @@ const MenuItemsSold = () => {
 					id: 'itemSoldPct',
 					header: 'Item Sold %',
 					dataType: 'number',
+					size: 60,
 					cell: (info) => {
 						const value = info.getValue();
 						return value != null ? `${parseFloat(value).toFixed(2)}%` : '';
@@ -509,67 +519,28 @@ const MenuItemsSold = () => {
 	};
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(51);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
-		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-	}, []);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		}
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
+	useEffect(() => {
+		if (companyID && alignmentID && (groupOrUnitAccess || selectedUnit)) {
+			fetchData(companyID);
+		} else {
+			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
+		}
+	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
+
+	const fetchData = async (companyId) => {
 		setIsLoading(true);
-		await Promise.all([
-			fetchUnits(companyId, alignmentId, selectedUnit),
-			fetchMenu(companyId),
-			fetchInventory(companyId),
-		]);
+		await Promise.all([fetchMenu(companyId), fetchInventory(companyId)]);
 		setIsLoading(false);
 	};
 
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
-		}
-	};
-
-	// Fetching Menu
 	const fetchMenu = async (companyId) => {
 		try {
 			setIsLoading(true);
@@ -592,7 +563,6 @@ const MenuItemsSold = () => {
 		}
 	};
 
-	// Fetching Inventory
 	const fetchInventory = async (companyId) => {
 		try {
 			setIsLoading(true);
@@ -633,8 +603,8 @@ const MenuItemsSold = () => {
 			const getData = {
 				url: url,
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -730,8 +700,8 @@ const MenuItemsSold = () => {
 			const getData = {
 				url: 'MenuItemSoldEmployeeData',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -829,8 +799,8 @@ const MenuItemsSold = () => {
 			const getData = {
 				url: 'MenuItemSoldHourData',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -875,13 +845,13 @@ const MenuItemsSold = () => {
 			const getData = {
 				url: 'MenuItemSoldModifiersData',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
-					options: viewValue === 0 ? 'GroupSummary' : viewValue === 1 ? 'GroupByUnit' : 'GroupByUnit',
-					groupBy: viewValue === 0 ? 1 : viewValue === 1 ? 0 : 0,
+					options: viewValue === 0 ? 'GroupSummary' : 'GroupByUnit',
+					groupBy: viewValue === 0 ? 1 : 0,
 				},
 			};
 
@@ -934,7 +904,7 @@ const MenuItemsSold = () => {
 	};
 
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setUnitShowModal(false);
 	};
@@ -1685,7 +1655,7 @@ const MenuItemsSold = () => {
 	const componentMap = {
 		Menu: (
 			<Menu
-				companyId={companyId}
+				companyId={companyID}
 				menuName={selectedMenuName}
 				setMenuName={setselectedMenuName}
 				onClick={handleMenuClick}
@@ -1693,7 +1663,7 @@ const MenuItemsSold = () => {
 		),
 		Inventory: (
 			<Inventory
-				companyId={companyId}
+				companyId={companyID}
 				InventoryName={selectedInventoryName}
 				setInventoryName={setselectedInventoryName}
 				onClick={handleInventoryClick}
@@ -1715,7 +1685,6 @@ const MenuItemsSold = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -1723,9 +1692,9 @@ const MenuItemsSold = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'> Menu Items Sold </h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'> Menu Items Sold </h2>
 				{/* Tabs Section */}
-				<header className='space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<header className='optionsBar mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center py-2 space-x-6 tab-section'>
 						<button
 							className={`py-2 px-4 ${
@@ -1772,12 +1741,12 @@ const MenuItemsSold = () => {
 					<div className='flex items-center justify-between space-x-3'>
 						<div className='flex items-center space-x-3'>
 							<UnitSelector
-								companyId={companyId}
-								alignmentId={alignmentId}
-								memberId={selectedUnit}
+								companyId={companyID}
+								alignmentId={alignmentID}
+								memberID={selectedUnit}
 								memberName={selectedUnitName}
 								includeAreas={true}
-								setMemberName={setselectedUnitName}
+								setMemberName={setSelectedUnitName}
 								onClick={() => setUnitShowModal(true)}
 							/>
 							<DateSelector
@@ -1794,29 +1763,6 @@ const MenuItemsSold = () => {
 										selectedOption={viewWeek}
 										onOptionChange={handleViewWeekChange}
 									/>
-								</div>
-							)}
-
-							{(activeTab === 'ItemsSoldByEmployee' || activeTab === 'ItemsSoldByHour') && (
-								<div className='pl-2 mt-2'>
-									<div className='p-3 checkbox-group hover:border-primary'>
-										<div className='flex flex-row space-x-6'>
-											<div className='flex items-center cursor-pointer'>
-												<input
-													type='checkbox'
-													id='Net'
-													name='byUnit'
-													value='Net'
-													checked={groupUnit === 'byUnit'}
-													onChange={() => handleGroupByUnitChange('byUnit')}
-													className='cursor-pointer checkbox-radio'
-												/>
-												<label htmlFor='byUnit' className='ml-2'>
-													Group By Unit
-												</label>
-											</div>
-										</div>
-									</div>
 								</div>
 							)}
 
@@ -1992,15 +1938,19 @@ const MenuItemsSold = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading &&
-					(menuItemSoldData.length > 0 ? (
-						<div className='paged-table'>{Table}</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						{!isLoading &&
+							(menuItemSoldData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</div>
 				)}
+
 				<div>
 					<UnitModal
 						unitData={unitsAndAreasList}
