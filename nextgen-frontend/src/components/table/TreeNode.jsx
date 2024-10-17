@@ -18,31 +18,11 @@ const TableCell = styled.div`
 	gap: 20px;
 `;
 
-const TableRow = styled.div`
-	position: relative;
-	align-items: center;
-	font-size: 14px;
-	justify-content: ${(props) => (props.columntype === 'number' ? 'center' : 'left')};
-	border-bottom: 1px solid ${(props) => props.theme.lightGrey};
-	padding: 10px 0;
-	// overflow: hidden;
-	display: flex;
-	flex-direction: row;
-	gap: 10px;
-`;
-
 const StyledCell = styled.div`
 	width: 100%;
 	min-width: ${(props) => props.$columnWidth || '145px'};
 
 	text-align: ${(props) => (props.columntype === 'number' || props.columntype === 'percent' ? 'center' : 'left')};
-`;
-
-const StyledCellParent = styled.div`
-	width: 100%;
-	margin-bottom: 10px;
-	padding-bottom: 10px;
-	font-weight: 500;
 `;
 
 const LimitsCell = styled.div`
@@ -57,11 +37,6 @@ const LimitsCell = styled.div`
 		background-color: ${(props) => props.theme.primary};
 		color: white;
 	}
-`;
-
-const ToggleIcon = styled.span`
-	cursor: pointer;
-	padding-right: 20px;
 `;
 
 const Select = styled.select`
@@ -324,14 +299,14 @@ const TreeNode = ({
 	}, [node]);
 	return (
 		<>
-			<TableCell>
-				<StyledCellParent>
-					<ToggleIcon onClick={toggleNode}>
+			<div className={` relative text-sm border-b border-[var(--tw-secondary)] bg-gray-100`}>
+				<div className=' py-1 font-semibold'>
+					<div className=' flex cursor-pointer ' onClick={toggleNode}>
 						{isExpanded ? <SlArrowUpIcon /> : <SlArrowDownIcon />}
 						{node.name}
-					</ToggleIcon>
-				</StyledCellParent>
-			</TableCell>
+					</div>
+				</div>
+			</div>
 			<SetOrderLimitsModal
 				companyAndUnitData={companyAndUnitData}
 				isOpen={isOrderLimitModalOpen}
@@ -346,7 +321,7 @@ const TreeNode = ({
 				node.suggestedOrderItem &&
 				node.suggestedOrderItem.map((childNode, index) =>
 					!childNode.isHidden ? (
-						<TableRow key={index}>
+						<div className=' relative items-center text-sm border-b border-gray-300 py-1 flex justify-center gap-[10px]' key={index}>
 							<StyledCell $columnWidth={columnWidths[0]}>{childNode.invItemDescription}</StyledCell>
 							<StyledCell $columnWidth={columnWidths[1]}>
 								{childNode.vendorItems && (
@@ -511,7 +486,7 @@ const TreeNode = ({
 									)}
 								</>
 							)}
-						</TableRow>
+						</div>
 					) : null
 				)}
 		</>

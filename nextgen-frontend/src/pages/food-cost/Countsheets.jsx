@@ -2,33 +2,49 @@ import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import voidsReport from '../../assets/introJSSteps/voidsReport';
-import { Dropdown, Loader, UnitSelector, CalendarModal, UnitModal, DateSelector, TableHOC } from '../../components';
+import {
+	Dropdown,
+	Loader,
+	UnitSelector,
+	CalendarModal,
+	UnitModal,
+	DateSelector,
+	TableHOC,
+	Modal,
+} from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
 const Countsheets = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [countsheetData, setCountsheetData] = useState([]);
 	const [filteredCountsheetData, setFilteredCountsheetData] = useState([]);
 
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Inventory Transfer Report, please try again later.'
+		'There was an error trying to load the countsheets Report, please try again later.'
 	);
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
-
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
+	const [showCommentModal, setShowCommentModal] = useState(false);
+	const [commentValue, setCommentValue] = useState('');
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
 		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
@@ -77,145 +93,102 @@ const Countsheets = () => {
 						Open
 					</Link>
 				),
-				size: 60,
+				size: '50',
 			}),
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
 				header: 'Unit',
-				size: 150,
+				size: 200,
 			}),
 			columnHelper.accessor('countType', {
 				id: 'countType',
 				header: 'Type',
 				cell: ({ getValue, row }) => {
-					return getValue() === 'DA'
-						? 'Daily'
-						: getValue() === 'WE'
-						? 'Weekly'
-						: getValue() === 'MO'
-						? 'Monthly'
-						: getValue() === 'WA'
-						? 'Waste'
-						: getValue() === 'IT'
-						? `${row.original.transfer}`
-						: 'none';
+					return getValue() !== 'IT'
+						? Object.keys(viewMap).find((key) => viewMap[key] === getValue())
+						: `${row.original.transfer}`;
 				},
-				size: 300,
+				size: 150,
 			}),
 			columnHelper.accessor('dateTime', {
 				id: 'dateTime',
 				header: 'Date',
-				size: 100,
+				size: 180,
 			}),
 			columnHelper.accessor(
 				(row) => {
-					const date = new Date(row.saveDateTime);
-
-					// Get hours, minutes, and AM/PM
-					const hours = date.getHours() % 12 || 12; // Convert to 12-hour format
-					const minutes = date.getMinutes().toString().padStart(2, '0'); // Ensure two digits
-					const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
-
-					// Format the date as MM/DD/YYYY
-					const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-
+					const formattedDate = `${row.userName} - ${dateFormat(row.saveDateTime, 'mm/dd/yyyy h:MM TT')}`;
 					// Combine formatted date and time
-					return `${row.userName} - ${formattedDate} ${hours}:${minutes} ${ampm}`;
+					return formattedDate;
 				},
 				{
 					id: 'lastEditedBy',
 					header: 'Last Edited By',
-					size: 300,
+					size: 320,
 				}
 			),
 			columnHelper.accessor('comment', {
 				id: 'comment',
 				header: 'Comment',
+				cell: ({ row, getValue }) => {
+					if (getValue() == '') {
+						return '';
+					} else {
+						return (
+							<Link
+								// to='/CountsheetDesigner'
+								onClick={() => {
+									setShowCommentModal(!showCommentModal);
+									setCommentValue(getValue());
+								}}
+								className='underline cursor-pointer'
+								state={{ companyId: row.original.companyId, countsheet: row.original }}
+							>
+								View comment
+							</Link>
+						);
+					}
+				},
 			}),
 			columnHelper.accessor('totalLineItemCost', {
 				id: 'totalLineItemCost',
 				header: 'Total Inventory Value',
 				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
-				size: 200,
+				size: '135',
 			}),
 		],
 		[]
 	);
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				console.log('testing mode');
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(5199);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
-		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+		if (groupOrUnitAccess || defaultUnitID) {
+			console.log(groupOrUnitAccess, defaultUnitID);
+
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-	}, []);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			console.log(groupOrUnitAccessName, defaultUnitName);
 
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
-		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
-		setIsLoading(false);
-	};
-
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	};
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	useEffect(() => {
 		if (selectedUnit && selectedFromDate && selectedToDate) {
-			handleCountsheet();
+			getCountsheetData();
 		}
 	}, [selectedUnit, selectedFromDate, selectedToDate]);
 
 	// Function to fetch the countsheet data
-	const handleCountsheet = async () => {
+	const getCountsheetData = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
 				url: 'getCountsheets',
 				urlParams: {
-					companyID: companyId,
-					alignmentID: alignmentId,
+					companyID: companyID,
+					alignmentID: alignmentID,
 					memberID: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -228,16 +201,15 @@ const Countsheets = () => {
 				.filter((data) => data.inventoryCountSheetID > 0)
 				.map((data) => ({
 					...data,
-					companyId: companyId,
-					unitName: unitsAndAreasList.units.find((unit) => unit.unitID === parseInt(data.unitId))?.unitName,
+					companyId: companyID,
+					unitName: unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.unitId))?.unitName,
 					transfer: `Transfer ${
 						data.unitId === selectedUnit
 							? data.transferDestUnitID === 0
 								? 'to ???'
 								: 'to ' +
-								  unitsAndAreasList.units.find(
-										(unit) => unit.unitID === parseInt(data.transferDestUnitID)
-								  )?.unitName
+								  unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.transferDestUnitID))
+										?.unitName
 							: 'from ' + data.name
 					}`,
 				}));
@@ -255,9 +227,9 @@ const Countsheets = () => {
 
 	// Function to handle the unit selection
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	// Function to handle the date selection
@@ -272,14 +244,7 @@ const Countsheets = () => {
 		setView(option);
 		if (option === 'All') {
 			setFilteredCountsheetData(countsheetData);
-		} else if (
-			option === 'Daily' ||
-			option === 'Weekly' ||
-			option === 'Monthly' ||
-			option === 'Ordering' ||
-			option === 'Transfer' ||
-			option === 'Waste'
-		) {
+		} else if (viewMap[option]) {
 			setFilteredCountsheetData(countsheetData.filter((data) => data.countType === viewMap[option]));
 		}
 	};
@@ -296,7 +261,6 @@ const Countsheets = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -304,17 +268,17 @@ const Countsheets = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Browse Countsheets</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Browse Countsheets</h2>
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
-							companyId={companyId}
-							alignmentId={alignmentId}
-							memberId={selectedUnit}
+							companyId={companyID}
+							alignmentId={alignmentID}
+							memberID={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
-							setMemberName={setselectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							setMemberName={setSelectedUnitName}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -322,7 +286,7 @@ const Countsheets = () => {
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
 						/>
-						<div className='w-28'>
+						<div className='w-36'>
 							<Dropdown
 								title='Type'
 								options={countDropdownOptions}
@@ -337,25 +301,27 @@ const Countsheets = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading &&
-					(countsheetData.length > 0 ? (
-						<div className='paged-table'>{Table}</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						{!isLoading &&
+							(countsheetData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</div>
 				)}
-
 				<div>
 					<UnitModal
-						unitData={unitsAndAreasList}
+						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>
@@ -369,6 +335,23 @@ const Countsheets = () => {
 						selectedFromDate={selectedFromDate}
 						selectedToDate={selectedToDate}
 					/>
+					<Modal
+						isOpen={showCommentModal}
+						title={'Comment'}
+						onClose={() => {
+							setShowCommentModal(!showCommentModal);
+						}}
+					>
+						<div
+							className='w-[300px] h-auto m-[15px]'
+							dangerouslySetInnerHTML={{
+								__html: commentValue
+									.replace(/•/g, '<br/>•') // Add <br/> before each •
+									.replace(/<br\/>/, '') // Remove the first <br/> so it doesn’t show before the first bullet
+									.replace(/°/g, '<br/>•'),
+							}}
+						></div>
+					</Modal>
 				</div>
 			</div>
 		</>

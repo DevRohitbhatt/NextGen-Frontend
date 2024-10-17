@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { useSelector } from 'react-redux';
 import businessSummary from '../../assets/introJSSteps/businessSummary';
 import {
 	Dropdown,
@@ -20,15 +21,21 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const BusinessSummary = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
+
 	const [businessSummaryData, setBusinessSummaryData] = useState([]);
 	const [columns, setColumns] = useState([]);
 
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Inventory Transfer Report, please try again later.'
@@ -36,7 +43,7 @@ const BusinessSummary = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -54,13 +61,13 @@ const BusinessSummary = () => {
 	const salesTypeOptions = [{ name: 'Net Sales' }, { name: 'Gross Sales' }];
 	const DOWTypeOptions = [
 		{ name: 'All' },
+		{ name: 'Sunday' },
 		{ name: 'Monday' },
 		{ name: 'Tuesday' },
 		{ name: 'Wednesday' },
 		{ name: 'Thursday' },
 		{ name: 'Friday' },
 		{ name: 'Saturday' },
-		{ name: 'Sunday' },
 	];
 
 	//IntroJS variables for the help steps
@@ -71,94 +78,28 @@ const BusinessSummary = () => {
 	});
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				console.log('testing mode');
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(5199);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
-		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-	}, []);
-
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
-		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
-		setIsLoading(false);
-	};
-
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	};
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
-	// Function to get the voids report
-	const handleBusinessSummary = async () => {
+	const fetchBusinessSummaryReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
 				url: 'businessSummary',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
-					DOW:
-						DOWType === 'All'
-							? 0
-							: DOWType === 'Sunday'
-							? 1
-							: DOWType === 'Monday'
-							? 2
-							: DOWType === 'Tuesday'
-							? 3
-							: DOWType === 'Wednesday'
-							? 4
-							: DOWType === 'Thursday'
-							? 5
-							: DOWType === 'Friday'
-							? 6
-							: 7,
-					summaryBy: summaryBy,
+					DOW: DOWTypeOptions.findIndex((option) => option.name === DOWType),
+					summaryBy,
 					salesType: salesType === 'Net Sales' ? 'SalesNet' : 'SalesGross',
 				},
 			};
@@ -228,11 +169,13 @@ const BusinessSummary = () => {
 				columnHelper.accessor('description', {
 					id: 'description',
 					header: 'Description',
+					size: 120,
 				}),
 				columnHelper.accessor('total', {
 					id: 'total',
 					header: 'Total',
-					cell: ({ getValue }) => getValue().toLocaleString('en-US'),
+					cell: ({ getValue }) => getValue(),
+					size: 120,
 				}),
 				...Object.keys(newData[0])
 					.filter((key) => !['description', 'total'].includes(key))
@@ -244,8 +187,8 @@ const BusinessSummary = () => {
 							cell: ({ getValue }) =>
 								typeof getValue() === 'string' && getValue().includes('%')
 									? getValue()
-									: Number(getValue()).toLocaleString('en-US'),
-							size: summaryBy === 'Day' ? 100 : 150,
+									: Number(getValue()),
+							size: summaryBy === 'Day' ? 90 : 120,
 						})
 					),
 			];
@@ -263,7 +206,7 @@ const BusinessSummary = () => {
 
 	// Function to handle the unit selection
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setUnitShowModal(false);
 	};
@@ -273,6 +216,10 @@ const BusinessSummary = () => {
 		setSelectedFromDate(from);
 		setSelectedToDate(to);
 		setShowDateModal(false);
+	};
+
+	const handleSummaryByChange = (option) => {
+		setSummaryBy(option);
 	};
 
 	// Function to handle the PDF export
@@ -304,9 +251,9 @@ const BusinessSummary = () => {
 	};
 
 	const generateBody = () => {
-		const rowsPerTable = 28; // Define how many rows you want per table
-		const totalRows = businessSummaryData.length; // Get total number of rows
-		const body = []; // Initialize the body array
+		const rowsPerTable = 28;
+		const totalRows = businessSummaryData.length;
+		const body = [];
 
 		// Loop through the data and create tables
 		for (let i = 0; i < totalRows; i += rowsPerTable) {
@@ -337,7 +284,6 @@ const BusinessSummary = () => {
 			});
 		}
 
-		// Now the `body` array contains all the tables for the report
 		return body;
 	};
 
@@ -391,7 +337,6 @@ const BusinessSummary = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -399,16 +344,16 @@ const BusinessSummary = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Business Summary</h2>
-				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Business Summary</h2>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
-							companyId={companyId}
-							alignmentId={alignmentId}
-							memberId={selectedUnit}
+							companyId={companyID}
+							alignmentId={alignmentID}
+							memberID={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
-							setMemberName={setselectedUnitName}
+							setMemberName={setSelectedUnitName}
 							onClick={() => setUnitShowModal(true)}
 						/>
 						<DateSelector
@@ -438,10 +383,10 @@ const BusinessSummary = () => {
 								title='Summary by'
 								options={summaryByOptions}
 								selectedOption={summaryBy}
-								onOptionChange={(option) => setSummaryBy(option)}
+								onOptionChange={handleSummaryByChange}
 							/>
 						</div>
-						<div className='run-button' onClick={handleBusinessSummary}>
+						<div className='run-button' onClick={fetchBusinessSummaryReport}>
 							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
@@ -465,14 +410,17 @@ const BusinessSummary = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading &&
-					(businessSummaryData.length > 0 ? (
-						<div className='paged-table'>{Table}</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						{!isLoading &&
+							(businessSummaryData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</div>
 				)}
 
 				<div>
