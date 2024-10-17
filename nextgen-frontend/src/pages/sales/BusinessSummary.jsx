@@ -38,7 +38,7 @@ const BusinessSummary = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Inventory Transfer Report, please try again later.'
+		'There was an error trying to load the Business Summary Report, please try again later.'
 	);
 
 	//selected unit state variables
