@@ -350,7 +350,7 @@ const InventoryTransfer = () => {
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
 				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Transfer Report</h2>
-				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
 							companyId={companyID}

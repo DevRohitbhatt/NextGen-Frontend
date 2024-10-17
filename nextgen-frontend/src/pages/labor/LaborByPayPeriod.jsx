@@ -22,7 +22,6 @@ import laborByPayPeriod from '../../assets/introJSSteps/labourByPayPeriod';
 const columnHelper = createColumnHelper();
 
 const LaborByPayPeriod = () => {
-	
 	const {
 		companyID,
 		alignmentID,
@@ -30,7 +29,7 @@ const LaborByPayPeriod = () => {
 		defaultUnitID,
 		defaultUnitName,
 		groupOrUnitAccess,
-		groupOrUnitAccessName
+		groupOrUnitAccessName,
 	} = useSelector((state) => state.globalState);
 	const [laborByPayPeriodData, setLaborByPayPeriodData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
@@ -199,12 +198,7 @@ const LaborByPayPeriod = () => {
 		if (groupOrUnitAccessName || defaultUnitName) {
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		defaultUnitID,
-		groupOrUnitAccess,
-		defaultUnitName,
-		groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	const fetchLaborByPayPeriod = async () => {
 		try {
@@ -490,100 +484,100 @@ const LaborByPayPeriod = () => {
 	);
 
 	return (
-		<>
-			<Loader loading={isLoading} />
-			<div className='w-[85%] mx-auto'>
-				<Steps
-					enabled={introSteps.stepsEnabled}
-					steps={introSteps.steps}
-					initialStep={introSteps.initialStep}
-					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Labor By Pay Period</h2>
-				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-					<div className='flex items-center space-x-3 '>
-						<UnitSelector
-							companyId={companyID}
-							alignmentId={alignmentID}
-							memberID={selectedUnit}
-							memberName={selectedUnitName}
-							includeAreas={true}
-							setMemberName={setSelectedUnitName}
-							onClick={() => setShowUnitModal(true)}
-						/>
-						<DateSelector
-							toDate={selectedToDate}
-							fromDate={selectedFromDate}
-							isDateRange={true}
-							onClick={() => setShowDateModal(true)}
-						/>
-						<div className='w-52'>
-							<Dropdown
-								title='Expand View'
-								options={dropdownOptions}
-								selectedOption={view}
-								onOptionChange={handleViewChange}
-							/>
-						</div>
-						<div className='run-button' onClick={fetchLaborByPayPeriod}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-								Run
-							</div>
-						</div>
-					</div>
-					<div>
-						<ExportOptions
-							includePDF={true}
-							handlePDFClick={handlePDFClick}
-							includeCSV={true}
-							handleCSVClick={handleCSVClick}
-							includeExcel={true}
-							handleExcelClick={handleExcelClick}
-							includeHelp={true}
-							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
-						/>
-					</div>
-				</header>
-
-				{/* Display the table if there is no error and the data is not loading */}
-				{isError ? (
-					<div>{errorMessage}</div>
-				) : (
-					!isLoading &&
-					(laborByPayPeriodData.length > 0 ? (
-						<div className='paged-table'>{Table}</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
-				)}
-
-				<div>
-					<UnitModal
-						unitData={unitsAndAreasList}
+		<div className='w-[85%] mx-auto'>
+			<Steps
+				enabled={introSteps.stepsEnabled}
+				steps={introSteps.steps}
+				initialStep={introSteps.initialStep}
+				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+			/>
+			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Labor By Pay Period</h2>
+			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+				<div className='flex items-center space-x-3 '>
+					<UnitSelector
+						companyId={companyID}
+						alignmentId={alignmentID}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showUnitModal}
 						includeAreas={true}
-						handleClose={() => {
-							setShowUnitModal(false);
-						}}
-						handleUnitSelection={handleUnitSelection}
+						setMemberName={setSelectedUnitName}
+						onClick={() => setShowUnitModal(true)}
 					/>
-					<CalendarModal
-						handleClose={() => setShowDateModal(false)}
-						modalOpen={showDateModal}
+					<DateSelector
+						toDate={selectedToDate}
+						fromDate={selectedFromDate}
 						isDateRange={true}
-						handleDateSelection={handleDateSelection}
-						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-						selectedFromDate={selectedFromDate}
-						selectedToDate={selectedToDate}
+						onClick={() => setShowDateModal(true)}
+					/>
+					<div className='w-52'>
+						<Dropdown
+							title='Expand View'
+							options={dropdownOptions}
+							selectedOption={view}
+							onOptionChange={handleViewChange}
+						/>
+					</div>
+					<div className='run-button' onClick={fetchLaborByPayPeriod}>
+						<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+							Run
+						</div>
+					</div>
+				</div>
+				<div>
+					<ExportOptions
+						includePDF={true}
+						handlePDFClick={handlePDFClick}
+						includeCSV={true}
+						handleCSVClick={handleCSVClick}
+						includeExcel={true}
+						handleExcelClick={handleExcelClick}
+						includeHelp={true}
+						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 					/>
 				</div>
+			</header>
+
+			{/* Display the table if there is no error and the data is not loading */}
+			{isError ? (
+				<div>{errorMessage}</div>
+			) : (
+				<div className='relative w-full min-h-56'>
+					<Loader loading={isLoading} />
+					{!isLoading &&
+						(laborByPayPeriodData.length > 0 ? (
+							<div className='paged-table'>{Table}</div>
+						) : !selectedUnit ? (
+							<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+						) : (
+							<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+						))}
+				</div>
+			)}
+
+			<div>
+				<UnitModal
+					unitData={unitsAndAreasList}
+					memberID={selectedUnit}
+					memberName={selectedUnitName}
+					show={showUnitModal}
+					includeAreas={true}
+					handleClose={() => {
+						setShowUnitModal(false);
+					}}
+					handleUnitSelection={handleUnitSelection}
+				/>
+				<CalendarModal
+					handleClose={() => setShowDateModal(false)}
+					modalOpen={showDateModal}
+					isDateRange={true}
+					handleDateSelection={handleDateSelection}
+					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+					selectedFromDate={selectedFromDate}
+					selectedToDate={selectedToDate}
+				/>
 			</div>
-		</>
+		</div>
 	);
 };
 
