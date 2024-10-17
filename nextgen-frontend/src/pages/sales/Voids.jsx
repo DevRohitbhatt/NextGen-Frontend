@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { useSelector } from 'react-redux';
 import voidsReport from '../../assets/introJSSteps/voidsReport';
 import {
 	Dropdown,
@@ -21,15 +22,16 @@ import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 const columnHelper = createColumnHelper();
 
 const Voids = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
+	const globalState = useSelector((state) => state.globalState);
+	const companyID = useSelector((state) => state.globalState.companyID);
+	const alignmentID = useSelector((state) => state.globalState.alignmentID);
+	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+
 	const [voidsReportData, setVoidsReportData] = useState([]);
 	const [filteredVoidsReportData, setFilteredVoidsReportData] = useState([]);
 
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Inventory Transfer Report, please try again later.'
@@ -37,8 +39,8 @@ const Voids = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -65,6 +67,7 @@ const Voids = () => {
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
+				size: 130,
 				cell: ({ getValue, row }) =>
 					row.getCanExpand() ? (
 						<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
@@ -83,11 +86,13 @@ const Voids = () => {
 				id: 'hour',
 				header: 'Hour',
 				dataType: 'number',
+				size: 100,
 			}),
 			columnHelper.accessor('minute', {
 				id: 'minute',
 				header: 'Minute',
 				dataType: 'number',
+				size: 100,
 			}),
 			columnHelper.accessor('voidReason', {
 				id: 'voidReason',
@@ -108,6 +113,7 @@ const Voids = () => {
 				id: 'fullDescription',
 				header: 'Description',
 				dataType: 'string',
+				size: 200,
 			}),
 			columnHelper.accessor('posCheckId', {
 				id: 'posCheckId',
@@ -122,6 +128,7 @@ const Voids = () => {
 			columnHelper.accessor('revenueID', {
 				id: 'revenueID',
 				header: 'Revenue ID',
+				size: 130,
 				footer: ({ table }) =>
 					`Count: ${table.getCoreRowModel().rows.reduce((acc, row) => acc + row.subRows.length, 0)}`,
 				dataType: 'number',
@@ -129,6 +136,7 @@ const Voids = () => {
 			columnHelper.accessor('price', {
 				id: 'price',
 				header: 'Price',
+				size: 100,
 				footer: ({ table }) =>
 					`$${table
 						.getCoreRowModel()
@@ -149,66 +157,20 @@ const Voids = () => {
 	);
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				console.log('testing mode');
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(5199);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
-		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
+			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
 		}
-	}, []);
-
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
-		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
-		setIsLoading(false);
-	};
-
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
+		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
+			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
 		}
-	};
+	}, [
+		globalState.defaultUnitID,
+		globalState.groupOrUnitAccess,
+		globalState.defaultUnitName,
+		globalState.groupOrUnitAccessName,
+	]);
 
-	// Function to get the voids report
-	const handleVoidsReport = async () => {
+	const fetchVoidsReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -217,8 +179,8 @@ const Voids = () => {
 			const getData = {
 				url: 'voids',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -262,9 +224,9 @@ const Voids = () => {
 
 	// Function to handle the unit selection
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	// Function to handle the date selection
@@ -468,17 +430,17 @@ const Voids = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Voids Report</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Voids Report</h2>
 				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
-							companyId={companyId}
-							alignmentId={alignmentId}
-							memberId={selectedUnit}
+							companyId={companyID}
+							alignmentId={alignmentID}
+							memberID={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
-							setMemberName={setselectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							setMemberName={setSelectedUnitName}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -510,8 +472,8 @@ const Voids = () => {
 >>>>>>> Reporting-Latest
 							</div>
 						</div>
-						<div className='run-button' onClick={handleVoidsReport}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+						<div className='run-button' onClick={fetchVoidsReport}>
+							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
@@ -548,10 +510,10 @@ const Voids = () => {
 						unitData={unitsAndAreasList}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>

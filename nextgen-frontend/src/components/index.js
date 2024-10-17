@@ -11,7 +11,6 @@ export { default as IntroJS } from './common/IntroJS';
 export { default as MessagePopup } from './common/MessagePopup';
 export { default as MinimizableContainer } from './common/MinimizableContainer';
 export { default as Tooltip } from './common/ToolTip';
-export { default as DraggableInventoryItem } from './common/DraggableInventoryItem';
 export { default as SearchBar } from './common/SearchBar';
 export { default as Modal } from './common/Modal';
 export { default as ModalSearchBar } from './common/ModalSearchBar';
@@ -46,3 +45,4 @@ export { default as TableCell } from './table/TableCell';
 export { default as TreeNode } from './table/TreeNode';
 export { default as TreeTable } from './table/TreeTableBuilder';
 export { default as TableHOC } from './table/TableHOC';
+export {default as DndTable } from './table/DndTable'

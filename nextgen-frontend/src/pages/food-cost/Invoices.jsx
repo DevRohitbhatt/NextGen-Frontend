@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { useSelector, useDispatch } from 'react-redux';
 import invoices from '../../assets/introJSSteps/invoices';
+import { setVendorsList } from '../../reducer/slices/globalState';
 import {
 	UnitSelector,
 	Loader,
@@ -23,11 +25,18 @@ import { MdEdit } from 'react-icons/md';
 const columnHelper = createColumnHelper();
 
 const Invoices = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
-	const [vendorsList, setVendorsList] = useState([]);
+	const dispatch = useDispatch();
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+		vendorsList,
+	} = useSelector((state) => state.globalState);
+	const debounceTimer = useRef(null);
 	const [invoiceReportData, setInvoiceReportData] = useState([]);
 	const [isBrowseInvoicesClicked, setIsBrowseInvoicesClicked] = useState(true);
 	const [searchKey, setSearchKey] = useState('');
@@ -37,17 +46,17 @@ const Invoices = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Invoices, please try again later.'
+		'There was an error trying to load your Invoices, please try again later.'
 	);
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
-	const [selectedVendorName, setselectedVendorName] = useState('All Vendors');
+	const [selectedVendorName, setSelectedVendorName] = useState('All Vendors');
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -75,110 +84,79 @@ const Invoices = () => {
 						<MdEdit className='cursor-pointer' />
 					</div>
 				),
-				size: '80',
+				size: 50,
 			}),
 			columnHelper.accessor('name', {
 				id: 'name',
 				header: 'Vendor',
 				dataType: 'string',
+				size: 60,
 			}),
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
 				header: 'Unit',
 				dataType: 'string',
+				size: 150,
 			}),
 			columnHelper.accessor('vendorInvoiceReference', {
 				id: 'vendorInvoiceReference',
 				header: 'Invoice Reference',
 				dataType: 'string',
+				size: 80,
 			}),
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
 				cell: ({ getValue }) => {
 					if (!getValue()) return '';
-					const date = new Date(getValue());
-					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-					return formattedDate;
+					return dateFormat(getValue(), 'mm-dd-yyyy');
 				},
 				dataType: 'date',
+				size: 80,
 			}),
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Total',
 				dataType: 'number',
+				size: 60,
 			}),
 			columnHelper.accessor('lastEditedBy', {
 				id: 'lastEditedBy',
 				header: 'Last Edited By',
 				dataType: 'string',
+				size: 80,
 			}),
 			columnHelper.accessor('status', {
 				id: 'status',
 				header: 'Status',
 				dataType: 'string',
+				size: 60,
 			}),
 		],
 		[]
 	);
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				console.log('testing mode');
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(5199);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		}
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		}
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+
+	useEffect(() => {
+		if (companyID && alignmentID && (groupOrUnitAccess || selectedUnit)) {
+			fetchData(companyID, alignmentID, groupOrUnitAccess || selectedUnit);
 		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
 		}
-	}, []);
+	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
+	const fetchData = async (companyID) => {
 		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit), fetchVendors(companyId)]);
+		await Promise.all([fetchVendors(companyID)]);
 		setIsLoading(false);
-	};
-
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
-		}
 	};
 
 	// This function fetches the vendors.
@@ -193,7 +171,7 @@ const Invoices = () => {
 			};
 
 			const result = await getCall(getData);
-			setVendorsList(result);
+			dispatch(setVendorsList(result));
 		} catch (error) {
 			setIsError(true);
 			setErrorMessage('There was an issue loading your vendors, please try again later.');
@@ -201,16 +179,15 @@ const Invoices = () => {
 		}
 	};
 
-	// Function to get the voids report
-	const handleInvoiceReport = async () => {
+	const fetchInvoiceReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
 				url: 'invoiceReport',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -239,19 +216,19 @@ const Invoices = () => {
 
 	useEffect(() => {
 		if (selectedUnit) {
-			handleInvoiceReport();
+			fetchInvoiceReport();
 		}
 	}, [selectedUnit, selectedVendor, selectedFromDate, selectedToDate]);
 
 	// Function to handle the unit selection
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleVendorSelection = (selectedVendorName, vendorList) => {
-		setselectedVendorName(selectedVendorName);
+		setSelectedVendorName(selectedVendorName);
 		setSelectedVendor(vendorList[0].id);
 		setVendorShowModal(false);
 	};
@@ -265,31 +242,35 @@ const Invoices = () => {
 
 	const handleSearchKeyChange = async (e) => {
 		setSearchKey(e.target.value);
-		if (e.target.value.length >= 3) {
-			try {
-				setIsLoading(true);
-				setIsError(false);
-				const getData = {
-					url: 'invoiceSearchReport',
-					urlParams: {
-						companyId: companyId,
-						alignmentId: alignmentId,
-						memberId: selectedUnit,
-						searchKey: e.target.value,
-						userId: 0,
-					},
-				};
+		if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-				const result = await getCall(getData);
-				setSearchInvoiceData(result.data);
-				setIsLoading(false);
-			} catch (error) {
-				setIsError(true);
-				setIsLoading(false);
-				setErrorMessage('There was an issue loading your data, please try again later.');
-				console.error('Error getting Invoices data: ', error);
+		debounceTimer.current = setTimeout(async () => {
+			if (e.target.value.length >= 3) {
+				try {
+					setIsLoading(true);
+					setIsError(false);
+					const getData = {
+						url: 'invoiceSearchReport',
+						urlParams: {
+							companyId: companyID,
+							alignmentId: alignmentID,
+							memberId: selectedUnit,
+							searchKey: e.target.value,
+							userId: 0,
+						},
+					};
+
+					const result = await getCall(getData);
+					setSearchInvoiceData(result.data);
+					setIsLoading(false);
+				} catch (error) {
+					setIsError(true);
+					setIsLoading(false);
+					setErrorMessage('There was an issue loading your data, please try again later.');
+					console.error('Error getting Invoices data: ', error);
+				}
 			}
-		}
+		}, 500);
 	};
 
 	// Function to handle the PDF export
@@ -404,7 +385,13 @@ const Invoices = () => {
 			invoiceReportData.length === 0 ? (
 				<div className='mx-auto mt-5 text-lg w-fit'>No Invoices Found</div>
 			) : (
-				<TableHOC columns={columns} data={invoiceReportData} isPaginated={true} />
+				<TableHOC
+					columns={columns}
+					data={invoiceReportData}
+					isPaginated={true}
+					dataPosition='left'
+					headerPosition='left'
+				/>
 			)
 		) : searchKey.length === 0 ? (
 			<div className='mx-auto mt-5 text-lg w-fit'>Enter invoice reference or total for searching</div>
@@ -420,7 +407,6 @@ const Invoices = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -428,9 +414,9 @@ const Invoices = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Invoices</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Invoices</h2>
 
-				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div>
 						<div className='flex gap-2'>
 							<button
@@ -453,18 +439,18 @@ const Invoices = () => {
 						{isBrowseInvoicesClicked ? (
 							<div className='flex items-center space-x-3'>
 								<UnitSelector
-									companyId={companyId}
-									alignmentId={alignmentId}
-									memberId={selectedUnit}
+									companyID={companyID}
+									alignmentID={alignmentID}
+									memberID={selectedUnit}
 									memberName={selectedUnitName}
 									includeAreas={true}
-									setMemberName={setselectedUnitName}
-									onClick={() => setUnitShowModal(true)}
+									setMemberName={setSelectedUnitName}
+									onClick={() => setShowUnitModal(true)}
 								/>
 								<VendorSelector
 									vendorID={selectedVendor}
 									vendorName={selectedVendorName}
-									setVendorName={setselectedVendorName}
+									setVendorName={setSelectedVendorName}
 									onClick={() => setVendorShowModal(true)}
 								/>
 								<DateSelector
@@ -507,18 +493,21 @@ const Invoices = () => {
 				) : !isLoading && !selectedUnit ? (
 					<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
 				) : (
-					<div className='paged-table'>{Table}</div>
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						<div className='paged-table'>{Table}</div>
+					</div>
 				)}
 
 				<div>
 					<UnitModal
-						unitData={unitsAndAreasList}
+						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>
