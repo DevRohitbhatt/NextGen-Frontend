@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 import { AiFillDownSquare } from 'react-icons/ai';
-import { CalendarContainer } from '../styles/ReactCalendarStyles';
 
 const CalendarSelector = ({ handleDateChange, date }) => {
 	const [showCalendar, setShowCalendar] = useState(false);
@@ -28,6 +26,13 @@ const CalendarSelector = ({ handleDateChange, date }) => {
 			document.removeEventListener('click', handleClickOutside);
 		};
 	}, []);
+
+	useEffect(() => {
+		console.log('Date changed: ', date);
+		if (date) {
+			setSelectedDate(date);
+		}
+	}, [date]);
 
 	const handleInputChange = (date) => {
 		setSelectedDate(date);
@@ -55,7 +60,7 @@ const CalendarSelector = ({ handleDateChange, date }) => {
 				ref={inputRef}
 			/>
 			<div
-				className='absolute top-0 flex items-center h-full text-4xl -right-1 text-primary'
+				className='absolute top-0 flex items-center h-full text-4xl -right-1 text-[var(--tw-primary)]'
 				onClick={handleIconClick}
 			>
 				<AiFillDownSquare />
@@ -63,9 +68,9 @@ const CalendarSelector = ({ handleDateChange, date }) => {
 
 			{showCalendar && (
 				<div ref={calendarRef}>
-					<CalendarContainer>
+					<div className='fixed z-30'>
 						<Calendar onChange={handleInputChange} value={selectedDate} onClickDay={toggleCalendar} />
-					</CalendarContainer>
+					</div>
 				</div>
 			)}
 		</div>

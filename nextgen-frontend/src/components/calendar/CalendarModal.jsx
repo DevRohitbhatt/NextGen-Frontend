@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import * as Styled from '../styles/DateModalStyles.jsx';
 import { FaTimes } from 'react-icons/fa';
-import { ModalHeader } from 'react-bootstrap';
 import { TableBuilder as Table, YearSelector, CalendarSelector } from '../index.js';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 
 const CalendarModal = ({
 	handleClose,
 	selectedFromDate,
 	selectedToDate,
-	handleFromDateChange,
-	handleToDateChange,
 	modalOpen,
 	isDateRange,
 	handleDateSelection,
@@ -28,7 +24,7 @@ const CalendarModal = ({
 		columnWidths: '1.5fr 2fr 2fr',
 		dataTypes: ['string', 'string', 'string'],
 		rows: [],
-		width: '92%',
+		width: '100%',
 	});
 
 	useEffect(() => {
@@ -94,7 +90,7 @@ const CalendarModal = ({
 	};
 
 	const handleOkButtonClick = () => {
-		if (isDateRange) {
+		if (isDateRange && new Date(localToDate) >= new Date(localFromDate)) {
 			handleDateSelection(localFromDate, localToDate);
 		} else {
 			handleDateSelection(localFromDate, localFromDate);
@@ -114,33 +110,33 @@ const CalendarModal = ({
 			{modalOpen && (
 				<div className='fixed bg-[#00000073] w-full h-dvh left-0 top-0 z-10'>
 					<div
-						className={`fixed w-[500px] bg-white rounded-lg shadow-lg overflow-hidden left-1/3 top-[6%]  ${
-							isDateRange ? '' : 'w-96'
-						}`}
+						className={`fixed bg-white rounded-lg shadow-lg overflow-hidden left-1/3  top-[6%] ${isDateRange ? '' : 'w-96'
+							}`}
 					>
-						<div className='flex items-center justify-between px-4 py-2 text-white bg-primary'>
+						<div className='flex items-center justify-between px-4 py-2 text-white bg-[var(--tw-primary)]'>
 							{isDateRange ? (
 								<h4>Select a business period or Date Range</h4>
 							) : (
 								<h4>Select a business Date</h4>
 							)}
 							<button
-								className='p-1 text-white bg-transparent border-[0.25px] border-white border-solid rounded-none cursor-pointer hover:bg-white hover:text-primary focus:outline-none'
+								className='p-1 text-white bg-transparent border-[0.25px] border-white border-solid rounded-none cursor-pointer hover:bg-white hover:text-[var(--tw-primary)] focus:outline-none'
 								onClick={handleCloseModal}
 							>
 								<FaTimes className='close' />
 							</button>
 						</div>
-						<div className='px-4'>
+						<div className='w-full mx-auto'>
 							{!isDateRange ? (
 								<Calendar
 									onChange={handleInputChange}
 									value={localFromDate}
 									onClickDay={toggleCalendar}
+									className='tailwind-calendar'
 								/>
 							) : (
 								<>
-									<div className='flex'>
+									<div className='flex px-4 pt-4'>
 										<div>
 											<span className='text-xs font-bold'>From:</span>
 											<CalendarSelector
@@ -161,7 +157,7 @@ const CalendarModal = ({
 										</div>
 									</div>
 
-									<div className=''>
+									<div className='w-full px-4 m-auto'>
 										<Table
 											columnHeaders={CalendarTable.columnHeaders}
 											columnwidths={CalendarTable.columnWidths}

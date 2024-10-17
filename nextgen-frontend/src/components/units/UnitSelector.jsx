@@ -53,7 +53,7 @@ export default function UnitSelector({
 			{formVersion ? (
 				<div className='w-full rounded-md cursor-pointer unit-selector' onClick={onClick}>
 					<div
-						className={`px-6 py-3 text-center rounded-md text-nowrap border-2 hover:border-primary border-solid ${
+						className={`px-6 py-3 text-center rounded-md text-nowrap border-2 hover:border-[var(--tw-primary)] border-solid ${
 							isInvalid ? 'border-[#e74c3c]' : ''
 						}`}
 					>
@@ -63,16 +63,18 @@ export default function UnitSelector({
 			) : (
 				<div
 					onClick={isEditable ? onClick : () => {}}
-					className='flex flex-col justify-center rounded-3xl unit-selector'
+					className='flex flex-col justify-center mx-1 rounded-3xl unit-selector'
 				>
 					{isEditable ? (
-						<h3 className='mb-1 ml-2 text-xl font-bold text-nowrap'>Select Unit(s)</h3>
+						<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>Select Unit(s)</h3>
 					) : (
-						<h3 className='mb-1 ml-2 text-xl font-bold text-nowrap'>Units</h3>
+						<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>Units</h3>
 					)}
 					<div
-						className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
-							isEditable ? ' hover:border-primary' : 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
+						className={`px-6 py-3 text-center capitalize border-2 border-solid  text-nowrap rounded-3xl ${
+							isEditable
+								? ' hover:border-[var(--tw-primary)] cursor-pointer'
+								: 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
 						}`}
 					>
 						{memberName}
