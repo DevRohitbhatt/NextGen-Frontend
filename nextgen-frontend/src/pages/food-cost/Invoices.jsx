@@ -16,11 +16,13 @@ import {
 	PdfBuilder,
 	ExcelExport as exportToExcel,
 	TableHOC,
+	Modal,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { PiMagnifyingGlassBold } from 'react-icons/pi';
 import { MdEdit } from 'react-icons/md';
+import { SlEye } from 'react-icons/sl';
 
 const columnHelper = createColumnHelper();
 
@@ -65,6 +67,7 @@ const Invoices = () => {
 	);
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
+	const [showPreviewModal, setShowPreviewModal] = useState(false)
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -78,10 +81,9 @@ const Invoices = () => {
 		() => [
 			columnHelper.display({
 				id: 'actions',
-				cell: () => (
-					<div className='flex space-x-2 text-lg'>
-						<PiMagnifyingGlassBold className='cursor-pointer' />
-						<MdEdit className='cursor-pointer' />
+				cell: ({row}) => (
+					<div className='flex space-x-2 text-lg' onClick={(e)=>{e.stopPropagation(),setShowPreviewModal(true)}}>
+						<SlEye />
 					</div>
 				),
 				size: 50,
@@ -203,7 +205,6 @@ const Invoices = () => {
 					subrows: row.voids,
 				})),
 			};
-
 			setInvoiceReportData(newData.data);
 			setIsLoading(false);
 		} catch (error) {
@@ -242,10 +243,12 @@ const Invoices = () => {
 
 	const handleSearchKeyChange = async (e) => {
 		setSearchKey(e.target.value);
+		setIsBrowseInvoicesClicked(true);
 		if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
 		debounceTimer.current = setTimeout(async () => {
 			if (e.target.value.length >= 3) {
+				setIsBrowseInvoicesClicked(false);
 				try {
 					setIsLoading(true);
 					setIsError(false);
@@ -269,6 +272,8 @@ const Invoices = () => {
 					setErrorMessage('There was an issue loading your data, please try again later.');
 					console.error('Error getting Invoices data: ', error);
 				}
+			} else if (value === '') {
+				setIsBrowseInvoicesClicked(true);
 			}
 		}, 500);
 	};
@@ -391,6 +396,7 @@ const Invoices = () => {
 					isPaginated={true}
 					dataPosition='left'
 					headerPosition='left'
+					onCallBack={(e)=>{}}
 				/>
 			)
 		) : searchKey.length === 0 ? (
@@ -418,62 +424,29 @@ const Invoices = () => {
 
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div>
-						<div className='flex gap-2'>
-							<button
-								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-									isBrowseInvoicesClicked ? 'bg-primary text-white' : 'text-primary bg-secondary'
-								}`}
-								onClick={() => setIsBrowseInvoicesClicked(true)}
-							>
-								Browse Invoices
-							</button>
-							<button
-								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-									isBrowseInvoicesClicked ? 'text-primary bg-secondary' : 'bg-primary text-white'
-								}`}
-								onClick={() => setIsBrowseInvoicesClicked(false)}
-							>
-								Search Invoices
-							</button>
+						<div className='flex items-center space-x-3'>
+							<UnitSelector
+								companyID={companyID}
+								alignmentID={alignmentID}
+								memberID={selectedUnit}
+								memberName={selectedUnitName}
+								includeAreas={true}
+								setMemberName={setSelectedUnitName}
+								onClick={() => setShowUnitModal(true)}
+							/>
+							<VendorSelector
+								vendorID={selectedVendor}
+								vendorName={selectedVendorName}
+								setVendorName={setSelectedVendorName}
+								onClick={() => setVendorShowModal(true)}
+							/>
+							<DateSelector
+								toDate={selectedToDate}
+								fromDate={selectedFromDate}
+								isDateRange={true}
+								onClick={() => setShowDateModal(true)}
+							/>
 						</div>
-						{isBrowseInvoicesClicked ? (
-							<div className='flex items-center space-x-3'>
-								<UnitSelector
-									companyID={companyID}
-									alignmentID={alignmentID}
-									memberID={selectedUnit}
-									memberName={selectedUnitName}
-									includeAreas={true}
-									setMemberName={setSelectedUnitName}
-									onClick={() => setShowUnitModal(true)}
-								/>
-								<VendorSelector
-									vendorID={selectedVendor}
-									vendorName={selectedVendorName}
-									setVendorName={setSelectedVendorName}
-									onClick={() => setVendorShowModal(true)}
-								/>
-								<DateSelector
-									toDate={selectedToDate}
-									fromDate={selectedFromDate}
-									isDateRange={true}
-									onClick={() => setShowDateModal(true)}
-								/>
-							</div>
-						) : (
-							<div className='mt-2'>
-								<p className='font-medium'>
-									Search by Invoice Reference or Total (minimum of 3 characters)
-								</p>
-								<input
-									className='p-2 border-2 rounded-lg border-secondary'
-									type='text'
-									placeholder='Invoice Reference or Total'
-									value={searchKey}
-									onChange={handleSearchKeyChange}
-								/>
-							</div>
-						)}
 					</div>
 
 					<div>
@@ -495,6 +468,18 @@ const Invoices = () => {
 				) : (
 					<div className='relative w-full min-h-56'>
 						<Loader loading={isLoading} />
+						<div className='mt-2'>
+							<p className='font-medium'>
+								Search by Invoice Reference or Total (minimum of 3 characters)
+							</p>
+							<input
+								className='search-bar rounded-full h-[30px] w-[24%] flex items-center outline-none border border-gray-200 p-5 pr-[18px] pl-[18px] shadow-[0_0_10px_rgba(0,0,0,0.08)] my-auto justify-start transition-all hover:border-[var(--tw-primary)]'
+								type='text'
+								placeholder='Invoice Reference or Total'
+								value={searchKey}
+								onChange={handleSearchKeyChange}
+							/>
+						</div>
 						<div className='paged-table'>{Table}</div>
 					</div>
 				)}
@@ -533,6 +518,72 @@ const Invoices = () => {
 						selectedToDate={selectedToDate}
 					/>
 				</div>
+				<Modal
+					isOpen={showPreviewModal}
+					title={'Invoice Details'}
+					onClose={() => {
+						setShowPreviewModal(!showPreviewModal);
+					}}
+				>
+					<div className="bg-white w-full max-w-5xl p-6 rounded-lg shadow-lg overflow-auto">
+						
+
+						<div className="my-4">
+							<div className="text-sm">
+								<span className="font-semibold">Unit:</span> 2290 Walmart Missouri City
+								<span className="mx-2 font-semibold">Vendor:</span> Sysco
+								<span className="mx-2 font-semibold">Date:</span> Mon 09/30/2024
+								<span className="mx-2 font-semibold">Invoice Reference:</span> 867060211
+								<span className="mx-2 font-semibold">Total:</span> $2539.40
+							</div>
+							<div className="text-sm mt-1">
+								<span className="font-semibold">Created By:</span> Data Import
+								<span className="mx-2 font-semibold">Last Edited By:</span> Data Import
+							</div>
+						</div>
+
+						<table className="w-full text-sm border-collapse border border-gray-300">
+							<thead>
+								<tr className="bg-blue-200 text-left">
+									<th className="border border-gray-300 p-2">Item Ref#</th>
+									<th className="border border-gray-300 p-2">Description</th>
+									<th className="border border-gray-300 p-2">UOM</th>
+									<th className="border border-gray-300 p-2">Pack/Size</th>
+									<th className="border border-gray-300 p-2">Qty</th>
+									<th className="border border-gray-300 p-2">Price</th>
+									<th className="border border-gray-300 p-2">Tax</th>
+									<th className="border border-gray-300 p-2">Line Total</th>
+								</tr>
+							</thead>
+							<tbody>
+								{/* Repeat this row for each item */}
+								<tr className="even:bg-gray-50">
+									<td className="border border-gray-300 p-2 text-center">2765127</td>
+									<td className="border border-gray-300 p-2">MIX SMOOTHIE STWBRY PUREE</td>
+									<td className="border border-gray-300 p-2 text-center">CA</td>
+									<td className="border border-gray-300 p-2 text-center">6 / 35OZ</td>
+									<td className="border border-gray-300 p-2 text-center">1</td>
+									<td className="border border-gray-300 p-2 text-center">$35.04</td>
+									<td className="border border-gray-300 p-2 text-center">$0.00</td>
+									<td className="border border-gray-300 p-2 text-center">$35.04</td>
+								</tr>
+								<tr className="even:bg-gray-50">
+									<td className="border border-gray-300 p-2 text-center">5447738</td>
+									<td className="border border-gray-300 p-2">SYRUP COKE ZERO SUGAR 2.5 GAL</td>
+									<td className="border border-gray-300 p-2 text-center">CA</td>
+									<td className="border border-gray-300 p-2 text-center">1 / 2.5GAL</td>
+									<td className="border border-gray-300 p-2 text-center">1</td>
+									<td className="border border-gray-300 p-2 text-center">$54.95</td>
+									<td className="border border-gray-300 p-2 text-center">$0.00</td>
+									<td className="border border-gray-300 p-2 text-center">$54.95</td>
+								</tr>
+								{/* End of item row */}
+							</tbody>
+						</table>
+ 
+					</div>
+
+				</Modal>
 			</div>
 		</>
 	);

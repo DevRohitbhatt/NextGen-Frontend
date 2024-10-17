@@ -30,6 +30,7 @@ function TableHOC({
 	enableColumnFilters = false,
 	headerPosition = 'center',
 	dataPosition = 'text-center',
+	onCallBack,
 }) {
 	const [expanded, setExpanded] = useState({});
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -240,11 +241,11 @@ function TableHOC({
 									className={`h-[35px] font-normal border-y relative hover:bg-gray-100 ${
 										row.getCanExpand() ? 'cursor-pointer' : 'cursor-default'
 									}`}
-									onClick={row.getCanExpand() ? row.getToggleExpandedHandler() : null}
+									onClick={(e)=>{e.stopPropagation(), onCallBack ? onCallBack(row.original) :  row.getCanExpand() ? row.getToggleExpandedHandler() : null}}
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (
-											<td key={cell.id} className={`${dataPosition} text-nowrap`}>
+											<td  key={cell.id} className={`${dataPosition} text-nowrap`}>
 												{cell.getIsGrouped() ? (
 													// If it's a grouped cell, add an expander and row count
 													<div className='flex items-center gap-2'>

@@ -292,6 +292,7 @@ const VarianceFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
+			
 			const newData = [
 				{
 					department: 'TOTAL',
@@ -367,7 +368,7 @@ const VarianceFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
-
+			
 			const countsheet = result.data.reduce((selectedCountsheet, countsheet) => {
 				if (isEnding) {
 					// Find the latest countsheet for Ending Countsheet
@@ -410,7 +411,6 @@ const VarianceFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
-
 			navigate('/PurchaseAnalysis', {
 				state: {
 					companyID: companyID,

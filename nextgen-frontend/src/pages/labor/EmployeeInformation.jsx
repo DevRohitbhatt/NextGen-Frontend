@@ -16,10 +16,13 @@ import {
 } from '../../components';
 
 const EmployeeInformation = () => {
-	const state = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		defaultUnitID,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [employeeInformationData, setEmployeeInformationData] = useState([]);
 	const [filteredEmployeeInformationData, setFilteredEmployeeInformationData] = useState([]);
 
@@ -276,13 +279,13 @@ const EmployeeInformation = () => {
 	];
 
 	useEffect(() => {
-		if (state.defaultUnitId) {
-			setSelectedUnit(state.defaultUnitId);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (state.defaultUnitName) {
-			setSelectedUnitName(state.defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [state.defaultUnitId, state.defaultUnitName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	// Fetching Employee Information
 	const fetchEmployeeInformation = async (companyId, alignmentId, selectedUnit) => {
@@ -609,7 +612,7 @@ const EmployeeInformation = () => {
 									<Table
 										data={filteredEmployeeInformationData.data}
 										headers={headers}
-										onRowClick={() => {}}
+										onRowClick={() => { }}
 									/>
 								</div>
 							) : !selectedUnit ? (

@@ -22,10 +22,15 @@ import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 const columnHelper = createColumnHelper();
 
 const Voids = () => {
-	const globalState = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		defaultUnitID,
+		defaultUnitName,
+		groupOrUnitAccess,
+		groupOrUnitAccessName
+	} = useSelector((state) => state.globalState);
 
 	const [voidsReportData, setVoidsReportData] = useState([]);
 	const [filteredVoidsReportData, setFilteredVoidsReportData] = useState([]);
@@ -34,7 +39,7 @@ const Voids = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Inventory Transfer Report, please try again later.'
+		'There was an error trying to load the Voids Report, please try again later.'
 	);
 
 	//selected unit state variables
@@ -157,17 +162,17 @@ const Voids = () => {
 	);
 
 	useEffect(() => {
-		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
-			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
-			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
 	}, [
-		globalState.defaultUnitID,
-		globalState.groupOrUnitAccess,
-		globalState.defaultUnitName,
-		globalState.groupOrUnitAccessName,
+		defaultUnitID,
+		groupOrUnitAccess,
+		defaultUnitName,
+		groupOrUnitAccessName,
 	]);
 
 	const fetchVoidsReport = async () => {

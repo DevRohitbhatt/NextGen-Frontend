@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { useLocation } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, DndTable, DateSelector } from '../../components';
+import { ExportOptions, PdfBuilder, ExcelExport as exportToExcel, DndTable, DateSelector, Modal } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 
 const columnHelper = createColumnHelper();
@@ -15,12 +15,14 @@ const CountsheetDesigner = () => {
 	// State variables for loading and error handling
 	const [isLoading, setIsLoading] = useState(true);
 	const [isError, setIsError] = useState(false);
+	const [priceInfoModal, setPriceInfoModal] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the countsheet Report, please try again later.'
 	);
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 	const moreOptionsDropdown = useRef(null);
-
+	const [selectedPriceInfoId, setSelectedPriceInfoId] = useState('')
+	
 	const countTypeMap = {
 		WE: 'Weekly',
 		DA: 'Daily',
@@ -59,10 +61,9 @@ const CountsheetDesigner = () => {
 			columnHelper.accessor('lineItemCost', {
 				id: 'lineItemCost',
 				cell: ({ row, getValue }) =>
-					`$${
-						row.getCanExpand()
-							? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
-							: getValue()
+					`$${row.getCanExpand()
+						? row.subRows.reduce((acc, subRow) => acc + subRow.original.lineItemCost, 0).toFixed(2)
+						: getValue()
 					}`,
 				footer: ({ table }) =>
 					`Total Inventory Value: $${table
@@ -97,17 +98,17 @@ const CountsheetDesigner = () => {
 			};
 
 			const result = await getCall(getData);
-
 			const newData = result.data.map((item) => ({
 				groupName: item.groupName,
 				subRows: item.countSheetDetailModels.map((subItem) => ({
 					description: subItem.description,
 					countDescription: subItem.countDescription,
 					lineItemCost: subItem.lineItemCost,
+					qsrInventoryItemID : subItem.qsrInventoryItemID
 				})),
 			}));
 			newData.forEach((element, index) => {
-				element.id = index + 1;
+				element.id = index + 1+"";
 				element.total = element.subRows.reduce((acc, subRow) => acc + subRow.lineItemCost, 0).toFixed(2);
 				element.subRows.forEach((el, ind) => {
 					el.id = index + 1 + '' + ind;
@@ -192,6 +193,25 @@ const CountsheetDesigner = () => {
 		}
 	};
 
+	const getPriceInfo = async () => {
+		try {
+			const getData = {
+				url: 'Countsheet_PricingInfo',
+				urlParams: {
+					companyId: location.state.companyId,
+					QSRInvoiceID :"" ,
+					QSRItemID  : "",
+					QSRInventoryItemID  :  "QSRInventoryItemID"
+				},
+			};
+
+			const result = await getCall(getData);
+		} catch (error) {
+
+		}
+
+	}
+
 	useEffect(() => {
 		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
@@ -199,6 +219,9 @@ const CountsheetDesigner = () => {
 		};
 	}, []);
 
+	const selectedData = (id) => {
+		setSelectedPriceInfoId(id)
+	}
 	const Table = (
 		<>
 			<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3'>
@@ -210,6 +233,7 @@ const CountsheetDesigner = () => {
 					expandCollapseButtons={true}
 					data={countsheetDetails}
 					setData={setCountsheetDetails}
+					seletedForPriceInfo={(id) => { selectedData(id) }}
 				/>
 			</div>
 		</>
@@ -221,7 +245,7 @@ const CountsheetDesigner = () => {
 				{`${countsheet?.name} --
 				${countTypeMap[countsheet?.countType] || ''} Countsheet`}
 			</h2>
-			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center sticky top-0'>
+			<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center '>
 				<div className='flex items-center gap-2'>
 					<DateSelector fromDate={new Date(countsheet?.dateTime)} isDateRange={false} isEditable={false} />
 
@@ -245,22 +269,30 @@ const CountsheetDesigner = () => {
 									<button className='w-[100%] bg-[#f9f9f9]'>Pricing Info</button>
 								</div>
 								<div className='mb-2 option '>
+									<button className='w-[100%] bg-[#f9f9f9]'>Possible Erors</button>
+								</div>
+								<div className='mb-2 option '>
 									<button className='w-[100%] bg-[#f9f9f9]'>Countsheet History</button>
 								</div>
 								<div className='mb-2 option'>
 									<button className='w-[100%] bg-[#f9f9f9]'>Copy Counts</button>
 								</div>
 								<div className='mb-2 option'>
+									<button className='w-[100%] bg-[#f9f9f9]'>Clear Countsheet</button>
+								</div>
+								<div className='mb-2 option'>
 									<button className='w-[100%] bg-[#f9f9f9]'>Delete Countsheet</button>
+								</div>
+								<div className='mb-2 option'>
+									<button className='w-[100%] bg-[#f9f9f9]'>Lock Countsheet</button>
 								</div>
 							</div>
 						)}
 					</div>
 
 					<div className='mt-8'>
-						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${
-							countsheet?.saveDateTime?.split('T')[1]
-						}`}</h3>
+						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${countsheet?.saveDateTime?.split('T')[1]
+							}`}</h3>
 					</div>
 				</div>
 				<div>
@@ -269,6 +301,8 @@ const CountsheetDesigner = () => {
 						handleExcelClick={handleExcelClick}
 						includePrint={true}
 						handlePrintClick={handlePrintClick}
+						includeSave={true}
+
 					/>
 				</div>
 			</header>
@@ -280,6 +314,74 @@ const CountsheetDesigner = () => {
 			) : (
 				countsheetDetails.length > 0 && <div className='paged-table'>{Table}</div>
 			)}
+
+			<Modal
+				isOpen={priceInfoModal}
+				title={'Price info'}
+				onClose={() => {
+					setPriceInfoModal(!priceInfoModal);
+				}}
+			>
+				<div className="bg-white w-96 p-4 rounded shadow-lg border border-gray-200">
+
+					<div className="text-center text-lg font-semibold text-blue-900 border-b pb-2 mb-4">
+						467 - SAUCE SRIRACHA 20 OZ BTL - I=A
+					</div>
+
+
+					<table className="w-full text-sm mb-4">
+						<thead>
+							<tr className="text-left border-b">
+								<th className="py-2 font-semibold">Unit of Measure</th>
+								<th className="py-2 font-semibold">Countsheet Price</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr className="border-b">
+								<td className="py-2">BOTTLE (28 OZ)</td>
+								<td className="py-2 text-green-600">$5.42</td>
+							</tr>
+							<tr className="border-b">
+								<td className="py-2">BOTTLE (20 OZ)</td>
+								<td className="py-2 text-green-600">$3.87</td>
+							</tr>
+							<tr>
+								<td className="py-2">BOTTLE (18 OZ)</td>
+								<td className="py-2 text-green-600">$3.49</td>
+							</tr>
+						</tbody>
+					</table>
+
+
+					<div className="border-t pt-2 mb-2">
+						<p className="font-semibold text-sm">Latest Price From</p>
+						<p className="text-sm">Vendor: <span className="font-medium">Sysco</span></p>
+						<p className="text-sm">Date: <span className="font-medium">7/23/2024</span> Invoice #:
+							<a href="#" className="text-blue-600 underline">637455060</a>
+						</p>
+					</div>
+
+
+					<div className="border-t pt-2 text-center">
+						<p className="font-semibold text-sm">Mapping Details</p>
+						<div className="flex items-center justify-center my-2">
+							<div className="flex flex-col items-center">
+								<p>1 x CA</p>
+								<p className="font-medium text-sm">SAUCE CHILI HOT SRIRACHA</p>
+								<p>@ $23.24/CA</p>
+							</div>
+							<div className="px-2">
+								<p className="text-2xl font-semibold">=</p>
+							</div>
+							<div className="flex flex-col items-center">
+								<p>4.2857 x BOTTLE (28 OZ)</p>
+								<p className="font-medium text-sm">SAUCE SRIRACHA 20 OZ BTL - I=A</p>
+								<p className="text-green-600">$5.42/BOTTLE (28 OZ)</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</Modal>
 		</div>
 	);
 };

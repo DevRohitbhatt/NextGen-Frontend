@@ -196,7 +196,6 @@ const Countsheets = () => {
 			};
 
 			const result = await getCall(getData);
-
 			const newData = result.data
 				.filter((data) => data.inventoryCountSheetID > 0)
 				.map((data) => ({
