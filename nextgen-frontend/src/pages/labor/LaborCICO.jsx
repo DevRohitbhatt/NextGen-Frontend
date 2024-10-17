@@ -39,7 +39,7 @@ const LaborCICO = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Labor By Pay Period Report, please try again later.'
+		'There was an error trying to load the Labor Clock In - Clock Out Report, please try again later.'
 	);
 
 	//selected unit state variables
