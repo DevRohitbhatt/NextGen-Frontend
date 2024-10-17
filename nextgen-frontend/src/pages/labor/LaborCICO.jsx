@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { useSelector } from 'react-redux';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	Loader,
@@ -21,15 +22,21 @@ import laborCICO from '../../assets/introJSSteps/laborCICO';
 const columnHelper = createColumnHelper();
 
 const LaborCICO = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
+
 	const [labourCICOData, setLabourCICOData] = useState([]);
-	const [isTableRendered, setIsTableRendered] = useState(true);
+	const [isTableRendered, setIsTableRendered] = useState(false);
 
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Labor By Pay Period Report, please try again later.'
@@ -37,7 +44,7 @@ const LaborCICO = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -93,13 +100,13 @@ const LaborCICO = () => {
 							)}
 						</div>
 					) : null,
-				size: '80',
+				size: 80,
 			}),
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
 				header: 'Unit Name',
 				dataType: 'string',
-				size: '250',
+				size: 250,
 			}),
 		];
 
@@ -209,80 +216,27 @@ const LaborCICO = () => {
 	};
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				console.log('testing mode');
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(5199);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
-		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-	}, []);
-
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
-		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
-		setIsLoading(false);
-	};
-
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	};
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
-	// Fetch data only when the "Run" button is clicked
 	const handleRunClick = () => {
-		fetchLaborCICOData(groupBy); // Fetch data based on the current groupBy state
+		fetchLaborCICOData(groupBy);
 	};
 
-	// Function to get the voids report
 	const fetchLaborCICOData = async (groupByOption) => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setIsTableRendered(false);
 			const getData = {
 				url: 'labourCICO',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -304,7 +258,7 @@ const LaborCICO = () => {
 						groupByOption === 'Employee'
 							? employee.employees.map((data) => ({
 									jobDescription: data.jobDesc,
-									totalMinutes: data.minuteTotal,
+									totalMinutes: data.minutesTotal,
 									totalHours: data.hoursTotal?.toFixed(2),
 									date: dateFormat(data.businessDateIn, 'mm-dd-yyyy'),
 									timeIn: dateFormat(data.businessDateIn, 'hh:MM TT'),
@@ -316,7 +270,7 @@ const LaborCICO = () => {
 										employeeID: employee.employeeID,
 										name: `${employee.firstName} ${employee.lastName}`,
 										subRows: employee.employees.map((data) => ({
-											totalMinutes: data.minuteTotal,
+											totalMinutes: data.minutesTotal,
 											totalHours: data.hoursTotal?.toFixed(2),
 											date: dateFormat(data.businessDateIn, 'mm-dd-yyyy'),
 											timeIn: dateFormat(data.businessDateIn, 'hh:MM TT'),
@@ -339,7 +293,7 @@ const LaborCICO = () => {
 	};
 
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setUnitShowModal(false);
 	};
@@ -577,12 +531,13 @@ const LaborCICO = () => {
 			setIsTableRendered={setIsTableRendered}
 			expandCollapseButtons={true}
 			detailOnTop={detailOnTop}
+			headerPosition='left'
+			dataPosition='left'
 		/>
 	);
 
 	return (
 		<>
-			<Loader loading={isLoading} />
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -590,16 +545,16 @@ const LaborCICO = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Clock In - Clock Out</h2>
-				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Clock In - Clock Out</h2>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center space-x-3 '>
 						<UnitSelector
-							companyId={companyId}
-							alignmentId={alignmentId}
-							memberId={selectedUnit}
+							companyId={companyID}
+							alignmentId={alignmentID}
+							memberID={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
-							setMemberName={setselectedUnitName}
+							setMemberName={setSelectedUnitName}
 							onClick={() => setUnitShowModal(true)}
 						/>
 						<DateSelector
@@ -632,14 +587,17 @@ const LaborCICO = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading &&
-					(labourCICOData.length > 0 ? (
-						<div className='paged-table'>{Table}</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						{!isLoading &&
+							(labourCICOData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</div>
 				)}
 
 				<div>
