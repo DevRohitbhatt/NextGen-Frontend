@@ -54,7 +54,7 @@ const MenuItemsSold = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//selected menu items
@@ -127,13 +127,13 @@ const MenuItemsSold = () => {
 
 	const handleViewWeekChange = (option) => {
 		setViewWeek(option);
-		const value = dayValueMap[option] || 0; // Default to 0 if option is not found
+		const value = dayValueMap[option] || 0;
 		setViewWeekValue(value);
 	};
 
 	const handleViewChange = (option) => {
 		setView(option);
-		const value = viewValueMap[option] || 0; // Default to 0 if option is not found
+		const value = viewValueMap[option] || 0;
 		setViewValue(value);
 		setMenuItemSoldData([]);
 	};
@@ -141,7 +141,7 @@ const MenuItemsSold = () => {
 	const handleItemChange = (option) => {
 		setItem(option);
 		setMenuItemSoldData([]);
-		const value = viewValueMap[option] || 0; // Default to 0 if option is not found
+		const value = viewValueMap[option] || 0;
 		setItemValue(value);
 	};
 
@@ -1767,7 +1767,7 @@ const MenuItemsSold = () => {
 							)}
 
 							<div className='run-button' onClick={handleRunClick}>
-								<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+								<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 									Run
 								</div>
 							</div>
