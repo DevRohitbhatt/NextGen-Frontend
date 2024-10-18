@@ -1734,7 +1734,7 @@ const MenuItemsSold = () => {
 					</div>
 
 					<div className='flex items-center justify-between space-x-3'>
-						<div className='flex items-center space-x-3'>
+						<div className='flex items-center space-x-1'>
 							<UnitSelector
 								companyId={companyID}
 								alignmentId={alignmentID}
@@ -1762,7 +1762,7 @@ const MenuItemsSold = () => {
 							)}
 
 							<div className='run-button' onClick={handleRunClick}>
-								<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+								<div className='py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 									Run
 								</div>
 							</div>
