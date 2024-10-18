@@ -427,7 +427,7 @@ const Invoices = () => {
 
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div>
-						<div className='flex items-center space-x-3'>
+						<div className='flex items-center'>
 							<UnitSelector
 								companyID={companyID}
 								alignmentID={alignmentID}
