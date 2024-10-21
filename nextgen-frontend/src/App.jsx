@@ -19,6 +19,7 @@ import {
 	EmployeeInformation,
 	LaborByPayPeriod,
 	Voids,
+	MenuGrossProfit,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
@@ -131,6 +132,7 @@ const App = () => {
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
+								<Route path='/MenuGrossProfit' element={<MenuGrossProfit />} />
 
 								{/* Labour */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
