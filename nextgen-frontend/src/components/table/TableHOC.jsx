@@ -242,7 +242,7 @@ function TableHOC({
 									}`}
 									onClick={(e) => {
 										e.stopPropagation();
-										if (onCallBack) {
+										if (!row.getCanExpand()) {
 											onCallBack(row.original);
 										} else if (row.getCanExpand()) {
 											row.getToggleExpandedHandler()(e);

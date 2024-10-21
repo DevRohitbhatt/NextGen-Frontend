@@ -41,6 +41,7 @@ const urlConfig = {
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
 	menuGrossProfit: 'api/sales/getMenuGrossProfitReport',
+	menuGrossProfitRecipeInfo: 'api/sales/GetMenuGrossProfitRecipePopupReport',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',

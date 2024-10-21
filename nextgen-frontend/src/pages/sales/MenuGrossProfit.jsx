@@ -33,10 +33,11 @@ const MenuGrossProfit = () => {
 	} = useSelector((state) => state.globalState);
 
 	const [menuGrossProfitData, setMenuGrossProfitData] = useState([]);
-	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+	const [recipeInfoData, setRecipeInfoData] = useState([]);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isRecipeInfoLoading, setIsRecipeInfoLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Menu Gross Profit Report, please try again later.'
@@ -58,7 +59,11 @@ const MenuGrossProfit = () => {
 	const [selectedCategories, setSelectedCategories] = useState(Categories);
 	const [isGroupByCategory, setIsGroupByCategory] = useState(true);
 	const [showItemsWithSales, setShowItemsWithSales] = useState(false);
+	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
 	const [showItemsWithNoRecipeCost, setShowItemsWithNoRecipeCost] = useState(false);
+	const [selectedRecipe, setSelectedRecipe] = useState();
+	const [recipeInforModalOpen, setRecipeInforModalOpen] = useState(false);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -181,6 +186,77 @@ const MenuGrossProfit = () => {
 	const memoizedColumns = useMemo(() => createColumns(columnHelper), []);
 	const [columns, setColumns] = useState(memoizedColumns);
 
+	const recipeModalColumns = [
+		columnHelper.accessor('qsrInventoryItemID', {
+			id: 'qsrInventoryItemID',
+			header: 'QSR Inventory Item ID',
+			dataType: 'number',
+			size: 150,
+		}),
+		columnHelper.accessor('inventoryItem', {
+			id: 'inventoryItem',
+			header: 'Inventory Item',
+			cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
+			dataType: 'string',
+			size: 300,
+		}),
+		columnHelper.accessor('mainUOMName', {
+			id: 'mainUOMName',
+			header: 'Main UOM Name',
+			cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
+			dataType: 'string',
+			size: 180,
+		}),
+		columnHelper.accessor('mainUOMCost', {
+			id: 'mainUOMCost',
+			header: 'Main UOM Cost',
+			cell: ({ getValue }) => `$${getValue().toFixed(2)}`,
+			dataType: 'number',
+			size: 100,
+		}),
+		columnHelper.accessor('mainUOMsInRecipe', {
+			id: 'mainUOMsInRecipe',
+			header: 'Main UOMs In Recipe',
+			cell: ({ getValue }) => getValue().toFixed(6),
+			dataType: 'number',
+			size: 100,
+		}),
+		columnHelper.accessor('smallUOMName', {
+			id: 'smallUOMName',
+			header: 'Small UOM Name',
+			dataType: 'string',
+			size: 100,
+		}),
+		columnHelper.accessor('smallUOMCost', {
+			id: 'smallUOMCost',
+			header: 'Small UOM Cost',
+			cell: ({ getValue }) => `$${getValue().toFixed(4)}`,
+			dataType: 'number',
+			size: 100,
+		}),
+		columnHelper.accessor('smallUOMsInRecipe', {
+			id: 'smallUOMsInRecipe',
+			header: 'Small UOMs In Recipe',
+			cell: ({ getValue }) => getValue().toFixed(6),
+			dataType: 'number',
+			size: 100,
+		}),
+		columnHelper.accessor('recipeItemCost', {
+			id: 'recipeItemCost',
+			header: 'Recipe Item Cost',
+			cell: ({ getValue }) => `$${getValue().toFixed(4)}`,
+			dataType: 'number',
+			size: 100,
+		}),
+		columnHelper.accessor('inventoryPriceSourceT0N', {
+			id: 'inventoryPriceSourceT0N',
+			header: 'Inventory Price Source',
+			cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
+			dataType: 'string',
+			size: 100,
+		}),
+	];
+
 	useEffect(() => {
 		if (groupOrUnitAccess || defaultUnitID) {
 			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
@@ -302,6 +378,32 @@ const MenuGrossProfit = () => {
 		if (e) fetchMenuGrossProfitData();
 	};
 
+	const handleRecipeInfoModal = async (e) => {
+		setSelectedRecipe(e);
+		setRecipeInforModalOpen(true);
+		try {
+			setIsRecipeInfoLoading(true);
+			const getData = {
+				url: 'menuGrossProfitRecipeInfo',
+				urlParams: {
+					companyId: companyID,
+					alignmentId: alignmentID,
+					memberId: selectedUnit,
+					itemID: e.itemID,
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+				},
+			};
+
+			const result = await getCall(getData);
+
+			setRecipeInfoData(result.data);
+			setIsRecipeInfoLoading(false);
+		} catch (e) {
+			console.log('Error getting Menu Gross Profit Recipe Information data: ', e);
+		}
+	};
+
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
 		const pdfData = {
@@ -395,7 +497,14 @@ const MenuGrossProfit = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={menuGrossProfitData} isFooter={true} />;
+	const Table = (
+		<TableHOC
+			columns={columns}
+			data={menuGrossProfitData}
+			isFooter={true}
+			onCallBack={(e) => handleRecipeInfoModal(e)}
+		/>
+	);
 
 	return (
 		<>
@@ -522,7 +631,7 @@ const MenuGrossProfit = () => {
 						onClose={() => setIsCategoryModalOpen(false)}
 						title={'Select The Categories To Show On The Report'}
 					>
-						<div className='w-[500px] p-4 space-y-4'>
+						<div className='p-4 w-[] space-y-4 '>
 							<div className='flex justify-between'>
 								<button
 									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
@@ -549,6 +658,35 @@ const MenuGrossProfit = () => {
 										<label className='text-lg font-medium ms-2'>{category}</label>
 									</div>
 								))}
+							</div>
+						</div>
+					</Modal>
+					<Modal
+						isOpen={recipeInforModalOpen}
+						onClose={() => setRecipeInforModalOpen(false)}
+						title={'Recipe Information'}
+					>
+						<div className='w-[80rem] p-4 overflow-auto'>
+							<h2 className='flex justify-center text-lg'>
+								Item:
+								<span className='mx-1 font-bold'>
+									{selectedRecipe?.itemID + ' - ' + selectedRecipe?.itemName}
+								</span>{' '}
+								| Total Recipe Cost: ${selectedRecipe?.recipeCost}
+							</h2>
+
+							<div className='relative w-full min-h-56'>
+								<Loader loading={isRecipeInfoLoading} />
+								{!isRecipeInfoLoading &&
+									(menuGrossProfitData.length > 0 ? (
+										<TableHOC
+											columns={recipeModalColumns}
+											data={recipeInfoData}
+											headerPosition='left'
+										/>
+									) : (
+										<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+									))}
 							</div>
 						</div>
 					</Modal>
