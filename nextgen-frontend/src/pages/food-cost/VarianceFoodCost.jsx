@@ -59,7 +59,11 @@ const VarianceFoodCost = () => {
 	const [countType, setCountType] = useState('WE');
 	const countDropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
 	const [viewby, setViewBy] = useState('Department');
-	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
+	const viewOptions = [
+		{ name: 'Department', row: 1 },
+		{ name: 'Sub Department', row: 2 },
+		{ name: 'Inventory Item', row: 3 },
+	];
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 	const moreOptionsDropdown = useRef(null);
 
@@ -639,7 +643,7 @@ const VarianceFoodCost = () => {
 		<TableHOC
 			columns={columns}
 			data={varianceFoodCostData}
-			view={viewby}
+			view={viewOptions.find((option) => option.name === viewby)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 		/>

@@ -59,7 +59,11 @@ const ActualFoodCost = () => {
 	const [countType, setCountType] = useState('WE');
 	const dropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }];
 	const [viewby, setViewBy] = useState('Department');
-	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
+	const viewOptions = [
+		{ name: 'Department', row: 1 },
+		{ name: 'Sub Department', row: 2 },
+		{ name: 'Inventory Item', row: 3 },
+	];
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
 	//IntroJS variables for the help steps
@@ -633,7 +637,7 @@ const ActualFoodCost = () => {
 		<TableHOC
 			columns={columns}
 			data={actualFoodCostData}
-			view={viewby}
+			view={viewOptions.find((option) => option.name === viewby)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 		/>

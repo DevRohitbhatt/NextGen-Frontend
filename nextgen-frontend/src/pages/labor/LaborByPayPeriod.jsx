@@ -54,7 +54,11 @@ const LaborByPayPeriod = () => {
 
 	//dropdown variables
 	const [view, setView] = useState('Units');
-	const dropdownOptions = [{ name: 'Units' }, { name: 'Employees' }, { name: 'Employee Details' }];
+	const dropdownOptions = [
+		{ name: 'Units', row: 0 },
+		{ name: 'Employees', row: 1 },
+		{ name: 'Employee Details', row: 2 },
+	];
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -476,7 +480,7 @@ const LaborByPayPeriod = () => {
 		<TableHOC
 			columns={columns}
 			data={laborByPayPeriodData}
-			view={view}
+			view={dropdownOptions.find((option) => option.name === view)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 			expandCollapseButtons={true}

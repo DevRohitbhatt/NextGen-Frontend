@@ -102,7 +102,7 @@ function TableHOC({
 				<div className='flex items-center my-4 space-x-4'>
 					<button
 						onClick={() => table.toggleAllRowsExpanded(false)}
-						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+						className={`flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
 							table.getIsAllRowsExpanded()
 								? 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
 								: 'bg-[var(--tw-primary)] text-white'
@@ -113,7 +113,7 @@ function TableHOC({
 					</button>
 					<button
 						onClick={() => table.toggleAllRowsExpanded(true)}
-						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+						className={`flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
 							table.getIsAllRowsExpanded()
 								? 'bg-[var(--tw-primary)] text-white'
 								: 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'

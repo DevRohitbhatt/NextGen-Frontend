@@ -159,9 +159,7 @@ const Invoices = () => {
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
 	const fetchData = async (companyID) => {
-		setIsLoading(true);
 		await Promise.all([fetchVendors(companyID)]);
-		setIsLoading(false);
 	};
 
 	// This function fetches the vendors.
