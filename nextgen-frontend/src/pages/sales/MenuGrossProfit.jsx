@@ -54,7 +54,7 @@ const MenuGrossProfit = () => {
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
-	const Categories = ['Beverage', 'Food', 'Wings'];
+	const Categories = ['Beverage', 'Food', 'Non Revenue', 'Wings'];
 	const [selectedCategories, setSelectedCategories] = useState(Categories);
 	const [isGroupByCategory, setIsGroupByCategory] = useState(true);
 	const [showItemsWithSales, setShowItemsWithSales] = useState(false);
