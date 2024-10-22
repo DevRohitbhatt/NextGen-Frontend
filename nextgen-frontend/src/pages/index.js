@@ -16,6 +16,7 @@ const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
+const Discounts = lazy(() => import('./sales/Discounts'));
 
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
@@ -31,6 +32,7 @@ export {
 	EmployeeInformation,
 	LaborByPayPeriod,
 	Voids,
+	Discounts,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,

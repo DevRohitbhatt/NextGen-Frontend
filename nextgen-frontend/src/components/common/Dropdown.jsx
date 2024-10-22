@@ -34,7 +34,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title }) => {
 				className='flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)]'
 				onClick={() => setIsOpen(!isOpen)}
 			>
-				{selectedOption}
+				<p className='truncate'>{selectedOption}</p>
 				<span className={`ml-2 transition ease-linear delay-300 transform `}>
 					{isOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
 				</span>
