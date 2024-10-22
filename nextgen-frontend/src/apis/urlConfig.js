@@ -3,7 +3,6 @@ const urlConfig = {
 	getCompanySetting: '/api/company/settings/getsetting',
 	getAllCompanySettings: '/api/company/settings/getallsettings',
 
-
 	unitsAndArea: '/api/unitsandareas/getbyid',
 	vendors: '/api/vendor/getvendorsbycompanyid',
 
@@ -31,12 +30,14 @@ const urlConfig = {
 	//food cost apis
 	inventoryTransferReportData: 'api/foodcost/getInventoryTransferReportData',
 	InventoryWeeksOnHand: 'api/foodcost/getInventoryWeeksOnHandReportData',
-	ActualFoodCost:'api/foodcost/getActualFoodCostReportData',
+	ActualFoodCost: 'api/foodcost/getActualFoodCostReportData',
 	varianceFoodCost: 'api/foodcost/getVarianceFoodCostReportData',
 	invoiceReport: '/api/foodcost/getInvoiceReportData',
 	invoiceSearchReport: 'api/foodcost/GetInvoiceSearchReportData',
 	getCountsheets: 'api/foodcost/GetCountSheets',
 	countsheetDetails: 'api/foodcost/GetCountsheetDetails',
+	Countsheet_PricingInfo: 'api/foodcost/getCountSheetsPriceInfo',
+	countsheetPossibleError: 'api/foodcost/getCountSheetsPossibleError',
 	PurchaseAnalysis: 'api/foodcost/getPurchaseAnalysisData',
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
