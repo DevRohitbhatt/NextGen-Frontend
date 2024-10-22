@@ -15,22 +15,28 @@ import {
 	TableHOC,
 	VendorSelector,
 	VendorModal,
+	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import PurchaseAnalysi from '../../assets/introJSSteps/PurchaseAnalysis';
 import { useLocation } from 'react-router-dom';
 import dateFormat from 'dateformat';
+import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 
 const columnHelper = createColumnHelper();
 
 const PurchaseAnalysis = () => {
 	const dispatch = useDispatch();
-	const globalState = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
-	const vendorsList = useSelector((state) => state.globalState.vendorsList);
-	const groupOrUnitAccessID = useSelector((state) => state.globalState.groupOrUnitAccess);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+		vendorsList,
+	} = useSelector((state) => state.globalState);
 	const [purchasetData, setPurchaseData] = useState([]);
 
 	//loading and error state variables
@@ -40,10 +46,12 @@ const PurchaseAnalysis = () => {
 		'There was an error trying to load the Purchase Analysis Report, please try again later.'
 	);
 
+	const [isTableRendered, setIsTableRendered] = useState(false);
+
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
@@ -57,6 +65,18 @@ const PurchaseAnalysis = () => {
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
+	const [selectedGroupBy, setSelectedGroupBy] = useState('None');
+	const groupByOptions = [
+		{ name: 'None' },
+		{ name: 'Unit - GLCode' },
+		{ name: 'Unit- Department' },
+		{ name: 'Unit - Inventory Item' },
+		{ name: 'Unit - Vendor Item - Inventory Item' },
+		{ name: 'Unit - Vendor - Invoice' },
+		{ name: 'Vendor - GLCode' },
+		{ name: 'Vendor - Department' },
+	];
+
 	//location for state
 	const location = useLocation();
 
@@ -68,24 +88,21 @@ const PurchaseAnalysis = () => {
 	});
 
 	// columns for tableHOC
-	const columns = useMemo(
+	const memoizedColumns = useMemo(
 		() => [
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
 				header: 'Unit',
 				dataType: 'string',
-				size: '150',
+				size: 200,
+				enableHiding: true,
 			}),
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
-				cell: ({ getValue }) => {
-					if (!getValue()) return '';
-					const date = new Date(getValue());
-					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-					return formattedDate;
-				},
+				cell: ({ getValue }) => dateFormat(getValue(), 'mm-dd-yyyy'),
 				dataType: 'date',
+				filterFn: 'includesString',
 				size: 100,
 			}),
 			columnHelper.accessor('name', {
@@ -98,46 +115,56 @@ const PurchaseAnalysis = () => {
 				id: 'vendorInvoiceReference',
 				header: 'Invoice Ref #',
 				dataType: 'string',
+				size: 120,
 			}),
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Invoice Total',
 				cell: ({ getValue }) => (getValue() ? `${getValue().toFixed(2)}` : ''),
+				filterFn: 'includesString',
 				dataType: 'number',
+				size: 120,
 			}),
 			columnHelper.accessor('companyGLCode', {
 				id: 'companyGLCode',
 				header: 'GL Code',
 				dataType: 'string',
+				size: 200,
 			}),
 			columnHelper.accessor('vendorItemDescription', {
 				id: 'vendorItemDescription',
 				header: 'Vendor Item',
 				dataType: 'string',
-				size: 200,
+				size: 250,
 			}),
 			columnHelper.accessor('quantity', {
 				id: 'quantity',
 				header: 'Item Quantity',
 				cell: ({ getValue }) => <div className='text-center'>{getValue() ?? 0}</div>,
+				dataType: 'number',
+				filterFn: 'includesString',
+				size: 100,
 				footer: ({ table }) => (
 					<div className='font-bold text-center'>
 						{parseInt(table.getCoreRowModel().rows.reduce((acc, row) => acc + row.original.quantity, 0))}
 					</div>
 				),
-				dataType: 'number',
 			}),
 			columnHelper.accessor('price', {
 				id: 'price',
 				header: 'Item Price',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				dataType: 'number',
+				filterFn: 'includesString',
+				size: 100,
 			}),
 			columnHelper.accessor('taxAmount', {
 				id: 'taxAmount',
 				header: 'Item Tax',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				dataType: 'number',
+				filterFn: 'includesString',
+				size: 100,
 			}),
 			columnHelper.accessor('extPrice', {
 				id: 'extPrice',
@@ -153,52 +180,52 @@ const PurchaseAnalysis = () => {
 					</div>
 				),
 				dataType: 'number',
+				filterFn: 'includesString',
+				size: 100,
 			}),
 			columnHelper.accessor('department', {
 				id: 'department',
 				header: 'Department',
 				dataType: 'string',
+				size: 150,
 			}),
 			columnHelper.accessor('subdepartment', {
 				id: 'subdepartment',
 				header: 'Sub Department',
 				dataType: 'string',
+				size: 150,
 			}),
 			columnHelper.accessor('inventoryItemDescription', {
 				id: 'inventoryItemDescription',
 				header: 'Inventory Item',
 				dataType: 'string',
-				size: '300',
+				size: 300,
 			}),
 		],
 		[]
 	);
+	const [columns, setColumns] = useState(memoizedColumns);
 
 	useEffect(() => {
-		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
-			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
-			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		globalState.defaultUnitID,
-		globalState.groupOrUnitAccess,
-		globalState.defaultUnitName,
-		globalState.groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	useEffect(() => {
-		if (companyID && alignmentID && (groupOrUnitAccessID || selectedUnit)) {
-			fetchData(companyID, alignmentID, groupOrUnitAccessID || selectedUnit);
+		if (companyID && alignmentID && (groupOrUnitAccess || selectedUnit)) {
+			fetchData(companyID, alignmentID, groupOrUnitAccess || selectedUnit);
 		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
 		}
-	}, [companyID, alignmentID, groupOrUnitAccessID, selectedUnit]);
+	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
 	useEffect(() => {
 		if (location.state) {
-			fetchPurchaseDetails();
+			fetchPurchaseAnalysisReport();
 		}
 	}, []);
 
@@ -228,69 +255,41 @@ const PurchaseAnalysis = () => {
 		}
 	};
 
-	// Function to fetch the purchase analysis details
-	const fetchPurchaseDetails = async () => {
+	const fetchPurchaseAnalysisReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
+			setIsTableRendered(false);
+
 			const getData = {
 				url: 'PurchaseAnalysis',
 				urlParams: {
-					companyID: location.state?.companyID,
-					alignmentID: location.state?.alignmentID,
-					memberID: location.state?.memberID,
-					fromDate: location.state?.fromDate,
-					toDate: location.state?.toDate,
-					vendorId: location.state?.vendorId,
+					companyID: location.state?.companyID || companyID,
+					alignmentID: location.state?.alignmentID || alignmentID,
+					memberId: location.state?.memberID || selectedUnit,
+					fromDate: location.state?.fromDate || dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: location.state?.toDate || dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					vendorId: location.state?.vendorId || selectedVendor,
 				},
 			};
 
-			setSelectedUnit(location.state?.memberID);
+			if (location.state?.memberID) {
+				setSelectedUnit(location.state.memberID);
+			}
 
 			const result = await getCall(getData);
 
 			const newData = result.data.map((item) => ({
 				...item,
-				unitName: location.state.unitsAndAreasList?.units.find((unit) => unit.unitID === parseInt(item.unitId))
-					?.unitName,
-			}));
-
-			setPurchaseData(newData);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			console.error('Error fetching Purchase Analysis details: ', error);
-		}
-	};
-
-	// Function to get the voids report
-	const handleRun = async () => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-
-			const getData = {
-				url: 'PurchaseAnalysis',
-				urlParams: {
-					companyID: companyID,
-					alignmentID: alignmentID,
-					memberId: selectedUnit,
-					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
-					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
-					vendorId: selectedVendor,
-				},
-			};
-
-			const result = await getCall(getData);
-
-			const newData = result.data.map((item) => ({
-				...item,
-				unitName: unitsAndAreasList.units.find((unit) => unit.unitID === parseInt(item.unitId))?.unitName,
+				unitName: (location.state?.unitsAndAreasList || unitsAndAreasList)?.units?.find(
+					(unit) => unit.unitID === parseInt(item.unitId)
+				)?.unitName,
 				inventoryItemDescription: `${item.qsrInventoryItemID} - ${item.inventoryItemDescription}`,
 			}));
 
 			setPurchaseData(newData);
 			setIsLoading(false);
+			setIsTableRendered(true);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -302,7 +301,7 @@ const PurchaseAnalysis = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleDateSelection = (from, to) => {
@@ -315,6 +314,66 @@ const PurchaseAnalysis = () => {
 		setSelectedVendorName(selectedVendorName);
 		setSelectedVendor(vendorList[0].id);
 		setVendorShowModal(false);
+	};
+
+	const handleGroupByChange = (option) => {
+		setSelectedGroupBy(option);
+		const groupByColumns = {
+			None: [],
+			'Unit - GLCode': ['unitName', 'companyGLCode'],
+			'Unit- Department': ['unitName', 'department'],
+			'Unit - Inventory Item': ['unitName', 'inventoryItemDescription'],
+			'Unit - Vendor Item - Inventory Item': ['unitName', 'vendorItemDescription', 'inventoryItemDescription'],
+			'Unit - Vendor - Invoice': ['unitName', 'name', 'vendorInvoiceReference'],
+			'Vendor - GLCode': ['name', 'companyGLCode'],
+			'Vendor - Department': ['name', 'department'],
+		};
+
+		const selectedGroupByColumns = groupByColumns[option] || [];
+		const newColumns = memoizedColumns.map((column) =>
+			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
+		);
+
+		if (option !== 'None') {
+			newColumns.unshift(
+				columnHelper.display({
+					id: 'actions',
+					cell: ({ row }) => {
+						if (!row.getCanExpand()) return null;
+
+						const label =
+							row.depth < selectedGroupByColumns.length
+								? `${columns.find((col) => col.id === selectedGroupByColumns[row.depth])?.header}: ${
+										row.original[selectedGroupByColumns[row.depth]]
+								  }`
+								: '';
+
+						return (
+							<div
+								{...{
+									style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem`, width: '100%' },
+									className: 'flex items-center gap-2 font-bold absolute bg-white inset-0 capitalize',
+								}}
+							>
+								{row.getIsExpanded() ? (
+									<CiSquareMinus className='text-[20px]' />
+								) : (
+									<CiSquarePlus className='text-[20px]' />
+								)}
+								{label}
+							</div>
+						);
+					},
+					size: 80,
+				})
+			);
+		}
+
+		setColumns(newColumns);
+
+		if (isTableRendered) {
+			fetchPurchaseAnalysisReport();
+		}
 	};
 
 	// Function to handle the PDF export
@@ -374,6 +433,7 @@ const PurchaseAnalysis = () => {
 			data={purchasetData}
 			isPaginated={true}
 			isFooter={true}
+			enableColumnFilters={true}
 			headerPosition='flex-start'
 			dataPosition='text-start'
 		/>
@@ -381,17 +441,16 @@ const PurchaseAnalysis = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
-			<div className='w-[85%] mx-auto'>
+			<div className='w-10/12 mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Purchase Analysis Report</h2>
-				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-					<div className='flex items-center space-x-3 '>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Purchase Analysis Report</h2>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+					<div className='flex items-center'>
 						<UnitSelector
 							companyID={companyID}
 							alignmentID={alignmentID}
@@ -399,7 +458,7 @@ const PurchaseAnalysis = () => {
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -413,9 +472,16 @@ const PurchaseAnalysis = () => {
 							setVendorName={setSelectedVendorName}
 							onClick={() => setVendorShowModal(true)}
 						/>
-
-						<div className='run-button' onClick={handleRun}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+						<div className='min-w-56'>
+							<Dropdown
+								title='Group By'
+								selectedOption={selectedGroupBy}
+								options={groupByOptions}
+								onOptionChange={handleGroupByChange}
+							/>
+						</div>
+						<div className='run-button' onClick={fetchPurchaseAnalysisReport}>
+							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
@@ -437,24 +503,27 @@ const PurchaseAnalysis = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading &&
-					(purchasetData.length > 0 ? (
-						<div className='paged-table'>{Table}</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						{!isLoading &&
+							(purchasetData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</div>
 				)}
 				<div>
 					<UnitModal
 						unitData={unitsAndAreasList}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>

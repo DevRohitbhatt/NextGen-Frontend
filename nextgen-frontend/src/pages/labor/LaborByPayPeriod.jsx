@@ -17,16 +17,20 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
-import laborByPayPeriod from '../../assets/introJSSteps/labourByPayPeriod';
+import laborByPayPeriod from '../../assets/introJSSteps/laborByPayPeriod';
 
 const columnHelper = createColumnHelper();
 
 const LaborByPayPeriod = () => {
-	const globalState = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
-
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		defaultUnitID,
+		defaultUnitName,
+		groupOrUnitAccess,
+		groupOrUnitAccessName,
+	} = useSelector((state) => state.globalState);
 	const [laborByPayPeriodData, setLaborByPayPeriodData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 	//loading and error state variables
@@ -38,8 +42,8 @@ const LaborByPayPeriod = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -50,7 +54,11 @@ const LaborByPayPeriod = () => {
 
 	//dropdown variables
 	const [view, setView] = useState('Units');
-	const dropdownOptions = [{ name: 'Units' }, { name: 'Employees' }, { name: 'Employee Details' }];
+	const dropdownOptions = [
+		{ name: 'Units', row: 0 },
+		{ name: 'Employees', row: 1 },
+		{ name: 'Employee Details', row: 2 },
+	];
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -60,6 +68,25 @@ const LaborByPayPeriod = () => {
 	});
 
 	// columns for tableHOC
+	const calculateSum = (row, accessor) => {
+		if (row.getCanExpand()) {
+			const sum = row.subRows
+				.reduce((acc, subrow) => {
+					if (subrow.getCanExpand()) {
+						return (
+							acc + subrow.subRows.reduce((subAcc, subSubrow) => subAcc + subSubrow.original[accessor], 0)
+						);
+					} else {
+						return acc + subrow.original[accessor];
+					}
+				}, 0)
+				.toFixed(2);
+			return sum;
+		} else {
+			return row.original[accessor];
+		}
+	};
+
 	const columns = useMemo(
 		() => [
 			columnHelper.display({
@@ -85,12 +112,13 @@ const LaborByPayPeriod = () => {
 				id: 'unitName',
 				header: 'Unit Name',
 				dataType: 'string',
-				size: '250',
+				size: 300,
 			}),
 			columnHelper.accessor('employeeId', {
 				id: 'employeeId',
 				header: 'Employee ID',
 				dataType: 'number',
+				size: 120,
 			}),
 			columnHelper.accessor((row) => (row.firstName && row.lastName ? `${row.firstName} ${row.lastName}` : ''), {
 				id: 'fullName',
@@ -107,11 +135,13 @@ const LaborByPayPeriod = () => {
 					return formattedDate;
 				},
 				dataType: 'date',
+				size: 100,
 			}),
 			columnHelper.accessor('jobCode', {
 				id: 'jobCode',
 				header: 'Job Code',
 				dataType: 'number',
+				size: 100,
 				cell: ({ row, getValue }) => {
 					if (row.getCanExpand()) {
 						const value = row.subRows.map((subrow) => subrow.original.jobCode);
@@ -124,119 +154,41 @@ const LaborByPayPeriod = () => {
 			columnHelper.accessor('overHours', {
 				id: 'overHours',
 				header: 'Overtime Hours',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) => subAcc + subSubrow.original.overHours,
-											0
-										)
-									);
-								} else {
-									return acc + subrow.original.overHours;
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return getValue();
-					}
-				},
+				cell: ({ row }) => calculateSum(row, 'overHours'),
 				dataType: 'number',
+				size: 140,
 			}),
 			columnHelper.accessor('rate', {
 				id: 'rate',
 				header: 'Rate',
 				dataType: 'number',
+				size: 60,
 			}),
 			columnHelper.accessor('declaredTips', {
 				id: 'declaredTips',
 				header: 'Declared Tips',
 				dataType: 'number',
+				size: 120,
 			}),
 			columnHelper.accessor('preTaxTicketSales', {
 				id: 'preTaxTicketSales',
 				header: 'Pre-Tax Ticket Sales',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) => subAcc + subSubrow.original.preTaxTicketSales,
-											0
-										)
-									);
-								} else {
-									return acc + subrow.original.preTaxTicketSales;
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return getValue();
-					}
-				},
+				cell: ({ row }) => calculateSum(row, 'preTaxTicketSales'),
 				dataType: 'number',
+				size: 160,
 			}),
 			columnHelper.accessor('declaredTipsPct', {
 				id: 'declaredTipsPct',
 				header: 'Tips %',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) => subAcc + subSubrow.original.declaredTipsPct,
-											0
-										)
-									);
-								} else {
-									return acc + subrow.original.declaredTipsPct;
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return getValue();
-					}
-				},
+				size: 80,
+				cell: ({ row }) => calculateSum(row, 'declaredTipsPct'),
 				dataType: 'number',
 			}),
 			columnHelper.accessor('regPay', {
 				id: 'regPay',
 				header: 'Total Pay',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce(
-											(subAcc, subSubrow) => subAcc + subSubrow.original.regPay,
-											0
-										)
-									);
-								} else {
-									return acc + subrow.original.regPay;
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return getValue();
-					}
-				},
+				size: 120,
+				cell: ({ row }) => calculateSum(row, 'regPay'),
 				dataType: 'number',
 			}),
 		],
@@ -244,21 +196,15 @@ const LaborByPayPeriod = () => {
 	);
 
 	useEffect(() => {
-		if (globalState.groupOrUnitAccess || globalState.defaultUnitID) {
-			setSelectedUnit(globalState.groupOrUnitAccess || globalState.defaultUnitID);
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-		if (globalState.groupOrUnitAccessName || globalState.defaultUnitName) {
-			setSelectedUnitName(globalState.groupOrUnitAccessName || globalState.defaultUnitName);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [
-		globalState.defaultUnitID,
-		globalState.groupOrUnitAccess,
-		globalState.defaultUnitName,
-		globalState.groupOrUnitAccessName,
-	]);
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
-	// Function to get the voids report
-	const handleLaborByPayPeriod = async () => {
+	const fetchLaborByPayPeriod = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -309,7 +255,7 @@ const LaborByPayPeriod = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleDateSelection = (from, to) => {
@@ -534,7 +480,7 @@ const LaborByPayPeriod = () => {
 		<TableHOC
 			columns={columns}
 			data={laborByPayPeriodData}
-			view={view}
+			view={dropdownOptions.find((option) => option.name === view)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 			expandCollapseButtons={true}
@@ -542,100 +488,100 @@ const LaborByPayPeriod = () => {
 	);
 
 	return (
-		<>
-			<Loader loading={isLoading} />
-			<div className='w-[85%] mx-auto'>
-				<Steps
-					enabled={introSteps.stepsEnabled}
-					steps={introSteps.steps}
-					initialStep={introSteps.initialStep}
-					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Labor By Pay Period</h2>
-				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-					<div className='flex items-center space-x-3 '>
-						<UnitSelector
-							companyId={companyID}
-							alignmentId={alignmentID}
-							memberID={selectedUnit}
-							memberName={selectedUnitName}
-							includeAreas={true}
-							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
-						/>
-						<DateSelector
-							toDate={selectedToDate}
-							fromDate={selectedFromDate}
-							isDateRange={true}
-							onClick={() => setShowDateModal(true)}
-						/>
-						<div className='w-52'>
-							<Dropdown
-								title='Expand View'
-								options={dropdownOptions}
-								selectedOption={view}
-								onOptionChange={handleViewChange}
-							/>
-						</div>
-						<div className='run-button' onClick={handleLaborByPayPeriod}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
-								Run
-							</div>
-						</div>
-					</div>
-					<div>
-						<ExportOptions
-							includePDF={true}
-							handlePDFClick={handlePDFClick}
-							includeCSV={true}
-							handleCSVClick={handleCSVClick}
-							includeExcel={true}
-							handleExcelClick={handleExcelClick}
-							includeHelp={true}
-							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
-						/>
-					</div>
-				</header>
-
-				{/* Display the table if there is no error and the data is not loading */}
-				{isError ? (
-					<div>{errorMessage}</div>
-				) : (
-					!isLoading &&
-					(laborByPayPeriodData.length > 0 ? (
-						<div className='paged-table'>{Table}</div>
-					) : !selectedUnit ? (
-						<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-					) : (
-						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-					))
-				)}
-
-				<div>
-					<UnitModal
-						unitData={unitsAndAreasList}
+		<div className='w-[85%] mx-auto'>
+			<Steps
+				enabled={introSteps.stepsEnabled}
+				steps={introSteps.steps}
+				initialStep={introSteps.initialStep}
+				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+			/>
+			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Labor By Pay Period</h2>
+			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+				<div className='flex items-center'>
+					<UnitSelector
+						companyId={companyID}
+						alignmentId={alignmentID}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
 						includeAreas={true}
-						handleClose={() => {
-							setUnitShowModal(false);
-						}}
-						handleUnitSelection={handleUnitSelection}
+						setMemberName={setSelectedUnitName}
+						onClick={() => setShowUnitModal(true)}
 					/>
-					<CalendarModal
-						handleClose={() => setShowDateModal(false)}
-						modalOpen={showDateModal}
+					<DateSelector
+						toDate={selectedToDate}
+						fromDate={selectedFromDate}
 						isDateRange={true}
-						handleDateSelection={handleDateSelection}
-						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-						selectedFromDate={selectedFromDate}
-						selectedToDate={selectedToDate}
+						onClick={() => setShowDateModal(true)}
+					/>
+					<div className='w-52'>
+						<Dropdown
+							title='Expand View'
+							options={dropdownOptions}
+							selectedOption={view}
+							onOptionChange={handleViewChange}
+						/>
+					</div>
+					<div className='run-button' onClick={fetchLaborByPayPeriod}>
+						<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+							Run
+						</div>
+					</div>
+				</div>
+				<div>
+					<ExportOptions
+						includePDF={true}
+						handlePDFClick={handlePDFClick}
+						includeCSV={true}
+						handleCSVClick={handleCSVClick}
+						includeExcel={true}
+						handleExcelClick={handleExcelClick}
+						includeHelp={true}
+						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 					/>
 				</div>
+			</header>
+
+			{/* Display the table if there is no error and the data is not loading */}
+			{isError ? (
+				<div>{errorMessage}</div>
+			) : (
+				<div className='relative w-full min-h-56'>
+					<Loader loading={isLoading} />
+					{!isLoading &&
+						(laborByPayPeriodData.length > 0 ? (
+							<div className='paged-table'>{Table}</div>
+						) : !selectedUnit ? (
+							<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+						) : (
+							<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+						))}
+				</div>
+			)}
+
+			<div>
+				<UnitModal
+					unitData={unitsAndAreasList}
+					memberID={selectedUnit}
+					memberName={selectedUnitName}
+					show={showUnitModal}
+					includeAreas={true}
+					handleClose={() => {
+						setShowUnitModal(false);
+					}}
+					handleUnitSelection={handleUnitSelection}
+				/>
+				<CalendarModal
+					handleClose={() => setShowDateModal(false)}
+					modalOpen={showDateModal}
+					isDateRange={true}
+					handleDateSelection={handleDateSelection}
+					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+					selectedFromDate={selectedFromDate}
+					selectedToDate={selectedToDate}
+				/>
 			</div>
-		</>
+		</div>
 	);
 };
 

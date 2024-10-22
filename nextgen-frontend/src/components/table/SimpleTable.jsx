@@ -52,7 +52,14 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 		return sortableData;
 	};
 
-	
+	const footerSum = () => {
+		const sorte = sortedData().slice(startIndex, endIndex).reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue.extendedPrice), 0);
+
+		return sorte.toFixed(2)
+
+
+	}
+
 	const handleSort = (key) => {
 		let direction = 'asc';
 		if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -87,7 +94,8 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 							{headers.map((header, index) => (
 								<React.Fragment key={index}>
 									<th
-										className='gap-3 p-2 text-left border-b border-gray-300 cursor-pointer  '
+										className='gap-3 p-2 text-left border-b border-gray-300 cursor-pointer'
+										style={{width: header?.width ? header?.width : 'auto',}}
 										onClick={() => handleSort(header.key)}
 									>
 										{header.toolTipDirection === '' || !header.toolTipDirection ? (

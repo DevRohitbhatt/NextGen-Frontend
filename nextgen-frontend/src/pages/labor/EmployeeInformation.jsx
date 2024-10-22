@@ -16,10 +16,13 @@ import {
 } from '../../components';
 
 const EmployeeInformation = () => {
-	const state = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		defaultUnitID,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [employeeInformationData, setEmployeeInformationData] = useState([]);
 	const [filteredEmployeeInformationData, setFilteredEmployeeInformationData] = useState([]);
 
@@ -32,8 +35,8 @@ const EmployeeInformation = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//dropdown variables
 	const [view, setView] = useState('All');
@@ -61,6 +64,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px', // Minimum width of the column
 			maxWidth: '250px', // Maximum width of the column
+			width: '265px', // fix width
 		},
 		{
 			key: 'employeeId',
@@ -70,6 +74,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width: '120px',
 		},
 		{
 			key: 'ssn',
@@ -79,6 +84,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '130px',
 			maxWidth: '200px',
+			width: '130px',
 		},
 		{
 			key: 'lastName',
@@ -88,6 +94,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '150px',
 		},
 		{
 			key: 'firstName',
@@ -97,6 +104,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '150px',
 		},
 		{
 			key: 'middleName',
@@ -106,6 +114,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '150px',
 		},
 		{
 			key: 'payRate',
@@ -115,6 +124,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '100px',
 			maxWidth: '150px',
+			width: '100px',
 		},
 		{
 			key: 'address',
@@ -124,6 +134,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '200px',
 			maxWidth: '300px',
+			width: '200px',
 		},
 		{
 			key: 'address2',
@@ -133,6 +144,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '200px',
 			maxWidth: '300px',
+			width: '200px',
 		},
 		{
 			key: 'city',
@@ -142,6 +154,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width: '120px',
 		},
 		{
 			key: 'state',
@@ -151,6 +164,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '100px',
 			maxWidth: '150px',
+			width: '140px',
 		},
 		{
 			key: 'zip',
@@ -160,6 +174,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '100px',
 			maxWidth: '120px',
+			width: '100px',
 		},
 		{
 			key: 'phone',
@@ -169,6 +184,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '120px',
 		},
 		{
 			key: 'maritalStatus',
@@ -178,6 +194,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '150px',
 		},
 		{
 			key: 'dependants',
@@ -187,6 +204,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '150px',
 		},
 		{
 			key: 'phantomEmployee',
@@ -196,6 +214,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '150px',
 		},
 		{
 			key: 'cellPhone',
@@ -205,6 +224,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
+			width: '150px',
 		},
 		{
 			key: 'email',
@@ -214,6 +234,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '200px',
 			maxWidth: '300px',
+			width: '270px',
 		},
 		{
 			key: 'payrollID',
@@ -223,6 +244,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width: '120px',
 		},
 		{
 			key: 'birthDate',
@@ -232,6 +254,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width: '120px',
 		},
 		{
 			key: 'startDate',
@@ -241,6 +264,7 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width: '120px',
 		},
 		{
 			key: 'termDate',
@@ -250,17 +274,18 @@ const EmployeeInformation = () => {
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
+			width: '120px',
 		},
 	];
 
 	useEffect(() => {
-		if (state.defaultUnitId) {
-			setSelectedUnit(state.defaultUnitId);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (state.defaultUnitName) {
-			setSelectedUnitName(state.defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [state.defaultUnitId, state.defaultUnitName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	// Fetching Employee Information
 	const fetchEmployeeInformation = async (companyId, alignmentId, selectedUnit) => {
@@ -311,7 +336,7 @@ const EmployeeInformation = () => {
 	const handleUnitSelection = async (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 		setIsLoading(true);
 		await fetchEmployeeInformation(companyID, alignmentID, unitID);
 		setIsLoading(false);
@@ -534,53 +559,53 @@ const EmployeeInformation = () => {
 	};
 
 	return (
-		<>
-			<Loader loading={isLoading} />
-			<div className='w-[85%] mx-auto'>
-				<Steps
-					enabled={introSteps.stepsEnabled}
-					steps={introSteps.steps}
-					initialStep={introSteps.initialStep}
-					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Employee Information</h2>
-				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-					<div className='flex items-center space-x-3 '>
-						<UnitSelector
-							companyId={companyID}
-							alignmentId={alignmentID}
-							memberId={selectedUnit}
-							memberName={selectedUnitName}
-							includeAreas={true}
-							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
-						/>
+		<div className='w-[85%] mx-auto'>
+			<Steps
+				enabled={introSteps.stepsEnabled}
+				steps={introSteps.steps}
+				initialStep={introSteps.initialStep}
+				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+			/>
+			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Employee Information</h2>
+			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+				<div className='flex items-center'>
+					<UnitSelector
+						companyId={companyID}
+						alignmentId={alignmentID}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						includeAreas={true}
+						setMemberName={setSelectedUnitName}
+						onClick={() => setShowUnitModal(true)}
+					/>
 
-						<div className='w-44'>
-							<Dropdown
-								options={dropdownOptions}
-								title='View'
-								selectedOption={view}
-								onOptionChange={handleViewChange}
-							/>
-						</div>
-					</div>
-					<div>
-						<ExportOptions
-							includePDF={true}
-							handlePDFClick={handlePDFClick}
-							includeExcel={true}
-							handleExcelClick={handleExcelClick}
-							includeHelp={true}
-							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					<div className='w-[155px]'>
+						<Dropdown
+							options={dropdownOptions}
+							title='View'
+							selectedOption={view}
+							onOptionChange={handleViewChange}
 						/>
 					</div>
-				</header>
+				</div>
+				<div>
+					<ExportOptions
+						includePDF={true}
+						handlePDFClick={handlePDFClick}
+						includeExcel={true}
+						handleExcelClick={handleExcelClick}
+						includeHelp={true}
+						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					/>
+				</div>
+			</header>
 
-				{isError ? (
-					<div>{errorMessage}</div>
-				) : (
-					!isLoading && (
+			{isError ? (
+				<div>{errorMessage}</div>
+			) : (
+				<div className='relative w-full min-h-56'>
+					<Loader loading={isLoading} />
+					{!isLoading && (
 						<>
 							{filteredEmployeeInformationData?.data ? (
 								<div>
@@ -596,23 +621,23 @@ const EmployeeInformation = () => {
 								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
 							)}
 						</>
-					)
-				)}
-
-				<div>
-					<UnitModal
-						unitData={unitsAndAreasList}
-						memberID={selectedUnit}
-						memberName={selectedUnitName}
-						show={showModal}
-						handleClose={() => {
-							setUnitShowModal(false);
-						}}
-						handleUnitSelection={handleUnitSelection}
-					/>
+					)}
 				</div>
+			)}
+
+			<div>
+				<UnitModal
+					unitData={unitsAndAreasList}
+					memberID={selectedUnit}
+					memberName={selectedUnitName}
+					show={showUnitModal}
+					handleClose={() => {
+						setShowUnitModal(false);
+					}}
+					handleUnitSelection={handleUnitSelection}
+				/>
 			</div>
-		</>
+		</div>
 	);
 };
 

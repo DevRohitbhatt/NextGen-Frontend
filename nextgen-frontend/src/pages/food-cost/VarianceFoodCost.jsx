@@ -23,10 +23,13 @@ import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
 const columnHelper = createColumnHelper();
 
 const VarianceFoodCost = () => {
-	const state = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		defaultUnitID,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [varianceFoodCostData, setVarianceFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 
@@ -41,8 +44,8 @@ const VarianceFoodCost = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -56,9 +59,13 @@ const VarianceFoodCost = () => {
 	const [countType, setCountType] = useState('WE');
 	const countDropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
 	const [viewby, setViewBy] = useState('Department');
-	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
-	const [isPopupVisible, setIsPopupVisible] = useState(false);
-	const popupRef = useRef(null);
+	const viewOptions = [
+		{ name: 'Department', row: 1 },
+		{ name: 'Sub Department', row: 2 },
+		{ name: 'Inventory Item', row: 3 },
+	];
+	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+	const moreOptionsDropdown = useRef(null);
 
 	const viewMap = {
 		Weekly: 'WE',
@@ -84,7 +91,6 @@ const VarianceFoodCost = () => {
 						<div
 							{...{
 								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
-								className: 'inline-block',
 							}}
 						>
 							{row.getIsExpanded() ? (
@@ -110,433 +116,169 @@ const VarianceFoodCost = () => {
 				id: 'description',
 				header: 'Description',
 				dataType: 'string',
+				size: 300,
 			}),
 			columnHelper.accessor('countDisplayUnitName', {
 				id: 'countDisplayUnitName',
 				header: 'UOM',
 				dataType: 'string',
+				size: 200,
 			}),
 			columnHelper.accessor('actualNumber', {
 				id: 'actualNumber',
 				header: 'Actual #',
 				dataType: 'number',
+				size: 90,
 			}),
 			columnHelper.accessor('actualDollar', {
 				id: 'actualDollar',
 				header: 'Actual $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.actualDollar
-																? Number(subsubsubrow.original.actualDollar)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.actualDollar
-														? Number(subSubrow.original.actualDollar)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc + (subrow.original.actualDollar ? Number(subrow.original.actualDollar) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'actualDollar', getValue),
+				size: 90,
 			}),
 			columnHelper.accessor('actualPct', {
 				id: 'actualPct',
 				header: 'Actual %',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.actualPct
-																? Number(subsubsubrow.original.actualPct * 100)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.actualPct
-														? Number(subSubrow.original.actualPct * 100)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc + (subrow.original.actualPct ? Number(subrow.original.actualPct * 100) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return `${sum}%`;
-					} else {
-						return `${(getValue() ?? 0).toFixed(2)}%`;
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'actualPct', getValue, true),
+				size: 90,
 			}),
 			columnHelper.accessor('idealNumber', {
 				id: 'idealNumber',
 				header: 'Ideal #',
 				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
 				dataType: 'number',
+				size: 90,
 			}),
 			columnHelper.accessor('idealDollar', {
 				id: 'idealDollar',
 				header: 'Ideal $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.idealDollar
-																? Number(subsubsubrow.original.idealDollar)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.idealDollar
-														? Number(subSubrow.original.idealDollar)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc + (subrow.original.idealDollar ? Number(subrow.original.idealDollar) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'idealDollar', getValue),
+				size: 90,
 			}),
 			columnHelper.accessor('idealPct', {
 				id: 'idealPct',
 				header: 'Ideal %',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.idealPct
-																? Number(subsubsubrow.original.idealPct)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.idealPct
-														? Number(subSubrow.original.idealPct)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return acc + (subrow.original.idealPct ? Number(subrow.original.idealPct) : 0);
-								}
-							}, 0)
-							.toFixed(2);
-						return `${sum}%`;
-					} else {
-						return `${(getValue() ?? 0).toFixed(2)}%`;
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'idealPct', getValue, true),
+				size: 90,
 			}),
 			columnHelper.accessor('varianceNumber', {
 				id: 'varianceNumber',
 				header: 'Variance #',
 				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
 				dataType: 'number',
+				size: 100,
 			}),
 			columnHelper.accessor('varianceDollar', {
 				id: 'varianceDollar',
 				header: 'Variance $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.varianceDollar
-																? Number(subsubsubrow.original.varianceDollar)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.varianceDollar
-														? Number(subSubrow.original.varianceDollar)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc +
-										(subrow.original.varianceDollar ? Number(subrow.original.varianceDollar) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'varianceDollar', getValue),
+				size: 100,
 			}),
 			columnHelper.accessor('variancePct', {
 				id: 'variancePct',
 				header: 'Variance %',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.variancePct
-																? Number(subsubsubrow.original.variancePct)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.variancePct
-														? Number(subSubrow.original.variancePct)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc + (subrow.original.variancePct ? Number(subrow.original.variancePct) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return `${sum}%`;
-					} else {
-						return `${(getValue() ?? 0).toFixed(2)}%`;
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'variancePct', getValue, true),
+				size: 100,
 			}),
 			columnHelper.accessor('wasteNumber', {
 				id: 'wasteNumber',
 				header: 'Waste #',
 				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
 				dataType: 'number',
+				size: 90,
 			}),
 			columnHelper.accessor('wasteDollar', {
 				id: 'wasteDollar',
 				header: 'Waste $',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.wasteDollar
-																? Number(subsubsubrow.original.wasteDollar)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.wasteDollar
-														? Number(subSubrow.original.wasteDollar)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return (
-										acc + (subrow.original.wasteDollar ? Number(subrow.original.wasteDollar) : 0)
-									);
-								}
-							}, 0)
-							.toFixed(2);
-						return sum;
-					} else {
-						return (getValue() ?? 0).toFixed(2);
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'wasteDollar', getValue),
+				size: 90,
 			}),
 			columnHelper.accessor('wastePct', {
 				id: 'wastePct',
 				header: 'Waste %',
 				dataType: 'number',
-				cell: ({ row, getValue }) => {
-					if (row.getCanExpand()) {
-						const sum = row.subRows
-							.reduce((acc, subrow) => {
-								if (subrow.getCanExpand()) {
-									return (
-										acc +
-										subrow.subRows.reduce((subAcc, subSubrow) => {
-											if (subSubrow.getCanExpand()) {
-												return (
-													subAcc +
-													subSubrow.subRows.reduce(
-														(subsubAcc, subsubsubrow) =>
-															subsubAcc +
-															(subsubsubrow.original.wastePct
-																? Number(subsubsubrow.original.wastePct)
-																: 0),
-														0
-													)
-												);
-											} else {
-												return (
-													subAcc +
-													(subSubrow.original.wastePct
-														? Number(subSubrow.original.wastePct)
-														: 0)
-												);
-											}
-										}, 0)
-									);
-								} else {
-									return acc + (subrow.original.wastePct ? Number(subrow.original.wastePct) : 0);
-								}
-							}, 0)
-							.toFixed(2);
-						return `${sum}%`;
-					} else {
-						return `${(getValue() ?? 0).toFixed(2)}%`;
-					}
-				},
+				cell: ({ row, getValue }) => calculateSum(row, 'wastePct', getValue, true),
+				size: 90,
 			}),
 			columnHelper.accessor('comparisonName', {
 				id: 'comparisonName',
 				header: 'Comparison Name',
 				dataType: 'string',
+				size: 160,
 			}),
 			columnHelper.accessor('comparisonSales', {
 				id: 'comparisonSales',
 				header: 'Comparison Sales',
 				dataType: 'number',
+				cell: ({ getValue }) => (getValue() !== undefined ? `$${getValue().toFixed(2)}` : ''),
+				size: 150,
 			}),
 		],
 		[]
 	);
 
-	useEffect(() => {
-		if (state.defaultUnitId) {
-			setSelectedUnit(state.defaultUnitId);
+	// calculate the sum of the subrows
+	const calculateSum = (row, field, getValue, isPercentage = false) => {
+		if (row.getCanExpand()) {
+			const sum = row.subRows
+				.reduce((acc, subrow) => {
+					if (subrow.getCanExpand()) {
+						return (
+							acc +
+							subrow.subRows.reduce((subAcc, subSubrow) => {
+								if (subSubrow.getCanExpand()) {
+									return (
+										subAcc +
+										subSubrow.subRows.reduce(
+											(subsubAcc, subsubsubrow) =>
+												subsubAcc +
+												(subsubsubrow.original[field]
+													? Number(subsubsubrow.original[field]) * (isPercentage ? 100 : 1)
+													: 0),
+											0
+										)
+									);
+								} else {
+									return (
+										subAcc +
+										(subSubrow.original[field]
+											? Number(subSubrow.original[field]) * (isPercentage ? 100 : 1)
+											: 0)
+									);
+								}
+							}, 0)
+						);
+					} else {
+						return (
+							acc +
+							(subrow.original[field] ? Number(subrow.original[field]) * (isPercentage ? 100 : 1) : 0)
+						);
+					}
+				}, 0)
+				.toFixed(2);
+			return isPercentage ? `${sum}%` : `$${sum}`;
+		} else {
+			return isPercentage ? `${getValue().toFixed(2)}%` : `$${getValue().toFixed(2)}`;
 		}
-		if (state.defaultUnitName) {
-			setSelectedUnitName(state.defaultUnitName);
-		}
-	}, [state.defaultUnitId, state.defaultUnitName]);
+	};
 
-	// Function to get the voids report
-	const handleVarianceFoodCost = async () => {
+	useEffect(() => {
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
+		}
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
+		}
+	}, [defaultUnitID, defaultUnitName]);
+
+	const fetchVarianceFoodCost = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -554,9 +296,10 @@ const VarianceFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
+
 			const newData = [
 				{
-					department: 'Total',
+					department: 'TOTAL',
 					subRows: result.data.map((department) => ({
 						department: department.department,
 						comparisonName:
@@ -601,7 +344,7 @@ const VarianceFoodCost = () => {
 	const handleUnitSelection = (unitName, unitID) => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleDateSelection = (from, to) => {
@@ -610,12 +353,12 @@ const VarianceFoodCost = () => {
 		setShowDateModal(false);
 	};
 
-	const handleCountType = (option) => {
+	const handleCountTypeChange = (option) => {
 		setView(option);
 		setCountType(viewMap[option]);
 	};
 
-	const handleCountsheet = async (isEnding = false) => {
+	const fetchCountsheets = async (isEnding = false) => {
 		try {
 			const getData = {
 				url: 'getCountsheets',
@@ -672,8 +415,7 @@ const VarianceFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
-
-			navigate('/Purchase', {
+			navigate('/PurchaseAnalysis', {
 				state: {
 					companyID: companyID,
 					alignmentID: alignmentID,
@@ -885,8 +627,8 @@ const VarianceFoodCost = () => {
 	};
 
 	const handleClickOutside = (event) => {
-		if (popupRef.current && !popupRef.current.contains(event.target)) {
-			setIsPopupVisible(false);
+		if (moreOptionsDropdown.current && !moreOptionsDropdown.current.contains(event.target)) {
+			setIsDropdownVisible(false);
 		}
 	};
 
@@ -901,7 +643,7 @@ const VarianceFoodCost = () => {
 		<TableHOC
 			columns={columns}
 			data={varianceFoodCostData}
-			view={viewby}
+			view={viewOptions.find((option) => option.name === viewby)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 		/>
@@ -909,25 +651,24 @@ const VarianceFoodCost = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
-			<div className='w-[85%] mx-auto'>
+			<div className='w-10/12 mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Variance Food Cost</h2>
-				<header className='lg:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-					<div className='flex items-center space-x-3 '>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Variance Food Cost</h2>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+					<div className='flex items-center'>
 						<UnitSelector
 							companyID={companyID}
 							alignmentID={alignmentID}
-							memberId={selectedUnit}
+							memberID={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
 							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -941,11 +682,11 @@ const VarianceFoodCost = () => {
 								options={countDropdownOptions}
 								title='Count Type'
 								selectedOption={view}
-								onOptionChange={handleCountType}
+								onOptionChange={handleCountTypeChange}
 							/>
 						</div>
-						<div className='run-button' onClick={handleVarianceFoodCost}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+						<div className='run-button' onClick={fetchVarianceFoodCost}>
+							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
@@ -968,71 +709,83 @@ const VarianceFoodCost = () => {
 				) : (
 					<>
 						{varianceFoodCostData.length > 0 && (
-							<div className='w-52 display-flex'>
-								<Dropdown
-									title='Expand View'
-									options={viewOptions}
-									selectedOption={viewby}
-									onOptionChange={(option) => setViewBy(option)}
-								/>
-								<span
-									onClick={() => setIsPopupVisible(!isPopupVisible)}
-									className='cursor-pointer mt-[47px]'
-								>
-									{' '}
-									More....
-								</span>
-								{isPopupVisible && (
-									<div className='more-container' ref={popupRef}>
-										<div className='option mb-2 w-[258px]'>
-											<button className='w-[100%]'>Show/Hide Departments</button>
-										</div>
-										<div className='option mb-2 w-[258px]'>
-											<button
-												className='w-[100%]'
-												onClick={() => {
-													handleCountsheet(); // For Beginning Countsheet
-													setIsPopupVisible(false);
-												}}
-											>
-												View Beginning Countsheet
-											</button>
-										</div>
-										<div className='option mb-2 w-[258px]'>
-											<button
-												className='w-[100%]'
-												onClick={() => {
-													handleCountsheet(true); // For Ending Countsheet
-													setIsPopupVisible(false);
-												}}
-											>
-												View Ending Countsheet
-											</button>
-										</div>
-										<div className='option'>
-											<button
-												className='w-[100%]'
-												onClick={() => {
-													handleViewPurchase(selectedFromDate, selectedToDate, true); // For view Purchase
-													setIsPopupVisible(false);
-												}}
-											>
-												View Purchases
-											</button>
-										</div>
+							<div className='flex flex-row items-center space-x-2'>
+								<div className='w-48'>
+									<Dropdown
+										title='Expand View'
+										options={viewOptions}
+										selectedOption={viewby}
+										onOptionChange={(option) => setViewBy(option)}
+									/>
+								</div>
+								{/* start  */}
+								<div className='flex items-center justify-center w-28 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
+									<div
+										onClick={() => setIsDropdownVisible(!isDropdownVisible)}
+										className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
+									>
+										<span
+											// onClick={() => setIsPopupVisible(!isPopupVisible)}
+											className='cursor-pointer mt-[47px]'
+										>
+											{' '}
+											More....
+										</span>
 									</div>
-								)}
+									{isDropdownVisible && (
+										<div className='more-container !mt-[32px]' ref={moreOptionsDropdown}>
+											<div className='option mb-2 w-[258px]'>
+												<button className='w-[100%] bg-[#f9f9f9]'>Show/Hide Departments</button>
+											</div>
+											<div className='option mb-2 w-[258px]'>
+												<button
+													className='w-[100%] bg-[#f9f9f9]'
+													onClick={() => {
+														fetchCountsheets(); // For Beginning Countsheet
+														setIsDropdownVisible(false);
+													}}
+												>
+													View Beginning Countsheet
+												</button>
+											</div>
+											<div className='option mb-2 w-[258px]'>
+												<button
+													className='w-[100%] bg-[#f9f9f9]'
+													onClick={() => {
+														fetchCountsheets(true); // For Ending Countsheet
+														setIsDropdownVisible(false);
+													}}
+												>
+													View Ending Countsheet
+												</button>
+											</div>
+											<div className='option'>
+												<button
+													className='w-[100%] bg-[#f9f9f9]'
+													onClick={() => {
+														handleViewPurchase(selectedFromDate, selectedToDate, true); // For view Purchase
+														setIsDropdownVisible(false);
+													}}
+												>
+													View Purchases
+												</button>
+											</div>
+										</div>
+									)}
+								</div>
 							</div>
 						)}
-
-						{!isLoading &&
-							(varianceFoodCostData.length > 0 ? (
-								<div className='paged-table'>{Table}</div>
-							) : !selectedUnit ? (
-								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-							) : (
-								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-							))}
+						<div className='relative w-full min-h-56'>
+							<Loader loading={isLoading} />
+							{!isLoading &&
+								(varianceFoodCostData.length > 0 ? (
+									<div className='paged-table'>{Table}</div>
+								) : !selectedUnit ? (
+									<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+								) : (
+									<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+								))}
+						</div>
 					</>
 				)}
 				<div>
@@ -1042,7 +795,7 @@ const VarianceFoodCost = () => {
 						memberName={selectedUnitName}
 						show={showModal}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>

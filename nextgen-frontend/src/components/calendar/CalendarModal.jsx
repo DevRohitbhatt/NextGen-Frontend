@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import * as Styled from '../styles/DateModalStyles.jsx';
 import { FaTimes } from 'react-icons/fa';
-import { ModalHeader } from 'react-bootstrap';
 import { TableBuilder as Table, YearSelector, CalendarSelector } from '../index.js';
 import Calendar from 'react-calendar';
 
@@ -10,8 +9,6 @@ const CalendarModal = ({
 	handleClose,
 	selectedFromDate,
 	selectedToDate,
-	handleFromDateChange,
-	handleToDateChange,
 	modalOpen,
 	isDateRange,
 	handleDateSelection,
@@ -93,7 +90,7 @@ const CalendarModal = ({
 	};
 
 	const handleOkButtonClick = () => {
-		if (isDateRange) {
+		if (isDateRange && new Date(localToDate) >= new Date(localFromDate)) {
 			handleDateSelection(localFromDate, localToDate);
 		} else {
 			handleDateSelection(localFromDate, localFromDate);
@@ -113,9 +110,8 @@ const CalendarModal = ({
 			{modalOpen && (
 				<div className='fixed bg-[#00000073] w-full h-dvh left-0 top-0 z-10'>
 					<div
-						className={`fixed bg-white rounded-lg shadow-lg overflow-hidden left-1/3  top-[6%] ${
-							isDateRange ? '' : 'w-96'
-						}`}
+						className={`fixed bg-white rounded-lg shadow-lg overflow-hidden left-1/3  top-[6%] ${isDateRange ? '' : 'w-96'
+							}`}
 					>
 						<div className='flex items-center justify-between px-4 py-2 text-white bg-[var(--tw-primary)]'>
 							{isDateRange ? (
@@ -130,13 +126,13 @@ const CalendarModal = ({
 								<FaTimes className='close' />
 							</button>
 						</div>
-						<div className='mx-auto w-full'>
+						<div className='w-full mx-auto'>
 							{!isDateRange ? (
 								<Calendar
 									onChange={handleInputChange}
 									value={localFromDate}
 									onClickDay={toggleCalendar}
-									className="tailwind-calendar"
+									className='tailwind-calendar'
 								/>
 							) : (
 								<>
@@ -161,7 +157,7 @@ const CalendarModal = ({
 										</div>
 									</div>
 
-									<div className='m-auto w-full px-4'>
+									<div className='w-full px-4 m-auto'>
 										<Table
 											columnHeaders={CalendarTable.columnHeaders}
 											columnwidths={CalendarTable.columnWidths}
