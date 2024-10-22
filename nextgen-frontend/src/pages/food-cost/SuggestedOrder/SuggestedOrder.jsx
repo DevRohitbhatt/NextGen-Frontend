@@ -1011,7 +1011,7 @@ export default function SuggestedOrder() {
           .map((item) => ({
             ...item,
             vendorItems: item.vendorItems.filter(
-              (vendorItem) => vendorItem.orderQty > 0 && vendorItem.isSelected
+              (vendorItem) => vendorItem?.orderQty > 0 && vendorItem.isSelected
             ),
           }))
           .filter((item) => item.vendorItems.length > 0),
