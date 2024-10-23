@@ -295,6 +295,10 @@ input.Search::placeholder {
 	@apply block h-12 bg-transparent;
 }
 
+.suggested-order-table::-webkit-scrollbar-button:start:decrement:vertical {
+	@apply block h-12 bg-transparent;
+}
+
 .tableHOC::-webkit-scrollbar-button:end:increment,
 .inventoryItemsTable::-webkit-scrollbar-button:end:increment,
 .CalendarTable::-webkit-scrollbar-button:end:increment,
