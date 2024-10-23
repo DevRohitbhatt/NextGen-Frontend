@@ -34,7 +34,7 @@ export default function PrepChartTemplate() {
 			},
 		],
 	});
-  const [selectedUnit, setSelectedUnit] = useState(state.defaultUnitId);
+  const [selectedUnit, setSelectedUnit] = useState(state.defaultUnitID);
   const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
   const [showModal, setShowModal] = useState(false);
   const [isSave, setIsSave] = useState(false);
@@ -138,8 +138,6 @@ export default function PrepChartTemplate() {
 				});
 			}
 
-      console.log(result.data);
-
 			result.data.prepChartTemplate.forEach((group) => {
 				group.inventoryItemList = group.inventoryItemList.map((item) => {
 					return {
@@ -171,7 +169,6 @@ export default function PrepChartTemplate() {
     const sourceClone = Array.from(source);
     const destClone = Array.from(destination);
     const itemBeingMoved = sourceClone[droppableSource.index];
-		console.log(droppableDestination);
 
     const itemExistsInDestination = destClone.some(
       (item) => item.inventoryItemID === itemBeingMoved.inventoryItemID

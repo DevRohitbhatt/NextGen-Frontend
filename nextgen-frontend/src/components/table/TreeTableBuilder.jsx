@@ -169,8 +169,6 @@ export default function TreeTable({
     onSearch(searchTerm, setExpandedNodes);
   };
 
-  console.log("data", initialData);
-
   const isEditableArray = [
     false,
     false,
@@ -207,56 +205,58 @@ export default function TreeTable({
         </div>
         {onSearch && <SearchBar data={initialData} onSearch={handleSearch} />}
       </div>
-      <div
-        className={`rounded-[30px] px-4 pb-4 tree-table`}
-      >
-				<TableHeader className='Header'>
-					{columnHeaders.map((header, index) => (
-						<TableHeaderCell
-							key={index}
-							columntype={dataTypes[index]}
-							$columnWidth={columnWidths[index]}
-							className={headerClassNames[index]}
-						>
-							{headerTooltips ? (
-								headerTooltips[index] === '' ? (
-									<div> {header} </div>
-								) : toolTipDirection[index] === 'left' ? (
-									<Tooltip content={headerTooltips[index]} direction='left'>
-										<HeaderCellContainer columntype={dataTypes[index]}>
-											{header} <InfoIcon />
-										</HeaderCellContainer>
-									</Tooltip>
-								) : (
-									<Tooltip content={headerTooltips[index]} direction='left'>
-										<HeaderCellContainer columntype={dataTypes[index]}>
-											{header} <InfoIcon />
-										</HeaderCellContainer>
-									</Tooltip>
-								)
-							) : (
-								<div>{header}</div>
-							)}
-						</TableHeaderCell>
-					))}
-				</TableHeader>
-        {initialData.map((node, index) => (
-          <TreeNode
-            companyAndUnitData={companyAndUnitData}
-            key={index}
-            node={node}
-            isExpanded={expandedNodes[node.name]}
-            onToggleNode={toggleNode}
-            headers={columnHeaders}
-            onEdit={handleEdit}
-            isEditable={isEditableArray}
-            dataTypes={dataTypes}
-            setQid={setQid}
-            orderLimits={orderLimits}
-            setOrderLimits={setOrderLimits}
-            columnWidths={columnWidths}
-          />
-        ))}
+      <div className="suggested-order-table overflow-auto mx-auto">
+        <div
+          className={` tree-table min-w-[1460px]`}
+        >
+          <TableHeader className='Header'>
+            {columnHeaders.map((header, index) => (
+              <TableHeaderCell
+                key={index}
+                columntype={dataTypes[index]}
+                $columnWidth={columnWidths[index]}
+                className={headerClassNames[index]}
+              >
+                {headerTooltips ? (
+                  headerTooltips[index] === '' ? (
+                    <div> {header} </div>
+                  ) : toolTipDirection[index] === 'left' ? (
+                    <Tooltip content={headerTooltips[index]} direction='left'>
+                      <HeaderCellContainer columntype={dataTypes[index]}>
+                        {header} <InfoIcon />
+                      </HeaderCellContainer>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip content={headerTooltips[index]} direction='left'>
+                      <HeaderCellContainer columntype={dataTypes[index]}>
+                        {header} <InfoIcon />
+                      </HeaderCellContainer>
+                    </Tooltip>
+                  )
+                ) : (
+                  <div>{header}</div>
+                )}
+              </TableHeaderCell>
+            ))}
+          </TableHeader>
+          {initialData.map((node, index) => (
+            <TreeNode
+              companyAndUnitData={companyAndUnitData}
+              key={index}
+              node={node}
+              isExpanded={expandedNodes[node.name]}
+              onToggleNode={toggleNode}
+              headers={columnHeaders}
+              onEdit={handleEdit}
+              isEditable={isEditableArray}
+              dataTypes={dataTypes}
+              setQid={setQid}
+              orderLimits={orderLimits}
+              setOrderLimits={setOrderLimits}
+              columnWidths={columnWidths}
+            />
+          ))}
+        </div>
       </div>
     </>
   );
