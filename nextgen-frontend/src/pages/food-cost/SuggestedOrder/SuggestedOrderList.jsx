@@ -283,24 +283,20 @@ const SuggestedOrderList = () => {
   };
 
   const filterSuggestedOrders = (vendorList) => {
-    console.log(vendorList);
     if (vendorList.length === 0) {
       setFilteredOrders(suggestedOrders);
       return;
     }
 
     const vendorListLookup = vendorList.map((vendor) => vendor.id);
-    console.log(vendorListLookup);
-    console.log(suggestedOrders);
     let filteredOrders = suggestedOrders.data.filter((order) => {
       return vendorListLookup.includes(order.vendorID);
     });
-    console.log(filteredOrders);
+
     setFilteredOrders({ data: filteredOrders });
   };
 
   const handleDateSelection = (from, to) => {
-		console.log(from, to);
     setSelectedFromDate(from);
     setSelectedToDate(to);
     setShowDateModal(false);
