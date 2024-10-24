@@ -40,7 +40,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title }) => {
 				</span>
 			</div>
 			{isOpen && (
-				<ul className='absolute top-full left-0 rounded-lg text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] z-10 mt-[1px] w-full '>
+				<ul className='absolute top-full left-0 rounded-lg text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] z-30 mt-[1px] w-full '>
 					{options.map((option, index) => (
 						<li
 							className='cursor-pointer bg-[#f9f9f9] rounded-md px-5 py-1 mb-2 font-semibold text-gray-800 hover:border border border-transparent hover:border-[var(--tw-primary)] mx-2 my-2'

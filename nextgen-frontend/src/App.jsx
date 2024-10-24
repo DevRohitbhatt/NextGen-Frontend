@@ -25,6 +25,8 @@ import {
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
+	CookChart,
+	CookChartTemplate
 } from './pages';
 import { Suspense } from 'react';
 
@@ -125,6 +127,8 @@ const App = () => {
 								<Route path='/Countsheets' element={<Countsheets />} />
 								<Route path='/CountsheetDesigner' element={<CountsheetDesigner />} />
 								<Route path='/PurchaseAnalysis' element={<PurchaseAnalysis />} />
+								<Route path='/CookChart' element={<CookChart />} />
+								<Route path='/CookChartTemplate' element={<CookChartTemplate />} />
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
@@ -132,6 +136,7 @@ const App = () => {
 								{/* Labour */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
+								
 							</Routes>
 						</Suspense>
 					</div>
