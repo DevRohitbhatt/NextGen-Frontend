@@ -33,7 +33,6 @@ const SalesVsLabor = () => {
 	} = useSelector((state) => state.globalState);
 
 	const [salesVsLaborData, setSalesVsLaborData] = useState([]);
-	const [isTableRendered, setIsTableRendered] = useState(false);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
@@ -71,64 +70,100 @@ const SalesVsLabor = () => {
 		() => [
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
-				header: 'Unit Name',
-				dataType: 'string',
-				size: 180,
-			}),
-			columnHelper.accessor('businessDate', {
-				id: 'businessDate',
-				header: 'Business Date',
-				dataType: 'string',
-				size: 120,
-			}),
-			columnHelper.accessor('employeeName', {
-				id: 'employeeName',
-				header: 'Employee Name',
-				dataType: 'string',
-				size: 120,
-			}),
-			columnHelper.accessor('jobDescription', {
-				id: 'jobDescription',
-				header: 'Job Description',
+				header: 'Unit',
 				dataType: 'string',
 			}),
-			columnHelper.accessor('shiftName', {
-				id: 'shiftName',
-				header: 'Shift Name',
+			columnHelper.accessor('date', {
+				id: 'date',
+				header: 'Date',
 				dataType: 'string',
-				size: 100,
 			}),
-			columnHelper.accessor('reportType', {
-				id: 'reportType',
-				header: 'Report Type',
+			columnHelper.accessor('time', {
+				id: 'time',
+				header: 'Time',
 				dataType: 'string',
-				size: 100,
 			}),
-
-			columnHelper.accessor('exceptionDetail', {
-				id: 'exceptionDetail',
-				header: 'Exception Detail',
-				dataType: 'string',
-				size: 400,
+			columnHelper.accessor('grossSales', {
+				id: 'grossSales',
+				header: 'Gross Sales',
+				cell: ({ row }) => `$${calculateSum(row, 'grossSales')}`,
+				dataType: 'number',
+				footer: ({ table }) => <div className='text-center'>${calculateFooterSum(table, 'grossSales')}</div>,
 			}),
-			columnHelper.accessor('totalCost', {
-				id: 'totalCost',
-				header: 'Total Cost',
+			columnHelper.accessor('sales', {
+				id: 'sales',
+				header: 'Sales',
+				cell: ({ row }) => `$${calculateSum(row, 'sales')}`,
+				dataType: 'number',
+				footer: ({ table }) => <div className='text-center'>${calculateFooterSum(table, 'sales')}</div>,
+			}),
+			columnHelper.accessor('variableLaborMinutes', {
+				id: 'variableLaborMinutes',
+				header: 'Variable Labor Minutes',
+				cell: ({ row }) => calculateSum(row, 'variableLaborMinutes'),
 				dataType: 'number',
 				footer: ({ table }) => (
-					<div className='font-bold text-start'>
-						$
-						{table
-							.getCoreRowModel()
-							.rows.reduce((acc, row) => acc + parseFloat(row.original.totalCost), 0)
-							.toFixed(2)}
-					</div>
+					<div className='text-center'>{calculateFooterSum(table, 'variableLaborMinutes')}</div>
 				),
+			}),
+
+			columnHelper.accessor('variableLaborHours', {
+				id: 'variableLaborHours',
+				header: 'Variable Labor Hours',
+				cell: ({ row }) => calculateSum(row, 'variableLaborHours'),
+				dataType: 'number',
+				footer: ({ table }) => (
+					<div className='text-center'>${calculateFooterSum(table, 'variableLaborHours')}</div>
+				),
+			}),
+			columnHelper.accessor('variableLaborDollars', {
+				id: 'variableLaborDollars',
+				header: 'Variable Labor Dollars',
+				cell: ({ row }) => `$${calculateSum(row, 'variableLaborDollars')}`,
+				dataType: 'number',
+				footer: ({ table }) => (
+					<div className='text-center'>${calculateFooterSum(table, 'variableLaborDollars')}</div>
+				),
+			}),
+			columnHelper.accessor('laborPercent', {
+				id: 'laborPercent',
+				header: 'Labor Percent',
+				cell: ({ row }) => `${calculateSum(row, 'laborPercent')}%`,
+				dataType: 'number',
+				footer: ({ table }) => <div className='text-center'>{calculateFooterSum(table, 'laborPercent')}%</div>,
 			}),
 		],
 		[]
 	);
 	const [columns, setColumns] = useState(memoizedColumns);
+
+	const calculateSum = (row, accessor) => {
+		if (row.getCanExpand()) {
+			const sum = row.subRows.reduce((acc, subrow) => {
+				if (subrow.getCanExpand()) {
+					return (
+						acc +
+						subrow.subRows.reduce(
+							(subAcc, subSubrow) => subAcc + parseFloat(subSubrow.original[accessor]),
+							0
+						)
+					);
+				} else {
+					return acc + parseFloat(subrow.original[accessor]);
+				}
+			}, 0);
+			return accessor === 'variableLaborMinutes' ? sum : sum.toFixed(2);
+		} else {
+			return row.original[accessor];
+		}
+	};
+
+	const calculateFooterSum = (table, accessor) => {
+		return table
+			.getCoreRowModel()
+			.rows.reduce((acc, row) => acc + parseFloat(row.original[accessor]), 0)
+			.toFixed(accessor === 'variableLaborMinutes' ? 0 : 2);
+	};
 
 	useEffect(() => {
 		if (groupOrUnitAccess || defaultUnitID) {
@@ -143,38 +178,35 @@ const SalesVsLabor = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setIsTableRendered(false);
 			const getData = {
-				url: 'labourCICOExceptions',
+				url: 'salesVsLabor',
 				urlParams: {
 					companyId: companyID,
 					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					reportType: reportTypeOptions.findIndex((option) => option.name === selectedReportType) + 1,
 				},
 			};
 
 			const result = await getCall(getData);
 
-			const newData = result.data.flatMap((unit) =>
-				unit.employees.flatMap((employee) =>
-					employee.employees.map((data) => ({
-						unitName: unit.unitName,
-						businessDate: dateFormat(data.businessDate, 'mm-dd-yyyy'),
-						employeeName: data.employeeFullName,
-						jobDescription: data.jobDescription,
-						shiftName: data.shiftName,
-						reportType: data.reportType,
-						exceptionDetail: data.exceptionDetail,
-						totalCost: Math.abs(data.totalAmount)?.toFixed(2),
-					}))
-				)
-			);
+			const newData = result.data.map((item) => ({
+				date: dateFormat(new Date(item.date), 'mm-dd-yyyy'),
+				unitName: item.unitName,
+				time: dateFormat(new Date(0, 0, 0, item.hour), 'h:MM TT'),
+				grossSales: item.salesGross.toFixed(2),
+				sales: item.sales.toFixed(2),
+				variableLaborMinutes: item.variableLaborMinutes,
+				variableLaborHours: (item.variableLaborMinutes / 60).toFixed(2),
+				variableLaborDollars: item.variableLabor.toFixed(2),
+				laborPercent: (item.laborPct * 100).toFixed(2),
+			}));
 
 			setSalesVsLaborData(newData);
+			handleGroupByChange(groupBy);
 			setIsLoading(false);
-			setIsTableRendered(true);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -198,74 +230,63 @@ const SalesVsLabor = () => {
 	const handleGroupByChange = (option) => {
 		setGroupBy(option);
 		const groupByColumns = {
-			None: [],
-			Date: ['businessDate'],
-			Employee: ['unitName', 'employeeName'],
-			Unit: ['unitName'],
+			Date: ['date', 'unitName'],
+			Unit: ['unitName', 'date'],
 		};
 
 		const selectedGroupByColumns = groupByColumns[option] || [];
-		const newColumns = memoizedColumns.map((column) =>
-			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
+		const newColumns = memoizedColumns.map((column) => ({
+			...column,
+			groupBy: selectedGroupByColumns.includes(column.id),
+			show: !selectedGroupByColumns.includes(column.id),
+		}));
+
+		const orderedColumns = [];
+		selectedGroupByColumns.forEach((colId) => {
+			const colIndex = newColumns.findIndex((column) => column.id === colId);
+			if (colIndex > -1) {
+				orderedColumns.push(newColumns[colIndex]);
+				newColumns.splice(colIndex, 1); // Remove the column from its original position
+			}
+		});
+
+		// Combine the ordered columns with the remaining columns
+		const finalColumns = [...orderedColumns, ...newColumns];
+
+		finalColumns.unshift(
+			columnHelper.display({
+				id: 'actions',
+				cell: ({ row }) => {
+					if (!row.getCanExpand()) return null;
+
+					const label =
+						row.depth < selectedGroupByColumns.length
+							? `${finalColumns.find((col) => col.id === selectedGroupByColumns[row.depth])?.header}: ${
+									row.original[selectedGroupByColumns[row.depth]]
+							  } `
+							: '';
+
+					return (
+						<div
+							{...{
+								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
+								className: 'flex items-center gap-2 font-bold top-0 bottom-0 capitalize',
+							}}
+						>
+							{row.getIsExpanded() ? (
+								<CiSquareMinus className='text-[20px]' />
+							) : (
+								<CiSquarePlus className='text-[20px]' />
+							)}
+							{label}
+						</div>
+					);
+				},
+				size: 20,
+			})
 		);
 
-		const calculateTotalCost = (rows) =>
-			rows.reduce((acc, subRow) => acc + parseFloat(subRow.original.totalCost || 0), 0);
-
-		// Helper function to handle depth-0 case where subRows have further nested subRows
-		const calculateNestedTotalCost = (rows) =>
-			rows.reduce((acc, subRow) => acc + calculateTotalCost(subRow.subRows), 0);
-
-		if (option !== 'None') {
-			newColumns.unshift(
-				columnHelper.display({
-					id: 'actions',
-					cell: ({ row }) => {
-						if (!row.getCanExpand()) return null;
-
-						const label =
-							row.depth < selectedGroupByColumns.length
-								? `${columns.find((col) => col.id === selectedGroupByColumns[row.depth])?.header}: ${
-										row.original[selectedGroupByColumns[row.depth]]
-								  } ($${
-										selectedGroupByColumns.length === 1
-											? calculateTotalCost(row.subRows).toFixed(2)
-											: row.depth === 0
-											? calculateNestedTotalCost(row.subRows).toFixed(2) // For depth-0 rows, process nested subrows
-											: calculateTotalCost(row.subRows).toFixed(2)
-								  })`
-								: '';
-
-						return (
-							<div
-								{...{
-									style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem`, width: '100%' },
-									className: 'flex items-center gap-2 font-bold absolute bg-white inset-0 capitalize',
-								}}
-							>
-								{row.getIsExpanded() ? (
-									<CiSquareMinus className='text-[20px]' />
-								) : (
-									<CiSquarePlus className='text-[20px]' />
-								)}
-								{label}
-							</div>
-						);
-					},
-					size: 20,
-				})
-			);
-		}
-
-		setColumns(newColumns);
-
-		if (isTableRendered) {
-			fetchSalesVsLabourReport();
-		}
-	};
-
-	const handleReportTypeChange = (option) => {
-		setSelectedReportType(option);
+		setColumns(finalColumns);
 	};
 
 	// Function to handle the PDF export
@@ -283,12 +304,12 @@ const SalesVsLabor = () => {
 			body: [
 				{
 					type: 'table',
-					widths: new Array(columns.length).fill('auto'),
-					dataTypes: columns.map((column) => column.dataType),
+					widths: new Array(columns.slice(1).length).fill('auto'),
+					dataTypes: columns.slice(1).map((column) => column.dataType),
 					data: {
-						columnHeaders: columns.map((column) => column.header),
+						columnHeaders: columns.slice(1).map((column) => column.header),
 						rows: salesVsLaborData.map((row) =>
-							columns.map((column) => ({
+							columns.slice(1).map((column) => ({
 								value: row[column.id],
 								cellType: column.dataType,
 								columnName: column.header,
@@ -304,8 +325,13 @@ const SalesVsLabor = () => {
 
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
-		const csvHeaders = columns.map((column) => column.header);
-		const csvData = salesVsLaborData.map((row) => columns.map((column) => `"${row[column.id]}"`).join(','));
+		const csvHeaders = columns.slice(1).map((column) => column.header);
+		const csvData = salesVsLaborData.map((row) =>
+			columns
+				.slice(1)
+				.map((column) => `"${row[column.id]}"`)
+				.join(',')
+		);
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
 		const url = window.URL.createObjectURL(blob);
@@ -320,8 +346,8 @@ const SalesVsLabor = () => {
 		const data = [
 			{
 				name: `Unit:${selectedUnitName}`,
-				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
-				data: salesVsLaborData.map((row) => columns.map((column) => row[column.id])),
+				columns: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
+				data: salesVsLaborData.map((row) => columns.slice(1).map((column) => row[column.id])),
 			},
 		];
 
@@ -332,16 +358,7 @@ const SalesVsLabor = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = (
-		<TableHOC
-			columns={columns}
-			data={salesVsLaborData}
-			headerPosition='left'
-			dataPosition='left'
-			isFooter={true}
-			isPaginated={true}
-		/>
-	);
+	const Table = <TableHOC columns={columns} data={salesVsLaborData} isFooter={true} />;
 
 	return (
 		<>
@@ -375,7 +392,7 @@ const SalesVsLabor = () => {
 								title='Report'
 								options={reportTypeOptions}
 								selectedOption={selectedReportType}
-								onOptionChange={handleReportTypeChange}
+								onOptionChange={(option) => setSelectedReportType(option)}
 							/>
 						</div>
 						<div className='w-32 ml-2 group-by'>
@@ -383,7 +400,7 @@ const SalesVsLabor = () => {
 								title='Group By'
 								options={groupByOptions}
 								selectedOption={groupBy}
-								onOptionChange={handleGroupByChange}
+								onOptionChange={(option) => setGroupBy(option)}
 							/>
 						</div>
 						<div className='run-button' onClick={fetchSalesVsLabourReport}>
