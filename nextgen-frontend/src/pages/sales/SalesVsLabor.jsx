@@ -139,9 +139,9 @@ const SalesVsLabor = () => {
 			columnHelper.accessor('laborPercent', {
 				id: 'laborPercent',
 				header: 'Labor Percent',
-				cell: ({ row }) => `${calculateSum(row, 'laborPercent')}%`,
+				cell: ({ row }) => `${calculateLaborPercent(row)}%`,
 				dataType: 'number',
-				footer: ({ table }) => <div className='text-center'>{calculateFooterSum(table, 'laborPercent')}%</div>,
+				footer: ({ table }) => <div className='text-center'>{calculateLaborPctFooter(table)}%</div>,
 				size: 60,
 			}),
 		],
@@ -168,6 +168,68 @@ const SalesVsLabor = () => {
 		} else {
 			return row.original[accessor];
 		}
+	};
+
+	const calculateLaborPercent = (row) => {
+		if (row.getCanExpand()) {
+			const totalLaborDollars = row.subRows.reduce((acc, subrow) => {
+				if (subrow.getCanExpand()) {
+					return (
+						acc +
+						subrow.subRows.reduce(
+							(subAcc, subSubrow) => subAcc + parseFloat(subSubrow.original['variableLaborDollars']),
+							0
+						)
+					);
+				} else {
+					return acc + parseFloat(subrow.original['variableLaborDollars']);
+				}
+			}, 0);
+
+			const totalSales = row.subRows.reduce((acc, subrow) => {
+				if (subrow.getCanExpand()) {
+					return (
+						acc +
+						subrow.subRows.reduce(
+							(subAcc, subSubrow) => subAcc + parseFloat(subSubrow.original['sales']),
+							0
+						)
+					);
+				} else {
+					return acc + parseFloat(subrow.original['sales']);
+				}
+			}, 0);
+
+			return ((totalLaborDollars / totalSales) * 100).toFixed(2);
+		} else {
+			return row.original['laborPercent'];
+		}
+	};
+
+	const calculateLaborPctFooter = (table) => {
+		const totalLaborDollars = table.getCoreRowModel().rows.reduce((acc, row) => {
+			if (row.getCanExpand()) {
+				return (
+					acc +
+					row.subRows.reduce(
+						(subAcc, subrow) => subAcc + parseFloat(subrow.original['variableLaborDollars']),
+						0
+					)
+				);
+			} else {
+				return acc + parseFloat(row.original['variableLaborDollars']);
+			}
+		}, 0);
+
+		const totalSales = table.getCoreRowModel().rows.reduce((acc, row) => {
+			if (row.getCanExpand()) {
+				return acc + row.subRows.reduce((subAcc, subrow) => subAcc + parseFloat(subrow.original['sales']), 0);
+			} else {
+				return acc + parseFloat(row.original['sales']);
+			}
+		}, 0);
+
+		return ((totalLaborDollars / totalSales) * 100).toFixed(2);
 	};
 
 	const calculateFooterSum = (table, accessor) => {
