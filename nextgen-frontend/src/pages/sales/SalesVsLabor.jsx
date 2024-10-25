@@ -504,7 +504,7 @@ const SalesVsLabor = () => {
 
 	const detailOnTop = (
 		<button
-			className='flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-base font-medium text-[var(--tw-primary)]'
+			className='flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-base font-medium text-[var(--tw-primary)] ml-2'
 			onClick={handleChartClick}
 		>
 			Chart This Data
