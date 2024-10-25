@@ -14,6 +14,8 @@ import {
 	ExcelExport as exportToExcel,
 	TableHOC,
 	Dropdown,
+	LineChart,
+	Modal,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
@@ -33,6 +35,7 @@ const SalesVsLabor = () => {
 	} = useSelector((state) => state.globalState);
 
 	const [salesVsLaborData, setSalesVsLaborData] = useState([]);
+	const [isChartModalOpen, setIsChartModalOpen] = useState(false);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +61,8 @@ const SalesVsLabor = () => {
 	const [groupBy, setGroupBy] = useState('Date');
 	const groupByOptions = [{ name: 'Date' }, { name: 'Unit' }];
 
+	const [chartData, setChartData] = useState({});
+
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
 		steps: salesVsLabor(),
@@ -82,6 +87,7 @@ const SalesVsLabor = () => {
 				id: 'time',
 				header: 'Time',
 				dataType: 'string',
+				size: 180,
 			}),
 			columnHelper.accessor('grossSales', {
 				id: 'grossSales',
@@ -89,6 +95,7 @@ const SalesVsLabor = () => {
 				cell: ({ row }) => `$${calculateSum(row, 'grossSales')}`,
 				dataType: 'number',
 				footer: ({ table }) => <div className='text-center'>${calculateFooterSum(table, 'grossSales')}</div>,
+				size: 60,
 			}),
 			columnHelper.accessor('sales', {
 				id: 'sales',
@@ -96,6 +103,7 @@ const SalesVsLabor = () => {
 				cell: ({ row }) => `$${calculateSum(row, 'sales')}`,
 				dataType: 'number',
 				footer: ({ table }) => <div className='text-center'>${calculateFooterSum(table, 'sales')}</div>,
+				size: 60,
 			}),
 			columnHelper.accessor('variableLaborMinutes', {
 				id: 'variableLaborMinutes',
@@ -105,6 +113,7 @@ const SalesVsLabor = () => {
 				footer: ({ table }) => (
 					<div className='text-center'>{calculateFooterSum(table, 'variableLaborMinutes')}</div>
 				),
+				size: 60,
 			}),
 
 			columnHelper.accessor('variableLaborHours', {
@@ -113,14 +122,16 @@ const SalesVsLabor = () => {
 				cell: ({ row }) => calculateSum(row, 'variableLaborHours'),
 				dataType: 'number',
 				footer: ({ table }) => (
-					<div className='text-center'>${calculateFooterSum(table, 'variableLaborHours')}</div>
+					<div className='text-center'>{calculateFooterSum(table, 'variableLaborHours')}</div>
 				),
+				size: 60,
 			}),
 			columnHelper.accessor('variableLaborDollars', {
 				id: 'variableLaborDollars',
 				header: 'Variable Labor Dollars',
 				cell: ({ row }) => `$${calculateSum(row, 'variableLaborDollars')}`,
 				dataType: 'number',
+				size: 60,
 				footer: ({ table }) => (
 					<div className='text-center'>${calculateFooterSum(table, 'variableLaborDollars')}</div>
 				),
@@ -131,6 +142,7 @@ const SalesVsLabor = () => {
 				cell: ({ row }) => `${calculateSum(row, 'laborPercent')}%`,
 				dataType: 'number',
 				footer: ({ table }) => <div className='text-center'>{calculateFooterSum(table, 'laborPercent')}%</div>,
+				size: 60,
 			}),
 		],
 		[]
@@ -192,18 +204,27 @@ const SalesVsLabor = () => {
 
 			const result = await getCall(getData);
 
-			const newData = result.data.map((item) => ({
-				date: dateFormat(new Date(item.date), 'mm-dd-yyyy'),
-				unitName: item.unitName,
-				time: dateFormat(new Date(0, 0, 0, item.hour), 'h:MM TT'),
-				grossSales: item.salesGross.toFixed(2),
-				sales: item.sales.toFixed(2),
-				variableLaborMinutes: item.variableLaborMinutes,
-				variableLaborHours: (item.variableLaborMinutes / 60).toFixed(2),
-				variableLaborDollars: item.variableLabor.toFixed(2),
-				laborPercent: (item.laborPct * 100).toFixed(2),
-			}));
+			const newData = result.data.map((item) => {
+				const quarterMinutes = item.quarterHourText ? parseInt(item.quarterHourText.replace(':', ''), 10) : 0;
 
+				const halfMinutes = item.halfHourText ? parseInt(item.halfHourText.replace(':', ''), 10) : 0;
+
+				const minutes = quarterMinutes || halfMinutes;
+
+				const time = dateFormat(new Date(0, 0, 0, item.hour, minutes), 'h:MM TT');
+
+				return {
+					date: dateFormat(new Date(item.date), 'mm-dd-yyyy'),
+					unitName: item.unitName,
+					time: time, // Use the formatted time
+					grossSales: item.salesGross.toFixed(2),
+					sales: item.sales.toFixed(2),
+					variableLaborMinutes: item.variableLaborMinutes,
+					variableLaborHours: (item.variableLaborMinutes / 60).toFixed(2),
+					variableLaborDollars: item.variableLabor.toFixed(2),
+					laborPercent: (item.laborPct * 100).toFixed(2),
+				};
+			});
 			setSalesVsLaborData(newData);
 			handleGroupByChange(groupBy);
 			setIsLoading(false);
@@ -246,7 +267,7 @@ const SalesVsLabor = () => {
 			const colIndex = newColumns.findIndex((column) => column.id === colId);
 			if (colIndex > -1) {
 				orderedColumns.push(newColumns[colIndex]);
-				newColumns.splice(colIndex, 1); // Remove the column from its original position
+				newColumns.splice(colIndex, 1);
 			}
 		});
 
@@ -270,7 +291,8 @@ const SalesVsLabor = () => {
 						<div
 							{...{
 								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
-								className: 'flex items-center gap-2 font-bold top-0 bottom-0 capitalize',
+								className:
+									'flex items-center absolute top-0 bottom-0 gap-2 font-bold top-0 bottom-0 capitalize',
 							}}
 						>
 							{row.getIsExpanded() ? (
@@ -287,6 +309,66 @@ const SalesVsLabor = () => {
 		);
 
 		setColumns(finalColumns);
+	};
+
+	const handleChartClick = () => {
+		const uniqueDates = [...new Set(salesVsLaborData.map((item) => item.date))];
+		const totalSales = uniqueDates.map((date) => {
+			const items = salesVsLaborData.filter((item) => item.date === date);
+			return items.reduce((acc, item) => acc + parseFloat(item.sales), 0).toFixed(2);
+		});
+		const totalGrossSales = uniqueDates.map((date) => {
+			const items = salesVsLaborData.filter((item) => item.date === date);
+			return items.reduce((acc, item) => acc + parseFloat(item.grossSales), 0).toFixed(2);
+		});
+		const totalLaborDollars = uniqueDates.map((date) => {
+			const items = salesVsLaborData.filter((item) => item.date === date);
+			return items.reduce((acc, item) => acc + parseFloat(item.variableLaborDollars), 0).toFixed(2);
+		});
+		const chartData = {
+			series: [
+				{
+					name: 'Sales',
+					data: totalSales,
+				},
+				{
+					name: 'Gross Sales',
+					data: totalGrossSales,
+				},
+				{
+					name: 'Labor Dollars',
+					data: totalLaborDollars,
+				},
+			],
+			xAxis: {
+				categories: uniqueDates,
+				tickPlacement: 'between',
+			},
+			yAxis: {
+				categories: Array.from(
+					{ length: Math.ceil(Math.max(...totalSales, ...totalGrossSales, ...totalLaborDollars) / 250) + 1 },
+					(_, i) => 100 + i * 250
+				),
+				min: 100,
+				stepSize: 250,
+				labels: {
+					showAlways: true,
+					formatter: function (value) {
+						return Math.round(value);
+					},
+				},
+				axisBorder: {
+					show: true,
+				},
+				axisTicks: {
+					show: true,
+				},
+			},
+			colors: ['#4F81BD', '#C0504D', '#9BBB59'],
+		};
+
+		setChartData(chartData);
+		setIsChartModalOpen(!isChartModalOpen);
 	};
 
 	// Function to handle the PDF export
@@ -358,7 +440,24 @@ const SalesVsLabor = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={salesVsLaborData} isFooter={true} />;
+	const detailOnTop = (
+		<button
+			className='flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-base font-medium text-[var(--tw-primary)]'
+			onClick={handleChartClick}
+		>
+			Chart This Data
+		</button>
+	);
+
+	const Table = (
+		<TableHOC
+			columns={columns}
+			data={salesVsLaborData}
+			isFooter={true}
+			expandCollapseButtons={true}
+			detailOnTop={detailOnTop}
+		/>
+	);
 
 	return (
 		<>
@@ -463,6 +562,15 @@ const SalesVsLabor = () => {
 						selectedFromDate={selectedFromDate}
 						selectedToDate={selectedToDate}
 					/>
+					<Modal
+						isOpen={isChartModalOpen}
+						onClose={() => setIsChartModalOpen(!isChartModalOpen)}
+						title='Sales Vs Labor Chart'
+					>
+						<div className='w-[60rem] p-4'>
+							<LineChart chartData={chartData} />
+						</div>
+					</Modal>
 				</div>
 			</div>
 		</>

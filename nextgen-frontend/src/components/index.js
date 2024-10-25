@@ -45,4 +45,7 @@ export { default as TableCell } from './table/TableCell';
 export { default as TreeNode } from './table/TreeNode';
 export { default as TreeTable } from './table/TreeTableBuilder';
 export { default as TableHOC } from './table/TableHOC';
-export {default as DndTable } from './table/DndTable'
+export { default as DndTable } from './table/DndTable';
+
+//chart components
+export { default as LineChart } from './Charts/LineChart';
