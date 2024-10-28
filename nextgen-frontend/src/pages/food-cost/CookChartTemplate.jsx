@@ -4,6 +4,7 @@ import { Steps } from "intro.js-react";
 import { useSelector } from "react-redux";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import EditAndAddDndTable from "../../components/table/EditAndAddDndTable";
+import HoverBorderButton from "../../components/buttons/HoverBorderButton";
 
 const CookChartTemplate = (props) => {
     const {
@@ -30,7 +31,30 @@ const CookChartTemplate = (props) => {
     );
     const [selectedToDate, setSelectedToDate] = useState(new Date());
     const [showDateModal, setShowDateModal] = useState(false);
-    const [openCreateItemModal, setopenCreateItemModal] = useState(false)
+    const [openCreateItemModal, setOpenCreateItemModal] = useState(false)
+
+
+    const [items, setItems] = useState([
+        { id: '10210104', description: '(4) Biscuit', qty: 4 },
+        { id: '10210112', description: '(12) Biscuit', qty: 12 },
+        { id: '10210101', description: '(1) Biscuit', qty: 1 },
+        { id: '10210106', description: '(6) Biscuit', qty: 6 },
+        { id: '10210107', description: '(8) Biscuit', qty: 8 },
+    ]);
+
+    const [inv, setInv] = useState([
+        { id: '10210134', description: '(4) Biscuit', qty: 4 },
+        { id: '102101132', description: '(12) Biscuit', qty: 12 },
+        { id: '102101031', description: '(1) Biscuit', qty: 1 },
+        { id: '102101036', description: '(6) Biscuit', qty: 6 },
+        { id: '102101037', description: '(8) Biscuit', qty: 8 },
+    ]);
+    const [templateItems, setTemplateItems] = useState([
+        { id: '10210112', description: '(12) Biscuit', qty: 12 },
+        { id: '10210104', description: '(4) Biscuit', qty: 4 },
+    ]);
+    const [sourceType, setSourceType] = useState('Menu Items');
+    const [sourceTypeDropDown, setSourceTypeDropDown] = useState(false);
 
     useEffect(() => {
         if (defaultUnitID) {
@@ -55,20 +79,6 @@ const CookChartTemplate = (props) => {
         setShowDateModal(false);
     };
 
-    const [items, setItems] = useState([
-        { id: '10210104', description: '(4) Biscuit', qty: 4 },
-        { id: '10210112', description: '(12) Biscuit', qty: 12 },
-        { id: '10210101', description: '(1) Biscuit', qty: 1 },
-        { id: '10210106', description: '(6) Biscuit', qty: 6 },
-        { id: '10210107', description: '(8) Biscuit', qty: 8 },
-    ]);
-
-    const [templateItems, setTemplateItems] = useState([
-        { id: '10210112', description: '(12) Biscuit', qty: 12 },
-        { id: '10210104', description: '(4) Biscuit', qty: 4 },
-    ]);
-    const [sourceType, setSourceType] = useState('Menu Items');
-    const [sourceTypeDropDown, setSourceTypeDropDown] = useState(false);
     const createItemModal = () => {
         const handleSourceTypeChange = (type) => {
             setSourceType(type);
@@ -202,80 +212,28 @@ const CookChartTemplate = (props) => {
 
                 {/* start  */}
                 {sourceType === "Menu Items" ?
-                    
-                  <EditAndAddDndTable />
+
+                    <EditAndAddDndTable
+                        key="menu-items"
+                        tableOneName="Menu Items"
+                        tableTwoName="Selected Items"
+                        tableOneHeaders={['Menu ID', 'Description']}
+                        tableTwoHeaders={['Menu ID', 'Description']}
+                        initialTableOneData={items}
+                        dorpabaleidOne={"items"}
+                        dorpabaleidTwo={"itemstemplate"}
+                    />
                     :
-                    <div className="flex w-full gap-4 justify-between">
-                        <div className="w-[40%]">
-
-                            <div className="flex items-center space-x-2 mb-4 justify-between">
-                                <h2 className="text-2xl font-bold mb-4 box-content whitespace-nowrap">Inventory item</h2>
-                                <div className="w-[200px]">
-                                    <SearchBar
-                                        extraClass="w-full"
-                                    />
-                                </div>
-
-                            </div>
-
-                            <div className="rounded2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]">
-                                <table className="min-w-full table-auto ">
-                                    <thead className="">
-                                        <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
-                                            <th className="px-4 py-2 text-left w-[50%]">Inventory ID</th>
-                                            <th className="px-4 py-2 text-left w-[50%]">Description</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {items.map((item) => (
-                                            <tr key={item.id}>
-                                                <td className="px-4 py-2 border-b">{item.id}</td>
-                                                <td className="px-4 py-2 border-b">{item.description}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-
-                        </div>
-                        <div className="w-[55%]">
-                            <div className="w-[100%] rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]">
-                                <h2 className="text-2xl font-bold mb-4">List of item</h2>
-                                <div className="">
-                                    <table className="min-w-full table-auto">
-                                        <thead>
-                                            <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
-                                                <th className="px-4 py-2 text-left w-[30%]">Inventory ID</th>
-                                                <th className="px-4 py-2 text-left w-[30%]">Description</th>
-                                                <th className="px-4 py-2 text-left w-[20%]">Qty of UOM</th>
-                                                <th className="px-4 py-2 text-left w-[10%]">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {templateItems.map((item) => (
-                                                <tr key={item.id}>
-                                                    <td className="px-4 py-2 border-b">{item.id}</td>
-                                                    <td className="px-4 py-2 border-b">{item.description}</td>
-                                                    <td className="px-4 py-2 border-b"><input></input></td>
-                                                    <td className="px-4 py-2 border-b">
-                                                        <button className="text-red-500 hover:text-red-700">
-                                                            <RiDeleteBin6Line />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                            </div>
-                            <div className="flex mt-[30px] w-full justify-end">
-                                <button className="relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] w-[110px] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button mr-[20px]">Save</button>
-                                <button className="relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] w-[110px] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
+                    <EditAndAddDndTable
+                        key="inventory-items"
+                        tableOneName="Inventory item"
+                        tableTwoName="List of item"
+                        tableOneHeaders={['Inventory ID', 'Description']}
+                        tableTwoHeaders={['Inventory ID', 'Description']}
+                        initialTableOneData={inv}
+                        dorpabaleidOne={"inventory"}
+                        dorpabaleidTwo={"inventorytemplate"}
+                    />
                 }
             </div>
         )
@@ -323,9 +281,9 @@ const CookChartTemplate = (props) => {
                                                 extraClass="w-full"
                                             />
                                         </div>
-                                        <button onClick={() => { setopenCreateItemModal(true) }} className="relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] min-w-[110px] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button">
+                                        <HoverBorderButton onClick={() => { setOpenCreateItemModal(true) }} >
                                             Create New Item
-                                        </button>
+                                        </HoverBorderButton>
                                     </div>
 
                                     <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]">
@@ -435,7 +393,7 @@ const CookChartTemplate = (props) => {
             </div>
             <Modal
                 isOpen={openCreateItemModal}
-                onClose={() => { setopenCreateItemModal(!openCreateItemModal) }}
+                onClose={() => { setOpenCreateItemModal(!openCreateItemModal) }}
                 title={"Add new cook drop item"}
             >
                 {createItemModal()}

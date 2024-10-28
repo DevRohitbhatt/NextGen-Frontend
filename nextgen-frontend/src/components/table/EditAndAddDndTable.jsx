@@ -1,155 +1,202 @@
-import React, { useState } from 'react';
-import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import React, { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import SearchBar from '../common/SearchBar';
+import HoverBorderButton from '../buttons/HoverBorderButton';
 
-// Draggable row component
-const DraggableRow = ({ item, isTemplate }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
+const LONG_PRESS_DELAY = 300;
 
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        backgroundColor: '#fff',
-        cursor: 'grab',
+const DraggableRow = ({ item, isTemplate, onDelete, onLongPressDragStart, extraHeaders }) => {
+    const [timeoutId, setTimeoutId] = useState(null);
+
+    const handleMouseDown = () => {
+        const id = setTimeout(() => onLongPressDragStart(item.id), LONG_PRESS_DELAY);
+        setTimeoutId(id);
     };
 
+    const handleMouseUp = () => clearTimeout(timeoutId);
+
+    useEffect(() => () => clearTimeout(timeoutId), [timeoutId]);
+
     return (
-        <tr ref={setNodeRef} {...attributes} {...listeners} style={style}>
-            <td className="px-4 py-2 border-b">{item.id}</td>
-            <td className="px-4 py-2 border-b">{item.description}</td>
+        <>
+            <td className="px-4 py-1 border-b w-[30%]">{item.id}</td>
+            <td className="px-4 py-1 border-b w-[30%]">{item.description}</td>
             {isTemplate && (
                 <>
-                    <td className="px-4 py-2 border-b">
+                    {/* {extraHeaders.map((_, index) =>{
+                        console.log('===index===',index)
+                        return ( */}
+                    <td className="px-4 py-1 border-b w-[20%]">
                         <input className="w-full px-2 py-1 border rounded" type="text" />
                     </td>
-                    <td className="px-4 py-2 border-b">
-                        <button className="text-red-500 hover:text-red-700">
+                    {/* // )})} */}
+                    <td className="px-4 py-1 border-b w-[10%]">
+                        <button
+                            className="text-red-500 hover:text-red-700"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(item.uniqueKey);
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            style={{ pointerEvents: 'auto' }}
+                        >
                             <RiDeleteBin6Line />
                         </button>
                     </td>
                 </>
             )}
-        </tr>
+        </>
     );
 };
 
-// Droppable Table component
-const DroppableTable = ({ id, items, setItems, title, isTemplate }) => {
-    const { setNodeRef } = useDroppable({
-        id,
-    });
+const EditAndAddDndTable = ({
+    tableOneName,
+    tableTwoName,
+    tableOneHeaders,
+    tableTwoHeaders,
+    initialTableOneData,
+    dorpabaleidOne,
+    dorpabaleidTwo
+}) => {
+    const [items, setItems] = useState([]);
+    const [templateItems, setTemplateItems] = useState([]);
+    const [draggingId, setDraggingId] = useState(null);
+    const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
 
-    return (
-        <div>
-            <table ref={setNodeRef} className="min-w-full table-auto">
-                <thead>
-                    <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
-                        <th className="px-4 py-2 text-left w-[30%]">Menu ID</th>
-                        <th className="px-4 py-2 text-left w-[30%]">Description</th>
-                        {isTemplate && (
-                            <>
-                                <th className="px-4 py-2 text-left w-[20%]">Qty of UOM</th>
-                                <th className="px-4 py-2 text-left w-[10%]"  >Action</th>
-                            </>
-                        )}
-                    </tr>
-                </thead>
-                <tbody>
-                    <SortableContext items={items} strategy={verticalListSortingStrategy}>
-                        {items.length === 0 && (
-                            <tr>
-                                <td colSpan={isTemplate ? 4 : 2} className="text-center py-4">
-                                    This is where you should drop a item to create a tamplate
-                                </td>
-                            </tr>
-                        )}
-                        {items.map((item) => (
-                            <DraggableRow key={item.id} item={item} isTemplate={isTemplate} />
-                        ))}
-                    </SortableContext>
-                </tbody>
-            </table>
-        </div>
-    );
-};
+    useEffect(() => {
+        // setItems([...initialTableOneData]); // Shallow copy ensures new reference
+        setItems(initialTableOneData);
+    }, [initialTableOneData]);
+    const handleLongPressDragStart = (id) => {
+        setDraggingId(id);
+    };
 
-const EditAndAddDndTable = () => {
-    const [items, setItems] = useState([
-        { id: '10210104', description: '(4) Biscuit', qty: 4 },
-        { id: '10210112', description: '(12) Biscuit', qty: 12 },
-        { id: '10210101', description: '(1) Biscuit', qty: 1 },
-        { id: '10210106', description: '(6) Biscuit', qty: 6 },
-        { id: '10210107', description: '(8) Biscuit', qty: 8 },
-    ]);
+    const handleDragEnd = (result) => {
+        setDraggingId(null);
+        const { source, destination } = result;
 
-    const [templateItems, setTemplateItems] = useState([
-    ]);
+        if (!destination || source.droppableId === destination.droppableId) return;
 
-    const handleDragEnd = (event) => {
-        const { active, over } = event;
-
-        if (!over) return;
-
-        const activeTable = items.find((item) => item.id === active.id) ? 'items' : 'templateItems';
-        const targetTable = over.id === 'table1' ? 'items' : 'templateItems';
-
-        if (activeTable !== targetTable) {
-            // Moving between tables
-            if (activeTable === 'items') {
-                const draggedItem = items.find((item) => item.id === active.id);
-                // setItems((prev) => prev.filter((item) => item.id !== active.id));
-                setTemplateItems((prev) => [...prev, draggedItem]);
-            } else {
-                const draggedItem = templateItems.find((item) => item.id === active.id);
-                setTemplateItems((prev) => prev.filter((item) => item.id !== active.id));
-                setItems((prev) => [...prev, draggedItem]);
+        if (source.droppableId === dorpabaleidOne && destination.droppableId === dorpabaleidTwo) {
+            const itemToAdd = items.find((item) => item.id === draggingId);
+            if (itemToAdd && !templateItems.some((item) => item.id === itemToAdd.id)) {
+                setTemplateItems((prev) => [
+                    ...prev,
+                    { ...itemToAdd, uniqueKey: uniqueIdCounter },
+                ]);
+                setUniqueIdCounter((prev) => prev + 1);
             }
         }
     };
 
+    const handleDelete = (uniqueKey) => {
+        setTemplateItems((prev) => prev.filter((item) => item.uniqueKey !== uniqueKey));
+    };
+
     return (
-        <DndContext onDragEnd={handleDragEnd}>
+        <DragDropContext onDragEnd={handleDragEnd}>
             <div className="flex w-full gap-4 justify-between">
-                <div className="w-[40%]">
-
-                    <div className="flex items-center space-x-2 mb-4 justify-between">
-                        <h2 className="text-2xl font-bold mb-4 whitespace-nowrap">Menu Items</h2>
-                        <div className="w-[200px]">
-                            <SearchBar
-                                extraClass="w-full"
-                            />
+                <Droppable droppableId={dorpabaleidOne}>
+                    {(provided) => (
+                        <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className="w-[40%] p-[15px]"
+                        >
+                            <div className="flex items-center space-x-2 mb-4 justify-between">
+                                <h2 className="text-2xl font-bold mb-4">{tableOneName}</h2>
+                                <div className="w-[200px]">
+                                    <SearchBar extraClass="w-full" />
+                                </div>
+                            </div>
+                            <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]">
+                                <table className="min-w-full table-auto">
+                                    <thead>
+                                        <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
+                                            {tableOneHeaders.map((header, index) => (
+                                                <th key={index} className="px-4 py-2 text-left">{header}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {items.map((item, index) => (
+                                            <Draggable key={item.id} draggableId={item.id} index={index}>
+                                                {(provided) => (
+                                                    <tr
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        onMouseDown={() => handleLongPressDragStart(item.id)}
+                                                    >
+                                                        <DraggableRow item={item} isTemplate={false} />
+                                                    </tr>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-
-                    </div>
-
-                    <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]">
-                        <DroppableTable id="table1" items={items} setItems={setItems} isTemplate={false} />
-                    </div>
-
-
-                </div>
-                <div className="w-[55%]">
-                    <div className="w-full rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]">
-                        <h2 className="text-2xl font-bold mb-4 whitespace-nowrap">List of item</h2>
-                        <div className="">
-                            <DroppableTable id="table2" items={templateItems} setItems={setTemplateItems} isTemplate={true} />
+                    )}
+                </Droppable>
+                <Droppable droppableId={dorpabaleidTwo}>
+                    {(provided) => (
+                        <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className="w-[55%] rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]"
+                        >
+                            <h2 className="text-2xl font-bold mb-4">{tableTwoName}</h2>
+                            <table className="min-w-full table-auto">
+                                <thead>
+                                    <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
+                                        {tableTwoHeaders.map((header, index) => (
+                                            <th key={index} className="px-4 py-2 text-left">{header}</th>
+                                        ))}
+                                        <th className="px-4 py-2 text-left">Qty of UOM</th>
+                                        <th className="px-4 py-2 text-left">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {templateItems.length === 0 && (
+                                        <tr>
+                                            <td colSpan={tableTwoHeaders.length + 2} className="text-center py-4">
+                                                This is where you should drop an item to create a template
+                                            </td>
+                                        </tr>
+                                    )}
+                                    {templateItems.map((item, index) => (
+                                        <Draggable key={item.uniqueKey} draggableId={item.uniqueKey.toString()} index={index}>
+                                            {(provided) => (
+                                                <tr
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                >
+                                                    <DraggableRow
+                                                        item={item}
+                                                        isTemplate={true}
+                                                        onDelete={handleDelete}
+                                                        extraHeaders={tableTwoHeaders}
+                                                    />
+                                                </tr>
+                                            )}
+                                        </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                    <div className="flex mt-[30px] w-full justify-end">
-                        <button className="relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] w-[110px] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button mr-[20px]">Save</button>
-                        <button className="relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] w-[110px] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button">Cancel</button>
-                    </div>
-                </div>
+                    )}
+                </Droppable>
             </div>
-
-            {/* tablr  */}
-            {/* <DroppableTable id="table1" items={items} setItems={setItems} title="Table 1" isTemplate={false} />
-                <DroppableTable id="table2" items={templateItems} setItems={setTemplateItems} title="Table 2" isTemplate={true} /> */}
-
-        </DndContext>
+            <div className="flex mb-[30px] w-full justify-end">
+                <HoverBorderButton>Save</HoverBorderButton>
+                <HoverBorderButton >Cancel</HoverBorderButton>
+            </div>
+        </DragDropContext>
     );
 };
 

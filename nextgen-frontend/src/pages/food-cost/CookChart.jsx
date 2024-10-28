@@ -16,6 +16,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import CookDropTable from '../../components/table/CookDropTable';
 import { Link } from 'react-router-dom';
+import HoverBorderButton from '../../components/buttons/HoverBorderButton';
 
 const columnHelper = createColumnHelper();
 
@@ -120,7 +121,7 @@ const CookChart = () => {
                 </header>
                 <div className='w-full flex justify-end'>
                     <Link to={'/CookChartTemplate'}>
-                        <button className="relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] m-w-[110px] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button mr-[20px] my-[20px] justify-end text-nowrap" onClick={() => { }}>Manage Templates</button>
+                        <HoverBorderButton >Manage Templates</HoverBorderButton>
                     </Link>
                 </div>
                 {isError ? (
