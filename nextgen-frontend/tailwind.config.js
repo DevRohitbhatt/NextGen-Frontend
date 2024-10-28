@@ -2,6 +2,7 @@
 import tailwindScrollbar from 'tailwind-scrollbar';
 
 export default {
+	mode: 'jit',
 	content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
 	theme: {
 		extend: {
@@ -10,7 +11,7 @@ export default {
 			},
 			colors: {
 				primary: '#36479D',
-				secondary: '#e6e7eb',
+				secondary: '#508cff',
 			},
 		},
 	},

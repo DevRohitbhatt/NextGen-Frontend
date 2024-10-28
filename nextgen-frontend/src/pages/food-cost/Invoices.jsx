@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
+import { useSelector, useDispatch } from 'react-redux';
 import invoices from '../../assets/introJSSteps/invoices';
+import { setVendorsList } from '../../reducer/slices/globalState';
 import {
 	UnitSelector,
 	Loader,
@@ -14,40 +16,47 @@ import {
 	PdfBuilder,
 	ExcelExport as exportToExcel,
 	TableHOC,
+	Modal,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
-import { PiMagnifyingGlassBold } from 'react-icons/pi';
-import { MdEdit } from 'react-icons/md';
+import { SlEye } from 'react-icons/sl';
 
 const columnHelper = createColumnHelper();
 
 const Invoices = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
-	const [vendorsList, setVendorsList] = useState([]);
+	const dispatch = useDispatch();
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+		vendorsList,
+	} = useSelector((state) => state.globalState);
+	const debounceTimer = useRef(null);
 	const [invoiceReportData, setInvoiceReportData] = useState([]);
 	const [isBrowseInvoicesClicked, setIsBrowseInvoicesClicked] = useState(true);
 	const [searchKey, setSearchKey] = useState('');
 	const [searchInvoiceData, setSearchInvoiceData] = useState([]);
 
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Invoices, please try again later.'
+		'There was an error trying to load your Invoices, please try again later.'
 	);
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
-	const [selectedVendorName, setselectedVendorName] = useState('All Vendors');
+	const [selectedVendorName, setSelectedVendorName] = useState('All Vendors');
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
@@ -56,6 +65,7 @@ const Invoices = () => {
 	);
 	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
+	const [showPreviewModal, setShowPreviewModal] = useState(false);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -70,115 +80,86 @@ const Invoices = () => {
 			columnHelper.display({
 				id: 'actions',
 				cell: () => (
-					<div className='flex space-x-2 text-lg'>
-						<PiMagnifyingGlassBold className='cursor-pointer' />
-						<MdEdit className='cursor-pointer' />
+					<div
+						className='flex space-x-2 text-lg'
+						onClick={(e) => {
+							e.stopPropagation(), setShowPreviewModal(true);
+						}}
+					>
+						<SlEye />
 					</div>
 				),
-				size: '80',
+				size: 50,
 			}),
 			columnHelper.accessor('name', {
 				id: 'name',
 				header: 'Vendor',
 				dataType: 'string',
+				size: 60,
 			}),
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
 				header: 'Unit',
 				dataType: 'string',
+				size: 150,
 			}),
 			columnHelper.accessor('vendorInvoiceReference', {
 				id: 'vendorInvoiceReference',
 				header: 'Invoice Reference',
 				dataType: 'string',
+				size: 80,
 			}),
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
 				cell: ({ getValue }) => {
 					if (!getValue()) return '';
-					const date = new Date(getValue());
-					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-					return formattedDate;
+					return dateFormat(getValue(), 'mm-dd-yyyy');
 				},
 				dataType: 'date',
+				size: 80,
 			}),
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Total',
 				dataType: 'number',
+				size: 60,
 			}),
 			columnHelper.accessor('lastEditedBy', {
 				id: 'lastEditedBy',
 				header: 'Last Edited By',
 				dataType: 'string',
+				size: 80,
 			}),
 			columnHelper.accessor('status', {
 				id: 'status',
 				header: 'Status',
 				dataType: 'string',
+				size: 60,
 			}),
 		],
 		[]
 	);
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				console.log('testing mode');
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(5199);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		}
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		}
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+
+	useEffect(() => {
+		if (companyID && alignmentID && (groupOrUnitAccess || selectedUnit)) {
+			fetchData(companyID, alignmentID, groupOrUnitAccess || selectedUnit);
 		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
 		}
-	}, []);
+	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
-		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit), fetchVendors(companyId)]);
-		setIsLoading(false);
-	};
-
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
-		}
+	const fetchData = async (companyID) => {
+		await Promise.all([fetchVendors(companyID)]);
 	};
 
 	// This function fetches the vendors.
@@ -193,7 +174,7 @@ const Invoices = () => {
 			};
 
 			const result = await getCall(getData);
-			setVendorsList(result);
+			dispatch(setVendorsList(result));
 		} catch (error) {
 			setIsError(true);
 			setErrorMessage('There was an issue loading your vendors, please try again later.');
@@ -201,16 +182,15 @@ const Invoices = () => {
 		}
 	};
 
-	// Function to get the voids report
-	const handleInvoiceReport = async () => {
+	const fetchInvoiceReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
 				url: 'invoiceReport',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -226,7 +206,6 @@ const Invoices = () => {
 					subrows: row.voids,
 				})),
 			};
-
 			setInvoiceReportData(newData.data);
 			setIsLoading(false);
 		} catch (error) {
@@ -239,19 +218,19 @@ const Invoices = () => {
 
 	useEffect(() => {
 		if (selectedUnit) {
-			handleInvoiceReport();
+			fetchInvoiceReport();
 		}
 	}, [selectedUnit, selectedVendor, selectedFromDate, selectedToDate]);
 
 	// Function to handle the unit selection
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleVendorSelection = (selectedVendorName, vendorList) => {
-		setselectedVendorName(selectedVendorName);
+		setSelectedVendorName(selectedVendorName);
 		setSelectedVendor(vendorList[0].id);
 		setVendorShowModal(false);
 	};
@@ -265,31 +244,39 @@ const Invoices = () => {
 
 	const handleSearchKeyChange = async (e) => {
 		setSearchKey(e.target.value);
-		if (e.target.value.length >= 3) {
-			try {
-				setIsLoading(true);
-				setIsError(false);
-				const getData = {
-					url: 'invoiceSearchReport',
-					urlParams: {
-						companyId: companyId,
-						alignmentId: alignmentId,
-						memberId: selectedUnit,
-						searchKey: e.target.value,
-						userId: 0,
-					},
-				};
+		setIsBrowseInvoicesClicked(true);
+		if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-				const result = await getCall(getData);
-				setSearchInvoiceData(result.data);
-				setIsLoading(false);
-			} catch (error) {
-				setIsError(true);
-				setIsLoading(false);
-				setErrorMessage('There was an issue loading your data, please try again later.');
-				console.error('Error getting Invoices data: ', error);
+		debounceTimer.current = setTimeout(async () => {
+			if (e.target.value.length >= 3) {
+				setIsBrowseInvoicesClicked(false);
+				try {
+					setIsLoading(true);
+					setIsError(false);
+					const getData = {
+						url: 'invoiceSearchReport',
+						urlParams: {
+							companyId: companyID,
+							alignmentId: alignmentID,
+							memberId: selectedUnit,
+							searchKey: e.target.value,
+							userId: 0,
+						},
+					};
+
+					const result = await getCall(getData);
+					setSearchInvoiceData(result.data);
+					setIsLoading(false);
+				} catch (error) {
+					setIsError(true);
+					setIsLoading(false);
+					setErrorMessage('There was an issue loading your data, please try again later.');
+					console.error('Error getting Invoices data: ', error);
+				}
+			} else if (e.target.value === '') {
+				setIsBrowseInvoicesClicked(true);
 			}
-		}
+		}, 500);
 	};
 
 	// Function to handle the PDF export
@@ -404,7 +391,14 @@ const Invoices = () => {
 			invoiceReportData.length === 0 ? (
 				<div className='mx-auto mt-5 text-lg w-fit'>No Invoices Found</div>
 			) : (
-				<TableHOC columns={columns} data={invoiceReportData} isPaginated={true} />
+				<TableHOC
+					columns={columns}
+					data={invoiceReportData}
+					isPaginated={true}
+					dataPosition='left'
+					headerPosition='left'
+					onCallBack={(e) => {}}
+				/>
 			)
 		) : searchKey.length === 0 ? (
 			<div className='mx-auto mt-5 text-lg w-fit'>Enter invoice reference or total for searching</div>
@@ -420,7 +414,6 @@ const Invoices = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -428,66 +421,33 @@ const Invoices = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Invoices</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Invoices</h2>
 
-				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div>
-						<div className='flex gap-2'>
-							<button
-								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-									isBrowseInvoicesClicked ? 'bg-primary text-white' : 'text-primary bg-secondary'
-								}`}
-								onClick={() => setIsBrowseInvoicesClicked(true)}
-							>
-								Browse Invoices
-							</button>
-							<button
-								className={`px-3 py-2 border-2 border-solid border-primary  hover:text-white hover:bg-primary focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-									isBrowseInvoicesClicked ? 'text-primary bg-secondary' : 'bg-primary text-white'
-								}`}
-								onClick={() => setIsBrowseInvoicesClicked(false)}
-							>
-								Search Invoices
-							</button>
+						<div className='flex items-center'>
+							<UnitSelector
+								companyID={companyID}
+								alignmentID={alignmentID}
+								memberID={selectedUnit}
+								memberName={selectedUnitName}
+								includeAreas={true}
+								setMemberName={setSelectedUnitName}
+								onClick={() => setShowUnitModal(true)}
+							/>
+							<VendorSelector
+								vendorID={selectedVendor}
+								vendorName={selectedVendorName}
+								setVendorName={setSelectedVendorName}
+								onClick={() => setVendorShowModal(true)}
+							/>
+							<DateSelector
+								toDate={selectedToDate}
+								fromDate={selectedFromDate}
+								isDateRange={true}
+								onClick={() => setShowDateModal(true)}
+							/>
 						</div>
-						{isBrowseInvoicesClicked ? (
-							<div className='flex items-center space-x-3'>
-								<UnitSelector
-									companyId={companyId}
-									alignmentId={alignmentId}
-									memberId={selectedUnit}
-									memberName={selectedUnitName}
-									includeAreas={true}
-									setMemberName={setselectedUnitName}
-									onClick={() => setUnitShowModal(true)}
-								/>
-								<VendorSelector
-									vendorID={selectedVendor}
-									vendorName={selectedVendorName}
-									setVendorName={setselectedVendorName}
-									onClick={() => setVendorShowModal(true)}
-								/>
-								<DateSelector
-									toDate={selectedToDate}
-									fromDate={selectedFromDate}
-									isDateRange={true}
-									onClick={() => setShowDateModal(true)}
-								/>
-							</div>
-						) : (
-							<div className='mt-2'>
-								<p className='font-medium'>
-									Search by Invoice Reference or Total (minimum of 3 characters)
-								</p>
-								<input
-									className='p-2 border-2 rounded-lg border-secondary'
-									type='text'
-									placeholder='Invoice Reference or Total'
-									value={searchKey}
-									onChange={handleSearchKeyChange}
-								/>
-							</div>
-						)}
 					</div>
 
 					<div>
@@ -507,18 +467,33 @@ const Invoices = () => {
 				) : !isLoading && !selectedUnit ? (
 					<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
 				) : (
-					<div className='paged-table'>{Table}</div>
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						<div className='mt-2'>
+							<p className='font-medium'>
+								Search by Invoice Reference or Total (minimum of 3 characters)
+							</p>
+							<input
+								className='search-bar rounded-full h-[30px] w-[24%] flex items-center outline-none border border-gray-200 p-5 pr-[18px] pl-[18px] shadow-[0_0_10px_rgba(0,0,0,0.08)] my-auto justify-start transition-all hover:border-[var(--tw-primary)]'
+								type='text'
+								placeholder='Invoice Reference or Total'
+								value={searchKey}
+								onChange={handleSearchKeyChange}
+							/>
+						</div>
+						<div className='paged-table'>{Table}</div>
+					</div>
 				)}
 
 				<div>
 					<UnitModal
-						unitData={unitsAndAreasList}
+						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>
@@ -544,6 +519,68 @@ const Invoices = () => {
 						selectedToDate={selectedToDate}
 					/>
 				</div>
+				<Modal
+					isOpen={showPreviewModal}
+					title={'Invoice Details'}
+					onClose={() => {
+						setShowPreviewModal(!showPreviewModal);
+					}}
+				>
+					<div className='w-full max-w-5xl p-6 overflow-auto bg-white rounded-lg shadow-lg'>
+						<div className='my-4'>
+							<div className='text-sm'>
+								<span className='font-semibold'>Unit:</span> 2290 Walmart Missouri City
+								<span className='mx-2 font-semibold'>Vendor:</span> Sysco
+								<span className='mx-2 font-semibold'>Date:</span> Mon 09/30/2024
+								<span className='mx-2 font-semibold'>Invoice Reference:</span> 867060211
+								<span className='mx-2 font-semibold'>Total:</span> $2539.40
+							</div>
+							<div className='mt-1 text-sm'>
+								<span className='font-semibold'>Created By:</span> Data Import
+								<span className='mx-2 font-semibold'>Last Edited By:</span> Data Import
+							</div>
+						</div>
+
+						<table className='w-full text-sm border border-collapse border-gray-300'>
+							<thead>
+								<tr className='text-left bg-blue-200'>
+									<th className='p-2 border border-gray-300'>Item Ref#</th>
+									<th className='p-2 border border-gray-300'>Description</th>
+									<th className='p-2 border border-gray-300'>UOM</th>
+									<th className='p-2 border border-gray-300'>Pack/Size</th>
+									<th className='p-2 border border-gray-300'>Qty</th>
+									<th className='p-2 border border-gray-300'>Price</th>
+									<th className='p-2 border border-gray-300'>Tax</th>
+									<th className='p-2 border border-gray-300'>Line Total</th>
+								</tr>
+							</thead>
+							<tbody>
+								{/* Repeat this row for each item */}
+								<tr className='even:bg-gray-50'>
+									<td className='p-2 text-center border border-gray-300'>2765127</td>
+									<td className='p-2 border border-gray-300'>MIX SMOOTHIE STWBRY PUREE</td>
+									<td className='p-2 text-center border border-gray-300'>CA</td>
+									<td className='p-2 text-center border border-gray-300'>6 / 35OZ</td>
+									<td className='p-2 text-center border border-gray-300'>1</td>
+									<td className='p-2 text-center border border-gray-300'>$35.04</td>
+									<td className='p-2 text-center border border-gray-300'>$0.00</td>
+									<td className='p-2 text-center border border-gray-300'>$35.04</td>
+								</tr>
+								<tr className='even:bg-gray-50'>
+									<td className='p-2 text-center border border-gray-300'>5447738</td>
+									<td className='p-2 border border-gray-300'>SYRUP COKE ZERO SUGAR 2.5 GAL</td>
+									<td className='p-2 text-center border border-gray-300'>CA</td>
+									<td className='p-2 text-center border border-gray-300'>1 / 2.5GAL</td>
+									<td className='p-2 text-center border border-gray-300'>1</td>
+									<td className='p-2 text-center border border-gray-300'>$54.95</td>
+									<td className='p-2 text-center border border-gray-300'>$0.00</td>
+									<td className='p-2 text-center border border-gray-300'>$54.95</td>
+								</tr>
+								{/* End of item row */}
+							</tbody>
+						</table>
+					</div>
+				</Modal>
 			</div>
 		</>
 	);

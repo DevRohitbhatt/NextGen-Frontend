@@ -10,6 +10,8 @@
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	--tw-primary: #364790;
+	--tw-secondary: #508cff;
 }
 
 #root {
@@ -136,13 +138,6 @@ input.Search::placeholder {
 	border: 1px solid #364790;
 	transition: 0.5s;
 }
-.search-bar {
-	display: flex;
-	justify-content: start;
-	gap: 40px;
-	align-items: center;
-	margin-bottom: 12px;
-}
 .hyToEn .iXzDqN {
 	display: grid;
 	grid-template-columns: 1.5fr 2.5fr !important;
@@ -225,6 +220,90 @@ input.Search::placeholder {
 .unitList::-webkit-scrollbar-thumb:hover {
 	background: #508bff;
 }
+.tailwind-button::before,
+.tailwind-button::after {
+	content: '';
+	position: absolute;
+	width: 0;
+	height: 0;
+	border: 0 solid transparent;
+	transition: border-color 0s, width 0.25s, height 0.25s;
+	box-sizing: border-box;
+	pointer-events: none;
+}
+
+.tailwind-button::after {
+	bottom: 0;
+	right: 0;
+	border-top-width: 2px;
+	border-right-width: 2px;
+	transition-delay: 0s, 0.25s, 0s;
+}
+
+.tailwind-button::before {
+	bottom: 0;
+	right: 0;
+	border-bottom-width: 2px;
+	border-left-width: 2px;
+	transition-delay: 0s, 0s, 0.25s;
+}
+
+.tailwind-button:hover::after,
+.tailwind-button:hover::before {
+	width: 100%;
+	height: 100%;
+	border-color: #fff;
+}
+
+.tableHOC::-webkit-scrollbar-thumb:hover,
+.inventoryItemsTable::-webkit-scrollbar-thumb:hover,
+.CalendarTable::-webkit-scrollbar-thumb:hover,
+.simpleTableContainer::-webkit-scrollbar-thumb:hover {
+	@apply bg-[var(--tw-secondary)];
+}
+
+.tableHOC::-webkit-scrollbar,
+.inventoryItemsTable::-webkit-scrollbar,
+.CalendarTable::-webkit-scrollbar,
+.simpleTableContainer::-webkit-scrollbar {
+	@apply w-3 cursor-pointer;
+}
+
+/* For horizontal scrollbars */
+.tableHOC::-webkit-scrollbar:horizontal,
+.inventoryItemsTable::-webkit-scrollbar:horizontal,
+.CalendarTable::-webkit-scrollbar:horizontal,
+.simpleTableContainer::-webkit-scrollbar:horizontal {
+	@apply h-3 cursor-pointer;
+}
+
+.tableHOC::-webkit-scrollbar-thumb,
+.inventoryItemsTable::-webkit-scrollbar-thumb,
+.CalendarTable::-webkit-scrollbar-thumb,
+.simpleTableContainer::-webkit-scrollbar-thumb {
+	@apply bg-[var(--tw-primary)] rounded-full p-4 border-2 border-white cursor-pointer;
+}
+
+.tableHOC::-webkit-scrollbar-button:start:decrement,
+.inventoryItemsTable::-webkit-scrollbar-button:start:decrement,
+.CalendarTable::-webkit-scrollbar-button:start:decrement,
+.simpleTableContainer::-webkit-scrollbar-button:start:decrement {
+	@apply block h-12 bg-transparent;
+}
+
+.tableHOC::-webkit-scrollbar-button:end:increment,
+.inventoryItemsTable::-webkit-scrollbar-button:end:increment,
+.CalendarTable::-webkit-scrollbar-button:end:increment,
+.simpleTableContainer::-webkit-scrollbar-button:end:increment {
+	@apply block h-6 bg-transparent;
+}
+
+.tableHOC::-webkit-scrollbar-track-piece,
+.inventoryItemsTable::-webkit-scrollbar-track-piece,
+.CalendarTable::-webkit-scrollbar-track-piece,
+.simpleTableContainer::-webkit-scrollbar-track-piece {
+	@apply bg-gray-200 rounded-full;
+}
 
 .btnOuter:hover .btn-save {
 	color: white !important;
@@ -271,24 +350,22 @@ svg.clearIcone {
 	width: 400px;
 	max-width: none;
 }
-.more-container
-	{
+.more-container {
 	position: absolute;
-    top: 288px;
-    /* left: 100%; */
-    background-color: #fff;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    width: 275px !important;
-    margin-top: 22px;
-    padding: 8px;
-    display: table-cell;
-    margin-left: 169px;
-
-	}
-	.display-flex{
-        display: flex;
-    }
+	top: 288px;
+	/* left: 100%; */
+	background-color: #fff;
+	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	width: 275px !important;
+	margin-top: 22px;
+	padding: 8px;
+	display: table-cell;
+	margin-left: 169px;
+}
+.display-flex {
+	display: flex;
+}
 @keyframes moveUpDown {
 	0% {
 		transform: translateY(0);
@@ -310,4 +387,94 @@ svg.clearIcone {
 	button {
 		background-color: #f9f9f9;
 	}
+}
+
+.tailwind-calendar {
+	@apply w-full m-auto bg-white border-none;
+}
+
+/* Override specific react-calendar classes */
+.react-calendar__navigation {
+	@apply text-white bg-[var(--tw-primary)] font-semibold align-middle h-full;
+}
+
+.react-calendar__navigation button {
+	@apply hover:bg-[var(--tw-primary)] hover:text-[var(--tw-secondary)]  px-1 m-auto text-xl;
+}
+
+.react-calendar__navigation__arrow {
+	@apply focus:bg-[var(--tw-primary)];
+}
+
+.react-calendar__tile {
+	@apply p-2 border border-gray-200 rounded-lg hover:bg-blue-100;
+}
+
+.react-calendar__month-view__weekdays {
+	@apply font-semibold text-gray-500;
+}
+
+.react-calendar__month-view__days__day {
+	@apply text-gray-700;
+}
+
+.react-calendar__tile--now {
+	@apply bg-gray-200;
+}
+
+.react-calendar__tile--range {
+	@apply text-blue-700 bg-blue-100;
+}
+
+.react-calendar__viewContainer {
+	@apply w-[95%] mx-auto mb-2.5;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+	@apply text-gray-400;
+}
+
+.react-calendar button:focus-visible,
+.react-calendar button:focus {
+	@apply outline-none;
+}
+
+.CalendarTable {
+	@apply border-none rounded-lg mt-3.5 mb-4 text-gray-900 align-top border-gray-400 p-0 w-full overflow-hidden shadow-none overflow-y-scroll max-h-[50vh];
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+	@apply bg-transparent;
+}
+
+.react-calendar__tile--now:enabled:hover,
+.react-calendar__tile--now:enabled:focus {
+	@apply bg-transparent;
+}
+
+button.react-calendar__navigation__label {
+	@apply bg-transparent outline-none;
+}
+
+button.react-calendar__tile.react-calendar__year-view__months__month,
+.react-calendar__decade-view__years button,
+.react-calendar__century-view__decades button {
+	@apply p-2 rounded-none;
+}
+
+.react-calendar__tile--hasActive {
+	@apply bg-[var(--tw-secondary)] text-white;
+}
+
+.react-calendar__tile--now {
+	@apply text-black bg-gray-200 rounded-full;
+}
+
+.react-calendar__tile--active {
+	@apply !bg-[var(--tw-secondary)] text-white rounded-full;
+}
+
+.SingleCalendar .react-calendar {
+	@apply w-full max-w-full bg-white border-0 leading-[1.125em] relative z-10;
 }

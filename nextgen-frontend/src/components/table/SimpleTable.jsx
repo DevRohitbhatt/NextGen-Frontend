@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { Tooltip, SimpleTableRow as Row } from '../index.js';
 import { FaInfoCircle } from 'react-icons/fa';
 
-const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 10, 20], isPaginated = true }) => {
+const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 10, 20], isPaginated = true, isFooter = false, footerData = {}}) => {
+
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage, setItemsPerPage] = useState(itemsPerPageOptions[0]);
 	const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -35,12 +36,10 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 		}));
 	};
 
-	// Sort data based on the column header clicked
 	const sortedData = () => {
 		let sortableData = [...filteredData];
-
 		if (sortConfig.key) {
-			const sorted = [...tableData].sort((a, b) => {
+			sortableData.sort((a, b) => {
 				if (a[sortConfig.key] < b[sortConfig.key]) {
 					return sortConfig.direction === 'asc' ? -1 : 1;
 				}
@@ -49,12 +48,18 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 				}
 				return 0;
 			});
-			return sorted;
 		}
 		return sortableData;
 	};
 
-	// Handle column header click to change sorting
+	const footerSum = () => {
+		const sorte = sortedData().slice(startIndex, endIndex).reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue.extendedPrice), 0);
+
+		return sorte.toFixed(2)
+
+
+	}
+
 	const handleSort = (key) => {
 		let direction = 'asc';
 		if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -63,18 +68,15 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 		setSortConfig({ key, direction });
 	};
 
-	// Handle page change
 	const handlePageChange = (page) => {
 		setCurrentPage(page);
 	};
 
-	// Handle page size change
 	const handlePageSizeChange = (e) => {
 		setItemsPerPage(parseInt(e.target.value));
-		setCurrentPage(1); // Reset to first page when changing page size
+		setCurrentPage(1);
 	};
 
-	// Calculate total pages
 	const totalPages = Math.ceil(tableData?.length / itemsPerPage);
 	const startIndex = isPaginated ? (currentPage - 1) * itemsPerPage : 0;
 	const endIndex = isPaginated ? Math.min(startIndex + itemsPerPage, tableData?.length) : tableData?.length;
@@ -85,28 +87,38 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 
 	return (
 		<div>
-			<div className='m-5 pr-1 max-h-[60vh] overflow-x-auto scrollbar scrollbar-thumb-rounded-3xl scrollbar-thumb-primary scrollbar-track-secondary'>
+			<div className=' simpleTableContainer m-5 pr-1 max-h-[60vh] overflow-x-auto '>
 				<table className='w-full border-collapse table-fixed'>
 					<thead className='sticky top-0 bg-white border-b border-gray-300'>
 						<tr className=''>
 							{headers.map((header, index) => (
 								<React.Fragment key={index}>
 									<th
-										className='p-2 text-left border-b border-gray-300 cursor-pointer w-36 '
+										className='gap-3 p-2 text-left border-b border-gray-300 cursor-pointer'
+										style={{width: header?.width ? header?.width : 'auto',}}
 										onClick={() => handleSort(header.key)}
 									>
 										{header.toolTipDirection === '' || !header.toolTipDirection ? (
-											header.label
+											<>
+												{header.label}
+												{" "}
+												{sortConfig.key === header.key && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+											</>
 										) : header.toolTipDirection === 'left' ? (
 											<Tooltip content={header.toolTip} direction='left'>
-												<FaInfoCircle className='inline text-primary' /> {header.label}
+												<FaInfoCircle className='inline text-[var(--tw-primary)]' />
+												{header.label}
+												{" "}
+												{sortConfig.key === header.key && (sortConfig.direction === 'asc' ? '↑' : '↓')}
 											</Tooltip>
 										) : (
 											<Tooltip content={header.toolTip} direction='right'>
-												{header.label} <FaInfoCircle className='inline text-secondary' />
+												{header.label}
+												{" "}
+												{sortConfig.key === header.key && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+												<FaInfoCircle className='inline text-[var(--tw-secondary)]' />
 											</Tooltip>
 										)}{' '}
-										{sortConfig.key === header.key && (sortConfig.direction === 'asc' ? '↑' : '↓')}
 									</th>
 								</React.Fragment>
 							))}
@@ -117,7 +129,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 									<th className='p-2 border-b border-gray-300'>
 										<input
 											type='text'
-											className='box-border w-full p-1 font-normal border-2 border-gray-300 border-solid hover:border-primary focus:border-primary focus:outline-none'
+											className='box-border w-full p-1 border-2 border-gray-300 border-solid hover:border-[var(--tw-primary)] focus:border-[var(--tw-primary)] focus:outline-none'
 											value={filters[header.key] || ''}
 											onChange={(e) => handleFilterChange(header.key, e.target.value)}
 										/>
@@ -127,20 +139,31 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 						</tr>
 					</thead>
 					<tbody className='max-h-[50vh]'>
-						{sortedData()?.length === 0 || !sortedData()?.length ? (
-							<tr>
-								<td colSpan={headers.length} className='py-4 text-center'>
-									No data found for the given parameters.
-								</td>
-							</tr>
-						) : (
-							sortedData()
-								?.slice(startIndex, endIndex)
-								.map((row, rowIndex) => (
-									<Row headers={headers} key={rowIndex} item={row} onItemClick={handleRowClick} />
-								))
-						)}
+						{(() => {
+							const sortedDataArray = sortedData();
+							return (sortedDataArray.length === 0 ? (
+								<tr>
+									<td colSpan={headers.length} className='py-4 text-center'>
+										No data found for the given parameters.
+									</td>
+								</tr>
+							) : (
+								sortedDataArray
+									.slice(startIndex, endIndex)
+									.map((row, rowIndex) => (
+										<Row headers={headers} key={rowIndex} item={row} onItemClick={handleRowClick} />
+									))
+							));
+						})()}
 					</tbody>
+					{isFooter && <tfoot className='sticky w-full bg-white border-b border-gray-300 bottom-0' >
+						<tr className="w-full">
+							<td colSpan="5" className='gap-3 p-2 font-bold text-left border-b border-gray-300 cursor-pointer'>{footerData.footerLabel}</td>
+
+							<td className='gap-3 font-bold p-2 text-left border-b border-gray-300 cursor-pointer'>${footerData.footerValue}</td>
+						</tr>
+
+					</tfoot>}
 				</table>
 			</div>
 			{!isPaginated ? null : (

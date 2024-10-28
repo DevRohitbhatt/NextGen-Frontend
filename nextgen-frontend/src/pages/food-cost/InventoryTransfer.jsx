@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import dateFormat from 'dateformat';
+import { useSelector } from 'react-redux';
 import inventoryTransferReport from '../../assets/introJSSteps/inventoryTransferReport';
 import {
 	Dropdown,
@@ -17,14 +18,19 @@ import {
 } from '../../components';
 
 const InventoryTransfer = () => {
-	const [companyId, setCompanyId] = useState();
-	const [alignmentId, setAlignmentId] = useState();
-	const [memberId, setMemberId] = useState();
-	const [unitsAndAreasList, setUnitsAndAreasList] = useState([]);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas,
+		groupOrUnitAccess,
+		defaultUnitID,
+		groupOrUnitAccessName,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [inventoryTransferReportData, setInventoryTransferReportData] = useState([]);
 
 	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Inventory Transfer Report, please try again later.'
@@ -32,8 +38,8 @@ const InventoryTransfer = () => {
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setselectedUnitName] = useState('No Unit Selected');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState(
@@ -60,6 +66,7 @@ const InventoryTransfer = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			width: '260px',
 		},
 		{
 			key: 'toUnit',
@@ -81,6 +88,7 @@ const InventoryTransfer = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
+			width: '150px',
 		},
 		{
 			key: 'inventoryItem',
@@ -102,79 +110,29 @@ const InventoryTransfer = () => {
 			cellType: 'number',
 			toolTip: '',
 			toolTipDirection: '',
+			width: '125px',
 		},
 	]);
 
 	useEffect(() => {
-		// Fetch initial data
-		if (!selectedUnit) {
-			let parameters = decodeURIComponent(window.location.search.replace('?data=', ''));
-			if (parameters) {
-				parameters = JSON.parse(parameters);
-				setCompanyId(parameters.CompanyId);
-				setAlignmentId(parameters.AlignmentId);
-				localStorage.setItem('companyId', parameters.CompanyId);
-				localStorage.setItem('alignmentId', parameters.AlignmentId);
-				fetchData(parameters.CompanyID, parameters.AlignmentId);
-			} else if (localStorage.getItem('groupOrUnitAccess')) {
-				setCompanyId(parseInt(localStorage.getItem('companyId')));
-				setAlignmentId(parseInt(localStorage.getItem('alignmentId')));
-				fetchData(localStorage.getItem('companyId'), localStorage.getItem('alignmentId'));
-			} else {
-				console.log('testing mode');
-				setCompanyId(1021);
-				setAlignmentId(1110);
-				setMemberId(5199);
-				setSelectedUnit(0);
-				fetchData(1021, 1110, 5199);
-			}
-		} else {
-			setErrorMessage('There was an issue loading your orders, please try again later.');
+		if (groupOrUnitAccess || defaultUnitID) {
+			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
-	}, []);
-
-	const fetchData = async (companyId, alignmentId, selectedUnit) => {
-		setIsLoading(true);
-		await Promise.all([fetchUnits(companyId, alignmentId, selectedUnit)]);
-		setIsLoading(false);
-	};
-
-	// Fetching Units and Areas
-	const fetchUnits = async (companyId, alignmentId, memberId) => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
-			const getData = {
-				url: 'unitsAndArea',
-				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
-					memberId: memberId,
-				},
-			};
-
-			const result = await getCall(getData);
-			setUnitsAndAreasList(result.data);
-
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your units, please try again later.');
-			console.error('Error getting units: ', error);
+		if (groupOrUnitAccessName || defaultUnitName) {
+			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	};
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	// Function to get the inventory transfer report
-	const handleInventoryTransferReport = async () => {
+	const fetchInventoryTransferReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
 				url: 'inventoryTransferReportData',
 				urlParams: {
-					companyId: companyId,
-					alignmentId: alignmentId,
+					companyId: companyID,
+					alignmentId: alignmentID,
 					unitIds: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -184,7 +142,7 @@ const InventoryTransfer = () => {
 
 			const result = await getCall(getData);
 			setInventoryTransferReportData(result);
-			handleHeaders();
+			changeHeadersBasedOnReportType();
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -195,7 +153,7 @@ const InventoryTransfer = () => {
 	};
 
 	// Function to handle the headers based on the report type
-	const handleHeaders = () => {
+	const changeHeadersBasedOnReportType = () => {
 		if (reportType === 'Detail') {
 			setHeaders([
 				{
@@ -204,6 +162,7 @@ const InventoryTransfer = () => {
 					cellType: 'string',
 					toolTip: '',
 					toolTipDirection: '',
+					width: '260px',
 				},
 				{
 					key: 'toUnit',
@@ -225,6 +184,7 @@ const InventoryTransfer = () => {
 					cellType: 'string',
 					toolTip: '',
 					toolTipDirection: '',
+					width: '150px',
 				},
 				{
 					key: 'inventoryItem',
@@ -246,6 +206,7 @@ const InventoryTransfer = () => {
 					cellType: 'integer',
 					toolTip: '',
 					toolTipDirection: '',
+					width: '125px',
 				},
 			]);
 		} else {
@@ -297,9 +258,9 @@ const InventoryTransfer = () => {
 	};
 
 	const handleUnitSelection = (unitName, unitID) => {
-		setselectedUnitName(unitName);
+		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
-		setUnitShowModal(false);
+		setShowUnitModal(false);
 	};
 
 	const handleDateSelection = (from, to) => {
@@ -381,7 +342,6 @@ const InventoryTransfer = () => {
 
 	return (
 		<>
-			<Loader loading={isLoading} />
 			<div className='w-[85%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
@@ -389,17 +349,17 @@ const InventoryTransfer = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='mt-4 mb-10 text-3xl font-semibold capitalize'>Inventory Transfer Report</h2>
-				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-					<div className='flex items-center space-x-3 '>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Transfer Report</h2>
+				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+					<div className='flex items-center'>
 						<UnitSelector
-							companyId={companyId}
-							alignmentId={alignmentId}
-							memberId={selectedUnit}
+							companyId={companyID}
+							alignmentId={alignmentID}
+							memberID={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
-							setMemberName={setselectedUnitName}
-							onClick={() => setUnitShowModal(true)}
+							setMemberName={setSelectedUnitName}
+							onClick={() => setShowUnitModal(true)}
 						/>
 						<DateSelector
 							toDate={selectedToDate}
@@ -408,14 +368,16 @@ const InventoryTransfer = () => {
 							onClick={() => setShowDateModal(true)}
 						/>
 
-						<Dropdown
-							options={dropdownOptions}
-							title='Report Type'
-							selectedOption={reportType}
-							onOptionChange={(optionValue) => setReportType(optionValue)}
-						/>
-						<div className='run-button' onClick={handleInventoryTransferReport}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+						<div className='w-48'>
+							<Dropdown
+								options={dropdownOptions}
+								title='Report Type'
+								selectedOption={reportType}
+								onOptionChange={(optionValue) => setReportType(optionValue)}
+							/>
+						</div>
+						<div className='run-button' onClick={fetchInventoryTransferReport}>
+							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
@@ -438,34 +400,37 @@ const InventoryTransfer = () => {
 				{isError ? (
 					<div>{errorMessage}</div>
 				) : (
-					!isLoading && (
-						<>
-							{inventoryTransferReportData?.data ? (
-								<div>
-									<Table
-										data={inventoryTransferReportData.data}
-										headers={headers}
-										onRowClick={() => {}}
-									/>
-								</div>
-							) : !selectedUnit ? (
-								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-							) : (
-								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-							)}
-						</>
-					)
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						{!isLoading && (
+							<>
+								{inventoryTransferReportData?.data ? (
+									<div>
+										<Table
+											data={inventoryTransferReportData.data}
+											headers={headers}
+											onRowClick={() => {}}
+										/>
+									</div>
+								) : !selectedUnit ? (
+									<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+								) : (
+									<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+								)}
+							</>
+						)}
+					</div>
 				)}
 
 				<div>
 					<UnitModal
-						unitData={unitsAndAreasList}
+						unitData={unitsAndAreas}
 						memberID={selectedUnit}
 						memberName={selectedUnitName}
-						show={showModal}
+						show={showUnitModal}
 						includeAreas={true}
 						handleClose={() => {
-							setUnitShowModal(false);
+							setShowUnitModal(false);
 						}}
 						handleUnitSelection={handleUnitSelection}
 					/>
