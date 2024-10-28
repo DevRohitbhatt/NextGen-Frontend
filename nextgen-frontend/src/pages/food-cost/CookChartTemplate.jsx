@@ -32,6 +32,7 @@ const CookChartTemplate = (props) => {
     const [selectedToDate, setSelectedToDate] = useState(new Date());
     const [showDateModal, setShowDateModal] = useState(false);
     const [openCreateItemModal, setOpenCreateItemModal] = useState(false)
+    const [openEditItemModal, setOpenEditItemModal] = useState(false)
 
 
     const [items, setItems] = useState([
@@ -315,7 +316,7 @@ const CookChartTemplate = (props) => {
                                     </div>
                                     {/* Edit and Delete Buttons */}
                                     <div className="flex justify-end mt-4">
-                                        <button className="bg-green-600 text-white p-2 rounded-lg mr-[20px] py-[15px] px-[35px]">Edit</button>
+                                        <button className="bg-green-600 text-white p-2 rounded-lg mr-[20px] py-[15px] px-[35px]" onClick={()=>{setOpenEditItemModal(true)}}>Edit</button>
                                         <button className="bg-red-600 text-white p-2 rounded-lg py-[15px] px-[35px]">Delete</button>
                                     </div>
                                 </div>
@@ -395,6 +396,14 @@ const CookChartTemplate = (props) => {
                 isOpen={openCreateItemModal}
                 onClose={() => { setOpenCreateItemModal(!openCreateItemModal) }}
                 title={"Add new cook drop item"}
+            >
+                {createItemModal()}
+            </Modal>
+
+            <Modal
+                isOpen={openEditItemModal}
+                onClose={() => { setOpenEditItemModal(!openEditItemModal) }}
+                title={"Eidt cook drop item"}
             >
                 {createItemModal()}
             </Modal>
