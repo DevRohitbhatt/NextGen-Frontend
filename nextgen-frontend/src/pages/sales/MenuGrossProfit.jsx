@@ -92,44 +92,18 @@ const MenuGrossProfit = () => {
 			cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 			dataType: 'string',
 			footer: ({ table }) => {
-				const totalGrossSales = table
-					.getCoreRowModel()
-					.rows.reduce((acc, row) => acc + row.original.itemPrice * row.original.quantitySold, 0)
-					.toFixed(2);
-				const totalCost = table
-					.getCoreRowModel()
-					.rows.reduce((acc, row) => acc + row.original.recipeCost * row.original.quantitySold, 0)
-					.toFixed(2);
-				const totalGrossProfit = table
-					.getCoreRowModel()
-					.rows.reduce((acc, row) => acc + parseFloat(row.original.grossProfit), 0)
-					.toFixed(2);
-				const totalNetSales = table
-					.getCoreRowModel()
-					.rows.reduce((acc, row) => acc + row.original.itemSales, 0);
-				const totalNetProfit = totalNetSales - totalCost;
-
 				return (
 					<div
 						style={{ cursor: 'pointer', width: '100%' }}
 						className='absolute inset-0 flex items-center justify-between gap-6 leading-5 capitalize shadow-[0_1px_0_var(--tw-primary)_inset] bg-white'
 					>
 						<div>Grand Total:</div>
-						<div>Total Gross Sales: ${totalGrossSales}</div>
-						<div>
-							Gross Food Cost: ${totalCost}/{((totalCost / totalGrossSales) * 100).toFixed(2)}%
-						</div>
-						<div>
-							Gross Profit: ${totalGrossProfit}/{((totalGrossProfit / totalGrossSales) * 100).toFixed(2)}%
-						</div>
-						<div>Total Net Sales: ${totalNetSales.toFixed(2)}</div>
-						<div>
-							Net Food Cost: ${totalCost}/{((totalCost / totalNetSales) * 100).toFixed(2)}%
-						</div>
-						<div>
-							Net Profit: ${totalNetProfit.toFixed(2)}/
-							{((totalNetProfit / totalNetSales) * 100).toFixed(2)}%
-						</div>
+						<div>Total Gross Sales: ${table.getCoreRowModel().rows[0].original.totalGrossSales}</div>
+						<div>Gross Food Cost: ${table.getCoreRowModel().rows[0].original.grossFoodCost}</div>
+						<div>Gross Profit: ${table.getCoreRowModel().rows[0].original.grossProfitFooter}</div>
+						<div>Total Net Sales: ${table.getCoreRowModel().rows[0].original.totalNetSales}</div>
+						<div>Net Food Cost: ${table.getCoreRowModel().rows[0].original.netFoodCost}</div>
+						<div>Net Profit: ${table.getCoreRowModel().rows[0].original.netProfit}</div>
 					</div>
 				);
 			},
@@ -287,7 +261,7 @@ const MenuGrossProfit = () => {
 
 			const result = await getCall(getData);
 
-			const newData = result.data.map((item) => ({
+			const newData = result.data.menuGrossSalesCodeModels.map((item) => ({
 				category: item.description,
 				itemID: item.itemID,
 				itemName: item.itemName,
@@ -298,7 +272,15 @@ const MenuGrossProfit = () => {
 				itemSales: item.grossItemSales,
 				grossProfit: item.grossProfit.toFixed(2),
 				grossProfitper: (item.grossProfitper * 100).toFixed(2) + '%',
+				totalGrossSales: result.data.menuGrossProfitFooterModel.totalGrossSales.slice(1),
+				grossFoodCost: result.data.menuGrossProfitFooterModel.grossFoodCost.slice(1),
+				grossProfitFooter: result.data.menuGrossProfitFooterModel.grossProfit.slice(1),
+				totalNetSales: result.data.menuGrossProfitFooterModel.totalNetSales.slice(1),
+				netFoodCost: result.data.menuGrossProfitFooterModel.netFoodCost.slice(1),
+				netProfit: result.data.menuGrossProfitFooterModel.netProfit,
 			}));
+
+			console.log('newData', newData);
 
 			let filteredData = newData.filter((item) => selectedCategories.includes(item.category));
 
