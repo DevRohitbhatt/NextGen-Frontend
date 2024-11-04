@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { getCall } from "../../../apis/network.js";
 import * as Styled from "./styles/SuggestedOrderStyles.jsx";
 import * as SuggestedOrderFunctions from "../../../functions/suggestedOrderFunctions.js";
@@ -1011,7 +1012,7 @@ export default function SuggestedOrder() {
           .map((item) => ({
             ...item,
             vendorItems: item.vendorItems.filter(
-              (vendorItem) => vendorItem.orderQty > 0 && vendorItem.isSelected
+              (vendorItem) => vendorItem?.orderQty > 0 && vendorItem.isSelected
             ),
           }))
           .filter((item) => item.vendorItems.length > 0),

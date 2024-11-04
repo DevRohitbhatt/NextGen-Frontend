@@ -258,14 +258,16 @@ input.Search::placeholder {
 .tableHOC::-webkit-scrollbar-thumb:hover,
 .inventoryItemsTable::-webkit-scrollbar-thumb:hover,
 .CalendarTable::-webkit-scrollbar-thumb:hover,
-.simpleTableContainer::-webkit-scrollbar-thumb:hover {
+.simpleTableContainer::-webkit-scrollbar-thumb:hover,
+.suggested-order-table::-webkit-scrollbar-thumb:hover {
 	@apply bg-[var(--tw-secondary)];
 }
 
 .tableHOC::-webkit-scrollbar,
 .inventoryItemsTable::-webkit-scrollbar,
 .CalendarTable::-webkit-scrollbar,
-.simpleTableContainer::-webkit-scrollbar {
+.simpleTableContainer::-webkit-scrollbar,
+.suggested-order-table::-webkit-scrollbar {
 	@apply w-3 cursor-pointer;
 }
 
@@ -273,14 +275,16 @@ input.Search::placeholder {
 .tableHOC::-webkit-scrollbar:horizontal,
 .inventoryItemsTable::-webkit-scrollbar:horizontal,
 .CalendarTable::-webkit-scrollbar:horizontal,
-.simpleTableContainer::-webkit-scrollbar:horizontal {
+.simpleTableContainer::-webkit-scrollbar:horizontal,
+.suggested-order-table::-webkit-scrollbar:horizontal {
 	@apply h-3 cursor-pointer;
 }
 
 .tableHOC::-webkit-scrollbar-thumb,
 .inventoryItemsTable::-webkit-scrollbar-thumb,
 .CalendarTable::-webkit-scrollbar-thumb,
-.simpleTableContainer::-webkit-scrollbar-thumb {
+.simpleTableContainer::-webkit-scrollbar-thumb,
+.suggested-order-table::-webkit-scrollbar-thumb {
 	@apply bg-[var(--tw-primary)] rounded-full p-4 border-2 border-white cursor-pointer;
 }
 
@@ -301,7 +305,8 @@ input.Search::placeholder {
 .tableHOC::-webkit-scrollbar-track-piece,
 .inventoryItemsTable::-webkit-scrollbar-track-piece,
 .CalendarTable::-webkit-scrollbar-track-piece,
-.simpleTableContainer::-webkit-scrollbar-track-piece {
+.simpleTableContainer::-webkit-scrollbar-track-piece,
+.suggested-order-table::-webkit-scrollbar-track-piece {
 	@apply bg-gray-200 rounded-full;
 }
 
