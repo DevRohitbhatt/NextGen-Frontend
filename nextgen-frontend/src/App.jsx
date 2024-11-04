@@ -40,7 +40,6 @@ const App = () => {
 		const fetchTheme = async () => {
 			if (companyID) {
 				const { primary, secondary } = await getCompanyTheme(companyID);
-				console.log(primary);
 				if (primary && secondary) {
 					setPrimaryColor(primary);
 					setSecondaryColor(secondary);
@@ -52,9 +51,7 @@ const App = () => {
 	}, [companyID]);
 
 	useEffect(() => {
-		console.log('primaryColor, secondaryColor', primaryColor, secondaryColor);
 		if (primaryColor && secondaryColor) {
-			console.log(primaryColor, secondaryColor);
 			setSelectedTheme((prev) => ({ ...prev, primary: primaryColor, secondary: secondaryColor }));
 			//update tailwind theme in the config file
 			const root = document.documentElement;

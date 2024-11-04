@@ -29,6 +29,7 @@ function TableHOC({
 	enableColumnFilters = false,
 	headerPosition = 'center',
 	dataPosition = 'text-center',
+	onCallBack,
 }) {
 	const [expanded, setExpanded] = useState({});
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -101,7 +102,7 @@ function TableHOC({
 				<div className='flex items-center my-4 space-x-4'>
 					<button
 						onClick={() => table.toggleAllRowsExpanded(false)}
-						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+						className={`flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
 							table.getIsAllRowsExpanded()
 								? 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
 								: 'bg-[var(--tw-primary)] text-white'
@@ -112,7 +113,7 @@ function TableHOC({
 					</button>
 					<button
 						onClick={() => table.toggleAllRowsExpanded(true)}
-						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
+						className={`flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
 							table.getIsAllRowsExpanded()
 								? 'bg-[var(--tw-primary)] text-white'
 								: 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
@@ -239,7 +240,14 @@ function TableHOC({
 									className={`h-[35px] font-normal border-y relative hover:bg-gray-100 ${
 										row.getCanExpand() ? 'cursor-pointer' : 'cursor-default'
 									}`}
-									onClick={row.getCanExpand() ? row.getToggleExpandedHandler() : null}
+									onClick={(e) => {
+										e.stopPropagation();
+										if (onCallBack) {
+											onCallBack(row.original);
+										} else if (row.getCanExpand()) {
+											row.getToggleExpandedHandler()(e);
+										}
+									}}
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (
@@ -250,8 +258,7 @@ function TableHOC({
 														{flexRender(cell.column.columnDef.cell, cell.getContext())} (
 														{row.subRows.length})
 													</div>
-												) : cell.getIsPlaceholder() ? null : ( // For cells with repeated values, render null
-													// Otherwise, just render the regular cell
+												) : cell.getIsPlaceholder() ? null : (
 													flexRender(cell.column.columnDef.cell, cell.getContext())
 												)}
 											</td>
@@ -362,6 +369,7 @@ TableHOC.propTypes = {
 	enableColumnFilters: PropTypes.bool,
 	headerPosition: PropTypes.string,
 	dataPosition: PropTypes.string,
+	onCallBack: PropTypes.func,
 };
 
 export default TableHOC;

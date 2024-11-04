@@ -3,7 +3,6 @@ const urlConfig = {
 	getCompanySetting: '/api/company/settings/getsetting',
 	getAllCompanySettings: '/api/company/settings/getallsettings',
 
-
 	unitsAndArea: '/api/unitsandareas/getbyid',
 	vendors: '/api/vendor/getvendorsbycompanyid',
 
@@ -37,6 +36,8 @@ const urlConfig = {
 	invoiceSearchReport: 'api/foodcost/GetInvoiceSearchReportData',
 	getCountsheets: 'api/foodcost/GetCountSheets',
 	countsheetDetails: 'api/foodcost/GetCountsheetDetails',
+	Countsheet_PricingInfo: 'api/foodcost/getCountSheetsPriceInfo',
+	countsheetPossibleError: 'api/foodcost/getCountSheetsPossibleError',
 	PurchaseAnalysis: 'api/foodcost/getPurchaseAnalysisData',
 
 	//Sales apis
