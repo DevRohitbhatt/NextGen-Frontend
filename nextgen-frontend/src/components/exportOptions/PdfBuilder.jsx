@@ -82,6 +82,13 @@ export default function PdfBuilder(data) {
 			const { title, table } = createTable(section);
 			if (title) content.push(title);
 			content.push(table);
+		} else if (section.type === 'table/SeperatePage') {
+			const { title, table } = createTable(section);
+			if (title) content.push(title);
+			content.push(table);
+			if (data.body.indexOf(section) !== data.body.length - 1) {
+				content.push({ text: '', pageBreak: 'after' }); // Add a page break after each table except the last one
+			}
 		} else if (section.type === 'table/Column') {
 			const { title, table } = createTable(section);
 			if (title) content.push(title);
@@ -90,9 +97,11 @@ export default function PdfBuilder(data) {
 	});
 
 	const docDefinition = {
+		pageSize: data.pageSize || 'A4',
 		pageOrientation: data.pageOrientation || 'portrait',
 		content: content,
 		...(data.exportType === 'pdf' && { pageMargins: [20, 20, 20, 20] }),
+
 		styles: {
 			header: {
 				fontSize: 16,
@@ -116,6 +125,9 @@ export default function PdfBuilder(data) {
 			tableCell: {
 				fontSize: 9,
 			},
+		},
+		defaultStyle: {
+			columnGap: 10,
 		},
 	};
 

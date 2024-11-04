@@ -39,6 +39,7 @@ const urlConfig = {
 	Countsheet_PricingInfo: 'api/foodcost/getCountSheetsPriceInfo',
 	countsheetPossibleError: 'api/foodcost/getCountSheetsPossibleError',
 	PurchaseAnalysis: 'api/foodcost/getPurchaseAnalysisData',
+
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
