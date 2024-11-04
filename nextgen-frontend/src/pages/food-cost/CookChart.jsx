@@ -12,11 +12,13 @@ import {
     ExportOptions,
     ExcelExport as exportToExcel,
     ForcastedSales,
+    DateSelector,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import CookDropTable from '../../components/table/CookDropTable';
 import { Link } from 'react-router-dom';
 import HoverBorderButton from '../../components/buttons/HoverBorderButton';
+import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
 
@@ -45,12 +47,14 @@ const CookChart = () => {
     );
     const [selectedToDate, setSelectedToDate] = useState(new Date());
     const [showDateModal, setShowDateModal] = useState(false);
+
     const [introSteps, setIntroSteps] = useState({
         steps: voidsReport(),
         initialStep: 0,
         stepsEnabled: false,
     });
-    const [forCastedSalesValue, setForcastedSalesValue] = useState('$3000')
+    const [cookChartData, setCookChartData] = useState({});
+    const [forCastedSalesValue, setForcastedSalesValue] = useState('')
 
     useEffect(() => {
         if (defaultUnitID) {
@@ -60,8 +64,71 @@ const CookChart = () => {
             setSelectedUnitName(defaultUnitName);
         }
     }, [defaultUnitID, defaultUnitName]);
+    // TransformData
+    const transformCookDropData = (data) => {
+        const headers = data[0].items.map(item => ({
+            itemName: item.itemName,
+            unitOfMeasure: item.unitOfMeasure,
+            safetyFactor: item.safetyFactor,
+            mix: item.mix,
+        }));
+
+        const rows = {};
+
+        // Iterate over each item and cook drop count to build rows based on cookDropTime
+        data[0].items.forEach(item => {
+            item.listCookDropItemCount.forEach(count => {
+                const time = count.cookDropTime.slice(0, 5); // Format time to HH:MM
+
+                if (!rows[time]) {
+                    rows[time] = [];
+                }
+
+                rows[time].push({
+                    needCount: count.needCount,
+                    haveCount: count.haveCount,
+                    cookCount: count.cookCount,
+                });
+            });
+        });
+
+        return { headers, rows };
+    };
 
 
+
+    useEffect(() => {
+        getCookChartData();
+
+    }, [selectedUnit,selectedFromDate])
+
+
+    const getCookChartData = async () => {
+        setIsLoading(true)
+        console.log(dateFormat(selectedFromDate, 'dd-mm-yyyy'))
+        try {
+            const getData = {
+                fullUrl: 'cookdrop',
+                urlParams: {
+                    companyId: 1083,
+                    cookDropChartID: 0,
+                    unitId: 1145,
+                    date: dateFormat(selectedFromDate, 'dd/mm/yyyy'),
+                },
+            };
+
+            const result = await getCall(getData);
+            if (result?.data && result?.data.length) {
+                setForcastedSalesValue(result.data[0].forecastedSales);
+                const { headers, rows } = transformCookDropData(result.data);
+                setCookChartData({ headers, rows })
+            }
+        } catch (error) {
+            console.error(error)
+        }
+
+        setIsLoading(false)
+    }
 
     const handleUnitSelection = (unitName, unitID) => {
         setSelectedUnitName(unitName);
@@ -75,8 +142,12 @@ const CookChart = () => {
         setShowDateModal(false);
     };
 
-
-
+    const handleDateSelectorClick = () => {
+        setShowDateModal(true);
+    };
+    const handleDateCloseModal = () => {
+        setShowDateModal(false);
+    };
     return (
         <>
             <Loader loading={isLoading} />
@@ -99,10 +170,11 @@ const CookChart = () => {
                             setMemberName={setSelectedUnitName}
                             onClick={() => setShowUnitModal(true)}
                         />
-                        <Dropdown
-                            options={[{ name: '08/09/2024' }, { name: '08/09/2024' }, { name: '08/09/2024' }, { name: '08/09/2024' }]}
-                            title='Select Date'
-                            selectedOption={'08/09/2024'}
+                        <DateSelector
+                            toDate={selectedToDate}
+                            fromDate={selectedFromDate}
+                            onClick={handleDateSelectorClick}
+                            isDateRange={false}
                         />
                         <ForcastedSales
                             value={forCastedSalesValue}
@@ -132,8 +204,8 @@ const CookChart = () => {
                         <div className='paged-table'>
                             <div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3' >
                                 <div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
-
-                                    <CookDropTable />
+                                    <Loader loading={isLoading} />
+                                    <CookDropTable initData={cookChartData} />
 
                                 </div>
                             </div>
@@ -158,14 +230,10 @@ const CookChart = () => {
                         handleUnitSelection={handleUnitSelection}
                     />
                     <CalendarModal
-                        handleClose={() => setShowDateModal(false)}
+                        handleClose={handleDateCloseModal}
                         modalOpen={showDateModal}
-                        isDateRange={true}
+                        isDateRang={false}
                         handleDateSelection={handleDateSelection}
-                        handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-                        handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-                        selectedFromDate={selectedFromDate}
-                        selectedToDate={selectedToDate}
                     />
                 </div>
             </div>
