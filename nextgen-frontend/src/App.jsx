@@ -25,7 +25,7 @@ import {
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
-	LabourAnalysis,
+	LaborAnalysis,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -136,7 +136,7 @@ const App = () => {
 								{/* Labour */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
-								<Route path='/LabourAnalysis' element={<LabourAnalysis />} />
+								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
 							</Routes>
 						</Suspense>
 					</div>

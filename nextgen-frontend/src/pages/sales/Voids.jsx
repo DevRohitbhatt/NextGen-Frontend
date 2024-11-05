@@ -13,7 +13,7 @@ import {
 	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
-	TableHOC2,
+	TableHOC,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
@@ -372,6 +372,8 @@ const Voids = () => {
 				data: voidsReportData.flatMap((row) => row.subRows.map((voidRow) => Object.values(voidRow))),
 			},
 		];
+
+		console.log(data);
 
 		const filename = 'voidsReport';
 		const spreadSheetTitle = 'Voids Report';
