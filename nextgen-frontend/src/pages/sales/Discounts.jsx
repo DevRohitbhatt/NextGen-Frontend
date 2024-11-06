@@ -261,36 +261,36 @@ const Discounts = () => {
 		}
 	};
 
-	const calculatePctFooter = (table) => {
-		const totalSalesGenerated = table.getCoreRowModel().rows.reduce((acc, row) => {
-			if (row.getCanExpand()) {
-				return (
-					acc +
-					row.subRows.reduce(
-						(subAcc, subrow) =>
-							subAcc +
-							parseFloat(subrow.original['salesGenerated'] || subrow.original['totalSalesGenerated']),
-						0
-					)
-				);
-			} else {
-				return acc + parseFloat(row.original['salesGenerated'] || row.original['totalSalesGenerated']);
-			}
-		}, 0);
+	const calculatePctFooter = (table, weekId) => {
+		let totalSalesGenerated;
+		let discountAmount;
+		if (viewBy === 'Summary' && weekId !== 'total') {
+			totalSalesGenerated = table
+				.getCoreRowModel()
+				.rows.reduce((acc, row) => {
+					const weekData = row.original.weeks.find((week) => week[`salesGenerated_${weekId}`] !== undefined);
+					return acc + (weekData ? weekData[`salesGenerated_${weekId}`] : 0);
+				}, 0)
+				.toFixed(2);
 
-		const discountAmount = table.getCoreRowModel().rows.reduce((acc, row) => {
-			if (row.getCanExpand()) {
-				return (
-					acc +
-					row.subRows.reduce(
-						(subAcc, subrow) => subAcc + parseFloat(subrow.original['totalDiscountAmount']),
-						0
-					)
-				);
-			} else {
-				return acc + parseFloat(row.original['totalDiscountAmount']);
-			}
-		}, 0);
+			discountAmount = table
+				.getCoreRowModel()
+				.rows.reduce((acc, row) => {
+					const weekData = row.original.weeks.find((week) => week[`discountAmount_${weekId}`] !== undefined);
+					return acc + (weekData ? weekData[`discountAmount_${weekId}`] : 0);
+				}, 0)
+				.toFixed(2);
+		} else {
+			totalSalesGenerated = table.getCoreRowModel().rows.reduce((acc, row) => {
+				const value = parseFloat(row.original['salesGenerated'] || row.original['totalSalesGenerated']);
+				return acc + (isNaN(value) ? 0 : value);
+			}, 0);
+
+			discountAmount = table.getCoreRowModel().rows.reduce((acc, row) => {
+				const value = parseFloat(row.original['totalDiscountAmount']);
+				return acc + (isNaN(value) ? 0 : value);
+			}, 0);
+		}
 
 		return ((discountAmount / totalSalesGenerated) * 100).toFixed(2);
 	};
@@ -358,6 +358,17 @@ const Discounts = () => {
 					new Set(result.data.flatMap((item) => item.weeks.map((week) => week.weekId)))
 				).sort();
 
+				const weeks = uniqueWeeks.map((weekId) => {
+					const startDate = new Date(selectedFromDate.getFullYear(), 0, 1 + (weekId - 2) * 7);
+					const endDate = new Date(startDate);
+					endDate.setDate(endDate.getDate() + 6);
+					return {
+						weekId,
+						WeekStartDate: dateFormat(startDate, 'mm-dd-yy'),
+						WeekEndDate: dateFormat(endDate, 'mm-dd-yy'),
+					};
+				});
+
 				memoizedColumns.length = 0;
 				memoizedColumns.unshift(
 					columnHelper.accessor('discountType', {
@@ -368,6 +379,17 @@ const Discounts = () => {
 					columnHelper.group({
 						header: 'Total',
 						columns: [
+							columnHelper.accessor('totalDiscountAmount', {
+								id: 'totalDiscountAmount',
+								header: 'Disc Amount',
+								cell: ({ getValue }) => `$${getValue()}`,
+								dataType: 'number',
+								footer: ({ table }) => (
+									<div className='text-center'>
+										${calculateFooterSum(table, 'totalDiscountAmount')}
+									</div>
+								),
+							}),
 							columnHelper.accessor('totalDiscountedChecks', {
 								id: 'totalDiscountedChecks',
 								header: 'Disc Checks',
@@ -375,16 +397,6 @@ const Discounts = () => {
 								footer: ({ table }) => (
 									<div className='text-center'>
 										{calculateFooterSum(table, 'totalDiscountedChecks')}
-									</div>
-								),
-							}),
-							columnHelper.accessor('totalDiscountAmount', {
-								id: 'totalDiscountAmount',
-								header: 'Disc Amount',
-								dataType: 'number',
-								footer: ({ table }) => (
-									<div className='text-center'>
-										${calculateFooterSum(table, 'totalDiscountAmount')}
 									</div>
 								),
 							}),
@@ -398,10 +410,11 @@ const Discounts = () => {
 									</div>
 								),
 							}),
+
 							columnHelper.accessor('totalSalesGenerated', {
 								id: 'totalSalesGenerated',
 								header: 'Sales $ Gen',
-								cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
+								cell: ({ getValue }) => `$${getValue()}`,
 								dataType: 'number',
 								footer: ({ table }) => (
 									<div className='text-center'>
@@ -412,16 +425,37 @@ const Discounts = () => {
 							columnHelper.accessor('totaldiscountedTickets', {
 								id: 'totaldiscountedTickets',
 								header: 'Disc Cost %',
-								cell: ({ getValue }) => `${getValue()?.toFixed(2)}%`,
+								cell: ({ getValue }) => `${getValue()}%`,
 								dataType: 'number',
-								footer: ({ table }) => <div className='text-center'>{calculatePctFooter(table)}%</div>,
+								footer: ({ table }) => (
+									<div className='text-center'>{calculatePctFooter(table, 'total')}%</div>
+								),
 							}),
 						],
 					}),
 					...uniqueWeeks.map((weekId) =>
 						columnHelper.group({
-							header: `Week ${weekId}`,
+							header: `Week ${weekId} (${weeks.find((week) => week.weekId === weekId).WeekStartDate} - ${
+								weeks.find((week) => week.weekId === weekId).WeekEndDate
+							})`,
 							columns: [
+								columnHelper.accessor(
+									(row) => {
+										const weekData = row.weeks.find((week) => week.weekId === weekId);
+										return weekData ? weekData[`discountAmount_${weekId}`] : 0;
+									},
+									{
+										id: `discountAmount_${weekId}`,
+										header: 'Disc Amount',
+										cell: ({ getValue }) => `$${getValue()}`,
+										dataType: 'number',
+										footer: ({ table }) => (
+											<div className='text-center'>
+												${calculateFooterSum(table, `discountAmount_${weekId}`)}
+											</div>
+										),
+									}
+								),
 								columnHelper.accessor(
 									(row) => {
 										const weekData = row.weeks.find((week) => week.weekId === weekId);
@@ -434,22 +468,6 @@ const Discounts = () => {
 										footer: ({ table }) => (
 											<div className='text-center'>
 												{calculateFooterSum(table, `discountedChecks_${weekId}`)}
-											</div>
-										),
-									}
-								),
-								columnHelper.accessor(
-									(row) => {
-										const weekData = row.weeks.find((week) => week.weekId === weekId);
-										return weekData ? weekData[`discountAmount_${weekId}`] : 0;
-									},
-									{
-										id: `discountAmount_${weekId}`,
-										header: 'Disc Amount',
-										dataType: 'number',
-										footer: ({ table }) => (
-											<div className='text-center'>
-												${calculateFooterSum(table, `discountAmount_${weekId}`)}
 											</div>
 										),
 									}
@@ -478,6 +496,7 @@ const Discounts = () => {
 									{
 										id: `salesGenerated_${weekId}`,
 										header: 'Sales $ Gen',
+										cell: ({ getValue }) => `$${getValue()}`,
 										dataType: 'number',
 										footer: ({ table }) => (
 											<div className='text-center'>
@@ -494,11 +513,10 @@ const Discounts = () => {
 									{
 										id: `discountedTickets_${weekId}`,
 										header: 'Disc Cost %',
+										cell: ({ getValue }) => `${getValue()}%`,
 										dataType: 'number',
 										footer: ({ table }) => (
-											<div className='text-center'>
-												{calculatePctFooter(table, `discountedTickets_${weekId}`)}%
-											</div>
+											<div className='text-center'>{calculatePctFooter(table, weekId)}%</div>
 										),
 									}
 								),
@@ -596,7 +614,6 @@ const Discounts = () => {
 
 		if (option !== 'None') {
 			const firstNonGroupByColumnIndex = newColumns.findIndex((col) => !col.groupBy);
-			console.log(firstNonGroupByColumnIndex);
 
 			if (firstNonGroupByColumnIndex !== -1) {
 				const updateColumn = (column) => ({
@@ -929,7 +946,7 @@ const Discounts = () => {
 						/>
 						<div className='w-44 viewBy-selector'>
 							<Dropdown
-								title='view'
+								title='View'
 								options={viewByOptions}
 								selectedOption={viewBy}
 								onOptionChange={handleViewByChange}
