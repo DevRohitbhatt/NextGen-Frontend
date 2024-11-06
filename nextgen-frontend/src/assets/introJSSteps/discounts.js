@@ -16,8 +16,12 @@ export default function discounts() {
 			intro: '-Select the date, or date range, you wish to display Discounts.',
 		},
 		{
+			element: '.viewBy-selector',
+			intro: '-Select the Discounts Report based on the following views.',
+		},
+		{
 			element: '.discount-selector',
-			intro: '-Select the Sales Vs Labor Report based on the following discounts options.',
+			intro: '-Select the Discounts Report based on the following discounts options.',
 		},
 		{
 			element: '.group-by',
