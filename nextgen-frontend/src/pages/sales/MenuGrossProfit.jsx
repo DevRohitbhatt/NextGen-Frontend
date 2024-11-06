@@ -277,10 +277,8 @@ const MenuGrossProfit = () => {
 				grossProfitFooter: result.data.menuGrossProfitFooterModel.grossProfit.slice(1),
 				totalNetSales: result.data.menuGrossProfitFooterModel.totalNetSales.slice(1),
 				netFoodCost: result.data.menuGrossProfitFooterModel.netFoodCost.slice(1),
-				netProfit: result.data.menuGrossProfitFooterModel.netProfit,
+				netProfit: result.data.menuGrossProfitFooterModel.netProfit.slice(1),
 			}));
-
-			console.log('newData', newData);
 
 			let filteredData = newData.filter((item) => selectedCategories.includes(item.category));
 
