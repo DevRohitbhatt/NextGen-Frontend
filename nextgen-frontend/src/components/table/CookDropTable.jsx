@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 
 const CookDropTableHeader = ({ headerData }) => {
     const headers = headerData && headerData.length > 0 ? headerData : [];
@@ -9,7 +9,7 @@ const CookDropTableHeader = ({ headerData }) => {
 
                 {headers.length > 0 && headers.map((header, index) => (
                     <>
-                        {index === 0 && <th className="main-header first-header text-nowrap px-[20px] bg-gray-300 rounded-tl-[10px] sticky left-0 z-10 shadow-[0_-1px_0_var(--tw-primary)_inset]" rowSpan="2">
+                        {index === 0 && <th key={header+index+""} className="main-header first-header text-nowrap px-[20px] bg-gray-300 rounded-tl-[10px] sticky left-0 z-10 shadow-[0_-1px_0_var(--tw-primary)_inset]" rowSpan="2">
                             <table className='ml-auto mr-auto'>
                                 <thead>
                                     <tr>
@@ -62,11 +62,20 @@ const CookDropTableHeader = ({ headerData }) => {
     );
 };
 
-const EditableTable = ({ rows }) => {
-    // Ensure rows is defined and is an object
+const EditableTable = ({ rows ,setRows }) => {
     if (!rows || typeof rows !== 'object') {
         return <tbody><tr><td colSpan="100%">No data available</td></tr></tbody>;
     }
+
+    const handleInputChange = (time, fieldIndex, type, value) => {
+        const numericValue = value.replace(/[^0-9]/g, '');
+        setRows(prevRows => ({
+            ...prevRows,
+            [time]: prevRows[time].map((fieldGroup, index) => (
+                index === fieldIndex ? { ...fieldGroup, [type]: numericValue } : fieldGroup
+            ))
+        }));
+    };
 
     return (
         <tbody>
@@ -74,7 +83,7 @@ const EditableTable = ({ rows }) => {
                 <tr key={time}>
                     {/* Display time */}
                     <td className="border px-4 py-2 bg-gray-200 sticky left-0 text-center">{time || "N/A"}</td>
-                    
+
                     {/* Display fields for each item at this time */}
                     {(fields || []).map((fieldGroup, fieldIndex) => (
                         <td key={`${time}-${fieldIndex}`} className="border px-4 py-2 text-center">
@@ -82,21 +91,21 @@ const EditableTable = ({ rows }) => {
                                 <input
                                     type="text"
                                     value={fieldGroup?.needCount ?? ""}
-                                    
+                                    onChange={(e) => handleInputChange(time, fieldIndex, "needCount", e.target.value)}
                                     className="w-8 text-center"
                                 />
                                 <span>/</span>
                                 <input
                                     type="text"
                                     value={fieldGroup?.haveCount ?? ""}
-                                    
+                                    onChange={(e) => handleInputChange(time, fieldIndex, "haveCount", e.target.value)}
                                     className="w-8 text-center"
                                 />
                                 <span>/</span>
                                 <input
                                     type="text"
                                     value={fieldGroup?.cookCount ?? ""}
-                                    
+                                    onChange={(e) => handleInputChange(time, fieldIndex, "cookCount", e.target.value)}
                                     className="w-8 text-center"
                                 />
                             </div>
@@ -108,16 +117,22 @@ const EditableTable = ({ rows }) => {
     );
 };
 
-const CookDropTable = ({ initData }) => {
-    const { headers, rows } = initData;
-    
+const CookDropTable = forwardRef(({ initData }, ref) => {
+    const { headers } = initData;
+    const [editableRows, setEditableRows] = useState(initData.rows);
+    const originalRows = useRef(initData.rows);  // Reference to the original rows for comparison
+
+    useImperativeHandle(ref, () => ({
+        getChangedData: () => editableRows,
+    }));
+
     return (
         <table className='w-full border-collapse table-auto select-none'>
             <CookDropTableHeader headerData={headers} />
-            <EditableTable rows={rows} />
+            <EditableTable rows={editableRows} setRows={setEditableRows} />
         </table>
     );
-};
+});
 
 
 export default CookDropTable;
