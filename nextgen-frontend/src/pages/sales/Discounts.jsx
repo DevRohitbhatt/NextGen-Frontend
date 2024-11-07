@@ -34,6 +34,7 @@ const Discounts = () => {
 
 	const [discountsData, setDiscountsData] = useState([]);
 	const [columns, setColumns] = useState([]);
+	const [summaryColumns, setSummaryColumns] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(false);
 
 	//loading and error state variables
@@ -128,8 +129,8 @@ const Discounts = () => {
 			}),
 			columnHelper.accessor('discountedTickets', {
 				id: 'discountedTickets',
-				header: 'Discounted Tickets',
-				cell: ({ getValue }) => `${getValue()?.toFixed(2)}%`,
+				header: 'Disc Cost %',
+				cell: ({ getValue, row }) => (row.getCanExpand() ? '' : `${getValue()}%`),
 				dataType: 'number',
 				footer: ({ table }) => <div className='text-center'>{calculatePctFooter(table)}%</div>,
 			}),
@@ -358,6 +359,8 @@ const Discounts = () => {
 					new Set(result.data.flatMap((item) => item.weeks.map((week) => week.weekId)))
 				).sort();
 
+				console.log('uniqueWeeks', uniqueWeeks);
+
 				const weeks = uniqueWeeks.map((weekId) => {
 					const startDate = new Date(selectedFromDate.getFullYear(), 0, 1 + (weekId - 2) * 7);
 					const endDate = new Date(startDate);
@@ -369,8 +372,7 @@ const Discounts = () => {
 					};
 				});
 
-				memoizedColumns.length = 0;
-				memoizedColumns.unshift(
+				const generatedColumns = [
 					columnHelper.accessor('discountType', {
 						id: 'discountType',
 						header: 'Discount Name',
@@ -522,8 +524,10 @@ const Discounts = () => {
 								),
 							],
 						})
-					)
-				);
+					),
+				];
+
+				setSummaryColumns(generatedColumns);
 			} else {
 				const newData = result.data.map((row) => {
 					if (viewBy === 'Detail') {
@@ -533,7 +537,7 @@ const Discounts = () => {
 							checkID: row.Value,
 							price: row.Price,
 							amountDiscount: row.AmountDiscount.toFixed(2),
-							itemID: JSON.stringify(row.ItemID),
+							itemID: row.ItemID,
 							salesCategory: row.Category,
 							menuItem: row.FullDescription,
 							discountType: row.TypeName + ': ' + row.TypeItemName,
@@ -549,7 +553,7 @@ const Discounts = () => {
 							salesGenerated: row.DiscountedTicketAmount,
 							discountedTickets:
 								row.DiscountedItemsAmount && row.DiscountedTicketAmount
-									? (row.DiscountedItemsAmount / row.DiscountedTicketAmount) * 100
+									? ((row.DiscountedItemsAmount / row.DiscountedTicketAmount) * 100).toFixed(2)
 									: 0,
 							week: row.WeekID,
 							date: row.Date,
@@ -562,12 +566,14 @@ const Discounts = () => {
 
 				const filterData =
 					discountType === 'All-All Discounts'
-						? newData
-						: newData.filter(
-								(row) =>
-									row.typeName ===
-									reportTypeOptions.find((option) => option.name === discountType)?.type
-						  );
+						? newData.sort((a, b) => new Date(a.date) - new Date(b.date))
+						: newData
+								.filter(
+									(row) =>
+										row.typeName ===
+										reportTypeOptions.find((option) => option.name === discountType)?.type
+								)
+								.sort((a, b) => new Date(a.date) - new Date(b.date));
 
 				setDiscountsData(filterData);
 			}
@@ -915,7 +921,9 @@ const Discounts = () => {
 		}
 	};
 
-	const Table = <TableHOC columns={columns} data={discountsData} isFooter={true} />;
+	const Table = (
+		<TableHOC columns={viewBy === 'Summary' ? summaryColumns : columns} data={discountsData} isFooter={true} />
+	);
 
 	return (
 		<>
