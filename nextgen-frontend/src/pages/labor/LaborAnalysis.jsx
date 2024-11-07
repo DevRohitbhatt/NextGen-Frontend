@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
@@ -34,6 +34,7 @@ const LabourAnalysis = () => {
 	const [laborAnalysisModalData, setLaborAnalysisModalData] = useState([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalData, setModalData] = useState([]);
+	const [modalColumns, setModalColumns] = useState([]);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
@@ -66,6 +67,17 @@ const LabourAnalysis = () => {
 		{ name: 'None' },
 	];
 
+	const modalNames = {
+		'Projected Sales': 'actlySales',
+		'Actual Sales': 'actSales',
+		'Allowed Labor Hours': 'bohAllowedEarnedHours',
+		'Scheduled Labor Hours': 'scheduledHours',
+		'Actual Labor Hours': 'actLaborHours',
+		'Ideal Labor Hours': 'ideal_AllowedEarnedHours',
+		'Scheduled Labor Dollars': 'scheduledDollars',
+		'Actual Labor Dollars': 'actLabor',
+	};
+
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
 		steps: labourAnalysis(),
@@ -88,7 +100,6 @@ const LabourAnalysis = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			console.log(dateFormat(selectedFromDate, ''));
 
 			const getData = {
 				url: 'laborAnalysis',
@@ -142,16 +153,28 @@ const LabourAnalysis = () => {
 						columnHelper.accessor(item, {
 							id: item,
 							header: item,
-							cell: ({ getValue, row }) => <div onClick={() => handleModal(row, item)}>{getValue()}</div>,
+							cell: ({ getValue, row }) => (
+								<div
+									onClick={() => {
+										if (
+											modalNames[
+												Object.keys(modalNames).find((key) => row.original.name.includes(key))
+											]
+										) {
+											handleModal(row, item, result.data.scheduleSalesLaborHoursModels);
+										}
+									}}
+								>
+									{getValue()}
+								</div>
+							),
 							dataType: 'string',
 						})
 					),
 			];
 
-			console.log('newData: ', newData);
-
 			setLaborAnalysisReportData(newData);
-			setLaborAnalysisModalData(result.data.scheduleSalesLaborHoursModels);
+
 			setColumns(generatedColumns);
 			setIsLoading(false);
 		} catch (error) {
@@ -176,10 +199,51 @@ const LabourAnalysis = () => {
 		setShowDateModal(false);
 	};
 
-	const handleModal = (row, item) => {
-		console.log('Row: ', row);
+	const handleModal = (row, item, data) => {
+		const hours = Array.from({ length: 24 }, (_, i) => {
+			const hour = i % 12 === 0 ? 12 : i % 12;
+			const period = i < 12 ? 'AM' : 'PM';
+			return `${hour}${period}`;
+		});
+		const getFilteredHours = (name) => {
+			if (name.includes('Breakfast')) {
+				return ['4AM', '5AM', '6AM', '7AM', '8AM', '9AM', '10AM'];
+			} else if (name.includes('Lunch')) {
+				return ['11AM', '12PM', '1PM'];
+			} else if (name.includes('Afernoon Snack')) {
+				return ['2PM', '3PM', '4PM'];
+			} else if (name.includes('Late Dinner')) {
+				return ['8PM', '9PM', '10PM', '11PM', '12AM', '1AM', '2AM', '3AM'];
+			} else if (name.includes('Dinner')) {
+				return ['5PM', '6PM', '7PM'];
+			} else {
+				return hours;
+			}
+		};
 
-		setIsModalOpen(!isModalOpen);
+		const filteredHours = getFilteredHours(row.original.name);
+
+		const modalColumns = filteredHours.map((hour) => columnHelper.accessor(hour, { header: hour, size: 60 }));
+		modalColumns.unshift(columnHelper.accessor('name', { header: 'Name', size: 150 }));
+
+		const modalData = [
+			filteredHours.reduce(
+				(acc, hour) => {
+					const hour24 = (parseInt(hour) % 12) + (hour.includes('PM') ? 12 : 0);
+					acc[hour] = data.find((item) => item.hour === hour24)?.[
+						`${modalNames[Object.keys(modalNames).find((key) => row.original.name.includes(key))]}${
+							item.split(' ')[0]
+						}`
+					];
+					return acc;
+				},
+				{ name: row.original.name }
+			),
+		];
+
+		setLaborAnalysisModalData(modalData);
+		setModalColumns(modalColumns);
+		setIsModalOpen((prev) => !prev);
 		setModalData({
 			row: row,
 			title: item,
@@ -262,6 +326,7 @@ const LabourAnalysis = () => {
 	};
 
 	const Table = <TableHOC columns={columns} data={laborAnalysisReportData} expandCollapseButtons={true} />;
+	const modalTable = <TableHOC columns={modalColumns} data={laborAnalysisModalData} />;
 
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -271,7 +336,7 @@ const LabourAnalysis = () => {
 				initialStep={introSteps.initialStep}
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Labour Analysis</h2>
+			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Labor Analysis</h2>
 			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center'>
 					<UnitSelector
@@ -352,11 +417,9 @@ const LabourAnalysis = () => {
 					selectedFromDate={selectedFromDate}
 					selectedToDate={selectedToDate}
 				/>
-				<Modal
-					isOpen={isModalOpen}
-					onClose={() => setIsModalOpen(!isModalOpen)}
-					title={modalData?.title}
-				></Modal>
+				<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(!isModalOpen)} title={modalData?.title}>
+					<div className='p-6'>{modalTable}</div>
+				</Modal>
 			</div>
 		</div>
 	);
