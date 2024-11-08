@@ -143,7 +143,7 @@ const LaborCICOExceptions = () => {
 			setIsError(false);
 			setIsTableRendered(false);
 			const getData = {
-				url: 'labourCICOExceptions',
+				url: 'laborCICOExceptions',
 				urlParams: {
 					companyId: companyID,
 					alignmentId: alignmentID,

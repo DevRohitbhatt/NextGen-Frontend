@@ -17,7 +17,7 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
-import laborByPayPeriod from '../../assets/introJSSteps/labourByPayPeriod';
+import laborByPayPeriod from '../../assets/introJSSteps/laborByPayPeriod';
 
 const columnHelper = createColumnHelper();
 
@@ -207,7 +207,7 @@ const LaborByPayPeriod = () => {
 			setIsError(false);
 			setIsTableRendered(false);
 			const getData = {
-				url: 'labourByPayPeriod',
+				url: 'laborByPayPeriod',
 				urlParams: {
 					companyId: companyID,
 					alignmentId: alignmentID,
@@ -418,7 +418,7 @@ const LaborByPayPeriod = () => {
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
 		tempLink.href = url;
-		tempLink.setAttribute('download', 'labourByPayPeriod.csv');
+		tempLink.setAttribute('download', 'laborByPayPeriod.csv');
 		tempLink.click();
 	};
 

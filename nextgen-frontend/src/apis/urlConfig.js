@@ -43,7 +43,7 @@ const urlConfig = {
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
-	labourByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
-	labourCICOExceptions: 'api/labor/getLaborCICOExceptionReportData',
+	laborByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
+	laborCICOExceptions: 'api/labor/getLaborCICOExceptionReportData',
 };
 export default urlConfig;
