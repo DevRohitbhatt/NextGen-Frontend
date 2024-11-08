@@ -133,7 +133,7 @@ const App = () => {
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
 
-								{/* Labour */}
+								{/* labor */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
 								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />

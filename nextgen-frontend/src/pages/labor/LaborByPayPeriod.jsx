@@ -273,7 +273,7 @@ const LaborByPayPeriod = () => {
 		}
 
 		if (!laborByPayPeriodData || laborByPayPeriodData.length === 0) {
-			console.error('Labour By Pay Period data is not defined or empty');
+			console.error('labor By Pay Period data is not defined or empty');
 			return;
 		}
 
