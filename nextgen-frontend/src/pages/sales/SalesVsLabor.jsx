@@ -36,6 +36,7 @@ const SalesVsLabor = () => {
 
 	const [salesVsLaborData, setSalesVsLaborData] = useState([]);
 	const [isChartModalOpen, setIsChartModalOpen] = useState(false);
+	const [isChartLoading, setIsChartLoading] = useState(false);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
@@ -248,7 +249,7 @@ const SalesVsLabor = () => {
 		}
 	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
-	const fetchSalesVsLabourReport = async () => {
+	const fetchSalesVslaborReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -374,6 +375,7 @@ const SalesVsLabor = () => {
 	};
 
 	const handleChartClick = () => {
+		setIsChartLoading(true);
 		const uniqueDates = [...new Set(salesVsLaborData.map((item) => item.date))];
 		const totalSales = uniqueDates.map((date) => {
 			const items = salesVsLaborData.filter((item) => item.date === date);
@@ -387,6 +389,7 @@ const SalesVsLabor = () => {
 			const items = salesVsLaborData.filter((item) => item.date === date);
 			return items.reduce((acc, item) => acc + parseFloat(item.variableLaborDollars), 0).toFixed(2);
 		});
+
 		const chartData = {
 			series: [
 				{
@@ -411,8 +414,6 @@ const SalesVsLabor = () => {
 					{ length: Math.ceil(Math.max(...totalSales, ...totalGrossSales, ...totalLaborDollars) / 250) + 1 },
 					(_, i) => 100 + i * 250
 				),
-				min: 100,
-				stepSize: 250,
 				labels: {
 					showAlways: true,
 					formatter: function (value) {
@@ -430,6 +431,7 @@ const SalesVsLabor = () => {
 		};
 
 		setChartData(chartData);
+		setIsChartLoading(false);
 		setIsChartModalOpen(!isChartModalOpen);
 	};
 
@@ -564,7 +566,7 @@ const SalesVsLabor = () => {
 								onOptionChange={(option) => setGroupBy(option)}
 							/>
 						</div>
-						<div className='run-button' onClick={fetchSalesVsLabourReport}>
+						<div className='run-button' onClick={fetchSalesVslaborReport}>
 							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
@@ -630,7 +632,7 @@ const SalesVsLabor = () => {
 						title='Sales Vs Labor Chart'
 					>
 						<div className='w-[60rem] p-4'>
-							<LineChart chartData={chartData} />
+							{isChartLoading ? <Loader loading={isChartLoading} /> : <LineChart chartData={chartData} />}
 						</div>
 					</Modal>
 				</div>

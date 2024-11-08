@@ -134,7 +134,7 @@ const App = () => {
 								<Route path='/Voids' element={<Voids />} />
 								<Route path='/SalesVsLabor' element={<SalesVsLabor />} />
 
-								{/* Labour */}
+								{/* labor */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
 							</Routes>

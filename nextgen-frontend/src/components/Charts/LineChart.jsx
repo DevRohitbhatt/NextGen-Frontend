@@ -26,6 +26,12 @@ const LineChart = ({ chartData }) => {
 				toolbar: {
 					show: false,
 				},
+				animation: {
+					enabled: false,
+				},
+			},
+			markers: {
+				size: 0,
 			},
 		},
 	};
