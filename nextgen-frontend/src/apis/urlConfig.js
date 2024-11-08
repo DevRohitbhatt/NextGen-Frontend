@@ -3,7 +3,6 @@ const urlConfig = {
 	getCompanySetting: '/api/company/settings/getsetting',
 	getAllCompanySettings: '/api/company/settings/getallsettings',
 
-
 	unitsAndArea: '/api/unitsandareas/getbyid',
 	vendors: '/api/vendor/getvendorsbycompanyid',
 
@@ -44,7 +43,7 @@ const urlConfig = {
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
-	labourByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
-	labourCICO: 'api/labor/getLaborCICOReportData',
+	laborByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
+	laborCICO: 'api/labor/getLaborCICOReportData',
 };
 export default urlConfig;

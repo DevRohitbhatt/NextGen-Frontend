@@ -32,7 +32,7 @@ const LaborCICO = () => {
 		defaultUnitName,
 	} = useSelector((state) => state.globalState);
 
-	const [labourCICOData, setLabourCICOData] = useState([]);
+	const [laborCICOData, setLaborCICOData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(false);
 
 	//loading and error state variables
@@ -233,7 +233,7 @@ const LaborCICO = () => {
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
-				url: 'labourCICO',
+				url: 'laborCICO',
 				urlParams: {
 					companyId: companyID,
 					alignmentId: alignmentID,
@@ -282,7 +282,7 @@ const LaborCICO = () => {
 				})),
 			}));
 
-			setLabourCICOData(newData);
+			setLaborCICOData(newData);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -317,7 +317,7 @@ const LaborCICO = () => {
 			return;
 		}
 
-		if (!labourCICOData || labourCICOData.length === 0) {
+		if (!laborCICOData || laborCICOData.length === 0) {
 			console.error('Labor Clock In - Clock Out data is not defined or empty');
 			return;
 		}
@@ -339,7 +339,7 @@ const LaborCICO = () => {
 	};
 
 	const buildPDFBody = () => {
-		const body = labourCICOData.map((row) => {
+		const body = laborCICOData.map((row) => {
 			const unit = unitsAndAreasList?.units?.find((unit) => unit.unitName === row.unitName);
 			const title = unit ? unit.unitName : '';
 			return {
@@ -426,7 +426,7 @@ const LaborCICO = () => {
 				period.invalid,
 			].join(',');
 
-		const csvData = labourCICOData.flatMap((unit) =>
+		const csvData = laborCICOData.flatMap((unit) =>
 			unit.subRows.flatMap((employee) =>
 				employee.subRows.flatMap((period) => {
 					const employeeID = groupBy === 'Employee' ? employee.employeeID : period.employeeID;
@@ -451,7 +451,7 @@ const LaborCICO = () => {
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
 		tempLink.href = url;
-		tempLink.setAttribute('download', 'labourCICO.csv');
+		tempLink.setAttribute('download', 'laborCICO.csv');
 		tempLink.click();
 	};
 
@@ -461,7 +461,7 @@ const LaborCICO = () => {
 			{
 				name: 'Labor Clock In - Clock Out',
 				columns: columns.slice(1).map((column) => ({ name: column.header, filter: column.dataType })),
-				data: labourCICOData.flatMap((unit) =>
+				data: laborCICOData.flatMap((unit) =>
 					unit.subRows.flatMap((employee) =>
 						groupBy === 'Employee'
 							? employee.subRows.map((period) => ({
@@ -525,7 +525,7 @@ const LaborCICO = () => {
 	const Table = (
 		<TableHOC
 			columns={columns}
-			data={labourCICOData}
+			data={laborCICOData}
 			view={viewOptions.find((option) => option.name === viewby)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
@@ -590,7 +590,7 @@ const LaborCICO = () => {
 					<div className='relative w-full min-h-56'>
 						<Loader loading={isLoading} />
 						{!isLoading &&
-							(labourCICOData.length > 0 ? (
+							(laborCICOData.length > 0 ? (
 								<div className='paged-table'>{Table}</div>
 							) : !selectedUnit ? (
 								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
