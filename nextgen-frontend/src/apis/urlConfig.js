@@ -43,6 +43,7 @@ const urlConfig = {
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
 	discounts: 'api/sales/GetDiscountReportData',
+	discountTypes: 'api/sales/GetDiscountTypesReportData',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',

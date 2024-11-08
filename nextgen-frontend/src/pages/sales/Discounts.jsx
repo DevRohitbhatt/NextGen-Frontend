@@ -33,9 +33,9 @@ const Discounts = () => {
 	} = useSelector((state) => state.globalState);
 
 	const [discountsData, setDiscountsData] = useState([]);
+	const [discountTypes, setDiscountTypes] = useState([]);
 	const [columns, setColumns] = useState([]);
 	const [summaryColumns, setSummaryColumns] = useState([]);
-	const [isTableRendered, setIsTableRendered] = useState(false);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
@@ -65,15 +65,12 @@ const Discounts = () => {
 		{ name: 'Detail' },
 	];
 	const [discountType, setDiscountType] = useState('All-All Discounts');
-	const reportTypeOptions = [
+	const discountTypeOptions = discountTypes?.map((type) => ({ name: type.name, type: type.type }));
+	discountTypeOptions.unshift(
 		{ name: 'All-All Discounts' },
 		{ name: 'All-All Comps', type: 'Comp' },
-		{ name: 'All-All promos', type: 'Promo' },
-		{ name: 'Promo-1/2 Off Lemonade Happy Hour' },
-		{ name: 'Promo-Free 4PC w/Combo' },
-		{ name: 'Promo-Free Kids Meal w/Combo' },
-		{ name: 'Promo-$12.99 2 Sm Cheesesteaks' },
-	];
+		{ name: 'All-All promos', type: 'Promo' }
+	);
 	const [groupBy, setGroupBy] = useState('None');
 	const [isGroupByEditable, setIsGroupByEditable] = useState(true);
 	const [groupByOptions, setGroupByOptions] = useState([{ name: 'None' }, { name: 'Discount Type' }]);
@@ -324,11 +321,39 @@ const Discounts = () => {
 		}
 	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
+	useEffect(() => {
+		if (selectedUnit) {
+			fetchDiscountTypes();
+		}
+	}, [selectedUnit]);
+
+	const fetchDiscountTypes = async () => {
+		try {
+			setIsLoading(true);
+			setIsError(false);
+			const getData = {
+				url: 'discountTypes',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData);
+			const discountTypes = result.data.map((type) => ({
+				name: type.TypeItemName,
+				type: type.TypeName,
+			}));
+			setDiscountTypes(discountTypes);
+			setIsLoading(false);
+		} catch (error) {
+			console.error('Error getting Discount Types: ', error);
+		}
+	};
+
 	const fetchDiscountsReportData = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setIsTableRendered(false);
 			const getData = {
 				url: 'discounts',
 				urlParams: {
@@ -351,15 +376,13 @@ const Discounts = () => {
 						: result.data.filter(
 								(row) =>
 									row.typeName ===
-									reportTypeOptions.find((option) => option.name === discountType)?.type
+									discountTypeOptions.find((option) => option.name === discountType)?.type
 						  );
 				setDiscountsData(filterData);
 
 				const uniqueWeeks = Array.from(
 					new Set(result.data.flatMap((item) => item.weeks.map((week) => week.weekId)))
 				).sort();
-
-				console.log('uniqueWeeks', uniqueWeeks);
 
 				const weeks = uniqueWeeks.map((weekId) => {
 					const startDate = new Date(selectedFromDate.getFullYear(), 0, 1 + (weekId - 2) * 7);
@@ -571,7 +594,7 @@ const Discounts = () => {
 								.filter(
 									(row) =>
 										row.typeName ===
-										reportTypeOptions.find((option) => option.name === discountType)?.type
+										discountTypeOptions.find((option) => option.name === discountType)?.type
 								)
 								.sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -580,7 +603,6 @@ const Discounts = () => {
 			handleGroupByChange(viewBy === 'Summary' || viewBy === 'Detail' ? groupBy : viewBy);
 
 			setIsLoading(false);
-			setIsTableRendered(true);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -614,7 +636,7 @@ const Discounts = () => {
 		};
 
 		const selectedGroupByColumns = groupByColumns[option] || [];
-		const newColumns = columns.map((column) =>
+		const newColumns = (viewBy === 'Summary' ? summaryColumns : columns).map((column) =>
 			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
 		);
 
@@ -667,7 +689,11 @@ const Discounts = () => {
 			});
 		}
 
-		setColumns(newColumns);
+		if (viewBy === 'Summary' && newColumns.length > 0) {
+			setSummaryColumns(newColumns);
+		} else {
+			setColumns(newColumns);
+		}
 	};
 
 	const handleReportTypeChange = (option) => {
@@ -769,7 +795,7 @@ const Discounts = () => {
 			pageOrientation: 'landscape',
 			body:
 				viewBy === 'Summary'
-					? generateBody(flattenColumns(columns), discountsData)
+					? generateBody(flattenColumns(summaryColumns), discountsData)
 					: [
 							{
 								type: 'table',
@@ -822,7 +848,7 @@ const Discounts = () => {
 				return flatColumns;
 			};
 
-			const flattenedColumns = flattenColumns(columns);
+			const flattenedColumns = flattenColumns(summaryColumns);
 
 			const generateCSVData = () => {
 				const csvHeaders = flattenedColumns.map((column) =>
@@ -889,7 +915,7 @@ const Discounts = () => {
 				return flatColumns;
 			};
 
-			const flattenedColumns = flattenColumns(columns);
+			const flattenedColumns = flattenColumns(summaryColumns);
 
 			const data = [
 				{
@@ -963,7 +989,7 @@ const Discounts = () => {
 						<div className='mx-2 w-52 discount-selector'>
 							<Dropdown
 								title='Discounts'
-								options={reportTypeOptions}
+								options={discountTypeOptions}
 								selectedOption={discountType}
 								onOptionChange={handleReportTypeChange}
 							/>
