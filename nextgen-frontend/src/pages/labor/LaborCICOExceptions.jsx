@@ -32,7 +32,7 @@ const LaborCICOExceptions = () => {
 		defaultUnitName,
 	} = useSelector((state) => state.globalState);
 
-	const [labourCICOExceptionsData, setLabourCICOExceptionsData] = useState([]);
+	const [laborCICOExceptionsData, setLaborCICOExceptionsData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(false);
 
 	//loading and error state variables
@@ -170,7 +170,7 @@ const LaborCICOExceptions = () => {
 				)
 			);
 
-			setLabourCICOExceptionsData(newData);
+			setLaborCICOExceptionsData(newData);
 			setIsLoading(false);
 			setIsTableRendered(true);
 		} catch (error) {
@@ -281,7 +281,7 @@ const LaborCICOExceptions = () => {
 					dataTypes: columns.map((column) => column.dataType),
 					data: {
 						columnHeaders: columns.map((column) => column.header),
-						rows: labourCICOExceptionsData.map((row) =>
+						rows: laborCICOExceptionsData.map((row) =>
 							columns.map((column) => ({
 								value: row[column.id],
 								cellType: column.dataType,
@@ -299,13 +299,13 @@ const LaborCICOExceptions = () => {
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
 		const csvHeaders = columns.map((column) => column.header);
-		const csvData = labourCICOExceptionsData.map((row) => columns.map((column) => `"${row[column.id]}"`).join(','));
+		const csvData = laborCICOExceptionsData.map((row) => columns.map((column) => `"${row[column.id]}"`).join(','));
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
 		tempLink.href = url;
-		tempLink.setAttribute('download', 'labourCICOExceptions.csv');
+		tempLink.setAttribute('download', 'laborCICOExceptions.csv');
 		tempLink.click();
 	};
 
@@ -315,7 +315,7 @@ const LaborCICOExceptions = () => {
 			{
 				name: `Unit:${selectedUnitName}`,
 				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
-				data: labourCICOExceptionsData.map((row) => columns.map((column) => row[column.id])),
+				data: laborCICOExceptionsData.map((row) => columns.map((column) => row[column.id])),
 			},
 		];
 
@@ -329,7 +329,7 @@ const LaborCICOExceptions = () => {
 	const Table = (
 		<TableHOC
 			columns={columns}
-			data={labourCICOExceptionsData}
+			data={laborCICOExceptionsData}
 			headerPosition='left'
 			dataPosition='left'
 			isFooter={true}
@@ -400,7 +400,7 @@ const LaborCICOExceptions = () => {
 					<div className='relative w-full min-h-56'>
 						<Loader loading={isLoading} />
 						{!isLoading &&
-							(labourCICOExceptionsData.length > 0 ? (
+							(laborCICOExceptionsData.length > 0 ? (
 								<div className='paged-table'>{Table}</div>
 							) : !selectedUnit ? (
 								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
