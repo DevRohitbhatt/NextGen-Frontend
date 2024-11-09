@@ -52,6 +52,7 @@ const CookChartTemplate = (props) => {
     const [sourceType, setSourceType] = useState('Menu Items');
     const [sourceTypeDropDown, setSourceTypeDropDown] = useState(false);
     const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
+    const [showFullTable, setShowFullTable] = useState(true)
 
     useEffect(() => {
         if (defaultUnitID) {
@@ -664,19 +665,19 @@ const CookChartTemplate = (props) => {
                                                     className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]"
                                                 >
                                                     <h2 className="text-2xl font-bold mb-4">Template</h2>
-                                                    <div className="p-4 rounded-lg bg-gray-100">
+                                                    <div className="p-4 rounded-lg bg-gray-100"  onClick={()=>{setShowFullTable(!showFullTable)}} >
                                                         <h2 className="font-bold text-xl">Biscuits</h2>
-                                                        <p className="font-semibold text-lg">
+                                                        <p className="font-semibold text-lg cursor-pointer">
                                                             Increment 0015:00, Cook time 0020:00, Hold 0060:00, Safety 10%
                                                         </p>
                                                     </div>
-                                                    <table className="min-w-full table-auto">
+                                                    <table className={`min-w-full table-auto ${showFullTable ? "" : "hidden"}`} >
                                                         <thead>
                                                             <tr className="border-b border-b-[var(--tw-primary)]">
                                                                 <th className="px-4 py-2 text-left">Item ID</th>
                                                                 <th className="px-4 py-2 text-left">Description</th>
                                                                 <th className="px-4 py-2 text-left">QTY</th>
-                                                                <th className="px-4 py-2 text-left">Action</th>
+                                                                {/* <th className="px-4 py-2 text-left">Action</th> */}
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -692,11 +693,11 @@ const CookChartTemplate = (props) => {
                                                                             <td className="px-4 py-2">{item.id}</td>
                                                                             <td className="px-4 py-2">{item.description}</td>
                                                                             <td className="px-4 py-2">{item.qty}</td>
-                                                                            <td className="px-4 py-2">
+                                                                            {/* <td className="px-4 py-2">
                                                                                 <button className="text-red-500 hover:text-red-700">
                                                                                     <RiDeleteBin6Line />
                                                                                 </button>
-                                                                            </td>
+                                                                            </td> */}
                                                                         </tr>
                                                                     )}
                                                                 </Draggable>
