@@ -36,6 +36,7 @@ const Discounts = () => {
 	const [discountTypes, setDiscountTypes] = useState([]);
 	const [columns, setColumns] = useState([]);
 	const [summaryColumns, setSummaryColumns] = useState([]);
+	const [isDiscountTypesLoading, setIsDiscountTypesLoading] = useState(false);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +66,9 @@ const Discounts = () => {
 		{ name: 'Detail' },
 	];
 	const [discountType, setDiscountType] = useState('All-All Discounts');
-	const discountTypeOptions = discountTypes?.map((type) => ({ name: type.name, type: type.type }));
+	const discountTypeOptions = discountTypes?.map((type) => ({
+		name: `${type.type} - ${type.name}`,
+	}));
 	discountTypeOptions.unshift(
 		{ name: 'All-All Discounts' },
 		{ name: 'All-All Comps', type: 'Comp' },
@@ -89,6 +92,7 @@ const Discounts = () => {
 				id: 'discountType',
 				header: 'Discount Type',
 				dataType: 'string',
+				size: 250,
 			}),
 			columnHelper.accessor('discountedChecks', {
 				id: 'discountedChecks',
@@ -329,7 +333,7 @@ const Discounts = () => {
 
 	const fetchDiscountTypes = async () => {
 		try {
-			setIsLoading(true);
+			setIsDiscountTypesLoading(true);
 			setIsError(false);
 			const getData = {
 				url: 'discountTypes',
@@ -344,7 +348,7 @@ const Discounts = () => {
 				type: type.TypeName,
 			}));
 			setDiscountTypes(discountTypes);
-			setIsLoading(false);
+			setIsDiscountTypesLoading(false);
 		} catch (error) {
 			console.error('Error getting Discount Types: ', error);
 		}
@@ -549,8 +553,7 @@ const Discounts = () => {
 						})
 					),
 				];
-
-				setSummaryColumns(generatedColumns);
+				handleGroupByChange(viewBy === 'Summary' || viewBy === 'Detail' ? groupBy : viewBy, generatedColumns);
 			} else {
 				const newData = result.data.map((row) => {
 					if (viewBy === 'Detail') {
@@ -598,9 +601,9 @@ const Discounts = () => {
 								)
 								.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+				handleGroupByChange(viewBy === 'Summary' || viewBy === 'Detail' ? groupBy : viewBy, columns);
 				setDiscountsData(filterData);
 			}
-			handleGroupByChange(viewBy === 'Summary' || viewBy === 'Detail' ? groupBy : viewBy);
 
 			setIsLoading(false);
 		} catch (error) {
@@ -623,7 +626,7 @@ const Discounts = () => {
 		setShowDateModal(false);
 	};
 
-	const handleGroupByChange = (option) => {
+	const handleGroupByChange = (option, columnsPassed) => {
 		const groupByColumns = {
 			None: [],
 			Date: ['date'],
@@ -636,7 +639,7 @@ const Discounts = () => {
 		};
 
 		const selectedGroupByColumns = groupByColumns[option] || [];
-		const newColumns = (viewBy === 'Summary' ? summaryColumns : columns).map((column) =>
+		const newColumns = columnsPassed.map((column) =>
 			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
 		);
 
@@ -649,9 +652,10 @@ const Discounts = () => {
 					cell: ({ row, getValue }) => {
 						const label =
 							row.depth < selectedGroupByColumns.length
-								? `${columns.find((col) => col.id === selectedGroupByColumns[row.depth])?.header}: ${
-										row.original[selectedGroupByColumns[row.depth]]
-								  } `
+								? `${
+										columnsPassed?.find((col) => col.id === selectedGroupByColumns[row.depth])
+											?.header
+								  }: ${row.original[selectedGroupByColumns[row.depth]]} `
 								: '';
 
 						return row.getCanExpand() ? (
@@ -668,6 +672,8 @@ const Discounts = () => {
 								)}
 								{label}
 							</div>
+						) : column.header === 'Disc Amount' ? (
+							`$${getValue()}`
 						) : (
 							getValue()
 						);
@@ -707,6 +713,7 @@ const Discounts = () => {
 			setIsGroupByEditable(true);
 			if (option === 'Summary') {
 				setGroupByOptions([{ name: 'None' }, { name: 'Discount Type' }]);
+				setGroupBy('None');
 			} else {
 				setGroupByOptions([
 					{ name: 'None' },
@@ -989,8 +996,8 @@ const Discounts = () => {
 						<div className='mx-2 w-52 discount-selector'>
 							<Dropdown
 								title='Discounts'
-								options={discountTypeOptions}
-								selectedOption={discountType}
+								options={isDiscountTypesLoading ? [{ name: 'Loading...' }] : discountTypeOptions}
+								selectedOption={isDiscountTypesLoading ? 'Loading...' : discountType}
 								onOptionChange={handleReportTypeChange}
 							/>
 						</div>
