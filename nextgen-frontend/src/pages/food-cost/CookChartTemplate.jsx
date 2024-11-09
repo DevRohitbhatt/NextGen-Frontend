@@ -47,11 +47,8 @@ const CookChartTemplate = (props) => {
     ]);
     const [addMenuItems, setAddMenuItems] = useState([]);
     const [addIntryItems, setAddIntryItems] = useState([]);
-    const [rightItems, setRightItems] = useState([
-    ]);
     const [sourceType, setSourceType] = useState('Menu Items');
     const [sourceTypeDropDown, setSourceTypeDropDown] = useState(false);
-    const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
     const [showFullTable, setShowFullTable] = useState(false);
     const [rightTableData, setRightTableData] = useState(null);
 

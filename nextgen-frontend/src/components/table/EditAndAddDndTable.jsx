@@ -66,14 +66,19 @@ const EditAndAddDndTable = ({
     const [templateItems, setTemplateItems] = useState([]);
     const [draggingId, setDraggingId] = useState(null);
     const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
-
-    // Pagination State
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredItems, setFilteredItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     useEffect(() => {
         setItems(initialTableOneData);
+        setFilteredItems(initialTableOneData); // Initialize filteredItems
     }, [initialTableOneData]);
+
+    useEffect(() => {
+        handleSearch(searchTerm); // Apply search when `searchTerm` or `items` change
+    }, [searchTerm, items]);
 
     const handleLongPressDragStart = (menuID) => {
         setDraggingId(menuID);
@@ -109,11 +114,19 @@ const EditAndAddDndTable = ({
         );
     };
 
-    // Pagination Calculations
-    const totalPages = Math.ceil(items.length / itemsPerPage);
-    const paginatedItems = isPaginationEnabled
-        ? items.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-        : items;
+    const handleSearch = (term) => {
+        setSearchTerm(term);
+        const filtered = items.filter(item =>
+            item.description.toLowerCase().includes(term.toLowerCase())
+        );
+        setFilteredItems(filtered);
+        setCurrentPage(1); // Reset to first page on search
+    };
+
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    const paginatedItems = isPaginationEnabled && filteredItems.length >= 100
+        ? filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+        : filteredItems;
 
     const handleChangeItemsPerPage = (e) => {
         setItemsPerPage(Number(e.target.value));
@@ -144,7 +157,7 @@ const EditAndAddDndTable = ({
                             <div className="flex items-center space-x-2 mb-4 justify-between">
                                 <h2 className="text-2xl font-bold mb-4">{tableOneName}</h2>
                                 <div className="w-[200px]">
-                                    <SearchBar onSearch={(e)=>{console.log(e)}} extraClass="w-full" />
+                                    <SearchBar onSearch={handleSearch} extraClass="w-full" />
                                 </div>
                             </div>
                             <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] px-[15px] tableHOC pr-1 max-h-full overflow-auto">
@@ -167,9 +180,7 @@ const EditAndAddDndTable = ({
                                                         onMouseDown={() => handleLongPressDragStart(item.menuID)}
                                                         className={"shadow-[0_-1px_0_rgba(0,0,0,0.2)_inset]"}
                                                     >
-                                                        {/* <div className='border-b w-full'> */}
                                                         <DraggableRow item={item} isTemplate={false} />
-                                                        {/* </div> */}
                                                     </tr>
                                                 )}
                                             </Draggable>
@@ -177,7 +188,7 @@ const EditAndAddDndTable = ({
                                         {provided.placeholder}
                                     </tbody>
                                 </table>
-                                {isPaginationEnabled && (
+                                {isPaginationEnabled && filteredItems.length >= 100 && (
                                     <div className="flex items-center justify-between sticky bottom-0 bg-white">
                                         <div className="flex gap-2">
                                             <button onClick={goToFirstPage} disabled={currentPage === 1}>First</button>
@@ -202,7 +213,7 @@ const EditAndAddDndTable = ({
                         <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className="w-[55%] rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] px-[15px]  tableHOC overflow-auto pr-1 h-[60vh] "
+                            className="w-[55%] rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] px-[15px] tableHOC overflow-auto pr-1 h-[60vh]"
                         >
                             <table className="min-w-full table-auto ">
                                 <thead className=' sticky top-0 bg-white z-10'>
@@ -259,4 +270,3 @@ const EditAndAddDndTable = ({
 };
 
 export default EditAndAddDndTable;
-
