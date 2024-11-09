@@ -6,6 +6,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import EditAndAddDndTable from "../../components/table/EditAndAddDndTable";
 import HoverBorderButton from "../../components/buttons/HoverBorderButton";
 import { getCall, postCall } from "../../apis/network";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 
 const CookChartTemplate = (props) => {
     const {
@@ -37,7 +38,7 @@ const CookChartTemplate = (props) => {
     const [cookAllData, setCookAllData] = useState([])
     const [editCookData, SetEditCookData] = useState([]);
     const [allDataFeilds, setAllDataFeilds] = useState({});
-    const [items, setItems] = useState([
+    const [leftItems, setLeftItems] = useState([
         { id: '10210104', description: '(4) Biscuit', qty: 4 },
         { id: '10210112', description: '(12) Biscuit', qty: 12 },
         { id: '10210101', description: '(1) Biscuit', qty: 1 },
@@ -46,9 +47,7 @@ const CookChartTemplate = (props) => {
     ]);
     const [addMenuItems, setAddMenuItems] = useState([]);
     const [addIntryItems, setAddIntryItems] = useState([]);
-    const [templateItems, setTemplateItems] = useState([
-        { id: '10210112', description: '(12) Biscuit', qty: 12 },
-        { id: '10210104', description: '(4) Biscuit', qty: 4 },
+    const [rightItems, setRightItems] = useState([
     ]);
     const [sourceType, setSourceType] = useState('Menu Items');
     const [sourceTypeDropDown, setSourceTypeDropDown] = useState(false);
@@ -176,9 +175,9 @@ const CookChartTemplate = (props) => {
             }))
         }
         const savedData = async (saved) => {
-            console.log("aaaaaaa",saved)
-            let values  = saved
-            values.forEach((item)=>  {
+            console.log("aaaaaaa", saved)
+            let values = saved
+            values.forEach((item) => {
                 delete item.menuID;
                 delete item.uniqueKey;
                 item.cookItemQuantity = parseInt(item.cookItemQuantity)
@@ -192,7 +191,7 @@ const CookChartTemplate = (props) => {
                     },
                     bodyData: body,
                 };
-        
+
                 let result = await postCall(postData);
             } catch (error) {
                 console.log(error)
@@ -200,7 +199,7 @@ const CookChartTemplate = (props) => {
 
         }
 
-        
+
 
         return (
             <div className="gap-[30px] flex justify-between mx-auto p-4 h-[100%] flex-col" >
@@ -502,18 +501,19 @@ const CookChartTemplate = (props) => {
                     <EditAndAddDndTable
                         key="menu-items"
                         tableOneName="Menu Items"
-                        tableTwoName="Selected Items"
+                        tableTwoName="Items"
                         tableOneHeaders={['Menu ID', 'Description']}
                         tableTwoHeaders={['Menu ID', 'Description']}
                         initialTableOneData={addMenuItems}
                         dorpabaleidOne={"items"}
                         dorpabaleidTwo={"itemstemplate"}
+                        isPaginationEnabled={true}
                     />
                     :
                     <EditAndAddDndTable
                         key="inventory-items"
                         tableOneName="Inventory item"
-                        tableTwoName="List of item"
+                        tableTwoName="item"
                         tableOneHeaders={['Inventory ID', 'Description']}
                         tableTwoHeaders={['Inventory ID', 'Description']}
                         initialTableOneData={addIntryItems}
@@ -524,6 +524,34 @@ const CookChartTemplate = (props) => {
             </div>
         )
     }
+
+    const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
+    const handleDragEnd = (result) => {
+        const { source, destination } = result;
+    
+        // Exit if there’s no destination or if the drag is within the same list
+        if (!destination || source.droppableId === destination.droppableId) return;
+    
+        // Check if the drag is from the left table to the right table
+        if (source.droppableId === 'left' && destination.droppableId === 'right') {
+            const itemToAdd = leftItems[source.index];
+    
+            // Only add if the item is not already in rightItems
+            if (itemToAdd && !rightItems.some((item) => item.id === itemToAdd.id)) {
+                const newItem = {
+                    ...itemToAdd,
+                    uniqueKey: uniqueIdCounter, // Add unique key
+                    draggableId: `${itemToAdd.id}-${uniqueIdCounter}`,
+                };
+    
+                // Update rightItems with the copied item and increment the unique ID counter
+                setRightItems((prevItems) => [...prevItems, newItem]);
+                setUniqueIdCounter((prev) => prev + 1);
+            }
+        }
+    };
+    
+    
 
     return (
         <>
@@ -556,98 +584,132 @@ const CookChartTemplate = (props) => {
                 ) : (
                     !isLoading &&
                     (true ? (
-                        <div className="container mx-auto  px-1 py-4">
-                            <div className="flex w-full gap-4 justify-between">
-                                <div className="w-[40%]">
-
-                                    <div className="flex items-center space-x-2 mb-4 justify-between" >
-                                        <h2 className="text-xl font-bold ">Cook Items</h2>
-                                        <div className="w-[300px]">
-                                            <SearchBar
-                                                extraClass="w-full"
-                                            />
-                                        </div>
-                                        <HoverBorderButton onClick={() => {
-                                            handleOpenCreateItemModal()
-
-                                        }} >
-                                            Create New Item
-                                        </HoverBorderButton>
-                                    </div>
-
-                                    <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]">
-                                        <div className="p-4 border rounded-lg bg-gray-100 mb-4">
-                                            <p className="font-semibold">
-                                                Biscuits, Increment 0015:00, Cook time 0020:00, Hold 0060:00, Safety 10%
-                                            </p>
+                        <div className="container mx-auto  px-1 py-4 max-w-full">
+                            <DragDropContext onDragEnd={handleDragEnd}>
+                                <div className="flex w-full gap-4 justify-between">
+                                    {/* Left Column - Cook Items */}
+                                    <div className="w-[40%]">
+                                        <div className="flex items-center space-x-2 mb-4 justify-between">
+                                            <h2 className="text-xl font-bold">Cook Items</h2>
+                                            <div className="w-[300px]">
+                                                <SearchBar extraClass="w-full" />
+                                            </div>
+                                            <HoverBorderButton onClick={handleOpenCreateItemModal}>Create New Item</HoverBorderButton>
                                         </div>
 
-                                        {/* Table */}
-                                        <table className="min-w-full table-auto">
-                                            <thead>
-                                                <tr className="bg-gray-100">
-                                                    <th className="px-4 py-2 text-left border-b">Item ID</th>
-                                                    <th className="px-4 py-2 text-left border-b">Description</th>
-                                                    <th className="px-4 py-2 text-left border-b">QTY</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {items.map((item) => (
-                                                    <tr key={item.id}>
-                                                        <td className="px-4 py-2 border-b">{item.id}</td>
-                                                        <td className="px-4 py-2 border-b">{item.description}</td>
-                                                        <td className="px-4 py-2 border-b">{item.qty}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                        <Droppable droppableId="left">
+                                            {(provided) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.droppableProps}
+                                                    className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]"
+                                                >
+                                                    <div className="p-4 rounded-lg bg-gray-100">
+                                                        <h2 className="font-bold text-xl">Biscuits</h2>
+                                                        <p className="font-semibold text-lg">
+                                                            Increment 0015:00, Cook time 0020:00, Hold 0060:00, Safety 10%
+                                                        </p>
+                                                    </div>
+                                                    <table className="min-w-full table-auto">
+                                                        <thead>
+                                                            <tr className="border-b border-b-[var(--tw-primary)]">
+                                                                <th className="px-4 py-2 text-left">Item ID</th>
+                                                                <th className="px-4 py-2 text-left">Description</th>
+                                                                <th className="px-4 py-2 text-left">QTY</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {leftItems.map((item, index) => (
+                                                                <Draggable key={item.id} draggableId={`left-${item.id}`} index={index}>
+                                                                    {(provided) => (
+                                                                        <tr
+                                                                            ref={provided.innerRef}
+                                                                            {...provided.draggableProps}
+                                                                            {...provided.dragHandleProps}
+                                                                            className="border-b"
+                                                                        >
+                                                                            <td className="px-4 py-2">{item.id}</td>
+                                                                            <td className="px-4 py-2">{item.description}</td>
+                                                                            <td className="px-4 py-2">{item.qty}</td>
+                                                                        </tr>
+                                                                    )}
+                                                                </Draggable>
+                                                            ))}
+                                                            {provided.placeholder}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </Droppable>
+
+                                        <div className="flex justify-end mt-4">
+                                            <button
+                                                className="bg-green-600 text-white p-2 rounded-lg mr-[20px] py-[15px] px-[35px]"
+                                                onClick={() => handleOpenEditItemModal(true)}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button className="bg-red-600 text-white p-2 rounded-lg py-[15px] px-[35px]">Delete</button>
+                                        </div>
                                     </div>
-                                    {/* Edit and Delete Buttons */}
-                                    <div className="flex justify-end mt-4">
-                                        <button className="bg-green-600 text-white p-2 rounded-lg mr-[20px] py-[15px] px-[35px]" onClick={() => { handleOpenEditItemModal(true) }}>Edit</button>
-                                        <button className="bg-red-600 text-white p-2 rounded-lg py-[15px] px-[35px]">Delete</button>
+
+                                    {/* Right Column - Template */}
+                                    <div className="w-[55%]">
+                                        <Droppable droppableId="right">
+                                            {(provided) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.droppableProps}
+                                                    className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]"
+                                                >
+                                                    <h2 className="text-2xl font-bold mb-4">Template</h2>
+                                                    <div className="p-4 rounded-lg bg-gray-100">
+                                                        <h2 className="font-bold text-xl">Biscuits</h2>
+                                                        <p className="font-semibold text-lg">
+                                                            Increment 0015:00, Cook time 0020:00, Hold 0060:00, Safety 10%
+                                                        </p>
+                                                    </div>
+                                                    <table className="min-w-full table-auto">
+                                                        <thead>
+                                                            <tr className="border-b border-b-[var(--tw-primary)]">
+                                                                <th className="px-4 py-2 text-left">Item ID</th>
+                                                                <th className="px-4 py-2 text-left">Description</th>
+                                                                <th className="px-4 py-2 text-left">QTY</th>
+                                                                <th className="px-4 py-2 text-left">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {rightItems.map((item, index) => (
+                                                                <Draggable key={item.id} draggableId={`right-${item.id}`} index={index}>
+                                                                    {(provided) => (
+                                                                        <tr
+                                                                            ref={provided.innerRef}
+                                                                            {...provided.draggableProps}
+                                                                            {...provided.dragHandleProps}
+                                                                            className="border-b"
+                                                                        >
+                                                                            <td className="px-4 py-2">{item.id}</td>
+                                                                            <td className="px-4 py-2">{item.description}</td>
+                                                                            <td className="px-4 py-2">{item.qty}</td>
+                                                                            <td className="px-4 py-2">
+                                                                                <button className="text-red-500 hover:text-red-700">
+                                                                                    <RiDeleteBin6Line />
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    )}
+                                                                </Draggable>
+                                                            ))}
+                                                            {provided.placeholder}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </Droppable>
                                     </div>
                                 </div>
+                            </DragDropContext>
 
-                                {/* Right Column - Template */}
-                                <div className="w-[55%] rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]">
-                                    <h2 className="text-2xl font-bold mb-4">Template</h2>
-
-                                    <div className="">
-                                        <div className="p-4 border rounded-lg bg-gray-100 mb-4">
-                                            <p className="font-semibold">
-                                                Biscuits, Increment 0015:00, Cook time 0020:00, Hold 0060:00, Safety 10%
-                                            </p>
-                                        </div>
-
-                                        {/* Template Table */}
-                                        <table className="min-w-full table-auto">
-                                            <thead>
-                                                <tr className="bg-gray-100">
-                                                    <th className="px-4 py-2 text-left border-b">Item ID</th>
-                                                    <th className="px-4 py-2 text-left border-b">Description</th>
-                                                    <th className="px-4 py-2 text-left border-b">QTY</th>
-                                                    <th className="px-4 py-2 text-left border-b">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {templateItems.map((item) => (
-                                                    <tr key={item.id}>
-                                                        <td className="px-4 py-2 border-b">{item.id}</td>
-                                                        <td className="px-4 py-2 border-b">{item.description}</td>
-                                                        <td className="px-4 py-2 border-b">{item.qty}</td>
-                                                        <td className="px-4 py-2 border-b">
-                                                            <button className="text-red-500 hover:text-red-700">
-                                                                <RiDeleteBin6Line />
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     ) : !selectedUnit ? (
                         <div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
