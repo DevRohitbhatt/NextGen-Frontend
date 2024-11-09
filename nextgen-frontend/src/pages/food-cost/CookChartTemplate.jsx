@@ -51,6 +51,7 @@ const CookChartTemplate = (props) => {
     ]);
     const [sourceType, setSourceType] = useState('Menu Items');
     const [sourceTypeDropDown, setSourceTypeDropDown] = useState(false);
+    const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
 
     useEffect(() => {
         if (defaultUnitID) {
@@ -135,7 +136,6 @@ const CookChartTemplate = (props) => {
             };
             const result = await getCall(getData);
             setCookAllData(result.data)
-            console.log("===>", result)
         } catch (error) {
 
         }
@@ -148,14 +148,14 @@ const CookChartTemplate = (props) => {
                 fullUrl: 'api/cookdrop/getcookdropcookitem',
                 urlParams: {
                     companyId: 1083,
-                    cookDropCookItemID: "7df14b0a-d405-4797-9f4c-89e685266c0c"
+                    cookDropCookItemID: "8CE44AD2-19E1-4976-945A-AF990B75F74C"
                 },
             };
             const result = await getCall(getData);
             result.data[0].listCookDropCookItemDetails.forEach((items) => items.menuID = items.inventoryOrMenuItemID + "")
             SetEditCookData(result.data[0].listCookDropCookItemDetails);
             let { cookItemName, unitOfMeasure, sourceType, cookInterval, safetyFactor, mixMultiplier, projectAhead, cookTimeSeconds, holdTimeSeconds, laborFixedSeconds, createdOn, deletedOn, deletedBy, laborVarSeconds } = result.data[0];
-            setAllDataFeilds({ cookItemName, unitOfMeasure, sourceType, cookInterval, safetyFactor, mixMultiplier, projectAhead, cookTimeSeconds, holdTimeSeconds, laborFixedSeconds, createdOn, deletedOn, deletedBy, laborVarSeconds })
+            setAllDataFeilds(result.data[0])
 
         } catch (error) {
 
@@ -175,16 +175,15 @@ const CookChartTemplate = (props) => {
             }))
         }
         const savedData = async (saved) => {
-            console.log("aaaaaaa", saved)
             let values = saved
             values.forEach((item) => {
                 delete item.menuID;
                 delete item.uniqueKey;
                 item.cookItemQuantity = parseInt(item.cookItemQuantity)
             })
+            let body = allDataFeilds
+            body.listCookDropCookItemDetails = values;
             try {
-                let body = allDataFeilds
-                body.listCookDropCookItemDetails = values
                 const postData = {
                     fullUrl: 'api/cookdrop/savecookdropcookitem',
                     urlParams: {
@@ -347,7 +346,9 @@ const CookChartTemplate = (props) => {
                         initialTableOneData={editCookData}
                         dorpabaleidOne={"items"}
                         dorpabaleidTwo={"itemstemplate"}
-                        onSave={(saved) => { savedData(saved) }}
+                        onSave={(saved) => {
+                            savedData(saved);
+                        }}
                     />
                     :
                     <EditAndAddDndTable
@@ -525,7 +526,7 @@ const CookChartTemplate = (props) => {
         )
     }
 
-    const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
+  
     const handleDragEnd = (result) => {
         const { source, destination } = result;
     
