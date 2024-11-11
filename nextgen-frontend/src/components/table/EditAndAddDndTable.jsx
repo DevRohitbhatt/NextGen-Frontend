@@ -3,7 +3,8 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import SearchBar from '../common/SearchBar';
 import HoverBorderButton from '../buttons/HoverBorderButton';
-
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 const LONG_PRESS_DELAY = 300;
 
 const DraggableRow = ({ item, isTemplate, onDelete, onLongPressDragStart, extraHeaders, onQuantityChange }) => {
@@ -20,21 +21,21 @@ const DraggableRow = ({ item, isTemplate, onDelete, onLongPressDragStart, extraH
 
     return (
         <>
-            <td className="px-4 py-1 w-[30%]">{item.menuID}</td>
-            <td className="px-4 py-1 w-[30%]">{item.description}</td>
+            <td className="px-4 py-[2px] w-[35%]">{item.menuID}</td>
+            <td className="px-4 py-[2px] w-[35%]">{item.description}</td>
             {isTemplate && (
                 <>
-                    <td className="px-4 py-1 w-[20%]">
+                    <td className="px-4 py-[2px] w-[20%]">
                         <input
-                            className="w-full px-2 py-1 border rounded"
+                            className="  border rounded w-[60%]"
                             value={item.cookItemQuantity || ""}
                             onChange={(e) => onQuantityChange(item.uniqueKey, e.target.value)}
                             type="text"
                         />
                     </td>
-                    <td className="px-4 py-1 w-[10%]">
+                    <td className="px-4 py-[2px] w-[10%]">
                         <button
-                            className="text-red-500 hover:text-red-700"
+                            className="text-red-500 hover:text-red-700 !py-[5px]"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onDelete(item.uniqueKey);
@@ -87,11 +88,25 @@ const EditAndAddDndTable = ({
     const handleDragEnd = (result) => {
         setDraggingId(null);
         const { source, destination } = result;
-
-        if (!destination || source.droppableId === destination.droppableId) return;
-
+        if (!destination) return;
+        if (source.droppableId === dorpabaleidTwo && destination.droppableId === dorpabaleidTwo) {
+            const updatedTemplateItems = Array.from(templateItems);
+            const [movedItem] = updatedTemplateItems.splice(source.index, 1);
+            updatedTemplateItems.splice(destination.index, 0, movedItem);
+            setTemplateItems(updatedTemplateItems);
+            return;
+        }
+    
         if (source.droppableId === dorpabaleidOne && destination.droppableId === dorpabaleidTwo) {
             const itemToAdd = items.find((item) => item.menuID === draggingId);
+
+            if (itemToAdd && templateItems.some((item) => item.menuID === itemToAdd.menuID)) {
+                // Trigger the error toast if item already exists
+
+                toast.error('Item already exists in the right table', { autoClose: 1500 });
+                return;
+            }
+
             if (itemToAdd && !templateItems.some((item) => item.menuID === itemToAdd.menuID)) {
                 setTemplateItems((prev) => [
                     ...prev,
@@ -101,6 +116,7 @@ const EditAndAddDndTable = ({
             }
         }
     };
+    
 
     const handleDelete = (uniqueKey) => {
         setTemplateItems((prev) => prev.filter((item) => item.uniqueKey !== uniqueKey));
@@ -120,7 +136,7 @@ const EditAndAddDndTable = ({
             item.description.toLowerCase().includes(term.toLowerCase())
         );
         setFilteredItems(filtered);
-        setCurrentPage(1); // Reset to first page on search
+        setCurrentPage(1);  
     };
 
     const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
@@ -139,6 +155,7 @@ const EditAndAddDndTable = ({
         }
     };
 
+   
     const goToFirstPage = () => setCurrentPage(1);
     const goToLastPage = () => setCurrentPage(totalPages);
     const goToNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
@@ -146,13 +163,14 @@ const EditAndAddDndTable = ({
 
     return (
         <DragDropContext onDragEnd={handleDragEnd}>
+            <ToastContainer />
             <div className="flex w-full gap-4 justify-between">
                 <Droppable droppableId={dorpabaleidOne}>
                     {(provided) => (
                         <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className="w-[40%] p-[15px] h-[55vh]"
+                            className="w-[40%] p-[15px] max-h-[580px]"
                         >
                             <div className="flex items-center space-x-2 mb-4 justify-between">
                                 <h2 className="text-2xl font-bold mb-4">{tableOneName}</h2>
@@ -189,7 +207,7 @@ const EditAndAddDndTable = ({
                                     </tbody>
                                 </table>
                                 {isPaginationEnabled && filteredItems.length >= 100 && (
-                                    <div className="flex items-center justify-between sticky bottom-0 bg-white">
+                                    <div className="flex items-center justify-between sticky bottom-0 bg-white py-2">
                                         <div className="flex gap-2">
                                             <button onClick={goToFirstPage} disabled={currentPage === 1}>First</button>
                                             <button onClick={goToPrevPage} disabled={currentPage === 1}>Prev</button>
@@ -213,17 +231,19 @@ const EditAndAddDndTable = ({
                         <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className="w-[55%] rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] px-[15px] tableHOC overflow-auto pr-1 h-[60vh]"
+                            className="w-[55%] rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] px-[15px] tableHOC overflow-auto pr-1 h-[626px]"
                         >
                             <table className="min-w-full table-auto ">
                                 <thead className=' sticky top-0 bg-white z-10'>
-                                    <h2 className="text-2xl font-bold w-full ">{tableTwoName}</h2>
-                                    <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset] bg-white">
+                                    <th colSpan={tableTwoHeaders.length + 2} className="text-2xl font-bold text-left px-4 py-2 ">
+                                        {tableTwoName}
+                                    </th>
+                                    <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset] ">
                                         {tableTwoHeaders.map((header, index) => (
-                                            <th key={index} className="px-4 py-2 text-left">{header}</th>
+                                            <th key={index} className="px-4 py-2 text-left w-[35%]">{header}</th>
                                         ))}
-                                        <th className="px-4 py-2 text-left">Qty of UOM</th>
-                                        <th className="px-4 py-2 text-left">Action</th>
+                                        <th className="px-4 py-2 text-left w-[20%]">Qty of UOM</th>
+                                        <th className="px-4 py-2 text-left w-[10%]">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -241,7 +261,7 @@ const EditAndAddDndTable = ({
                                                     ref={provided.innerRef}
                                                     {...provided.draggableProps}
                                                     {...provided.dragHandleProps}
-                                                    className={`shadow-[0_-1px_0_rgba(0,0,0,0.2)_inset] ${snapshot.isDragging ? 'dragging-row' : ''}`}
+                                                    className={`shadow-[0_-1px_0_rgba(0,0,0,0.2)_inset] ${snapshot.isDragging ? 'dragging-row' : ''} h-[28px]`}
                                                 >
                                                     <DraggableRow
                                                         item={item}

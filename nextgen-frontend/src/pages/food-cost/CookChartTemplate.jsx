@@ -7,6 +7,7 @@ import EditAndAddDndTable from "../../components/table/EditAndAddDndTable";
 import HoverBorderButton from "../../components/buttons/HoverBorderButton";
 import { getCall, postCall } from "../../apis/network";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { FaAngleUp, FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const CookChartTemplate = (props) => {
     const {
@@ -295,7 +296,7 @@ const CookChartTemplate = (props) => {
                                             {sourceType}
                                             {/* <i className="ml-2 fa fa-chevron-down"></i> */}
                                         </button>
-                                        {sourceTypeDropDown && <div className="absolute z-10 mt-2 w-full bg-white rounded shadow-lg">
+                                        {sourceTypeDropDown && <div className="absolute z-20 mt-2 w-full bg-white rounded shadow-lg">
                                             <ul className="text-left">
                                                 <li
                                                     className="p-2 hover:bg-gray-100 cursor-pointer"
@@ -459,7 +460,7 @@ const CookChartTemplate = (props) => {
                                             {sourceType}
                                             {/* <i className="ml-2 fa fa-chevron-down"></i> */}
                                         </button>
-                                        {sourceTypeDropDown && <div className="absolute z-10 mt-2 w-full bg-white rounded shadow-lg">
+                                        {sourceTypeDropDown && <div className="absolute z-50 mt-2 w-full bg-white rounded shadow-lg">
                                             <ul className="text-left">
                                                 <li
                                                     className="p-2 hover:bg-gray-100 cursor-pointer"
@@ -513,7 +514,7 @@ const CookChartTemplate = (props) => {
                     <EditAndAddDndTable
                         key="inventory-items"
                         tableOneName="Inventory item"
-                        tableTwoName="item"
+                        tableTwoName="Items"
                         tableOneHeaders={['Inventory ID', 'Description']}
                         tableTwoHeaders={['Inventory ID', 'Description']}
                         initialTableOneData={addIntryItems}
@@ -653,9 +654,18 @@ const CookChartTemplate = (props) => {
                                                                     setRightTableData(null);
                                                                     console.log("pawaneep singh")
                                                                 }}
-                                                                className="absolute top-1/2 right-4 transform -translate-y-1/2 text-red-500 hover:text-red-700 z-9"
+                                                                className="absolute top-1/2 right-10 transform -translate-y-1/2 text-red-500 hover:text-red-700 z-9"
                                                             >
                                                                 <RiDeleteBin6Line />
+                                                            </span>
+                                                            <span
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation(); // To prevent triggering the parent 
+                                                                    setShowFullTable(!showFullTable)
+                                                                }}
+                                                                className="absolute top-1/2 right-4 transform -translate-y-1/2 z-9"
+                                                            >
+                                                               {showFullTable ? <FaChevronDown /> : <FaChevronUp /> }
                                                             </span>
 
                                                         </div>
