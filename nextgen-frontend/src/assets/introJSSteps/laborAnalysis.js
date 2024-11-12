@@ -1,8 +1,8 @@
-export default function labourAnalysis() {
+export default function laborAnalysis() {
 	return [
 		{
 			intro:
-				'<center>Welcome to QSROnline’s Labour Analysis tool! Let us show you around.' +
+				'<center>Welcome to QSROnline’s Labor Analysis tool! Let us show you around.' +
 				'<br><br>Press the enter or arrow keys to advance through the tutorial.</center>',
 		},
 		{
@@ -13,11 +13,11 @@ export default function labourAnalysis() {
 		},
 		{
 			element: '.date-selector',
-			intro: '-Select the date, or date range, you wish to display Labour Analysis',
+			intro: '-Select the date, or date range, you wish to display Labor Analysis',
 		},
 		{
 			element: '.dropdown-selector',
-			intro: '-Select the Job for which you want to see the Labour Analysis.',
+			intro: '-Select the Job for which you want to see the Labor Analysis.',
 		},
 		{
 			element: '.run-button',
@@ -25,7 +25,7 @@ export default function labourAnalysis() {
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Voids Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
+			intro: 'You can export the Labor Analysis Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.paged-table',

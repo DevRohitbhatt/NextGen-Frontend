@@ -18,11 +18,11 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
-import labourAnalysis from '../../assets/introJSSteps/labourAnalysis';
+import laborAnalysis from '../../assets/introJSSteps/laborAnalysis';
 
 const columnHelper = createColumnHelper();
 
-const LabourAnalysis = () => {
+const LaborAnalysis = () => {
 	const {
 		companyID,
 		alignmentID,
@@ -68,7 +68,7 @@ const LabourAnalysis = () => {
 	];
 
 	const modalNames = {
-		'Projected Sales': 'actlySales',
+		'Projected Sales': 'avg',
 		'Actual Sales': 'actSales',
 		'Allowed Labor Hours': 'bohAllowedEarnedHours',
 		'Scheduled Labor Hours': 'scheduledHours',
@@ -76,11 +76,13 @@ const LabourAnalysis = () => {
 		'Ideal Labor Hours': 'ideal_AllowedEarnedHours',
 		'Scheduled Labor Dollars': 'scheduledDollars',
 		'Actual Labor Dollars': 'actLabor',
+		'Scheduled Labor Percent': ['scheduledDollars', 'avg'],
+		'Actual Labor Percent': ['actLabor', 'actSales'],
 	};
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
-		steps: labourAnalysis(),
+		steps: laborAnalysis(),
 		initialStep: 0,
 		stepsEnabled: false,
 	});
@@ -95,6 +97,12 @@ const LabourAnalysis = () => {
 			setSelectedUnitName(defaultUnitName);
 		}
 	}, [defaultUnitID, defaultUnitName]);
+
+	useEffect(() => {
+		if (selectedUnit && selectedFromDate && selectedToDate && jobDescription) {
+			fetchLaborAnalysisReport();
+		}
+	}, [selectedUnit, selectedFromDate, selectedToDate, jobDescription]);
 
 	const fetchLaborAnalysisReport = async () => {
 		try {
@@ -120,15 +128,18 @@ const LabourAnalysis = () => {
 
 			const newData = result.data.laborAnalysisModels.map((item) => ({
 				sectionName: item.sectionName,
-				subRows: item.laborAnalysisDetaislModels.map((subItem) => ({
-					name: subItem.name,
-					...subItem.laborAnalysisDateDataModels.reduce((acc, subSubItem) => {
-						acc[subSubItem.date] = subSubItem.value.includes('¤')
+				subRows: item.laborAnalysisDetaislModels.map((subItem) => {
+					const rowData = { name: subItem.name };
+					subItem.laborAnalysisDateDataModels.forEach((subSubItem) => {
+						rowData[subSubItem.date] = subSubItem.value.includes('¤')
 							? `$${subSubItem.value.replace('¤', '')}`
 							: subSubItem.value;
-						return acc;
-					}, {}),
-				})),
+						rowData[
+							`${subSubItem.date}_color`
+						] = `rgba(${subSubItem.color.r}, ${subSubItem.color.g}, ${subSubItem.color.b}, ${subSubItem.color.a})`;
+					});
+					return rowData;
+				}),
 			}));
 
 			const generatedColumns = [
@@ -148,13 +159,20 @@ const LabourAnalysis = () => {
 				}),
 
 				...Object.keys(newData[0].subRows[0])
-					.filter((key) => !['name'].includes(key))
+					.filter((key) => !['name'].includes(key) && !key.includes('_color'))
 					.map((item) =>
 						columnHelper.accessor(item, {
 							id: item,
 							header: item,
 							cell: ({ getValue, row }) => (
 								<div
+									style={{
+										backgroundColor: row.original[`${item}_color`]?.includes(
+											'rgba(226, 240, 255, 255)'
+										)
+											? 'transparent'
+											: row.original[`${item}_color`],
+									}}
 									onClick={() => {
 										if (
 											modalNames[
@@ -181,7 +199,7 @@ const LabourAnalysis = () => {
 			setIsError(true);
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting Labour Analysis  data: ', error);
+			console.error('Error getting labor Analysis  data: ', error);
 		}
 	};
 
@@ -223,22 +241,80 @@ const LabourAnalysis = () => {
 
 		const filteredHours = getFilteredHours(row.original.name);
 
-		const modalColumns = filteredHours.map((hour) => columnHelper.accessor(hour, { header: hour, size: 60 }));
+		const columnOrder = [
+			'4AM',
+			'5AM',
+			'6AM',
+			'7AM',
+			'8AM',
+			'9AM',
+			'10AM',
+			'11AM',
+			'12PM',
+			'1PM',
+			'2PM',
+			'3PM',
+			'4PM',
+			'5PM',
+			'6PM',
+			'7PM',
+			'8PM',
+			'9PM',
+			'10PM',
+			'11PM',
+			'12AM',
+			'1AM',
+			'2AM',
+			'3AM',
+		];
+
+		const modalColumns = filteredHours
+			.sort((a, b) => columnOrder.indexOf(a) - columnOrder.indexOf(b))
+			.map((hour) => columnHelper.accessor(hour, { header: hour, cell: ({ getValue }) => getValue(), size: 60 }));
 		modalColumns.unshift(columnHelper.accessor('name', { header: 'Name', size: 150 }));
 
 		const modalData = [
-			filteredHours.reduce(
-				(acc, hour) => {
-					const hour24 = (parseInt(hour) % 12) + (hour.includes('PM') ? 12 : 0);
-					acc[hour] = data.find((item) => item.hour === hour24)?.[
-						`${modalNames[Object.keys(modalNames).find((key) => row.original.name.includes(key))]}${
-							item.split(' ')[0]
-						}`
-					];
-					return acc;
-				},
-				{ name: row.original.name }
-			),
+			row.original.name.includes('Scheduled Labor Percent') || row.original.name.includes('Actual Labor Percent')
+				? filteredHours.reduce(
+						(acc, hour) => {
+							const hour24 = (parseInt(hour) % 12) + (hour.includes('PM') ? 12 : 0);
+
+							const numerator = data.find((item) => item.hour === hour24)?.[
+								`${
+									modalNames[
+										Object.keys(modalNames).find((key) => row.original.name.includes(key))
+									][0]
+								}${item.split(' ')[0]}`
+							];
+
+							const denominator = data.find((item) => item.hour === hour24)?.[
+								`${
+									modalNames[
+										Object.keys(modalNames).find((key) => row.original.name.includes(key))
+									][1]
+								}${item.split(' ')[0]}`
+							];
+							acc[hour] = denominator ? `${((numerator / denominator) * 100).toFixed(1)}%` : 0;
+							return acc;
+						},
+						{ name: row.original.name }
+				  )
+				: filteredHours.reduce(
+						(acc, hour) => {
+							const hour24 = (parseInt(hour) % 12) + (hour.includes('PM') ? 12 : 0);
+							acc[hour] = data
+								.find((item) => item.hour === hour24)
+								?.[
+									`${
+										modalNames[
+											Object.keys(modalNames).find((key) => row.original.name.includes(key))
+										]
+									}${item.split(' ')[0]}`
+								].toFixed(2);
+							return acc;
+						},
+						{ name: row.original.name }
+				  ),
 		];
 
 		setLaborAnalysisModalData(modalData);
@@ -362,11 +438,6 @@ const LabourAnalysis = () => {
 							selectedOption={jobDescription}
 						/>
 					</div>
-					<div className='run-button' onClick={fetchLaborAnalysisReport}>
-						<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
-							Run
-						</div>
-					</div>
 				</div>
 				<div>
 					<ExportOptions
@@ -425,4 +496,4 @@ const LabourAnalysis = () => {
 	);
 };
 
-export default LabourAnalysis;
+export default LaborAnalysis;

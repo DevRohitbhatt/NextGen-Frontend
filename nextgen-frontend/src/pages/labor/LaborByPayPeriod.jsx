@@ -210,7 +210,7 @@ const LaborByPayPeriod = () => {
 			setIsError(false);
 			setIsTableRendered(false);
 			const getData = {
-				url: 'labourByPayPeriod',
+				url: 'laborByPayPeriod',
 				urlParams: {
 					companyId: companyID,
 					alignmentId: alignmentID,
@@ -276,7 +276,7 @@ const LaborByPayPeriod = () => {
 		}
 
 		if (!laborByPayPeriodData || laborByPayPeriodData.length === 0) {
-			console.error('Labour By Pay Period data is not defined or empty');
+			console.error('labor By Pay Period data is not defined or empty');
 			return;
 		}
 
@@ -421,7 +421,7 @@ const LaborByPayPeriod = () => {
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
 		tempLink.href = url;
-		tempLink.setAttribute('download', 'labourByPayPeriod.csv');
+		tempLink.setAttribute('download', 'laborByPayPeriod.csv');
 		tempLink.click();
 	};
 
