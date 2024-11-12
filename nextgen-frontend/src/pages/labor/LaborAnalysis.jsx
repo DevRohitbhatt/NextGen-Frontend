@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
+import { defineCancelApiObject } from '../../apis/configs/axiosUtils';
 import {
 	Dropdown,
 	Loader,
@@ -21,6 +22,7 @@ import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 import laborAnalysis from '../../assets/introJSSteps/laborAnalysis';
 
 const columnHelper = createColumnHelper();
+const cancelApiObject = defineCancelApiObject({ laborAnalysis: 'laborAnalysis' });
 
 const LaborAnalysis = () => {
 	const {
@@ -29,6 +31,7 @@ const LaborAnalysis = () => {
 		unitsAndAreas: unitsAndAreasList,
 		defaultUnitID,
 		defaultUnitName,
+		userID,
 	} = useSelector((state) => state.globalState);
 	const [laborAnalysisReportData, setLaborAnalysisReportData] = useState([]);
 	const [laborAnalysisModalData, setLaborAnalysisModalData] = useState([]);
@@ -105,6 +108,8 @@ const LaborAnalysis = () => {
 	}, [selectedUnit, selectedFromDate, selectedToDate, jobDescription]);
 
 	const fetchLaborAnalysisReport = async () => {
+		const signal = cancelApiObject['laborAnalysis'].handleRequestCancellation().signal;
+
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -118,10 +123,11 @@ const LaborAnalysis = () => {
 					weekStartDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					forecastType: 'SALES',
 					intervalType: 'QH',
-					userID: 31439,
+					userID: userID,
 					options: ' ',
 					jobIdFilter: ' ',
 				},
+				signal, // Enable cancellation
 			};
 
 			const result = await getCall(getData);
@@ -196,10 +202,14 @@ const LaborAnalysis = () => {
 			setColumns(generatedColumns);
 			setIsLoading(false);
 		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting labor Analysis  data: ', error);
+			if (error.name === 'CanceledError') {
+				console.log('Request canceled');
+			} else {
+				setIsError(true);
+				setErrorMessage('There was an issue loading your data, please try again later.');
+				console.error('Error getting labor Analysis data: ', error);
+				setIsLoading(false);
+			}
 		}
 	};
 
