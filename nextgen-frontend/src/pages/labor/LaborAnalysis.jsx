@@ -10,7 +10,7 @@ import {
 	CalendarModal,
 	UnitModal,
 	ExportOptions,
-	DateSelector,
+	DateDropdown,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
 	TableHOC,
@@ -159,7 +159,7 @@ const LaborAnalysis = () => {
 								{row.original.sectionName}
 							</div>
 						) : (
-							getValue()
+							<div className='pl-4 text-left'>{getValue()}</div>
 						),
 					dataType: 'string',
 				}),
@@ -434,13 +434,13 @@ const LaborAnalysis = () => {
 						setMemberName={setSelectedUnitName}
 						onClick={() => setUnitShowModal(true)}
 					/>
-					<DateSelector
-						toDate={selectedToDate}
-						fromDate={selectedFromDate}
-						isDateRange={true}
-						onClick={() => setShowDateModal(true)}
+					<DateDropdown
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
 					/>
-					<div className='w-48'>
+					<div className='w-48 ml-2'>
 						<Dropdown
 							title='Job Description'
 							options={jobDescriptionOptions}

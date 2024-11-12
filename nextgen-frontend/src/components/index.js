@@ -4,6 +4,7 @@ export { default as CalendarModal } from './calendar/CalendarModal';
 export { default as DateRangePicker } from './calendar/DateRangePicker';
 export { default as DateSelector } from './calendar/DateSelector';
 export { default as YearSelector } from './calendar/YearSelector';
+export { default as DateDropdown } from './calendar/DateDropdown';
 
 // common components
 export { default as Dropdown } from './common/Dropdown';
@@ -45,4 +46,4 @@ export { default as TableCell } from './table/TableCell';
 export { default as TreeNode } from './table/TreeNode';
 export { default as TreeTable } from './table/TreeTableBuilder';
 export { default as TableHOC } from './table/TableHOC';
-export {default as DndTable } from './table/DndTable'
+export { default as DndTable } from './table/DndTable';
