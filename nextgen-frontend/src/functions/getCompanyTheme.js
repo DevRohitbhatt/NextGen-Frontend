@@ -8,7 +8,7 @@ export const getCompanyTheme = async (companyID) => {
         companyID: companyID,
       },
     });
-    console.log(response);
+
     const theme = response.data.find((setting) => setting.name === 'App3ThemeEditorColors');
     if (theme) {
       const firstColor = theme.value.split(',')[0];
@@ -20,7 +20,6 @@ export const getCompanyTheme = async (companyID) => {
         primaryColor = secondColor;
         secondaryColor = thirdColor;
       }
-      console.log(primaryColor, secondaryColor);
       return { primary: primaryColor, secondary: secondaryColor };
     }
     return response.data;

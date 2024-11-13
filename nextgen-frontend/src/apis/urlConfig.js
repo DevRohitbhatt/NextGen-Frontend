@@ -36,7 +36,10 @@ const urlConfig = {
 	invoiceSearchReport: 'api/foodcost/GetInvoiceSearchReportData',
 	getCountsheets: 'api/foodcost/GetCountSheets',
 	countsheetDetails: 'api/foodcost/GetCountsheetDetails',
+	Countsheet_PricingInfo: 'api/foodcost/getCountSheetsPriceInfo',
+	countsheetPossibleError: 'api/foodcost/getCountSheetsPossibleError',
 	PurchaseAnalysis: 'api/foodcost/getPurchaseAnalysisData',
+
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
@@ -44,6 +47,7 @@ const urlConfig = {
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
 	laborByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
+	laborCICOExceptions: 'api/labor/getLaborCICOExceptionReportData',
 	laborCICO: 'api/labor/getLaborCICOReportData',
 };
 export default urlConfig;

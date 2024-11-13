@@ -59,7 +59,11 @@ const VarianceFoodCost = () => {
 	const [countType, setCountType] = useState('WE');
 	const countDropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
 	const [viewby, setViewBy] = useState('Department');
-	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
+	const viewOptions = [
+		{ name: 'Department', row: 1 },
+		{ name: 'Sub Department', row: 2 },
+		{ name: 'Inventory Item', row: 3 },
+	];
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 	const moreOptionsDropdown = useRef(null);
 
@@ -292,6 +296,7 @@ const VarianceFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
+
 			const newData = [
 				{
 					department: 'TOTAL',
@@ -410,7 +415,6 @@ const VarianceFoodCost = () => {
 			};
 
 			const result = await getCall(getData);
-
 			navigate('/PurchaseAnalysis', {
 				state: {
 					companyID: companyID,
@@ -639,7 +643,7 @@ const VarianceFoodCost = () => {
 		<TableHOC
 			columns={columns}
 			data={varianceFoodCostData}
-			view={viewby}
+			view={viewOptions.find((option) => option.name === viewby)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 		/>
@@ -656,7 +660,7 @@ const VarianceFoodCost = () => {
 				/>
 				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Variance Food Cost</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
-					<div className='flex items-center space-x-3 '>
+					<div className='flex items-center'>
 						<UnitSelector
 							companyID={companyID}
 							alignmentID={alignmentID}
@@ -682,7 +686,7 @@ const VarianceFoodCost = () => {
 							/>
 						</div>
 						<div className='run-button' onClick={fetchVarianceFoodCost}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

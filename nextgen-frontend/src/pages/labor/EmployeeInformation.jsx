@@ -16,10 +16,13 @@ import {
 } from '../../components';
 
 const EmployeeInformation = () => {
-	const state = useSelector((state) => state.globalState);
-	const companyID = useSelector((state) => state.globalState.companyID);
-	const alignmentID = useSelector((state) => state.globalState.alignmentID);
-	const unitsAndAreasList = useSelector((state) => state.globalState.unitsAndAreas);
+	const {
+		companyID,
+		alignmentID,
+		unitsAndAreas: unitsAndAreasList,
+		defaultUnitID,
+		defaultUnitName,
+	} = useSelector((state) => state.globalState);
 	const [employeeInformationData, setEmployeeInformationData] = useState([]);
 	const [filteredEmployeeInformationData, setFilteredEmployeeInformationData] = useState([]);
 
@@ -276,13 +279,13 @@ const EmployeeInformation = () => {
 	];
 
 	useEffect(() => {
-		if (state.defaultUnitId) {
-			setSelectedUnit(state.defaultUnitId);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (state.defaultUnitName) {
-			setSelectedUnitName(state.defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [state.defaultUnitId, state.defaultUnitName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	// Fetching Employee Information
 	const fetchEmployeeInformation = async (companyId, alignmentId, selectedUnit) => {
@@ -469,53 +472,53 @@ const EmployeeInformation = () => {
 	};
 
 	return (
-		<>
-			<Loader loading={isLoading} />
-			<div className='w-[85%] mx-auto'>
-				<Steps
-					enabled={introSteps.stepsEnabled}
-					steps={introSteps.steps}
-					initialStep={introSteps.initialStep}
-					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Employee Information</h2>
-				<header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
-					<div className='flex items-center space-x-3 '>
-						<UnitSelector
-							companyId={companyID}
-							alignmentId={alignmentID}
-							memberId={selectedUnit}
-							memberName={selectedUnitName}
-							includeAreas={true}
-							setMemberName={setSelectedUnitName}
-							onClick={() => setShowUnitModal(true)}
-						/>
+		<div className='w-[85%] mx-auto'>
+			<Steps
+				enabled={introSteps.stepsEnabled}
+				steps={introSteps.steps}
+				initialStep={introSteps.initialStep}
+				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+			/>
+			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Employee Information</h2>
+			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+				<div className='flex items-center'>
+					<UnitSelector
+						companyId={companyID}
+						alignmentId={alignmentID}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						includeAreas={true}
+						setMemberName={setSelectedUnitName}
+						onClick={() => setShowUnitModal(true)}
+					/>
 
-						<div className='w-44'>
-							<Dropdown
-								options={dropdownOptions}
-								title='View'
-								selectedOption={view}
-								onOptionChange={handleViewChange}
-							/>
-						</div>
-					</div>
-					<div>
-						<ExportOptions
-							includePDF={true}
-							handlePDFClick={handlePDFClick}
-							includeExcel={true}
-							handleExcelClick={handleExcelClick}
-							includeHelp={true}
-							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					<div className='w-[155px]'>
+						<Dropdown
+							options={dropdownOptions}
+							title='View'
+							selectedOption={view}
+							onOptionChange={handleViewChange}
 						/>
 					</div>
-				</header>
+				</div>
+				<div>
+					<ExportOptions
+						includePDF={true}
+						handlePDFClick={handlePDFClick}
+						includeExcel={true}
+						handleExcelClick={handleExcelClick}
+						includeHelp={true}
+						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+					/>
+				</div>
+			</header>
 
-				{isError ? (
-					<div>{errorMessage}</div>
-				) : (
-					!isLoading && (
+			{isError ? (
+				<div>{errorMessage}</div>
+			) : (
+				<div className='relative w-full min-h-56'>
+					<Loader loading={isLoading} />
+					{!isLoading && (
 						<>
 							{filteredEmployeeInformationData?.data ? (
 								<div>
@@ -531,23 +534,23 @@ const EmployeeInformation = () => {
 								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
 							)}
 						</>
-					)
-				)}
-
-				<div>
-					<UnitModal
-						unitData={unitsAndAreasList}
-						memberID={selectedUnit}
-						memberName={selectedUnitName}
-						show={showUnitModal}
-						handleClose={() => {
-							setShowUnitModal(false);
-						}}
-						handleUnitSelection={handleUnitSelection}
-					/>
+					)}
 				</div>
+			)}
+
+			<div>
+				<UnitModal
+					unitData={unitsAndAreasList}
+					memberID={selectedUnit}
+					memberName={selectedUnitName}
+					show={showUnitModal}
+					handleClose={() => {
+						setShowUnitModal(false);
+					}}
+					handleUnitSelection={handleUnitSelection}
+				/>
 			</div>
-		</>
+		</div>
 	);
 };
 
