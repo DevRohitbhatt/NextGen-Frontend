@@ -21,6 +21,7 @@ const HourlySales = lazy(() => import('./sales/HourlySales'));
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
+const LaborCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
 
 export {
 	PrepChart,
@@ -31,6 +32,7 @@ export {
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
+	LaborCICOExceptions,
 	Voids,
 	HourlySales,
 	ActualFoodCost,
