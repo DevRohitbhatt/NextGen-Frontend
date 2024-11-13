@@ -1,26 +1,55 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Dropdown } from '../../components';
 import dateFormat from 'dateformat';
+import { useSelector } from 'react-redux';
+import { getCall } from '../../apis/network';
 
-const DateDropdown = ({ selectedFromDate, selectedToDate, handleFromDateChange, handleToDateChange }) => {
-	const [date, setDate] = useState(
-		`${dateFormat(selectedFromDate, 'mm/dd/yyyy')} - ${dateFormat(selectedToDate, 'mm/dd/yyyy')}`
-	);
-	const dateOptions = [
-		{ name: '11/18/2024 - 11/24/2024' },
-		{ name: '11/11/2024 - 11/17/2024' },
-		{ name: '11/04/2024 - 11/10/2024' },
-		{ name: '10/28/2024 - 11/03/2024' },
-		{ name: '10/21/2024 - 10/27/2024' },
-		{ name: '10/14/2024 - 10/20/2024' },
-		{ name: '10/07/2024 - 10/13/2024' },
-		{ name: '09/30/2024 - 10/06/2024' },
-		{ name: '09/23/2024 - 09/29/2024' },
-		{ name: '09/16/2024 - 09/22/2024' },
-		{ name: '09/09/2024 - 09/15/2024' },
-		{ name: '09/02/2024 - 09/08/2024' },
-	];
+const DateDropdown = ({ handleFromDateChange, handleToDateChange }) => {
+	const {
+		companyID,
+
+		defaultUnitID,
+	} = useSelector((state) => state.globalState);
+
+	const [date, setDate] = useState(() => {
+		const date = new Date();
+		const day = date.getDay();
+		const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+		const fromDate = dateFormat(new Date(date.setDate(diff)), 'mm/dd/yyyy');
+		const toDate = dateFormat(new Date(date.setDate(diff + 6)), 'mm/dd/yyyy');
+		return `${fromDate} - ${toDate}`;
+	});
+	const [dateOptions, setDateOptions] = useState([]);
+	const [isDateLoading, setIsDateLoading] = useState(false);
+
+	useEffect(() => {
+		(async () => {
+			try {
+				setIsDateLoading(true);
+				const getData = {
+					url: 'companyUnitDates',
+					urlParams: {
+						companyId: companyID,
+						unitId: defaultUnitID,
+					},
+				};
+
+				const result = await getCall(getData);
+
+				setDateOptions(
+					result.data.map((date) => ({
+						name: date,
+					}))
+				);
+				handleDateChange(date);
+			} catch (error) {
+				console.log('Error in fetching date options', error);
+			} finally {
+				setIsDateLoading(false);
+			}
+		})();
+	}, [companyID, defaultUnitID]);
 
 	const handleDateChange = (date) => {
 		setDate(date);
@@ -30,10 +59,10 @@ const DateDropdown = ({ selectedFromDate, selectedToDate, handleFromDateChange, 
 	};
 
 	return (
-		<div className='min-w-64'>
+		<div className='z-20 min-w-64'>
 			<Dropdown
 				title='Select Date'
-				selectedOption={date}
+				selectedOption={isDateLoading ? 'Loading...' : date}
 				onChange={handleDateChange}
 				options={dateOptions}
 				onOptionChange={handleDateChange}
@@ -42,8 +71,6 @@ const DateDropdown = ({ selectedFromDate, selectedToDate, handleFromDateChange, 
 	);
 };
 DateDropdown.propTypes = {
-	selectedFromDate: PropTypes.instanceOf(Date).isRequired,
-	selectedToDate: PropTypes.instanceOf(Date).isRequired,
 	handleFromDateChange: PropTypes.func.isRequired,
 	handleToDateChange: PropTypes.func.isRequired,
 };

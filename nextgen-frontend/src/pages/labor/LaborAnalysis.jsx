@@ -7,7 +7,6 @@ import {
 	Dropdown,
 	Loader,
 	UnitSelector,
-	CalendarModal,
 	UnitModal,
 	ExportOptions,
 	DateDropdown,
@@ -52,17 +51,8 @@ const LaborAnalysis = () => {
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(() => {
-		const date = new Date();
-		const day = date.getDay();
-		const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-		return new Date(date.setDate(diff));
-	});
-	const [selectedToDate, setSelectedToDate] = useState(() => {
-		const fromDate = new Date(selectedFromDate);
-		return new Date(fromDate.setDate(fromDate.getDate() + 6));
-	});
-	const [showDateModal, setShowDateModal] = useState(false);
+	const [selectedFromDate, setSelectedFromDate] = useState('');
+	const [selectedToDate, setSelectedToDate] = useState();
 
 	//dropdown state variables
 	const [jobDescription, setJobDescription] = useState('All');
@@ -225,13 +215,6 @@ const LaborAnalysis = () => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setUnitShowModal(false);
-	};
-
-	// Function to handle the date selection
-	const handleDateSelection = (from, to) => {
-		setSelectedFromDate(from);
-		setSelectedToDate(to);
-		setShowDateModal(false);
 	};
 
 	const handleModal = (row, item, data) => {
@@ -442,8 +425,6 @@ const LaborAnalysis = () => {
 						onClick={() => setUnitShowModal(true)}
 					/>
 					<DateDropdown
-						selectedFromDate={selectedFromDate}
-						selectedToDate={selectedToDate}
 						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
 						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
 					/>
@@ -495,18 +476,8 @@ const LaborAnalysis = () => {
 					}}
 					handleUnitSelection={handleUnitSelection}
 				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
 				<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(!isModalOpen)} title={modalData?.title}>
-					<div className='p-6'>{modalTable}</div>
+					<div className='p-6 '>{modalTable}</div>
 				</Modal>
 			</div>
 		</div>
