@@ -52,10 +52,16 @@ const LaborAnalysis = () => {
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState(() => {
+		const date = new Date();
+		const day = date.getDay();
+		const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+		return new Date(date.setDate(diff));
+	});
+	const [selectedToDate, setSelectedToDate] = useState(() => {
+		const fromDate = new Date(selectedFromDate);
+		return new Date(fromDate.setDate(fromDate.getDate() + 6));
+	});
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown state variables
@@ -162,6 +168,7 @@ const LaborAnalysis = () => {
 							<div className='pl-4 text-left'>{getValue()}</div>
 						),
 					dataType: 'string',
+					size: 310,
 				}),
 
 				...Object.keys(newData[0].subRows[0])

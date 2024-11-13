@@ -30,7 +30,7 @@ const DateDropdown = ({ selectedFromDate, selectedToDate, handleFromDateChange, 
 	};
 
 	return (
-		<div className='w-64'>
+		<div className='min-w-64'>
 			<Dropdown
 				title='Select Date'
 				selectedOption={date}
