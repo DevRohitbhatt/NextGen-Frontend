@@ -350,8 +350,6 @@ const LaborAnalysis = () => {
 			body: buildPDFBody(),
 		};
 
-		console.log('PDF Data: ', pdfData);
-
 		PdfBuilder(pdfData);
 	};
 
@@ -384,15 +382,13 @@ const LaborAnalysis = () => {
 	};
 
 	const handleExcelClick = () => {
-		const data = [
-			{
-				name: 'Labor Analysis',
-				columns: columns.map((column) => column.header),
-				data: laborAnalysisReportData.flatMap((row) => row.subRows.map((subRow) => Object.values(subRow))),
-			},
-		];
-
-		console.log('Excel Data: ', data);
+		const data = laborAnalysisReportData.map((row) => {
+			return {
+				name: row.sectionName,
+				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
+				data: row.subRows.map((subRow) => columns.map((column) => subRow[column.id] || '0')),
+			};
+		});
 
 		const filename = 'LaborAnalysis';
 		const spreadSheetTitle = 'Labor Analysis';

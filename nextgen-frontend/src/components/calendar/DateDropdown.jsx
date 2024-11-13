@@ -59,7 +59,7 @@ const DateDropdown = ({ handleFromDateChange, handleToDateChange }) => {
 	};
 
 	return (
-		<div className='z-20 min-w-64'>
+		<div className='z-[9] min-w-[270px]'>
 			<Dropdown
 				title='Select Date'
 				selectedOption={isDateLoading ? 'Loading...' : date}
