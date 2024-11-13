@@ -16,12 +16,8 @@ export default function laborAnalysis() {
 			intro: '-Select the date, or date range, you wish to display Labor Analysis',
 		},
 		{
-			element: '.dropdown-selector',
+			element: '.job-selector',
 			intro: '-Select the Job for which you want to see the Labor Analysis.',
-		},
-		{
-			element: '.run-button',
-			intro: 'Click the Run button to generate the report based on the selected criteria.',
 		},
 		{
 			element: '.export-options',

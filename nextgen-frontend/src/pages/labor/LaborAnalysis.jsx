@@ -424,7 +424,7 @@ const LaborAnalysis = () => {
 						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
 						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
 					/>
-					<div className='w-48 ml-2'>
+					<div className='w-56 ml-2 job-selector'>
 						<Dropdown
 							title='Job Description'
 							options={jobDescriptionOptions}
