@@ -18,6 +18,7 @@ import {
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
+	LaborCICO,
 	LaborCICOExceptions,
 	Voids,
 	HourlySales,
@@ -132,10 +133,11 @@ const App = () => {
 								<Route path='/Voids' element={<Voids />} />
 								<Route path='/HourlySales' element={<HourlySales />} />
 
-								{/* labor */}
+								{/* Labor */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
 								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
+								<Route path='/LaborCICO' element={<LaborCICO />} />
 							</Routes>
 						</Suspense>
 					</div>

@@ -21,6 +21,7 @@ const HourlySales = lazy(() => import('./sales/HourlySales'));
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
+const LaborCICO = lazy(() => import('./labor/LaborCICO'));
 const LaborCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
 
 export {
@@ -32,6 +33,7 @@ export {
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
+	LaborCICO,
 	LaborCICOExceptions,
 	Voids,
 	HourlySales,

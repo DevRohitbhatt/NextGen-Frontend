@@ -29,6 +29,7 @@ function TableHOC({
 	enableColumnFilters = false,
 	headerPosition = 'center',
 	dataPosition = 'text-center',
+	detailOnTop,
 	onCallBack,
 }) {
 	const [expanded, setExpanded] = useState({});
@@ -357,7 +358,7 @@ function TableHOC({
 	);
 }
 TableHOC.propTypes = {
-	view: PropTypes.object.isRequired,
+	view: PropTypes.oneOfType([PropTypes.object, PropTypes.number]).isRequired,
 	columns: PropTypes.array.isRequired,
 	data: PropTypes.array.isRequired,
 	isHeader: PropTypes.bool,
