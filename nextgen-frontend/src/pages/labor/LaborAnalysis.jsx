@@ -55,6 +55,7 @@ const LaborAnalysis = () => {
 	const [selectedToDate, setSelectedToDate] = useState();
 
 	//dropdown state variables
+	const [jobDetails, setJobDetails] = useState([]);
 	const [jobDescription, setJobDescription] = useState('All');
 	const jobDescriptionOptions = [
 		{ name: 'All' },
@@ -98,10 +99,32 @@ const LaborAnalysis = () => {
 	}, [defaultUnitID, defaultUnitName]);
 
 	useEffect(() => {
+		if (selectedUnit) {
+			fetchJobDetails();
+		}
+	}, [selectedUnit]);
+
+	useEffect(() => {
 		if (selectedUnit && selectedFromDate && selectedToDate && jobDescription) {
 			fetchLaborAnalysisReport();
 		}
 	}, [selectedUnit, selectedFromDate, selectedToDate, jobDescription]);
+
+	const fetchJobDetails = async () => {
+		try {
+			const getData = {
+				url: 'getJobDetails',
+				urlParams: {
+					companyId: companyID,
+					memberId: selectedUnit,
+				},
+			};
+			const result = await getCall(getData);
+			setJobDetails(result.data);
+		} catch (error) {
+			console.error('Error getting job details: ', error);
+		}
+	};
 
 	const fetchLaborAnalysisReport = async () => {
 		const signal = cancelApiObject['laborAnalysis'].handleRequestCancellation().signal;
@@ -121,9 +144,12 @@ const LaborAnalysis = () => {
 					intervalType: 'QH',
 					userID: userID,
 					options: ' ',
-					jobIdFilter: ' ',
+					jobIdFilter:
+						jobDescription === 'All'
+							? ' '
+							: jobDetails.find((item) => item.description === jobDescription).jobId,
 				},
-				signal, // Enable cancellation
+				signal,
 			};
 
 			const result = await getCall(getData);
@@ -343,7 +369,7 @@ const LaborAnalysis = () => {
 				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
 					selectedToDate,
 					'mm-dd-yyyy'
-				)} | ${selectedUnitName}`,
+				)} | ${selectedUnitName} | ${jobDescription}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
