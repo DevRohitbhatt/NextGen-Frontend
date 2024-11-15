@@ -7,7 +7,10 @@ import EditAndAddDndTable from "../../components/table/EditAndAddDndTable";
 import HoverBorderButton from "../../components/buttons/HoverBorderButton";
 import { getCall, postCall } from "../../apis/network";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { FaAngleUp, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import { formatTime } from "../../functions/utils/timeConvertFunction";
+import HhmmssSelector from "../../components/common/HhmmssSelector";
 
 const CookChartTemplate = (props) => {
     const {
@@ -39,19 +42,34 @@ const CookChartTemplate = (props) => {
     const [cookAllData, setCookAllData] = useState([])
     const [editCookData, SetEditCookData] = useState([]);
     const [allDataFeilds, setAllDataFeilds] = useState({});
-    const [leftItems, setLeftItems] = useState([
-        { id: '10210104', description: '(4) Biscuit', qty: 4 },
-        { id: '10210112', description: '(12) Biscuit', qty: 12 },
-        { id: '10210101', description: '(1) Biscuit', qty: 1 },
-        { id: '10210106', description: '(6) Biscuit', qty: 6 },
-        { id: '10210107', description: '(8) Biscuit', qty: 8 },
-    ]);
+    const [filteredData, setFilteredData] = useState(cookAllData);
     const [addMenuItems, setAddMenuItems] = useState([]);
     const [addIntryItems, setAddIntryItems] = useState([]);
-    const [sourceType, setSourceType] = useState('Menu Items');
+    const [sourceType, setSourceType] = useState('Menu');
+    const [editsourceType, setEditSourceType] = useState('Menu');
     const [sourceTypeDropDown, setSourceTypeDropDown] = useState(false);
-    const [showFullTable, setShowFullTable] = useState(false);
-    const [rightTableData, setRightTableData] = useState(null);
+    const [showFullTable, setShowFullTable] = useState({});
+    const [rightTableData, setRightTableData] = useState([]);
+    const [addHeadrFeilds, setAddHeadrFeilds] = useState({
+        cookItemName: "",
+        unitOfMeasure: "",
+        cookInterval: 0,
+        safetyFactor: 0,
+        mixMultiplier: 0,
+        projectAhead: "",
+        cookTimeSeconds: 0,
+        holdTimeSeconds: 0,
+        laborFixedSeconds: 0,
+        laborVarSeconds: 0,
+        sourceType: "Menu",
+        "createdOn": "0001-01-01T00:00:00",
+        "createdBy": 0,
+        "deletedOn": "0001-01-01T00:00:00",
+        "deletedBy": 0,
+        companyID: 1083,
+        cookDropCookItemID: null
+    })
+
 
     useEffect(() => {
         if (defaultUnitID) {
@@ -80,14 +98,19 @@ const CookChartTemplate = (props) => {
         setOpenCreateItemModal(true)
     }
     //open edit Modal
-    const handleOpenEditItemModal = () => {
-        getEditCookData(sourceType)
+    const handleOpenEditItemModal = async (id, type) => {
+        setEditSourceType(type)
+        getAddNewCookData(type)
+        const editData = await getEditCookData(id)
+        const deepCopiedData = JSON.parse(JSON.stringify(editData.data[0]));
+        setAllDataFeilds(deepCopiedData)
         setOpenEditItemModal(true)
     }
 
     //Create new item data call
     const getAddNewCookData = async (type) => {
-        if (type === "Menu Items") {
+        setIsLoading(true)
+        if (type === "Menu") {
             try {
                 const getData = {
                     fullUrl: 'api/cookdrop/getmenuitems',
@@ -100,12 +123,15 @@ const CookChartTemplate = (props) => {
                 if (result?.data && result?.data.length) {
                     result.data.forEach((items) => items.menuID = items.menuID + "")
                     setAddMenuItems(result.data)
+
                 }
             } catch (error) {
-                setCookChartData({})
+
                 console.error(error)
+            } finally {
+                setIsLoading(false)
             }
-        } else if (type === "Inventory item") {
+        } else if (type === "Inventory") {
             try {
                 const getData = {
                     fullUrl: 'api/prepcharttemplate/getinventorylist',
@@ -120,45 +146,53 @@ const CookChartTemplate = (props) => {
                     setAddIntryItems(result.data)
                 }
             } catch (error) {
-                setCookChartData({})
+                // setCookChartData({})
                 console.error(error)
+            } finally {
+                setIsLoading(false)
             }
         }
     }
     //Get all item data call
     const getCookAllItemData = async () => {
+        setIsLoading(true)
         try {
             const getData = {
-                fullUrl: 'api/cookdrop/getcookdropcookallitems',
+                fullUrl: 'api/cookdrop/getcookdropcookitem',
                 urlParams: {
-                    companyId: 1083,
+                    companyId: 1083
                 },
             };
-            const result = await getCall(getData);
+            const result = await getCall(getData, false);
             setCookAllData(result.data)
+            setFilteredData(result.data)
         } catch (error) {
 
+        } finally {
+            setIsLoading(false)
         }
 
     }
     //Edit  item data call
-    const getEditCookData = async () => {
+    const getEditCookData = async (id) => {
+        setIsLoading(true)
         try {
             const getData = {
                 fullUrl: 'api/cookdrop/getcookdropcookitem',
                 urlParams: {
                     companyId: 1083,
-                    cookDropCookItemID: "8CE44AD2-19E1-4976-945A-AF990B75F74C"
+                    cookDropCookItemID: id
                 },
             };
-            const result = await getCall(getData);
+            const result = await getCall(getData, false);
             result.data[0].listCookDropCookItemDetails.forEach((items) => items.menuID = items.inventoryOrMenuItemID + "")
             SetEditCookData(result.data[0].listCookDropCookItemDetails);
-            let { cookItemName, unitOfMeasure, sourceType, cookInterval, safetyFactor, mixMultiplier, projectAhead, cookTimeSeconds, holdTimeSeconds, laborFixedSeconds, createdOn, deletedOn, deletedBy, laborVarSeconds } = result.data[0];
-            setAllDataFeilds(result.data[0])
-
+            
+            return result
         } catch (error) {
 
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -167,22 +201,32 @@ const CookChartTemplate = (props) => {
     }, [])
 
     const createEditItemModal = () => {
-        let { cookItemName, unitOfMeasure, cookInterval, safetyFactor, mixMultiplier, projectAhead, cookTimeSeconds, holdTimeSeconds, laborFixedSeconds, laborVarSeconds } = allDataFeilds;
+        let { cookItemName, unitOfMeasure, cookInterval, safetyFactor, mixMultiplier, projectAhead, cookTimeSeconds, holdTimeSeconds, laborFixedSeconds, laborVarSeconds, sourceType } = allDataFeilds;
+        const handleSourceTypeChange = async (type) => {
+            await getAddNewCookData(type)
+            setEditSourceType(type);
+            setSourceTypeDropDown(false);
+        };
 
-        const onChangeHeaderValues = (value, name) => {
+        const onChangeHeaderValues = (e, name) => {
+            let value = e.target.value;
+
             setAllDataFeilds((prev) => ({
-                ...prev, [name]: value.target.value
+                ...prev, [name]: value
             }))
         }
         const savedData = async (saved) => {
             let values = saved
             values.forEach((item) => {
+                item.inventoryOrMenuItemID = item.menuID
                 delete item.menuID;
                 delete item.uniqueKey;
+                delete item.draggableId
                 item.cookItemQuantity = parseInt(item.cookItemQuantity)
             })
             let body = allDataFeilds
             body.listCookDropCookItemDetails = values;
+            body.sourceType = editsourceType;
             try {
                 const postData = {
                     fullUrl: 'api/cookdrop/savecookdropcookitem',
@@ -192,7 +236,16 @@ const CookChartTemplate = (props) => {
                 };
 
                 let result = await postCall(postData);
+                if (result?.error == null) {
+                    await getCookAllItemData();
+                    toast.success('Saved...', { autoClose: 1500 });
+                    setOpenEditItemModal(false);
+
+                } else {
+                    toast.error('Failed to save', { autoClose: 1500 });
+                }
             } catch (error) {
+                toast.error('Failed to save', { autoClose: 1500 });
                 console.log(error)
             }
 
@@ -201,7 +254,7 @@ const CookChartTemplate = (props) => {
 
 
         return (
-            <div className="gap-[30px] flex justify-between mx-auto p-4 h-[100%] flex-col" >
+            <div className="gap-[20px] flex justify-between mx-auto p-4 h-[100%] flex-col" >
                 <div className=" xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center">
                     <table className="min-w-full table-auto ">
                         <thead className="">
@@ -230,28 +283,38 @@ const CookChartTemplate = (props) => {
                                     />
                                 </td>
                                 <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value={cookInterval}
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
-                                        onChange={(e) => { onChangeHeaderValues(e, "cookInterval") }}
+                                    <HhmmssSelector initialSeconds={cookInterval}
+                                        key={"cookInterval"}
+                                        onTimeChange={(e) => {
+                                            setAllDataFeilds((prev) => ({
+                                                ...prev, ["cookInterval"]: e
+                                            }))
+                                        }}
+                                        enableSeconds={false}
                                     />
+
                                 </td>
                                 <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value={cookTimeSeconds}
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
-                                        onChange={(e) => { onChangeHeaderValues(e, "cookTimeSeconds") }}
+                                    <HhmmssSelector initialSeconds={cookTimeSeconds}
+                                        key={"cookTimeSeconds"}
+                                        onTimeChange={(e) => {
+                                            setAllDataFeilds((prev) => ({
+                                                ...prev, ["cookTimeSeconds"]: e
+                                            }))
+                                        }}
                                     />
+
                                 </td>
                                 <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value={holdTimeSeconds}
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
-                                        onChange={(e) => { onChangeHeaderValues(e, "holdTimeSeconds") }}
+                                    <HhmmssSelector initialSeconds={holdTimeSeconds}
+                                        key={"holdTimeSeconds"}
+                                        onTimeChange={(e) => {
+                                            setAllDataFeilds((prev) => ({
+                                                ...prev, ["holdTimeSeconds"]: e
+                                            }))
+                                        }}
                                     />
+
                                 </td>
                                 <td className="px-4 py-2 ">
                                     <input
@@ -270,43 +333,49 @@ const CookChartTemplate = (props) => {
                                     />
                                 </td>
                                 <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value={laborFixedSeconds}
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
-                                        onChange={(e) => { onChangeHeaderValues(e, "laborFixedSeconds") }}
+                                    <HhmmssSelector initialSeconds={laborFixedSeconds}
+                                        key={"laborFixedSeconds"}
+                                        onTimeChange={(e) => {
+                                            setAllDataFeilds((prev) => ({
+                                                ...prev, ["laborFixedSeconds"]: e
+                                            }))
+                                        }}
                                     />
+
                                 </td>
                                 <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value={laborVarSeconds}
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
-                                        onChange={(e) => { onChangeHeaderValues(e, "laborVarSeconds") }}
+                                    <HhmmssSelector initialSeconds={laborVarSeconds}
+                                        key={"laborVarSeconds"}
+                                        onTimeChange={(e) => {
+                                            setAllDataFeilds((prev) => ({
+                                                ...prev, ["laborVarSeconds"]: e
+                                            }))
+                                        }}
                                     />
+
                                 </td>
                                 <td className="px-4 py-2 ">
                                     <div className="relative">
                                         <button
-                                            className="bg-gray-200 p-2 rounded-full border-none box-content whitespace-nowrap w-[130px]"
+                                            className="bg-gray-200 p-2 rounded-full border-none box-content whitespace-nowrap w-[130px] text-left"
                                             onClick={() =>
                                                 setSourceTypeDropDown(!sourceTypeDropDown)
                                             }
                                         >
-                                            {sourceType}
+                                            {editsourceType} item
                                             {/* <i className="ml-2 fa fa-chevron-down"></i> */}
                                         </button>
                                         {sourceTypeDropDown && <div className="absolute z-20 mt-2 w-full bg-white rounded shadow-lg">
                                             <ul className="text-left">
                                                 <li
                                                     className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                    onClick={() => handleSourceTypeChange('Menu Items')}
+                                                    onClick={() => handleSourceTypeChange('Menu')}
                                                 >
                                                     Menu Items
                                                 </li>
                                                 <li
                                                     className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                    onClick={() => handleSourceTypeChange('Inventory item')}
+                                                    onClick={() => handleSourceTypeChange('Inventory')}
                                                 >
                                                     Inventory item
                                                 </li>
@@ -335,20 +404,23 @@ const CookChartTemplate = (props) => {
                     </table>
 
                 </div>
-                {sourceType === "Menu Items" ?
 
+                {editsourceType === "Menu" ?
                     <EditAndAddDndTable
                         key="menu-items-edit"
                         tableOneName="Menu Items"
                         tableTwoName="Selected Items"
                         tableOneHeaders={['Menu ID', 'Description']}
                         tableTwoHeaders={['Menu ID', 'Description']}
-                        initialTableOneData={editCookData}
+                        initialTableOneData={addMenuItems}
+                        initialTemplateItems={sourceType == editsourceType ? editCookData : []}
                         dorpabaleidOne={"items"}
                         dorpabaleidTwo={"itemstemplate"}
                         onSave={(saved) => {
                             savedData(saved);
                         }}
+                        isPaginationEnabled={true}
+                        onCancel={() => setOpenEditItemModal(!openEditItemModal)}
                     />
                     :
                     <EditAndAddDndTable
@@ -358,22 +430,96 @@ const CookChartTemplate = (props) => {
                         tableOneHeaders={['Inventory ID', 'Description']}
                         tableTwoHeaders={['Inventory ID', 'Description']}
                         initialTableOneData={addIntryItems}
+                        initialTemplateItems={sourceType == editsourceType ? editCookData : []}
                         dorpabaleidOne={"inventory"}
                         dorpabaleidTwo={"inventorytemplate"}
+                        onSave={(saved) => {
+                            savedData(saved);
+                        }}
+                        onCancel={() => setOpenEditItemModal(!openEditItemModal)}
                     />
                 }
+
             </div>
         )
     }
 
+    const convertToSeconds = (timeString) => {
+        const timeParts = timeString.split(':');
+        let seconds = 0;
+
+        if (timeParts.length === 2) { // HH:MM format
+            const [hours, minutes] = timeParts;
+            seconds = parseInt(hours) * 3600 + parseInt(minutes) * 60;
+        } else if (timeParts.length === 3) { // HH:MM:SS format
+            const [hours, minutes, secs] = timeParts;
+            seconds = parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(secs);
+        }
+
+        return seconds;
+    };
+    const convertToHHMMSS = (seconds) => {
+        const hrs = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const mins = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        return `${hrs}:${mins}:${secs}`;
+    };
+
+
     const createItemModal = () => {
+        let { cookItemName, unitOfMeasure, cookInterval, safetyFactor, mixMultiplier, projectAhead, cookTimeSeconds, holdTimeSeconds, laborFixedSeconds, laborVarSeconds } = addHeadrFeilds;
+
+        const onChangeHeaderValues = (e, name) => {
+            let value = e.target.value;
+            // if (name === "cookInterval" || name === "cookTimeSeconds") {
+            //     // Convert the time input to seconds
+            //     value = convertToSeconds(value);
+            // }
+            setAddHeadrFeilds((prev) => ({
+                ...prev, [name]: value
+            }))
+        }
+
         const handleSourceTypeChange = async (type) => {
             await getAddNewCookData(type)
             setSourceType(type);
             setSourceTypeDropDown(false);
         };
+
+
+
+        const savedData = async (saved) => {
+            let values = saved
+            console.log(values)
+            values.forEach((item) => {
+                item.inventoryOrMenuItemID = parseInt(item.menuID);
+                delete item.menuID;
+                delete item.uniqueKey;
+                delete item.draggableId
+                item.cookItemQuantity = parseInt(item.cookItemQuantity)
+            })
+            let body = addHeadrFeilds
+            body.listCookDropCookItemDetails = values;
+            body.sourceType = sourceType;
+            console.log(body)
+            try {
+                const postData = {
+                    fullUrl: 'api/cookdrop/savecookdropcookitem',
+                    urlParams: {
+                    },
+                    bodyData: body,
+                };
+
+                let result = await postCall(postData);
+            } catch (error) {
+                console.log(error)
+            }
+
+        }
+
+
         return (
-            <div className="gap-[30px] flex justify-between mx-auto p-4 h-[100%] flex-col" >
+            <div className="gap-[20px] flex justify-between mx-auto p-4 h-[100%] flex-col" >
                 <div className=" xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center">
                     <table className="min-w-full table-auto ">
                         <thead className="">
@@ -396,81 +542,98 @@ const CookChartTemplate = (props) => {
                                 <td className="px-4 py-2 ">
                                     <input
                                         type="text"
-                                        value="Classic Wing"
+                                        value={cookItemName}
                                         className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
+                                        onChange={(e) => { onChangeHeaderValues(e, "cookItemName") }}
+                                    />
+                                </td>
+                                <td className="px-4 py-2 ">
+                                    <HhmmssSelector
+                                        enableSeconds={false}
+                                        initialSeconds={cookInterval}
+                                        onTimeChange={(e) => {
+                                            setAddHeadrFeilds((prev) => ({
+                                                ...prev, ["cookInterval"]: e
+                                            }))
+                                        }}
+                                    />
+
+                                </td>
+                                <td className="px-4 py-2 ">
+                                    <HhmmssSelector initialSeconds={cookTimeSeconds}
+                                        onTimeChange={(e) => {
+                                            setAddHeadrFeilds((prev) => ({
+                                                ...prev, ["cookTimeSeconds"]: e
+                                            }))
+                                        }} />
+                                </td>
+                                <td className="px-4 py-2 ">
+                                    <HhmmssSelector initialSeconds={holdTimeSeconds}
+                                        onTimeChange={(e) => {
+                                            setAddHeadrFeilds((prev) => ({
+                                                ...prev, ["holdTimeSeconds"]: e
+                                            }))
+                                        }}
+                                    />
+
+                                </td>
+                                <td className="px-4 py-2 ">
+                                    <input
+                                        type="number"
+                                        value={safetyFactor}
+                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
+                                        onChange={(e) => { onChangeHeaderValues(e, "safetyFactor") }}
                                     />
                                 </td>
                                 <td className="px-4 py-2 ">
                                     <input
                                         type="text"
-                                        value="30 Min"
+                                        value={projectAhead}
                                         className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
+                                        onChange={(e) => { onChangeHeaderValues(e, "projectAhead") }}
                                     />
                                 </td>
                                 <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value="0012:00"
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
+                                    <HhmmssSelector initialSeconds={laborFixedSeconds}
+                                        onTimeChange={(e) => {
+                                            setAddHeadrFeilds((prev) => ({
+                                                ...prev, ["laborFixedSeconds"]: e
+                                            }))
+                                        }}
                                     />
+
                                 </td>
                                 <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value="00.60:00"
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
-                                    />
-                                </td>
-                                <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value="10%"
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
-                                    />
-                                </td>
-                                <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value="N"
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
-                                    />
-                                </td>
-                                <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value="00:00"
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
-                                    />
-                                </td>
-                                <td className="px-4 py-2 ">
-                                    <input
-                                        type="text"
-                                        value="00:00"
-                                        className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
+                                    <HhmmssSelector initialSeconds={laborVarSeconds}
+                                        onTimeChange={(e) => {
+                                            setAddHeadrFeilds((prev) => ({
+                                                ...prev, ["laborVarSeconds"]: e
+                                            }))
+                                        }}
                                     />
                                 </td>
                                 <td className="px-4 py-2 ">
                                     <div className="relative">
                                         <button
-                                            className="bg-gray-200 p-2 rounded-full border-none box-content whitespace-nowrap w-[130px]"
+                                            className="bg-gray-200 p-2 rounded-full border-none box-content whitespace-nowrap w-[130px] text-left"
                                             onClick={() =>
                                                 setSourceTypeDropDown(!sourceTypeDropDown)
                                             }
                                         >
-                                            {sourceType}
-                                            {/* <i className="ml-2 fa fa-chevron-down"></i> */}
+                                            {sourceType} item
+
                                         </button>
                                         {sourceTypeDropDown && <div className="absolute z-50 mt-2 w-full bg-white rounded shadow-lg">
                                             <ul className="text-left">
                                                 <li
                                                     className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                    onClick={() => handleSourceTypeChange('Menu Items')}
+                                                    onClick={() => handleSourceTypeChange('Menu')}
                                                 >
                                                     Menu Items
                                                 </li>
                                                 <li
                                                     className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                    onClick={() => handleSourceTypeChange('Inventory item')}
+                                                    onClick={() => handleSourceTypeChange('Inventory')}
                                                 >
                                                     Inventory item
                                                 </li>
@@ -481,15 +644,17 @@ const CookChartTemplate = (props) => {
                                 <td className="px-4 py-2 ">
                                     <input
                                         type="text"
-                                        value="Each"
+                                        value={unitOfMeasure}
                                         className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
+                                        onChange={(e) => { onChangeHeaderValues(e, "unitOfMeasure") }}
                                     />
                                 </td>
                                 <td className="px-4 py-2">
                                     <input
                                         type="text"
-                                        value="54.0%"
+                                        value={mixMultiplier}
                                         className="bg-gray-200 p-2 w-full rounded-full  border-none box-content"
+                                        onChange={(e) => { onChangeHeaderValues(e, "mixMultiplier") }}
                                     />
                                 </td>
                             </tr>
@@ -497,7 +662,7 @@ const CookChartTemplate = (props) => {
                     </table>
 
                 </div>
-                {sourceType === "Menu Items" ?
+                {sourceType === "Menu" ?
 
                     <EditAndAddDndTable
                         key="menu-items"
@@ -506,9 +671,14 @@ const CookChartTemplate = (props) => {
                         tableOneHeaders={['Menu ID', 'Description']}
                         tableTwoHeaders={['Menu ID', 'Description']}
                         initialTableOneData={addMenuItems}
+
                         dorpabaleidOne={"items"}
                         dorpabaleidTwo={"itemstemplate"}
                         isPaginationEnabled={addMenuItems.length > 100}
+                        onSave={(saved) => {
+                            savedData(saved);
+                        }}
+                        onCancel={() => setOpenCreateItemModal(!openCreateItemModal)}
                     />
                     :
                     <EditAndAddDndTable
@@ -520,6 +690,10 @@ const CookChartTemplate = (props) => {
                         initialTableOneData={addIntryItems}
                         dorpabaleidOne={"inventory"}
                         dorpabaleidTwo={"inventorytemplate"}
+                        onSave={(saved) => {
+                            savedData(saved);
+                        }}
+                        onCancel={() => setOpenCreateItemModal(!openCreateItemModal)}
                     />
                 }
             </div>
@@ -529,22 +703,66 @@ const CookChartTemplate = (props) => {
     const handleDragEnd = (result) => {
         const { source, destination } = result;
 
+        // Exit if there's no destination
         if (!destination) return;
 
-        if (source.droppableId === "left" && destination.droppableId === "right") {
-            // Set the data for the right table on drop
-            setRightTableData({
-                title: "Biscuits",
-                description: "Increment 0015:00, Cook time 0020:00, Hold 0060:00, Safety 10%",
-                items: leftItems, // Assuming leftItems holds the table data
-            });
-            setShowFullTable(false); // Reset view to show only title and description initially
+        // If dropped in the right table area
+        if (source.droppableId === 'left' && destination.droppableId === 'right') {
+            const draggedItem = cookAllData.find(
+                (item) => item.cookDropCookItemID === result.draggableId
+            );
+
+            // Check if item already exists in the right table to avoid duplicates
+            const exists = rightTableData.some(
+                (table) => table.cookDropCookItemID === draggedItem.cookDropCookItemID
+            );
+            if (exists) {
+                toast.error('Item already exists in the right table', { autoClose: 1500 });
+                return;
+            }
+
+            // Append the new table data to the right side
+            setRightTableData((prev) => [
+                ...prev,
+                {
+                    title: draggedItem.cookItemName,
+                    description: `Increment 0015:00, Cook time ${draggedItem.cookTimeSeconds}, Hold ${draggedItem.holdTimeSeconds}, Safety ${draggedItem.safetyFactor}%`,
+                    items: draggedItem.listCookDropCookItemDetails.map((detail) => ({
+                        id: detail.inventoryOrMenuItemID,
+                        description: detail.description,
+                        qty: detail.cookItemQuantity,
+                    })),
+                    cookDropCookItemID: draggedItem.cookDropCookItemID,
+                },
+            ]);
         }
     };
 
+    const toggleTableVisibility = (tableId) => {
+        setShowFullTable((prev) => ({
+            ...prev,
+            [tableId]: !prev[tableId],
+        }));
+    };
+
+    const removeTable = (tableId) => {
+        setRightTableData((prev) =>
+            prev.filter((table) => table.cookDropCookItemID !== tableId)
+        );
+    };
+
+
+    const handleSearch = (searchTerm) => {
+        const filtered = cookAllData.filter((item) =>
+            item.cookItemName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredData(filtered);
+    };
+
+
     return (
         <>
-            <Loader loading={isLoading} />
+            <ToastContainer />
             <div className='w-[85%] mx-auto'>
                 <h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Cook Drop Templates</h2>
                 <header className='xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center'>
@@ -574,133 +792,140 @@ const CookChartTemplate = (props) => {
                     !isLoading &&
                     (true ? (
                         <div className="container mx-auto  px-1 py-4 max-w-full">
+                            <Loader loading={isLoading} />
                             <DragDropContext onDragEnd={handleDragEnd}>
                                 <div className="flex w-full gap-4 justify-between">
-                                    <div className=" w-[40%]  justify-between">
-                                        <Droppable droppableId="left">
-                                            {(provided) => (
-                                                <div ref={provided.innerRef} {...provided.droppableProps} className="w-full">
-                                                    <div className="flex items-center space-x-2 mb-4 justify-between">
-                                                        <h2 className="text-xl font-bold">Cook Items</h2>
-                                                        <HoverBorderButton onClick={() => handleOpenCreateItemModal()}>Create New Item</HoverBorderButton>
-                                                    </div>
-
-                                                    <Draggable draggableId="left-table" index={0}>
-                                                        {(provided) => (
-                                                            <div
-                                                                ref={provided.innerRef}
-                                                                {...provided.draggableProps}
-                                                                {...provided.dragHandleProps}
-                                                                className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]"
-                                                            >
-                                                                <div className="p-4 rounded-lg bg-gray-100">
-                                                                    <h2 className="font-bold text-xl">Biscuits</h2>
-                                                                    <p className="font-semibold text-lg">
-                                                                        Increment 0015:00, Cook time 0020:00, Hold 0060:00, Safety 10%
-                                                                    </p>
-                                                                </div>
-                                                                <table className="min-w-full table-auto">
-                                                                    <thead>
-                                                                        <tr className="border-b border-b-[var(--tw-primary)]">
-                                                                            <th className="px-4 py-2 text-left">Item ID</th>
-                                                                            <th className="px-4 py-2 text-left">Description</th>
-                                                                            <th className="px-4 py-2 text-left">QTY</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {leftItems.map((item, index) => (
-                                                                            <tr key={item.id} className="border-b">
-                                                                                <td className="px-4 py-2">{item.id}</td>
-                                                                                <td className="px-4 py-2">{item.description}</td>
-                                                                                <td className="px-4 py-2">{item.qty}</td>
-                                                                            </tr>
-                                                                        ))}
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        )}
-                                                    </Draggable>
-                                                    {provided.placeholder}
-                                                </div>
-                                            )}
-                                        </Droppable>
-                                        <div className="flex justify-end mt-[15px]">
-                                            <button
-                                                className="bg-green-600 text-white p-2 rounded-lg mr-[20px] py-[15px] px-[35px]"
-                                                onClick={() => handleOpenEditItemModal(true)}
+                                    {/* Left Column - Cook Items */}
+                                    <Droppable droppableId="left">
+                                        {(provided) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.droppableProps}
+                                                className="w-[40%]"
                                             >
-                                                Edit
-                                            </button>
-                                            <button className="bg-red-600 text-white p-2 rounded-lg py-[15px] px-[35px]">Delete</button>
-                                        </div>
-                                    </div>
+                                                <div className="flex items-center space-x-2 mb-4 justify-between">
+                                                    <h2 className="text-xl font-bold">Cook Items</h2>
+                                                    <div className="w-[30%] ml-[10px] mr-[10px]"> <SearchBar onSearch={handleSearch} extraClass="w-full" /></div>
+                                                    <HoverBorderButton onClick={() => handleOpenCreateItemModal()}>Create New Item</HoverBorderButton>
+                                                </div>
+
+                                                {filteredData.map((item, index) => (
+                                                    <div>
+                                                        <Draggable key={item.cookDropCookItemID} draggableId={item.cookDropCookItemID} index={index}>
+                                                            {(provided) => (
+                                                                <div
+                                                                    ref={provided.innerRef}
+                                                                    {...provided.draggableProps}
+                                                                    {...provided.dragHandleProps}
+                                                                    className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px] mb-5"
+                                                                >
+                                                                    <div className="p-4 rounded-lg bg-gray-100">
+                                                                        <h2 className="font-bold text-xl capitalize">{item.cookItemName}</h2>
+                                                                        <p className="font-semibold text-lg">
+                                                                            {`Increment 0015:00, Cook time ${formatTime(item.cookTimeSeconds)}, Hold ${formatTime(item.holdTimeSeconds)}, Safety ${item.safetyFactor}%`}
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="tableHOC overflow-auto max-h-[250px]">
+                                                                        <table className="min-w-full table-auto relative">
+                                                                            <thead className="bg-white sticky top-0 z-9">
+                                                                                <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset] ">
+                                                                                    <th className="px-4 py-2 text-left">Item ID</th>
+                                                                                    <th className="px-4 py-2 text-left">Description</th>
+                                                                                    <th className="px-4 py-2 text-left">QTY</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {item.listCookDropCookItemDetails.map((menuItem) => (
+                                                                                    <tr key={menuItem.inventoryOrMenuItemID} className="border-b">
+                                                                                        <td className="px-4 py-2">{menuItem.inventoryOrMenuItemID}</td>
+                                                                                        <td className="px-4 py-2">{menuItem.description}</td>
+                                                                                        <td className="px-4 py-2">{menuItem.cookItemQuantity}</td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </Draggable>
+                                                        <div className="flex justify-end mt-[15px] mb-[15px]">
+                                                            <button
+                                                                className="bg-green-600 text-white p-2 rounded-lg py-[10px] px-[35px] mr-[20px] border-none"
+                                                                onClick={() => { handleOpenEditItemModal(item.cookDropCookItemID, item.sourceType) }}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button className="bg-red-600 text-white p-2 rounded-lg py-[10px] px-[35px]">Delete</button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {provided.placeholder}
+                                            </div>
+                                        )}
+                                    </Droppable>
+
                                     {/* Right Column - Template */}
                                     <Droppable droppableId="right">
                                         {(provided) => (
                                             <div ref={provided.innerRef} {...provided.droppableProps} className="w-[55%]">
                                                 <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px]">
                                                     <h2 className="text-2xl font-bold mb-4">Template</h2>
-                                                    {rightTableData ? (
-                                                        <div
-                                                            className="p-4 rounded-lg bg-gray-100 cursor-pointer relative"
-                                                            onClick={() => setShowFullTable(!showFullTable)}
-                                                        >
-                                                            <h2 className="font-bold text-xl">{rightTableData.title}</h2>
-                                                            <p className="font-semibold text-lg relative">{rightTableData.description}
-                                                            </p>
-                                                            <span
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation(); // To prevent triggering the parent 
-                                                                    setRightTableData(null);
-                                                                    console.log("pawaneep singh")
-                                                                }}
-                                                                className="absolute top-1/2 right-10 transform -translate-y-1/2 text-red-500 hover:text-red-700 z-9"
-                                                            >
-                                                                <RiDeleteBin6Line />
-                                                            </span>
-                                                            <span
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation(); // To prevent triggering the parent 
-                                                                    setShowFullTable(!showFullTable)
-                                                                }}
-                                                                className="absolute top-1/2 right-4 transform -translate-y-1/2 z-9"
-                                                            >
-                                                               {showFullTable ? <FaChevronDown /> : <FaChevronUp /> }
-                                                            </span>
+                                                    {rightTableData.length === 0 && (
+                                                        <p className="text-gray-500">Drop the Cook Items tables here</p>
+                                                    )}
+                                                    {rightTableData.map((table) => (
+                                                        <div key={table.cookDropCookItemID} className=" mb-4 relative bg-gray-100 p-1 rounded-lg ">
+                                                            <div className="cursor-pointer p-4 rounded-lg bg-gray-100 relative" onClick={() => toggleTableVisibility(table.cookDropCookItemID)}>
+                                                                <h2 className="font-bold text-xl capitalize">{table.title}</h2>
+                                                                <p className="font-semibold text-lg">{table.description}</p>
+                                                                <span
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation(); // To prevent triggering the parent 
+                                                                        removeTable(table.cookDropCookItemID);
+                                                                    }}
+                                                                    className="absolute top-1/2 right-10 transform -translate-y-1/2 text-red-500 hover:text-red-700 z-9"
+                                                                >
+                                                                    <RiDeleteBin6Line />
+                                                                </span>
+                                                                <span
+                                                                    onClick={(e) => {
+                                                                    }}
+                                                                    className="absolute top-1/2 right-4 transform -translate-y-1/2 z-9"
+                                                                >
+                                                                    {showFullTable[table.cookDropCookItemID] ? <FaChevronUp /> : <FaChevronDown />}
+                                                                </span>
+                                                            </div>
 
+                                                            {showFullTable[table.cookDropCookItemID] && (
+                                                                <div className="tableHOC overflow-auto max-h-[245px]">
+                                                                    <table className="min-w-full table-auto mt-0 bg-white">
+                                                                        <thead className="border-b border-b-[var(--tw-primary)] sticky top-0 z-9 bg-white">
+                                                                            <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset] ">
+                                                                                <th className="px-4 py-2 text-left">Item ID</th>
+                                                                                <th className="px-4 py-2 text-left">Description</th>
+                                                                                <th className="px-4 py-2 text-left">QTY</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {table.items.map((item, index) => (
+                                                                                <tr key={item.id} className={`border-b`}>
+                                                                                    <td className="px-4 py-2">{item.id}</td>
+                                                                                    <td className="px-4 py-2">{item.description}</td>
+                                                                                    <td className="px-4 py-2">{item.qty}</td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    ) : (
-                                                        <p className="text-gray-500">Drop the Cook Items table here</p>
-                                                    )}
-                                                    {showFullTable && rightTableData && (
-                                                        <table className="min-w-full table-auto mt-4">
-                                                            <thead>
-                                                                <tr className="border-b border-b-[var(--tw-primary)]">
-                                                                    <th className="px-4 py-2 text-left">Item ID</th>
-                                                                    <th className="px-4 py-2 text-left">Description</th>
-                                                                    <th className="px-4 py-2 text-left">QTY</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {rightTableData.items.map((item) => (
-                                                                    <tr key={item.id} className="border-b">
-                                                                        <td className="px-4 py-2">{item.id}</td>
-                                                                        <td className="px-4 py-2">{item.description}</td>
-                                                                        <td className="px-4 py-2">{item.qty}</td>
-
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </table>
-                                                    )}
+                                                    ))}
                                                 </div>
-
                                             </div>
                                         )}
                                     </Droppable>
                                 </div>
                             </DragDropContext>
-
                         </div>
                     ) : !selectedUnit ? (
                         <div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>

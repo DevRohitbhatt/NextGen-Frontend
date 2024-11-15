@@ -27,7 +27,7 @@ const DraggableRow = ({ item, isTemplate, onDelete, onLongPressDragStart, extraH
                 <>
                     <td className="px-4 py-[2px] w-[20%]">
                         <input
-                            className="  border rounded w-[60%]"
+                            className="  border rounded-full pr-[18px] pl-[10px] outline-none w-[60%]"
                             value={item.cookItemQuantity || ""}
                             onChange={(e) => onQuantityChange(item.uniqueKey, e.target.value)}
                             type="text"
@@ -38,7 +38,7 @@ const DraggableRow = ({ item, isTemplate, onDelete, onLongPressDragStart, extraH
                             className="text-red-500 hover:text-red-700 !py-[5px]"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onDelete(item.uniqueKey);
+                                onDelete(item.uniqueKey, item.menuID);
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
                             style={{ pointerEvents: 'auto' }}
@@ -58,21 +58,26 @@ const EditAndAddDndTable = ({
     tableOneHeaders,
     tableTwoHeaders,
     initialTableOneData,
+    initialTemplateItems,
     dorpabaleidOne,
     dorpabaleidTwo,
     onSave,
+    onCancel,
     isPaginationEnabled // New prop to control pagination
 }) => {
+
     const [items, setItems] = useState([]);
-    const [templateItems, setTemplateItems] = useState([]);
+    const [templateItems, setTemplateItems] = useState(initialTemplateItems && initialTemplateItems.length > 0 ? initialTemplateItems : []);
     const [draggingId, setDraggingId] = useState(null);
     const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredItems, setFilteredItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [itemsPerPage, setItemsPerPage] = useState(20);
 
     useEffect(() => {
+
+
         setItems(initialTableOneData);
         setFilteredItems(initialTableOneData); // Initialize filteredItems
     }, [initialTableOneData]);
@@ -80,6 +85,18 @@ const EditAndAddDndTable = ({
     useEffect(() => {
         handleSearch(searchTerm); // Apply search when `searchTerm` or `items` change
     }, [searchTerm, items]);
+
+    useEffect(() => {
+        if (initialTemplateItems && initialTemplateItems.length > 0) {
+            const initializedTemplateItems = initialTemplateItems.map((item, index) => ({
+                ...item,
+                uniqueKey: index + 1,
+                draggableId: `${item.menuID}-${index + 1}`,
+            }));
+            setTemplateItems(initializedTemplateItems);
+            setUniqueIdCounter(initialTemplateItems.length + 1);
+        }
+    }, [initialTemplateItems])
 
     const handleLongPressDragStart = (menuID) => {
         setDraggingId(menuID);
@@ -96,7 +113,7 @@ const EditAndAddDndTable = ({
             setTemplateItems(updatedTemplateItems);
             return;
         }
-    
+
         if (source.droppableId === dorpabaleidOne && destination.droppableId === dorpabaleidTwo) {
             const itemToAdd = items.find((item) => item.menuID === draggingId);
 
@@ -116,10 +133,16 @@ const EditAndAddDndTable = ({
             }
         }
     };
-    
 
-    const handleDelete = (uniqueKey) => {
-        setTemplateItems((prev) => prev.filter((item) => item.uniqueKey !== uniqueKey));
+
+    const handleDelete = (uniqueKey, id) => {
+        console.log(uniqueKey, "uniqueKey")
+        if (uniqueKey) {
+            setTemplateItems((prev) => prev.filter((item) => item.uniqueKey !== uniqueKey));
+
+        } else {
+            setTemplateItems((prev) => prev.filter((item) => item.menuID !== id));
+        }
     };
 
     const handleQuantityChange = (uniqueKey, newQuantity) => {
@@ -136,7 +159,7 @@ const EditAndAddDndTable = ({
             item.description.toLowerCase().includes(term.toLowerCase())
         );
         setFilteredItems(filtered);
-        setCurrentPage(1);  
+        setCurrentPage(1);
     };
 
     const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
@@ -150,12 +173,20 @@ const EditAndAddDndTable = ({
     };
 
     const handleSave = () => {
+        toast.info('Saving data...', {autoClose: 1000 });
         if (onSave) {
-            onSave(templateItems);
+            
+            let isvulnerab =  templateItems.find((item)=> item?.cookItemQuantity === undefined)
+            if(isvulnerab){
+                toast.error('Qty of UOM is Empty', { autoClose: 1500 });
+            }else{
+
+                onSave(templateItems);
+            }
         }
     };
 
-   
+
     const goToFirstPage = () => setCurrentPage(1);
     const goToLastPage = () => setCurrentPage(totalPages);
     const goToNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
@@ -163,14 +194,14 @@ const EditAndAddDndTable = ({
 
     return (
         <DragDropContext onDragEnd={handleDragEnd}>
-            <ToastContainer />
+            
             <div className="flex w-full gap-4 justify-between">
                 <Droppable droppableId={dorpabaleidOne}>
                     {(provided) => (
                         <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className="w-[40%] p-[15px] max-h-[580px]"
+                            className="w-[40%] pr-[15px] pb-[15px] max-h-[580px]"
                         >
                             <div className="flex items-center space-x-2 mb-4 justify-between">
                                 <h2 className="text-2xl font-bold mb-4">{tableOneName}</h2>
@@ -207,18 +238,18 @@ const EditAndAddDndTable = ({
                                     </tbody>
                                 </table>
                                 {isPaginationEnabled && filteredItems.length >= 100 && (
-                                    <div className="flex items-center justify-between sticky bottom-0 bg-white py-2">
-                                        <div className="flex gap-2">
-                                            <button onClick={goToFirstPage} disabled={currentPage === 1}>First</button>
-                                            <button onClick={goToPrevPage} disabled={currentPage === 1}>Prev</button>
+                                    <div className="flex items-center justify-between sticky bottom-0 bg-white py-2 shadow-[0px_1px_0px_var(--tw-primary)_inset] ">
+                                        <div className="flex gap-2 px-0 ">
+                                            <button onClick={goToFirstPage} className='py-0 px-3 rounded-none' disabled={currentPage === 1}>First</button>
+                                            <button onClick={goToPrevPage} className='py-0 px-3 rounded-none' disabled={currentPage === 1}>Prev</button>
                                             <span className='mt-2'>Page {currentPage} of {totalPages}</span>
-                                            <button onClick={goToNextPage} disabled={currentPage === totalPages}>Next</button>
-                                            <button onClick={goToLastPage} disabled={currentPage === totalPages}>Last</button>
+                                            <button className='py-0 px-3 rounded-none' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</button>
+                                            <button className='py-0 px-3 rounded-none' onClick={goToLastPage} disabled={currentPage === totalPages}>Last</button>
                                         </div>
-                                        <select value={itemsPerPage} onChange={handleChangeItemsPerPage} className="border rounded px-2">
-                                            <option value={5}>5 per page</option>
-                                            <option value={10}>10 per page</option>
+                                        <select value={itemsPerPage} onChange={handleChangeItemsPerPage} className="border rounded mx-4">
                                             <option value={20}>20 per page</option>
+                                            <option value={30}>30 per page</option>
+                                            <option value={50}>50 per page</option>
                                         </select>
                                     </div>
                                 )}
@@ -281,9 +312,9 @@ const EditAndAddDndTable = ({
                     )}
                 </Droppable>
             </div>
-            <div className="flex mb-[10px] w-full justify-end">
-                <HoverBorderButton onClick={handleSave}>Save</HoverBorderButton>
-                <HoverBorderButton>Cancel</HoverBorderButton>
+            <div className="flex  w-full justify-end">
+                <HoverBorderButton extraClass={"my-[0px]"} onClick={handleSave}>Save</HoverBorderButton>
+                <HoverBorderButton extraClass={"my-[0px]"} onClick={onCancel}>Cancel</HoverBorderButton>
             </div>
         </DragDropContext>
     );
