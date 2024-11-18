@@ -411,8 +411,17 @@ const LaborAnalysis = () => {
 		const data = laborAnalysisReportData.map((row) => {
 			return {
 				name: row.sectionName,
+				colored: true,
 				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
-				data: row.subRows.map((subRow) => columns.map((column) => subRow[column.id] || '0')),
+				data: row.subRows.map((subRow) =>
+					columns.map((column) => ({
+						value: subRow[column.id] || '0',
+						color:
+							subRow[`${column.id}_color`] === 'rgba(226, 240, 255, 255)'
+								? ''
+								: subRow[`${column.id}_color`],
+					}))
+				),
 			};
 		});
 
