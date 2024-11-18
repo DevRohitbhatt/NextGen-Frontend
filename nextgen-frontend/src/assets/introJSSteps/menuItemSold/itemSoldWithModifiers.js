@@ -1,13 +1,9 @@
-export default function menuItemSold() {
+export default function itemSoldWithModifiers() {
 	return [
 		{
 			intro:
-				'<center>Welcome to QSROnline’s Actual Food Cost Report tool! Let us show you around.' +
+				'<center>Welcome to QSROnline’s Menu Item Sold - Item Sold With Modifiers Report tool! Let us show you around.' +
 				'<br><br>Press the enter or arrow keys to advance through the tutorial.</center>',
-		},
-		{
-			element: '.tab-section',
-			intro: '-Select the Tab for which you want to view the report',
 		},
 		{
 			element: '.unit-selector',
@@ -17,11 +13,7 @@ export default function menuItemSold() {
 		},
 		{
 			element: '.date-selector',
-			intro: '-Select the date, or date range, you wish to display Menu Item Sold Report Report',
-		},
-		{
-			element: '.dropdown-selector',
-			intro: 'You can select the Menu Item Sold Report based on specific days of the week or all days.',
+			intro: '-Select the date, or date range, you wish to display Item Sold With Modifiers Report',
 		},
 		{
 			element: '.run-button',
@@ -29,15 +21,11 @@ export default function menuItemSold() {
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Menu Item Sold Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
+			intro: 'You can export the Item Sold With Modifiers Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.view-selector',
-			intro: '-Select the view you like to display for the Menu Item Sold Report',
-		},
-		{
-			element: '.sale-selector',
-			intro: '-Select the sale type - Net or Gross, you wish to display fot the Menu Item Sold Report Report',
+			intro: '-Select the view you like to display for the Item Sold With Modifiers Report',
 		},
 		{
 			element: '.paged-table',

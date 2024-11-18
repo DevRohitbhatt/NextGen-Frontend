@@ -3,7 +3,7 @@ import { getCall } from '../../apis/network';
 
 export default function Menu({ onClick, companyId, menuName, setMenuName, menuId }) {
 	useEffect(() => {
-		const fetchUnitList = async () => {
+		const fetchMenuItems = async () => {
 			try {
 				const getData = {
 					url: 'MenuItemsByCompanyID',
@@ -26,14 +26,14 @@ export default function Menu({ onClick, companyId, menuName, setMenuName, menuId
 				setMenuName('No Menu selected');
 			}
 		};
-		if (companyId && menuId) fetchUnitList();
+		if (companyId && menuId) fetchMenuItems();
 	}, [menuId]);
 
 	return (
 		<>
-			<div onClick={onClick} className='flex flex-col justify-center rounded-3xl unit-selector'>
+			<div onClick={onClick} className='flex flex-col justify-center rounded-3xl'>
 				<div
-					className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl border-[#D3D3D3] hover:border-[#d3d3d3]`}
+					className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl  hover:border-[var(--tw-primary)]`}
 				>
 					{menuName}
 				</div>

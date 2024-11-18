@@ -1,25 +1,19 @@
 import { useEffect } from 'react';
 import { getCall } from '../../apis/network';
 
-export default function Inventory({
-	onClick,
-	companyId,
-	InventoryName,
-	setInventoryName,
-	menuId
-}) {
+export default function Inventory({ onClick, companyId, InventoryName, setInventoryName, menuId }) {
 	useEffect(() => {
-		const fetchUnitList = async () => {
+		const fetchInventoryItemList = async () => {
 			try {
 				const getData = {
 					url: 'InventoryByCompanyID',
 					urlParams: {
-						companyId: companyId
+						companyId: companyId,
 					},
 				};
 
 				const result = await getCall(getData);
-                
+
 				if (result.data.units.length > 0) {
 					const unitName = result.data.units.find((unit) => unit.unitID === menuId).unitName;
 					if (unitName) {
@@ -31,21 +25,18 @@ export default function Inventory({
 				setInventoryName('No Inventory selected');
 			}
 		};
-		if (companyId && menuId) fetchUnitList();
+		if (companyId && menuId) fetchInventoryItemList();
 	}, [menuId]);
 
 	return (
 		<>
+			<div onClick={onClick} className='flex flex-col justify-center rounded-3xl'>
 				<div
-					onClick={onClick}
-					className='flex flex-col justify-center rounded-3xl unit-selector'
+					className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)]`}
 				>
-					<div
-						className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl border-[#D3D3D3] hover:border-[#d3d3d3]`}
-					>
-						{InventoryName}
-					</div>
+					{InventoryName}
 				</div>
+			</div>
 		</>
 	);
 }

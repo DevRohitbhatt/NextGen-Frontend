@@ -16,7 +16,7 @@ const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
-const MenuItemsSold = lazy(() => import('./sales/MenuItemsSold'));
+const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
 
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
