@@ -718,7 +718,7 @@ const ItemsSoldByEmployee = () => {
 						<label className='block ml-2 mb-1 mt-[-12px] text-lg font-semibold'>
 							{item === 'Menu' ? 'Menu Items' : 'Inventory Items'}
 						</label>
-						<div className='cursor-pointer w-52'>
+						<div className='w-56 cursor-pointer'>
 							{componentMap[item === 'Menu' ? 'Menu' : 'Inventory']}
 						</div>
 					</div>

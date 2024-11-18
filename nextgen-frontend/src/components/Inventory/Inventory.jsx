@@ -32,7 +32,7 @@ export default function Inventory({ onClick, companyId, InventoryName, setInvent
 		<>
 			<div onClick={onClick} className='flex flex-col justify-center rounded-3xl'>
 				<div
-					className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)]`}
+					className={`px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)] truncate`}
 				>
 					{InventoryName}
 				</div>
