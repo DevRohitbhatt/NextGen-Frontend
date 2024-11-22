@@ -246,7 +246,9 @@ const CookChart = () => {
                         <ForcastedSales
                             value={forCastedSalesValue}
                             onChange={(e) => { setForcastedSalesValue(e.value) }}
+
                         />
+                        
                     </div>
                     <div>
                         <ExportOptions

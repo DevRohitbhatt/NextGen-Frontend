@@ -22,7 +22,7 @@ const DraggableRow = ({ item, isTemplate, onDelete, onLongPressDragStart, extraH
     return (
         <>
             <td className="px-4 py-[2px] w-[35%]">{item.menuID}</td>
-            <td className="px-4 py-[2px] w-[35%]">{item.description}</td>
+            <td className="px-4 py-[2px] w-[35%]">{item?.description ? item?.description : item.inventoryOrMenuItemName}</td>
             {isTemplate && (
                 <>
                     <td className="px-4 py-[2px] w-[20%]">
@@ -210,7 +210,7 @@ const EditAndAddDndTable = ({
                                 </div>
                             </div>
                             <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] px-[15px] tableHOC pr-1 max-h-full overflow-auto">
-                                <table className="min-w-full table-auto max-h-[433px] ">
+                                <table className="min-w-full  max-h-[433px] ">
                                     <thead className='sticky top-0 bg-white'>
                                         <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
                                             {tableOneHeaders.map((header, index) => (
@@ -242,7 +242,7 @@ const EditAndAddDndTable = ({
                                         <div className="flex gap-2 px-0 ">
                                             <button onClick={goToFirstPage} className='py-0 px-3 rounded-none' disabled={currentPage === 1}>First</button>
                                             <button onClick={goToPrevPage} className='py-0 px-3 rounded-none' disabled={currentPage === 1}>Prev</button>
-                                            <span className='mt-2'>Page {currentPage} of {totalPages}</span>
+                                            <span className='mt-0'>Page {currentPage} of {totalPages}</span>
                                             <button className='py-0 px-3 rounded-none' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</button>
                                             <button className='py-0 px-3 rounded-none' onClick={goToLastPage} disabled={currentPage === totalPages}>Last</button>
                                         </div>
