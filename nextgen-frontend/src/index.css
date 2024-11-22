@@ -263,6 +263,7 @@ input.Search::placeholder {
 	@apply bg-[var(--tw-secondary)];
 }
 
+.dropdownList::-webkit-scrollbar,
 .tableHOC::-webkit-scrollbar,
 .inventoryItemsTable::-webkit-scrollbar,
 .CalendarTable::-webkit-scrollbar,
@@ -280,6 +281,7 @@ input.Search::placeholder {
 	@apply h-3 cursor-pointer;
 }
 
+.dropdownList::-webkit-scrollbar-thumb,
 .tableHOC::-webkit-scrollbar-thumb,
 .inventoryItemsTable::-webkit-scrollbar-thumb,
 .CalendarTable::-webkit-scrollbar-thumb,
@@ -295,6 +297,14 @@ input.Search::placeholder {
 	@apply block h-12 bg-transparent;
 }
 
+.dropdownList::-webkit-scrollbar-button:start:decrement {
+	@apply block h-[2px] bg-transparent;
+}
+
+.dropdownList::-webkit-scrollbar-button:end:increment {
+	@apply block h-[2px] bg-transparent;
+}
+
 .suggested-order-table::-webkit-scrollbar-button:start:decrement:vertical {
 	@apply block h-12 bg-transparent;
 }
@@ -306,6 +316,7 @@ input.Search::placeholder {
 	@apply block h-6 bg-transparent;
 }
 
+.dropdownList::-webkit-scrollbar-track-piece,
 .tableHOC::-webkit-scrollbar-track-piece,
 .inventoryItemsTable::-webkit-scrollbar-track-piece,
 .CalendarTable::-webkit-scrollbar-track-piece,

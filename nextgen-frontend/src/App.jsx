@@ -18,13 +18,19 @@ import {
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
+	LaborCICO,
+	LaborCICOExceptions,
 	Voids,
+	HourlySales,
+	SalesVsLabor,
+	BusinessSummary,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
+	MenuItemsSold,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -128,10 +134,16 @@ const App = () => {
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
+								<Route path='/HourlySales' element={<HourlySales />} />
+								<Route path='/MenuItemsSold' element={<MenuItemsSold />} />
+								<Route path='/SalesVsLabor' element={<SalesVsLabor />} />
+								<Route path='/BusinessSummary' element={<BusinessSummary />} />
 
-								{/* Labour */}
+								{/* Labor */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
+								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
+								<Route path='/LaborCICO' element={<LaborCICO />} />
 							</Routes>
 						</Suspense>
 					</div>
