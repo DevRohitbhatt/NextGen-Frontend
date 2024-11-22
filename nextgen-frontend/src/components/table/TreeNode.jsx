@@ -23,6 +23,9 @@ const StyledCell = styled.div`
 	min-width: ${(props) => props.$columnWidth || '145px'};
 
 	text-align: ${(props) => (props.columntype === 'number' || props.columntype === 'percent' ? 'center' : 'left')};
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 `;
 
 const LimitsCell = styled.div`
@@ -76,7 +79,7 @@ const DollarSign = styled.span`
 const PercentSign = styled.span`
 	font-size: 1em;
 `;
-const EditableCell = ({ value, onChange, DataType, isOutOfBounds = false, columnWidth }) => {
+const EditableCell = ({ value, title, onChange, DataType, isOutOfBounds = false, columnWidth }) => {
 	const [inputValue, setInputValue] = useState(value);
 
 	const handleInputChange = (e) => {
@@ -96,6 +99,7 @@ const EditableCell = ({ value, onChange, DataType, isOutOfBounds = false, column
 			{DataType === 'string' || DataType === 'percent' ? (
 				<InputCell
 					type='text'
+					title={title}
 					value={inputValue}
 					onChange={handleInputChange}
 					onBlur={handleBlur}
@@ -127,9 +131,12 @@ const EditableCell = ({ value, onChange, DataType, isOutOfBounds = false, column
 	);
 };
 
-const DropdownCell = ({ value, options, onChange }) => {
+const DropdownCell = ({ value, title, options, onChange }) => {
 	return (
-		<Select value={value} onChange={(e) => onChange(e.target.value)}>
+		<Select 
+			value={value}
+			title={title}
+			onChange={(e) => onChange(e.target.value)}>
 			{options.map((item, index) => (
 				<option key={index} value={item.qsrItemID}>
 					{item.description}
@@ -322,11 +329,12 @@ const TreeNode = ({
 				node.suggestedOrderItem.map((childNode, index) =>
 					!childNode.isHidden ? (
 						<div className=' relative items-center text-sm border-b border-gray-300 py-1 flex justify-center gap-[10px]' key={index}>
-							<StyledCell $columnWidth={columnWidths[0]}>{childNode.invItemDescription}</StyledCell>
+							<StyledCell $columnWidth={columnWidths[0]} title={childNode.invItemDescription}>{childNode.invItemDescription}</StyledCell>
 							<StyledCell $columnWidth={columnWidths[1]}>
 								{childNode.vendorItems && (
 									<DropdownCell
 										value={selectedVendorItems[index]?.qsrItemID || ''}
+										title={selectedVendorItems[index]?.description}
 										options={childNode.vendorItems}
 										onChange={(value) => handleVendorChange(value, index)}
 									/>
