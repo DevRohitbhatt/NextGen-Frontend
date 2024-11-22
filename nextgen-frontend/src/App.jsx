@@ -28,6 +28,7 @@ import {
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
+	MenuItemsSold,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -132,6 +133,7 @@ const App = () => {
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
 								<Route path='/HourlySales' element={<HourlySales />} />
+								<Route path='/MenuItemsSold' element={<MenuItemsSold />} />
 
 								{/* Labor */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />

@@ -43,11 +43,21 @@ const urlConfig = {
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
+	MenuItemSoldSummaryReport:'api/sales/getMenuItemSoldSummaryReportData',
+	MenuItemSoldUnitReport:'api/sales/getMenuItemSoldUnitReportData',
+	MenuItemSoldSellersReport:'api/sales/getMenuItemSoldTopSellersReportData',
+	MenuItemSoldEmployeeData:'api/sales/getMenuItemSoldEmployeeData',
+	MenuItemSoldHourData:'api/sales/getMenuItemSoldHourData',
+	MenuItemSoldModifiersData: 'api/sales/getMenuItemSoldModifiersData',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
 	laborByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
 	laborCICOExceptions: 'api/labor/getLaborCICOExceptionReportData',
 	laborCICO: 'api/labor/getLaborCICOReportData',
+
+	//Menu item
+	MenuItemsByCompanyID: 'api/menus/getMenuItemsByCompanyID',
+	InventoryByCompanyID: 'api/prepcharttemplate/getinventorylist',
 };
 export default urlConfig;

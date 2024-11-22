@@ -15,6 +15,7 @@ export { default as SearchBar } from './common/SearchBar';
 export { default as Modal } from './common/Modal';
 export { default as ModalSearchBar } from './common/ModalSearchBar';
 export { default as Loader } from './common/Loader';
+export { default as SelectionModal } from './common/SelectionModal';
 
 // ExportOptions components
 export { default as PdfBuilder } from './exportOptions/PdfBuilder';
@@ -45,4 +46,10 @@ export { default as TableCell } from './table/TableCell';
 export { default as TreeNode } from './table/TreeNode';
 export { default as TreeTable } from './table/TreeTableBuilder';
 export { default as TableHOC } from './table/TableHOC';
-export {default as DndTable } from './table/DndTable'
+export { default as DndTable } from './table/DndTable';
+
+//menu components
+export { default as Menu } from './menu/Menu';
+
+// inventory components
+export { default as Inventory } from './Inventory/Inventory';
