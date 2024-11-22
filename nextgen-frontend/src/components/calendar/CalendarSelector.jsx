@@ -28,7 +28,6 @@ const CalendarSelector = ({ handleDateChange, date }) => {
 	}, []);
 
 	useEffect(() => {
-		console.log('Date changed: ', date);
 		if (date) {
 			setSelectedDate(date);
 		}

@@ -9,6 +9,7 @@ import { tooltip } from "../../../assets/toolTips/prepChartTemplateToolTips.js";
 import { toast } from "react-toastify";
 import introSteps from "../../../assets/introJSSteps/prepChartTemplate.js";
 import IntroJS from "../../../components/common/IntroJS.jsx";
+import { FaRegTrashAlt } from "react-icons/fa";
 import {
   UnitModal,
   SearchBar,
@@ -33,7 +34,7 @@ export default function PrepChartTemplate() {
 			},
 		],
 	});
-  const [selectedUnit, setSelectedUnit] = useState(state.defaultUnitId);
+  const [selectedUnit, setSelectedUnit] = useState(state.defaultUnitID);
   const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
   const [showModal, setShowModal] = useState(false);
   const [isSave, setIsSave] = useState(false);
@@ -123,12 +124,14 @@ export default function PrepChartTemplate() {
 					prepGroupKey: 'Today',
 					inventoryItemList: [],
 				});
-			} else if (!result.data.prepChartTemplate.find((group) => group.prepGroupKey === 'Tomorrow')) {
+			} 
+      if (!result.data.prepChartTemplate.find((group) => group.prepGroupKey === 'Tomorrow')) {
 				result.data.prepChartTemplate.push({
 					prepGroupKey: 'Tomorrow',
 					inventoryItemList: [],
 				});
-			} else if (!result.data.prepChartTemplate.find((group) => group.prepGroupKey === 'Next Day')) {
+			} 
+      if (!result.data.prepChartTemplate.find((group) => group.prepGroupKey === 'Next Day')) {
 				result.data.prepChartTemplate.push({
 					prepGroupKey: 'Next Day',
 					inventoryItemList: [],
@@ -166,7 +169,6 @@ export default function PrepChartTemplate() {
     const sourceClone = Array.from(source);
     const destClone = Array.from(destination);
     const itemBeingMoved = sourceClone[droppableSource.index];
-		console.log(droppableDestination);
 
     const itemExistsInDestination = destClone.some(
       (item) => item.inventoryItemID === itemBeingMoved.inventoryItemID
@@ -208,7 +210,7 @@ export default function PrepChartTemplate() {
 
     const sourceIsInventory = sourceId === "inventoryItems";
     const sourceList = sourceIsInventory
-      ? inventoryItems
+      ? filteredInventoryItems
       : prepChartTemplate.prepChartTemplate.find(
           (item) => item.uniqueID === sourceId
         ).inventoryItemList;
@@ -244,6 +246,17 @@ export default function PrepChartTemplate() {
       destinationGroup.inventoryItemList = moveResult.destinationList;
       setPrepChartTemplate(newPrepChartTemplate);
     }
+  };
+
+  const removeItemFromDropTable = (prepGroupKey, uniqueID) => {
+    const newPrepChartTemplate = { ...prepChartTemplate };
+    const group = newPrepChartTemplate.prepChartTemplate.find(
+      (item) => item.prepGroupKey === prepGroupKey
+    );
+    group.inventoryItemList = group.inventoryItemList.filter(
+      (item) => item.uniqueID !== uniqueID
+    );
+    setPrepChartTemplate(newPrepChartTemplate);
   };
 
   const handleUnitSelection = (unitName, unitID) => {
@@ -479,7 +492,7 @@ export default function PrepChartTemplate() {
 																				{...provided.draggableProps}
 																				{...provided.dragHandleProps}
 																				ref={provided.innerRef}
-																				className=" grid grid-cols-4 p-1 border-b border-x-slate-100"
+																				className=" grid grid-cols-5 p-1 border-b border-x-slate-100"
 																			>
 																				<div className=" col-span-1 ">
 																					{item.inventoryItemID}
@@ -487,6 +500,9 @@ export default function PrepChartTemplate() {
 																				<div className=" col-span-3 ">
 																					{item.description}
 																				</div>
+                                        <div className=" col-span-1 m-auto cursor-pointer" onClick={() => removeItemFromDropTable(prepGroup.prepGroupKey, item.uniqueID)}>
+                                          <FaRegTrashAlt/>
+                                        </div>
 																			</div>
 																		)}
 																	</Draggable>

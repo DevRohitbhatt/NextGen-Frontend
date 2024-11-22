@@ -3,7 +3,6 @@ const urlConfig = {
 	getCompanySetting: '/api/company/settings/getsetting',
 	getAllCompanySettings: '/api/company/settings/getallsettings',
 
-
 	unitsAndArea: '/api/unitsandareas/getbyid',
 	vendors: '/api/vendor/getvendorsbycompanyid',
 
@@ -37,15 +36,30 @@ const urlConfig = {
 	invoiceSearchReport: 'api/foodcost/GetInvoiceSearchReportData',
 	getCountsheets: 'api/foodcost/GetCountSheets',
 	countsheetDetails: 'api/foodcost/GetCountsheetDetails',
+	Countsheet_PricingInfo: 'api/foodcost/getCountSheetsPriceInfo',
+	countsheetPossibleError: 'api/foodcost/getCountSheetsPossibleError',
 	PurchaseAnalysis: 'api/foodcost/getPurchaseAnalysisData',
 
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
+	MenuItemSoldSummaryReport:'api/sales/getMenuItemSoldSummaryReportData',
+	MenuItemSoldUnitReport:'api/sales/getMenuItemSoldUnitReportData',
+	MenuItemSoldSellersReport:'api/sales/getMenuItemSoldTopSellersReportData',
+	MenuItemSoldEmployeeData:'api/sales/getMenuItemSoldEmployeeData',
+	MenuItemSoldHourData:'api/sales/getMenuItemSoldHourData',
+	MenuItemSoldModifiersData: 'api/sales/getMenuItemSoldModifiersData',
+	salesVsLabor: 'api/sales/SalesVsLaborReport',
 	businessSummary: 'api/sales/GetBusinessSummaryReportData',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
-	labourByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
+	laborByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
+	laborCICOExceptions: 'api/labor/getLaborCICOExceptionReportData',
+	laborCICO: 'api/labor/getLaborCICOReportData',
+
+	//Menu item
+	MenuItemsByCompanyID: 'api/menus/getMenuItemsByCompanyID',
+	InventoryByCompanyID: 'api/prepcharttemplate/getinventorylist',
 };
 export default urlConfig;
