@@ -22,6 +22,7 @@ import {
 	LaborCICOExceptions,
 	Voids,
 	HourlySales,
+	SalesVsLabor,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
@@ -134,6 +135,7 @@ const App = () => {
 								<Route path='/Voids' element={<Voids />} />
 								<Route path='/HourlySales' element={<HourlySales />} />
 								<Route path='/MenuItemsSold' element={<MenuItemsSold />} />
+								<Route path='/SalesVsLabor' element={<SalesVsLabor />} />
 
 								{/* Labor */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />

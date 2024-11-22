@@ -53,3 +53,6 @@ export { default as Menu } from './menu/Menu';
 
 // inventory components
 export { default as Inventory } from './Inventory/Inventory';
+
+//chart components
+export { default as LineChart } from './Charts/LineChart';

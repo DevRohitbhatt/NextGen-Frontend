@@ -98,15 +98,14 @@ function TableHOC({
 
 	return (
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3'>
-			{/* expand/collapse all button */}
-			<div className='flex items-center gap-4'>
+			<div className='flex items-center gap-2'>
 				{expandCollapseButtons && (
 					<div className='flex items-center my-4 space-x-4'>
 						<button
 							onClick={() => table.toggleAllRowsExpanded(false)}
 							className={`flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
 								table.getIsAllRowsExpanded()
-									? 'text-[var(--tw-primary)]'
+									? 'text-[var(--tw-primary)]]'
 									: 'bg-[var(--tw-primary)] text-white'
 							}`}
 						>
