@@ -79,14 +79,14 @@ const CookChartTemplate = (props) => {
     cookDropCookItemID: null,
   });
   const moreOptionsDropdown = useRef(null);
-  const [isSticky, setIsSticky] = useState(false); 
-  const leftColumnRef = useRef(null); 
+  const [isSticky, setIsSticky] = useState(false);
+  const leftColumnRef = useRef(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   useEffect(() => {
     const handleScroll = () => {
       if (leftColumnRef.current) {
         const offsetTop = leftColumnRef.current.getBoundingClientRect().top;
-        setIsSticky(offsetTop <= 0); 
+        setIsSticky(offsetTop <= 0);
       }
     };
 
@@ -672,7 +672,6 @@ const CookChartTemplate = (props) => {
       }
     };
 
-    
     return (
       <div className="gap-[20px] flex justify-between mx-auto p-4 h-[100%] flex-col ">
         <div className=" xl:flex space-y-3 xl:space-y-0 py-3 px-4  rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center tableHOC pr-1 max-h-full  overflow-x-auto overflow-y-visible">
@@ -995,8 +994,7 @@ const CookChartTemplate = (props) => {
         bodyData: body,
       };
       await deleteCall(deleteData);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -1007,7 +1005,6 @@ const CookChartTemplate = (props) => {
   }, []);
 
   const handleClickOutside = (event) => {
- 
     if (
       moreOptionsDropdown.current &&
       !moreOptionsDropdown.current.contains(event.target)
@@ -1048,271 +1045,262 @@ const CookChartTemplate = (props) => {
 
         {isError ? (
           <div>{errorMessage}</div>
-        ) : (
-          !isLoading &&
-          (true ? (
-            <div className="container mx-auto  px-1 py-4 max-w-full">
-              <Loader loading={isLoading} />
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <div className="flex w-full gap-4 justify-between">
-                  <Droppable droppableId="left">
-                    {(provided) => (
+        ) : !isLoading ? (
+          <div className="container mx-auto  px-1 py-4 max-w-full">
+            <Loader loading={isLoading} />
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <div className="flex w-full gap-4 justify-between">
+                <Droppable droppableId="left">
+                  {(provided) => (
+                    <div
+                      ref={(node) => {
+                        provided.innerRef(node);
+                        leftColumnRef.current = node;
+                      }}
+                      {...provided.droppableProps}
+                      className="w-[40%] "
+                    >
                       <div
-                        ref={(node) => {
-                          provided.innerRef(node);
-                          leftColumnRef.current = node;
-                        }}
-                        {...provided.droppableProps}
-                        className="w-[40%] "
+                        className={`sticky top-[1px] ${
+                          isSticky
+                            ? "bg-[#fff] z-10 py-3 rounded-2xl px-2 shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)]"
+                            : ""
+                        }`}
                       >
                         <div
-                          className={`sticky top-[1px] ${
-                            isSticky
-                              ? "bg-[#fff] z-10 py-3 rounded-2xl px-2 shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)]"
-                              : ""
-                          }`}
+                          className={`flex items-center space-x-2 ${
+                            isSticky ? "" : "mb-4"
+                          } justify-between`}
                         >
-                          <div
-                            className={`flex items-center space-x-2 ${
-                              isSticky ? "" : "mb-4"
-                            } justify-between`}
+                          <h2 className="xl:text-xl text-base font-bold">
+                            Cook Items
+                          </h2>
+                          <div className="w-[60%] xl:w-[30%] ml-[10px] mr-[10px]">
+                            {" "}
+                            <SearchBar
+                              onSearch={handleSearch}
+                              extraClass="w-full"
+                            />
+                          </div>
+                          <HoverBorderButton
+                            extraClass={"!mt-[5px] !mb-[5px]"}
+                            onClick={() => handleOpenCreateItemModal()}
                           >
-                            <h2 className="xl:text-xl text-base font-bold">
-                              Cook Items
-                            </h2>
-                            <div className="w-[60%] xl:w-[30%] ml-[10px] mr-[10px]">
-                              {" "}
-                              <SearchBar
-                                onSearch={handleSearch}
-                                extraClass="w-full"
-                              />
-                            </div>
-                            <HoverBorderButton
-                              extraClass={"!mt-[5px] !mb-[5px]"}
-                              onClick={() => handleOpenCreateItemModal()}
-                            >
-                              Create New Item
-                            </HoverBorderButton>
-                          </div>
+                            Create New Item
+                          </HoverBorderButton>
                         </div>
-                        {filteredData.map((item, index) => (
-                          <div>
-                            <Draggable
-                              key={item.cookDropCookItemID}
-                              draggableId={item.cookDropCookItemID}
-                              index={index}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px] mb-5"
-                                >
-                                  <div className="p-4 rounded-lg bg-gray-100 relative">
-                                    <div className=" xl:w-[85%] w-[75%]">
-                                      <h2 className="font-bold xl:text-xl text-base capitalize">
-                                        {item.cookItemName}
-                                      </h2>
-                                      <p className="font-semibold text-sm xl:text-lg">
-                                        {`Increment 0015:00, Cook time ${formatTime(
-                                          item.cookTimeSeconds
-                                        )}, Hold ${formatTime(
-                                          item.holdTimeSeconds
-                                        )}, Safety ${item.safetyFactor}%`}
-                                      </p>
-                                    </div>
-                                    <span
-                                      onClick={(e) => {
-                                        e.stopPropagation(); 
-                                        handleOpenEditItemModal(
-                                          item.cookDropCookItemID,
-                                          item.sourceType
-                                        );
-                                      }}
-                                      className="absolute top-1/2 text-xl right-12 transform -translate-y-1/2 text-green-600   z-9"
-                                    >
-                                      <FaEdit className="" />
-                                    </span>
-                                    <span
-                                      onClick={(e) => {
-                                        e.stopPropagation(),
-                                          e.preventDefault(),
-                                          deleteCookItem(
-                                            item.cookDropCookItemID
-                                          );
-                                      }}
-                                      className="absolute cursor-default top-1/2 text-xl right-4 transform -translate-y-1/2 z-9 text-red-500 hover:text-red-700"
-                                    >
-                                      <RiDeleteBin6Line />
-                                    </span>
-                                  </div>
-                                  <div className="tableHOC overflow-auto max-h-[250px]">
-                                    <table className="min-w-full table-auto relative">
-                                      <thead className="bg-white sticky top-0 z-9">
-                                        <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset] ">
-                                          <th className="px-4 py-2 text-left">
-                                            Item ID
-                                          </th>
-                                          <th className="px-4 py-2 text-left">
-                                            Description
-                                          </th>
-                                          <th className="px-4 py-2 text-left">
-                                            QTY
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {item.listCookDropCookItemDetails.map(
-                                          (menuItem) => (
-                                            <tr
-                                              key={
-                                                menuItem.inventoryOrMenuItemID
-                                              }
-                                              className="border-b"
-                                            >
-                                              <td className="px-4 py-2">
-                                                {menuItem.inventoryOrMenuItemID}
-                                              </td>
-                                              <td className="px-4 py-2">
-                                                {
-                                                  menuItem.inventoryOrMenuItemName
-                                                }
-                                              </td>
-                                              <td className="px-4 py-2">
-                                                {menuItem.cookItemQuantity}
-                                              </td>
-                                            </tr>
-                                          )
-                                        )}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </div>
-                              )}
-                            </Draggable>
-                          </div>
-                        ))}
-                        {provided.placeholder}
                       </div>
-                    )}
-                  </Droppable>
-
-                  <Droppable droppableId="right">
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="w-[55%] sticky top-0"
-                      >
-                        <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px] sticky top-0 ">
-                          <h2 className="text-2xl font-bold mb-4 ">Template</h2>
-                          <div className=" tableHOC overflow-auto h-[90vh]">
-                            {rightTableData.length === 0 && (
-                              <p className="text-gray-500">
-                                Drop the Cook Items tables here
-                              </p>
-                            )}
-                            {rightTableData.map((table) => (
+                      {filteredData.map((item, index) => (
+                        <div>
+                          <Draggable
+                            key={item.cookDropCookItemID}
+                            draggableId={item.cookDropCookItemID}
+                            index={index}
+                          >
+                            {(provided) => (
                               <div
-                                key={table.cookDropCookItemID}
-                                className=" mb-4 relative bg-gray-100 p-1 rounded-lg tableHOC overflow-auto"
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px] mb-5"
                               >
-                                <div
-                                  className="cursor-pointer p-4 rounded-lg bg-gray-100 relative"
-                                  onClick={() =>
-                                    toggleTableVisibility(
-                                      table.cookDropCookItemID
-                                    )
-                                  }
-                                >
-                                  <div className=" w-[90%]">
-                                    <h2 className="font-bold text-xl capitalize">
-                                      {table.title}
+                                <div className="p-4 rounded-lg bg-gray-100 relative">
+                                  <div className=" xl:w-[85%] w-[75%]">
+                                    <h2 className="font-bold xl:text-xl text-base capitalize">
+                                      {item.cookItemName}
                                     </h2>
-                                    <p className="font-semibold text-lg">
-                                      {table.description}
+                                    <p className="font-semibold text-sm xl:text-lg">
+                                      {`Increment 0015:00, Cook time ${formatTime(
+                                        item.cookTimeSeconds
+                                      )}, Hold ${formatTime(
+                                        item.holdTimeSeconds
+                                      )}, Safety ${item.safetyFactor}%`}
                                     </p>
                                   </div>
                                   <span
                                     onClick={(e) => {
-                                      e.stopPropagation(); 
-                                      removeTable(table.cookDropCookItemID);
+                                      e.stopPropagation();
+                                      handleOpenEditItemModal(
+                                        item.cookDropCookItemID,
+                                        item.sourceType
+                                      );
                                     }}
-                                    className="absolute top-1/2 right-10 transform -translate-y-1/2 text-red-500 hover:text-red-700 z-9"
+                                    className="absolute top-1/2 text-xl right-12 transform -translate-y-1/2 text-green-600   z-9"
+                                  >
+                                    <FaEdit className="" />
+                                  </span>
+                                  <span
+                                    onClick={(e) => {
+                                      e.stopPropagation(),
+                                        e.preventDefault(),
+                                        deleteCookItem(item.cookDropCookItemID);
+                                    }}
+                                    className="absolute cursor-default top-1/2 text-xl right-4 transform -translate-y-1/2 z-9 text-red-500 hover:text-red-700"
                                   >
                                     <RiDeleteBin6Line />
                                   </span>
-                                  <span
-                                    onClick={(e) => {}}
-                                    className="absolute top-1/2 right-4 transform -translate-y-1/2 z-9"
-                                  >
-                                    {showFullTable[table.cookDropCookItemID] ? (
-                                      <FaChevronUp />
-                                    ) : (
-                                      <FaChevronDown />
-                                    )}
-                                  </span>
                                 </div>
-
-                                {showFullTable[table.cookDropCookItemID] && (
-                                  <div className="tableHOC overflow-auto max-h-[245px]">
-                                    <table className="min-w-full table-auto mt-0 bg-white">
-                                      <thead className="border-b border-b-[var(--tw-primary)] sticky top-0 z-9 bg-white">
-                                        <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset] ">
-                                          <th className="px-4 py-2 text-left">
-                                            Item ID
-                                          </th>
-                                          <th className="px-4 py-2 text-left">
-                                            Description
-                                          </th>
-                                          <th className="px-4 py-2 text-left">
-                                            QTY
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {table.items.map((item, index) => (
+                                <div className="tableHOC overflow-auto max-h-[250px]">
+                                  <table className="min-w-full table-auto relative">
+                                    <thead className="bg-white sticky top-0 z-9">
+                                      <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset] ">
+                                        <th className="px-4 py-2 text-left">
+                                          Item ID
+                                        </th>
+                                        <th className="px-4 py-2 text-left">
+                                          Description
+                                        </th>
+                                        <th className="px-4 py-2 text-left">
+                                          QTY
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {item.listCookDropCookItemDetails.map(
+                                        (menuItem) => (
                                           <tr
-                                            key={item.id}
-                                            className={`border-b`}
+                                            key={menuItem.inventoryOrMenuItemID}
+                                            className="border-b"
                                           >
                                             <td className="px-4 py-2">
-                                              {item.id}
+                                              {menuItem.inventoryOrMenuItemID}
                                             </td>
                                             <td className="px-4 py-2">
-                                              {item.inventoryOrMenuItemName}
+                                              {menuItem.inventoryOrMenuItemName}
                                             </td>
                                             <td className="px-4 py-2">
-                                              {item.qty}
+                                              {menuItem.cookItemQuantity}
                                             </td>
                                           </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                )}
+                                        )
+                                      )}
+                                    </tbody>
+                                  </table>
+                                </div>
                               </div>
-                            ))}
-                          </div>
+                            )}
+                          </Draggable>
+                        </div>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+
+                <Droppable droppableId="right">
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="w-[55%] sticky top-0"
+                    >
+                      <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px] sticky top-0 ">
+                        <h2 className="text-2xl font-bold mb-4 ">Template</h2>
+                        <div className=" tableHOC overflow-auto h-[90vh]">
+                          {rightTableData.length === 0 && (
+                            <p className="text-gray-500">
+                              Drop the Cook Items tables here
+                            </p>
+                          )}
+                          {rightTableData.map((table) => (
+                            <div
+                              key={table.cookDropCookItemID}
+                              className=" mb-4 relative bg-gray-100 p-1 rounded-lg tableHOC overflow-auto"
+                            >
+                              <div
+                                className="cursor-pointer p-4 rounded-lg bg-gray-100 relative"
+                                onClick={() =>
+                                  toggleTableVisibility(
+                                    table.cookDropCookItemID
+                                  )
+                                }
+                              >
+                                <div className=" w-[90%]">
+                                  <h2 className="font-bold text-xl capitalize">
+                                    {table.title}
+                                  </h2>
+                                  <p className="font-semibold text-lg">
+                                    {table.description}
+                                  </p>
+                                </div>
+                                <span
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeTable(table.cookDropCookItemID);
+                                  }}
+                                  className="absolute top-1/2 right-10 transform -translate-y-1/2 text-red-500 hover:text-red-700 z-9"
+                                >
+                                  <RiDeleteBin6Line />
+                                </span>
+                                <span
+                                  onClick={(e) => {}}
+                                  className="absolute top-1/2 right-4 transform -translate-y-1/2 z-9"
+                                >
+                                  {showFullTable[table.cookDropCookItemID] ? (
+                                    <FaChevronUp />
+                                  ) : (
+                                    <FaChevronDown />
+                                  )}
+                                </span>
+                              </div>
+
+                              {showFullTable[table.cookDropCookItemID] && (
+                                <div className="tableHOC overflow-auto max-h-[245px]">
+                                  <table className="min-w-full table-auto mt-0 bg-white">
+                                    <thead className="border-b border-b-[var(--tw-primary)] sticky top-0 z-9 bg-white">
+                                      <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset] ">
+                                        <th className="px-4 py-2 text-left">
+                                          Item ID
+                                        </th>
+                                        <th className="px-4 py-2 text-left">
+                                          Description
+                                        </th>
+                                        <th className="px-4 py-2 text-left">
+                                          QTY
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {table.items.map((item, index) => (
+                                        <tr
+                                          key={item.id}
+                                          className={`border-b`}
+                                        >
+                                          <td className="px-4 py-2">
+                                            {item.id}
+                                          </td>
+                                          <td className="px-4 py-2">
+                                            {item.inventoryOrMenuItemName}
+                                          </td>
+                                          <td className="px-4 py-2">
+                                            {item.qty}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    )}
-                  </Droppable>
-                </div>
-              </DragDropContext>
-            </div>
-          ) : !selectedUnit ? (
-            <div className="mt-10 text-xl font-medium text-center">
-              No Unit Selected
-            </div>
-          ) : (
-            <div className="mt-10 text-xl font-medium text-center">
-              No data available
-            </div>
-          ))
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+            </DragDropContext>
+          </div>
+        ) : !selectedUnit ? (
+          <div className="mt-10 text-xl font-medium text-center">
+            No Unit Selected
+          </div>
+        ) : (
+          <div className="mt-10 text-xl font-medium text-center">
+            No data available
+          </div>
         )}
-
+        <Loader loading={isLoading} />
         <div>
           <UnitModal
             unitData={unitsAndAreasList}
