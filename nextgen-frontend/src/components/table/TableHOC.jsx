@@ -156,7 +156,7 @@ function TableHOC({
 																<div
 																	{...{
 																		className: header.column.getCanSort()
-																			? 'cursor-pointer flex gap-1 items-center '
+																			? `cursor-pointer flex gap-1 items-center text-${headerPosition}`
 																			: '',
 																		onClick:
 																			header.column.getToggleSortingHandler(),
@@ -180,7 +180,7 @@ function TableHOC({
 															<div
 																{...{
 																	className: header.column.getCanSort()
-																		? 'cursor-pointer flex gap-1 items-center '
+																		? `cursor-pointer flex gap-1 items-center text-${headerPosition}`
 																		: '',
 																	onClick: header.column.getToggleSortingHandler(),
 																}}

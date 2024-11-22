@@ -50,6 +50,7 @@ const urlConfig = {
 	MenuItemSoldHourData:'api/sales/getMenuItemSoldHourData',
 	MenuItemSoldModifiersData: 'api/sales/getMenuItemSoldModifiersData',
 	salesVsLabor: 'api/sales/SalesVsLaborReport',
+	businessSummary: 'api/sales/GetBusinessSummaryReportData',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
