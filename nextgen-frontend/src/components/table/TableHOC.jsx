@@ -274,7 +274,7 @@ function TableHOC({
 
 					{/* footer */}
 					{isFooter && (
-						<tfoot className='sticky bottom-0 bg-white shadow-[0_1px_0_var(--tw-primary)_inset]'>
+						<tfoot className='sticky -bottom-1 bg-white shadow-[0_1px_0_var(--tw-primary)_inset]'>
 							{table.getFooterGroups().map((footerGroup) => (
 								<>
 									<tr className='' key={footerGroup.id}>
@@ -360,7 +360,7 @@ function TableHOC({
 	);
 }
 TableHOC.propTypes = {
-	view: PropTypes.object.isRequired,
+	view: PropTypes.oneOfType([PropTypes.object, PropTypes.number]).isRequired,
 	columns: PropTypes.array.isRequired,
 	data: PropTypes.array.isRequired,
 	isHeader: PropTypes.bool,
@@ -372,6 +372,7 @@ TableHOC.propTypes = {
 	enableColumnFilters: PropTypes.bool,
 	headerPosition: PropTypes.string,
 	dataPosition: PropTypes.string,
+	detailOnTop: PropTypes.node,
 	onCallBack: PropTypes.func,
 };
 

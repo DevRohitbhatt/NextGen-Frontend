@@ -420,8 +420,6 @@ const ActualFoodCost = () => {
 			return;
 		}
 
-		console.log('actualFoodCostData', actualFoodCostData);
-
 		const pdfData = {
 			title: 'Actual Food Cost Report',
 			subHeaders: [

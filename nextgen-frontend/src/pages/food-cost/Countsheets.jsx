@@ -162,13 +162,9 @@ const Countsheets = () => {
 
 	useEffect(() => {
 		if (groupOrUnitAccess || defaultUnitID) {
-			console.log(groupOrUnitAccess, defaultUnitID);
-
 			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
 		if (groupOrUnitAccessName || defaultUnitName) {
-			console.log(groupOrUnitAccessName, defaultUnitName);
-
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
 	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);

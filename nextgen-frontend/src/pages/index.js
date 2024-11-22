@@ -16,11 +16,15 @@ const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
+const HourlySales = lazy(() => import('./sales/HourlySales'));
+const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
 const SalesVsLabor = lazy(() => import('./sales/SalesVsLabor'));
 
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
+const LaborCICO = lazy(() => import('./labor/LaborCICO'));
+const LaborCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
 
 export {
 	PrepChart,
@@ -31,7 +35,11 @@ export {
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
+	LaborCICO,
+	LaborCICOExceptions,
 	Voids,
+	HourlySales,
+	MenuItemsSold,
 	SalesVsLabor,
 	ActualFoodCost,
 	VarianceFoodCost,

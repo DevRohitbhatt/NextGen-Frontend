@@ -236,7 +236,6 @@ const CountsheetDesigner = () => {
 			};
 
 			const result = await getCall(getData);
-			console.log('result', result);
 
 			setPossibleErrorsData(result.data);
 			setPossibleErrorsModal(!possibleErrorsModal);
