@@ -59,7 +59,11 @@ const ActualFoodCost = () => {
 	const [countType, setCountType] = useState('WE');
 	const dropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }];
 	const [viewby, setViewBy] = useState('Department');
-	const viewOptions = [{ name: 'Department' }, { name: 'Sub Department' }, { name: 'Inventory Item' }];
+	const viewOptions = [
+		{ name: 'Department', row: 1 },
+		{ name: 'Sub Department', row: 2 },
+		{ name: 'Inventory Item', row: 3 },
+	];
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
 	//IntroJS variables for the help steps
@@ -416,8 +420,6 @@ const ActualFoodCost = () => {
 			return;
 		}
 
-		console.log('actualFoodCostData', actualFoodCostData);
-
 		const pdfData = {
 			title: 'Actual Food Cost Report',
 			subHeaders: [
@@ -633,7 +635,7 @@ const ActualFoodCost = () => {
 		<TableHOC
 			columns={columns}
 			data={actualFoodCostData}
-			view={viewby}
+			view={viewOptions.find((option) => option.name === viewby)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 		/>
@@ -725,7 +727,7 @@ const ActualFoodCost = () => {
 				/>
 				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Actual Food Cost</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
-					<div className='flex items-center space-x-3 '>
+					<div className='flex items-center'>
 						<UnitSelector
 							companyId={companyID}
 							alignmentId={alignmentID}
@@ -751,7 +753,7 @@ const ActualFoodCost = () => {
 						</div>
 
 						<div className='run-button' onClick={fetchActualFoodCostReport}>
-							<div className='py-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

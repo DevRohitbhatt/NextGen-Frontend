@@ -1,7 +1,6 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FaSortAlphaUp, FaInfoCircle, FaSortAlphaDownAlt } from 'react-icons/fa';
-import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 import { Tooltip } from '../index';
 import {
@@ -31,6 +30,7 @@ function TableHOC({
 	headerPosition = 'center',
 	dataPosition = 'text-center',
 	detailOnTop,
+	onCallBack,
 }) {
 	const [expanded, setExpanded] = useState({});
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -244,7 +244,14 @@ function TableHOC({
 									className={`h-[35px] font-normal border-y relative hover:bg-gray-100 ${
 										row.getCanExpand() ? 'cursor-pointer' : 'cursor-default'
 									}`}
-									onClick={row.getCanExpand() ? row.getToggleExpandedHandler() : null}
+									onClick={(e) => {
+										e.stopPropagation();
+										if (onCallBack) {
+											onCallBack(row.original);
+										} else if (row.getCanExpand()) {
+											row.getToggleExpandedHandler()(e);
+										}
+									}}
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (
@@ -255,8 +262,7 @@ function TableHOC({
 														{flexRender(cell.column.columnDef.cell, cell.getContext())} (
 														{row.subRows.length})
 													</div>
-												) : cell.getIsPlaceholder() ? null : ( // For cells with repeated values, render null
-													// Otherwise, just render the regular cell
+												) : cell.getIsPlaceholder() ? null : (
 													flexRender(cell.column.columnDef.cell, cell.getContext())
 												)}
 											</td>
@@ -269,7 +275,7 @@ function TableHOC({
 
 					{/* footer */}
 					{isFooter && (
-						<tfoot className='sticky bottom-0 bg-white shadow-[0_1px_0_var(--tw-primary)_inset]'>
+						<tfoot className='sticky -bottom-1 bg-white shadow-[0_1px_0_var(--tw-primary)_inset]'>
 							{table.getFooterGroups().map((footerGroup) => (
 								<>
 									<tr className='' key={footerGroup.id}>
@@ -355,7 +361,7 @@ function TableHOC({
 	);
 }
 TableHOC.propTypes = {
-	view: PropTypes.object.isRequired,
+	view: PropTypes.oneOfType([PropTypes.object, PropTypes.number]).isRequired,
 	columns: PropTypes.array.isRequired,
 	data: PropTypes.array.isRequired,
 	isHeader: PropTypes.bool,
@@ -368,6 +374,7 @@ TableHOC.propTypes = {
 	headerPosition: PropTypes.string,
 	dataPosition: PropTypes.string,
 	detailOnTop: PropTypes.node,
+	onCallBack: PropTypes.func,
 };
 
 export default TableHOC;
