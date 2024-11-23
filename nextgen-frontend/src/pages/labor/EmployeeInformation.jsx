@@ -287,6 +287,12 @@ const EmployeeInformation = () => {
 		}
 	}, [defaultUnitID, defaultUnitName]);
 
+	useEffect(() => {
+		if (selectedUnit) {
+			fetchEmployeeInformation(companyID, alignmentID, selectedUnit);
+		}
+	}, [selectedUnit]);
+
 	// Fetching Employee Information
 	const fetchEmployeeInformation = async (companyId, alignmentId, selectedUnit) => {
 		try {
@@ -337,9 +343,6 @@ const EmployeeInformation = () => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setShowUnitModal(false);
-		setIsLoading(true);
-		await fetchEmployeeInformation(companyID, alignmentID, unitID);
-		setIsLoading(false);
 	};
 
 	// function	to handle the view change
