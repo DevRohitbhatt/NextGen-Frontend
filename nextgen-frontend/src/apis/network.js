@@ -1,5 +1,4 @@
 import api from './configs/axiosConfig';
-import { defineCancelApiObject } from './configs/axiosUtils';
 import urlConfig from './urlConfig';
 
 //Cache object to store API responses
@@ -60,7 +59,7 @@ export const postCall = async (postData = {}) => {
 		method: 'POST',
 		url: url,
 		data: bodyData,
-		signal: postData.cancel ? cancelApiObject[postData.url].handleRequestCancellation().signal : undefined,
+		signal: postData.signal,
 	});
 
 	return response.data;
@@ -98,10 +97,10 @@ export const getCall = async (getData = {}) => {
 	const response = await api.request({
 		method: 'GET',
 		url: url,
-		signal: getData.cancel ? cancelApiObject[getData.url].handleRequestCancellation().signal : undefined,
+		signal: getData.signal,
 	});
 
-	//Cache the response
+	// Cache the response
 	setCache(cacheKey, response.data, 3600000);
 
 	return response.data;
@@ -140,7 +139,7 @@ export const putCall = async (putData = {}) => {
 		method: 'PUT',
 		url: url,
 		data: bodyData,
-		signal: putData.cancel ? cancelApiObject[putData.url].handleRequestCancellation().signal : undefined,
+		signal: putData.signal,
 	});
 
 	return response.data;
@@ -173,11 +172,8 @@ export const deleteCall = async (deleteData = {}) => {
 	const response = await api.request({
 		method: 'DELETE',
 		url: url,
-		signal: deleteData.cancel ? cancelApiObject[deleteData.url].handleRequestCancellation().signal : undefined,
+		signal: deleteData.signal,
 	});
 
 	return response.data;
 };
-
-// function to cancel API calls
-const cancelApiObject = defineCancelApiObject({ postCall, getCall, putCall, deleteCall });

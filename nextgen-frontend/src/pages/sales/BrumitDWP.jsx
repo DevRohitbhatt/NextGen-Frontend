@@ -3,6 +3,7 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
 import brumitDWP from '../../assets/introJSSteps/brumitDWP';
+import { defineCancelApiObject } from '../../apis/configs/axiosUtils';
 import {
 	Dropdown,
 	Loader,
@@ -19,6 +20,7 @@ import dateFormat from 'dateformat';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 
 const columnHelper = createColumnHelper();
+const cancelApiObject = defineCancelApiObject({ brumitDWP: 'brumitDWP' });
 
 const BrumitDWP = () => {
 	const {
@@ -78,6 +80,7 @@ const BrumitDWP = () => {
 	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	const fetchBrumitDWP = async () => {
+		const signal = cancelApiObject['brumitDWP'].handleRequestCancellation().signal;
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -91,10 +94,11 @@ const BrumitDWP = () => {
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 					Options: reportTypeOptions.find((option) => option.name === reportType).value,
 				},
+				signal,
 			};
 
 			const result = await getCall(getData);
-			const newData = result.data.data.map((row) => {
+			const newData = result.data.map((row) => {
 				if (
 					[
 						'Net Sales',
@@ -114,7 +118,7 @@ const BrumitDWP = () => {
 								row.itemName === 'Order Average' ||
 								row.itemName === 'Order Average Comparison +/- vs. LY'
 							) {
-								acc[key] = `${row.unitGroups[key]}%`;
+								acc[key] = `$${row.unitGroups[key]}`;
 							} else {
 								acc[key] = `${(row.unitGroups[key] * 100).toFixed(2)}%`;
 							}
@@ -266,10 +270,14 @@ const BrumitDWP = () => {
 			setBrumitDWPData(dwpData);
 			setIsLoading(false);
 		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting the Brumit DWP report data: ', error);
+			if (error.name === 'CanceledError') {
+				console.log('Request canceled');
+			} else {
+				setIsError(true);
+				setErrorMessage('There was an issue loading your data, please try again later.');
+				console.error('Error getting Brumit DWP report data: ', error);
+				setIsLoading(false);
+			}
 		}
 	};
 
