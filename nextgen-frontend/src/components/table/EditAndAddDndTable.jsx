@@ -21,8 +21,8 @@ const DraggableRow = ({ item, isTemplate, onDelete, onLongPressDragStart, extraH
 
     return (
         <>
-            <td className="px-4 py-[2px] w-[35%]">{item.menuID}</td>
-            <td className="px-4 py-[2px] w-[35%]">{item?.description ? item?.description : item.inventoryOrMenuItemName}</td>
+            <td className="px-4 py-[2px] w-[20%]">{item.menuID}</td>
+            <td className="px-4 py-[2px] w-[50%]">{item?.description ? item?.description : item.inventoryOrMenuItemName}</td>
             {isTemplate && (
                 <>
                     <td className="px-4 py-[2px] w-[20%]">
@@ -63,6 +63,7 @@ const EditAndAddDndTable = ({
     dorpabaleidTwo,
     onSave,
     onCancel,
+    isSaveDisable = false,
     isPaginationEnabled // New prop to control pagination
 }) => {
 
@@ -262,16 +263,16 @@ const EditAndAddDndTable = ({
                         <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className="w-[55%] rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] px-[15px] tableHOC overflow-auto pr-1 h-[626px]"
+                            className="w-[55%] rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] px-[15px] tableHOC overflow-auto pr-1 h-[626px] max-w-[799px]"
                         >
                             <table className="min-w-full table-auto ">
                                 <thead className=' sticky top-0 bg-white z-10'>
-                                    <th colSpan={tableTwoHeaders.length + 2} className="text-2xl font-bold text-left px-4 py-2 ">
+                                    <th colSpan={tableTwoHeaders.length + 2} className="text-2xl font-bold text-left px-4 py-2 pt-4 ">
                                         {tableTwoName}
                                     </th>
                                     <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset] ">
                                         {tableTwoHeaders.map((header, index) => (
-                                            <th key={index} className="px-4 py-2 text-left w-[35%]">{header}</th>
+                                            <th key={index} className={`px-4 py-2 text-left ${index== 0 ?'w-[20%]': 'w-[50%]'}`}>{header}</th>
                                         ))}
                                         <th className="px-4 py-2 text-left w-[20%]">Qty of UOM</th>
                                         <th className="px-4 py-2 text-left w-[10%]">Action</th>
@@ -313,7 +314,7 @@ const EditAndAddDndTable = ({
                 </Droppable>
             </div>
             <div className="flex  w-full justify-end">
-                <HoverBorderButton extraClass={"my-[0px]"} onClick={handleSave}>Save</HoverBorderButton>
+                <HoverBorderButton isSaveDisable={isSaveDisable} extraClass={"my-[0px]"} onClick={handleSave}>Save</HoverBorderButton>
                 <HoverBorderButton extraClass={"my-[0px]"} onClick={onCancel}>Cancel</HoverBorderButton>
             </div>
         </DragDropContext>

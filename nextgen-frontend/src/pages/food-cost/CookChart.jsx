@@ -13,6 +13,7 @@ import {
   ExcelExport as exportToExcel,
   ForcastedSales,
   DateSelector,
+  PdfBuilder,
 } from "../../components";
 import { createColumnHelper } from "@tanstack/react-table";
 import CookDropTable from "../../components/table/CookDropTable";
@@ -21,6 +22,7 @@ import HoverBorderButton from "../../components/buttons/HoverBorderButton";
 import dateFormat from "dateformat";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
+import cookChart from "../../assets/introJSSteps/cookChart";
 const columnHelper = createColumnHelper();
 
 const CookChart = () => {
@@ -49,7 +51,7 @@ const CookChart = () => {
   const [originalData, setOriginalData] = useState(null);
 
   const [introSteps, setIntroSteps] = useState({
-    steps: voidsReport(),
+    steps: cookChart(),
     initialStep: 0,
     stepsEnabled: false,
   });
@@ -112,11 +114,11 @@ const CookChart = () => {
           companyId: 1083,
           // cookDropChartID: 0,
           unitId: 1145,
-          date: dateFormat(selectedFromDate, "dd/mm/yyyy"),
+          date: dateFormat(selectedFromDate, "yyyy/mm/dd"),
         },
       };
 
-      const result = await getCall(getData);
+      const result = await getCall(getData, false);
       if (result?.data && result?.data.length) {
         setForcastedSalesValue(result.data[0].forecastedSales);
         console.log(
@@ -124,7 +126,8 @@ const CookChart = () => {
             result.data[0].originalForecastedSales
         );
         setIsChangedForcaste(
-          result.data[0].forecastedSales !== result.data[0].originalForecastedSales
+          result.data[0].forecastedSales !==
+            result.data[0].originalForecastedSales
         );
         setOriginalData(result.data[0]);
         const { headers, rows } = transformCookDropData(result.data);
@@ -180,9 +183,91 @@ const CookChart = () => {
     return updatedData;
   };
 
+  const prepareDynamicPdfData = (data, mode) => {
+    // Extract headers
+    const headers = data.lstItems.map((item) => ({
+      text: item.itemName,
+      unit: item.unitOfMeasure,
+      safetyFactor: `${item.safetyFactor}%`,
+    }));
+
+    // Extract rows based on `cookDropTime`
+    const rows = {};
+
+    data.lstItems.forEach((item) => {
+      item.lstItemCount.forEach((count) => {
+        const time = count.cookDropTime.slice(0, 5); // Extract HH:MM from time
+        if (!rows[time]) {
+          rows[time] = [];
+        }
+        rows[time].push({
+          value: `${count.needCount} / ${count.haveCount} / ${count.cookCount}`,
+        });
+      });
+    });
+
+    // Prepare rows in the format expected by PdfBuilder
+    const tableRows = Object.entries(rows).map(([time, counts]) => [
+      { value: time }, // Add time as the first column
+      ...counts, // Add dynamic data for each column
+    ]);
+
+    // Create PdfBuilder-compatible data
+    return {
+      title: "Cook Drop Chart",
+      subHeaders: [
+        `Unit: ${data.unitID}`,
+        `Date: ${data.date.split("T")[0]}`,
+        `Forecasted Sales: ${data.forecastedSales}`,
+      ],
+      body: [
+        {
+          type: "table",
+          title: "",
+
+          widths: [100, ...Array(headers.length).fill("*")], // Dynamic column widths
+          data: {
+            columnHeaders: [
+              "Time",
+              ...headers.map(
+                (header) =>
+                  `${header.text} (Unit: ${header.unit}, Safety Factor: ${header.safetyFactor})`
+              ),
+            ],
+            rows: tableRows,
+          },
+        },
+      ],
+      exportType: mode,
+      pageOrientation: "landscape",
+    };
+  };
+  const handleDynamicPdfExport = async (mode) => {
+    const changedData = cookDropTableRef.current?.getChangedData();
+    console.log("=>", JSON.stringify(changedData));
+    const transformedData = await applyChangesToOriginalData(
+      originalData,
+      changedData
+    );
+    const pdfData = prepareDynamicPdfData({ ...transformedData }, mode);
+
+    if (pdfData) {
+      PdfBuilder(pdfData);
+    }
+  };
+
+  const handlePdfExport = (mode) => {
+    const pdfData = handleDynamicPdfExport(mode);
+
+    if (pdfData) {
+      PdfBuilder(pdfData);
+    }
+  };
+
   const handleSaveClick = async () => {
     toast.info("Saving data...", { autoClose: 1000 });
     const changedData = cookDropTableRef.current?.getChangedData();
+    console.log("=>", JSON.stringify(changedData));
     const transformedData = await applyChangesToOriginalData(
       originalData,
       changedData
@@ -223,17 +308,81 @@ const CookChart = () => {
     setShowDateModal(false);
   };
 
+  const prepareExcelData = async (cookDropChartData) => {
+   
+    const headers = cookDropChartData.lstItems.map((item) => ({
+      name: `${item.itemName} (${item.unitOfMeasure}, ${item.safetyFactor}%)`,
+    }));
+
+    const rows = {};
+
+    // Group rows by cookDropTime
+    cookDropChartData.lstItems.forEach((item) => {
+      item.lstItemCount.forEach((count) => {
+        const time = count.cookDropTime.slice(0, 5); // Format time to HH:MM
+        if (!rows[time]) {
+          rows[time] = [];
+        }
+        rows[time].push(
+          `${count.needCount} / ${count.haveCount} / ${count.cookCount}`
+        );
+      });
+    });
+
+    // Convert grouped rows to an array
+    const excelRows = Object.entries(rows).map(([time, counts]) => [
+      time,
+      ...counts,
+    ]);
+
+    return {
+      columns: [{ name: "Time" }, ...headers], // Include "Time" as the first column
+      data: excelRows.map((row) =>
+        row.reduce((acc, value) => {
+          acc.push(value);
+          return acc;
+        }, [])
+      ),
+    };
+  };
+
+  const handleExcelExport = async () => {
+   
+    const changedData = cookDropTableRef.current?.getChangedData();
+    const cookDropChartData = await applyChangesToOriginalData(
+      originalData,
+      changedData
+    );
+    const excelData = await prepareExcelData(cookDropChartData);
+    console.log("=>", JSON.stringify(changedData));
+
+    exportToExcel(
+      [
+        {
+          name: "Cook Drop Data",
+          columns: excelData.columns,
+          data: excelData.data,
+          hasTableHeader: true,
+        },
+      ],
+      "CookDropChart",
+      "Cook Drop Chart",
+      cookDropChartData.date.split("T")[0], // Date from data
+      `Unit ${cookDropChartData.unitID}`
+    );
+  };
+
   return (
     <>
       <Loader loading={isLoading} />
       <ToastContainer />
       <div className="w-[85%] mx-auto">
-        {/* <Steps
-                    enabled={introSteps.stepsEnabled}
-                    steps={introSteps.steps}
-                    initialStep={introSteps.initialStep}
-                    onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-                /> */}
+        <Steps
+          enabled={introSteps.stepsEnabled}
+          steps={introSteps.steps}
+          initialStep={introSteps.initialStep}
+          onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+        />
         <h2 className="my-4 text-2xl leading-tight text-left pageTitle">
           Cook Drop Chart
         </h2>
@@ -261,7 +410,13 @@ const CookChart = () => {
                   setForcastedSalesValue(e.target.value.split("$")[1]);
               }}
             />
-            {isChangedForcaste ? <p className="relative text-xs xl:text-sm py-2 overflow-hidden flex flex-row justify-start mt-6">*Changed</p> : ""}
+            {isChangedForcaste ? (
+              <p className="relative text-xs xl:text-sm py-2 overflow-hidden flex flex-row justify-start mt-6">
+                *Changed
+              </p>
+            ) : (
+              ""
+            )}
           </div>
           <div>
             <ExportOptions
@@ -270,14 +425,22 @@ const CookChart = () => {
               includeExcel={true}
               includePrint={true}
               includeHelp={true}
+              handleHelpClick={() =>
+                setIntroSteps({ ...introSteps, stepsEnabled: true })
+              }
               handleSaveClick={() => {
                 handleSaveClick();
               }}
+              handlePDFClick={() => handlePdfExport("pdf")}
+              handlePrintClick={() => {
+                handlePdfExport("print");
+              }}
+              handleExcelClick={() => handleExcelExport()}
             />
           </div>
         </header>
         <div className="w-full flex justify-end">
-          <Link to={"/CookChartTemplate"}>
+          <Link to={"/CookChartTemplate"} className="text-[#213547]">
             <HoverBorderButton>Manage Templates</HoverBorderButton>
           </Link>
         </div>

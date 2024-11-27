@@ -19,9 +19,10 @@ import { deleteCall, getCall, postCall } from "../../apis/network";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { FaChevronDown, FaChevronUp, FaEdit } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
-import { formatTime } from "../../functions/utils/timeConvertFunction";
+import { convertMinutesToHHMM, formatTime } from "../../functions/utils/timeConvertFunction";
 import HhmmssSelector from "../../components/common/HhmmssSelector";
 import ReactDOM from "react-dom";
+import cookChartTemplates from "../../assets/introJSSteps/cookChartTemplate";
 
 const CookChartTemplate = (props) => {
   const {
@@ -82,6 +83,12 @@ const CookChartTemplate = (props) => {
   const [isSticky, setIsSticky] = useState(false);
   const leftColumnRef = useRef(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const [saveDisable, setSaveDisable] = useState(false);
+  const [introSteps, setIntroSteps] = useState({
+    steps: cookChartTemplates(),
+    initialStep: 0,
+    stepsEnabled: false,
+  });
   useEffect(() => {
     const handleScroll = () => {
       if (leftColumnRef.current) {
@@ -148,14 +155,14 @@ const CookChartTemplate = (props) => {
           ...prev,
           {
             title: resultData[i].cookItemName,
-            description: `Increment 0015:00, Cook time ${formatTime(
+            description: `Cook Interval ${convertMinutesToHHMM(resultData[i].cookInterval)}, Cook time ${formatTime(
               resultData[i].cookTimeSeconds
             )}, Hold ${formatTime(resultData[i].holdTimeSeconds)}, Safety ${
               resultData[i].safetyFactor
             }%`,
             items: resultData[i].listCookDropCookItemDetails.map((detail) => ({
               id: detail.inventoryOrMenuItemID,
-              description: detail.description,
+              inventoryOrMenuItemName: detail.inventoryOrMenuItemName,
               qty: detail.cookItemQuantity,
             })),
             cookDropCookItemID: resultData[i].cookDropCookItemID,
@@ -167,7 +174,7 @@ const CookChartTemplate = (props) => {
 
   //Create new item data call
   const getAddNewCookData = async (type) => {
-    setIsLoading(true);
+    
     if (type === "Menu") {
       try {
         const getData = {
@@ -185,7 +192,7 @@ const CookChartTemplate = (props) => {
       } catch (error) {
         console.error(error);
       } finally {
-        setIsLoading(false);
+       
       }
     } else if (type === "Inventory") {
       try {
@@ -206,7 +213,7 @@ const CookChartTemplate = (props) => {
       } catch (error) {
         console.error(error);
       } finally {
-        setIsLoading(false);
+       
       }
     }
   };
@@ -230,7 +237,7 @@ const CookChartTemplate = (props) => {
   };
   //Edit  item data call
   const getEditCookData = async (id) => {
-    setIsLoading(true);
+   
     try {
       const getData = {
         fullUrl: "api/cookdrop/getcookdropcookitembyid",
@@ -248,11 +255,12 @@ const CookChartTemplate = (props) => {
       return result;
     } catch (error) {
     } finally {
-      setIsLoading(false);
+      
     }
   };
 
   const saveTemplateData = async () => {
+    toast.info('Saving data...', {autoClose: 1000 });
     let body = {
       companyID: 1083,
       memberID: 1045,
@@ -273,7 +281,14 @@ const CookChartTemplate = (props) => {
       };
 
       let result = await postCall(postData);
-    } catch (error) {}
+      if(result?.errors === null){
+        toast.success("Saved...", { autoClose: 1500 });
+      }else{
+        toast.error("Failed to save", {autoClose: 1000 });
+      }
+    } catch (error) {
+      toast.error("Failed to save", {autoClose: 1000 });
+    }
   };
 
   useEffect(() => {
@@ -618,6 +633,7 @@ const CookChartTemplate = (props) => {
     };
 
     const savedData = async (saved) => {
+      setSaveDisable(true)
       let values = saved.map((item) => {
         let newItem = { ...item };
         newItem.inventoryOrMenuItemID = parseInt(newItem.menuID);
@@ -669,6 +685,8 @@ const CookChartTemplate = (props) => {
       } catch (error) {
         console.log(error);
         toast.error("Failed to save", { autoClose: 1500 });
+      }finally{
+        setSaveDisable(false)
       }
     };
 
@@ -895,6 +913,7 @@ const CookChartTemplate = (props) => {
               savedData(saved);
             }}
             onCancel={() => setOpenCreateItemModal(!openCreateItemModal)}
+            isSaveDisable={saveDisable}
           />
         ) : (
           <EditAndAddDndTable
@@ -910,6 +929,7 @@ const CookChartTemplate = (props) => {
               savedData(saved);
             }}
             onCancel={() => setOpenCreateItemModal(!openCreateItemModal)}
+            isSaveDisable={saveDisable}
           />
         )}
       </div>
@@ -935,20 +955,20 @@ const CookChartTemplate = (props) => {
         });
         return;
       }
-
+      
       // Append the new table data to the right side
       setRightTableData((prev) => [
         ...prev,
         {
           title: draggedItem.cookItemName,
-          description: `Increment 0015:00, Cook time ${formatTime(
+          description: `Cook Interval ${convertMinutesToHHMM(draggedItem.cookInterval)}, Cook time ${formatTime(
             draggedItem.cookTimeSeconds
           )}, Hold ${formatTime(draggedItem.holdTimeSeconds)}, Safety ${
             draggedItem.safetyFactor
           }%`,
           items: draggedItem.listCookDropCookItemDetails.map((detail) => ({
             id: detail.inventoryOrMenuItemID,
-            description: detail.description,
+            inventoryOrMenuItemName: detail.inventoryOrMenuItemName,
             qty: detail.cookItemQuantity,
           })),
           cookDropCookItemID: draggedItem.cookDropCookItemID,
@@ -1017,6 +1037,12 @@ const CookChartTemplate = (props) => {
     <>
       <ToastContainer />
       <div className="xl:w-[85%] sm:w-[97%] mx-auto">
+      <Steps
+          enabled={introSteps.stepsEnabled}
+          steps={introSteps.steps}
+          initialStep={introSteps.initialStep}
+          onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+        />
         <h2 className="my-4 text-xl xl:text-2xl leading-tight text-left pageTitle">
           Cook Drop Templates
         </h2>
@@ -1039,6 +1065,9 @@ const CookChartTemplate = (props) => {
               handleSaveClick={() => {
                 saveTemplateData();
               }}
+              handleHelpClick={() =>
+                setIntroSteps({ ...introSteps, stepsEnabled: true })
+              }
             />
           </div>
         </header>
@@ -1083,7 +1112,7 @@ const CookChartTemplate = (props) => {
                             />
                           </div>
                           <HoverBorderButton
-                            extraClass={"!mt-[5px] !mb-[5px]"}
+                            extraClass={"!mt-[5px] !mb-[5px] create-New-CookItem"}
                             onClick={() => handleOpenCreateItemModal()}
                           >
                             Create New Item
@@ -1110,7 +1139,7 @@ const CookChartTemplate = (props) => {
                                       {item.cookItemName}
                                     </h2>
                                     <p className="font-semibold text-sm xl:text-lg">
-                                      {`Increment 0015:00, Cook time ${formatTime(
+                                      {`Cook Interval ${convertMinutesToHHMM(item.cookInterval)}, Cook time ${formatTime(
                                         item.cookTimeSeconds
                                       )}, Hold ${formatTime(
                                         item.holdTimeSeconds
@@ -1125,7 +1154,7 @@ const CookChartTemplate = (props) => {
                                         item.sourceType
                                       );
                                     }}
-                                    className="absolute top-1/2 text-xl right-12 transform -translate-y-1/2 text-green-600   z-9"
+                                    className="absolute top-1/2 text-xl right-12 transform -translate-y-1/2 text-green-600 hover:text-green-800 cursor-pointer  z-9"
                                   >
                                     <FaEdit className="" />
                                   </span>
@@ -1135,7 +1164,7 @@ const CookChartTemplate = (props) => {
                                         e.preventDefault(),
                                         deleteCookItem(item.cookDropCookItemID);
                                     }}
-                                    className="absolute cursor-default top-1/2 text-xl right-4 transform -translate-y-1/2 z-9 text-red-500 hover:text-red-700"
+                                    className="absolute cursor-pointer top-1/2 text-xl right-4 transform -translate-y-1/2 z-9 text-red-500 hover:text-red-700"
                                   >
                                     <RiDeleteBin6Line />
                                   </span>
@@ -1192,7 +1221,7 @@ const CookChartTemplate = (props) => {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="w-[55%] sticky top-0"
+                      className="w-[55%] sticky top-0 cook-template"
                     >
                       <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px] sticky top-0 ">
                         <h2 className="text-2xl font-bold mb-4 ">Template</h2>

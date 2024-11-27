@@ -7,7 +7,7 @@ const ForcastedSales = ({ value, onChange }) => {
             <input
                 onChange={onChange}
                 value={`$${value ? value : ""}`}
-                className='px-6 py-3 text-left capitalize border-2 border-solid  text-nowrap rounded-3xl hover:border-[var(--tw-primary)] focus:border-[var(--tw-primary)] outline-none' />
+                className='px-6 py-3 text-left capitalize border-2 border-solid  text-nowrap rounded-3xl hover:border-[var(--tw-primary)] focus:border-[var(--tw-primary)] outline-none max-w-[160px]' />
         </div>
     )
 }
