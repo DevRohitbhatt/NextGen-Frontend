@@ -44,7 +44,7 @@ const CookChart = () => {
   const [selectedUnitName, setSelectedUnitName] = useState("Loading...");
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [selectedFromDate, setSelectedFromDate] = useState(
-    new Date(new Date().getFullYear(), new Date().getMonth(), 0)
+    new Date()
   );
   const [selectedToDate, setSelectedToDate] = useState(new Date());
   const [showDateModal, setShowDateModal] = useState(false);
@@ -59,6 +59,7 @@ const CookChart = () => {
   const [forCastedSalesValue, setForcastedSalesValue] = useState("");
   const cookDropTableRef = useRef(); // ref for getting CookDropTable
   const [isChangedForcaste, setIsChangedForcaste] = useState(false);
+  const [companyStateId, setCompanyStateId] = useState("");
 
   useEffect(() => {
     if (defaultUnitID) {
@@ -67,7 +68,10 @@ const CookChart = () => {
     if (defaultUnitName) {
       setSelectedUnitName(defaultUnitName);
     }
-  }, [defaultUnitID, defaultUnitName]);
+    if (companyID) {
+      setCompanyStateId(() => companyID);
+    }
+  }, [defaultUnitID, defaultUnitName,companyID]);
   // TransformData
   const transformCookDropData = (data) => {
     const headers = data[0].lstItems.map((item) => ({
@@ -101,7 +105,10 @@ const CookChart = () => {
   };
 
   useEffect(() => {
-    getCookChartData();
+    if(selectedUnit){
+
+      getCookChartData();
+    }
   }, [selectedUnit, selectedFromDate]);
 
   const getCookChartData = async () => {
@@ -111,9 +118,9 @@ const CookChart = () => {
       const getData = {
         fullUrl: "api/cookdrop/getcookdropchart",
         urlParams: {
-          companyId: 1083,
+          companyId: companyStateId,
           // cookDropChartID: 0,
-          unitId: 1145,
+          unitId: selectedUnit,
           date: dateFormat(selectedFromDate, "yyyy/mm/dd"),
         },
       };
@@ -133,6 +140,9 @@ const CookChart = () => {
         const { headers, rows } = transformCookDropData(result.data);
         console.log("rows", rows);
         setCookChartData({ headers, rows });
+      }else{
+        setCookChartData({});
+        setOriginalData([]);
       }
     } catch (error) {
       setCookChartData({});
@@ -244,7 +254,6 @@ const CookChart = () => {
   };
   const handleDynamicPdfExport = async (mode) => {
     const changedData = cookDropTableRef.current?.getChangedData();
-    console.log("=>", JSON.stringify(changedData));
     const transformedData = await applyChangesToOriginalData(
       originalData,
       changedData
@@ -267,7 +276,6 @@ const CookChart = () => {
   const handleSaveClick = async () => {
     toast.info("Saving data...", { autoClose: 1000 });
     const changedData = cookDropTableRef.current?.getChangedData();
-    console.log("=>", JSON.stringify(changedData));
     const transformedData = await applyChangesToOriginalData(
       originalData,
       changedData
@@ -283,7 +291,7 @@ const CookChart = () => {
 
     let result = await postCall(postData);
     if (result.errors === null) {
-      toast.success(result?.data, { autoClose: 1500 });
+      toast.success("Saved...", { autoClose: 1500 });
     } else {
       toast.error("Failed to save", { autoClose: 1500 });
     }

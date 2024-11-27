@@ -89,7 +89,7 @@ const HhmmssSelector = (props) => {
         setSs(seconds);
       }
     }
-  }, []);
+  }, [props?.initDataLoading]);
 
   useEffect(() => {
     calculateTotalSeconds();
@@ -99,65 +99,73 @@ const HhmmssSelector = (props) => {
       className={`bg-gray-200 py-2 w-full rounded-full  border-none box-content flex  
       `}
     >
-      <input
-        type="text"
-        value={hh}
-        className="bg-gray-200 text-right  w-[20px] focus:outline-none ml-2"
-        onChange={(e) => {
-          hour(e);
-        }}
-        ref={hhRef}
-        onFocus={() => {
-          activeFocuse("hh");
-        }}
-        onKeyDown={(e) => {
-          onKeyDownCapture(e, "hh");
-        }}
-        onBlur={(e) => {
-          onBlureHandle("hh");
-        }}
-      />
-      <p className="mx-[3px]">:</p>
-      <input
-        type="text"
-        value={mm}
-        className={`bg-gray-200 w-[20px] focus:outline-none ${!enableSeconds && 'mr-2' }`}
-        onChange={(e) => {
-          minute(e);
-        }}
-        maxLength={2}
-        ref={mmRef}
-        onFocus={() => {
-          activeFocuse("mm");
-        }}
-        onKeyDown={(e) => {
-          onKeyDownCapture(e, "mm");
-        }}
-        onBlur={(e) => {
-          onBlureHandle("mm");
-        }}
-      />
-      {enableSeconds && <p className="mx-[3px]">:</p>}
-      {enableSeconds && (
-        <input
-          type="text"
-          maxLength={2}
-          value={ss}
-          className="bg-gray-200 w-[20px] focus:outline-none mr-2"
-          onChange={(e) => {
-            sec(e);
-          }}
-          ref={ssRef}
-          onFocus={() => {
-            activeFocuse("ss");
-          }}
-          onKeyDown={(e) => {
-            onKeyDownCapture(e, "ss");
-          }}
-          onBlur={(e) => {
-            onBlureHandle("ss");
-          }}
-        />
+      {props.initDataLoading ? (
+        <div className="w-[95px]">Loading...</div>
+      ) : (
+        <>
+          <input
+            type="text"
+            value={hh}
+            className="bg-gray-200 text-right  w-[20px] focus:outline-none ml-2"
+            onChange={(e) => {
+              hour(e);
+            }}
+            ref={hhRef}
+            onFocus={() => {
+              activeFocuse("hh");
+            }}
+            onKeyDown={(e) => {
+              onKeyDownCapture(e, "hh");
+            }}
+            onBlur={(e) => {
+              onBlureHandle("hh");
+            }}
+          />
+          <p className="mx-[3px]">:</p>
+          <input
+            type="text"
+            value={mm}
+            className={`bg-gray-200 w-[20px] focus:outline-none ${
+              !enableSeconds && "mr-2"
+            }`}
+            onChange={(e) => {
+              minute(e);
+            }}
+            maxLength={2}
+            ref={mmRef}
+            onFocus={() => {
+              activeFocuse("mm");
+            }}
+            onKeyDown={(e) => {
+              onKeyDownCapture(e, "mm");
+            }}
+            onBlur={(e) => {
+              onBlureHandle("mm");
+            }}
+          />
+          {enableSeconds && <p className="mx-[3px]">:</p>}
+          {enableSeconds && (
+            <input
+              type="text"
+              maxLength={2}
+              value={ss}
+              className="bg-gray-200 w-[20px] focus:outline-none mr-2"
+              onChange={(e) => {
+                sec(e);
+              }}
+              ref={ssRef}
+              onFocus={() => {
+                activeFocuse("ss");
+              }}
+              onKeyDown={(e) => {
+                onKeyDownCapture(e, "ss");
+              }}
+              onBlur={(e) => {
+                onBlureHandle("ss");
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   );

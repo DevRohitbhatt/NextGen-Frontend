@@ -19,7 +19,10 @@ import { deleteCall, getCall, postCall } from "../../apis/network";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { FaChevronDown, FaChevronUp, FaEdit } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
-import { convertMinutesToHHMM, formatTime } from "../../functions/utils/timeConvertFunction";
+import {
+  convertMinutesToHHMM,
+  formatTime,
+} from "../../functions/utils/timeConvertFunction";
 import HhmmssSelector from "../../components/common/HhmmssSelector";
 import ReactDOM from "react-dom";
 import cookChartTemplates from "../../assets/introJSSteps/cookChartTemplate";
@@ -31,6 +34,7 @@ const CookChartTemplate = (props) => {
     unitsAndAreas: unitsAndAreasList,
     defaultUnitID,
     defaultUnitName,
+    userID
   } = useSelector((state) => state.globalState);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +80,7 @@ const CookChartTemplate = (props) => {
     createdBy: 0,
     deletedOn: "0001-01-01T00:00:00",
     deletedBy: 0,
-    companyID: 1083,
+    companyID: companyID,
     cookDropCookItemID: null,
   });
   const moreOptionsDropdown = useRef(null);
@@ -84,11 +88,14 @@ const CookChartTemplate = (props) => {
   const leftColumnRef = useRef(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [saveDisable, setSaveDisable] = useState(false);
+  const [initDataLoading, setInitDataLodading] = useState(false);
+  const [isHeaderLoade, setIsHeaderLoade] = useState(false);
   const [introSteps, setIntroSteps] = useState({
     steps: cookChartTemplates(),
     initialStep: 0,
     stepsEnabled: false,
   });
+  const [companyStateId, setCompanyStateId] = useState("");
   useEffect(() => {
     const handleScroll = () => {
       if (leftColumnRef.current) {
@@ -105,12 +112,18 @@ const CookChartTemplate = (props) => {
 
   useEffect(() => {
     if (defaultUnitID) {
-      setSelectedUnit(defaultUnitID);
+      setSelectedUnit(() => defaultUnitID);
     }
     if (defaultUnitName) {
-      setSelectedUnitName(defaultUnitName);
+      setSelectedUnitName(() => defaultUnitName);
     }
-  }, [defaultUnitID, defaultUnitName]);
+    if (companyID) {
+      setCompanyStateId(() => companyID);
+    }
+    if(userID){
+      setAddHeadrFeilds((prev)=>({...prev,createdBy:userID,deletedBy:userID}))
+    }
+  }, [defaultUnitID, defaultUnitName,userID]);
 
   const handleUnitSelection = (unitName, unitID) => {
     setSelectedUnitName(unitName);
@@ -131,10 +144,10 @@ const CookChartTemplate = (props) => {
   const handleOpenEditItemModal = async (id, type) => {
     setEditSourceType(type);
     getAddNewCookData(type);
+    setOpenEditItemModal(true);
     const editData = await getEditCookData(id);
     const deepCopiedData = JSON.parse(JSON.stringify(editData.data[0]));
     setAllDataFeilds(deepCopiedData);
-    setOpenEditItemModal(true);
   };
 
   // get Template data api
@@ -143,44 +156,52 @@ const CookChartTemplate = (props) => {
       const getData = {
         fullUrl: "api/cookdrop/getcookdroptemplate",
         urlParams: {
-          companyId: 1083,
-          memberID: 1045,
+          companyId: companyStateId,
+          memberID: selectedUnit,
         },
       };
 
       const result = await getCall(getData);
       let resultData = result.data;
-      for (let i = 0; i < resultData.length; i++) {
-        setRightTableData((prev) => [
-          ...prev,
-          {
-            title: resultData[i].cookItemName,
-            description: `Cook Interval ${convertMinutesToHHMM(resultData[i].cookInterval)}, Cook time ${formatTime(
-              resultData[i].cookTimeSeconds
-            )}, Hold ${formatTime(resultData[i].holdTimeSeconds)}, Safety ${
-              resultData[i].safetyFactor
-            }%`,
-            items: resultData[i].listCookDropCookItemDetails.map((detail) => ({
-              id: detail.inventoryOrMenuItemID,
-              inventoryOrMenuItemName: detail.inventoryOrMenuItemName,
-              qty: detail.cookItemQuantity,
-            })),
-            cookDropCookItemID: resultData[i].cookDropCookItemID,
-          },
-        ]);
+      if (result.data.length > 0) {
+        for (let i = 0; i < resultData.length; i++) {
+          setRightTableData((prev) => [
+            ...prev,
+            {
+              title: resultData[i].cookItemName,
+              description: `Cook Interval ${convertMinutesToHHMM(
+                resultData[i].cookInterval
+              )}, Cook time ${formatTime(
+                resultData[i].cookTimeSeconds
+              )}, Hold ${formatTime(resultData[i].holdTimeSeconds)}, Safety ${
+                resultData[i].safetyFactor
+              }%`,
+              items: resultData[i].listCookDropCookItemDetails.map(
+                (detail) => ({
+                  id: detail.inventoryOrMenuItemID,
+                  inventoryOrMenuItemName: detail.inventoryOrMenuItemName,
+                  qty: detail.cookItemQuantity,
+                })
+              ),
+              cookDropCookItemID: resultData[i].cookDropCookItemID,
+            },
+          ]);
+        }
+      } else {
+        setRightTableData([]);
       }
     } catch (error) {}
   };
 
   //Create new item data call
   const getAddNewCookData = async (type) => {
-    
+    setInitDataLodading(true);
     if (type === "Menu") {
       try {
         const getData = {
           fullUrl: "api/cookdrop/getmenuitems",
           urlParams: {
-            companyId: 1083,
+            companyId: companyStateId,
           },
         };
 
@@ -192,14 +213,14 @@ const CookChartTemplate = (props) => {
       } catch (error) {
         console.error(error);
       } finally {
-       
+        setInitDataLodading(false);
       }
     } else if (type === "Inventory") {
       try {
         const getData = {
           fullUrl: "api/prepcharttemplate/getinventorylist",
           urlParams: {
-            companyId: 1083,
+            companyId: companyStateId,
           },
         };
 
@@ -213,7 +234,7 @@ const CookChartTemplate = (props) => {
       } catch (error) {
         console.error(error);
       } finally {
-       
+        setInitDataLodading(false);
       }
     }
   };
@@ -224,7 +245,7 @@ const CookChartTemplate = (props) => {
       const getData = {
         fullUrl: "api/cookdrop/getcookdropcookitem",
         urlParams: {
-          companyId: 1083,
+          companyId: companyStateId,
         },
       };
       const result = await getCall(getData, false);
@@ -237,12 +258,12 @@ const CookChartTemplate = (props) => {
   };
   //Edit  item data call
   const getEditCookData = async (id) => {
-   
+    setIsHeaderLoade(true);
     try {
       const getData = {
         fullUrl: "api/cookdrop/getcookdropcookitembyid",
         urlParams: {
-          companyId: 1083,
+          companyId: companyStateId,
           cookDropCookItemID: id,
         },
       };
@@ -255,25 +276,25 @@ const CookChartTemplate = (props) => {
       return result;
     } catch (error) {
     } finally {
-      
+      setIsHeaderLoade(false);
     }
   };
 
   const saveTemplateData = async () => {
-    toast.info('Saving data...', {autoClose: 1000 });
+    toast.info("Saving data...", { autoClose: 1000 });
     let body = {
-      companyID: 1083,
-      memberID: 1045,
+      companyID: companyStateId,
+      memberID: selectedUnit,
       templateName: "",
       cookDropTemplateID: null,
-      createdBy: 0,
+      createdBy: userID,
       cookDropTemplateDetailList: [],
     };
 
     rightTableData.map((item) =>
       body.cookDropTemplateDetailList.push(item.cookDropCookItemID)
     );
-    // let body = rightTableData;
+    
     try {
       const postData = {
         fullUrl: "api/cookdrop/savecookdroptemplate",
@@ -281,20 +302,22 @@ const CookChartTemplate = (props) => {
       };
 
       let result = await postCall(postData);
-      if(result?.errors === null){
+      if (result?.errors === null) {
         toast.success("Saved...", { autoClose: 1500 });
-      }else{
-        toast.error("Failed to save", {autoClose: 1000 });
+      } else {
+        toast.error("Failed to save", { autoClose: 1000 });
       }
     } catch (error) {
-      toast.error("Failed to save", {autoClose: 1000 });
+      toast.error("Failed to save", { autoClose: 1000 });
     }
   };
 
   useEffect(() => {
-    getCookAllItemData();
-    getTemplateData();
-  }, []);
+    if (companyStateId && selectedUnit) {
+      getCookAllItemData();
+      getTemplateData();
+    }
+  }, [companyStateId, selectedUnit]);
 
   const createEditItemModal = () => {
     let {
@@ -325,6 +348,7 @@ const CookChartTemplate = (props) => {
       }));
     };
     const savedData = async (saved) => {
+      setSaveDisable(true);
       let values = saved.map((item) => {
         let newItem = { ...item };
         newItem.inventoryOrMenuItemID = parseInt(newItem.menuID);
@@ -356,6 +380,8 @@ const CookChartTemplate = (props) => {
         }
       } catch (error) {
         toast.error("Failed to save", { autoClose: 1500 });
+      }finally{
+        setSaveDisable(false);
       }
     };
 
@@ -403,7 +429,7 @@ const CookChartTemplate = (props) => {
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={cookItemName}
+                    value={isHeaderLoade ? "Loading..." : cookItemName}
                     className="bg-gray-200 p-2 w-full rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "cookItemName");
@@ -421,6 +447,7 @@ const CookChartTemplate = (props) => {
                       }));
                     }}
                     enableSeconds={false}
+                    initDataLoading={isHeaderLoade}
                   />
                 </td>
                 <td className="px-2 py-2 ">
@@ -433,6 +460,7 @@ const CookChartTemplate = (props) => {
                         ["cookTimeSeconds"]: e,
                       }));
                     }}
+                    initDataLoading={isHeaderLoade}
                   />
                 </td>
                 <td className="px-2 py-2 ">
@@ -445,12 +473,13 @@ const CookChartTemplate = (props) => {
                         ["holdTimeSeconds"]: e,
                       }));
                     }}
+                    initDataLoading={isHeaderLoade}
                   />
                 </td>
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={safetyFactor}
+                    value={isHeaderLoade ? "Loading..." : safetyFactor}
                     className="bg-gray-200 p-2 w-[105px]  rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "safetyFactor");
@@ -460,7 +489,7 @@ const CookChartTemplate = (props) => {
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={projectAhead}
+                    value={isHeaderLoade ? "Loading..." : projectAhead}
                     className="bg-gray-200 p-2 w-[130px] rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "projectAhead");
@@ -477,6 +506,7 @@ const CookChartTemplate = (props) => {
                         ["laborFixedSeconds"]: e,
                       }));
                     }}
+                    initDataLoading={isHeaderLoade}
                   />
                 </td>
                 <td className="px-2 py-2 ">
@@ -489,6 +519,7 @@ const CookChartTemplate = (props) => {
                         ["laborVarSeconds"]: e,
                       }));
                     }}
+                    initDataLoading={isHeaderLoade}
                   />
                 </td>
                 <td className="px-2 py-2 ">
@@ -540,7 +571,7 @@ const CookChartTemplate = (props) => {
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={unitOfMeasure}
+                    value={isHeaderLoade ? "Loading..." : unitOfMeasure}
                     className="bg-gray-200 p-2 w-[90px] rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "unitOfMeasure");
@@ -550,7 +581,7 @@ const CookChartTemplate = (props) => {
                 <td className="px-2 py-2">
                   <input
                     type="text"
-                    value={mixMultiplier}
+                    value={isHeaderLoade ? "Loading..." : mixMultiplier}
                     className="bg-gray-200 p-2 w-[115px] rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "mixMultiplier");
@@ -578,8 +609,11 @@ const CookChartTemplate = (props) => {
             onSave={(saved) => {
               savedData(saved);
             }}
-            isPaginationEnabled={true}
+            isPaginationEnabled={addMenuItems.length > 0}
             onCancel={() => setOpenEditItemModal(!openEditItemModal)}
+            initDataLoading={initDataLoading}
+            initialTemplateLoade={isHeaderLoade}
+            isSaveDisable={saveDisable}
           />
         ) : (
           <EditAndAddDndTable
@@ -597,7 +631,10 @@ const CookChartTemplate = (props) => {
             onSave={(saved) => {
               savedData(saved);
             }}
+            isPaginationEnabled={addIntryItems.length > 0}
             onCancel={() => setOpenEditItemModal(!openEditItemModal)}
+            initDataLoading={initDataLoading}
+            isSaveDisable={saveDisable}
           />
         )}
       </div>
@@ -633,7 +670,7 @@ const CookChartTemplate = (props) => {
     };
 
     const savedData = async (saved) => {
-      setSaveDisable(true)
+      setSaveDisable(true);
       let values = saved.map((item) => {
         let newItem = { ...item };
         newItem.inventoryOrMenuItemID = parseInt(newItem.menuID);
@@ -675,7 +712,7 @@ const CookChartTemplate = (props) => {
             createdBy: 0,
             deletedOn: "0001-01-01T00:00:00",
             deletedBy: 0,
-            companyID: 1083,
+            companyID: companyStateId,
             cookDropCookItemID: null,
           });
           setOpenCreateItemModal(false);
@@ -685,8 +722,8 @@ const CookChartTemplate = (props) => {
       } catch (error) {
         console.log(error);
         toast.error("Failed to save", { autoClose: 1500 });
-      }finally{
-        setSaveDisable(false)
+      } finally {
+        setSaveDisable(false);
       }
     };
 
@@ -914,6 +951,7 @@ const CookChartTemplate = (props) => {
             }}
             onCancel={() => setOpenCreateItemModal(!openCreateItemModal)}
             isSaveDisable={saveDisable}
+            initDataLoading={initDataLoading}
           />
         ) : (
           <EditAndAddDndTable
@@ -930,6 +968,8 @@ const CookChartTemplate = (props) => {
             }}
             onCancel={() => setOpenCreateItemModal(!openCreateItemModal)}
             isSaveDisable={saveDisable}
+            isPaginationEnabled={addIntryItems.length > 100}
+            initDataLoading={initDataLoading}
           />
         )}
       </div>
@@ -955,13 +995,15 @@ const CookChartTemplate = (props) => {
         });
         return;
       }
-      
+
       // Append the new table data to the right side
       setRightTableData((prev) => [
         ...prev,
         {
           title: draggedItem.cookItemName,
-          description: `Cook Interval ${convertMinutesToHHMM(draggedItem.cookInterval)}, Cook time ${formatTime(
+          description: `Cook Interval ${convertMinutesToHHMM(
+            draggedItem.cookInterval
+          )}, Cook time ${formatTime(
             draggedItem.cookTimeSeconds
           )}, Hold ${formatTime(draggedItem.holdTimeSeconds)}, Safety ${
             draggedItem.safetyFactor
@@ -1003,9 +1045,9 @@ const CookChartTemplate = (props) => {
     );
     try {
       let body = {
-        companyId: 1083,
+        companyId: companyStateId,
         cookDropCookItemID: id,
-        userID: 0,
+        userID: userID,
         undeleteYN: "N",
       };
       const deleteData = {
@@ -1037,7 +1079,7 @@ const CookChartTemplate = (props) => {
     <>
       <ToastContainer />
       <div className="xl:w-[85%] sm:w-[97%] mx-auto">
-      <Steps
+        <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
@@ -1075,7 +1117,7 @@ const CookChartTemplate = (props) => {
         {isError ? (
           <div>{errorMessage}</div>
         ) : !isLoading ? (
-          <div className="container mx-auto  px-1 py-4 max-w-full">
+          <div className="container mx-auto  px-1 py-4 max-w-full cooktemplate">
             <Loader loading={isLoading} />
             <DragDropContext onDragEnd={handleDragEnd}>
               <div className="flex w-full gap-4 justify-between">
@@ -1112,7 +1154,9 @@ const CookChartTemplate = (props) => {
                             />
                           </div>
                           <HoverBorderButton
-                            extraClass={"!mt-[5px] !mb-[5px] create-New-CookItem"}
+                            extraClass={
+                              "!mt-[5px] !mb-[5px] create-New-CookItem"
+                            }
                             onClick={() => handleOpenCreateItemModal()}
                           >
                             Create New Item
@@ -1139,7 +1183,9 @@ const CookChartTemplate = (props) => {
                                       {item.cookItemName}
                                     </h2>
                                     <p className="font-semibold text-sm xl:text-lg">
-                                      {`Cook Interval ${convertMinutesToHHMM(item.cookInterval)}, Cook time ${formatTime(
+                                      {`Cook Interval ${convertMinutesToHHMM(
+                                        item.cookInterval
+                                      )}, Cook time ${formatTime(
                                         item.cookTimeSeconds
                                       )}, Hold ${formatTime(
                                         item.holdTimeSeconds
