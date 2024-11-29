@@ -25,6 +25,7 @@ function TableHOC({
 	view,
 	isTableRendered,
 	setIsTableRendered,
+	setTableState,
 	expandCollapseButtons = false,
 	enableColumnFilters = false,
 	headerPosition = 'center',
@@ -70,12 +71,21 @@ function TableHOC({
 	useTableView(table, view, isTableRendered);
 
 	useEffect(() => {
+		if (setTableState) {
+			setTableState(table.getState());
+		}
 		table.getAllColumns().map((column) => {
 			if (column.columnDef.show === false) {
 				column.toggleVisibility(false);
+			} else {
+				if (table.getExpandedDepth() < column.columnDef.showDepth) {
+					column.toggleVisibility(false);
+				} else {
+					column.toggleVisibility(true);
+				}
 			}
 		});
-	}, [table]);
+	}, [table, table.getState().expanded]);
 
 	useEffect(() => {
 		const newGrouping = [];

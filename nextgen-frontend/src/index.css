@@ -263,7 +263,6 @@ input.Search::placeholder {
 	@apply bg-[var(--tw-secondary)];
 }
 
-.dropdownList::-webkit-scrollbar,
 .tableHOC::-webkit-scrollbar,
 .inventoryItemsTable::-webkit-scrollbar,
 .CalendarTable::-webkit-scrollbar,
@@ -281,7 +280,6 @@ input.Search::placeholder {
 	@apply h-3 cursor-pointer;
 }
 
-.dropdownList::-webkit-scrollbar-thumb,
 .tableHOC::-webkit-scrollbar-thumb,
 .inventoryItemsTable::-webkit-scrollbar-thumb,
 .CalendarTable::-webkit-scrollbar-thumb,
@@ -297,18 +295,6 @@ input.Search::placeholder {
 	@apply block h-12 bg-transparent;
 }
 
-.dropdownList::-webkit-scrollbar-button:start:decrement {
-	@apply block h-[2px] bg-transparent;
-}
-
-.dropdownList::-webkit-scrollbar-button:end:increment {
-	@apply block h-[2px] bg-transparent;
-}
-
-.suggested-order-table::-webkit-scrollbar-button:start:decrement:vertical {
-	@apply block h-12 bg-transparent;
-}
-
 .tableHOC::-webkit-scrollbar-button:end:increment,
 .inventoryItemsTable::-webkit-scrollbar-button:end:increment,
 .CalendarTable::-webkit-scrollbar-button:end:increment,
@@ -316,7 +302,6 @@ input.Search::placeholder {
 	@apply block h-6 bg-transparent;
 }
 
-.dropdownList::-webkit-scrollbar-track-piece,
 .tableHOC::-webkit-scrollbar-track-piece,
 .inventoryItemsTable::-webkit-scrollbar-track-piece,
 .CalendarTable::-webkit-scrollbar-track-piece,
@@ -376,7 +361,7 @@ svg.clearIcone {
 	/* left: 100%; */
 	background-color: #fff;
 	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-	z-index: 1000;
+	z-index: 6;
 	width: 275px !important;
 	margin-top: 22px;
 	padding: 8px;

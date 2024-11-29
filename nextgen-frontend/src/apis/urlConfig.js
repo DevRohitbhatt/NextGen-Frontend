@@ -2,9 +2,10 @@ const urlConfig = {
 	//Company apis
 	getCompanySetting: '/api/company/settings/getsetting',
 	getAllCompanySettings: '/api/company/settings/getallsettings',
+	companyUnitDates: 'api/companysetting/getCompanyUnitDates',
 
 	unitsAndArea: '/api/unitsandareas/getbyid',
-	vendors: '/api/vendor/getvendorsbycompanyid',
+	vendors: '/api/vendor/getvendorsbycompanyID',
 
 	//suggested order apis
 	orderList: '/api/order/GetOrderList',
@@ -43,11 +44,11 @@ const urlConfig = {
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
-	MenuItemSoldSummaryReport:'api/sales/getMenuItemSoldSummaryReportData',
-	MenuItemSoldUnitReport:'api/sales/getMenuItemSoldUnitReportData',
-	MenuItemSoldSellersReport:'api/sales/getMenuItemSoldTopSellersReportData',
-	MenuItemSoldEmployeeData:'api/sales/getMenuItemSoldEmployeeData',
-	MenuItemSoldHourData:'api/sales/getMenuItemSoldHourData',
+	MenuItemSoldSummaryReport: 'api/sales/getMenuItemSoldSummaryReportData',
+	MenuItemSoldUnitReport: 'api/sales/getMenuItemSoldUnitReportData',
+	MenuItemSoldSellersReport: 'api/sales/getMenuItemSoldTopSellersReportData',
+	MenuItemSoldEmployeeData: 'api/sales/getMenuItemSoldEmployeeData',
+	MenuItemSoldHourData: 'api/sales/getMenuItemSoldHourData',
 	MenuItemSoldModifiersData: 'api/sales/getMenuItemSoldModifiersData',
 	salesVsLabor: 'api/sales/SalesVsLaborReport',
 	businessSummary: 'api/sales/GetBusinessSummaryReportData',

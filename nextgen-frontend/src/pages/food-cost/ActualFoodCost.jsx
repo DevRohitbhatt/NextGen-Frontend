@@ -9,11 +9,11 @@ import {
 	CalendarModal,
 	UnitModal,
 	ExportOptions,
-	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
 	TableHOC,
 	Dropdown,
+	Modal,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
@@ -23,20 +23,16 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const ActualFoodCost = () => {
-	const {
-		companyID,
-		alignmentID,
-		unitsAndAreas,
-		groupOrUnitAccess,
-		defaultUnitID,
-		groupOrUnitAccessName,
-		defaultUnitName,
-	} = useSelector((state) => state.globalState);
+	const { companyID, alignmentID, unitsAndAreas, defaultUnitID, defaultUnitName } = useSelector(
+		(state) => state.globalState
+	);
 	const [actualFoodCostData, setActualFoodCostData] = useState([]);
+	const [filteredActualFoodCostData, setFilteredActualFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isDateLoading, setIsDateLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Actual Food Cost Report, please try again later.'
@@ -48,16 +44,33 @@ const ActualFoodCost = () => {
 	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [fromDateOptions, setFromDateOptions] = useState([]);
+	const [selectedToDate, setSelectedToDate] = useState();
+	const [toDateOptions, setToDateOptions] = useState([]);
 	const [showDateModal, setShowDateModal] = useState(false);
+
+	const [showQuantities, setShowQuantities] = useState(true);
+	const [showDollarAmounts, setShowDollarAmounts] = useState(true);
+
+	const [isShowHideDepartments, setIsShowHideDepartments] = useState(false);
+	const [checkedItems, setCheckedItems] = useState([
+		{ name: 'DO NOT COUNT/DO NOT COUNT', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'FOOD/BEVERAGES', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'FOOD/BREAD', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'FOOD/DAIRY', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'FOOD/GROCERY', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'FOOD/MEAT', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'FOOD/PRODUCE', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'PREP/PREP', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'SUPPLY/CLEANING', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'SUPPLY/PAPER', showOnReport: false, includeInGrandTotal: false },
+	]);
 
 	//dropdown variables
 	const [view, setView] = useState('Weekly');
 	const [countType, setCountType] = useState('WE');
-	const dropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }];
+	const dropdownOptions = [{ name: 'Daily' }, { name: 'Monthly' }, { name: 'Shift' }, { name: 'Weekly' }];
 	const [viewby, setViewBy] = useState('Department');
 	const viewOptions = [
 		{ name: 'Department', row: 1 },
@@ -65,6 +78,10 @@ const ActualFoodCost = () => {
 		{ name: 'Inventory Item', row: 3 },
 	];
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+
+	const [isExportFilteredViewDropDownVisible, setIsExportFilteredViewDropDownVisible] = useState(false);
+	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
+	const [tableState, setTableState] = useState(false);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -88,176 +105,183 @@ const ActualFoodCost = () => {
 		setViewBy(option);
 	};
 
-	useEffect(() => {}, [countType]);
+	const [columns, setColumns] = useState([]);
 
-	const columns = useMemo(
-		() => [
-			columnHelper.display({
-				id: 'actions',
-				cell: ({ row }) =>
-					row.getCanExpand() ? (
-						<div
-							{...{
-								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
-							}}
-						>
-							{row.getIsExpanded() ? (
-								<CiSquareMinus className='text-[20px]' />
-							) : (
-								<CiSquarePlus className='text-[20px]' />
-							)}
-						</div>
-					) : null,
-				size: '80',
-			}),
-			columnHelper.accessor('department', {
-				id: 'department',
-				header: 'Department',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('subDepartment', {
-				id: 'subDepartment',
-				header: 'Sub Department',
-				dataType: 'string',
-			}),
-			columnHelper.accessor('description', {
-				id: 'description',
-				header: 'Description',
-				dataType: 'string',
-				size: 300,
-			}),
-			columnHelper.accessor('countDisplayUnitName', {
-				id: 'countDisplayUnitName',
-				header: 'UOM',
-				dataType: 'string',
-				size: 200,
-			}),
-			columnHelper.accessor('begCountDisplayUnits', {
-				id: 'begCountDisplayUnits',
-				header: 'Beg #',
-				dataType: 'number',
-				cell: ({ getValue }) => getValue()?.toFixed(2),
-				size: 90,
-			}),
-			columnHelper.accessor('begCountCost', {
-				id: 'begCountCost',
-				header: 'Beg $',
-				dataType: 'number',
-				cell: ({ row, getValue }) => `${calculateSum(row, 'begCountCost', getValue)}`,
-				size: 90,
-			}),
-			columnHelper.accessor('purchaseDisplayUnits', {
-				id: 'purchaseDisplayUnits',
-				header: 'Pur #',
-				dataType: 'number',
-				size: 60,
-			}),
-			columnHelper.accessor('purchaseCost', {
-				id: 'purchaseCost',
-				header: 'Pur $',
-				dataType: 'number',
-				cell: ({ row, getValue }) => calculateSum(row, 'purchaseCost', getValue),
-				size: 60,
-			}),
-			columnHelper.accessor('iTinCountDisplayUnits', {
-				id: 'iTinCountDisplayUnits',
-				header: 'Trans In #',
-				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
-				dataType: 'number',
-				size: 60,
-			}),
-			columnHelper.accessor('iTinCountCost', {
-				id: 'iTinCountCost',
-				header: 'Trans In $',
-				dataType: 'number',
-				cell: ({ row, getValue }) => calculateSum(row, 'iTinCountCost', getValue),
-				size: 60,
-			}),
-			columnHelper.accessor('iToutCountDisplayUnits', {
-				id: 'iToutCountDisplayUnits',
-				header: 'Trans Out #',
-				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
-				dataType: 'number',
-				size: 80,
-			}),
-			columnHelper.accessor('iToutCountCost', {
-				id: 'iToutCountCost',
-				header: 'Trans Out $',
-				dataType: 'number',
-				cell: ({ row, getValue }) => calculateSum(row, 'iToutCountCost', getValue),
-				size: 80,
-			}),
-			columnHelper.accessor('endCountDisplayUnits', {
-				id: 'endCountDisplayUnits',
-				header: 'End #',
-				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
-				dataType: 'number',
-				size: 60,
-			}),
-			columnHelper.accessor('endCountCost', {
-				id: 'endCountCost',
-				header: 'End $',
-				dataType: 'number',
-				cell: ({ row, getValue }) => calculateSum(row, 'endCountCost', getValue),
-				size: 60,
-			}),
-			columnHelper.accessor('usageCountDisplayUnits', {
-				id: 'usageCountDisplayUnits',
-				header: 'Actual Usage #',
-				cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
-				dataType: 'number',
-				size: 80,
-			}),
-			columnHelper.accessor('usageCost', {
-				id: 'usageCost',
-				header: 'Actual Usage $',
-				dataType: 'number',
-				cell: ({ row, getValue }) => calculateSum(row, 'usageCost', getValue),
-				size: 80,
-			}),
-			columnHelper.accessor('usageCostPct', {
-				id: 'usageCostPct',
-				header: 'Actual Usage %',
-				dataType: 'number',
-				cell: ({ row, getValue }) => calculateSum(row, 'usageCostPct', getValue, true),
-				size: 90,
-			}),
-			columnHelper.accessor('wasteCountDisplayUnits', {
-				id: 'wasteCountDisplayUnits',
-				header: 'Waste #',
-				dataType: 'number',
-				size: 80,
-			}),
-			columnHelper.accessor('wasteCountCost', {
-				id: 'wasteCountCost',
-				header: 'Waste $',
-				dataType: 'number',
-				cell: ({ row, getValue }) => calculateSum(row, 'wasteCountCost', getValue),
-				size: 80,
-			}),
-			columnHelper.accessor('wasteCostPct', {
-				id: 'wasteCostPct',
-				header: 'Waste %',
-				dataType: 'number',
-				cell: ({ row, getValue }) => calculateSum(row, 'wasteCostPct', getValue, true),
-				size: 90,
-			}),
-			columnHelper.accessor('comparisonName', {
-				id: 'comparisonName',
-				header: 'Comparison Name',
-				dataType: 'string',
-				size: 100,
-			}),
-			columnHelper.accessor('comparisonSales', {
-				id: 'comparisonSales',
-				header: 'Comparison Sales',
-				dataType: 'number',
-				cell: ({ getValue }) => (getValue() !== undefined ? `$${getValue().toFixed(2)}` : ''),
-				size: 100,
-			}),
-		],
-		[]
-	);
+	const generatedColumns = [
+		columnHelper.display({
+			id: 'actions',
+			cell: ({ row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+					</div>
+				) : null,
+			size: '80',
+		}),
+		columnHelper.accessor('department', {
+			id: 'department',
+			header: 'Department',
+			dataType: 'string',
+		}),
+		columnHelper.accessor('subDepartment', {
+			id: 'subDepartment',
+			header: 'Sub Department',
+			showDepth: 2,
+			dataType: 'string',
+		}),
+		columnHelper.accessor('description', {
+			id: 'description',
+			header: 'Description',
+			showDepth: 3,
+			dataType: 'string',
+			size: 300,
+		}),
+		columnHelper.accessor('countDisplayUnitName', {
+			id: 'countDisplayUnitName',
+			header: 'UOM',
+			showDepth: 3,
+			dataType: 'string',
+			size: 200,
+		}),
+		columnHelper.accessor('begCountDisplayUnits', {
+			id: 'begCountDisplayUnits',
+			header: 'Beg #',
+			showDepth: 3,
+			dataType: 'number',
+			cell: ({ getValue }) => getValue()?.toFixed(2),
+			size: 90,
+		}),
+		columnHelper.accessor('begCountCost', {
+			id: 'begCountCost',
+			header: 'Beg $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => `$${calculateSum(row, 'begCountCost', getValue)}`,
+			size: 90,
+		}),
+		columnHelper.accessor('purchaseDisplayUnits', {
+			id: 'purchaseDisplayUnits',
+			header: 'Pur #',
+			showDepth: 3,
+			dataType: 'number',
+			size: 60,
+		}),
+		columnHelper.accessor('purchaseCost', {
+			id: 'purchaseCost',
+			header: 'Pur $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => `$${calculateSum(row, 'purchaseCost', getValue)}`,
+			size: 60,
+		}),
+		columnHelper.accessor('iTinCountDisplayUnits', {
+			id: 'iTinCountDisplayUnits',
+			header: 'Trans In #',
+			showDepth: 3,
+			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			dataType: 'number',
+			size: 60,
+		}),
+		columnHelper.accessor('iTinCountCost', {
+			id: 'iTinCountCost',
+			header: 'Trans In $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => `$${calculateSum(row, 'iTinCountCost', getValue)}`,
+			size: 60,
+		}),
+		columnHelper.accessor('iToutCountDisplayUnits', {
+			id: 'iToutCountDisplayUnits',
+			header: 'Trans Out #',
+			showDepth: 3,
+			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			dataType: 'number',
+			size: 80,
+		}),
+		columnHelper.accessor('iToutCountCost', {
+			id: 'iToutCountCost',
+			header: 'Trans Out $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => `$${calculateSum(row, 'iToutCountCost', getValue)}`,
+			size: 80,
+		}),
+		columnHelper.accessor('endCountDisplayUnits', {
+			id: 'endCountDisplayUnits',
+			header: 'End #',
+			showDepth: 3,
+			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			dataType: 'number',
+			size: 60,
+		}),
+		columnHelper.accessor('endCountCost', {
+			id: 'endCountCost',
+			header: 'End $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => `$${calculateSum(row, 'endCountCost', getValue)}`,
+			size: 60,
+		}),
+		columnHelper.accessor('usageCountDisplayUnits', {
+			id: 'usageCountDisplayUnits',
+			header: 'Actual Usage #',
+			showDepth: 3,
+			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			dataType: 'number',
+			size: 80,
+		}),
+		columnHelper.accessor('usageCost', {
+			id: 'usageCost',
+			header: 'Actual Usage $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => `$${calculateSum(row, 'usageCost', getValue)}`,
+			size: 80,
+		}),
+		columnHelper.accessor('usageCostPct', {
+			id: 'usageCostPct',
+			header: 'Actual Usage %',
+			dataType: 'number',
+			cell: ({ row, getValue }) => `${calculateSum(row, 'usageCostPct', getValue, true)}%`,
+			size: 90,
+		}),
+		columnHelper.accessor('wasteCountDisplayUnits', {
+			id: 'wasteCountDisplayUnits',
+			header: 'Waste #',
+			showDepth: 3,
+			dataType: 'number',
+			size: 80,
+		}),
+		columnHelper.accessor('wasteCountCost', {
+			id: 'wasteCountCost',
+			header: 'Waste $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => `$${calculateSum(row, 'wasteCountCost', getValue)}`,
+			size: 80,
+		}),
+		columnHelper.accessor('wasteCostPct', {
+			id: 'wasteCostPct',
+			header: 'Waste %',
+			dataType: 'number',
+			cell: ({ row, getValue }) => `${calculateSum(row, 'wasteCostPct', getValue, false)}%`,
+			size: 90,
+		}),
+		columnHelper.accessor('comparisonName', {
+			id: 'comparisonName',
+			header: 'Comparison Name',
+			dataType: 'string',
+			size: 100,
+		}),
+		columnHelper.accessor('comparisonSales', {
+			id: 'comparisonSales',
+			header: 'Comparison Net Sales',
+			dataType: 'number',
+			cell: ({ getValue }) => (getValue() !== undefined ? `$${getValue().toFixed(2)}` : ''),
+			size: 100,
+		}),
+	];
 
 	// calculate the sum of the subrows
 	const calculateSum = (row, field, getValue, isPercentage = false) => {
@@ -269,21 +293,28 @@ const ActualFoodCost = () => {
 							acc +
 							subrow.subRows.reduce((subAcc, subSubrow) => {
 								if (subSubrow.getCanExpand()) {
+									const item = checkedItems.find(
+										(item) => item.name.split('/')[1] === subSubrow.original.subDepartment
+									);
 									return (
 										subAcc +
 										subSubrow.subRows.reduce(
 											(subsubAcc, subsubsubrow) =>
 												subsubAcc +
-												(subsubsubrow.original[field]
+												(item.includeInGrandTotal && subsubsubrow.original[field]
 													? Number(subsubsubrow.original[field]) * (isPercentage ? 100 : 1)
 													: 0),
 											0
 										)
 									);
 								} else {
+									let item = checkedItems.find(
+										(item) => item?.name.split('/')[1] === subrow.original.subDepartment
+									);
+
 									return (
 										subAcc +
-										(subSubrow.original[field]
+										(item?.includeInGrandTotal && subSubrow.original[field]
 											? Number(subSubrow.original[field]) * (isPercentage ? 100 : 1)
 											: 0)
 									);
@@ -298,20 +329,73 @@ const ActualFoodCost = () => {
 					}
 				}, 0)
 				.toFixed(2);
-			return isPercentage ? `${sum}%` : `$${sum}`;
+			return sum;
 		} else {
-			return isPercentage ? `${getValue()?.toFixed(2)}%` : `$${getValue()?.toFixed(2)}`;
+			return getValue()?.toFixed(2);
 		}
 	};
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
+
+	useEffect(() => {
+		const date = new Date();
+		const day = date.getDay();
+		const diff = date.getDate() - day - 7 + (day === 0 ? -6 : 1);
+		const fromDate = new Date(date.setDate(diff));
+		const toDate = new Date(date.setDate(diff + 6));
+
+		setSelectedFromDate(dateFormat(fromDate, 'mm/dd/yyyy'));
+		setSelectedToDate(dateFormat(toDate, 'mm/dd/yyyy'));
+	}, []);
+
+	useEffect(() => {
+		if (!checkedItemsLoaded) {
+			setColumns(generatedColumns);
+			setCheckedItemsLoaded(true);
+		}
+	}, [checkedItems]);
+
+	useEffect(() => {
+		setViewBy(viewby);
+	}, [isTableRendered]);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			setIsDateLoading(true);
+			try {
+				const result = await getCall({
+					url: 'companyUnitDates',
+					urlParams: {
+						companyId: companyID,
+						unitId: defaultUnitID,
+					},
+				});
+
+				const fromOptions = result.data.map((option) => ({
+					name: option.split(' - ')[0],
+				}));
+				const toOptions = result.data.map((option) => ({
+					name: option.split(' - ')[1],
+				}));
+
+				setFromDateOptions(fromOptions);
+				setToDateOptions(toOptions);
+			} catch (error) {
+				console.error('Error in fetching date options', error);
+			} finally {
+				setIsDateLoading(false);
+			}
+		};
+
+		fetchData();
+	}, [companyID, defaultUnitID]);
 
 	const fetchActualFoodCostReport = async () => {
 		try {
@@ -386,7 +470,25 @@ const ActualFoodCost = () => {
 					},
 				];
 
+				const updatedCheckedItems = checkedItems.map((item) => {
+					const [department, subDepartment] = item.name.split('/');
+					const match = result.data?.some(
+						(data) =>
+							data.department === department &&
+							data.subDepartments.some(
+								(subData) =>
+									subData.subDepartment === subDepartment ||
+									subData.subDepartment.includes(subDepartment)
+							)
+					);
+					return match
+						? { ...item, showOnReport: true, includeInGrandTotal: true }
+						: { ...item, showOnReport: false, includeInGrandTotal: false };
+				});
+
+				setCheckedItems(updatedCheckedItems);
 				setActualFoodCostData(newData);
+				setFilteredActualFoodCostData(newData);
 			}
 			setIsLoading(false);
 		} catch (error) {
@@ -408,34 +510,87 @@ const ActualFoodCost = () => {
 		setSelectedToDate(to);
 		setShowDateModal(false);
 	};
+
+	const handleShowColumns = (status, type) => {
+		if (type === '#') {
+			setShowQuantities(!showQuantities);
+		} else {
+			setShowDollarAmounts(!showDollarAmounts);
+		}
+
+		const updatedColumns = columns.map((column) => {
+			if (column.header && column.header.includes(type)) {
+				console.log(column);
+
+				return {
+					...column,
+					show: status,
+				};
+			} else {
+				return {
+					...column,
+				};
+			}
+		});
+
+		setColumns((prev) => [...updatedColumns]);
+		fetchActualFoodCostReport();
+	};
+
+	const handleShowHideDepartments = () => {
+		setIsShowHideDepartments(false);
+		const newActualFoodCostData = actualFoodCostData.map((item) => {
+			const filteredSubRows = item.subRows
+				.map((subItem) => {
+					const filteredSubSubRows = subItem.subRows.filter(
+						(subSubItem) =>
+							!checkedItems.some(
+								(checkedItem) =>
+									checkedItem.name === `${subItem.department}/${subSubItem.subDepartment}` &&
+									!checkedItem.showOnReport
+							)
+					);
+					const updatedSubItem = { ...subItem, subRows: filteredSubSubRows };
+					return filteredSubSubRows.length > 0 ? updatedSubItem : null;
+				})
+				.filter((subItem) => subItem !== null);
+			return { ...item, subRows: filteredSubRows };
+		});
+		setIsTableRendered(false);
+		setFilteredActualFoodCostData(newActualFoodCostData);
+	};
+
 	// Function to handle the PDF export
-	const handlePDFClick = () => {
+	const handlePDFClick = (type) => {
 		if (!columns || columns.length === 0) {
 			console.error('Columns are not defined or empty');
 			return;
 		}
 
 		if (!actualFoodCostData || actualFoodCostData.length === 0) {
-			console.error('Voids report data is not defined or empty');
+			console.error('Actual report data is not defined or empty');
 			return;
 		}
 
 		const pdfData = {
 			title: 'Actual Food Cost Report',
 			subHeaders: [
-				`${selectedFromDate.toLocaleDateString()} - ${selectedToDate.toLocaleDateString()} | ${selectedUnitName}`,
+				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
+					selectedToDate,
+					'mm-dd-yyyy'
+				)} | ${selectedUnitName}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
-			body: buildPDFBody(),
+			body: buildPDFBody(type),
 		};
 
 		PdfBuilder(pdfData);
 	};
 
-	const buildPDFBody = () => {
+	const buildPDFBody = (type) => {
 		let body = [];
-		actualFoodCostData.flatMap((row) => [
+		(type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData).flatMap((row) => [
 			(body = row.subRows.flatMap((subRow) => {
 				return {
 					type: 'table',
@@ -550,7 +705,7 @@ const ActualFoodCost = () => {
 	};
 
 	// // Function to handle the Excel export
-	const handleExcelClick = () => {
+	const handleExcelClick = (type) => {
 		const data = [
 			{
 				name: 'Actual Food Cost Report',
@@ -578,7 +733,7 @@ const ActualFoodCost = () => {
 					{ name: 'Comparison Name', filter: 'text' },
 					{ name: 'Comparison Sales', filter: 'text' },
 				],
-				data: actualFoodCostData.flatMap((row) =>
+				data: (type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData).flatMap((row) =>
 					row.subRows.flatMap((department) =>
 						department.subRows.flatMap((subDepartment) =>
 							subDepartment.subRows.map((item) => ({
@@ -621,6 +776,7 @@ const ActualFoodCost = () => {
 	const handleClickOutside = (event) => {
 		if (moreOptionsDropdown.current && !moreOptionsDropdown.current.contains(event.target)) {
 			setIsDropdownVisible(false);
+			setIsExportFilteredViewDropDownVisible(false);
 		}
 	};
 
@@ -634,10 +790,11 @@ const ActualFoodCost = () => {
 	const Table = (
 		<TableHOC
 			columns={columns}
-			data={actualFoodCostData}
+			data={filteredActualFoodCostData}
 			view={viewOptions.find((option) => option.name === viewby)?.row}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
+			setTableState={setTableState}
 		/>
 	);
 
@@ -649,8 +806,8 @@ const ActualFoodCost = () => {
 					companyID: companyID,
 					alignmentID: alignmentID,
 					memberID: selectedUnit,
-					fromDate: fromDate.toLocaleDateString('en-CA'),
-					toDate: toDate.toLocaleDateString('en-CA'),
+					fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(toDate, 'yyyy-mm-dd'),
 				},
 			};
 
@@ -684,36 +841,18 @@ const ActualFoodCost = () => {
 	};
 
 	const handleViewPurchase = async (fromDate, toDate) => {
-		try {
-			const getData = {
-				url: 'PurchaseAnalysis',
-				urlParams: {
-					companyID: companyID,
-					alignmentID: alignmentID,
-					memberID: selectedUnit,
-					fromDate: fromDate.toLocaleDateString('en-CA'),
-					toDate: toDate.toLocaleDateString('en-CA'),
-					vendorId: 0,
-				},
-			};
-
-			const result = await getCall(getData);
-
-			navigate('/PurchaseAnalysis', {
-				state: {
-					companyId: companyID,
-					alignmentID: alignmentID,
-					memberID: selectedUnit,
-					fromDate: fromDate.toLocaleDateString('en-CA'),
-					toDate: toDate.toLocaleDateString('en-CA'),
-					vendorId: 0,
-					unitsAndAreasList: unitsAndAreas,
-					purchaseData: result,
-				},
-			});
-		} catch (error) {
-			console.error('Error getting Countsheet data: ', error);
-		}
+		navigate('/PurchaseAnalysis', {
+			state: {
+				companyId: companyID,
+				alignmentID: alignmentID,
+				selectedUnit: selectedUnit,
+				selectedUnitName: selectedUnitName,
+				fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
+				toDate: dateFormat(toDate, 'yyyy-mm-dd'),
+				vendorId: 0,
+				unitsAndAreasList: unitsAndAreas,
+			},
+		});
 	};
 
 	return (
@@ -737,12 +876,23 @@ const ActualFoodCost = () => {
 							setMemberName={setSelectedUnitName}
 							onClick={() => setShowUnitModal(true)}
 						/>
-						<DateSelector
-							toDate={selectedToDate}
-							fromDate={selectedFromDate}
-							isDateRange={true}
-							onClick={() => setShowDateModal(true)}
-						/>
+
+						<div className='flex'>
+							<Dropdown
+								title='From Date'
+								options={fromDateOptions}
+								selectedOption={selectedFromDate}
+								handleOptionChange={(date) => setSelectedFromDate(date)}
+								isLoading={isDateLoading}
+							/>
+							<Dropdown
+								title='To Date'
+								options={toDateOptions}
+								selectedOption={selectedToDate}
+								handleOptionChange={(date) => setSelectedToDate(date)}
+								isLoading={isDateLoading}
+							/>
+						</div>
 						<div className='w-36'>
 							<Dropdown
 								title='Count Type'
@@ -775,59 +925,111 @@ const ActualFoodCost = () => {
 				) : (
 					<>
 						{actualFoodCostData.length > 0 && (
-							<div className='flex flex-row items-center space-x-2 '>
-								<div className='w-48'>
-									<Dropdown
-										title='Expand View'
-										options={viewOptions}
-										selectedOption={viewby}
-										onOptionChange={handleTotalViewChange}
-									/>
+							<div className='flex flex-row items-center justify-between'>
+								<div className='flex items-center gap-3'>
+									<div className='w-48'>
+										<Dropdown
+											title='Expand View'
+											options={viewOptions}
+											selectedOption={viewby}
+											onOptionChange={handleTotalViewChange}
+										/>
+									</div>
+									<div className='flex items-center justify-center w-28  py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
+										<div
+											onClick={togglePopup}
+											className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
+										>
+											<span className='cursor-pointer '> More....</span>
+										</div>
+										{isDropdownVisible && (
+											<div className='more-container !mt-[32px]' ref={moreOptionsDropdown}>
+												<div
+													className='option mb-2 w-[258px]'
+													onClick={() => setIsShowHideDepartments(true)}
+												>
+													<button className='w-[100%] bg-[#f9f9f9]'>
+														Show/Hide Departments
+													</button>
+												</div>
+												<div className='option mb-2 w-[258px]'>
+													<button
+														className='w-[100%] bg-[#f9f9f9]'
+														onClick={() => {
+															handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
+															setIsDropdownVisible(false);
+														}}
+													>
+														View Beginning Countsheet
+													</button>
+												</div>
+												<div className='option mb-2 w-[258px] bg-[#f9f9f9]'>
+													<button
+														className='w-[100%]'
+														onClick={() => {
+															handleCountsheet(selectedFromDate, selectedToDate, true); // For Ending Countsheet
+															setIsDropdownVisible(false);
+														}}
+													>
+														View Ending Countsheet
+													</button>
+												</div>
+												<div className='option'>
+													<button
+														className='w-[100%] bg-[#f9f9f9]'
+														onClick={() => {
+															handleViewPurchase(selectedFromDate, selectedToDate, true); // For View Purchase
+															setIsDropdownVisible(false);
+														}}
+													>
+														View Purchases
+													</button>
+												</div>
+											</div>
+										)}
+									</div>
+									{tableState?.expanded && Object.keys(tableState.expanded).length > 2 && (
+										<div className='flex items-center mt-[31px] gap-3'>
+											<div>
+												<input
+													className='mr-1 accent-[var(--tw-primary)]'
+													type='checkbox'
+													checked={showQuantities}
+													onChange={(e) => handleShowColumns(e.target.checked, '#')}
+												/>
+												Show Quantities
+											</div>
+											<div>
+												<input
+													className='mr-1 accent-[var(--tw-primary)]'
+													type='checkbox'
+													checked={showDollarAmounts}
+													onChange={(e) => handleShowColumns(e.target.checked, '$')}
+												/>
+												Show Dollar Amounts
+											</div>
+										</div>
+									)}
 								</div>
-								<div className='flex items-center justify-center w-28  py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
+								<div className='flex items-center justify-center w-48 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl mt-[31px] select-none'>
 									<div
-										onClick={togglePopup}
+										onClick={() =>
+											setIsExportFilteredViewDropDownVisible(!isExportFilteredViewDropDownVisible)
+										}
 										className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
 									>
-										<span className='cursor-pointer '> More....</span>
+										<span className='cursor-pointer'> Export Filtered View</span>
 									</div>
-									{isDropdownVisible && (
-										<div className='more-container z-9 !mt-[32px]' ref={moreOptionsDropdown}>
-											<div className='option mb-2 w-[258px]'>
-												<button className='w-[100%] bg-[#f9f9f9]'>Show/Hide Departments</button>
+									{isExportFilteredViewDropDownVisible && (
+										<div className='more-container !mr-[80px] !mt-[32px]' ref={moreOptionsDropdown}>
+											<div className='mb-2 option' onClick={() => handleExcelClick('filtered')}>
+												<button className='w-[100%] bg-[#f9f9f9]'>Export to Excel</button>
 											</div>
-											<div className='option mb-2 w-[258px]'>
-												<button
-													className='w-[100%] bg-[#f9f9f9]'
-													onClick={() => {
-														handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
-														setIsDropdownVisible(false);
-													}}
-												>
-													View Beginning Countsheet
-												</button>
-											</div>
-											<div className='option mb-2 w-[258px] bg-[#f9f9f9]'>
-												<button
-													className='w-[100%]'
-													onClick={() => {
-														handleCountsheet(selectedToDate, selectedToDate, true); // For Ending Countsheet
-														setIsDropdownVisible(false);
-													}}
-												>
-													View Ending Countsheet
-												</button>
-											</div>
-											<div className='option'>
-												<button
-													className='w-[100%] bg-[#f9f9f9]'
-													onClick={() => {
-														handleViewPurchase(selectedFromDate, selectedToDate, true); // For View Purchase
-														setIsDropdownVisible(false);
-													}}
-												>
-													View Purchases
-												</button>
+											<div
+												className='option mb-2 w-[258px]'
+												onClick={() => handlePDFClick('filtered')}
+											>
+												<button className='w-[100%] bg-[#f9f9f9]'>Export to PDF</button>
 											</div>
 										</div>
 									)}
@@ -872,6 +1074,70 @@ const ActualFoodCost = () => {
 						selectedFromDate={selectedFromDate}
 						selectedToDate={selectedToDate}
 					/>
+					<Modal
+						title={'Show/Hide Departments'}
+						isOpen={isShowHideDepartments}
+						onClose={() => setIsShowHideDepartments(false)}
+					>
+						<div className='p-4'>
+							<table className='w-full border-collapse table-auto select-none'>
+								<thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
+									<tr className='grid grid-cols-3 '>
+										<th>Department/Subdepartment</th>
+										<th>Show on Report</th>
+										<th>Include in Grand Total</th>
+									</tr>
+								</thead>
+								<tbody>
+									{checkedItems.map((item, index) => (
+										<tr
+											key={index}
+											className='relative text-sm grid grid-cols-3 font-normal py-1 border-y-[0.5px] hover:bg-gray-100 '
+										>
+											<td className=''>{item.name}</td>
+											<td className='text-center'>
+												<input
+													className='accent-[var(--tw-primary)]'
+													type='checkbox'
+													checked={item.showOnReport}
+													onChange={(e) =>
+														setCheckedItems((prev) => {
+															const newItems = [...prev];
+															newItems[index].showOnReport = e.target.checked;
+															newItems[index].includeInGrandTotal = e.target.checked;
+															return newItems;
+														})
+													}
+												/>
+											</td>
+											<td className='text-center'>
+												<input
+													className='accent-[var(--tw-primary)]'
+													checked={item.includeInGrandTotal}
+													type='checkbox'
+													onChange={(e) =>
+														setCheckedItems((prev) => {
+															const newItems = [...prev];
+															newItems[index].includeInGrandTotal = e.target.checked;
+															return newItems;
+														})
+													}
+												/>
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+							<div className='flex justify-center mt-4'>
+								<button
+									className='flex items-center gap-2 px-4 py-2 border-solid text-[var(--tw-primary)] focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
+									onClick={handleShowHideDepartments}
+								>
+									Update Report
+								</button>
+							</div>
+						</div>
+					</Modal>
 				</div>
 			</div>
 		</>
