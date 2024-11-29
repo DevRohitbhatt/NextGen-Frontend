@@ -345,20 +345,9 @@ const ActualFoodCost = () => {
 	}, [defaultUnitID, defaultUnitName]);
 
 	useEffect(() => {
-		const date = new Date();
-		const day = date.getDay();
-		const diff = date.getDate() - day - 7 + (day === 0 ? -6 : 1);
-		const fromDate = new Date(date.setDate(diff));
-		const toDate = new Date(date.setDate(diff + 6));
-
-		setSelectedFromDate(dateFormat(fromDate, 'mm/dd/yyyy'));
-		setSelectedToDate(dateFormat(toDate, 'mm/dd/yyyy'));
-	}, []);
-
-	useEffect(() => {
-		if (!checkedItemsLoaded) {
+		if (checkedItemsLoaded) {
 			setColumns(generatedColumns);
-			setCheckedItemsLoaded(true);
+			setCheckedItemsLoaded(false);
 		}
 	}, [checkedItems]);
 
@@ -367,35 +356,44 @@ const ActualFoodCost = () => {
 	}, [isTableRendered]);
 
 	useEffect(() => {
-		const fetchData = async () => {
-			setIsDateLoading(true);
+		const fetchDates = async () => {
 			try {
-				const result = await getCall({
-					url: 'companyUnitDates',
+				setIsDateLoading(true);
+				const getData = {
+					url: 'getCountsheetDates',
 					urlParams: {
 						companyId: companyID,
-						unitId: defaultUnitID,
+						unitId: selectedUnit,
+						countType: countType,
 					},
-				});
+				};
 
-				const fromOptions = result.data.map((option) => ({
-					name: option.split(' - ')[0],
+				const result = await getCall(getData);
+
+				const fromOptions = result.data.fromDates.map((option) => ({
+					name: dateFormat(option, 'mm-dd-yyyy'),
 				}));
-				const toOptions = result.data.map((option) => ({
-					name: option.split(' - ')[1],
+				const toOptions = result.data.toDates.map((option) => ({
+					name: dateFormat(option, 'mm-dd-yyyy'),
 				}));
+
+				setSelectedFromDate(fromOptions[0].name);
+				setSelectedToDate(toOptions[0].name);
 
 				setFromDateOptions(fromOptions);
 				setToDateOptions(toOptions);
+
+				setIsDateLoading(false);
 			} catch (error) {
 				console.error('Error in fetching date options', error);
 			} finally {
 				setIsDateLoading(false);
 			}
 		};
-
-		fetchData();
-	}, [companyID, defaultUnitID]);
+		if (selectedUnit) {
+			fetchDates();
+		}
+	}, [selectedUnit, countType]);
 
 	const fetchActualFoodCostReport = async () => {
 		try {
@@ -486,7 +484,8 @@ const ActualFoodCost = () => {
 						: { ...item, showOnReport: false, includeInGrandTotal: false };
 				});
 
-				setCheckedItems(updatedCheckedItems);
+				setCheckedItemsLoaded(true);
+				setCheckedItems((prev) => [...updatedCheckedItems]);
 				setActualFoodCostData(newData);
 				setFilteredActualFoodCostData(newData);
 			}
@@ -881,16 +880,14 @@ const ActualFoodCost = () => {
 							<Dropdown
 								title='From Date'
 								options={fromDateOptions}
-								selectedOption={selectedFromDate}
-								handleOptionChange={(date) => setSelectedFromDate(date)}
-								isLoading={isDateLoading}
+								selectedOption={isDateLoading ? 'Loading...' : selectedFromDate}
+								onOptionChange={(date) => setSelectedFromDate(date)}
 							/>
 							<Dropdown
 								title='To Date'
 								options={toDateOptions}
-								selectedOption={selectedToDate}
-								handleOptionChange={(date) => setSelectedToDate(date)}
-								isLoading={isDateLoading}
+								selectedOption={isDateLoading ? 'Loading...' : selectedToDate}
+								onOptionChange={(date) => setSelectedToDate(date)}
 							/>
 						</div>
 						<div className='w-36'>
@@ -988,7 +985,9 @@ const ActualFoodCost = () => {
 											</div>
 										)}
 									</div>
-									{tableState?.expanded && Object.keys(tableState.expanded).length > 2 && (
+									{((tableState?.expanded &&
+										Object.keys(tableState.expanded).some((key) => /^\d+\.\d+\.\d+$/.test(key))) ||
+										viewby === 'Inventory Item') && (
 										<div className='flex items-center mt-[31px] gap-3'>
 											<div>
 												<input

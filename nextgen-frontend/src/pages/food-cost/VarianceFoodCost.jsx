@@ -59,6 +59,7 @@ const VarianceFoodCost = () => {
 
 	const [showQuantities, setShowQuantities] = useState(true);
 	const [showDollarAmounts, setShowDollarAmounts] = useState(true);
+	const [showWarnings, setShowWarnings] = useState(false);
 
 	const [isShowHideDepartmentsModalVisible, setIsShowHideDepartmentsModalVisible] = useState(false);
 	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
@@ -173,7 +174,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('idealNumber', {
 			id: 'idealNumber',
 			header: 'Ideal #',
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
+			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -194,7 +195,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('varianceNumber', {
 			id: 'varianceNumber',
 			header: 'Variance #',
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
+			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 100,
 		}),
@@ -215,7 +216,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('wasteNumber', {
 			id: 'wasteNumber',
 			header: 'Waste #',
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue().toFixed(2)),
+			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -243,7 +244,7 @@ const VarianceFoodCost = () => {
 			id: 'comparisonSales',
 			header: 'Comparison Sales',
 			dataType: 'number',
-			cell: ({ getValue }) => (getValue() !== undefined ? `$${getValue().toFixed(2)}` : ''),
+			cell: ({ getValue }) => (getValue() !== undefined ? `$${getValue()?.toFixed(2)}` : ''),
 			size: 150,
 		}),
 	];
@@ -295,7 +296,7 @@ const VarianceFoodCost = () => {
 				.toFixed(2);
 			return isPercentage ? `${sum}%` : `$${sum}`;
 		} else {
-			return isPercentage ? `${getValue().toFixed(2)}%` : `$${getValue().toFixed(2)}`;
+			return isPercentage ? `${getValue()?.toFixed(2)}%` : `$${getValue()?.toFixed(2)}`;
 		}
 	};
 
@@ -320,9 +321,9 @@ const VarianceFoodCost = () => {
 	}, []);
 
 	useEffect(() => {
-		if (!checkedItemsLoaded) {
+		if (checkedItemsLoaded) {
 			setColumns(generatedColumns);
-			setCheckedItemsLoaded(true);
+			setCheckedItemsLoaded(false);
 		}
 	}, [checkedItems]);
 
@@ -331,35 +332,47 @@ const VarianceFoodCost = () => {
 	}, [isTableRendered]);
 
 	useEffect(() => {
-		const fetchData = async () => {
-			setIsDateLoading(true);
+		const fetchDates = async () => {
 			try {
-				const result = await getCall({
-					url: 'companyUnitDates',
+				setIsDateLoading(true);
+				const getData = {
+					url: 'getCountsheetDates',
 					urlParams: {
 						companyId: companyID,
-						unitId: defaultUnitID,
+						unitId: selectedUnit,
+						countType: countType,
 					},
-				});
+				};
 
-				const fromOptions = result.data.map((option) => ({
-					name: option.split(' - ')[0],
+				const result = await getCall(getData);
+
+				const fromOptions = result.data.fromDates.map((option) => ({
+					name: dateFormat(option, 'mm-dd-yyyy'),
 				}));
-				const toOptions = result.data.map((option) => ({
-					name: option.split(' - ')[1],
+				const toOptions = result.data.toDates.map((option) => ({
+					name: dateFormat(option, 'mm-dd-yyyy'),
 				}));
+
+				if (fromOptions.length === 1 || toOptions.length === 1) {
+					setShowWarnings(true);
+				}
+
+				setSelectedFromDate(fromOptions[0].name);
+				setSelectedToDate(toOptions[0].name);
 
 				setFromDateOptions(fromOptions);
 				setToDateOptions(toOptions);
+				setIsDateLoading(false);
 			} catch (error) {
 				console.error('Error in fetching date options', error);
 			} finally {
 				setIsDateLoading(false);
 			}
 		};
-
-		fetchData();
-	}, [companyID, defaultUnitID]);
+		if (selectedUnit) {
+			fetchDates();
+		}
+	}, [selectedUnit, countType]);
 
 	const fetchVarianceFoodCost = async () => {
 		try {
@@ -380,58 +393,69 @@ const VarianceFoodCost = () => {
 
 			const result = await getCall(getData);
 
-			const newData = [
-				{
-					department: 'TOTAL',
-					subRows: result.data.map((department) => ({
-						department: department.department,
-						comparisonName:
-							department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonName || 'Net Sales',
-						comparisonSales: department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonSales || 0,
-						subRows: department.subDepartments.map((subDepartment) => ({
-							subDepartment: subDepartment.subDepartment,
-							comparisonName: 'Net Sales',
+			if (result?.data && result?.data?.length === 0) {
+				setVarianceFoodCostData([]);
+			} else {
+				const newData = [
+					{
+						department: 'TOTAL',
+						subRows: result.data.map((department) => ({
+							department: department.department,
+							comparisonName:
+								department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonName || 'Net Sales',
 							comparisonSales:
 								department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonSales || 0,
-							subRows: subDepartment.varianceFoodCostModels.map((foodCost) => ({
-								description: foodCost.description,
-								countDisplayUnitName: foodCost.countDisplayUnitName,
-								actualNumber: foodCost.actualQuant,
-								actualDollar: foodCost.actualCost,
-								actualPct: foodCost.actualCostPct,
-								idealNumber: foodCost.idealQuant,
-								idealDollar: foodCost.idealCost,
-								idealPct: foodCost.salesNet ? (foodCost.idealCost / foodCost.salesNet) * 100 : 0,
-								varianceNumber: foodCost.varianceQuant,
-								varianceDollar: foodCost.varianceCost,
-								variancePct: foodCost.salesNet ? (foodCost.varianceCost / foodCost.salesNet) * 100 : 0,
-								wasteNumber: foodCost.wasteCountCases,
-								wasteDollar: foodCost.wasteCountCost,
-								wastePct: foodCost.salesNet ? (foodCost.wasteCountCost / foodCost.salesNet) * 100 : 0,
+							subRows: department.subDepartments.map((subDepartment) => ({
+								subDepartment: subDepartment.subDepartment,
+								comparisonName: 'Net Sales',
+								comparisonSales:
+									department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonSales || 0,
+								subRows: subDepartment.varianceFoodCostModels.map((foodCost) => ({
+									description: foodCost.description,
+									countDisplayUnitName: foodCost.countDisplayUnitName,
+									actualNumber: foodCost.actualQuant,
+									actualDollar: foodCost.actualCost,
+									actualPct: foodCost.actualCostPct,
+									idealNumber: foodCost.idealQuant,
+									idealDollar: foodCost.idealCost,
+									idealPct: foodCost.salesNet ? (foodCost.idealCost / foodCost.salesNet) * 100 : 0,
+									varianceNumber: foodCost.varianceQuant,
+									varianceDollar: foodCost.varianceCost,
+									variancePct: foodCost.salesNet
+										? (foodCost.varianceCost / foodCost.salesNet) * 100
+										: 0,
+									wasteNumber: foodCost.wasteCountCases,
+									wasteDollar: foodCost.wasteCountCost,
+									wastePct: foodCost.salesNet
+										? (foodCost.wasteCountCost / foodCost.salesNet) * 100
+										: 0,
+								})),
 							})),
 						})),
-					})),
-				},
-			];
+					},
+				];
 
-			const updatedCheckedItems = checkedItems.map((item) => {
-				const [department, subDepartment] = item.name.split('/');
-				const match = result.data?.some(
-					(data) =>
-						data.department === department &&
-						data.subDepartments.some(
-							(subData) =>
-								subData.subDepartment === subDepartment || subData.subDepartment.includes(subDepartment)
-						)
-				);
-				return match
-					? { ...item, showOnReport: true, includeInGrandTotal: true }
-					: { ...item, showOnReport: false, includeInGrandTotal: false };
-			});
+				const updatedCheckedItems = checkedItems.map((item) => {
+					const [department, subDepartment] = item.name.split('/');
+					const match = result.data?.some(
+						(data) =>
+							data.department === department &&
+							data.subDepartments.some(
+								(subData) =>
+									subData.subDepartment === subDepartment ||
+									subData.subDepartment.includes(subDepartment)
+							)
+					);
+					return match
+						? { ...item, showOnReport: true, includeInGrandTotal: true }
+						: { ...item, showOnReport: false, includeInGrandTotal: false };
+				});
 
-			setCheckedItems(updatedCheckedItems);
-			setVarianceFoodCostData(newData);
-			setFilteredVarianceFoodCostData(newData);
+				setCheckedItemsLoaded(true);
+				setCheckedItems(updatedCheckedItems);
+				setVarianceFoodCostData(newData);
+				setFilteredVarianceFoodCostData(newData);
+			}
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -807,14 +831,14 @@ const VarianceFoodCost = () => {
 							<Dropdown
 								title='From Date'
 								options={fromDateOptions}
-								selectedOption={selectedFromDate}
+								selectedOption={isDateLoading ? 'Loading...' : selectedFromDate}
 								handleOptionChange={(date) => setSelectedFromDate(date)}
 								isLoading={isDateLoading}
 							/>
 							<Dropdown
 								title='To Date'
 								options={toDateOptions}
-								selectedOption={selectedToDate}
+								selectedOption={isDateLoading ? 'Loading...' : selectedToDate}
 								handleOptionChange={(date) => setSelectedToDate(date)}
 								isLoading={isDateLoading}
 							/>
@@ -854,7 +878,7 @@ const VarianceFoodCost = () => {
 							<div className='flex flex-row items-center space-x-3'>
 								<div className='w-48'>
 									<Dropdown
-										title='Expand View'
+										title='View Totals By'
 										options={viewOptions}
 										selectedOption={viewby}
 										onOptionChange={(option) => setViewBy(option)}
@@ -912,7 +936,9 @@ const VarianceFoodCost = () => {
 										</div>
 									)}
 								</div>
-								{tableState?.expanded && Object.keys(tableState.expanded).length > 2 && (
+								{((tableState?.expanded &&
+									Object.keys(tableState.expanded).some((key) => /^\d+\.\d+\.\d+$/.test(key))) ||
+									viewby === 'Inventory Item') && (
 									<div className='flex items-center mt-[31px] gap-3'>
 										<div>
 											<input
@@ -1032,6 +1058,16 @@ const VarianceFoodCost = () => {
 									Update Report
 								</button>
 							</div>
+						</div>
+					</Modal>
+					<Modal title={'Warning'} isOpen={showWarnings} onClose={() => setShowWarnings(false)}>
+						<div className='p-4 w-[340px]'>
+							<p className='text-center'>
+								{`Not enough countsheets of ${Object.keys(viewMap).find(
+									(key) => viewMap[key] === countType
+								)} type to compare for ${selectedUnitName}.`}{' '}
+								<br /> Please select a different type or a different date range.
+							</p>
 						</div>
 					</Modal>
 				</div>

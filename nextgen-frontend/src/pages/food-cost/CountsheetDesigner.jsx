@@ -113,7 +113,7 @@ const CountsheetDesigner = () => {
 			const getData = {
 				url: 'countsheetDetails',
 				urlParams: {
-					companyId: location.state.companyId,
+					companyId: location.state.companyID,
 					countsheetID: location.state.countsheet?.inventoryCountSheetID,
 				},
 			};
