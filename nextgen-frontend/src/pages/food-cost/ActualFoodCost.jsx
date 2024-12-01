@@ -52,6 +52,7 @@ const ActualFoodCost = () => {
 
 	const [showQuantities, setShowQuantities] = useState(true);
 	const [showDollarAmounts, setShowDollarAmounts] = useState(true);
+	const [showWarnings, setShowWarnings] = useState(false);
 
 	const [isShowHideDepartments, setIsShowHideDepartments] = useState(false);
 	const [checkedItems, setCheckedItems] = useState([
@@ -345,11 +346,8 @@ const ActualFoodCost = () => {
 	}, [defaultUnitID, defaultUnitName]);
 
 	useEffect(() => {
-		if (checkedItemsLoaded) {
-			setColumns(generatedColumns);
-			setCheckedItemsLoaded(false);
-		}
-	}, [checkedItems]);
+		setColumns(generatedColumns);
+	}, [checkedItemsLoaded]);
 
 	useEffect(() => {
 		setViewBy(viewby);
@@ -377,12 +375,15 @@ const ActualFoodCost = () => {
 					name: dateFormat(option, 'mm-dd-yyyy'),
 				}));
 
+				if (fromOptions.length === 1 || toOptions.length === 1) {
+					setShowWarnings(true);
+				}
+
 				setSelectedFromDate(fromOptions[0].name);
 				setSelectedToDate(toOptions[0].name);
 
 				setFromDateOptions(fromOptions);
 				setToDateOptions(toOptions);
-
 				setIsDateLoading(false);
 			} catch (error) {
 				console.error('Error in fetching date options', error);
@@ -486,6 +487,7 @@ const ActualFoodCost = () => {
 
 				setCheckedItemsLoaded(true);
 				setCheckedItems((prev) => [...updatedCheckedItems]);
+
 				setActualFoodCostData(newData);
 				setFilteredActualFoodCostData(newData);
 			}
@@ -519,8 +521,6 @@ const ActualFoodCost = () => {
 
 		const updatedColumns = columns.map((column) => {
 			if (column.header && column.header.includes(type)) {
-				console.log(column);
-
 				return {
 					...column,
 					show: status,
@@ -531,6 +531,8 @@ const ActualFoodCost = () => {
 				};
 			}
 		});
+
+		console.log('updatedColumns', updatedColumns);
 
 		setColumns((prev) => [...updatedColumns]);
 		fetchActualFoodCostReport();
@@ -876,21 +878,25 @@ const ActualFoodCost = () => {
 							onClick={() => setShowUnitModal(true)}
 						/>
 
-						<div className='flex'>
-							<Dropdown
-								title='From Date'
-								options={fromDateOptions}
-								selectedOption={isDateLoading ? 'Loading...' : selectedFromDate}
-								onOptionChange={(date) => setSelectedFromDate(date)}
-							/>
-							<Dropdown
-								title='To Date'
-								options={toDateOptions}
-								selectedOption={isDateLoading ? 'Loading...' : selectedToDate}
-								onOptionChange={(date) => setSelectedToDate(date)}
-							/>
+						<div className='flex gap-2'>
+							<div className='w-44'>
+								<Dropdown
+									title='From Date'
+									options={fromDateOptions}
+									selectedOption={isDateLoading ? 'Loading...' : selectedFromDate}
+									onOptionChange={(date) => setSelectedFromDate(date)}
+								/>
+							</div>
+							<div className='w-44'>
+								<Dropdown
+									title='To Date'
+									options={toDateOptions}
+									selectedOption={isDateLoading ? 'Loading...' : selectedToDate}
+									onOptionChange={(date) => setSelectedToDate(date)}
+								/>
+							</div>
 						</div>
-						<div className='w-36'>
+						<div className='ml-2 w-36'>
 							<Dropdown
 								title='Count Type'
 								options={dropdownOptions}
@@ -1135,6 +1141,16 @@ const ActualFoodCost = () => {
 									Update Report
 								</button>
 							</div>
+						</div>
+					</Modal>
+					<Modal title={'Warning'} isOpen={showWarnings} onClose={() => setShowWarnings(false)}>
+						<div className='p-4 w-[340px]'>
+							<p className='text-center'>
+								{`Not enough countsheets of ${Object.keys(viewMap).find(
+									(key) => viewMap[key] === countType
+								)} type to compare for ${selectedUnitName}.`}{' '}
+								<br /> Please select a different type or a different date range.
+							</p>
 						</div>
 					</Modal>
 				</div>

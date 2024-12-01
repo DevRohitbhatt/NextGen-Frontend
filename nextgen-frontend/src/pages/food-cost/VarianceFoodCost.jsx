@@ -310,22 +310,8 @@ const VarianceFoodCost = () => {
 	}, [defaultUnitID, defaultUnitName]);
 
 	useEffect(() => {
-		const date = new Date();
-		const day = date.getDay();
-		const diff = date.getDate() - day - 7 + (day === 0 ? -6 : 1);
-		const fromDate = new Date(date.setDate(diff));
-		const toDate = new Date(date.setDate(diff + 6));
-
-		setSelectedFromDate(dateFormat(fromDate, 'mm/dd/yyyy'));
-		setSelectedToDate(dateFormat(toDate, 'mm/dd/yyyy'));
-	}, []);
-
-	useEffect(() => {
-		if (checkedItemsLoaded) {
-			setColumns(generatedColumns);
-			setCheckedItemsLoaded(false);
-		}
-	}, [checkedItems]);
+		setColumns(generatedColumns);
+	}, [checkedItemsLoaded]);
 
 	useEffect(() => {
 		setViewBy(viewby);
@@ -828,20 +814,24 @@ const VarianceFoodCost = () => {
 							onClick={() => setShowUnitModal(true)}
 						/>
 						<div className='flex'>
-							<Dropdown
-								title='From Date'
-								options={fromDateOptions}
-								selectedOption={isDateLoading ? 'Loading...' : selectedFromDate}
-								handleOptionChange={(date) => setSelectedFromDate(date)}
-								isLoading={isDateLoading}
-							/>
-							<Dropdown
-								title='To Date'
-								options={toDateOptions}
-								selectedOption={isDateLoading ? 'Loading...' : selectedToDate}
-								handleOptionChange={(date) => setSelectedToDate(date)}
-								isLoading={isDateLoading}
-							/>
+							<div className='w-44'>
+								<Dropdown
+									title='From Date'
+									options={fromDateOptions}
+									selectedOption={isDateLoading ? 'Loading...' : selectedFromDate}
+									handleOptionChange={(date) => setSelectedFromDate(date)}
+									isLoading={isDateLoading}
+								/>
+							</div>
+							<div className='w-44'>
+								<Dropdown
+									title='To Date'
+									options={toDateOptions}
+									selectedOption={isDateLoading ? 'Loading...' : selectedToDate}
+									handleOptionChange={(date) => setSelectedToDate(date)}
+									isLoading={isDateLoading}
+								/>
+							</div>
 						</div>
 						<div className='w-36'>
 							<Dropdown
