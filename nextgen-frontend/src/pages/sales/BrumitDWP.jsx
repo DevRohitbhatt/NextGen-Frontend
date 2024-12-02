@@ -256,7 +256,7 @@ const BrumitDWP = () => {
 							id: key,
 							header: key,
 							cell: ({ getValue }) => (
-								<div className={`${parseFloat(getValue()) < 0 ? 'text-[#D43F3A]' : ''}`}>
+								<div className={`${getValue()?.includes('-') ? 'text-[#D43F3A]' : ''}`}>
 									{getValue()}
 								</div>
 							),
