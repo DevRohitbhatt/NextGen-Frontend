@@ -590,115 +590,81 @@ const ActualFoodCost = () => {
 	};
 
 	const buildPDFBody = (type) => {
-		let body = [];
-		(type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData).flatMap((row) => [
-			(body = row.subRows.flatMap((subRow) => {
-				return {
-					type: 'table',
-					title: subRow.department,
-					widths: [
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-					],
-					dataTypes: [
-						'string',
-						'string',
-						'string',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'string',
-						'number',
-					],
-					data: formatPDFData(subRow),
-				};
-			})),
-		]);
+		const rowsPerTable = 28;
+		const body = [];
+		const data = type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData;
+
+		data.forEach((row) => {
+			row.subRows.forEach((subRow) => {
+				const allRows = subRow.subRows.flatMap((subDept) =>
+					subDept.subRows.map((item) => ({
+						subDepartment: subDept.subDepartment,
+						...item,
+					}))
+				);
+
+				const totalRows = allRows.length;
+
+				const allColumns = [
+					{ id: 'subDepartment', header: 'Sub Department', dataType: 'string' },
+					{ id: 'description', header: 'Description', dataType: 'string' },
+					{ id: 'countDisplayUnitName', header: 'UOM', dataType: 'string' },
+					{ id: 'begCountDisplayUnits', header: 'Beg #', dataType: 'number' },
+					{ id: 'begCountCost', header: 'Beg $', dataType: 'number' },
+					{ id: 'purchaseDisplayUnits', header: 'Pur #', dataType: 'number' },
+					{ id: 'purchaseCost', header: 'Pur $', dataType: 'number' },
+					{ id: 'iTinCountDisplayUnits', header: 'Trans In#', dataType: 'number' },
+					{ id: 'iTinCountCost', header: 'Trans In $', dataType: 'number' },
+					{ id: 'iToutCountDisplayUnits', header: 'Trans Out#', dataType: 'number' },
+					{ id: 'iToutCountCost', header: 'Trans Out $', dataType: 'number' },
+					{ id: 'endCountDisplayUnits', header: 'End #', dataType: 'number' },
+					{ id: 'endCountCost', header: 'End $', dataType: 'number' },
+					{ id: 'usageCountDisplayUnits', header: 'Actual Usage #', dataType: 'number' },
+					{ id: 'usageCost', header: 'Actual Usage $', dataType: 'number' },
+					{ id: 'usageCostPct', header: 'Actual Usage %', dataType: 'number' },
+					{ id: 'wasteCountDisplayUnits', header: 'Waste #', dataType: 'number' },
+					{ id: 'wasteCountCost', header: 'Waste $', dataType: 'number' },
+					{ id: 'comparisonName', header: 'Comparison Name', dataType: 'string' },
+					{ id: 'comparisonSales', header: 'Comparison Sales', dataType: 'number' },
+				];
+
+				for (let i = 0; i < totalRows; i += rowsPerTable) {
+					const chunkedColumns = [];
+					for (let j = 0; j < allColumns.length; j += 13) {
+						chunkedColumns.push(allColumns.slice(j, j + 13));
+					}
+
+					chunkedColumns.forEach((columnChunk) => {
+						body.push({
+							type: 'table/SeperatePage',
+							title: subRow.department,
+							widths: columnChunk.map(() => 'auto'),
+							dataTypes: columnChunk.map((column) => column.dataType),
+							data: {
+								columnHeaders: columnChunk.map((column) => column.header),
+								rows: allRows.slice(i, i + rowsPerTable).map((row) =>
+									columnChunk.map((column) => ({
+										value: formatCellValue(row[column.id], column.dataType),
+										cellType: column.dataType,
+										columnName: column.header,
+									}))
+								),
+							},
+						});
+					});
+				}
+			});
+		});
 
 		return body;
 	};
 
-	const formatPDFData = (data) => {
-		const newData = {
-			columnHeaders: [
-				'Sub Department',
-				'Description',
-				'UOM',
-				'Beg #',
-				'Beg $',
-				'Pur #',
-				'Pur $',
-				'Trans In#',
-				'Trans In $',
-				'Trans Out#',
-				'Trans Out $',
-				'End #',
-				'End $',
-				'Actual Usage #',
-				'Actual Usage $',
-				'Actual Usage %',
-				'Waste #',
-				'Waste $',
-				'Comparison Name',
-				'Comparison Sales',
-			],
-			rows: data.subRows.flatMap((subRow) =>
-				subRow.subRows.map((subSubRow) => [
-					{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
-					{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
-					{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'UOM' },
-					{ value: subSubRow.begCountDisplayUnits, cellType: 'number', columnName: 'Beg #' },
-					{ value: subSubRow.begCountCost, cellType: 'number', columnName: 'Beg $' },
-					{ value: subSubRow.purchaseDisplayUnits, cellType: 'number', columnName: 'Pur #' },
-					{ value: subSubRow.purchaseCost, cellType: 'number', columnName: 'Pur $' },
-					{ value: subSubRow.iTinCountDisplayUnits, cellType: 'number', columnName: 'Trans In#' },
-					{ value: subSubRow.iTinCountCost, cellType: 'number', columnName: 'Trans In $' },
-					{ value: subSubRow.iToutCountDisplayUnits, cellType: 'number', columnName: 'Trans Out #' },
-					{ value: subSubRow.iToutCountCost, cellType: 'number', columnName: 'Trans Out $' },
-					{ value: subSubRow.endCountDisplayUnits, cellType: 'number', columnName: 'End #' },
-					{ value: subSubRow.endCountCost, cellType: 'number', columnName: 'End $' },
-					{ value: subSubRow.usageCountDisplayUnits, cellType: 'number', columnName: 'Actual Usage #' },
-					{ value: subSubRow.usageCost, cellType: 'number', columnName: 'Actual Usage $' },
-					{ value: subSubRow.usageCostPct, cellType: 'number', columnName: 'Actual Usage %' },
-					{ value: subSubRow.wasteCountDisplayUnits, cellType: 'number', columnName: 'Waste #' },
-					{ value: subSubRow.wasteCountCost, cellType: 'number', columnName: 'Waste $' },
-					{ value: subSubRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
-					{ value: subSubRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
-				])
-			),
-		};
-
-		return newData;
+	const formatCellValue = (value, dataType) => {
+		if (value === undefined || value === null) return '';
+		if (dataType === 'number') {
+			return typeof value === 'number' ? value.toLocaleString('en-US') : value;
+		}
+		return value;
 	};
 
 	const togglePopup = () => {
@@ -835,7 +801,7 @@ const ActualFoodCost = () => {
 				return selectedCountsheet;
 			}, null);
 
-			navigate('/CountsheetDesigner', { state: { companyId: companyID, countsheet: countsheet } });
+			navigate('/CountsheetDesigner', { state: { companyID: companyID, countsheet: countsheet } });
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
 		}

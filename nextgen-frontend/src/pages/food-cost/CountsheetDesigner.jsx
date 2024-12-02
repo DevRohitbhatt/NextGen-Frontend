@@ -102,6 +102,7 @@ const CountsheetDesigner = () => {
 	useEffect(() => {
 		setCountsheet(location.state.countsheet);
 		setSelectedFromDate(new Date(location.state.countsheet?.dateTime));
+		console.log(location.state);
 
 		fetchCountsheetDetails();
 	}, []);

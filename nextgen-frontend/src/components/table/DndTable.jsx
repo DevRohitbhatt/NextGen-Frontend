@@ -246,9 +246,9 @@ function DndTable(props) {
 				<div className='flex items-center my-4 space-x-4'>
 					<button
 						onClick={() => collapseAll()}
-						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-							true
-								? 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
+						className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+							Object.keys(expanded).length !== 0
+								? 'text-[var(--tw-primary)] bg-white'
 								: 'bg-[var(--tw-primary)] text-white'
 						}`}
 					>
@@ -257,10 +257,10 @@ function DndTable(props) {
 					</button>
 					<button
 						onClick={() => expandAll()}
-						className={`flex items-center gap-2 px-4 py-3 border-2 border-solid border-[var(--tw-primary)]  hover:text-white hover:bg-[var(--tw-primary)] focus:outline-none transition-[color] delay-[0.0833333333s] duration-[250ms] ${
-							true
+						className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] border-solid font-medium focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+							Object.values(expanded).every((val) => val === true) && Object.keys(expanded).length > 0
 								? 'bg-[var(--tw-primary)] text-white'
-								: 'text-[var(--tw-primary)] bg-[var(--tw-secondary)]'
+								: 'text-[var(--tw-primary)] bg-white'
 						}`}
 					>
 						Expand All
