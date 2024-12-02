@@ -23,15 +23,9 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const ActualFoodCost = () => {
-	const {
-		companyID,
-		alignmentID,
-		unitsAndAreas,
-		groupOrUnitAccess,
-		defaultUnitID,
-		groupOrUnitAccessName,
-		defaultUnitName,
-	} = useSelector((state) => state.globalState);
+	const { companyID, alignmentID, unitsAndAreas, defaultUnitID, defaultUnitName } = useSelector(
+		(state) => state.globalState
+	);
 	const [actualFoodCostData, setActualFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 
@@ -305,13 +299,13 @@ const ActualFoodCost = () => {
 	};
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	const fetchActualFoodCostReport = async () => {
 		try {
