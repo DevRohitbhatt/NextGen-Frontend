@@ -113,7 +113,7 @@ const BrumitDWP = () => {
 					return {
 						...Object.keys(row.unitGroups).reduce((acc, key) => {
 							if (row.itemName === 'Net Sales') {
-								acc[key] = `$${parseInt(row.unitGroups[key])}`;
+								acc[key] = `$${row.unitGroups[key].toFixed(0)}`;
 							} else if (
 								row.itemName === 'Order Average' ||
 								row.itemName === 'Order Average Comparison +/- vs. LY'
@@ -144,7 +144,7 @@ const BrumitDWP = () => {
 						[row.dateRange]: row.itemName,
 						...Object.keys(row.unitGroups).reduce((acc, key) => {
 							if (row.itemName === 'Cash +/-') {
-								acc[key] = `$${parseInt(row.unitGroups[key])}`;
+								acc[key] = `$${row.unitGroups[key].toFixed(0)}`;
 							} else {
 								acc[key] = `${(row.unitGroups[key] * 100).toFixed(2)}%`;
 							}
