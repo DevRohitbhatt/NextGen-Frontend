@@ -18,15 +18,9 @@ import dateFormat from 'dateformat';
 const columnHelper = createColumnHelper();
 
 const InventoryWeeksOnHand = () => {
-	const {
-		companyID,
-		alignmentID,
-		unitsAndAreas,
-		groupOrUnitAccess,
-		defaultUnitID,
-		groupOrUnitAccessName,
-		defaultUnitName,
-	} = useSelector((state) => state.globalState);
+	const { companyID, alignmentID, unitsAndAreas, defaultUnitID, defaultUnitName } = useSelector(
+		(state) => state.globalState
+	);
 	const [inventoryWeeksOnHandReportData, setInventoryWeeksOnHandReportData] = useState([]);
 	const [total, setTotal] = useState(0);
 
@@ -43,7 +37,7 @@ const InventoryWeeksOnHand = () => {
 	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//dropdown variables
-	const [usage, setUsage] = useState('Last Week Avg - Actual');
+	const [usage, setUsage] = useState('4 Weeks Avg - Actual');
 	const [weekBefore, setWeekBefore] = useState(1);
 	const dropdownOptions = [
 		{ name: 'Last Week Avg - Actual' },
@@ -187,13 +181,13 @@ const InventoryWeeksOnHand = () => {
 	);
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	const fetchInventoryWeeksOnHandReport = async () => {
 		try {

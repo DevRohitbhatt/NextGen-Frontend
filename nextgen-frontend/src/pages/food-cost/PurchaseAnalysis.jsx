@@ -47,6 +47,8 @@ const PurchaseAnalysis = () => {
 	);
 
 	const [isTableRendered, setIsTableRendered] = useState(false);
+	const [isLocationReportRendered, setIsLocationReportRendered] = useState(false);
+	const [hasUnitChanged, setHasUnitchanged] = useState(true);
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
@@ -55,6 +57,7 @@ const PurchaseAnalysis = () => {
 
 	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
+	const [isVendorsLoading, setIsVendorsLoading] = useState(false);
 	const [selectedVendorName, setSelectedVendorName] = useState('All Vendors');
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
@@ -224,15 +227,28 @@ const PurchaseAnalysis = () => {
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
 	useEffect(() => {
-		if (location.state) {
-			fetchPurchaseAnalysisReport();
+		if (location.state && !isLocationReportRendered) {
+			console.log('location.state', location.state);
+
+			setSelectedUnit(location.state?.selectedUnit);
+			setSelectedUnitName(location.state.selectedUnitName);
+			setSelectedFromDate(new Date(location.state.fromDate));
+			setSelectedToDate(new Date(location.state.toDate));
+			setSelectedVendor(location.state.vendorId);
+			if (selectedUnit) {
+				fetchPurchaseAnalysisReport('Department');
+			}
+		} else if (hasUnitChanged && isLocationReportRendered) {
+			handleGroupByChange(selectedGroupBy, true);
+			setHasUnitchanged(false);
+			setPurchaseData([]);
 		}
-	}, []);
+	}, [selectedUnit]);
 
 	const fetchData = async (companyId) => {
-		setIsLoading(true);
+		setIsVendorsLoading(true);
 		await Promise.all([fetchVendors(companyId)]);
-		setIsLoading(false);
+		setIsVendorsLoading(false);
 	};
 
 	// This function fetches the vendors.
@@ -242,7 +258,7 @@ const PurchaseAnalysis = () => {
 			const getData = {
 				url: 'vendors',
 				urlParams: {
-					companyID: companyID,
+					companyId: companyID,
 				},
 			};
 
@@ -255,7 +271,7 @@ const PurchaseAnalysis = () => {
 		}
 	};
 
-	const fetchPurchaseAnalysisReport = async () => {
+	const fetchPurchaseAnalysisReport = async (option) => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -264,18 +280,14 @@ const PurchaseAnalysis = () => {
 			const getData = {
 				url: 'PurchaseAnalysis',
 				urlParams: {
-					companyID: location.state?.companyID || companyID,
-					alignmentID: location.state?.alignmentID || alignmentID,
-					memberId: location.state?.memberID || selectedUnit,
-					fromDate: location.state?.fromDate || dateFormat(selectedFromDate, 'yyyy-mm-dd'),
-					toDate: location.state?.toDate || dateFormat(selectedToDate, 'yyyy-mm-dd'),
-					vendorId: location.state?.vendorId || selectedVendor,
+					companyID: companyID,
+					alignmentID: alignmentID,
+					memberId: selectedUnit,
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					vendorId: selectedVendor,
 				},
 			};
-
-			if (location.state?.memberID) {
-				setSelectedUnit(location.state.memberID);
-			}
 
 			const result = await getCall(getData);
 
@@ -290,6 +302,10 @@ const PurchaseAnalysis = () => {
 			setPurchaseData(newData);
 			setIsLoading(false);
 			setIsTableRendered(true);
+			if (option && isLocationReportRendered === false) {
+				handleGroupByChange(option);
+			}
+			setIsLocationReportRendered(true);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -316,20 +332,24 @@ const PurchaseAnalysis = () => {
 		setVendorShowModal(false);
 	};
 
-	const handleGroupByChange = (option) => {
-		setSelectedGroupBy(option);
+	const handleGroupByChange = (option, status) => {
+		if (option !== 'Department') {
+			setSelectedGroupBy(option);
+		}
 		const groupByColumns = {
 			None: [],
+			Department: ['department', 'subdepartment'],
 			'Unit - GLCode': ['unitName', 'companyGLCode'],
-			'Unit- Department': ['unitName', 'department'],
+			'Unit- Department': ['unitName', 'department', 'subdepartment'],
 			'Unit - Inventory Item': ['unitName', 'inventoryItemDescription'],
 			'Unit - Vendor Item - Inventory Item': ['unitName', 'vendorItemDescription', 'inventoryItemDescription'],
 			'Unit - Vendor - Invoice': ['unitName', 'name', 'vendorInvoiceReference'],
 			'Vendor - GLCode': ['name', 'companyGLCode'],
-			'Vendor - Department': ['name', 'department'],
+			'Vendor - Department': ['name', 'department', 'subdepartment'],
 		};
 
 		const selectedGroupByColumns = groupByColumns[option] || [];
+
 		const newColumns = memoizedColumns.map((column) =>
 			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
 		);
@@ -371,7 +391,7 @@ const PurchaseAnalysis = () => {
 
 		setColumns(newColumns);
 
-		if (isTableRendered) {
+		if (isTableRendered && !status) {
 			fetchPurchaseAnalysisReport();
 		}
 	};
@@ -468,7 +488,7 @@ const PurchaseAnalysis = () => {
 						/>
 						<VendorSelector
 							vendorID={selectedVendor}
-							vendorName={selectedVendorName}
+							vendorName={isVendorsLoading ? 'Loading...' : selectedVendorName}
 							setVendorName={setSelectedVendorName}
 							onClick={() => setVendorShowModal(true)}
 						/>
@@ -480,7 +500,7 @@ const PurchaseAnalysis = () => {
 								onOptionChange={handleGroupByChange}
 							/>
 						</div>
-						<div className='run-button' onClick={fetchPurchaseAnalysisReport}>
+						<div className='run-button' onClick={() => fetchPurchaseAnalysisReport()}>
 							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>

@@ -28,8 +28,6 @@ const LaborByPayPeriod = () => {
 		unitsAndAreas: unitsAndAreasList,
 		defaultUnitID,
 		defaultUnitName,
-		groupOrUnitAccess,
-		groupOrUnitAccessName,
 	} = useSelector((state) => state.globalState);
 	const [laborByPayPeriodData, setLaborByPayPeriodData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
@@ -196,13 +194,13 @@ const LaborByPayPeriod = () => {
 	);
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	const fetchLaborByPayPeriod = async () => {
 		try {

@@ -28,8 +28,6 @@ const Voids = () => {
 		unitsAndAreas: unitsAndAreasList,
 		defaultUnitID,
 		defaultUnitName,
-		groupOrUnitAccess,
-		groupOrUnitAccessName,
 	} = useSelector((state) => state.globalState);
 
 	const [voidsReportData, setVoidsReportData] = useState([]);
@@ -57,7 +55,7 @@ const Voids = () => {
 	//dropdown variables
 	const [fromFilter, setFromFilter] = useState(0);
 	const [toFilter, setToFilter] = useState(0);
-	const dropdownOptions = Array.from({ length: 24 }, (_, index) => ({ name: (index + 1).toString() }));
+	const dropdownOptions = Array.from({ length: 24 }, (_, index) => ({ name: index.toString() }));
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -162,20 +160,18 @@ const Voids = () => {
 	);
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	const fetchVoidsReport = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setFromFilter(0);
-			setToFilter(0);
 			const getData = {
 				url: 'voids',
 				urlParams: {
@@ -213,6 +209,10 @@ const Voids = () => {
 
 			setVoidsReportData(newData.data);
 			setFilteredVoidsReportData(newData.data);
+			if (fromFilter > 0 && toFilter > 0) {
+				handleFromByHour(fromFilter, newData.data);
+				handleToByHour(toFilter, newData.data);
+			}
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -236,26 +236,22 @@ const Voids = () => {
 		setShowDateModal(false);
 	};
 
-	// Function to handle the hour filter
-	const handleFromByHour = (hour) => {
+	const handleFromByHour = (hour, data) => {
 		setFromFilter(hour);
 
-		const filteredData = voidsReportData.map((row) => ({
+		const filteredData = (data?.length > 0 ? data : voidsReportData).map((row) => ({
 			...row,
-			// Filter the voids by the selected hour
 			subRows: row.subRows.filter((subRow) => +subRow.hour >= hour && +subRow.hour <= toFilter),
 		}));
 
 		setFilteredVoidsReportData(filteredData);
 	};
 
-	// Function to handle the hour filter
-	const handleToByHour = (hour) => {
+	const handleToByHour = (hour, data) => {
 		setToFilter(hour);
 
-		const filteredData = voidsReportData.map((row) => ({
+		const filteredData = (data?.length > 0 ? data : voidsReportData).map((row) => ({
 			...row,
-			// Filter the voids by the selected hour
 			subRows: row.subRows.filter((subRow) => +subRow.hour <= hour && +subRow.hour >= fromFilter),
 		}));
 
@@ -275,7 +271,7 @@ const Voids = () => {
 		}
 
 		const pdfData = {
-			title: 'Voids Report',
+			title: 'Voids',
 			subHeaders: [
 				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
 					selectedToDate,
@@ -353,7 +349,7 @@ const Voids = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: 'Voids Report',
+				name: 'Voids',
 				columns: [
 					{ name: 'Unit Name', filterButton: true },
 					{ name: 'Date', filterButton: true },
@@ -373,8 +369,8 @@ const Voids = () => {
 			},
 		];
 
-		const filename = 'voidsReport';
-		const spreadSheetTitle = 'Voids Report';
+		const filename = 'voids';
+		const spreadSheetTitle = 'Voids';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
@@ -390,7 +386,7 @@ const Voids = () => {
 				initialStep={introSteps.initialStep}
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Voids Report</h2>
+			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Voids</h2>
 			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center'>
 					<UnitSelector
@@ -409,10 +405,10 @@ const Voids = () => {
 						onClick={() => setShowDateModal(true)}
 					/>
 					<div className='ml-1 filterByHour-selector'>
-						<span className='text-xl font-bold '>Filter By Hour</span>
-						<div className='flex '>
-							<div className='flex items-center '>
-								<span className='font-bold '>From: </span>
+						<span className='text-xl font-medium'>Filter By Hour</span>
+						<div className='flex'>
+							<div className='flex items-center'>
+								<span className='font-medium'>From: </span>
 								<Dropdown
 									options={dropdownOptions}
 									title=''
@@ -420,8 +416,8 @@ const Voids = () => {
 									onOptionChange={handleFromByHour}
 								/>
 							</div>
-							<div className='flex items-center '>
-								<span className='font-bold '>To: </span>
+							<div className='flex items-center'>
+								<span className='font-medium'>To: </span>
 								<Dropdown
 									options={dropdownOptions}
 									title=''
