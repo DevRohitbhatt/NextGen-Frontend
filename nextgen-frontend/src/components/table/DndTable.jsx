@@ -318,7 +318,7 @@ function DndTable(props) {
 												</div>
 												<div className='flex items-center gap-2 px-2 '> {group.groupName}</div>
 											</td>
-											<td className='px-2'> {group.total} </td>
+											<td className='px-2'>$ {group.total} </td>
 										</DraggableRow>
 										{expanded[group.id] && filteredSubRows.length > 0 && (
 											<SortableContext

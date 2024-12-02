@@ -844,7 +844,7 @@ const ActualFoodCost = () => {
 							onClick={() => setShowUnitModal(true)}
 						/>
 
-						<div className='flex gap-2'>
+						<div className='flex gap-2 date-selector'>
 							<div className='w-44'>
 								<Dropdown
 									title='From Date'
@@ -862,7 +862,7 @@ const ActualFoodCost = () => {
 								/>
 							</div>
 						</div>
-						<div className='ml-2 w-36'>
+						<div className='ml-2 w-36 countType-selector'>
 							<Dropdown
 								title='Count Type'
 								options={dropdownOptions}

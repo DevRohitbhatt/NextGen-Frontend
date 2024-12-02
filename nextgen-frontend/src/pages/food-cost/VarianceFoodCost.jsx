@@ -813,7 +813,7 @@ const VarianceFoodCost = () => {
 							setMemberName={setSelectedUnitName}
 							onClick={() => setShowUnitModal(true)}
 						/>
-						<div className='flex'>
+						<div className='flex gap-2 date-selector'>
 							<div className='w-44'>
 								<Dropdown
 									title='From Date'
@@ -833,7 +833,7 @@ const VarianceFoodCost = () => {
 								/>
 							</div>
 						</div>
-						<div className='w-36'>
+						<div className='ml-2 w-36 countType-selector'>
 							<Dropdown
 								options={countDropdownOptions}
 								title='Count Type'

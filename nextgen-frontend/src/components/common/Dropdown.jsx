@@ -26,7 +26,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable =
 
 	return (
 		<div
-			className='relative flex flex-col justify-center w-full m-1 dropdown-selector rounded-3xl'
+			className='relative flex flex-col justify-center w-full mx-1 dropdown-selector rounded-3xl'
 			ref={dropdownRef}
 		>
 			<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>{title}</h3>
