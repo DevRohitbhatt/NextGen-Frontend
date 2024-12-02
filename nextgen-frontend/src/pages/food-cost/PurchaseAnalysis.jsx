@@ -228,6 +228,8 @@ const PurchaseAnalysis = () => {
 
 	useEffect(() => {
 		if (location.state && !isLocationReportRendered) {
+			console.log('location.state', location.state);
+
 			setSelectedUnit(location.state?.selectedUnit);
 			setSelectedUnitName(location.state.selectedUnitName);
 			setSelectedFromDate(new Date(location.state.fromDate));
@@ -269,7 +271,7 @@ const PurchaseAnalysis = () => {
 		}
 	};
 
-	const fetchPurchaseAnalysisReport = async (groupByOption) => {
+	const fetchPurchaseAnalysisReport = async (option) => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -300,8 +302,8 @@ const PurchaseAnalysis = () => {
 			setPurchaseData(newData);
 			setIsLoading(false);
 			setIsTableRendered(true);
-			if (groupByOption && isLocationReportRendered === false) {
-				handleGroupByChange(groupByOption);
+			if (option && isLocationReportRendered === false) {
+				handleGroupByChange(option);
 			}
 			setIsLocationReportRendered(true);
 		} catch (error) {
@@ -347,7 +349,6 @@ const PurchaseAnalysis = () => {
 		};
 
 		const selectedGroupByColumns = groupByColumns[option] || [];
-		console.log('selectedGroupByColumns', selectedGroupByColumns);
 
 		const newColumns = memoizedColumns.map((column) =>
 			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
@@ -499,7 +500,7 @@ const PurchaseAnalysis = () => {
 								onOptionChange={handleGroupByChange}
 							/>
 						</div>
-						<div className='run-button' onClick={fetchPurchaseAnalysisReport}>
+						<div className='run-button' onClick={() => fetchPurchaseAnalysisReport()}>
 							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>

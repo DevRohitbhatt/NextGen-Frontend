@@ -28,8 +28,6 @@ const Voids = () => {
 		unitsAndAreas: unitsAndAreasList,
 		defaultUnitID,
 		defaultUnitName,
-		groupOrUnitAccess,
-		groupOrUnitAccessName,
 	} = useSelector((state) => state.globalState);
 
 	const [voidsReportData, setVoidsReportData] = useState([]);
@@ -162,13 +160,13 @@ const Voids = () => {
 	);
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	const fetchVoidsReport = async () => {
 		try {
@@ -211,8 +209,10 @@ const Voids = () => {
 
 			setVoidsReportData(newData.data);
 			setFilteredVoidsReportData(newData.data);
-			handleFromByHour(fromFilter, newData.data);
-			handleToByHour(toFilter, newData.data);
+			if (fromFilter > 0 && toFilter > 0) {
+				handleFromByHour(fromFilter, newData.data);
+				handleToByHour(toFilter, newData.data);
+			}
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
