@@ -247,7 +247,7 @@ function DndTable(props) {
 					<button
 						onClick={() => collapseAll()}
 						className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
-							Object.keys(expanded).length !== 0
+							Object.keys(expanded).length >= data?.length
 								? 'text-[var(--tw-primary)] bg-white'
 								: 'bg-[var(--tw-primary)] text-white'
 						}`}
@@ -258,7 +258,8 @@ function DndTable(props) {
 					<button
 						onClick={() => expandAll()}
 						className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] border-solid font-medium focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
-							Object.values(expanded).every((val) => val === true) && Object.keys(expanded).length > 0
+							Object.values(expanded).every((val) => val === true) &&
+							Object.keys(expanded).length === data?.length
 								? 'bg-[var(--tw-primary)] text-white'
 								: 'text-[var(--tw-primary)] bg-white'
 						}`}

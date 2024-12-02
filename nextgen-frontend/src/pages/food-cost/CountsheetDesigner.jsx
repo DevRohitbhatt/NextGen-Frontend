@@ -220,7 +220,7 @@ const CountsheetDesigner = () => {
 			const getData = {
 				url: 'Countsheet_PricingInfo',
 				urlParams: {
-					companyId: location.state.companyId,
+					companyId: location.state.companyID,
 					QSRInvoiceID: location.state.countsheet?.inventoryCountSheetID,
 					QSRItemID: selectedRow?.id,
 					QSRInventoryItemID: selectedRow?.qsrInventoryItemID,
@@ -241,7 +241,7 @@ const CountsheetDesigner = () => {
 			const getData = {
 				url: 'countsheetPossibleError',
 				urlParams: {
-					companyId: location.state.companyId,
+					companyId: location.state.companyID,
 					InventoryCountSheetID: location.state.countsheet?.inventoryCountSheetID,
 				},
 			};
