@@ -477,7 +477,10 @@ const VarianceFoodCost = () => {
 					alignmentID: alignmentID,
 					memberID: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
-					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(
+						new Date(new Date(selectedToDate).setDate(new Date(selectedToDate).getDate() + 1)),
+						'yyyy-mm-dd'
+					),
 				},
 			};
 
