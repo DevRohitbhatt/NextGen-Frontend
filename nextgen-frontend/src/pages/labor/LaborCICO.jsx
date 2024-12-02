@@ -26,9 +26,7 @@ const LaborCICO = () => {
 		companyID,
 		alignmentID,
 		unitsAndAreas: unitsAndAreasList,
-		groupOrUnitAccess,
 		defaultUnitID,
-		groupOrUnitAccessName,
 		defaultUnitName,
 	} = useSelector((state) => state.globalState);
 
@@ -216,13 +214,13 @@ const LaborCICO = () => {
 	};
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	const handleRunClick = () => {
 		fetchLaborCICOData(groupBy);
