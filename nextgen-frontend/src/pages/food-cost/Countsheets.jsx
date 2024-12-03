@@ -88,7 +88,7 @@ const Countsheets = () => {
 					<Link
 						to='/CountsheetDesigner'
 						className='underline cursor-pointer'
-						state={{ companyId: row.original.companyId, countsheet: row.original }}
+						state={{ companyID: row.original.companyId, countsheet: row.original }}
 					>
 						Open
 					</Link>
