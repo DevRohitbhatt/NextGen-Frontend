@@ -51,7 +51,7 @@ const LaborByPayPeriod = () => {
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
-	const [view, setView] = useState('Units');
+	const [view, setView] = useState('Employees');
 	const dropdownOptions = [
 		{ name: 'Units', row: 0 },
 		{ name: 'Employees', row: 1 },

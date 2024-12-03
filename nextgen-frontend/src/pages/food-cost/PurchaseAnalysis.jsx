@@ -411,7 +411,7 @@ const PurchaseAnalysis = () => {
 		const pdfData = {
 			title: 'Purchase Analysis Report',
 			subHeaders: [
-				`Unit:${selectedUnitName} | Vendor:${selectedVendorName} | Date Range:${dateFormat(
+				`Unit:${selectedUnitName}  |  Vendor:${selectedVendorName}  |  Date Range:${dateFormat(
 					selectedFromDate,
 					'mm-dd-yyyy'
 				)} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
@@ -502,7 +502,7 @@ const PurchaseAnalysis = () => {
 							setVendorName={setSelectedVendorName}
 							onClick={() => setVendorShowModal(true)}
 						/>
-						<div className='min-w-56'>
+						<div className='min-w-56 groupBy-selector'>
 							<Dropdown
 								title='Group By'
 								selectedOption={selectedGroupBy}

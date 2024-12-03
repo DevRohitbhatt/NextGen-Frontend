@@ -106,95 +106,99 @@ const BusinessSummary = () => {
 
 			const result = await getCall(getData);
 
-			const newData = result.data.map((data) => {
-				let updatedData;
+			if (result.data.length === 0) {
+				setBusinessSummaryData([]);
+			} else {
+				const newData = result.data.map((data) => {
+					let updatedData;
 
-				updatedData = {
-					...data,
-					...Object.fromEntries(
-						Object.entries(data.dateValues).map(([key, value]) => [
-							key,
-							Number.isInteger(value) ? value : value.toFixed(2),
-						])
-					),
-					total: Number(
-						Object.values(data.dateValues)
-							.reduce((acc, curr) => acc + curr, 0)
-							.toFixed(2)
-					),
-				};
+					updatedData = {
+						...data,
+						...Object.fromEntries(
+							Object.entries(data.dateValues).map(([key, value]) => [
+								key,
+								Number.isInteger(value) ? value : value.toFixed(2),
+							])
+						),
+						total: Number(
+							Object.values(data.dateValues)
+								.reduce((acc, curr) => acc + curr, 0)
+								.toFixed(2)
+						),
+					};
 
-				delete updatedData.dateValues;
-				return updatedData;
-			});
+					delete updatedData.dateValues;
+					return updatedData;
+				});
 
-			// Calculate the total for Variable Labor %, Check Average and Food Cost %
-			newData.forEach((data) => {
-				if (
-					data.description === 'Variable Lbr %' ||
-					data.description === 'Check Average' ||
-					data.description === 'Food Cost %'
-				) {
-					const variableLabor = newData.find((item) => item.description === 'Variable Labor');
-					const foodCostPct = newData.find((item) => item.description === 'Food Cost %');
-					const netSales = newData.find((item) => item.description === salesType);
-					const transactions = newData.find((item) => item.description === 'Transactions');
-					if (variableLabor && netSales && data.description === 'Variable Lbr %') {
-						data.total = ((variableLabor.total / netSales.total) * 100).toFixed(2) + ' %';
-						Object.keys(data)
-							.filter((key) => !['description', 'total'].includes(key))
-							.forEach((key) => {
-								data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
-							});
-					} else if (data.description === 'Check Average') {
-						data.total = (netSales.total / transactions.total).toFixed(2);
-					} else if (foodCostPct && data.description === 'Food Cost %') {
-						data.total =
-							(
-								foodCostPct.total /
-								Object.keys(data).filter((key) => !['description', 'total'].includes(key)).length
-							).toFixed(2) + ' %';
-						Object.keys(data)
-							.filter((key) => !['description', 'total'].includes(key))
-							.forEach((key) => {
-								data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
-							});
+				// Calculate the total for Variable Labor %, Check Average and Food Cost %
+				newData.forEach((data) => {
+					if (
+						data.description === 'Variable Lbr %' ||
+						data.description === 'Check Average' ||
+						data.description === 'Food Cost %'
+					) {
+						const variableLabor = newData.find((item) => item.description === 'Variable Labor');
+						const foodCostPct = newData.find((item) => item.description === 'Food Cost %');
+						const netSales = newData.find((item) => item.description === salesType);
+						const transactions = newData.find((item) => item.description === 'Transactions');
+						if (variableLabor && netSales && data.description === 'Variable Lbr %') {
+							data.total = ((variableLabor.total / netSales.total) * 100).toFixed(2) + ' %';
+							Object.keys(data)
+								.filter((key) => !['description', 'total'].includes(key))
+								.forEach((key) => {
+									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
+								});
+						} else if (data.description === 'Check Average') {
+							data.total = (netSales.total / transactions.total).toFixed(2);
+						} else if (foodCostPct && data.description === 'Food Cost %') {
+							data.total =
+								(
+									foodCostPct.total /
+									Object.keys(data).filter((key) => !['description', 'total'].includes(key)).length
+								).toFixed(2) + ' %';
+							Object.keys(data)
+								.filter((key) => !['description', 'total'].includes(key))
+								.forEach((key) => {
+									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
+								});
+						}
 					}
-				}
-				return data;
-			});
+					return data;
+				});
 
-			// Generate the columns for the table
-			const generatedColumns = [
-				columnHelper.accessor('description', {
-					id: 'description',
-					header: 'Description',
-					size: 120,
-				}),
-				columnHelper.accessor('total', {
-					id: 'total',
-					header: 'Total',
-					cell: ({ getValue }) => getValue(),
-					size: 120,
-				}),
-				...Object.keys(newData[0])
-					.filter((key) => !['description', 'total'].includes(key))
-					.map((item) =>
-						columnHelper.accessor(item, {
-							id: item,
-							header: summaryBy === 'Day' ? dateFormat(item, 'dddd mm/dd/yy') : item,
-							dataType: 'number',
-							cell: ({ getValue }) =>
-								typeof getValue() === 'string' && getValue().includes('%')
-									? getValue()
-									: Number(getValue()),
-							size: summaryBy === 'Day' ? 90 : 120,
-						})
-					),
-			];
+				// Generate the columns for the table
+				const generatedColumns = [
+					columnHelper.accessor('description', {
+						id: 'description',
+						header: 'Description',
+						size: 120,
+					}),
+					columnHelper.accessor('total', {
+						id: 'total',
+						header: 'Total',
+						cell: ({ getValue }) => getValue(),
+						size: 120,
+					}),
+					...Object.keys(newData[0])
+						.filter((key) => !['description', 'total'].includes(key))
+						.map((item) =>
+							columnHelper.accessor(item, {
+								id: item,
+								header: summaryBy === 'Day' ? dateFormat(item, 'dddd mm/dd/yy') : item,
+								dataType: 'number',
+								cell: ({ getValue }) =>
+									typeof getValue() === 'string' && getValue().includes('%')
+										? getValue()
+										: Number(getValue()),
+								size: summaryBy === 'Day' ? 90 : 120,
+							})
+						),
+				];
 
-			setColumns(generatedColumns);
-			setBusinessSummaryData(newData);
+				setColumns(generatedColumns);
+				setBusinessSummaryData(newData);
+			}
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);

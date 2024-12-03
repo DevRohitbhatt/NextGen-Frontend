@@ -111,142 +111,139 @@ const ItemsSoldTotals = () => {
 		setMenuItemSoldData([]);
 	};
 
-	const columns = useMemo(
-		() => [
-			...(viewValue === 2
-				? [
-						columnHelper.accessor('category', {
-							id: 'category',
-							header: 'Category',
-							dataType: 'string',
-							size: 60,
-							cell: (info) => info.getValue() || '',
-						}),
-				  ]
-				: []),
-			columnHelper.accessor('itemId', {
-				id: 'itemId',
-				header: 'Item',
-				dataType: 'string',
-				cell: ({ getValue, row }) =>
-					row.getCanExpand() ? (
-						<div
-							{...{
-								style: {
-									cursor: 'pointer',
-									paddingLeft: `${row.depth * 2}rem`,
-								},
-								className: 'flex items-center gap-2 font-bold absolute inset-0 w-96]',
-							}}
-						>
-							{row.getIsExpanded() ? (
-								<CiSquareMinus className='text-[20px]' />
-							) : (
-								<CiSquarePlus className='text-[20px]' />
-							)}
-							{row.depth === 0 ? (
-								<span>
-									Category: {row.original.category} (Count: {row.subRows.length}, Total Amount: $
-									{(() => {
-										if (row.getCanExpand()) {
-											const sum = row.subRows
-												.reduce((acc, subrow) => {
-													if (subrow.getCanExpand()) {
-														return (
-															acc +
-															subrow.subRows.reduce(
-																(subAcc, subSubrow) =>
-																	subAcc + subSubrow.original.discPrice,
-																0
-															)
-														);
-													} else {
-														return acc + subrow.original.discPrice;
-													}
-												}, 0)
-												.toFixed(2);
-											return sum;
-										} else {
-											return getValue();
-										}
-									})()}
-									)
-								</span>
-							) : (
-								<span>
-									Description: {row.original.item} (Count: {row.subRows.length}, Total Amount: ${' '}
-									{row.subRows.reduce((acc, curr) => acc + curr.original.discPrice, 0).toFixed(2)})
-								</span>
-							)}
-						</div>
-					) : getValue() ? (
-						getValue() || ''
-					) : (
-						''
-					),
-			}),
+	const columns = [
+		...(viewValue === 2
+			? [
+					columnHelper.accessor('category', {
+						id: 'category',
+						header: 'Category',
+						dataType: 'string',
+						size: 60,
+						cell: (info) => info.getValue() || '',
+					}),
+			  ]
+			: []),
+		columnHelper.accessor('itemId', {
+			id: 'itemId',
+			header: 'Item',
+			dataType: 'string',
+			cell: ({ getValue, row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: {
+								cursor: 'pointer',
+								paddingLeft: `${row.depth * 2}rem`,
+							},
+							className: 'flex items-center gap-2 font-bold absolute inset-0 w-96]',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.depth === 0 ? (
+							<span>
+								Category: {row.original.category} (Count: {row.subRows.length}, Total Amount: $
+								{(() => {
+									if (row.getCanExpand()) {
+										const sum = row.subRows
+											.reduce((acc, subrow) => {
+												if (subrow.getCanExpand()) {
+													return (
+														acc +
+														subrow.subRows.reduce(
+															(subAcc, subSubrow) =>
+																subAcc + subSubrow.original.discPrice,
+															0
+														)
+													);
+												} else {
+													return acc + subrow.original.discPrice;
+												}
+											}, 0)
+											.toFixed(2);
+										return sum;
+									} else {
+										return getValue();
+									}
+								})()}
+								)
+							</span>
+						) : (
+							<span>
+								Description: {row.original.item} (Count: {row.subRows.length}, Total Amount: ${' '}
+								{row.subRows.reduce((acc, curr) => acc + curr.original.discPrice, 0).toFixed(2)})
+							</span>
+						)}
+					</div>
+				) : getValue() ? (
+					getValue() || ''
+				) : (
+					''
+				),
+		}),
 
-			...(viewValue === 1
-				? [
-						columnHelper.accessor('unitName', {
-							id: 'unitName',
-							header: 'Unit',
-							dataType: 'string',
-							cell: (info) => info.getValue() || '',
-						}),
-				  ]
-				: [
-						columnHelper.accessor('description', {
-							id: 'description',
-							header: 'Description',
-							dataType: 'string',
-							cell: (info) => info.getValue() || '',
-						}),
-				  ]),
-			columnHelper.accessor('quant', {
-				id: 'quant',
-				header: 'Quantity',
-				dataType: 'number',
-				size: 60,
-				cell: (info) => info.getValue() || '',
-			}),
-			columnHelper.accessor('discPrice', {
-				id: 'discPrice',
-				header: 'Amount',
-				dataType: 'number',
-				cell: ({ row, getValue }) =>
-					row.getCanExpand()
-						? ''
-						: `$${getValue() !== null && getValue() !== undefined ? getValue().toFixed(2) : '0.00'}`,
-			}),
-			columnHelper.accessor('itemSoldPct', {
-				id: 'itemSoldPct',
-				header: 'Item Sold %',
-				dataType: 'number',
-				size: 60,
-				cell: (info) => {
-					const value = info.getValue();
-					return value != null ? `${parseFloat(value).toFixed(2)}%` : '';
-				},
-			}),
-			columnHelper.accessor('quantity_Avg', {
-				id: 'quantity_Avg',
-				header: 'Avg Item Quantity',
-				dataType: 'number',
-				cell: (info) => info.getValue() || '',
-			}),
-			columnHelper.accessor('discPrice_Avg', {
-				id: 'discPrice_Avg',
-				header: 'Avg Item Amount',
-				dataType: 'number',
-				cell: ({ row, getValue }) =>
-					row.getCanExpand()
-						? ''
-						: `$${getValue() !== null && getValue() !== undefined ? getValue().toFixed(2) : '0.00'}`,
-			}),
-		],
-		[]
-	);
+		...(viewValue === 1
+			? [
+					columnHelper.accessor('unitName', {
+						id: 'unitName',
+						header: 'Unit',
+						dataType: 'string',
+						cell: (info) => info.getValue() || '',
+					}),
+			  ]
+			: [
+					columnHelper.accessor('description', {
+						id: 'description',
+						header: 'Description',
+						dataType: 'string',
+						cell: (info) => info.getValue() || '',
+					}),
+			  ]),
+		columnHelper.accessor('quant', {
+			id: 'quant',
+			header: 'Quantity',
+			dataType: 'number',
+			size: 60,
+			cell: (info) => info.getValue() || '',
+		}),
+		columnHelper.accessor('discPrice', {
+			id: 'discPrice',
+			header: 'Amount',
+			dataType: 'number',
+			cell: ({ row, getValue }) =>
+				row.getCanExpand()
+					? ''
+					: `$${getValue() !== null && getValue() !== undefined ? getValue().toFixed(2) : '0.00'}`,
+		}),
+		columnHelper.accessor('itemSoldPct', {
+			id: 'itemSoldPct',
+			header: 'Item Sold %',
+			dataType: 'number',
+			size: 60,
+			cell: (info) => {
+				const value = info.getValue();
+				return value != null ? `${parseFloat(value).toFixed(2)}%` : '';
+			},
+		}),
+		columnHelper.accessor('quantity_Avg', {
+			id: 'quantity_Avg',
+			header: 'Avg Item Quantity',
+			dataType: 'number',
+			cell: (info) => info.getValue() || '',
+		}),
+		columnHelper.accessor('discPrice_Avg', {
+			id: 'discPrice_Avg',
+			header: 'Avg Item Amount',
+			dataType: 'number',
+			cell: ({ row, getValue }) =>
+				row.getCanExpand()
+					? ''
+					: `$${getValue() !== null && getValue() !== undefined ? getValue().toFixed(2) : '0.00'}`,
+		}),
+	];
 
 	useEffect(() => {
 		if (groupOrUnitAccess || defaultUnitID) {
