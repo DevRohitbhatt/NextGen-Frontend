@@ -3,7 +3,7 @@ const urlConfig = {
 	getCompanySetting: '/api/company/settings/getsetting',
 	getAllCompanySettings: '/api/company/settings/getallsettings',
 	companyUnitDates: 'api/companysetting/getCompanyUnitDates',
-
+	getPeriodFromDateModel : "/api/company/settings/getPeriodFromDateModel",
 	unitsAndArea: '/api/unitsandareas/getbyid',
 	vendors: '/api/vendor/getvendorsbycompanyID',
 

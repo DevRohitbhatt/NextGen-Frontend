@@ -98,6 +98,35 @@ const HourlySales = () => {
 		}
 	}, [renderCount]);
 
+	//Default date get
+	const getDefaultDates = async () =>{
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: "getPeriodFromDateModel",
+				urlParams: {
+					companyId: companyID
+				},
+			};
+
+			const result = await getCall(getData,false);
+			if(result?.data?.weekMaxDate){
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate)
+				setSelectedToDate(maxDate)
+			}
+		} catch (error) {
+			
+		}finally{
+			setIsLoading(false);
+		}
+	}
+
+	useEffect(()=>{
+		getDefaultDates()
+	},[])
+
 	const fetchHourlySalesReport = async () => {
 		try {
 			setIsLoading(true);

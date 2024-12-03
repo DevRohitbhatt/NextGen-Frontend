@@ -46,10 +46,8 @@ const LaborCICO = () => {
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [groupBy, setGroupBy] = useState('Employee');
@@ -77,6 +75,35 @@ const LaborCICO = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
+
+	//Default date get
+	const getDefaultDates = async () =>{
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: "getPeriodFromDateModel",
+				urlParams: {
+					companyId: companyID
+				},
+			};
+
+			const result = await getCall(getData,false);
+			if(result?.data?.weekMaxDate){
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate)
+				setSelectedToDate(maxDate)
+			}
+		} catch (error) {
+			
+		}finally{
+			setIsLoading(false);
+		}
+	}
+
+	useEffect(()=>{
+		getDefaultDates()
+	},[])
 
 	// columns for tableHOC
 	const columns = useMemo(() => {
@@ -560,6 +587,7 @@ const LaborCICO = () => {
 							fromDate={selectedFromDate}
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
+							extraClass={"w-[219px]"}
 						/>
 						<div className='run-button' onClick={handleRunClick}>
 							<div className='py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>

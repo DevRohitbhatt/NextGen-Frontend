@@ -45,10 +45,8 @@ const ItemsSoldTotals = () => {
 	const [showModal, setUnitShowModal] = useState(false);
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
@@ -64,6 +62,35 @@ const ItemsSoldTotals = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
+
+	//Default date get
+	const getDefaultDates = async () =>{
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: "getPeriodFromDateModel",
+				urlParams: {
+					companyId: companyID
+				},
+			};
+
+			const result = await getCall(getData,false);
+			if(result?.data?.weekMaxDate){
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate)
+				setSelectedToDate(maxDate)
+			}
+		} catch (error) {
+			
+		}finally{
+			setIsLoading(false);
+		}
+	}
+
+	useEffect(()=>{
+		getDefaultDates()
+	},[])
 
 	const dropdownOptions = [
 		{ name: 'All' },
@@ -681,6 +708,7 @@ const ItemsSoldTotals = () => {
 							fromDate={selectedFromDate}
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
+							extraClass={"w-[219px]"}
 						/>
 
 						<div className='w-44'>
