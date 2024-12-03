@@ -345,6 +345,57 @@ const ActualFoodCost = () => {
 		}
 	}, [defaultUnitID, defaultUnitName]);
 
+	useEffect(() => {
+		setColumns(generatedColumns);
+	}, [checkedItemsLoaded]);
+
+	useEffect(() => {
+		setViewBy(viewby);
+	}, [isTableRendered]);
+
+	useEffect(() => {
+		const fetchDates = async () => {
+			try {
+				setIsDateLoading(true);
+				const getData = {
+					url: 'getCountsheetDates',
+					urlParams: {
+						companyId: companyID,
+						unitId: selectedUnit,
+						countType: countType,
+					},
+				};
+
+				const result = await getCall(getData);
+
+				const fromOptions = result.data.fromDates.map((option) => ({
+					name: dateFormat(option, 'mm-dd-yyyy'),
+				}));
+				const toOptions = result.data.toDates.map((option) => ({
+					name: dateFormat(option, 'mm-dd-yyyy'),
+				}));
+
+				if (fromOptions.length === 1 || toOptions.length === 1) {
+					setShowWarnings(true);
+				}
+
+				setSelectedFromDate(fromOptions[0].name);
+				setSelectedToDate(toOptions[0].name);
+
+				setFromDateOptions(fromOptions);
+				setToDateOptions(toOptions);
+				setIsDateLoading(false);
+			} catch (error) {
+				console.error('Error in fetching date options', error);
+			} finally {
+				setIsDateLoading(false);
+			}
+		};
+		if (selectedUnit) {
+			fetchDates();
+		}
+	}, [selectedUnit, countType]);
+
 	const fetchActualFoodCostReport = async () => {
 		try {
 			setIsLoading(true);
