@@ -17,7 +17,11 @@ export default function PurchaseAnalysi() {
 		},
 		{
 			element: '.vendor-selector',
-			intro: 'Select the Vendor(s) you want to display in the Invoices activity list.',
+			intro: 'Select the Vendor(s) you want to display in the Purchase Analysis Report.',
+		},
+		{
+			element: '.groupBy-selector',
+			intro: 'Select the group by which you want to display in the Purchase Analysis Report.',
 		},
 		{
 			element: '.run-button',
@@ -36,4 +40,3 @@ export default function PurchaseAnalysi() {
 		},
 	];
 }
-

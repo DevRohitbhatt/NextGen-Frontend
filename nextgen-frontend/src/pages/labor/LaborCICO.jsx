@@ -54,7 +54,7 @@ const LaborCICO = () => {
 
 	const [groupBy, setGroupBy] = useState('Employee');
 	const groupOptions = [{ name: 'Employee' }, { name: 'Job Description' }];
-	const [viewby, setViewBy] = useState('Unit');
+	const [viewby, setViewBy] = useState('Employees');
 	const viewOptions = useMemo(() => {
 		if (groupBy === 'Job Description') {
 			return [
@@ -263,20 +263,31 @@ const LaborCICO = () => {
 									timeOut: dateFormat(data.businessDateOut, 'hh:MM TT'),
 									invalid: data.invalid,
 							  }))
-							: [
-									{
-										employeeID: employee.employeeID,
-										name: `${employee.firstName} ${employee.lastName}`,
-										subRows: employee.employees.map((data) => ({
-											totalMinutes: data.minutesTotal,
-											totalHours: data.hoursTotal?.toFixed(2),
-											date: dateFormat(data.businessDateIn, 'mm-dd-yyyy'),
-											timeIn: dateFormat(data.businessDateIn, 'hh:MM TT'),
-											timeOut: dateFormat(data.businessDateOut, 'hh:MM TT'),
-											invalid: data.invalid,
-										})),
-									},
-							  ],
+							: employee.employees
+									.map((item) => ({
+										employeeID: item.employeeID,
+										name: `${item.firstName} ${item.lastName}`,
+										subRows: employee.employees
+											.filter(
+												(data) =>
+													`${item.firstName} ${item.lastName}` ===
+													`${data.firstName} ${data.lastName}`
+											)
+											.map((data) => ({
+												totalMinutes: data.minutesTotal,
+												totalHours: data.hoursTotal?.toFixed(2),
+												date: dateFormat(data.businessDateIn, 'mm-dd-yyyy'),
+												timeIn: dateFormat(data.businessDateIn, 'hh:MM TT'),
+												timeOut: dateFormat(data.businessDateOut, 'hh:MM TT'),
+												invalid: data.invalid,
+											})),
+									}))
+									.filter(
+										(data, index, self) =>
+											self.findIndex(
+												(t) => t.employeeID === data.employeeID && t.name === data.name
+											) === index
+									),
 				})),
 			}));
 
