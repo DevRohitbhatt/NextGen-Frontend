@@ -47,10 +47,8 @@ const BrumitDWP = () => {
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showUnitModal, setShowUnitModal] = useState(false);
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState(new Date(new Date().setDate(new Date().getDate() - 1)));
+	const [selectedToDate, setSelectedToDate] = useState(new Date(new Date().setDate(new Date().getDate() - 1)));
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
