@@ -11,6 +11,8 @@ import {
 	getExpandedRowModel,
 	getSortedRowModel,
 	getGroupedRowModel,
+	getFacetedRowModel,
+	getFacetedUniqueValues,
 	flexRender,
 } from '@tanstack/react-table';
 import useTableView from '../../hooks/useTableView';
@@ -63,6 +65,8 @@ function TableHOC({
 		getSortedRowModel: getSortedRowModel(),
 		...(isPaginated && { getPaginationRowModel: getPaginationRowModel() }),
 		getExpandedRowModel: getExpandedRowModel(),
+		getFacetedRowModel: getFacetedRowModel(), // client-side faceting
+		getFacetedUniqueValues: getFacetedUniqueValues(),
 		//filterFromLeafRows: true,
 		//maxLeafRowFilterDepth: 1,
 		debugTable: false,
