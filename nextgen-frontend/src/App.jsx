@@ -31,6 +31,7 @@ import {
 	CountsheetDesigner,
 	PurchaseAnalysis,
 	MenuItemsSold,
+	LaborAnalysis,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -144,6 +145,7 @@ const App = () => {
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
 								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
 								<Route path='/LaborCICO' element={<LaborCICO />} />
+								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
 							</Routes>
 						</Suspense>
 					</div>

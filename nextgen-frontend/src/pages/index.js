@@ -26,6 +26,7 @@ const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
 const LaborCICO = lazy(() => import('./labor/LaborCICO'));
 const LaborCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
+const LaborAnalysis = lazy(() => import('./labor/LaborAnalysis'));
 
 export {
 	PrepChart,
@@ -49,4 +50,5 @@ export {
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
+	LaborAnalysis,
 };
