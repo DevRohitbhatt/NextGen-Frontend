@@ -48,8 +48,8 @@ const LaborCICOExceptions = () => {
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState();
-	const [selectedToDate, setSelectedToDate] = useState();
+	const [selectedFromDate, setSelectedFromDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 0));
+	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [groupBy, setGroupBy] = useState('None');
@@ -139,6 +139,7 @@ const LaborCICOExceptions = () => {
 			columnHelper.accessor('totalCost', {
 				id: 'totalCost',
 				header: 'Total Cost',
+				cell:({getValue})=>`$${getValue()}`,
 				dataType: 'number',
 				footer: ({ table }) => (
 					<div className='font-bold text-start'>
@@ -190,7 +191,7 @@ const LaborCICOExceptions = () => {
 						employeeName: data.employeeFullName,
 						jobDescription: data.jobDescription,
 						shiftName: data.shiftName,
-						reportType: data.reportType,
+						reportType: data.exceptionType,
 						exceptionDetail: data.exceptionDetail,
 						totalCost: Math.abs(data.totalAmount)?.toFixed(2),
 					}))
@@ -310,7 +311,7 @@ const LaborCICOExceptions = () => {
 						columnHeaders: columns.map((column) => column.header),
 						rows: laborCICOExceptionsData.map((row) =>
 							columns.map((column) => ({
-								value: row[column.id],
+								value: column.id=== "totalCost" ?  "$" +row[column.id] : row[column.id],
 								cellType: column.dataType,
 								columnName: column.header,
 							}))
