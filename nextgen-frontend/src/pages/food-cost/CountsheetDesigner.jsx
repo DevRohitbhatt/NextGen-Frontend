@@ -8,6 +8,7 @@ import {
 	ExcelExport as exportToExcel,
 	DndTable,
 	DateSelector,
+	CalendarModal,
 	Modal,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -18,6 +19,7 @@ const CountsheetDesigner = () => {
 	const location = useLocation();
 	const [countsheet, setCountsheet] = useState({});
 	const [countsheetDetails, setCountsheetDetails] = useState([]);
+	const [showCommentModal, setShowCommentModal] = useState(false);
 
 	// State variables for loading and error handling
 	const [isLoading, setIsLoading] = useState(true);
@@ -26,9 +28,19 @@ const CountsheetDesigner = () => {
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the countsheet Report, please try again later.'
 	);
+
+	//calendar state variables
+	const [selectedFromDate, setSelectedFromDate] = useState(
+		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
+	);
+	const [showDateModal, setShowDateModal] = useState(false);
+
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 	const moreOptionsDropdown = useRef(null);
-	const [selectedPriceInfoId, setSelectedPriceInfoId] = useState('');
+	const [selectedRow, setSelectedRow] = useState(null);
+	const [selectedPriceInfoData, setSelectedPriceInfoData] = useState([]);
+	const [possibleErrorsModal, setPossibleErrorsModal] = useState(false);
+	const [possibleErrorsData, setPossibleErrorsData] = useState([]);
 
 	const countTypeMap = {
 		WE: 'Weekly',
@@ -89,6 +101,7 @@ const CountsheetDesigner = () => {
 
 	useEffect(() => {
 		setCountsheet(location.state.countsheet);
+		setSelectedFromDate(new Date(location.state.countsheet?.dateTime));
 
 		fetchCountsheetDetails();
 	}, []);
@@ -100,7 +113,7 @@ const CountsheetDesigner = () => {
 			const getData = {
 				url: 'countsheetDetails',
 				urlParams: {
-					companyId: location.state.companyId,
+					companyId: location.state.companyID,
 					countsheetID: location.state.countsheet?.inventoryCountSheetID,
 				},
 			};
@@ -122,6 +135,7 @@ const CountsheetDesigner = () => {
 					el.id = index + 1 + '' + ind;
 				});
 			});
+
 			setCountsheetDetails(newData);
 			setIsLoading(false);
 		} catch (error) {
@@ -206,15 +220,39 @@ const CountsheetDesigner = () => {
 			const getData = {
 				url: 'Countsheet_PricingInfo',
 				urlParams: {
-					companyId: location.state.companyId,
-					QSRInvoiceID: '',
-					QSRItemID: '',
-					QSRInventoryItemID: 'QSRInventoryItemID',
+					companyId: location.state.companyID,
+					QSRInvoiceID: location.state.countsheet?.inventoryCountSheetID,
+					QSRItemID: selectedRow?.id,
+					QSRInventoryItemID: selectedRow?.qsrInventoryItemID,
 				},
 			};
 
 			const result = await getCall(getData);
-		} catch (error) {}
+
+			setSelectedPriceInfoData(result.data);
+			setPriceInfoModal(!priceInfoModal);
+		} catch (error) {
+			console.error('Error fetching price info: ', error);
+		}
+	};
+
+	const getPossibleErrors = async () => {
+		try {
+			const getData = {
+				url: 'countsheetPossibleError',
+				urlParams: {
+					companyId: location.state.companyID,
+					InventoryCountSheetID: location.state.countsheet?.inventoryCountSheetID,
+				},
+			};
+
+			const result = await getCall(getData);
+
+			setPossibleErrorsData(result.data);
+			setPossibleErrorsModal(!possibleErrorsModal);
+		} catch (error) {
+			console.error('Error fetching possible errors: ', error);
+		}
 	};
 
 	useEffect(() => {
@@ -224,8 +262,8 @@ const CountsheetDesigner = () => {
 		};
 	}, []);
 
-	const selectedData = (id) => {
-		setSelectedPriceInfoId(id);
+	const selectedData = (item) => {
+		setSelectedRow(item);
 	};
 	const Table = (
 		<>
@@ -238,7 +276,7 @@ const CountsheetDesigner = () => {
 					expandCollapseButtons={true}
 					data={countsheetDetails}
 					setData={setCountsheetDetails}
-					seletedForPriceInfo={(id) => {
+					selectedForPriceInfo={(id) => {
 						selectedData(id);
 					}}
 				/>
@@ -254,9 +292,16 @@ const CountsheetDesigner = () => {
 			</h2>
 			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center gap-2'>
-					<DateSelector fromDate={new Date(countsheet?.dateTime)} isDateRange={false} isEditable={false} />
+					<DateSelector
+						fromDate={selectedFromDate}
+						isDateRange={false}
+						onClick={() => setShowDateModal(true)}
+					/>
 
-					<div className='flex items-center justify-between mt-8  px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)]'>
+					<div
+						className='flex items-center justify-between mt-8  px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)]'
+						onClick={() => setShowCommentModal(true)}
+					>
 						Insert Comment
 					</div>
 
@@ -273,10 +318,14 @@ const CountsheetDesigner = () => {
 								ref={moreOptionsDropdown}
 							>
 								<div className='mb-2 option '>
-									<button className='w-[100%] bg-[#f9f9f9]'>Pricing Info</button>
+									<button className='w-[100%] bg-[#f9f9f9]' onClick={getPriceInfo}>
+										Pricing Info
+									</button>
 								</div>
 								<div className='mb-2 option '>
-									<button className='w-[100%] bg-[#f9f9f9]'>Possible Erors</button>
+									<button className='w-[100%] bg-[#f9f9f9]' onClick={getPossibleErrors}>
+										Possible Errors
+									</button>
 								</div>
 								<div className='mb-2 option '>
 									<button className='w-[100%] bg-[#f9f9f9]'>Countsheet History</button>
@@ -296,12 +345,6 @@ const CountsheetDesigner = () => {
 							</div>
 						)}
 					</div>
-
-					<div className='mt-8'>
-						<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${
-							countsheet?.saveDateTime?.split('T')[1]
-						}`}</h3>
-					</div>
 				</div>
 				<div>
 					<ExportOptions
@@ -313,6 +356,11 @@ const CountsheetDesigner = () => {
 					/>
 				</div>
 			</header>
+			<div>
+				<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${
+					countsheet?.saveDateTime?.split('T')[1]
+				}`}</h3>
+			</div>
 
 			{isLoading ? (
 				<div>Loading...</div>
@@ -321,6 +369,31 @@ const CountsheetDesigner = () => {
 			) : (
 				countsheetDetails.length > 0 && <div className='paged-table'>{Table}</div>
 			)}
+
+			<CalendarModal
+				handleClose={() => setShowDateModal(false)}
+				modalOpen={showDateModal}
+				isDateRange={false}
+				handleDateSelection={(date) => setSelectedFromDate(date)}
+				handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+				selectedFromDate={selectedFromDate}
+			/>
+
+			<Modal
+				isOpen={showCommentModal}
+				title={'Insert Comment'}
+				onClose={() => {
+					setShowCommentModal(!showCommentModal);
+				}}
+			>
+				<div className='h-32 m-4 w-96'>
+					<textarea
+						className='w-full h-full block p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border-2 border-[var(--tw-primary)] focus:outline-[var(--tw-primary)] caret-[var(--tw-primary)]'
+						name=''
+						id=''
+					></textarea>
+				</div>
+			</Modal>
 
 			<Modal
 				isOpen={priceInfoModal}
@@ -331,7 +404,7 @@ const CountsheetDesigner = () => {
 			>
 				<div className='p-4 bg-white border border-gray-200 rounded shadow-lg w-96'>
 					<div className='pb-2 mb-4 text-lg font-semibold text-center text-blue-900 border-b'>
-						467 - SAUCE SRIRACHA 20 OZ BTL - I=A
+						{selectedRow?.qsrInventoryItemID + ' - ' + selectedRow?.description}
 					</div>
 
 					<table className='w-full mb-4 text-sm'>
@@ -342,30 +415,24 @@ const CountsheetDesigner = () => {
 							</tr>
 						</thead>
 						<tbody>
-							<tr className='border-b'>
-								<td className='py-2'>BOTTLE (28 OZ)</td>
-								<td className='py-2 text-green-600'>$5.42</td>
-							</tr>
-							<tr className='border-b'>
-								<td className='py-2'>BOTTLE (20 OZ)</td>
-								<td className='py-2 text-green-600'>$3.87</td>
-							</tr>
-							<tr>
-								<td className='py-2'>BOTTLE (18 OZ)</td>
-								<td className='py-2 text-green-600'>$3.49</td>
-							</tr>
+							{selectedPriceInfoData?.map((item) => (
+								<tr className='border-b' key={item.itemID}>
+									<td className='py-2'>{item?.unitOfMeasure}</td>
+									<td className='py-2 text-green-600'>${item?.unitPrice}</td>
+								</tr>
+							))}
 						</tbody>
 					</table>
 
 					<div className='pt-2 mb-2 border-t'>
-						<p className='text-sm font-semibold'>Latest Price From</p>
+						<p className='text-sm font-semibold text-center underline'>Latest Price From</p>
 						<p className='text-sm'>
 							Vendor: <span className='font-medium'>Sysco</span>
 						</p>
 						<p className='text-sm'>
 							Date: <span className='font-medium'>7/23/2024</span> Invoice #:
 							<a href='#' className='text-blue-600 underline'>
-								637455060
+								{selectedRow?.qsrInventoryItemID}
 							</a>
 						</p>
 					</div>
@@ -387,6 +454,34 @@ const CountsheetDesigner = () => {
 								<p className='text-green-600'>$5.42/BOTTLE (28 OZ)</p>
 							</div>
 						</div>
+					</div>
+				</div>
+			</Modal>
+			<Modal
+				isOpen={possibleErrorsModal}
+				title={'Possible Errors'}
+				onClose={() => {
+					setPossibleErrorsModal(!possibleErrorsModal);
+				}}
+			>
+				<div className='p-4'>
+					<div className='pr-2 overflow-auto bg-white max-h-96'>
+						<table className='sticky top-0 w-full mb-4 max-h-96'>
+							<thead className='sticky top-0 bg-white'>
+								<tr className='text-left shadow-[0_-1px_0_var(--tw-primary)_inset]'>
+									<th className='py-2 font-semibold text-center'>Item</th>
+									<th className='py-2 font-semibold text-center'>Possible Error</th>
+								</tr>
+							</thead>
+							<tbody>
+								{possibleErrorsData?.map((item, index) => (
+									<tr className='text-sm border-b' key={index}>
+										<td className='py-2'>{item?.description}</td>
+										<td className='py-2 text-right'>{item?.problem}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</Modal>

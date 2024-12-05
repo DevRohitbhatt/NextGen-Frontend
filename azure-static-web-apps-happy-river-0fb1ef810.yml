@@ -9,6 +9,9 @@ trigger:
     include:
       - Testing_Server
 
+variables:
+  VITE_API_URL: "https://d101.qsronline.com/QSROnlineGateway/"
+
 jobs:
 - job: build_and_deploy_job
   displayName: Build and Deploy Job
@@ -23,6 +26,7 @@ jobs:
     
   - script: |
       cd nextgen-frontend
+      echo "##vso[task.setvariable variable=VITE_API_URL]$(VITE_API_URL)"
       npm install
       npm run build
     displayName: 'Build application'

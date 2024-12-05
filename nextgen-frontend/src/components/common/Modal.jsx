@@ -5,7 +5,7 @@ import { FaRegWindowClose } from 'react-icons/fa';
 const ModalContainer = styled.div`
 	display: ${(props) => (props.isOpen ? 'block' : 'none')};
 	position: fixed;
-	z-index: 10;
+	z-index: 30;
 	padding-top: 100px;
 	left: 0;
 	top: 0;
