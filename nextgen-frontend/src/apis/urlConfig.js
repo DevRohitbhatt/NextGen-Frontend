@@ -56,6 +56,8 @@ const urlConfig = {
   MenuItemSoldModifiersData: "api/sales/getMenuItemSoldModifiersData",
   salesVsLabor: "api/sales/SalesVsLaborReport",
   businessSummary: "api/sales/GetBusinessSummaryReportData",
+	discounts: 'api/sales/GetDiscountReportData',
+	discountTypes: 'api/sales/GetDiscountTypesReportData',
 
   //labor apis
   employeeInformation: "api/labor/getEmployeeInformation",

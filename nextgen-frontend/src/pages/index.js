@@ -16,6 +16,7 @@ const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
+const Discounts = lazy(() => import('./sales/Discounts'));
 const HourlySales = lazy(() => import('./sales/HourlySales'));
 const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
 const SalesVsLabor = lazy(() => import('./sales/SalesVsLabor'));
@@ -40,6 +41,7 @@ export {
 	LaborCICO,
 	LaborCICOExceptions,
 	Voids,
+	Discounts,
 	HourlySales,
 	MenuItemsSold,
 	SalesVsLabor,
