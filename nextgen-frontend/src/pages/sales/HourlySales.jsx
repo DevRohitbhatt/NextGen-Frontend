@@ -1,562 +1,649 @@
-import { useEffect, useState } from 'react';
-import { getCall } from '../../apis/network';
-import { Steps } from 'intro.js-react';
-import { useSelector } from 'react-redux';
-import hourlySales from '../../assets/introJSSteps/hourlySales';
+import { useEffect, useState } from "react";
+import { getCall } from "../../apis/network";
+import { Steps } from "intro.js-react";
+import { useSelector } from "react-redux";
+import hourlySales from "../../assets/introJSSteps/hourlySales";
 import {
-	Dropdown,
-	Loader,
-	UnitSelector,
-	CalendarModal,
-	UnitModal,
-	ExportOptions,
-	DateSelector,
-	PdfBuilder,
-	ExcelExport as exportToExcel,
-	TableHOC,
-} from '../../components';
-import { createColumnHelper } from '@tanstack/react-table';
-import dateFormat from 'dateformat';
+  Dropdown,
+  Loader,
+  UnitSelector,
+  CalendarModal,
+  UnitModal,
+  ExportOptions,
+  DateSelector,
+  PdfBuilder,
+  ExcelExport as exportToExcel,
+  TableHOC,
+} from "../../components";
+import { createColumnHelper } from "@tanstack/react-table";
+import dateFormat from "dateformat";
 
 const columnHelper = createColumnHelper();
 
 const HourlySales = () => {
-	const {
-		companyID,
-		alignmentID,
-		unitsAndAreas: unitsAndAreasList,
-		groupOrUnitAccess,
-		defaultUnitID,
-		groupOrUnitAccessName,
-		defaultUnitName,
-	} = useSelector((state) => state.globalState);
+  const {
+    companyID,
+    alignmentID,
+    unitsAndAreas: unitsAndAreasList,
+    groupOrUnitAccess,
+    defaultUnitID,
+    groupOrUnitAccessName,
+    defaultUnitName,
+  } = useSelector((state) => state.globalState);
 
-	const [hourlySalesData, setHourlySalesData] = useState([]);
-	const [renderCount, setRenderCount] = useState(0); // Controls re-render
-	const [columns, setColumns] = useState([]);
+  const [hourlySalesData, setHourlySalesData] = useState([]);
+  const [renderCount, setRenderCount] = useState(0); // Controls re-render
+  const [columns, setColumns] = useState([]);
 
-	//loading and error state variables
-	const [isLoading, setIsLoading] = useState(false);
-	const [isError, setIsError] = useState(false);
-	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Hourly Sales Report, please try again later.'
-	);
+  //loading and error state variables
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(
+    "There was an error trying to load the Hourly Sales Report, please try again later."
+  );
 
-	//selected unit state variables
-	const [selectedUnit, setSelectedUnit] = useState();
-	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
-	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
+  //selected unit state variables
+  const [selectedUnit, setSelectedUnit] = useState();
+  const [selectedUnitName, setSelectedUnitName] = useState("Loading...");
+  const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
-	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
-	const [showDateModal, setShowDateModal] = useState(false);
+  //calendar state variables
+  const [selectedFromDate, setSelectedFromDate] = useState(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 0)
+  );
+  const [selectedToDate, setSelectedToDate] = useState(new Date());
+  const [showDateModal, setShowDateModal] = useState(false);
 
-	//dropdown variables
-	const [reportType, setReportType] = useState('Hour and Day');
-	const [salesType, setSalesType] = useState('Net Sales');
-	const [DOWType, setDOWType] = useState('All');
-	const [viewBy, setViewBy] = useState('Hour');
-	const [isSalesEditable, setIsSalesEditable] = useState(true);
-	const [isDOWEditable, setIsDOWEditable] = useState(false);
-	const [isViewByEditable, setIsViewByEditable] = useState(true);
-	const reportTypeOptions = [{ name: 'Hour and Day' }, { name: 'Unit' }, { name: 'Unit, Hour and Day' }];
-	const salesTypeOptions = [{ name: 'Net Sales' }, { name: 'Gross Sales' }, { name: 'Transaction' }];
-	const DOWTypeOptions = [
-		{ name: 'All' },
-		{ name: 'Monday' },
-		{ name: 'Tuesday' },
-		{ name: 'Wednesday' },
-		{ name: 'Thursday' },
-		{ name: 'Friday' },
-		{ name: 'Saturday' },
-		{ name: 'Sunday' },
-	];
-	const [viewByOptions, setViewByOptions] = useState([{ name: 'Hour' }, { name: 'Half-Hour' }, { name: 'Qtr-Hour' }]);
+  //dropdown variables
+  const [reportType, setReportType] = useState("Hour and Day");
+  const [salesType, setSalesType] = useState("Net Sales");
+  const [DOWType, setDOWType] = useState("All");
+  const [viewBy, setViewBy] = useState("Hour");
+  const [isSalesEditable, setIsSalesEditable] = useState(true);
+  const [isDOWEditable, setIsDOWEditable] = useState(false);
+  const [isViewByEditable, setIsViewByEditable] = useState(true);
+  const reportTypeOptions = [
+    { name: "Hour and Day" },
+    { name: "Unit" },
+    { name: "Unit, Hour and Day" },
+  ];
+  const salesTypeOptions = [
+    { name: "Net Sales" },
+    { name: "Gross Sales" },
+    { name: "Transaction" },
+  ];
+  const DOWTypeOptions = [
+    { name: "All" },
+    { name: "Monday" },
+    { name: "Tuesday" },
+    { name: "Wednesday" },
+    { name: "Thursday" },
+    { name: "Friday" },
+    { name: "Saturday" },
+    { name: "Sunday" },
+  ];
+  const [viewByOptions, setViewByOptions] = useState([
+    { name: "Hour" },
+    { name: "Half-Hour" },
+    { name: "Qtr-Hour" },
+  ]);
 
-	//IntroJS variables for the help steps
-	const [introSteps, setIntroSteps] = useState({
-		steps: hourlySales(),
-		initialStep: 0,
-		stepsEnabled: false,
-	});
+  //IntroJS variables for the help steps
+  const [introSteps, setIntroSteps] = useState({
+    steps: hourlySales(),
+    initialStep: 0,
+    stepsEnabled: false,
+  });
 
-	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
-		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
-		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+  useEffect(() => {
+    if (groupOrUnitAccess || defaultUnitID) {
+      setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+    }
+    if (groupOrUnitAccessName || defaultUnitName) {
+      setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+    }
+  }, [
+    defaultUnitID,
+    groupOrUnitAccess,
+    defaultUnitName,
+    groupOrUnitAccessName,
+  ]);
 
-	useEffect(() => {
-		if (renderCount === 0) {
-			setRenderCount(1);
-		}
-	}, [renderCount]);
+  useEffect(() => {
+    if (renderCount === 0) {
+      setRenderCount(1);
+    }
+  }, [renderCount]);
 
-	const fetchHourlySalesReport = async () => {
-		try {
-			setIsLoading(true);
-			setIsError(false);
+  //Default date get
+  const getDefaultDates = async () => {
+    try {
+      setIsLoading(true);
+      const getData = {
+        url: "getCurrentPeriodDates",
+        urlParams: {
+          companyId: companyID,
+        },
+      };
 
-			const getData = {
-				url: 'hourlySales',
-				urlParams: {
-					companyId: companyID,
-					alignmentId: alignmentID,
-					memberId: selectedUnit,
-					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
-					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
-					reportType: reportType === 'Hour and Day' ? 1 : reportType === 'Unit' ? 2 : 3,
-					sumType:
-						viewBy === 'Hour'
-							? 'HOUR'
-							: viewBy === 'Half-Hour'
-							? 'HALF-HOUR'
-							: viewBy === 'Qtr-Hour'
-							? 'QTR-HOUR'
-							: viewBy === 'Sum'
-							? 'SUM'
-							: 'AVG',
-					salesType:
-						salesType === 'Net Sales'
-							? 'SalesNet'
-							: salesType === 'Gross Sales'
-							? 'SalesGross'
-							: 'Transactions',
-					DOW:
-						DOWType === 'All'
-							? '1234567'
-							: DOWType === 'Sunday'
-							? 1
-							: DOWType === 'Monday'
-							? 2
-							: DOWType === 'Tuesday'
-							? 3
-							: DOWType === 'Wednesday'
-							? 4
-							: DOWType === 'Thursday'
-							? 5
-							: DOWType === 'Friday'
-							? 6
-							: 7,
-				},
-			};
+      const result = await getCall(getData, false);
+      if (result?.data?.weekMaxDate) {
+        const maxDate = new Date(result?.data?.weekMaxDate);
+        const minDate = new Date(result?.data?.weekMinDate);
+        setSelectedFromDate(minDate);
+        setSelectedToDate(maxDate);
+      }
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-			const result = await getCall(getData);
+  useEffect(() => {
+    getDefaultDates();
+  }, []);
 
-			const newData = result.data.map((data) => {
-				const updatedData = {
-					...data,
-					Date: new Date(data.Date).toLocaleDateString('en-CA'),
-					Avg: data.Total / Object.keys(data).filter((key) => /^\d{2}\/\d{2}\/\d{4}$/.test(key)).length,
-				};
+  const fetchHourlySalesReport = async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
 
-				Object.keys(data).forEach((key) => {
-					if (/^\d{2}\/\d{2}\/\d{4}$/.test(key)) {
-						let currentDate = new Date(selectedFromDate);
-						while (currentDate <= selectedToDate) {
-							const formattedDate = dateFormat(currentDate, 'mm/dd/yyyy');
-							updatedData[formattedDate] = data[formattedDate] || 0;
-							currentDate.setDate(currentDate.getDate() + 1); // Increment the date
-						}
-					}
-				});
+      const getData = {
+        url: "hourlySales",
+        urlParams: {
+          companyId: companyID,
+          alignmentId: alignmentID,
+          memberId: selectedUnit,
+          fromDate: dateFormat(selectedFromDate, "yyyy-mm-dd"),
+          toDate: dateFormat(selectedToDate, "yyyy-mm-dd"),
+          reportType:
+            reportType === "Hour and Day" ? 1 : reportType === "Unit" ? 2 : 3,
+          sumType:
+            viewBy === "Hour"
+              ? "HOUR"
+              : viewBy === "Half-Hour"
+              ? "HALF-HOUR"
+              : viewBy === "Qtr-Hour"
+              ? "QTR-HOUR"
+              : viewBy === "Sum"
+              ? "SUM"
+              : "AVG",
+          salesType:
+            salesType === "Net Sales"
+              ? "SalesNet"
+              : salesType === "Gross Sales"
+              ? "SalesGross"
+              : "Transactions",
+          DOW:
+            DOWType === "All"
+              ? "1234567"
+              : DOWType === "Sunday"
+              ? 1
+              : DOWType === "Monday"
+              ? 2
+              : DOWType === "Tuesday"
+              ? 3
+              : DOWType === "Wednesday"
+              ? 4
+              : DOWType === "Thursday"
+              ? 5
+              : DOWType === "Friday"
+              ? 6
+              : 7,
+        },
+      };
 
-				updatedData.HoursSales =
-					data.SalesYN01 +
-					data.SalesYN02 +
-					data.SalesYN03 +
-					data.SalesYN04 +
-					data.SalesYN05 +
-					data.SalesYN06 +
-					data.SalesYN07 +
-					data.SalesYN08 +
-					data.SalesYN09 +
-					data.SalesYN10 +
-					data.SalesYN11 +
-					data.SalesYN12 +
-					data.SalesYN13 +
-					data.SalesYN14 +
-					data.SalesYN15 +
-					data.SalesYN16 +
-					data.SalesYN17 +
-					data.SalesYN18 +
-					data.SalesYN19 +
-					data.SalesYN20 +
-					data.SalesYN21 +
-					data.SalesYN22 +
-					data.SalesYN23 +
-					data.SalesYN24;
+      const result = await getCall(getData);
 
-				return updatedData;
-			});
+      const newData = result.data.map((data) => {
+        const updatedData = {
+          ...data,
+          Date: new Date(data.Date).toLocaleDateString("en-CA"),
+          Avg:
+            data.Total /
+            Object.keys(data).filter((key) => /^\d{2}\/\d{2}\/\d{4}$/.test(key))
+              .length,
+        };
 
-			// Define readable hour labels
-			const hourLabels = Array.from({ length: 24 }, (_, i) =>
-				new Date(0, 0, 0, i).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
-			);
+        Object.keys(data).forEach((key) => {
+          if (/^\d{2}\/\d{2}\/\d{4}$/.test(key)) {
+            let currentDate = new Date(selectedFromDate);
+            while (currentDate <= selectedToDate) {
+              const formattedDate = dateFormat(currentDate, "mm/dd/yyyy");
+              updatedData[formattedDate] = data[formattedDate] || 0;
+              currentDate.setDate(currentDate.getDate() + 1); // Increment the date
+            }
+          }
+        });
 
-			// Dynamically generate columns based on the received data
-			const generatedColumns = [
-				// Conditionally add Hour column only if reportType is not 'Hour and Day'
-				...(reportType === 'Hour and Day'
-					? [
-							columnHelper.accessor('Hour', {
-								id: 'Hour',
-								header: 'Hour',
-								footer: 'Summary:',
-								size: 60,
-							}),
-					  ]
-					: [
-							columnHelper.accessor('UnitName', {
-								id: 'UnitName',
-								header: 'Unit Name',
-								footer: reportType === 'Unit, Hour and Day' ? null : 'Summary:',
-							}),
-					  ]),
+        updatedData.HoursSales =
+          data.SalesYN01 +
+          data.SalesYN02 +
+          data.SalesYN03 +
+          data.SalesYN04 +
+          data.SalesYN05 +
+          data.SalesYN06 +
+          data.SalesYN07 +
+          data.SalesYN08 +
+          data.SalesYN09 +
+          data.SalesYN10 +
+          data.SalesYN11 +
+          data.SalesYN12 +
+          data.SalesYN13 +
+          data.SalesYN14 +
+          data.SalesYN15 +
+          data.SalesYN16 +
+          data.SalesYN17 +
+          data.SalesYN18 +
+          data.SalesYN19 +
+          data.SalesYN20 +
+          data.SalesYN21 +
+          data.SalesYN22 +
+          data.SalesYN23 +
+          data.SalesYN24;
 
-				// Conditionally add the Date and HoursSales column only if reportType is 'Unit, Hour and Day'
-				...(reportType === 'Unit, Hour and Day'
-					? [
-							columnHelper.accessor('Date', {
-								id: 'Date',
-								header: 'Date',
-							}),
-							columnHelper.accessor('HoursSales', {
-								id: 'HoursSales',
-								header: 'Hours w/Sales',
-							}),
-					  ]
-					: []),
+        return updatedData;
+      });
 
-				columnHelper.accessor('Total', {
-					id: 'Total',
-					header: 'Total',
-					size: 120,
-					footer: ({ table }) =>
-						reportType === 'Unit, Hour and Day' ? null : (
-							<div className='text-center'>
-								{`$ ${table
-									.getRowModel()
-									.rows.reduce((acc, row) => acc + row.original.Total, 0)
-									.toFixed(2)}`}
-							</div>
-						),
-				}),
-				...(reportType === 'Hour and Day'
-					? [
-							columnHelper.accessor('Avg', {
-								id: 'Avg',
-								header: 'Avg',
-								cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
-								size: 120,
-								footer: ({ table }) => (
-									<div className='text-center'>
-										{`$ ${table
-											.getRowModel()
-											.rows.reduce((acc, row) => acc + row.original.Avg, 0)
-											.toFixed(2)}`}
-									</div>
-								),
-							}),
-					  ]
-					: []),
-				...Object.keys(newData[0] || {})
-					.filter(
-						(key) => !['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour', 'Avg'].includes(key)
-					)
-					.filter((key) =>
-						reportType !== 'Hour and Day' ? key.startsWith('Hour') || key.startsWith('SalesYN') : !null
-					) // Filter hour and SalesYN keys
-					.map((item) =>
-						columnHelper.accessor(item, {
-							id: item,
-							header: item.startsWith('SalesYN')
-								? `Sales YN${item.replace('SalesYN', '')}`
-								: item.startsWith('Hour')
-								? hourLabels[parseInt(item.replace('Hour', ''), 10)]
-								: /\d{2}\/\d{2}\/\d{4}/.test(item)
-								? item.replace(/\//g, '-')
-								: item,
-							dataType: 'number',
-							size: 120,
-							cell: ({ getValue }) => (getValue() === null ? 0 : getValue() === '00' ? 0 : getValue()),
-							footer: ({ table }) =>
-								reportType !== 'Hour and Day' ? null : item === 'Mins' ? (
-									''
-								) : (
-									<div className='text-center'>
-										{`${salesType !== 'Transaction' ? '$' : ''} ${table
-											.getRowModel()
-											.rows.reduce((acc, row) => acc + row.original[item], 0)
-											.toFixed(2)}`}
-									</div>
-								),
-						})
-					),
-			];
+      // Define readable hour labels
+      const hourLabels = Array.from({ length: 24 }, (_, i) =>
+        new Date(0, 0, 0, i).toLocaleTimeString("en-US", {
+          hour: "numeric",
+          hour12: true,
+        })
+      );
 
-			setColumns(generatedColumns);
-			setHourlySalesData(newData);
-			setIsLoading(false);
-		} catch (error) {
-			setIsError(true);
-			setIsLoading(false);
-			setErrorMessage('There was an issue loading your data, please try again later.');
-			console.error('Error getting Hourly Sales data: ', error);
-		}
-	};
+      // Dynamically generate columns based on the received data
+      const generatedColumns = [
+        // Conditionally add Hour column only if reportType is not 'Hour and Day'
+        ...(reportType === "Hour and Day"
+          ? [
+              columnHelper.accessor("Hour", {
+                id: "Hour",
+                header: "Hour",
+                footer: "Summary:",
+                size: 60,
+              }),
+            ]
+          : [
+              columnHelper.accessor("UnitName", {
+                id: "UnitName",
+                header: "Unit Name",
+                footer: reportType === "Unit, Hour and Day" ? null : "Summary:",
+              }),
+            ]),
 
-	// Function to handle the unit selection
-	const handleUnitSelection = (unitName, unitID) => {
-		setSelectedUnitName(unitName);
-		setSelectedUnit(unitID);
-		setUnitShowModal(false);
-	};
+        // Conditionally add the Date and HoursSales column only if reportType is 'Unit, Hour and Day'
+        ...(reportType === "Unit, Hour and Day"
+          ? [
+              columnHelper.accessor("Date", {
+                id: "Date",
+                header: "Date",
+              }),
+              columnHelper.accessor("HoursSales", {
+                id: "HoursSales",
+                header: "Hours w/Sales",
+              }),
+            ]
+          : []),
 
-	// Function to handle the date selection
-	const handleDateSelection = (from, to) => {
-		setSelectedFromDate(from);
-		setSelectedToDate(to);
-		setShowDateModal(false);
-	};
+        columnHelper.accessor("Total", {
+          id: "Total",
+          header: "Total",
+          size: 120,
+          footer: ({ table }) =>
+            reportType === "Unit, Hour and Day" ? null : (
+              <div className="text-center">
+                {`$ ${table
+                  .getRowModel()
+                  .rows.reduce((acc, row) => acc + row.original.Total, 0)
+                  .toFixed(2)}`}
+              </div>
+            ),
+        }),
+        ...(reportType === "Hour and Day"
+          ? [
+              columnHelper.accessor("Avg", {
+                id: "Avg",
+                header: "Avg",
+                cell: ({ getValue }) =>
+                  getValue() !== 0 ? getValue().toFixed(2) : 0,
+                size: 120,
+                footer: ({ table }) => (
+                  <div className="text-center">
+                    {`$ ${table
+                      .getRowModel()
+                      .rows.reduce((acc, row) => acc + row.original.Avg, 0)
+                      .toFixed(2)}`}
+                  </div>
+                ),
+              }),
+            ]
+          : []),
+        ...Object.keys(newData[0] || {})
+          .filter(
+            (key) =>
+              ![
+                "UnitID",
+                "UnitName",
+                "Date",
+                "Total",
+                "HoursSales",
+                "Hour",
+                "Avg",
+              ].includes(key)
+          )
+          .filter((key) =>
+            reportType !== "Hour and Day"
+              ? key.startsWith("Hour") || key.startsWith("SalesYN")
+              : !null
+          ) // Filter hour and SalesYN keys
+          .map((item) =>
+            columnHelper.accessor(item, {
+              id: item,
+              header: item.startsWith("SalesYN")
+                ? `Sales YN${item.replace("SalesYN", "")}`
+                : item.startsWith("Hour")
+                ? hourLabels[parseInt(item.replace("Hour", ""), 10)]
+                : /\d{2}\/\d{2}\/\d{4}/.test(item)
+                ? item.replace(/\//g, "-")
+                : item,
+              dataType: "number",
+              size: 120,
+              cell: ({ getValue }) =>
+                getValue() === null ? 0 : getValue() === "00" ? 0 : getValue(),
+              footer: ({ table }) =>
+                reportType !== "Hour and Day" ? null : item === "Mins" ? (
+                  ""
+                ) : (
+                  <div className="text-center">
+                    {`${salesType !== "Transaction" ? "$" : ""} ${table
+                      .getRowModel()
+                      .rows.reduce((acc, row) => acc + row.original[item], 0)
+                      .toFixed(2)}`}
+                  </div>
+                ),
+            })
+          ),
+      ];
 
-	const handleReportTypeChange = (option) => {
-		setReportType(option);
-		if (option === 'Hour and Day') {
-			setIsSalesEditable(true);
-			setIsDOWEditable(false);
-			setIsViewByEditable(true);
-			setViewBy('Hour');
-			setViewByOptions([{ name: 'Hour' }, { name: 'Half-Hour' }, { name: 'Qtr-Hour' }]);
-		} else if (option === 'Unit') {
-			setIsSalesEditable(true);
-			setIsDOWEditable(true);
-			setIsViewByEditable(true);
-			setViewBy('Sum');
-			setViewByOptions([{ name: 'Sum' }, { name: 'Avg' }]);
-		} else if (option === 'Unit, Hour and Day') {
-			setIsSalesEditable(false);
-			setIsDOWEditable(false);
-			setIsViewByEditable(false);
-		}
-	};
+      setColumns(generatedColumns);
+      setHourlySalesData(newData);
+      setIsLoading(false);
+    } catch (error) {
+      setIsError(true);
+      setIsLoading(false);
+      setErrorMessage(
+        "There was an issue loading your data, please try again later."
+      );
+      console.error("Error getting Hourly Sales data: ", error);
+    }
+  };
 
-	//  Function to handle the PDF export
-	const handlePDFClick = () => {
-		if (hourlySalesData.length === 0) return;
+  // Function to handle the unit selection
+  const handleUnitSelection = (unitName, unitID) => {
+    setSelectedUnitName(unitName);
+    setSelectedUnit(unitID);
+    setUnitShowModal(false);
+  };
 
-		const pdfData = {
-			title: 'Hourly Sales',
-			subHeaders: [
-				`${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
-			],
-			exportType: 'pdf',
-			pageOrientation: 'landscape',
-			body: generateBody(),
-		};
+  // Function to handle the date selection
+  const handleDateSelection = (from, to) => {
+    setSelectedFromDate(from);
+    setSelectedToDate(to);
+    setShowDateModal(false);
+  };
 
-		PdfBuilder(pdfData);
-	};
+  const handleReportTypeChange = (option) => {
+    setReportType(option);
+    if (option === "Hour and Day") {
+      setIsSalesEditable(true);
+      setIsDOWEditable(false);
+      setIsViewByEditable(true);
+      setViewBy("Hour");
+      setViewByOptions([
+        { name: "Hour" },
+        { name: "Half-Hour" },
+        { name: "Qtr-Hour" },
+      ]);
+    } else if (option === "Unit") {
+      setIsSalesEditable(true);
+      setIsDOWEditable(true);
+      setIsViewByEditable(true);
+      setViewBy("Sum");
+      setViewByOptions([{ name: "Sum" }, { name: "Avg" }]);
+    } else if (option === "Unit, Hour and Day") {
+      setIsSalesEditable(false);
+      setIsDOWEditable(false);
+      setIsViewByEditable(false);
+    }
+  };
 
-	const generateBody = () => {
-		const rowsPerTable = 28; // Define how many rows you want per table
-		const totalRows = hourlySalesData.length; // Get total number of rows
-		const body = []; // Initialize the body array
+  //  Function to handle the PDF export
+  const handlePDFClick = () => {
+    if (hourlySalesData.length === 0) return;
 
-		// Loop through the data and create tables
-		for (let i = 0; i < totalRows; i += rowsPerTable) {
-			const chunkedColumns = [];
-			for (let j = 0; j < columns.length; j += 13) {
-				chunkedColumns.push(columns.slice(j, j + 13));
-			}
-			chunkedColumns.forEach((columnChunk) => {
-				body.push({
-					type: 'table/SeperatePage',
-					widths: columnChunk.map(() => 'auto'),
-					dataTypes: columnChunk.map((column) => column.dataType),
-					data: {
-						columnHeaders: columnChunk.map((column) => column.header),
-						rows: hourlySalesData.slice(i, i + rowsPerTable).map((row) =>
-							columnChunk.map((column) => ({
-								value:
-									row[column.id] - Math.floor(row[column.id]) !== 0
-										? typeof row[column.id] === 'number'
-											? row[column.id].toFixed(2)
-											: row[column.id]
-										: row[column.id] || '0 ',
-								cellType: '',
-								columnName: column.header,
-							}))
-						),
-					},
-				});
-			});
-		}
+    const pdfData = {
+      title: "Hourly Sales",
+      subHeaders: [
+        `${dateFormat(selectedFromDate, "mm-dd-yyyy")} to ${dateFormat(
+          selectedToDate,
+          "mm-dd-yyyy"
+        )}`,
+      ],
+      exportType: "pdf",
+      pageOrientation: "landscape",
+      body: generateBody(),
+    };
 
-		// Now the `body` array contains all the tables for the report
-		return body;
-	};
+    PdfBuilder(pdfData);
+  };
 
-	// Function to handle the Excel export
-	const handleExcelClick = () => {
-		if (hourlySalesData.length === 0) return;
+  const generateBody = () => {
+    const rowsPerTable = 28; // Define how many rows you want per table
+    const totalRows = hourlySalesData.length; // Get total number of rows
+    const body = []; // Initialize the body array
 
-		const data = [
-			{
-				name: '',
-				columns: columns.map((column) => ({ name: column.header })),
-				data: hourlySalesData.map((subRow) =>
-					columns.map((column) =>
-						subRow[column.id] - Math.floor(subRow[column.id]) !== 0
-							? typeof subRow[column.id] === 'number'
-								? subRow[column.id].toFixed(2)
-								: subRow[column.id]
-							: subRow[column.id] || '0'
-					)
-				),
-			},
-		];
+    // Loop through the data and create tables
+    for (let i = 0; i < totalRows; i += rowsPerTable) {
+      const chunkedColumns = [];
+      for (let j = 0; j < columns.length; j += 13) {
+        chunkedColumns.push(columns.slice(j, j + 13));
+      }
+      chunkedColumns.forEach((columnChunk) => {
+        body.push({
+          type: "table/SeperatePage",
+          widths: columnChunk.map(() => "auto"),
+          dataTypes: columnChunk.map((column) => column.dataType),
+          data: {
+            columnHeaders: columnChunk.map((column) => column.header),
+            rows: hourlySalesData.slice(i, i + rowsPerTable).map((row) =>
+              columnChunk.map((column) => ({
+                value:
+                  row[column.id] - Math.floor(row[column.id]) !== 0
+                    ? typeof row[column.id] === "number"
+                      ? row[column.id].toFixed(2)
+                      : row[column.id]
+                    : row[column.id] || "0 ",
+                cellType: "",
+                columnName: column.header,
+              }))
+            ),
+          },
+        });
+      });
+    }
 
-		const filename = 'hourlySales';
-		const spreadSheetTitle = 'Hourly Sales';
-		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
+    // Now the `body` array contains all the tables for the report
+    return body;
+  };
 
-		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
-	};
+  // Function to handle the Excel export
+  const handleExcelClick = () => {
+    if (hourlySalesData.length === 0) return;
 
-	const Table = <TableHOC columns={columns} data={hourlySalesData} isFooter={true} />;
-	return (
-		<div className='w-[85%] mx-auto'>
-			<Steps
-				enabled={introSteps.stepsEnabled}
-				steps={introSteps.steps}
-				initialStep={introSteps.initialStep}
-				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Hourly Sales</h2>
-			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
-				<div className='flex flex-col '>
-					<div className='flex items-center space-x-1'>
-						<UnitSelector
-							companyId={companyID}
-							alignmentId={alignmentID}
-							memberID={selectedUnit}
-							memberName={selectedUnitName}
-							includeAreas={true}
-							setMemberName={setSelectedUnitName}
-							onClick={() => setUnitShowModal(true)}
-						/>
-						<DateSelector
-							toDate={selectedToDate}
-							fromDate={selectedFromDate}
-							isDateRange={true}
-							onClick={() => setShowDateModal(true)}
-						/>
-						<div className='w-56 reportType-selector'>
-							<Dropdown
-								title='Report Type'
-								options={reportTypeOptions}
-								selectedOption={reportType}
-								onOptionChange={handleReportTypeChange}
-							/>
-						</div>
-						<div className='ml-3 run-button' onClick={fetchHourlySalesReport}>
-							<div className='py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
-								Run
-							</div>
-						</div>
-					</div>
-					<div className='flex items-center space-x-2'>
-						<div className='w-40 salesType-selector'>
-							<Dropdown
-								title='Sales Type'
-								options={salesTypeOptions}
-								selectedOption={salesType}
-								onOptionChange={(option) => setSalesType(option)}
-								isEditable={isSalesEditable}
-							/>
-						</div>
-						<div className='w-36 DOWType-selector'>
-							<Dropdown
-								title='DOW'
-								options={DOWTypeOptions}
-								selectedOption={DOWType}
-								onOptionChange={(option) => setDOWType(option)}
-								isEditable={isDOWEditable}
-							/>
-						</div>
-						<div className='w-36 viewType-selector'>
-							<Dropdown
-								title='View By'
-								options={viewByOptions}
-								selectedOption={viewBy}
-								onOptionChange={(option) => setViewBy(option)}
-								isEditable={isViewByEditable}
-							/>
-						</div>
-					</div>
-				</div>
-				<div>
-					<ExportOptions
-						includePDF={true}
-						handlePDFClick={handlePDFClick}
-						includeExcel={true}
-						handleExcelClick={handleExcelClick}
-						includeHelp={true}
-						handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
-					/>
-				</div>
-			</header>
+    const data = [
+      {
+        name: "",
+        columns: columns.map((column) => ({ name: column.header })),
+        data: hourlySalesData.map((subRow) =>
+          columns.map((column) =>
+            subRow[column.id] - Math.floor(subRow[column.id]) !== 0
+              ? typeof subRow[column.id] === "number"
+                ? subRow[column.id].toFixed(2)
+                : subRow[column.id]
+              : subRow[column.id] || "0"
+          )
+        ),
+      },
+    ];
 
-			{/* Display the table if there is no error and the data is not loading */}
-			{isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				<div className='relative w-full min-h-56'>
-					<Loader loading={isLoading} />
-					{!isLoading &&
-						(hourlySalesData.length > 0 ? (
-							<div className='paged-table'>{Table}</div>
-						) : !selectedUnit ? (
-							<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-						) : (
-							<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-						))}
-				</div>
-			)}
+    const filename = "hourlySales";
+    const spreadSheetTitle = "Hourly Sales";
+    const date = `${dateFormat(selectedFromDate, "mm-dd-yyyy")} to ${dateFormat(
+      selectedToDate,
+      "mm-dd-yyyy"
+    )}`;
 
-			<div>
-				<UnitModal
-					unitData={unitsAndAreasList}
-					memberID={selectedUnit}
-					memberName={selectedUnitName}
-					show={showModal}
-					includeAreas={true}
-					handleClose={() => {
-						setUnitShowModal(false);
-					}}
-					handleUnitSelection={handleUnitSelection}
-				/>
-				<CalendarModal
-					handleClose={() => setShowDateModal(false)}
-					modalOpen={showDateModal}
-					isDateRange={true}
-					handleDateSelection={handleDateSelection}
-					handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-					selectedFromDate={selectedFromDate}
-					selectedToDate={selectedToDate}
-				/>
-			</div>
-		</div>
-	);
+    exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
+  };
+
+  const Table = (
+    <TableHOC columns={columns} data={hourlySalesData} isFooter={true} />
+  );
+  return (
+    <div className="w-[85%] mx-auto">
+      <Steps
+        enabled={introSteps.stepsEnabled}
+        steps={introSteps.steps}
+        initialStep={introSteps.initialStep}
+        onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+      />
+      <h2 className="my-4 text-2xl leading-tight text-left pageTitle">
+        Hourly Sales
+      </h2>
+      <header className="optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
+        <div className="flex flex-col ">
+          <div className="flex items-center space-x-1">
+            <UnitSelector
+              companyId={companyID}
+              alignmentId={alignmentID}
+              memberID={selectedUnit}
+              memberName={selectedUnitName}
+              includeAreas={true}
+              setMemberName={setSelectedUnitName}
+              onClick={() => setUnitShowModal(true)}
+            />
+            <DateSelector
+              toDate={selectedToDate}
+              fromDate={selectedFromDate}
+              isDateRange={true}
+              onClick={() => setShowDateModal(true)}
+            />
+            <div className="w-56 reportType-selector">
+              <Dropdown
+                title="Report Type"
+                options={reportTypeOptions}
+                selectedOption={reportType}
+                onOptionChange={handleReportTypeChange}
+              />
+            </div>
+            <div className="ml-3 run-button" onClick={fetchHourlySalesReport}>
+              <div className="py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
+                Run
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-40 salesType-selector">
+              <Dropdown
+                title="Sales Type"
+                options={salesTypeOptions}
+                selectedOption={salesType}
+                onOptionChange={(option) => setSalesType(option)}
+                isEditable={isSalesEditable}
+              />
+            </div>
+            <div className="w-36 DOWType-selector">
+              <Dropdown
+                title="DOW"
+                options={DOWTypeOptions}
+                selectedOption={DOWType}
+                onOptionChange={(option) => setDOWType(option)}
+                isEditable={isDOWEditable}
+              />
+            </div>
+            <div className="w-36 viewType-selector">
+              <Dropdown
+                title="View By"
+                options={viewByOptions}
+                selectedOption={viewBy}
+                onOptionChange={(option) => setViewBy(option)}
+                isEditable={isViewByEditable}
+              />
+            </div>
+          </div>
+        </div>
+        <div>
+          <ExportOptions
+            includePDF={true}
+            handlePDFClick={handlePDFClick}
+            includeExcel={true}
+            handleExcelClick={handleExcelClick}
+            includeHelp={true}
+            handleHelpClick={() =>
+              setIntroSteps({ ...introSteps, stepsEnabled: true })
+            }
+          />
+        </div>
+      </header>
+
+      {/* Display the table if there is no error and the data is not loading */}
+      {isError ? (
+        <div>{errorMessage}</div>
+      ) : (
+        <div className="relative w-full min-h-56">
+          <Loader loading={isLoading} />
+          {!isLoading &&
+            (hourlySalesData.length > 0 ? (
+              <div className="paged-table">{Table}</div>
+            ) : !selectedUnit ? (
+              <div className="mt-10 text-xl font-medium text-center">
+                No Unit Selected
+              </div>
+            ) : (
+              <div className="mt-10 text-xl font-medium text-center">
+                No data available
+              </div>
+            ))}
+        </div>
+      )}
+
+      <div>
+        <UnitModal
+          unitData={unitsAndAreasList}
+          memberID={selectedUnit}
+          memberName={selectedUnitName}
+          show={showModal}
+          includeAreas={true}
+          handleClose={() => {
+            setUnitShowModal(false);
+          }}
+          handleUnitSelection={handleUnitSelection}
+        />
+        <CalendarModal
+          handleClose={() => setShowDateModal(false)}
+          modalOpen={showDateModal}
+          isDateRange={true}
+          handleDateSelection={handleDateSelection}
+          handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+          handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+          selectedFromDate={selectedFromDate}
+          selectedToDate={selectedToDate}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default HourlySales;
