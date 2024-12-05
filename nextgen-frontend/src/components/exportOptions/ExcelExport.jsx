@@ -14,7 +14,6 @@ const createInfoRow = (worksheet, info) => {
 };
 
 const addTable = (worksheet, table, index, lastColumn, lastRow) => {
-	const tableData = table.data.map((row) => Object.values(row));
 	const headerRowOffset = table.hasTableHeader !== false ? 1 : 0;
 	const startColumn = table.float === 'right' ? lastColumn + 2 : 1;
 	const startRow =
@@ -33,6 +32,42 @@ const addTable = (worksheet, table, index, lastColumn, lastRow) => {
 		);
 	}
 
+	if (table.colored) {
+		const startRowWithHeaderOffset = startRow + headerRowOffset + 1;
+		table.data.forEach((rowData, rowIndex) => {
+			rowData.forEach((cellData, columnIndex) => {
+				const cell = worksheet.getCell(startRowWithHeaderOffset + rowIndex, startColumn + columnIndex);
+				cell.value = cellData.value;
+				const rgbaToArgb = (rgba) => {
+					const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)/);
+					if (!match) return '';
+
+					let [r, g, b, a = 1] = match.slice(1);
+					if (a == 255) a = 1;
+					const alpha = Math.round(parseFloat(a) * 255)
+						.toString(16)
+						.padStart(2, '0')
+						.toUpperCase();
+					const red = parseInt(r, 10).toString(16).padStart(2, '0').toUpperCase();
+					const green = parseInt(g, 10).toString(16).padStart(2, '0').toUpperCase();
+					const blue = parseInt(b, 10).toString(16).padStart(2, '0').toUpperCase();
+
+					return `${alpha}${red}${green}${blue}`;
+				};
+
+				const fillColor = cellData.color ? rgbaToArgb(cellData.color) : '';
+				if (cellData.color) {
+					cell.fill = {
+						type: 'pattern',
+						pattern: 'solid',
+						fgColor: { argb: fillColor },
+					};
+				}
+			});
+		});
+	}
+
+	const tableData = table.data.map((row) => (table.colored ? row.map((cell) => cell.value) : Object.values(row)));
 	const tableRef = `${String.fromCharCode(64 + startColumn)}${startRow + headerRowOffset}`;
 	worksheet.addTable({
 		name: table.name || `Table${index + 1}`,

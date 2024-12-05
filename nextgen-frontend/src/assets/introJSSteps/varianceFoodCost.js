@@ -16,7 +16,7 @@ export default function varianceFoodCost() {
 			intro: '-Select the date, or date range, you wish to display Variance Food Cost Report',
 		},
 		{
-			element: '.dropdown-selector',
+			element: '.countType-selector',
 			intro: 'You can select the Variance Food Cost Report based on the following options: Weeks, Days, Months, or Shifts.',
 		},
 		{

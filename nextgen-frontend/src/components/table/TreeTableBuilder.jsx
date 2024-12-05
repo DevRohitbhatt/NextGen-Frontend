@@ -21,6 +21,10 @@ const TableHeader = styled.div`
 	gap: 10px;
 	//  min-width:145px;
 	border-bottom: 2px solid ${(props) => props.theme.primary};
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
 `;
 
 const TableHeaderCell = styled.div`
@@ -205,7 +209,7 @@ export default function TreeTable({
         </div>
         {onSearch && <SearchBar data={initialData} onSearch={handleSearch} />}
       </div>
-      <div className="suggested-order-table overflow-auto mx-auto">
+      <div className="suggested-order-table overflow-auto mx-auto max-h-[85vh]">
         <div
           className={` tree-table min-w-[1460px]`}
         >
