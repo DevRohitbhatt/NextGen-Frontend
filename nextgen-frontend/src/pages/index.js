@@ -16,10 +16,16 @@ const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
+const HourlySales = lazy(() => import('./sales/HourlySales'));
+const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
+const SalesVsLabor = lazy(() => import('./sales/SalesVsLabor'));
+const BusinessSummary = lazy(() => import('./sales/BusinessSummary'));
 
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
+const LaborCICO = lazy(() => import('./labor/LaborCICO'));
+const LaborCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
 const LaborAnalysis = lazy(() => import('./labor/LaborAnalysis'));
 
 export {
@@ -29,14 +35,20 @@ export {
 	SuggestedOrderList,
 	InventoryTransfer,
 	InventoryWeeksOnHand,
+	EmployeeInformation,
+	LaborByPayPeriod,
+	LaborCICO,
+	LaborCICOExceptions,
+	Voids,
+	HourlySales,
+	MenuItemsSold,
+	SalesVsLabor,
+	BusinessSummary,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
-	Voids,
-	EmployeeInformation,
-	LaborByPayPeriod,
 	LaborAnalysis,
 };

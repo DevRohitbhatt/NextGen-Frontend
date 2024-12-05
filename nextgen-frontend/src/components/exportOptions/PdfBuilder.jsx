@@ -101,59 +101,71 @@ const getCellValue = (cell, dataType) => {
 };
 
 export default function PdfBuilder(data) {
-  const content = [];
-  let columns = [];
-  content.push({ text: data.title, style: "header" });
-  if (data.subHeaders) {
-    data.subHeaders.map((subHeader) => {
-      content.push({ text: subHeader, style: "subheader" });
-    });
-  }
-  data.body.map((section) => {
-    if (section.type !== "table/Column" && columns.length > 0) {
-      content.push({ columns: columns });
-      columns = [];
-    }
-    if (section.type === "table") {
-      const { title, table } = createTable(section);
-      if (title) content.push(title);
-      content.push(table);
-    } else if (section.type === "table/Column") {
-      const { title, table } = createTable(section);
-      if (title) content.push(title);
-      columns.push(table);
-    }
-  });
+	const content = [];
+	let columns = [];
+	content.push({ text: data.title, style: 'header' });
+	if (data.subHeaders) {
+		data.subHeaders.map((subHeader) => {
+			content.push({ text: subHeader, style: 'subheader' });
+		});
+	}
+	data.body.map((section) => {
+		if (section.type !== 'table/Column' && columns.length > 0) {
+			content.push({ columns: columns });
+			columns = [];
+		}
+		if (section.type === 'table') {
+			const { title, table } = createTable(section);
+			if (title) content.push(title);
+			content.push(table);
+		} else if (section.type === 'table/SeperatePage') {
+			const { title, table } = createTable(section);
+			if (title) content.push(title);
+			content.push(table);
+			if (data.body.indexOf(section) !== data.body.length - 1) {
+				content.push({ text: '', pageBreak: 'after' }); // Add a page break after each table except the last one
+			}
+		} else if (section.type === 'table/Column') {
+			const { title, table } = createTable(section);
+			if (title) content.push(title);
+			columns.push(table);
+		}
+	});
 
-  const docDefinition = {
-    pageOrientation: data.pageOrientation || "portrait",
-    content: content,
-    ...(data.exportType === "pdf" && { pageMargins: [20, 20, 20, 20] }),
-    styles: {
-      header: {
-        fontSize: 16,
-        bold: true,
-      },
-      subheader: {
-        fontSize: 12,
-        bold: true,
-        margin: [0, 5, 0, 0],
-      },
-      tableTitle: {
-        fontSize: 12,
-        bold: true,
-        margin: [0, 10, 0, 5],
-      },
-      tableHeader: {
-        bold: true,
-        fontSize: 9,
-        margin: [0, 2, 0, 2],
-      },
-      tableCell: {
-        fontSize: 9,
-      },
-    },
-  };
+	const docDefinition = {
+		pageSize: data.pageSize || 'A4',
+		pageOrientation: data.pageOrientation || 'portrait',
+		content: content,
+		...(data.exportType === 'pdf' && { pageMargins: [20, 20, 20, 20] }),
+
+		styles: {
+			header: {
+				fontSize: 16,
+				bold: true,
+			},
+			subheader: {
+				fontSize: 12,
+				bold: true,
+				margin: [0, 5, 0, 0],
+			},
+			tableTitle: {
+				fontSize: 12,
+				bold: true,
+				margin: [0, 10, 0, 5],
+			},
+			tableHeader: {
+				bold: true,
+				fontSize: 9,
+				margin: [0, 2, 0, 2],
+			},
+			tableCell: {
+				fontSize: 9,
+			},
+		},
+		defaultStyle: {
+			columnGap: 10,
+		},
+	};
 
   if (data.exportType === "pdf") {
     pdfMake.createPdf(docDefinition).open();

@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { Modal, SimpleTable } from '../index';
 import * as suggestedOrderFunctions from '../../functions/suggestedOrderFunctions';
 import { toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 import { postCall } from '../../apis/network';
 
 const FormRow = styled.div`

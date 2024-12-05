@@ -11,6 +11,8 @@ import {
 	getExpandedRowModel,
 	getSortedRowModel,
 	getGroupedRowModel,
+	getFacetedRowModel,
+	getFacetedUniqueValues,
 	flexRender,
 } from '@tanstack/react-table';
 import useTableView from '../../hooks/useTableView';
@@ -25,10 +27,12 @@ function TableHOC({
 	view,
 	isTableRendered,
 	setIsTableRendered,
+	setTableState,
 	expandCollapseButtons = false,
 	enableColumnFilters = false,
 	headerPosition = 'center',
 	dataPosition = 'text-center',
+	detailOnTop,
 	onCallBack,
 }) {
 	const [expanded, setExpanded] = useState({});
@@ -61,6 +65,8 @@ function TableHOC({
 		getSortedRowModel: getSortedRowModel(),
 		...(isPaginated && { getPaginationRowModel: getPaginationRowModel() }),
 		getExpandedRowModel: getExpandedRowModel(),
+		getFacetedRowModel: getFacetedRowModel(), // client-side faceting
+		getFacetedUniqueValues: getFacetedUniqueValues(),
 		//filterFromLeafRows: true,
 		//maxLeafRowFilterDepth: 1,
 		debugTable: false,
@@ -69,12 +75,21 @@ function TableHOC({
 	useTableView(table, view, isTableRendered);
 
 	useEffect(() => {
+		if (setTableState) {
+			setTableState(table.getState());
+		}
 		table.getAllColumns().map((column) => {
 			if (column.columnDef.show === false) {
 				column.toggleVisibility(false);
+			} else {
+				if (table.getExpandedDepth() < column.columnDef.showDepth) {
+					column.toggleVisibility(false);
+				} else {
+					column.toggleVisibility(true);
+				}
 			}
 		});
-	}, [table]);
+	}, [table, table.getState().expanded]);
 
 	useEffect(() => {
 		const newGrouping = [];
@@ -97,33 +112,35 @@ function TableHOC({
 
 	return (
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3'>
-			{/* expand/collapse all button */}
-			{expandCollapseButtons && (
-				<div className='flex items-center my-4 space-x-4'>
-					<button
-						onClick={() => table.toggleAllRowsExpanded(false)}
-						className={`flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
-							table.getIsAllRowsExpanded()
-								? 'text-[var(--tw-primary)]'
-								: 'bg-[var(--tw-primary)] text-white'
-						}`}
-					>
-						Collapse All
-						<IoIosArrowDown />
-					</button>
-					<button
-						onClick={() => table.toggleAllRowsExpanded(true)}
-						className={`flex items-center gap-2 px-4 py-3 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
-							table.getIsAllRowsExpanded()
-								? 'bg-[var(--tw-primary)] text-white'
-								: 'text-[var(--tw-primary)]'
-						}`}
-					>
-						Expand All
-						<IoIosArrowUp />
-					</button>
-				</div>
-			)}
+			<div className='flex items-center gap-2'>
+				{expandCollapseButtons && (
+					<div className='flex items-center my-4 space-x-4'>
+						<button
+							onClick={() => table.toggleAllRowsExpanded(true)}
+							className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+								table.getIsAllRowsExpanded()
+									? 'bg-[var(--tw-primary)] text-white'
+									: 'text-[var(--tw-primary)]'
+							}`}
+						>
+							Expand All
+							<IoIosArrowDown />
+						</button>
+						<button
+							onClick={() => table.toggleAllRowsExpanded(false)}
+							className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+								table.getIsAllRowsExpanded()
+									? 'text-[var(--tw-primary)]'
+									: 'bg-[var(--tw-primary)] text-white'
+							}`}
+						>
+							Collapse All
+							<IoIosArrowUp />
+						</button>
+					</div>
+				)}
+				<div className='text-xl font-bold'>{detailOnTop}</div>
+			</div>
 
 			{/* table */}
 			<div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
@@ -153,7 +170,7 @@ function TableHOC({
 																<div
 																	{...{
 																		className: header.column.getCanSort()
-																			? 'cursor-pointer flex gap-1 items-center '
+																			? `cursor-pointer flex gap-1 items-center text-${headerPosition}`
 																			: '',
 																		onClick:
 																			header.column.getToggleSortingHandler(),
@@ -177,7 +194,7 @@ function TableHOC({
 															<div
 																{...{
 																	className: header.column.getCanSort()
-																		? 'cursor-pointer flex gap-1 items-center '
+																		? `cursor-pointer flex gap-1 items-center text-${headerPosition}`
 																		: '',
 																	onClick: header.column.getToggleSortingHandler(),
 																}}
@@ -271,7 +288,7 @@ function TableHOC({
 
 					{/* footer */}
 					{isFooter && (
-						<tfoot className='sticky bottom-0 bg-white shadow-[0_1px_0_var(--tw-primary)_inset]'>
+						<tfoot className='sticky -bottom-1 bg-white shadow-[0_1px_0_var(--tw-primary)_inset]'>
 							{table.getFooterGroups().map((footerGroup) => (
 								<>
 									<tr className='' key={footerGroup.id}>
@@ -357,7 +374,7 @@ function TableHOC({
 	);
 }
 TableHOC.propTypes = {
-	view: PropTypes.object.isRequired,
+	view: PropTypes.oneOfType([PropTypes.object, PropTypes.number]).isRequired,
 	columns: PropTypes.array.isRequired,
 	data: PropTypes.array.isRequired,
 	isHeader: PropTypes.bool,
@@ -369,6 +386,7 @@ TableHOC.propTypes = {
 	enableColumnFilters: PropTypes.bool,
 	headerPosition: PropTypes.string,
 	dataPosition: PropTypes.string,
+	detailOnTop: PropTypes.node,
 	onCallBack: PropTypes.func,
 };
 

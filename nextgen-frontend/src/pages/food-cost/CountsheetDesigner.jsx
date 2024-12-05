@@ -8,6 +8,7 @@ import {
 	ExcelExport as exportToExcel,
 	DndTable,
 	DateSelector,
+	CalendarModal,
 	Modal,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -18,6 +19,7 @@ const CountsheetDesigner = () => {
 	const location = useLocation();
 	const [countsheet, setCountsheet] = useState({});
 	const [countsheetDetails, setCountsheetDetails] = useState([]);
+	const [showCommentModal, setShowCommentModal] = useState(false);
 
 	// State variables for loading and error handling
 	const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +28,13 @@ const CountsheetDesigner = () => {
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the countsheet Report, please try again later.'
 	);
+
+	//calendar state variables
+	const [selectedFromDate, setSelectedFromDate] = useState(
+		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
+	);
+	const [showDateModal, setShowDateModal] = useState(false);
+
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 	const moreOptionsDropdown = useRef(null);
 	const [selectedRow, setSelectedRow] = useState(null);
@@ -92,6 +101,7 @@ const CountsheetDesigner = () => {
 
 	useEffect(() => {
 		setCountsheet(location.state.countsheet);
+		setSelectedFromDate(new Date(location.state.countsheet?.dateTime));
 
 		fetchCountsheetDetails();
 	}, []);
@@ -103,7 +113,7 @@ const CountsheetDesigner = () => {
 			const getData = {
 				url: 'countsheetDetails',
 				urlParams: {
-					companyId: location.state.companyId,
+					companyId: location.state.companyID,
 					countsheetID: location.state.countsheet?.inventoryCountSheetID,
 				},
 			};
@@ -125,6 +135,7 @@ const CountsheetDesigner = () => {
 					el.id = index + 1 + '' + ind;
 				});
 			});
+
 			setCountsheetDetails(newData);
 			setIsLoading(false);
 		} catch (error) {
@@ -209,7 +220,7 @@ const CountsheetDesigner = () => {
 			const getData = {
 				url: 'Countsheet_PricingInfo',
 				urlParams: {
-					companyId: location.state.companyId,
+					companyId: location.state.companyID,
 					QSRInvoiceID: location.state.countsheet?.inventoryCountSheetID,
 					QSRItemID: selectedRow?.id,
 					QSRInventoryItemID: selectedRow?.qsrInventoryItemID,
@@ -230,13 +241,12 @@ const CountsheetDesigner = () => {
 			const getData = {
 				url: 'countsheetPossibleError',
 				urlParams: {
-					companyId: location.state.companyId,
+					companyId: location.state.companyID,
 					InventoryCountSheetID: location.state.countsheet?.inventoryCountSheetID,
 				},
 			};
 
 			const result = await getCall(getData);
-			console.log('result', result);
 
 			setPossibleErrorsData(result.data);
 			setPossibleErrorsModal(!possibleErrorsModal);
@@ -282,9 +292,16 @@ const CountsheetDesigner = () => {
 			</h2>
 			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center gap-2'>
-					<DateSelector fromDate={new Date(countsheet?.dateTime)} isDateRange={false} isEditable={false} />
+					<DateSelector
+						fromDate={selectedFromDate}
+						isDateRange={false}
+						onClick={() => setShowDateModal(true)}
+					/>
 
-					<div className='flex items-center justify-between mt-8  px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)]'>
+					<div
+						className='flex items-center justify-between mt-8  px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)]'
+						onClick={() => setShowCommentModal(true)}
+					>
 						Insert Comment
 					</div>
 
@@ -307,7 +324,7 @@ const CountsheetDesigner = () => {
 								</div>
 								<div className='mb-2 option '>
 									<button className='w-[100%] bg-[#f9f9f9]' onClick={getPossibleErrors}>
-										Possible Erors
+										Possible Errors
 									</button>
 								</div>
 								<div className='mb-2 option '>
@@ -352,6 +369,31 @@ const CountsheetDesigner = () => {
 			) : (
 				countsheetDetails.length > 0 && <div className='paged-table'>{Table}</div>
 			)}
+
+			<CalendarModal
+				handleClose={() => setShowDateModal(false)}
+				modalOpen={showDateModal}
+				isDateRange={false}
+				handleDateSelection={(date) => setSelectedFromDate(date)}
+				handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+				selectedFromDate={selectedFromDate}
+			/>
+
+			<Modal
+				isOpen={showCommentModal}
+				title={'Insert Comment'}
+				onClose={() => {
+					setShowCommentModal(!showCommentModal);
+				}}
+			>
+				<div className='h-32 m-4 w-96'>
+					<textarea
+						className='w-full h-full block p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border-2 border-[var(--tw-primary)] focus:outline-[var(--tw-primary)] caret-[var(--tw-primary)]'
+						name=''
+						id=''
+					></textarea>
+				</div>
+			</Modal>
 
 			<Modal
 				isOpen={priceInfoModal}
