@@ -278,6 +278,7 @@ const Discounts = () => {
         setSelectedToDate(maxDate);
       }
     } catch (error) {
+      console.error("Error getting default dates: ", error);
     } finally {
       setIsLoading(false);
     }
