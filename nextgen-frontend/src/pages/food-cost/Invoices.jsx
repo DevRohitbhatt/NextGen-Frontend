@@ -168,7 +168,7 @@ const Invoices = () => {
     try {
       setIsLoading(true);
       const getData = {
-        url: "getPeriodFromDateModel",
+        url: "getCurrentPeriodDates",
         urlParams: {
           companyId: companyID,
         },
@@ -497,7 +497,7 @@ const Invoices = () => {
                 fromDate={selectedFromDate}
                 isDateRange={true}
                 onClick={() => setShowDateModal(true)}
-				extraClass={"w-[219px]"}
+                extraClass={"w-[219px]"}
               />
             </div>
           </div>

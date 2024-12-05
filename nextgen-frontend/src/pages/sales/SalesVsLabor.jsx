@@ -51,7 +51,7 @@ const SalesVsLabor = () => {
   const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
   //calendar state variables
-  const [selectedFromDate, setSelectedFromDate] = useState( );
+  const [selectedFromDate, setSelectedFromDate] = useState();
   const [selectedToDate, setSelectedToDate] = useState();
   const [showDateModal, setShowDateModal] = useState(false);
 
@@ -173,7 +173,7 @@ const SalesVsLabor = () => {
     try {
       setIsLoading(true);
       const getData = {
-        url: "getPeriodFromDateModel",
+        url: "getCurrentPeriodDates",
         urlParams: {
           companyId: companyID,
         },
@@ -653,7 +653,7 @@ const SalesVsLabor = () => {
               fromDate={selectedFromDate}
               isDateRange={true}
               onClick={() => setShowDateModal(true)}
-			  extraClass={"w-[219px]"}
+              extraClass={"w-[219px]"}
             />
             <div className="w-36 reportType-selector">
               <Dropdown

@@ -59,46 +59,62 @@ const InventoryWeeksOnHand = () => {
 				id: 'unitName',
 				header: 'Unit Name',
 				dataType: 'string',
+				size: 200,
+				filterFn: 'arrIncludesSome',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('inventoryItemName', {
 				id: 'inventoryItemName',
-				header: 'Inventory Item',
+				header: <div className='w-full text-left'>Inventory Item</div>,
+				cell: ({ getValue }) => <div className='w-full text-left'>{getValue()}</div>,
 				dataType: 'string',
 				size: 400,
+				filterFn: 'arrIncludesSome',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('department', {
 				id: 'department',
 				header: 'Department',
 				dataType: 'string',
 				size: 120,
+				filterFn: 'arrIncludesSome',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('subDepartment', {
 				id: 'subDepartment',
 				header: 'Sub Department',
 				dataType: 'string',
-				size: 150,
+				size: 120,
+				filterFn: 'arrIncludesSome',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('latestCountDate', {
 				id: 'latestCountDate',
 				header: 'Latest Count Date',
 				dataType: 'string',
-				size: 160,
+				size: 120,
+				filterFn: 'arrIncludesSome',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('caseUnitOfMeasureName', {
 				id: 'caseUnitOfMeasureName',
 				header: 'UOM',
 				dataType: 'string',
 				size: 150,
+				filterFn: 'arrIncludesSome',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('casesOnHandAtLastCount', {
 				id: 'casesOnHandAtLastCount',
 				header: 'On Hand At Last Count',
-				cell: ({ getValue }) => getValue().toFixed(2),
+				cell: ({ getValue }) => getValue(),
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 				dataType: 'number',
 				footer: ({ table }) => (
 					<div className='font-bold text-center'>
 						{`Total = ${table
-							.getCoreRowModel()
+							.getFilteredRowModel()
 							.rows.reduce((acc, row) => acc + row.original.casesOnHandAtLastCount, 0)
 							.toFixed(2)}`}
 					</div>
@@ -109,72 +125,96 @@ const InventoryWeeksOnHand = () => {
 				header: 'Cases Purchased Since Last Count',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('casesTransferredInSinceLastCount', {
 				id: 'casesTransferredInSinceLastCount',
 				header: 'Cases Transferred In Since Last Count',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('casesTransferredOutSinceLastCount', {
 				id: 'casesTransferredOutSinceLastCount',
 				header: 'Cases Transferred Out Since Last Count',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('casesWastedSinceLastCount', {
 				id: 'casesWastedSinceLastCount',
 				header: 'Cases Wasted Since Last Count',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('casesAddedSinceLastCount', {
 				id: 'casesAddedSinceLastCount',
 				header: 'Added Since Last Count',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('casesUsedEstimate', {
 				id: 'casesUsedEstimate',
 				header: 'Used Estimate',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('estimatedCasesOnHandNow', {
 				id: 'estimatedCasesOnHandNow',
 				header: 'Estimated Cases On Hand',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('estimatedValueOnHandNow', {
 				id: 'estimatedValueOnHandNow',
 				header: 'Estimated $ On Hand Now',
 				cell: ({ getValue }) => `$${getValue() !== 0 ? getValue().toFixed(2) : 0}`,
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('averageCasesUsedPerWeek', {
 				id: 'averageCasesUsedPerWeek',
 				header: 'Average Used Per Week',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('averageValueUsedPerWeek', {
 				id: 'averageValueUsedPerWeek',
 				header: 'Average $ Used Per Week',
 				cell: ({ getValue }) => `$${getValue() !== 0 ? getValue().toFixed(2) : 0}`,
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('salesYieldWeeklyAverage', {
 				id: 'salesYieldWeeklyAverage',
 				header: 'Sales Yield Weekly Average',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'string',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 			columnHelper.accessor('inventoryWeeksOnHandNow', {
 				id: 'inventoryWeeksOnHandNow',
 				header: 'Inventory Weeks On Hand Now',
 				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
 				dataType: 'number',
+				filterFn: 'weakEquals',
+				isFilterMenu: true,
 			}),
 		],
 		[]
@@ -262,11 +302,12 @@ const InventoryWeeksOnHand = () => {
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
 		if (inventoryWeeksOnHandReportData.length === 0) return;
-		const csvHeaders = columns.map((column) => column.header);
+		const csvHeaders = columns.map((column) => (typeof column.header === 'object' ? column.header.props.children : column.header));
 		const csvData = inventoryWeeksOnHandReportData.map((row) =>
 			[columns.map((column) => row[column.id])].join(',')
 		);
-		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
+		const date = dateFormat(new Date(), 'mm-dd-yyyy');
+		const csvString = [`InventoryWeeksOnHand ${date}`, '', csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
@@ -300,8 +341,7 @@ const InventoryWeeksOnHand = () => {
 			data={inventoryWeeksOnHandReportData}
 			isPaginated={true}
 			isFooter={true}
-			dataPosition='left'
-			headerPosition='left'
+			enableColumnFilters={true}
 		/>
 	);
 
@@ -363,7 +403,7 @@ const InventoryWeeksOnHand = () => {
 							(inventoryWeeksOnHandReportData.length > 0 ? (
 								<div className='mt-4'>
 									{total > 0 && (
-										<div className='text-2xl font-bold min-w-fit'>{`Total $: ${total}`}</div>
+										<div className='text-2xl font-medium min-w-fit'>{`Total $: ${total}`}</div>
 									)}
 									{Table}
 								</div>

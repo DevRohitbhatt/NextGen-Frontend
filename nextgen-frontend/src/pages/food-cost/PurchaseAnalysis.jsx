@@ -98,32 +98,35 @@ const PurchaseAnalysis = () => {
         dataType: "string",
         size: 200,
         enableHiding: true,
+        filterFn: "arrIncludesSome",
       }),
       columnHelper.accessor("date", {
         id: "date",
         header: "Date",
         cell: ({ getValue }) => dateFormat(getValue(), "mm-dd-yyyy"),
         dataType: "date",
-        filterFn: "includesString",
+        filterFn: "arrIncludesSome",
         size: 100,
       }),
       columnHelper.accessor("name", {
         id: "name",
         header: "Vendor",
         dataType: "string",
+        filterFn: "arrIncludesSome",
         size: 100,
       }),
       columnHelper.accessor("vendorInvoiceReference", {
         id: "vendorInvoiceReference",
         header: "Invoice Ref #",
         dataType: "string",
+        filterFn: "arrIncludesSome",
         size: 120,
       }),
       columnHelper.accessor("totalAmountIncludingTax", {
         id: "totalAmountIncludingTax",
         header: "Invoice Total",
         cell: ({ getValue }) => (getValue() ? `${getValue().toFixed(2)}` : ""),
-        filterFn: "includesString",
+        filterFn: "weakEquals",
         dataType: "number",
         size: 120,
       }),
@@ -131,12 +134,14 @@ const PurchaseAnalysis = () => {
         id: "companyGLCode",
         header: "GL Code",
         dataType: "string",
+        filterFn: "arrIncludesSome",
         size: 200,
       }),
       columnHelper.accessor("vendorItemDescription", {
         id: "vendorItemDescription",
         header: "Vendor Item",
         dataType: "string",
+        filterFn: "arrIncludesSome",
         size: 250,
       }),
       columnHelper.accessor("quantity", {
@@ -146,13 +151,13 @@ const PurchaseAnalysis = () => {
           <div className="text-center">{getValue() ?? 0}</div>
         ),
         dataType: "number",
-        filterFn: "includesString",
+        filterFn: "weakEquals",
         size: 100,
         footer: ({ table }) => (
           <div className="font-bold text-center">
             {parseInt(
               table
-                .getCoreRowModel()
+                .getFilteredRowModel()
                 .rows.reduce((acc, row) => acc + row.original.quantity, 0)
             )}
           </div>
@@ -164,7 +169,7 @@ const PurchaseAnalysis = () => {
         cell: ({ getValue }) =>
           getValue() ? `$${getValue().toFixed(2)}` : "$0.00",
         dataType: "number",
-        filterFn: "includesString",
+        filterFn: "weakEquals",
         size: 100,
       }),
       columnHelper.accessor("taxAmount", {
@@ -173,7 +178,7 @@ const PurchaseAnalysis = () => {
         cell: ({ getValue }) =>
           getValue() ? `$${getValue().toFixed(2)}` : "$0.00",
         dataType: "number",
-        filterFn: "includesString",
+        filterFn: "weakEquals",
         size: 100,
       }),
       columnHelper.accessor("extPrice", {
@@ -185,31 +190,34 @@ const PurchaseAnalysis = () => {
           <div className="font-bold text-start">
             $
             {table
-              .getCoreRowModel()
+              .getFilteredRowModel()
               .rows.reduce((acc, row) => acc + row.original.extPrice, 0)
               .toFixed(2)}
           </div>
         ),
         dataType: "number",
-        filterFn: "includesString",
+        filterFn: "weakEquals",
         size: 100,
       }),
       columnHelper.accessor("department", {
         id: "department",
         header: "Department",
         dataType: "string",
+        filterFn: "arrIncludesSome",
         size: 150,
       }),
       columnHelper.accessor("subdepartment", {
         id: "subdepartment",
         header: "Sub Department",
         dataType: "string",
+        filterFn: "arrIncludesSome",
         size: 150,
       }),
       columnHelper.accessor("inventoryItemDescription", {
         id: "inventoryItemDescription",
         header: "Inventory Item",
         dataType: "string",
+        filterFn: "arrIncludesSome",
         size: 300,
       }),
     ],
@@ -265,7 +273,7 @@ const PurchaseAnalysis = () => {
     try {
       setIsLoading(true);
       const getData = {
-        url: "getPeriodFromDateModel",
+        url: "getCurrentPeriodDates",
         urlParams: {
           companyId: companyID,
         },
@@ -462,7 +470,7 @@ const PurchaseAnalysis = () => {
     const pdfData = {
       title: "Purchase Analysis Report",
       subHeaders: [
-        `Unit:${selectedUnitName} | Vendor:${selectedVendorName} | Date Range:${dateFormat(
+        `Unit:${selectedUnitName}  |  Vendor:${selectedVendorName}  |  Date Range:${dateFormat(
           selectedFromDate,
           "mm-dd-yyyy"
         )} to ${dateFormat(selectedToDate, "mm-dd-yyyy")}`,
@@ -538,7 +546,7 @@ const PurchaseAnalysis = () => {
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
         <h2 className="my-4 text-2xl leading-tight text-left pageTitle">
-          Purchase Analysis Report
+          Purchase Analysis
         </h2>
         <header className="optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
           <div className="flex items-center">
@@ -556,7 +564,7 @@ const PurchaseAnalysis = () => {
               fromDate={selectedFromDate}
               isDateRange={true}
               onClick={() => setShowDateModal(true)}
-			  extraClass={"w-[219px]"}
+              extraClass={"w-[219px]"}
             />
             <VendorSelector
               vendorID={selectedVendor}

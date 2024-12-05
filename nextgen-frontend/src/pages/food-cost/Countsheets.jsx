@@ -82,94 +82,85 @@ const Countsheets = () => {
     stepsEnabled: false,
   });
 
-  const columns = useMemo(
-    () => [
-      columnHelper.display({
-        id: "action",
-        cell: ({ row }) => (
-          <Link
-            to="/CountsheetDesigner"
-            className="underline cursor-pointer"
-            state={{
-              companyId: row.original.companyId,
-              countsheet: row.original,
-            }}
-          >
-            Open
-          </Link>
-        ),
-        size: "50",
-      }),
-      columnHelper.accessor("unitName", {
-        id: "unitName",
-        header: "Unit",
-        size: 200,
-      }),
-      columnHelper.accessor("countType", {
-        id: "countType",
-        header: "Type",
-        cell: ({ getValue, row }) => {
-          return getValue() !== "IT"
-            ? Object.keys(viewMap).find((key) => viewMap[key] === getValue())
-            : `${row.original.transfer}`;
-        },
-        size: 150,
-      }),
-      columnHelper.accessor("dateTime", {
-        id: "dateTime",
-        header: "Date",
-        size: 180,
-      }),
-      columnHelper.accessor(
-        (row) => {
-          const formattedDate = `${row.userName} - ${dateFormat(
-            row.saveDateTime,
-            "mm/dd/yyyy h:MM TT"
-          )}`;
-          // Combine formatted date and time
-          return formattedDate;
-        },
-        {
-          id: "lastEditedBy",
-          header: "Last Edited By",
-          size: 320,
-        }
-      ),
-      columnHelper.accessor("comment", {
-        id: "comment",
-        header: "Comment",
-        cell: ({ row, getValue }) => {
-          if (getValue() == "") {
-            return "";
-          } else {
-            return (
-              <Link
-                // to='/CountsheetDesigner'
-                onClick={() => {
-                  setShowCommentModal(!showCommentModal);
-                  setCommentValue(getValue());
-                }}
-                className="underline cursor-pointer"
-                state={{
-                  companyId: row.original.companyId,
-                  countsheet: row.original,
-                }}
-              >
-                View comment
-              </Link>
-            );
-          }
-        },
-      }),
-      columnHelper.accessor("totalLineItemCost", {
-        id: "totalLineItemCost",
-        header: "Total Inventory Value",
-        cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
-        size: "135",
-      }),
-    ],
-    []
-  );
+	const columns = useMemo(
+		() => [
+			columnHelper.display({
+				id: 'action',
+				cell: ({ row }) => (
+					<Link
+						to='/CountsheetDesigner'
+						className='underline cursor-pointer'
+						state={{ companyID: row.original.companyId, countsheet: row.original }}
+					>
+						Open
+					</Link>
+				),
+				size: '50',
+			}),
+			columnHelper.accessor('unitName', {
+				id: 'unitName',
+				header: 'Unit',
+				size: 200,
+			}),
+			columnHelper.accessor('countType', {
+				id: 'countType',
+				header: 'Type',
+				cell: ({ getValue, row }) => {
+					return getValue() !== 'IT'
+						? Object.keys(viewMap).find((key) => viewMap[key] === getValue())
+						: `${row.original.transfer}`;
+				},
+				size: 150,
+			}),
+			columnHelper.accessor('dateTime', {
+				id: 'dateTime',
+				header: 'Date',
+				size: 180,
+			}),
+			columnHelper.accessor(
+				(row) => {
+					const formattedDate = `${row.userName} - ${dateFormat(row.saveDateTime, 'mm/dd/yyyy h:MM TT')}`;
+					// Combine formatted date and time
+					return formattedDate;
+				},
+				{
+					id: 'lastEditedBy',
+					header: 'Last Edited By',
+					size: 320,
+				}
+			),
+			columnHelper.accessor('comment', {
+				id: 'comment',
+				header: 'Comment',
+				cell: ({ row, getValue }) => {
+					if (getValue() == '') {
+						return '';
+					} else {
+						return (
+							<Link
+								// to='/CountsheetDesigner'
+								onClick={() => {
+									setShowCommentModal(!showCommentModal);
+									setCommentValue(getValue());
+								}}
+								className='underline cursor-pointer'
+								state={{ companyId: row.original.companyId, countsheet: row.original }}
+							>
+								View comment
+							</Link>
+						);
+					}
+				},
+			}),
+			columnHelper.accessor('totalLineItemCost', {
+				id: 'totalLineItemCost',
+				header: 'Total Inventory Value',
+				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
+				size: '135',
+			}),
+		],
+		[]
+	);
 
   useEffect(() => {
     if (groupOrUnitAccess || defaultUnitID) {
