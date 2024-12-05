@@ -116,17 +116,6 @@ function TableHOC({
 				{expandCollapseButtons && (
 					<div className='flex items-center my-4 space-x-4'>
 						<button
-							onClick={() => table.toggleAllRowsExpanded(false)}
-							className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
-								table.getIsAllRowsExpanded()
-									? 'text-[var(--tw-primary)]'
-									: 'bg-[var(--tw-primary)] text-white'
-							}`}
-						>
-							Collapse All
-							<IoIosArrowDown />
-						</button>
-						<button
 							onClick={() => table.toggleAllRowsExpanded(true)}
 							className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
 								table.getIsAllRowsExpanded()
@@ -135,6 +124,17 @@ function TableHOC({
 							}`}
 						>
 							Expand All
+							<IoIosArrowDown />
+						</button>
+						<button
+							onClick={() => table.toggleAllRowsExpanded(false)}
+							className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+								table.getIsAllRowsExpanded()
+									? 'text-[var(--tw-primary)]'
+									: 'bg-[var(--tw-primary)] text-white'
+							}`}
+						>
+							Collapse All
 							<IoIosArrowUp />
 						</button>
 					</div>

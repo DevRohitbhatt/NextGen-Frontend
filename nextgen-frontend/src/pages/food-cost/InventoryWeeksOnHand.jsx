@@ -302,11 +302,12 @@ const InventoryWeeksOnHand = () => {
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
 		if (inventoryWeeksOnHandReportData.length === 0) return;
-		const csvHeaders = columns.map((column) => column.header);
+		const csvHeaders = columns.map((column) => (typeof column.header === 'object' ? column.header.props.children : column.header));
 		const csvData = inventoryWeeksOnHandReportData.map((row) =>
 			[columns.map((column) => row[column.id])].join(',')
 		);
-		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
+		const date = dateFormat(new Date(), 'mm-dd-yyyy');
+		const csvString = [`InventoryWeeksOnHand ${date}`, '', csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
 		const url = window.URL.createObjectURL(blob);
 		const tempLink = document.createElement('a');
