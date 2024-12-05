@@ -21,6 +21,7 @@ const HourlySales = lazy(() => import('./sales/HourlySales'));
 const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
 const SalesVsLabor = lazy(() => import('./sales/SalesVsLabor'));
 const BusinessSummary = lazy(() => import('./sales/BusinessSummary'));
+const MenuGrossProfit = lazy(() => import('./sales/MenuGrossProfit'));
 
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
@@ -46,6 +47,7 @@ export {
 	MenuItemsSold,
 	SalesVsLabor,
 	BusinessSummary,
+	MenuGrossProfit,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,

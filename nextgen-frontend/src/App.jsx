@@ -25,6 +25,7 @@ import {
 	HourlySales,
 	SalesVsLabor,
 	BusinessSummary,
+	MenuGrossProfit,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
@@ -141,6 +142,7 @@ const App = () => {
 								<Route path='/MenuItemsSold' element={<MenuItemsSold />} />
 								<Route path='/SalesVsLabor' element={<SalesVsLabor />} />
 								<Route path='/BusinessSummary' element={<BusinessSummary />} />
+								<Route path='/MenuGrossProfit' element={<MenuGrossProfit />} />
 
 								{/* Labor */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />

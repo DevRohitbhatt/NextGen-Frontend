@@ -58,6 +58,8 @@ const urlConfig = {
   businessSummary: "api/sales/GetBusinessSummaryReportData",
 	discounts: 'api/sales/GetDiscountReportData',
 	discountTypes: 'api/sales/GetDiscountTypesReportData',
+	menuGrossProfit: 'api/sales/getMenuGrossProfitReport',
+	menuGrossProfitRecipeInfo: 'api/sales/GetMenuGrossProfitRecipePopupReport',
 
   //labor apis
   employeeInformation: "api/labor/getEmployeeInformation",
