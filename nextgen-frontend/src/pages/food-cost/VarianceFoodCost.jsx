@@ -161,14 +161,17 @@ const VarianceFoodCost = () => {
 			id: 'actualDollar',
 			header: 'Actual $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'actualDollar', getValue),
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'actualDollar', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 90,
 		}),
 		columnHelper.accessor('actualPct', {
 			id: 'actualPct',
 			header: 'Actual %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'actualPct', getValue, true),
+			cell: ({ row, getValue }) => `${calculateSum(row, 'actualPct', getValue, false)}%`,
 			size: 90,
 		}),
 		columnHelper.accessor('idealNumber', {
@@ -182,14 +185,17 @@ const VarianceFoodCost = () => {
 			id: 'idealDollar',
 			header: 'Ideal $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'idealDollar', getValue),
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'idealDollar', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 90,
 		}),
 		columnHelper.accessor('idealPct', {
 			id: 'idealPct',
 			header: 'Ideal %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'idealPct', getValue, true),
+			cell: ({ row, getValue }) => `${calculateSum(row, 'idealPct', getValue, false)}%`,
 			size: 90,
 		}),
 		columnHelper.accessor('varianceNumber', {
@@ -203,14 +209,17 @@ const VarianceFoodCost = () => {
 			id: 'varianceDollar',
 			header: 'Variance $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'varianceDollar', getValue),
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'varianceDollar', getValue);
+				return value < 0 ? `-$${Math.abs(value)}` : `$${value}`;
+			},
 			size: 100,
 		}),
 		columnHelper.accessor('variancePct', {
 			id: 'variancePct',
 			header: 'Variance %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'variancePct', getValue, true),
+			cell: ({ row, getValue }) => `${calculateSum(row, 'variancePct', getValue, false)}%`,
 			size: 100,
 		}),
 		columnHelper.accessor('wasteNumber', {
@@ -224,14 +233,17 @@ const VarianceFoodCost = () => {
 			id: 'wasteDollar',
 			header: 'Waste $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'wasteDollar', getValue),
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'wasteDollar', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 90,
 		}),
 		columnHelper.accessor('wastePct', {
 			id: 'wastePct',
 			header: 'Waste %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'wastePct', getValue, true),
+			cell: ({ row, getValue }) => `${calculateSum(row, 'wastePct', getValue, false)}%`,
 			size: 90,
 		}),
 		columnHelper.accessor('comparisonName', {
@@ -244,7 +256,8 @@ const VarianceFoodCost = () => {
 			id: 'comparisonSales',
 			header: 'Comparison Sales',
 			dataType: 'number',
-			cell: ({ getValue }) => (getValue() !== undefined ? `$${getValue()?.toFixed(2)}` : ''),
+			cell: ({ getValue }) =>
+				getValue() !== undefined ? `$${parseFloat(getValue()?.toFixed(2)).toLocaleString('en-US')}` : '',
 			size: 150,
 		}),
 	];
@@ -294,9 +307,9 @@ const VarianceFoodCost = () => {
 					}
 				}, 0)
 				.toFixed(2);
-			return isPercentage ? `${sum}%` : `$${sum}`;
+			return parseFloat(sum).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 		} else {
-			return isPercentage ? `${getValue()?.toFixed(2)}%` : `$${getValue()?.toFixed(2)}`;
+			return getValue()?.toFixed(2);
 		}
 	};
 
@@ -401,7 +414,7 @@ const VarianceFoodCost = () => {
 									countDisplayUnitName: foodCost.countDisplayUnitName,
 									actualNumber: foodCost.actualQuant,
 									actualDollar: foodCost.actualCost,
-									actualPct: foodCost.actualCostPct,
+									actualPct: foodCost.actualCostPct * 100,
 									idealNumber: foodCost.idealQuant,
 									idealDollar: foodCost.idealCost,
 									idealPct: foodCost.salesNet ? (foodCost.idealCost / foodCost.salesNet) * 100 : 0,
@@ -611,8 +624,9 @@ const VarianceFoodCost = () => {
 			(body = row.subRows.flatMap((subRow) => {
 				return {
 					type: 'table',
-					title: subRow.department,
+					title: '',
 					widths: [
+						'auto',
 						'auto',
 						'auto',
 						'auto',
@@ -635,6 +649,7 @@ const VarianceFoodCost = () => {
 						'string',
 						'string',
 						'string',
+						'string',
 						'number',
 						'number',
 						'number',
@@ -651,16 +666,17 @@ const VarianceFoodCost = () => {
 						'number',
 						'number',
 					],
-					data: formatPDFData(subRow),
+					data: formatPDFData(subRow, subRow.department),
 				};
 			})),
 		]);
 		return body;
 	};
 
-	const formatPDFData = (data) => {
+	const formatPDFData = (data, department) => {
 		const newData = {
 			columnHeaders: [
+				'Department',
 				'Sub Department',
 				'Description',
 				'UOM',
@@ -679,31 +695,53 @@ const VarianceFoodCost = () => {
 				'Comparison Name',
 				'Comparison Sales',
 			],
-			rows: data.subRows.flatMap((subRow) =>
-				subRow.subRows.map((subSubRow) => [
-					{ value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
-					{ value: subSubRow.description, cellType: 'string', columnName: 'Description' },
-					{ value: subSubRow.countDisplayUnitName, cellType: 'string', columnName: 'Description' },
-					{ value: subSubRow.actualNumber, cellType: 'number', columnName: 'Actual #' },
-					{ value: subSubRow.actualDollar, cellType: 'number', columnName: 'Actual $' },
-					{ value: Number(subSubRow.actualPct).toFixed(2), cellType: 'number', columnName: 'Actual %' },
-					{ value: subSubRow.idealNumber, cellType: 'number', columnName: 'Ideal #' },
-					{ value: subSubRow.idealDollar, cellType: 'number', columnName: 'Ideal $' },
-					{ value: Number(subSubRow.idealPct).toFixed(2), cellType: 'number', columnName: 'Ideal %' },
-					{ value: subSubRow.varianceNumber, cellType: 'number', columnName: 'Variance #' },
-					{ value: subSubRow.varianceDollar, cellType: 'number', columnName: 'Variance $' },
-					{
-						value: Number(subSubRow.variancePct).toFixed(2),
-						cellType: 'number',
-						columnName: 'Variance %',
+			rows: data.subRows.flatMap((subRow) => {
+				const commonSubRowData = {
+					department: { value: department, cellType: 'string', columnName: 'Department' },
+					subDepartment: { value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
+					comparison: {
+						name: { value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
+						sales: {
+							value: `$${subRow.comparisonSales.toLocaleString('en-US')}`,
+							cellType: 'number',
+							columnName: 'Comparison Sales',
+						},
 					},
-					{ value: subSubRow.wasteNumber, cellType: 'number', columnName: 'Waste #' },
-					{ value: subSubRow.wasteDollar, cellType: 'number', columnName: 'Waste $' },
-					{ value: Number(subSubRow.wastePct).toFixed(2), cellType: 'number', columnName: 'Waste %' },
-					{ value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
-					{ value: subRow.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
-				])
-			),
+				};
+
+				return subRow.subRows.map((item) => {
+					const formatNumber = (num, prefix = '') => ({
+						value: `${prefix}${num.toFixed(2).toLocaleString('en-US')}`,
+						cellType: 'number',
+					});
+
+					const formatPercent = (num) => ({
+						value: `${Number(num).toFixed(2).toLocaleString('en-US')}%`,
+						cellType: 'number',
+					});
+
+					return [
+						commonSubRowData.department,
+						commonSubRowData.subDepartment,
+						{ value: item.description, cellType: 'string', columnName: 'Description' },
+						{ value: item.countDisplayUnitName, cellType: 'string', columnName: 'UOM' },
+						{ ...formatNumber(item.actualNumber), columnName: 'Actual #' },
+						{ ...formatNumber(item.actualDollar, '$'), columnName: 'Actual $' },
+						{ ...formatPercent(item.actualPct), columnName: 'Actual %' },
+						{ ...formatNumber(item.idealNumber), columnName: 'Ideal #' },
+						{ ...formatNumber(item.idealDollar, '$'), columnName: 'Ideal $' },
+						{ ...formatPercent(item.idealPct), columnName: 'Ideal %' },
+						{ ...formatNumber(item.varianceNumber), columnName: 'Variance #' },
+						{ ...formatNumber(item.varianceDollar, '$'), columnName: 'Variance $' },
+						{ ...formatPercent(item.variancePct), columnName: 'Variance %' },
+						{ ...formatNumber(item.wasteNumber), columnName: 'Waste #' },
+						{ ...formatNumber(item.wasteDollar, '$'), columnName: 'Waste $' },
+						{ ...formatPercent(item.wastePct), columnName: 'Waste %' },
+						commonSubRowData.comparison.name,
+						commonSubRowData.comparison.sales,
+					];
+				});
+			}),
 		};
 
 		return newData;
@@ -743,20 +781,20 @@ const VarianceFoodCost = () => {
 								'Sub Department': subDepartment.subDepartment,
 								Description: item.description,
 								UOM: item.countDisplayUnitName,
-								'Actual #': item.actualNumber,
-								'Actual $': item.actualDollar,
-								'Actual %': item.actualPct,
-								'Ideal #': item.idealNumber,
-								'Ideal $': item.idealDollar,
-								'Ideal %': item.idealPct,
-								'Variance #': item.varianceNumber,
-								'Variance $': item.varianceDollar,
-								'Variance %': item.variancePct,
-								'Waste #': item.wasteNumber,
-								'Waste $': item.wasteDollar,
-								'Waste %': item.wastePct,
+								'Actual #': item.actualNumber?.toFixed(2),
+								'Actual $': item.actualDollar?.toFixed(2),
+								'Actual %': item.actualPct?.toFixed(2),
+								'Ideal #': item.idealNumber?.toFixed(2),
+								'Ideal $': item.idealDollar?.toFixed(2),
+								'Ideal %': item.idealPct?.toFixed(2),
+								'Variance #': item.varianceNumber?.toFixed(2),
+								'Variance $': item.varianceDollar?.toFixed(2),
+								'Variance %': item.variancePct?.toFixed(2),
+								'Waste #': item.wasteNumber?.toFixed(2),
+								'Waste $': item.wasteDollar?.toFixed(2),
+								'Waste %': item.wastePct?.toFixed(2),
 								'Comparison Name': subDepartment.comparisonName,
-								'Comparison Sales': subDepartment.comparisonSales,
+								'Comparison Sales': subDepartment.comparisonSales?.toFixed(2),
 							}))
 						)
 					)

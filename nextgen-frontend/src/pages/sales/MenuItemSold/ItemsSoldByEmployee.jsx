@@ -73,6 +73,8 @@ const ItemsSoldByEmployee = () => {
 	const [item, setItem] = useState('Menu');
 	const [itemValue, setItemValue] = useState(0);
 	const [isItemsLoading, setIsItemsLoading] = useState(false);
+	const [isGroupByUnitChecked, setIsGroupByUnitChecked] = useState(false);
+	const [inventoryFirstRender, setInventoryFirstRender] = useState(false);
 
 	const inventoryHeaders = [
 		{ label: 'Qsr Inventory Item ID', key: 'inventoryItemID' },
@@ -101,6 +103,10 @@ const ItemsSoldByEmployee = () => {
 	const handleItemChange = (option) => {
 		setItem(option);
 		setMenuItemSoldData([]);
+		setIsGroupByUnitChecked(false);
+		if (option === 'Inventory') {
+			setInventoryFirstRender(false);
+		}
 		const value = viewValueMap[option.toLowerCase()] || 0;
 		setItemValue(value);
 	};
@@ -110,40 +116,19 @@ const ItemsSoldByEmployee = () => {
 		setMenuItemSoldData([]);
 	};
 
-	const [columns, setColumns] = useState([]);
-
 	const generatedColumns = [
 		columnHelper.accessor('unitName', {
 			id: 'unitName',
 			header: 'Unit',
 			dataType: 'number',
-			cell: ({ getValue, row }) =>
-				itemValue === 0 ? (
-					getValue()
-				) : row.getCanExpand() ? (
-					<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
-						{row.getIsExpanded() ? <CiSquareMinus /> : <CiSquarePlus />}
-						{`Employee ID: ${row.original.employeeId} (Count ${row.subRows.length}, Total Quantity
-						 ${row.subRows.reduce((acc, curr) => acc + curr.original.quant, 0)}, Total Amount ${row.subRows
-							.reduce((acc, curr) => acc + curr.original.discPrice, 0)
-							.toFixed(2)})`}
-					</div>
-				) : getValue() ? (
-					getValue() || ''
-				) : (
-					''
-				),
 		}),
-		...(itemValue === 0
-			? [
-					columnHelper.accessor('employeeId', {
-						id: 'employeeId',
-						header: 'Employee ID',
-						dataType: 'string',
-						cell: (info) => info.getValue() || '',
-					}),
-			  ]
-			: []),
+
+		columnHelper.accessor('employeeId', {
+			id: 'employeeId',
+			header: 'Employee ID',
+			dataType: 'string',
+			cell: (info) => info.getValue() || '',
+		}),
 		columnHelper.accessor('firstName', {
 			id: 'firstName',
 			header: 'First Name',
@@ -203,6 +188,8 @@ const ItemsSoldByEmployee = () => {
 			},
 		}),
 	];
+
+	const [columns, setColumns] = useState(generatedColumns);
 
 	useEffect(() => {
 		if (groupOrUnitAccess || defaultUnitID) {
@@ -298,63 +285,24 @@ const ItemsSoldByEmployee = () => {
 
 			const result = await getCall(getData);
 
-			const newData =
-				itemValue === 0
-					? result.data.menuItemSoldEmployeeModels.map((item) => ({
-							employeeId: item.employeeId,
-							unitName: item.name,
-							total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
-							firstName: item.firstName,
-							lastName: item.lastName,
-							description: item.description,
-							discPrice: item?.discPrice,
-							fullDescription: item.fullDescription,
-							quant: item.quant,
-							multiplier: item.multiplier,
-							covers: item.covers,
-							employeeCoversPercent: (item.employeeCoversPercent * 100).toFixed(2),
-							employeeCovers: item.employeeCovers,
-							hour: item.hour,
-					  }))
-					: result.data.menuItemSoldEmployeeModels.reduce((acc, item) => {
-							const existingEmployee = acc.find((emp) => emp.employeeId === item.employeeId);
-							const newItem = {
-								unitId: item.unitId,
-								unitName: item.name,
-								employeeId: item.employeeId,
-								firstName: item.firstName,
-								lastName: item.lastName,
-								grouping1: item.grouping1,
-								itemId: item.itemId,
-								description: item.description,
-								fullDescription: item.fullDescription,
-								quant: item.quant,
-								discPrice: item.discPrice,
-								multiplier: item.multiplier,
-								covers: item.covers,
-								employeeCoversPercent: (item.employeeCoversPercent * 100).toFixed(2),
-								employeeCovers: item.employeeCovers,
-								hour: item.hour,
-								caseUnitName: item.caseUnitName,
-								usageCases: item.usageCases,
-								countDisplayUnitName: item.countDisplayUnitName,
-								usageCountDisplayUnits: item.usageCountDisplayUnits,
-							};
+			const newData = result.data.menuItemSoldEmployeeModels.map((item) => ({
+				employeeId: item.employeeId,
+				unitName: item.name,
+				total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
+				firstName: item.firstName,
+				lastName: item.lastName,
+				description: item.description,
+				discPrice: item?.discPrice,
+				fullDescription: item.fullDescription,
+				quant: item.quant,
+				multiplier: item.multiplier,
+				covers: item.covers,
+				employeeCoversPercent: (item.employeeCoversPercent * 100).toFixed(2),
+				employeeCovers: item.employeeCovers,
+				hour: item.hour,
+				caseUnitName: item.caseUnitName,
+			}));
 
-							if (existingEmployee) {
-								existingEmployee.subRows.push(newItem);
-							} else {
-								acc.push({
-									employeeId: item.employeeId,
-									total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
-									subRows: [newItem],
-								});
-							}
-
-							return acc;
-					  }, []);
-
-			setColumns(generatedColumns);
 			setMenuItemSoldData(newData);
 			setIsLoading(false);
 		} catch (error) {
@@ -391,6 +339,106 @@ const ItemsSoldByEmployee = () => {
 		setShowDateModal(false);
 	};
 
+	useEffect(() => {
+		if (itemValue == 1) {
+			handleGroupChange('Employee');
+			setInventoryFirstRender(true);
+		} else {
+			setColumns(generatedColumns);
+			setInventoryFirstRender(true);
+		}
+	}, [itemValue]);
+
+	const handleGroupChange = (option) => {
+		if (option.target) {
+			const isChecked = option.target.checked;
+			setIsGroupByUnitChecked(isChecked);
+			if (itemValue === 1) {
+				option = isChecked ? 'UnitAndEmployee' : 'Employee';
+			} else {
+				option = isChecked ? 'Unit' : 'None';
+			}
+		}
+		const groupByColumns = {
+			None: [],
+			Employee: ['employeeId'],
+			Unit: ['unitName'],
+			UnitAndEmployee: ['unitName', 'employeeId'],
+		};
+
+		const selectedGroupByColumns = groupByColumns[option] || [];
+
+		const newColumns = generatedColumns.map((column) =>
+			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
+		);
+
+		const calculateTotalCost = (rows, item) =>
+			rows.reduce((acc, subRow) => acc + parseFloat(subRow.original[item] || 0), 0);
+
+		const calculateNestedTotalCost = (rows, item) =>
+			rows.reduce((acc, subRow) => acc + calculateTotalCost(subRow.subRows, item), 0);
+
+		if (option !== 'None') {
+			newColumns.unshift(
+				columnHelper.display({
+					id: 'actions',
+					cell: ({ row }) => {
+						if (!row.getCanExpand()) return null;
+
+						const label =
+							row.depth < selectedGroupByColumns.length
+								? `${columns.find((col) => col.id === selectedGroupByColumns[row.depth])?.header}: ${
+										row.original[selectedGroupByColumns[row.depth]]
+								  } (Count: ${
+										selectedGroupByColumns.length === 1
+											? row.subRows.length
+											: row.depth === 0
+											? row.subRows.reduce((acc, subRow) => acc + subRow.subRows.length, 0)
+											: row.subRows.length
+								  } Total Quantity: ${
+										selectedGroupByColumns.length === 1
+											? calculateTotalCost(row.subRows, 'quant')
+											: row.depth === 0
+											? calculateNestedTotalCost(row.subRows, 'quant')
+											: calculateTotalCost(row.subRows, 'quant')
+								  } Total Amount: $${
+										selectedGroupByColumns.length === 1
+											? calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											: row.depth === 0
+											? calculateNestedTotalCost(row.subRows, 'discPrice').toFixed(2)
+											: calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+								  }) `
+								: '';
+
+						return (
+							<div
+								{...{
+									style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem`, width: '100%' },
+									className: 'flex items-center gap-2 font-bold absolute bg-white inset-0 capitalize',
+								}}
+							>
+								{row.getIsExpanded() ? (
+									<CiSquareMinus className='text-[20px]' />
+								) : (
+									<CiSquarePlus className='text-[20px]' />
+								)}
+								{label}
+							</div>
+						);
+					},
+					size: 20,
+				})
+			);
+			setColumns((prev) => [...newColumns]);
+		} else {
+			setColumns(generatedColumns);
+		}
+
+		if (isTableRendered && inventoryFirstRender) {
+			fetchSoldByEmpData();
+		}
+	};
+
 	const handlePDFClick = () => {
 		if (!columns || columns.length === 0) {
 			console.error('Columns are not defined or empty');
@@ -417,66 +465,53 @@ const ItemsSoldByEmployee = () => {
 			body: buildPDFBody(),
 		};
 
+		console.log('PDF Data: ', pdfData);
+
 		PdfBuilder(pdfData);
 	};
 
 	const buildPDFBody = () => {
-		const body =
-			itemValue === 0
-				? [
-						{
-							type: 'table',
-							title: `Items Sold By Employee | ${item}`,
-							widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
-							dataTypes: [
-								'string',
-								'string',
-								'string',
-								'string',
-								'string',
-								'number',
-								'number',
-								'number',
-								'number',
-							],
-							data: {
+		const body = [
+			{
+				type: 'table',
+				title: `Items Sold By Employee | ${item}`,
+				widths: [
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					'auto',
+					...(itemValue === 1 ? ['auto'] : []),
+				],
+				dataTypes: ['string', 'string', 'string', 'string', 'string', 'number', 'number', 'number', 'number'],
+				data:
+					itemValue === 0 && !isGroupByUnitChecked
+						? {
 								columnHeaders: columns.map((column) => column.header),
 								rows: menuItemSoldData.map((row) =>
 									columns.map((column) => ({
-										value: row[column.id],
+										value: row[column.id] || '0 ',
 										cellType: column.dataType,
 										columnName: column.header,
 									}))
 								),
-							},
-						},
-				  ]
-				: menuItemSoldData.flatMap((row) => ({
-						type: 'table',
-						title: `Employee ID: ${row.employeeId}`,
-						widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
-						dataTypes: [
-							'string',
-							'string',
-							'string',
-							'string',
-							'number',
-							'number',
-							'string',
-							'number',
-							'number',
-						],
-						data: {
-							columnHeaders: columns.map((column) => column.header),
-							rows: row.subRows.map((subRow) =>
-								columns.map((column) => ({
-									value: subRow[column.id],
-									cellType: column.dataType,
-									columnName: column.header,
-								}))
-							),
-						},
-				  }));
+						  }
+						: {
+								columnHeaders: columns.slice(1).map((column) => column.header),
+								rows: menuItemSoldData.map((row) =>
+									columns.slice(1).map((column) => ({
+										value: row[column.id] || '0 ',
+										cellType: column.dataType,
+										columnName: column.header,
+									}))
+								),
+						  },
+			},
+		];
 
 		return body;
 	};
@@ -490,39 +525,24 @@ const ItemsSoldByEmployee = () => {
 			'Menu Item',
 			'# Sold',
 			'Item Sales',
+			...(itemValue === 1 ? ['Case Unit'] : []),
 			'Total Guests',
 			'% of Guests',
 		];
-		const csvData =
-			itemValue === 0
-				? menuItemSoldData.flatMap((item) =>
-						[
-							item.unitName,
-							item.employeeId,
-							item.firstName,
-							item.lastName,
-							item.description,
-							item.quant,
-							item.discPrice,
-							item.employeeCovers,
-							item.employeeCoversPercent,
-						].join(',')
-				  )
-				: menuItemSoldData.flatMap((item) =>
-						item.subRows.map((subRow) =>
-							[
-								subRow.unitName,
-								subRow.employeeId,
-								subRow.firstName,
-								subRow.lastName,
-								subRow.description,
-								subRow.quant,
-								subRow.discPrice,
-								subRow.covers,
-								subRow.employeeCoversPercent,
-							].join(',')
-						)
-				  );
+		const csvData = menuItemSoldData.flatMap((item) =>
+			[
+				item.unitName,
+				item.employeeId,
+				item.firstName,
+				item.lastName,
+				item.description,
+				item.quant,
+				item.discPrice,
+				...(itemValue === 1 ? [item.caseUnitName] : []),
+				item.employeeCovers,
+				item.employeeCoversPercent,
+			].join(',')
+		);
 
 		if (csvHeaders.length > 0 && csvData.length > 0) {
 			const csvString = [csvHeaders.join(','), ...csvData].join('\n');
@@ -545,42 +565,29 @@ const ItemsSoldByEmployee = () => {
 						? `Items Sold By Employee | Menu Item: ${selectedMenuName}`
 						: `Items Sold By Employee | Inventory Item: ${selectedInventoryName}`,
 				columns: [
-					{ name: 'Unit Name', filter: 'text' },
-					{ name: 'Employee ID', filter: 'text' },
-					{ name: 'First Name', filter: 'text' },
-					{ name: 'Last Name', filter: 'text' },
-					{ name: 'Menu Item', filter: 'text' },
-					{ name: '# Sold', filter: 'text' },
-					{ name: 'Item Sales', filter: 'text' },
-					{ name: 'Total Guests', filter: 'text' },
-					{ name: '% of Guests', filter: 'text' },
+					{ name: 'Unit Name' },
+					{ name: 'Employee ID' },
+					{ name: 'First Name' },
+					{ name: 'Last Name' },
+					{ name: 'Menu Item' },
+					{ name: '# Sold' },
+					{ name: 'Item Sales' },
+					...(itemValue === 1 ? [{ name: 'Case Unit' }] : []),
+					{ name: 'Total Guests' },
+					{ name: '% of Guests' },
 				],
-				data:
-					itemValue === 0
-						? menuItemSoldData.flatMap((item) => ({
-								'Unit Name': item.unitName,
-								'Employee ID': item.employeeId,
-								'First Name': item.firstName,
-								'Last Name': item.lastName,
-								'Menu Item': item.description,
-								'# Sold': item.quant,
-								'Item Sales': item.discPrice,
-								'Total Guests': item.employeeCovers,
-								'% of Guests': parseFloat(item.employeeCoversPercent).toFixed(2),
-						  }))
-						: menuItemSoldData.flatMap((item) =>
-								item.subRows.flatMap((subRow) => ({
-									'Unit Name': subRow.unitName,
-									'Employee ID': subRow.employeeId,
-									'First Name': subRow.firstName,
-									'Last Name': subRow.lastName,
-									'Menu Item': subRow.description,
-									'# Sold': subRow.quant,
-									'Item Sales': subRow.discPrice,
-									'Total Guests': subRow.employeeCovers,
-									'% of Guests': parseFloat(subRow.employeeCoversPercent).toFixed(2),
-								}))
-						  ),
+				data: menuItemSoldData.flatMap((item) => ({
+					'Unit Name': item.unitName,
+					'Employee ID': item.employeeId,
+					'First Name': item.firstName,
+					'Last Name': item.lastName,
+					'Menu Item': item.description,
+					'# Sold': item.quant,
+					'Item Sales': item.discPrice,
+					...(itemValue === 1 ? { 'Case Unit': item.caseUnitName } : {}),
+					'Total Guests': item.employeeCovers,
+					'% of Guests': parseFloat(item.employeeCoversPercent).toFixed(2),
+				})),
 			},
 		];
 
@@ -658,8 +665,17 @@ const ItemsSoldByEmployee = () => {
 							onClick={() => setShowDateModal(true)}
 						/>
 
+						<div className='pl-1 mt-6'>
+							<input
+								onChange={handleGroupChange}
+								checked={isGroupByUnitChecked}
+								className='mr-1 accent-[var(--tw-primary)]'
+								type='checkbox'
+							/>
+							Group By Unit
+						</div>
 						<div className='run-button' onClick={fetchSoldByEmpData}>
-							<div className='py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

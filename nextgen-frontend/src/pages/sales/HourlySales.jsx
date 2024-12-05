@@ -249,21 +249,24 @@ const HourlySales = () => {
 							</div>
 						),
 				}),
-				columnHelper.accessor('Avg', {
-					id: 'Avg',
-					header: 'Avg',
-					cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
-					size: 120,
-					footer: ({ table }) =>
-						reportType === 'Unit, Hour and Day' ? null : (
-							<div className='text-center'>
-								{`$ ${table
-									.getRowModel()
-									.rows.reduce((acc, row) => acc + row.original.Avg, 0)
-									.toFixed(2)}`}
-							</div>
-						),
-				}),
+				...(reportType === 'Hour and Day'
+					? [
+							columnHelper.accessor('Avg', {
+								id: 'Avg',
+								header: 'Avg',
+								cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+								size: 120,
+								footer: ({ table }) => (
+									<div className='text-center'>
+										{`$ ${table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original.Avg, 0)
+											.toFixed(2)}`}
+									</div>
+								),
+							}),
+					  ]
+					: []),
 				...Object.keys(newData[0] || {})
 					.filter(
 						(key) => !['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour', 'Avg'].includes(key)
@@ -384,7 +387,9 @@ const HourlySales = () => {
 							columnChunk.map((column) => ({
 								value:
 									row[column.id] - Math.floor(row[column.id]) !== 0
-										? row[column.id].toFixed(2)
+										? typeof row[column.id] === 'number'
+											? row[column.id].toFixed(2)
+											: row[column.id]
 										: row[column.id] || '0 ',
 								cellType: '',
 								columnName: column.header,
@@ -410,7 +415,9 @@ const HourlySales = () => {
 				data: hourlySalesData.map((subRow) =>
 					columns.map((column) =>
 						subRow[column.id] - Math.floor(subRow[column.id]) !== 0
-							? subRow[column.id].toFixed(2)
+							? typeof subRow[column.id] === 'number'
+								? subRow[column.id].toFixed(2)
+								: subRow[column.id]
 							: subRow[column.id] || '0'
 					)
 				),
