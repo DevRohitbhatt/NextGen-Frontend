@@ -270,7 +270,7 @@ const MenuGrossProfit = () => {
     try {
       setIsLoading(true);
       const getData = {
-        url: "getPeriodFromDateModel",
+        url: "getCurrentPeriodDates",
         urlParams: {
           companyId: companyID,
         },
