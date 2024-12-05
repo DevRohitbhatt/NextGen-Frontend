@@ -4,6 +4,8 @@ import * as Styled from '../styles/DateModalStyles.jsx';
 import { FaTimes } from 'react-icons/fa';
 import { TableBuilder as Table, YearSelector, CalendarSelector } from '../index.js';
 import Calendar from 'react-calendar';
+import { getCall } from '../../apis/network.js';
+import { useSelector } from 'react-redux';
 
 const CalendarModal = ({
 	handleClose,
@@ -13,12 +15,16 @@ const CalendarModal = ({
 	isDateRange,
 	handleDateSelection,
 }) => {
+	const {
+		companyID
+	} = useSelector((state) => state.globalState);
 	const [initialFromDate, setInitialFromDate] = useState(selectedFromDate);
 	const [initialToDate, setInitialToDate] = useState(selectedToDate);
 	const [localFromDate, setLocalFromDate] = useState(selectedFromDate);
 	const [localToDate, setLocalToDate] = useState(selectedToDate);
 	const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 	const [showCalendar, setShowCalendar] = useState(false);
+	const [dynamicData, setDynamicData] = useState(null);
 	const [CalendarTable, setCalendarTable] = useState({
 		columnHeaders: ['Period', 'From', 'To'],
 		columnWidths: '1.5fr 2fr 2fr',
@@ -34,29 +40,45 @@ const CalendarModal = ({
 			setLocalFromDate(selectedFromDate);
 			setLocalToDate(selectedToDate);
 		}
+		getDynamicDates();
 	}, [modalOpen, selectedFromDate, selectedToDate]);
 
+	// useEffect(() => {
+	// 	buildCalendarTable(selectedYear);
+	// }, [selectedYear]);
+
 	useEffect(() => {
-		buildCalendarTable(selectedYear);
-	}, [selectedYear]);
+		if (dynamicData) {
+		  buildCalendarTable(selectedYear);
+		}
+	  }, [selectedYear, dynamicData]);
+
+	  const getDynamicDates = async () =>{
+		try {
+			const getData = {
+				fullUrl: "api/company/settings/getAllPeriodDates",
+				urlParams: {
+					companyId : companyID
+				},
+			};
+
+			const result = await getCall(getData);
+			if (result && result.data) {
+				setDynamicData(result);
+			}
+		} catch (error) {
+			
+		}
+	  } 
 
 	const buildCalendarTable = (year) => {
-		const rows = [];
-		let startDate = new Date(year, 0, 1);
-
-		for (let i = 0; i < 12; i++) {
-			const endDate = new Date(startDate);
-			endDate.setDate(startDate.getDate() + 27);
-
-			rows.push([
-				{ value: (i + 1).toString(), cellType: '' },
-				{ value: formatDate(startDate), cellType: '' },
-				{ value: formatDate(endDate), cellType: '' },
-			]);
-
-			startDate = new Date(endDate);
-			startDate.setDate(startDate.getDate() + 1);
-		}
+		const rows = dynamicData.data
+      .filter((entry) => entry.yearID === year) // Filter periods by selected year
+      .map((entry) => [
+        { value: entry.periodID.toString(), cellType: '' },
+        { value: formatDate(new Date(entry.periodMinDate)), cellType: '' },
+        { value: formatDate(new Date(entry.periodMaxDate)), cellType: '' },
+      ]);
 
 		setCalendarTable((prevState) => ({
 			...prevState,

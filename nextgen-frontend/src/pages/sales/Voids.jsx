@@ -46,8 +46,10 @@ const Voids = () => {
 	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState();
-	const [selectedToDate, setSelectedToDate] = useState();
+	const [selectedFromDate, setSelectedFromDate] = useState(
+		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
+	);
+	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
@@ -513,6 +515,7 @@ const Voids = () => {
 					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
 					selectedFromDate={selectedFromDate}
 					selectedToDate={selectedToDate}
+					
 				/>
 			</div>
 		</div>
