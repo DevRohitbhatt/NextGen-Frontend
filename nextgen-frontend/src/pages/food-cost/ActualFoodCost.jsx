@@ -57,15 +57,15 @@ const ActualFoodCost = () => {
 	const [isShowHideDepartments, setIsShowHideDepartments] = useState(false);
 	const [checkedItems, setCheckedItems] = useState([
 		{ name: 'DO NOT COUNT/DO NOT COUNT', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/BEVERAGES', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/BREAD', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/DAIRY', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/GROCERY', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/MEAT', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/PRODUCE', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'FOOD/BEVERAGES', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/BREAD', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/DAIRY', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/GROCERY', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/MEAT', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/PRODUCE', showOnReport: true, includeInGrandTotal: true },
 		{ name: 'PREP/PREP', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'SUPPLY/CLEANING', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'SUPPLY/PAPER', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'SUPPLY/CLEANING', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'SUPPLY/PAPER', showOnReport: true, includeInGrandTotal: true },
 	]);
 
 	//dropdown variables
@@ -171,6 +171,7 @@ const ActualFoodCost = () => {
 			id: 'purchaseDisplayUnits',
 			header: 'Pur #',
 			showDepth: 3,
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 60,
 		}),
@@ -252,6 +253,7 @@ const ActualFoodCost = () => {
 			id: 'wasteCountDisplayUnits',
 			header: 'Waste #',
 			showDepth: 3,
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 80,
 		}),
@@ -279,7 +281,8 @@ const ActualFoodCost = () => {
 			id: 'comparisonSales',
 			header: 'Comparison Net Sales',
 			dataType: 'number',
-			cell: ({ getValue }) => (getValue() !== undefined ? `$${getValue().toFixed(2)}` : ''),
+			cell: ({ getValue }) =>
+				getValue() !== undefined ? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}` : '',
 			size: 100,
 		}),
 	];
@@ -330,7 +333,7 @@ const ActualFoodCost = () => {
 					}
 				}, 0)
 				.toFixed(2);
-			return sum;
+			return parseFloat(sum).toFixed(2).toLocaleString('en-US');
 		} else {
 			return getValue()?.toFixed(2);
 		}
@@ -469,25 +472,6 @@ const ActualFoodCost = () => {
 					},
 				];
 
-				const updatedCheckedItems = checkedItems.map((item) => {
-					const [department, subDepartment] = item.name.split('/');
-					const match = result.data?.some(
-						(data) =>
-							data.department === department &&
-							data.subDepartments.some(
-								(subData) =>
-									subData.subDepartment === subDepartment ||
-									subData.subDepartment.includes(subDepartment)
-							)
-					);
-					return match
-						? { ...item, showOnReport: true, includeInGrandTotal: true }
-						: { ...item, showOnReport: false, includeInGrandTotal: false };
-				});
-
-				setCheckedItemsLoaded(true);
-				setCheckedItems((prev) => [...updatedCheckedItems]);
-
 				setActualFoodCostData(newData);
 				setFilteredActualFoodCostData(newData);
 			}
@@ -531,8 +515,6 @@ const ActualFoodCost = () => {
 				};
 			}
 		});
-
-		console.log('updatedColumns', updatedColumns);
 
 		setColumns((prev) => [...updatedColumns]);
 		fetchActualFoodCostReport();
@@ -644,7 +626,12 @@ const ActualFoodCost = () => {
 								columnHeaders: columnChunk.map((column) => column.header),
 								rows: allRows.slice(i, i + rowsPerTable).map((row) =>
 									columnChunk.map((column) => ({
-										value: formatCellValue(row[column.id], column.dataType),
+										value:
+											column.header?.includes('$') || column.header === 'Comparison Sales'
+												? `$${parseFloat(
+														formatCellValue(row[column.id], column.dataType)
+												  ).toLocaleString('en-US')}`
+												: formatCellValue(row[column.id], column.dataType),
 										cellType: column.dataType,
 										columnName: column.header,
 									}))
@@ -662,7 +649,7 @@ const ActualFoodCost = () => {
 	const formatCellValue = (value, dataType) => {
 		if (value === undefined || value === null) return '';
 		if (dataType === 'number') {
-			return typeof value === 'number' ? value.toLocaleString('en-US') : value;
+			return typeof value === 'number' ? value.toFixed(2) : value;
 		}
 		return value;
 	};
@@ -708,24 +695,24 @@ const ActualFoodCost = () => {
 								subDepartment: subDepartment.subDepartment,
 								description: item.description,
 								UOM: item.countDisplayUnitName,
-								begNumber: item.begCountDisplayUnits,
-								begDollar: item.begCountCost,
-								purNumber: item.purchaseDisplayUnits,
-								purDollar: item.purchaseCost,
-								trInNumber: item.iTinCountDisplayUnits,
-								trInDollar: item.iTinCountCost,
-								trOutNumber: item.iToutCountDisplayUnits,
-								trOutDollar: item.iToutCountCost,
-								endDollar: item.endCountDisplayUnits,
-								useNumber: item.endCountCost,
-								useDollar: item.usageCountDisplayUnits,
-								salesNet: item.usageCost,
-								usePct: item.usageCostPct,
-								wasteNumber: item.wasteCountDisplayUnits,
-								wasteDollar: item.wasteCountCost,
-								wasteCostPct: item.wasteCostPct,
+								begNumber: item.begCountDisplayUnits?.toFixed(2),
+								begDollar: item.begCountCost?.toFixed(2),
+								purNumber: item.purchaseDisplayUnits?.toFixed(2),
+								purDollar: item.purchaseCost?.toFixed(2),
+								trInNumber: item.iTinCountDisplayUnits?.toFixed(2),
+								trInDollar: item.iTinCountCost?.toFixed(2),
+								trOutNumber: item.iToutCountDisplayUnits?.toFixed(2),
+								trOutDollar: item.iToutCountCost?.toFixed(2),
+								endNumber: item.endCountDisplayUnits?.toFixed(2),
+								endDollar: item.endCountCost?.toFixed(2),
+								useNumber: item.usageCountDisplayUnits?.toFixed(2),
+								useDollar: item.usageCost?.toFixed(2),
+								usePct: item.usageCostPct?.toFixed(2),
+								wasteNumber: item.wasteCountDisplayUnits?.toFixed(2),
+								wasteDollar: item.wasteCountCost?.toFixed(2),
+								wasteCostPct: item.wasteCostPct?.toFixed(2),
 								comparisonName: item.comparisonName,
-								comparisonSales: item.comparisonSales,
+								comparisonSales: item.comparisonSales?.toFixed(2),
 							}))
 						)
 					)

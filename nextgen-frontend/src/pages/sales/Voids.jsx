@@ -186,25 +186,30 @@ const Voids = () => {
 			const result = await getCall(getData);
 			const newData = {
 				...result,
-				data: result.data.map((row) => ({
-					...row,
-					subRows: row.voids.map((item) => ({
+				data: result.data
+					.map((row) => ({
+						...row,
+						subRows: row.voids
+							.map((item) => ({
+								unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)
+									?.unitName,
+								date: item.date,
+								hour: item.hour,
+								minute: item.minute,
+								voidReason: item.voidReason,
+								employeeName: item.employeeName,
+								managerName: item.managerName,
+								fullDescription: item.fullDescription,
+								posCheckId: item.posCheckId,
+								tableName: item.tableName,
+								revenueID: item.revenueID,
+								price: item.price,
+								tendersUsed: item.tendersUsed,
+							}))
+							.sort((a, b) => new Date(a.date) - new Date(b.date)),
 						unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
-						date: item.date,
-						hour: item.hour,
-						minute: item.minute,
-						voidReason: item.voidReason,
-						employeeName: item.employeeName,
-						managerName: item.managerName,
-						fullDescription: item.fullDescription,
-						posCheckId: item.posCheckId,
-						tableName: item.tableName,
-						revenueID: item.revenueID,
-						price: item.price,
-						tendersUsed: item.tendersUsed,
-					})),
-					unitName: unitsAndAreasList?.units?.find((unit) => unit.unitID === row.unitId)?.unitName,
-				})),
+					}))
+					.sort((a, b) => a.unitId - b.unitId),
 			};
 
 			setVoidsReportData(newData.data);

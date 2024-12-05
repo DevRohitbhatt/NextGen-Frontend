@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getCall } from '../../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
+import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	UnitSelector,
 	CalendarModal,
@@ -74,6 +75,8 @@ const ItemsSoldByHour = () => {
 	const [item, setItem] = useState('Menu');
 	const [itemValue, setItemValue] = useState(0);
 	const [isItemsLoading, setIsItemsLoading] = useState(false);
+	const [isGroupByUnitChecked, setIsGroupByUnitChecked] = useState(false);
+	const [inventoryFirstRender, setInventoryFirstRender] = useState(false);
 
 	const inventoryHeaders = [
 		{ label: 'Qsr Inventory Item ID', key: 'inventoryItemID' },
@@ -102,6 +105,9 @@ const ItemsSoldByHour = () => {
 	const handleItemChange = (option) => {
 		setItem(option);
 		setMenuItemSoldData([]);
+		if (option === 'Inventory') {
+			setInventoryFirstRender(false);
+		}
 		const value = viewValueMap[option.toLowerCase()] || 0;
 		setItemValue(value);
 	};
@@ -111,7 +117,7 @@ const ItemsSoldByHour = () => {
 		setMenuItemSoldData([]);
 	};
 
-	const columns = useMemo(
+	const generatedColumns = useMemo(
 		() => [
 			columnHelper.accessor('unit', {
 				id: 'unit',
@@ -177,6 +183,12 @@ const ItemsSoldByHour = () => {
 		],
 		[itemValue]
 	);
+
+	const [columns, setColumns] = useState(generatedColumns);
+
+	useEffect(() => {
+		setColumns(generatedColumns);
+	}, [generatedColumns]);
 
 	useEffect(() => {
 		if (groupOrUnitAccess || defaultUnitID) {
@@ -320,6 +332,84 @@ const ItemsSoldByHour = () => {
 		setShowDateModal(false);
 	};
 
+	const handleGroupChange = (e) => {
+		const isChecked = e.target.checked;
+		setIsGroupByUnitChecked(isChecked);
+
+		const option = isChecked ? 'Unit' : 'None';
+
+		const groupByColumns = {
+			None: [],
+			Unit: ['unit'],
+		};
+
+		const selectedGroupByColumns = groupByColumns[option] || [];
+
+		const newColumns = generatedColumns.map((column) =>
+			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
+		);
+
+		const calculateTotalCost = (rows, item) =>
+			rows.reduce((acc, subRow) => acc + parseFloat(subRow.original[item] || 0), 0);
+
+		const calculateNestedTotalCost = (rows, item) =>
+			rows.reduce((acc, subRow) => acc + calculateTotalCost(subRow.subRows, item), 0);
+
+		if (option !== 'None') {
+			newColumns.unshift(
+				columnHelper.display({
+					id: 'actions',
+					cell: ({ row }) => {
+						if (!row.getCanExpand()) return null;
+
+						const label =
+							row.depth < selectedGroupByColumns.length
+								? `${columns.find((col) => col.id === selectedGroupByColumns[row.depth])?.header}: ${
+										row.original[selectedGroupByColumns[row.depth]]
+								  } (Total Quantity: ${
+										selectedGroupByColumns.length === 1
+											? calculateTotalCost(row.subRows, 'sold')
+											: row.depth === 0
+											? calculateNestedTotalCost(row.subRows, 'sold')
+											: calculateTotalCost(row.subRows, 'sold')
+								  } Total Amount: $${
+										selectedGroupByColumns.length === 1
+											? calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											: row.depth === 0
+											? calculateNestedTotalCost(row.subRows, 'discPrice').toFixed(2)
+											: calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+								  }) `
+								: '';
+
+						return (
+							<div
+								{...{
+									style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem`, width: '100%' },
+									className: 'flex items-center gap-2 font-bold absolute bg-white inset-0 capitalize',
+								}}
+							>
+								{row.getIsExpanded() ? (
+									<CiSquareMinus className='text-[20px]' />
+								) : (
+									<CiSquarePlus className='text-[20px]' />
+								)}
+								{label}
+							</div>
+						);
+					},
+					size: 20,
+				})
+			);
+			setColumns((prev) => [...newColumns]);
+		} else {
+			setColumns(generatedColumns);
+		}
+
+		if (isTableRendered) {
+			fetchSoldByHourData();
+		}
+	};
+
 	const handlePDFClick = () => {
 		if (!columns || columns.length === 0) {
 			console.error('Columns are not defined or empty');
@@ -346,6 +436,8 @@ const ItemsSoldByHour = () => {
 			body: buildPDFBody(),
 		};
 
+		console.log('PDF Data: ', pdfData);
+
 		PdfBuilder(pdfData);
 	};
 
@@ -370,16 +462,27 @@ const ItemsSoldByHour = () => {
 					'number',
 					...(itemValue === 1 ? ['string', 'number', 'string', 'number'] : []),
 				],
-				data: {
-					columnHeaders: columns.map((column) => column.header),
-					rows: menuItemSoldData.map((row) =>
-						columns.map((column) => ({
-							value: row[column.id],
-							cellType: column.dataType,
-							columnName: column.header,
-						}))
-					),
-				},
+				data: isGroupByUnitChecked
+					? {
+							columnHeaders: columns.slice(1).map((column) => column.header),
+							rows: menuItemSoldData.map((row) =>
+								columns.slice(1).map((column) => ({
+									value: row[column.id] || '0 ',
+									cellType: column.dataType,
+									columnName: column.header,
+								}))
+							),
+					  }
+					: {
+							columnHeaders: columns.map((column) => column.header),
+							rows: menuItemSoldData.map((row) =>
+								columns.map((column) => ({
+									value: row[column.id] || '0 ',
+									cellType: column.dataType,
+									columnName: column.header,
+								}))
+							),
+					  },
 			},
 		];
 
@@ -534,7 +637,15 @@ const ItemsSoldByHour = () => {
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
 						/>
-
+						<div className='pl-1 mt-6'>
+							<input
+								onChange={handleGroupChange}
+								checked={isGroupByUnitChecked}
+								className='mr-1 accent-[var(--tw-primary)]'
+								type='checkbox'
+							/>
+							Group By Unit
+						</div>
 						<div className='run-button' onClick={fetchSoldByHourData}>
 							<div className='py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run

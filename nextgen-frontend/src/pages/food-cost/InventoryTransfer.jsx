@@ -292,7 +292,10 @@ const InventoryTransfer = () => {
 						columnHeaders: headers.map((header) => header.label),
 						rows: inventoryTransferReportData.data.map((row) =>
 							headers.map((header) => ({
-								value: row[header.key],
+								value:
+									header.key === 'transferTime'
+										? dateFormat(row[header.key], 'mm/dd/yyyy hh:MM TT')
+										: row[header.key],
 								cellType: header.cellType,
 								columnName: header.label,
 							}))
@@ -310,7 +313,11 @@ const InventoryTransfer = () => {
 		if (!inventoryTransferReportData?.data) return;
 		const csvHeaders = headers.map((header) => header.label);
 		const csvData = inventoryTransferReportData.data.map((row) =>
-			[headers.map((header) => row[header.key])].join(',')
+			[
+				headers.map((header) =>
+					header.key === 'transferTime' ? dateFormat(row[header.key], 'mm/dd/yyyy hh:MM TT') : row[header.key]
+				),
+			].join(',')
 		);
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
@@ -329,7 +336,13 @@ const InventoryTransfer = () => {
 			{
 				name: 'Inventory Transfer Report',
 				columns: headers.map((header) => ({ name: header.label, filterButton: true })),
-				data: inventoryTransferReportData.data.map((row) => headers.map((header) => row[header.key])),
+				data: inventoryTransferReportData.data.map((row) =>
+					headers.map((header) =>
+						header.key === 'transferTime'
+							? dateFormat(row[header.key], 'mm/dd/yyyy hh:MM TT')
+							: row[header.key]
+					)
+				),
 			},
 		];
 
