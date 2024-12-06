@@ -95,11 +95,12 @@ function TableHOC({
 		const newGrouping = [];
 		table.getHeaderGroups().forEach((headerGroup) => {
 			headerGroup.headers.forEach((header) => {
-				if (header.column.columnDef.groupBy) {
+				if (header.column.columnDef.groupBy && !newGrouping.includes(header.column.id)) {
 					newGrouping.push(header.column.id);
 				}
 			});
 		});
+
 		table.setGrouping(newGrouping);
 	}, [table]);
 
@@ -264,7 +265,7 @@ function TableHOC({
 									}`}
 									onClick={(e) => {
 										e.stopPropagation();
-										if (onCallBack) {
+										if (!row.getCanExpand()) {
 											onCallBack(row.original);
 										} else if (row.getCanExpand()) {
 											row.getToggleExpandedHandler()(e);

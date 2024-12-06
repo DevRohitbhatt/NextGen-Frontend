@@ -62,10 +62,8 @@ const PurchaseAnalysis = () => {
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [selectedGroupBy, setSelectedGroupBy] = useState('None');
@@ -255,6 +253,34 @@ const PurchaseAnalysis = () => {
 		}
 	}, [selectedUnit]);
 
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
+	}, []);
+
 	const fetchData = async (companyId) => {
 		setIsVendorsLoading(true);
 		await Promise.all([fetchVendors(companyId)]);
@@ -381,7 +407,11 @@ const PurchaseAnalysis = () => {
 						return (
 							<div
 								{...{
-									style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem`, width: '100%' },
+									style: {
+										cursor: 'pointer',
+										paddingLeft: `${row.depth * 2}rem`,
+										width: '100%',
+									},
 									className: 'flex items-center gap-2 font-bold absolute bg-white inset-0 capitalize',
 								}}
 							>
@@ -516,6 +546,7 @@ const PurchaseAnalysis = () => {
 							fromDate={selectedFromDate}
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
+							extraClass={'w-[219px]'}
 						/>
 						<VendorSelector
 							vendorID={selectedVendor}
@@ -523,7 +554,7 @@ const PurchaseAnalysis = () => {
 							setVendorName={setSelectedVendorName}
 							onClick={() => setVendorShowModal(true)}
 						/>
-						<div className='min-w-56 groupBy-selector'>
+						<div className='min-w-56'>
 							<Dropdown
 								title='Group By'
 								selectedOption={selectedGroupBy}

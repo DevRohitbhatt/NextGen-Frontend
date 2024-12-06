@@ -4,6 +4,7 @@ export { default as CalendarModal } from './calendar/CalendarModal';
 export { default as DateRangePicker } from './calendar/DateRangePicker';
 export { default as DateSelector } from './calendar/DateSelector';
 export { default as YearSelector } from './calendar/YearSelector';
+export { default as DateDropdown } from './calendar/DateDropdown';
 
 // common components
 export { default as Dropdown } from './common/Dropdown';

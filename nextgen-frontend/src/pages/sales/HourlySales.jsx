@@ -98,6 +98,34 @@ const HourlySales = () => {
 		}
 	}, [renderCount]);
 
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
+	}, []);
+
 	const fetchHourlySalesReport = async () => {
 		try {
 			setIsLoading(true);
@@ -198,7 +226,10 @@ const HourlySales = () => {
 
 			// Define readable hour labels
 			const hourLabels = Array.from({ length: 24 }, (_, i) =>
-				new Date(0, 0, 0, i).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+				new Date(0, 0, 0, i).toLocaleTimeString('en-US', {
+					hour: 'numeric',
+					hour12: true,
+				})
 			);
 
 			// Dynamically generate columns based on the received data
