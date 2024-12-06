@@ -311,7 +311,11 @@ function TableHOC({
 											<td
 												key={cell.id}
 												className={`${dataPosition} text-nowrap`}
-												style={{ ...getCommonPinningStyles(cell.column) }}
+												style={
+													cell.column.columnDef.pinDirection
+														? getCommonPinningStyles(cell.column)
+														: {}
+												}
 											>
 												{cell.getIsGrouped() ? (
 													// If it's a grouped cell, add an expander and row count

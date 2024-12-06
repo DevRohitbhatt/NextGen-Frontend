@@ -246,7 +246,7 @@ const ActualFoodCost = () => {
 			id: 'usageCostPct',
 			header: 'Actual Usage %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `${calculateSum(row, 'usageCostPct', getValue, true)}%`,
+			cell: ({ row, getValue }) => `${calculateSum(row, 'usageCostPct', getValue, false)}%`,
 			size: 90,
 		}),
 		columnHelper.accessor('wasteCountDisplayUnits', {
@@ -460,7 +460,7 @@ const ActualFoodCost = () => {
 									usageCases: foodCost.usageCases,
 									usageCountDisplayUnits: foodCost.usageCountDisplayUnits,
 									usageCost: foodCost.usageCost,
-									usageCostPct: foodCost.usageCostPct,
+									usageCostPct: foodCost.usageCostPct * 100,
 									salesNet: foodCost.salesNet,
 									comparisonName: foodCost.comparisonName,
 									comparisonSales: foodCost.comparisonSales,
