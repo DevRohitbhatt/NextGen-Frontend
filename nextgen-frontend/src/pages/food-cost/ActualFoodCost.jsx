@@ -164,7 +164,10 @@ const ActualFoodCost = () => {
 			id: 'begCountCost',
 			header: 'Beg $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `$${calculateSum(row, 'begCountCost', getValue)}`,
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'begCountCost', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 90,
 		}),
 		columnHelper.accessor('purchaseDisplayUnits', {
@@ -179,7 +182,10 @@ const ActualFoodCost = () => {
 			id: 'purchaseCost',
 			header: 'Pur $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `$${calculateSum(row, 'purchaseCost', getValue)}`,
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'purchaseCost', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 60,
 		}),
 		columnHelper.accessor('iTinCountDisplayUnits', {
@@ -194,7 +200,10 @@ const ActualFoodCost = () => {
 			id: 'iTinCountCost',
 			header: 'Trans In $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `$${calculateSum(row, 'iTinCountCost', getValue)}`,
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'iTinCountCost', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 60,
 		}),
 		columnHelper.accessor('iToutCountDisplayUnits', {
@@ -209,7 +218,10 @@ const ActualFoodCost = () => {
 			id: 'iToutCountCost',
 			header: 'Trans Out $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `$${calculateSum(row, 'iToutCountCost', getValue)}`,
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'iToutCountCost', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 80,
 		}),
 		columnHelper.accessor('endCountDisplayUnits', {
@@ -224,7 +236,10 @@ const ActualFoodCost = () => {
 			id: 'endCountCost',
 			header: 'End $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `$${calculateSum(row, 'endCountCost', getValue)}`,
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'endCountCost', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 60,
 		}),
 		columnHelper.accessor('usageCountDisplayUnits', {
@@ -239,14 +254,17 @@ const ActualFoodCost = () => {
 			id: 'usageCost',
 			header: 'Actual Usage $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `$${calculateSum(row, 'usageCost', getValue)}`,
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'usageCost', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 80,
 		}),
 		columnHelper.accessor('usageCostPct', {
 			id: 'usageCostPct',
 			header: 'Actual Usage %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `${calculateSum(row, 'usageCostPct', getValue, true)}%`,
+			cell: ({ row, getValue }) => `${calculateSum(row, 'usageCostPct', getValue, false)}%`,
 			size: 90,
 		}),
 		columnHelper.accessor('wasteCountDisplayUnits', {
@@ -261,7 +279,10 @@ const ActualFoodCost = () => {
 			id: 'wasteCountCost',
 			header: 'Waste $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `$${calculateSum(row, 'wasteCountCost', getValue)}`,
+			cell: ({ row, getValue }) => {
+				const value = calculateSum(row, 'wasteCountCost', getValue);
+				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
+			},
 			size: 80,
 		}),
 		columnHelper.accessor('wasteCostPct', {
@@ -460,7 +481,7 @@ const ActualFoodCost = () => {
 									usageCases: foodCost.usageCases,
 									usageCountDisplayUnits: foodCost.usageCountDisplayUnits,
 									usageCost: foodCost.usageCost,
-									usageCostPct: foodCost.usageCostPct,
+									usageCostPct: foodCost.usageCostPct * 100,
 									salesNet: foodCost.salesNet,
 									comparisonName: foodCost.comparisonName,
 									comparisonSales: foodCost.comparisonSales,
@@ -662,7 +683,7 @@ const ActualFoodCost = () => {
 	const handleExcelClick = (type) => {
 		const data = [
 			{
-				name: 'Actual Food Cost Report',
+				name: '',
 				columns: [
 					{ name: 'Department', filter: 'text' },
 					{ name: 'Sub Department', filter: 'text' },
@@ -720,8 +741,11 @@ const ActualFoodCost = () => {
 			},
 		];
 
-		const filename = 'ActualFoodCost';
-		const spreadSheetTitle = 'Actual Food Cost Report';
+		const filename = `ActualFoodCost_${selectedUnitName}_${dateFormat(
+			selectedFromDate,
+			'mm-dd-yyyy'
+		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
+		const spreadSheetTitle = 'Actual Food Cost';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
