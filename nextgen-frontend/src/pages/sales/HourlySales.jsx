@@ -249,6 +249,7 @@ const HourlySales = () => {
 								header: 'Unit Name',
 								cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 								pinDirection: 'left',
+								size: 180,
 								footer: reportType === 'Unit, Hour and Day' ? null : 'Summary:',
 							}),
 					  ]),
@@ -478,7 +479,10 @@ const HourlySales = () => {
 			},
 		];
 
-		const filename = 'hourlySales';
+		const filename = `HourlySales_${selectedUnitName}_${dateFormat(selectedFromDate, 'mm-dd-yyyy')}_to_${dateFormat(
+			selectedToDate,
+			'mm-dd-yyyy'
+		)}`;
 		const spreadSheetTitle = 'Hourly Sales';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 

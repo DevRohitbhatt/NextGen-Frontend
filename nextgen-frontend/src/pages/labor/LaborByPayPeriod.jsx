@@ -179,7 +179,7 @@ const LaborByPayPeriod = () => {
 			columnHelper.accessor('preTaxTicketSales', {
 				id: 'preTaxTicketSales',
 				header: 'Pre-Tax Ticket Sales',
-				cell: ({ row }) => calculateSum(row, 'preTaxTicketSales'),
+				cell: ({ row }) => `$${Number(calculateSum(row, 'preTaxTicketSales')).toLocaleString('en-US')}`,
 				dataType: 'number',
 				size: 160,
 			}),
@@ -194,7 +194,7 @@ const LaborByPayPeriod = () => {
 				id: 'regPay',
 				header: 'Total Pay',
 				size: 120,
-				cell: ({ row }) => calculateSum(row, 'regPay'),
+				cell: ({ row }) => `$${Number(calculateSum(row, 'regPay')).toLocaleString('en-US')}`,
 				dataType: 'number',
 			}),
 		],
@@ -408,33 +408,33 @@ const LaborByPayPeriod = () => {
 						columnName: 'Job Description',
 					},
 					{
-						value: subRow.regHours,
+						value: subRow.regHours || '0 ',
 						cellType: 'number',
 						columnName: 'Regular Hours',
 					},
 					{
-						value: subRow.overHours,
+						value: subRow.overHours || '0 ',
 						cellType: 'number',
 						columnName: 'Overtime Hours',
 					},
 					{ value: subRow.rate, cellType: 'number', columnName: 'Rate' },
 					{
-						value: subRow.declaredTips,
+						value: subRow.declaredTips || '0 ',
 						cellType: 'number',
 						columnName: 'Declared Tips',
 					},
 					{
-						value: subRow.preTaxTicketSales,
+						value: subRow.preTaxTicketSales || '0 ',
 						cellType: 'number',
 						columnName: 'Pre-Tax Ticket Sales',
 					},
 					{
-						value: subRow.declaredTipsPct,
+						value: subRow.declaredTipsPct || '0.00%',
 						cellType: 'number',
 						columnName: 'Declared Tips %',
 					},
 					{
-						value: subRow.regPay,
+						value: subRow.regPay || '0 ',
 						cellType: 'number',
 						columnName: 'Regular Pay',
 					},
@@ -497,7 +497,7 @@ const LaborByPayPeriod = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: 'Labor By Pay Period Report',
+				name: '',
 				columns: [
 					{ name: 'Unit Name', filter: 'text' },
 					{ name: 'First Name', filter: 'text' },
@@ -537,7 +537,10 @@ const LaborByPayPeriod = () => {
 			},
 		];
 
-		const filename = 'laborByPayPeriodReport';
+		const filename = `laborByPayPeriodReport_${selectedUnitName}_${dateFormat(
+			selectedFromDate,
+			'mm-dd-yyyy'
+		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 		const spreadSheetTitle = 'Labor By Pay Period Report';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 

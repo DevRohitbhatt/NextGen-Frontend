@@ -439,7 +439,10 @@ const LaborAnalysis = () => {
 			};
 		});
 
-		const filename = 'LaborAnalysis';
+		const filename = `LaborAnalysis_${selectedUnitName}_${dateFormat(
+			selectedFromDate,
+			'mm-dd-yyyy'
+		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 		const spreadSheetTitle = 'Labor Analysis';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 

@@ -474,7 +474,7 @@ const PurchaseAnalysis = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: `Vendor:${selectedVendorName}`,
+				name: '',
 				columns:
 					selectedGroupBy === 'None'
 						? columns.map((column) => ({ name: column.header, filterButton: true }))
@@ -500,7 +500,10 @@ const PurchaseAnalysis = () => {
 			},
 		];
 
-		const filename = 'PurchaseAnalysis';
+		const filename = `PurchaseAnalysis_${selectedUnitName}_${dateFormat(
+			selectedFromDate,
+			'mm-dd-yyyy'
+		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 		const spreadSheetTitle = 'Purchase Analysis';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 

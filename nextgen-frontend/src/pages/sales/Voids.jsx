@@ -412,6 +412,8 @@ const Voids = () => {
 			},
 		];
 
+		console.log('data', data);
+
 		const filename = 'voids';
 		const spreadSheetTitle = 'Voids';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;

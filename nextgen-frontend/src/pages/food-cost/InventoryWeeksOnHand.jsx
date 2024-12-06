@@ -325,7 +325,7 @@ const InventoryWeeksOnHand = () => {
 
 		const data = [
 			{
-				name: `Inventory Weeks On Hand | ${usage}`,
+				name: '',
 				columns: columns.map((column) =>
 					typeof column.header === 'object'
 						? { name: column.header.props.children, filterButton: true }

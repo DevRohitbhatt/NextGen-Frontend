@@ -751,7 +751,7 @@ const VarianceFoodCost = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: 'Variance Food Cost Report',
+				name: '',
 				columns: [
 					{ name: 'Department', filter: 'text' },
 					{ name: 'Sub Department', filter: 'text' },
@@ -802,8 +802,11 @@ const VarianceFoodCost = () => {
 			},
 		];
 
-		const filename = 'varianceFoodCost';
-		const spreadSheetTitle = 'Variance Food Cost Report';
+		const filename = `varianceFoodCost_${selectedUnitName}_${dateFormat(
+			selectedFromDate,
+			'mm-dd-yyyy'
+		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
+		const spreadSheetTitle = 'Variance Food Cost';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
