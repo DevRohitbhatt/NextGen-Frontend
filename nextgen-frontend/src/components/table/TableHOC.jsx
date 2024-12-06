@@ -18,6 +18,29 @@ import {
 import useTableView from '../../hooks/useTableView';
 import ColumnFilter from './ColumnFilter';
 
+const getCommonPinningStyles = (column, row) => {
+	const isPinned = column.getIsPinned();
+	const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
+	const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
+
+	return {
+		boxShadow:
+			row === 'footer' || row === 'header'
+				? null
+				: isLastLeftPinnedColumn
+				? '-4px 0 4px -4px var(--tw-primary) inset'
+				: isFirstRightPinnedColumn
+				? '4px 0 4px -4px gray inset'
+				: undefined,
+		left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
+		right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
+		position: isPinned ? 'sticky' : 'relative',
+		width: column.getSize(),
+		zIndex: isPinned ? 1 : 0,
+		backgroundColor: 'white',
+	};
+};
+
 function TableHOC({
 	columns,
 	data,
@@ -40,18 +63,21 @@ function TableHOC({
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
 	const [grouping, setGrouping] = useState([]);
 	const [columnVisibility, setColumnVisibility] = useState({});
+	const [columnPinning, setColumnPinning] = useState({});
 
 	const table = useReactTable({
 		data,
 		columns,
 		filterFns: {},
 		state: {
+			columnPinning,
 			expanded,
 			columnFilters,
 			pagination,
 			grouping,
 			columnVisibility,
 		},
+		onColumnPinningChange: setColumnPinning,
 		onColumnVisibilityChange: setColumnVisibility,
 		onGroupingChange: setGrouping,
 		onPaginationChange: setPagination,
@@ -69,6 +95,7 @@ function TableHOC({
 		getFacetedUniqueValues: getFacetedUniqueValues(),
 		//filterFromLeafRows: true,
 		//maxLeafRowFilterDepth: 1,
+		columnResizeMode: 'onChange',
 		debugTable: false,
 	});
 
@@ -165,6 +192,7 @@ function TableHOC({
 													style={{
 														minWidth: header.getSize(),
 														width: 'auto',
+														...getCommonPinningStyles(header.column, 'header'),
 													}}
 												>
 													{header.column.columnDef.tooltip ? (
@@ -215,6 +243,12 @@ function TableHOC({
 																	desc: <FaSortAlphaDownAlt />,
 																}[header.column.getIsSorted()] ?? null}
 															</div>
+															{!header.isPlaceholder &&
+																header.column.getCanPin() &&
+																header.column.columnDef.pinDirection &&
+																header.column.getIsPinned() !==
+																	header.column.columnDef.pinDirection &&
+																header.column.pin(header.column.columnDef.pinDirection)}
 															{header.column.columnDef.groupBy === true
 																? header.column.getToggleGroupingHandler(true)
 																: null}
@@ -274,7 +308,11 @@ function TableHOC({
 								>
 									{row.getVisibleCells().map((cell) => {
 										return (
-											<td key={cell.id} className={`${dataPosition} text-nowrap`}>
+											<td
+												key={cell.id}
+												className={`${dataPosition} text-nowrap`}
+												style={{ ...getCommonPinningStyles(cell.column) }}
+											>
 												{cell.getIsGrouped() ? (
 													// If it's a grouped cell, add an expander and row count
 													<div className='flex items-center gap-2'>
@@ -294,15 +332,18 @@ function TableHOC({
 
 					{/* footer */}
 					{isFooter && (
-						<tfoot className='sticky -bottom-1 bg-white shadow-[0_1px_0_var(--tw-primary)_inset]'>
+						<tfoot className='sticky z-[2] bg-white -bottom-1 shadow-[0_1px_0_var(--tw-primary)_inset]'>
 							{table.getFooterGroups().map((footerGroup) => (
 								<>
 									<tr className='' key={footerGroup.id}>
 										{footerGroup.headers.map((footer) => (
 											<td
 												key={footer.id}
-												className='p-2 text-left cursor-pointer'
-												style={{ width: footer.getSize() }}
+												className='p-2 text-left cursor-pointer shadow-[0_1px_0_var(--tw-primary)_inset] '
+												style={{
+													width: footer.getSize(),
+													...getCommonPinningStyles(footer.column, 'footer'),
+												}}
 												colSpan={footer.colSpan}
 											>
 												{flexRender(footer.column.columnDef.footer, footer.getContext())}
@@ -388,6 +429,7 @@ TableHOC.propTypes = {
 	isFooter: PropTypes.bool,
 	isTableRendered: PropTypes.bool,
 	setIsTableRendered: PropTypes.func,
+	setTableState: PropTypes.func,
 	expandCollapseButtons: PropTypes.bool,
 	enableColumnFilters: PropTypes.bool,
 	headerPosition: PropTypes.string,

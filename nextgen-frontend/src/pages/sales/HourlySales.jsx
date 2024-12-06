@@ -232,22 +232,23 @@ const HourlySales = () => {
 				})
 			);
 
-			// Dynamically generate columns based on the received data
 			const generatedColumns = [
-				// Conditionally add Hour column only if reportType is not 'Hour and Day'
 				...(reportType === 'Hour and Day'
 					? [
 							columnHelper.accessor('Hour', {
 								id: 'Hour',
 								header: 'Hour',
+								pinDirection: 'left',
 								footer: 'Summary:',
-								size: 60,
+								size: 100,
 							}),
 					  ]
 					: [
 							columnHelper.accessor('UnitName', {
 								id: 'UnitName',
 								header: 'Unit Name',
+								cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
+								pinDirection: 'left',
 								footer: reportType === 'Unit, Hour and Day' ? null : 'Summary:',
 							}),
 					  ]),
@@ -257,20 +258,22 @@ const HourlySales = () => {
 							columnHelper.accessor('Mins', {
 								id: 'Mins',
 								header: 'Mins',
+								pinDirection: 'left',
 							}),
 					  ]
 					: []),
 
-				// Conditionally add the Date and HoursSales column only if reportType is 'Unit, Hour and Day'
 				...(reportType === 'Unit, Hour and Day'
 					? [
 							columnHelper.accessor('Date', {
 								id: 'Date',
 								header: 'Date',
+								pinDirection: 'left',
 							}),
 							columnHelper.accessor('HoursSales', {
 								id: 'HoursSales',
 								header: 'Hours w/Sales',
+								pinDirection: 'left',
 							}),
 					  ]
 					: []),
@@ -278,14 +281,18 @@ const HourlySales = () => {
 				columnHelper.accessor('Total', {
 					id: 'Total',
 					header: 'Total',
-					size: 120,
+					pinDirection: 'left',
+					cell: ({ getValue }) => Number(getValue()).toLocaleString('en-US'),
+					size: 100,
 					footer: ({ table }) =>
 						reportType === 'Unit, Hour and Day' ? null : (
 							<div className='text-center'>
-								{`$ ${table
-									.getRowModel()
-									.rows.reduce((acc, row) => acc + row.original.Total, 0)
-									.toFixed(2)}`}
+								{`$ ${Number(
+									table
+										.getRowModel()
+										.rows.reduce((acc, row) => acc + row.original.Total, 0)
+										.toFixed(2)
+								).toLocaleString('en-US')}`}
 							</div>
 						),
 				}),
@@ -294,8 +301,9 @@ const HourlySales = () => {
 							columnHelper.accessor('Avg', {
 								id: 'Avg',
 								header: 'Avg',
+								pinDirection: 'left',
 								cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
-								size: 120,
+								size: 100,
 								footer: ({ table }) => (
 									<div className='text-center'>
 										{`$ ${table
@@ -327,7 +335,12 @@ const HourlySales = () => {
 								: item,
 							dataType: 'number',
 							size: 120,
-							cell: ({ getValue }) => (getValue() === null ? 0 : getValue() === '00' ? 0 : getValue()),
+							cell: ({ getValue }) =>
+								getValue() === null
+									? 0
+									: getValue() === '00'
+									? 0
+									: Number(getValue()).toLocaleString('en-US'),
 							footer: ({ table }) =>
 								reportType !== 'Hour and Day' ? null : item === '' ? (
 									''
