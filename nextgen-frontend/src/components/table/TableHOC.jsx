@@ -103,6 +103,11 @@ function TableHOC({
 		table.setGrouping(newGrouping);
 	}, [table]);
 
+	useEffect(() => {
+		const currentExpanded = table.getState().expanded;
+		table.setExpanded(currentExpanded);
+	}, [columnFilters]);
+
 	//Set isTableRendered to true after the table has rendered once
 	useEffect(() => {
 		if (table.getRowModel().rows.length > 0 && !isTableRendered && setIsTableRendered) {

@@ -445,13 +445,33 @@ const PurchaseAnalysis = () => {
 		const data = [
 			{
 				name: `Vendor:${selectedVendorName}`,
-				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
-				data: purchasetData.map((row) => columns.map((column) => row[column.id])),
+				columns:
+					selectedGroupBy === 'None'
+						? columns.map((column) => ({ name: column.header, filterButton: true }))
+						: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
+				data:
+					selectedGroupBy === 'None'
+						? purchasetData.map((row) =>
+								columns.map((column) =>
+									column.header === 'Date'
+										? dateFormat(row[column.id], 'mm/dd/yyyy hh:MM TT')
+										: row[column.id]
+								)
+						  )
+						: purchasetData.map((row) =>
+								columns
+									.slice(1)
+									.map((column) =>
+										column.header === 'Date'
+											? dateFormat(row[column.id], 'mm/dd/yyyy hh:MM TT')
+											: row[column.id]
+									)
+						  ),
 			},
 		];
 
 		const filename = 'PurchaseAnalysis';
-		const spreadSheetTitle = 'Purchase Analysis Report';
+		const spreadSheetTitle = 'Purchase Analysis';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
@@ -463,6 +483,7 @@ const PurchaseAnalysis = () => {
 			data={purchasetData}
 			isPaginated={true}
 			isFooter={true}
+			expandCollapseButtons={selectedGroupBy !== 'None' ? true : false}
 			enableColumnFilters={true}
 			headerPosition='flex-start'
 			dataPosition='text-start'

@@ -221,6 +221,15 @@ const HourlySales = () => {
 							}),
 					  ]),
 
+				...(reportType === 'Hour and Day' && viewBy !== 'Hour'
+					? [
+							columnHelper.accessor('Mins', {
+								id: 'Mins',
+								header: 'Mins',
+							}),
+					  ]
+					: []),
+
 				// Conditionally add the Date and HoursSales column only if reportType is 'Unit, Hour and Day'
 				...(reportType === 'Unit, Hour and Day'
 					? [
@@ -269,7 +278,8 @@ const HourlySales = () => {
 					: []),
 				...Object.keys(newData[0] || {})
 					.filter(
-						(key) => !['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour', 'Avg'].includes(key)
+						(key) =>
+							!['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour', 'Avg', 'Mins'].includes(key)
 					)
 					.filter((key) =>
 						reportType !== 'Hour and Day' ? key.startsWith('Hour') || key.startsWith('SalesYN') : !null
@@ -288,7 +298,7 @@ const HourlySales = () => {
 							size: 120,
 							cell: ({ getValue }) => (getValue() === null ? 0 : getValue() === '00' ? 0 : getValue()),
 							footer: ({ table }) =>
-								reportType !== 'Hour and Day' ? null : item === 'Mins' ? (
+								reportType !== 'Hour and Day' ? null : item === '' ? (
 									''
 								) : (
 									<div className='text-center'>
@@ -474,7 +484,7 @@ const HourlySales = () => {
 						</div>
 					</div>
 					<div className='flex items-center space-x-2'>
-						<div className='w-40 salesType-selector'>
+						<div className='w-44 salesType-selector'>
 							<Dropdown
 								title='Sales Type'
 								options={salesTypeOptions}
@@ -492,7 +502,7 @@ const HourlySales = () => {
 								isEditable={isDOWEditable}
 							/>
 						</div>
-						<div className='w-36 viewType-selector'>
+						<div className='w-44 viewType-selector'>
 							<Dropdown
 								title='View By'
 								options={viewByOptions}
