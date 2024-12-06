@@ -158,6 +158,7 @@ const CookChartTemplate = (props) => {
         urlParams: {
           companyId: companyStateId,
           memberID: selectedUnit,
+          templateName : 'Default'
         },
       };
 
@@ -285,7 +286,7 @@ const CookChartTemplate = (props) => {
     let body = {
       companyID: companyStateId,
       memberID: selectedUnit,
-      templateName: "",
+      templateName: "Default",
       cookDropTemplateID: null,
       createdBy: userID,
       cookDropTemplateDetailList: [],

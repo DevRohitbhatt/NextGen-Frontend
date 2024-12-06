@@ -32,6 +32,7 @@ const CookChart = () => {
     unitsAndAreas: unitsAndAreasList,
     defaultUnitID,
     defaultUnitName,
+    userID
   } = useSelector((state) => state.globalState);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -119,9 +120,10 @@ const CookChart = () => {
         fullUrl: "api/cookdrop/getcookdropchart",
         urlParams: {
           companyId: companyStateId,
-          // cookDropChartID: 0,
+          templateName : 'Default',
           unitId: selectedUnit,
-          date: dateFormat(selectedFromDate, "yyyy/mm/dd"),
+          userID : userID,
+          date: dateFormat(selectedFromDate, "mm/dd/yyyy"),
         },
       };
 
