@@ -162,6 +162,13 @@ const LaborByPayPeriod = () => {
           }
         },
       }),
+      columnHelper.accessor("regHours", {
+        id: "regHours",
+        header: "Regular Hours",
+        dataType: "number",
+        size: 100,
+       cell: ({ row }) => calculateSum(row, "regHours"),
+      }),
       columnHelper.accessor("overHours", {
         id: "overHours",
         header: "Overtime Hours",
@@ -533,7 +540,7 @@ const LaborByPayPeriod = () => {
               date: period.date,
               jobCode: period.jobCode,
               jobDesc: period.jobDesc,
-              regHoursPeriod: period.regHours,
+              regHoursPeriod: period?.regHours.toFixed(2),
               overHours: period.overHours,
               rate: period.rate,
               declaredTips: period.declaredTips,
