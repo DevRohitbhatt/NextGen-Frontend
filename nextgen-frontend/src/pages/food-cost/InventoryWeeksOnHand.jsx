@@ -323,7 +323,7 @@ const InventoryWeeksOnHand = () => {
 		const data = [
 			{
 				name: `Inventory Weeks On Hand | ${usage}`,
-				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
+				columns: columns.map((column) => (typeof column.header === 'object' ? { name: column.header.props.children, filterButton: true } : { name: column.header, filterButton: true })),
 				data: inventoryWeeksOnHandReportData.map((row) => columns.map((column) => row[column.id])),
 			},
 		];
