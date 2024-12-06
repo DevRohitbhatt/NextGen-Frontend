@@ -302,7 +302,7 @@ const InventoryWeeksOnHand = () => {
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
 		if (inventoryWeeksOnHandReportData.length === 0) return;
-		const csvHeaders = columns.map((column) => column.header);
+		const csvHeaders = columns.map((column) => (typeof column.header === 'object' ? column.header.props.children : column.header));
 		const csvData = inventoryWeeksOnHandReportData.map((row) =>
 			[columns.map((column) => row[column.id])].join(',')
 		);
