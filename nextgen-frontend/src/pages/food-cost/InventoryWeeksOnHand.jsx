@@ -107,7 +107,7 @@ const InventoryWeeksOnHand = () => {
 			columnHelper.accessor('casesOnHandAtLastCount', {
 				id: 'casesOnHandAtLastCount',
 				header: 'On Hand At Last Count',
-				cell: ({ getValue }) => getValue(),
+				cell: ({ getValue }) => getValue().toFixed(2),
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
 				dataType: 'number',
@@ -203,7 +203,8 @@ const InventoryWeeksOnHand = () => {
 			columnHelper.accessor('salesYieldWeeklyAverage', {
 				id: 'salesYieldWeeklyAverage',
 				header: 'Sales Yield Weekly Average',
-				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				cell: ({ getValue }) =>
+					getValue() !== 0 ? `$${Number(getValue().toFixed(2)).toLocaleString('en-US')}` : 0,
 				dataType: 'string',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
@@ -302,7 +303,9 @@ const InventoryWeeksOnHand = () => {
 	// Function to handle the CSV export
 	const handleCSVClick = () => {
 		if (inventoryWeeksOnHandReportData.length === 0) return;
-		const csvHeaders = columns.map((column) => (typeof column.header === 'object' ? column.header.props.children : column.header));
+		const csvHeaders = columns.map((column) =>
+			typeof column.header === 'object' ? column.header.props.children : column.header
+		);
 		const csvData = inventoryWeeksOnHandReportData.map((row) =>
 			[columns.map((column) => row[column.id])].join(',')
 		);
@@ -322,8 +325,12 @@ const InventoryWeeksOnHand = () => {
 
 		const data = [
 			{
-				name: `Inventory Weeks On Hand | ${usage}`,
-				columns: columns.map((column) => (typeof column.header === 'object' ? { name: column.header.props.children, filterButton: true } : { name: column.header, filterButton: true })),
+				name: '',
+				columns: columns.map((column) =>
+					typeof column.header === 'object'
+						? { name: column.header.props.children, filterButton: true }
+						: { name: column.header, filterButton: true }
+				),
 				data: inventoryWeeksOnHandReportData.map((row) => columns.map((column) => row[column.id])),
 			},
 		];
