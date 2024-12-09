@@ -38,7 +38,7 @@ const ActualFoodCost = () => {
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Actual Food Cost Report, please try again later.'
 	);
-	const navigate = useNavigate();
+
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
@@ -84,7 +84,6 @@ const ActualFoodCost = () => {
 	const [isExportFilteredViewDropDownVisible, setIsExportFilteredViewDropDownVisible] = useState(false);
 	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
 	const [tableState, setTableState] = useState(false);
-	const channel = new BroadcastChannel('app_channel');
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -787,6 +786,8 @@ const ActualFoodCost = () => {
 	);
 
 	const handleCountsheet = async (fromDate, toDate, isEnding = false) => {
+		const begCountsheetChannel = new BroadcastChannel('begCountsheet_channel');
+		const endCountsheetChannel = new BroadcastChannel('endCountsheet_channel');
 		try {
 			const getData = {
 				url: 'getCountsheets',
@@ -827,19 +828,31 @@ const ActualFoodCost = () => {
 
 			const dataToSend = { companyID: companyID, countsheet: countsheet, timestamp: Date.now() };
 
-			channel.onmessage = (event) => {
-				if (event.data === 'ready') {
-					channel.postMessage(dataToSend);
-				}
-			};
+			if (isEnding) {
+				endCountsheetChannel.onmessage = (event) => {
+					if (event.data === 'ready') {
+						endCountsheetChannel.postMessage(dataToSend);
+					}
+				};
+			} else {
+				begCountsheetChannel.onmessage = (event) => {
+					if (event.data === 'ready') {
+						begCountsheetChannel.postMessage(dataToSend);
+					}
+				};
+			}
 
-			window.open(`${window.location.origin}/CountsheetDesigner`, '_blank');
+			window.open(
+				`${window.location.origin}/CountsheetDesigner?type=${isEnding ? 'endCountsheet' : 'begCountsheet'}`,
+				'_blank'
+			);
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
 		}
 	};
 
 	const handleViewPurchase = async (fromDate, toDate) => {
+		const purchaseChannel = new BroadcastChannel('purchase_channel');
 		const dataToSend = {
 			companyId: companyID,
 			alignmentID: alignmentID,
@@ -852,9 +865,9 @@ const ActualFoodCost = () => {
 			timestamp: Date.now(),
 		};
 
-		channel.onmessage = (event) => {
+		purchaseChannel.onmessage = (event) => {
 			if (event.data === 'ready') {
-				channel.postMessage(dataToSend);
+				purchaseChannel.postMessage(dataToSend);
 			}
 		};
 
@@ -1138,7 +1151,11 @@ const ActualFoodCost = () => {
 									))}
 								</tbody>
 							</table>
-							<div className='flex justify-center mt-4'>
+							<div className='flex justify-between mt-4'>
+								<div className='flex items-center gap-1 accent-[var(--tw-primary)]'>
+									<input type='checkbox' />
+									Save as Company Defaults
+								</div>
 								<button
 									className='flex items-center gap-2 px-4 py-2 border-solid text-[var(--tw-primary)] focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
 									onClick={handleShowHideDepartments}

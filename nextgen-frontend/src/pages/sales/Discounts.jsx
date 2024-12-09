@@ -104,7 +104,7 @@ const Discounts = () => {
 				id: 'totalDiscountAmount',
 				header: 'Total Discount Amount',
 				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
-				dataType: 'number',
+				dataType: 'price',
 				footer: ({ table }) => (
 					<div className='text-center'>${calculateFooterSum(table, 'totalDiscountAmount')}</div>
 				),
@@ -121,7 +121,7 @@ const Discounts = () => {
 				id: 'salesGenerated',
 				header: 'Sales $ Generated',
 				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
-				dataType: 'number',
+				dataType: 'price',
 				footer: ({ table }) => (
 					<div className='text-center'>${calculateFooterSum(table, 'salesGenerated')}</div>
 				),
@@ -130,7 +130,7 @@ const Discounts = () => {
 				id: 'discountedTickets',
 				header: 'Disc Cost %',
 				cell: ({ getValue, row }) => (row.getCanExpand() ? '' : `${getValue()}%`),
-				dataType: 'number',
+				dataType: 'percent',
 				footer: ({ table }) => <div className='text-center'>{calculatePctFooter(table)}%</div>,
 			}),
 		];
@@ -173,7 +173,7 @@ const Discounts = () => {
 				}),
 				columnHelper.accessor('date', {
 					id: 'date',
-					header: 'DATE',
+					header: 'Date',
 					dataType: 'string',
 					size: 80,
 				}),
@@ -187,7 +187,7 @@ const Discounts = () => {
 					id: 'price',
 					header: 'Price',
 					cell: ({ row }) => `$${calculateSum(row, 'price')}`,
-					dataType: 'number',
+					dataType: 'price',
 					footer: ({ table }) => <div className='text-center'>${calculateFooterSum(table, 'price')}</div>,
 					size: 80,
 				}),
@@ -195,7 +195,7 @@ const Discounts = () => {
 					id: 'amountDiscount',
 					header: 'Amount Discount',
 					cell: ({ row }) => `$${calculateSum(row, 'amountDiscount')}`,
-					dataType: 'number',
+					dataType: 'price',
 					footer: ({ table }) => (
 						<div className='text-center'>${calculateFooterSum(table, 'amountDiscount')}</div>
 					),
@@ -467,7 +467,7 @@ const Discounts = () => {
 								id: 'totalSalesGenerated',
 								header: 'Sales $ Gen',
 								cell: ({ getValue }) => `$${getValue()}`,
-								dataType: 'number',
+								dataType: 'price',
 								footer: ({ table }) => (
 									<div className='text-center'>
 										${calculateFooterSum(table, 'totalSalesGenerated')}
@@ -478,7 +478,7 @@ const Discounts = () => {
 								id: 'totaldiscountedTickets',
 								header: 'Disc Cost %',
 								cell: ({ getValue }) => `${getValue()}%`,
-								dataType: 'number',
+								dataType: 'percent',
 								footer: ({ table }) => (
 									<div className='text-center'>{calculatePctFooter(table, 'total')}%</div>
 								),
@@ -549,7 +549,7 @@ const Discounts = () => {
 										id: `salesGenerated_${weekId}`,
 										header: 'Sales $ Gen',
 										cell: ({ getValue }) => `$${getValue()}`,
-										dataType: 'number',
+										dataType: 'price',
 										footer: ({ table }) => (
 											<div className='text-center'>
 												${calculateFooterSum(table, `salesGenerated_${weekId}`)}
@@ -566,7 +566,7 @@ const Discounts = () => {
 										id: `discountedTickets_${weekId}`,
 										header: 'Disc Cost %',
 										cell: ({ getValue }) => `${getValue()}%`,
-										dataType: 'number',
+										dataType: 'percent',
 										footer: ({ table }) => (
 											<div className='text-center'>{calculatePctFooter(table, weekId)}%</div>
 										),
@@ -796,19 +796,31 @@ const Discounts = () => {
 								column.parentHeader ? `${column.parentHeader} - ${column.header}` : column.header
 							),
 							rows: data.slice(i, i + rowsPerTable).map((row) =>
-								columnChunk.map((column) => ({
-									value:
+								columnChunk.map((column) => {
+									const isMetricColumn =
 										column.id.startsWith('discounted') ||
 										column.id.startsWith('salesGenerated') ||
 										column.id.startsWith('discountAmount') ||
-										column.id.startsWith('discountedTickets')
-											? row.weeks.find((week) => week[column.id])?.[column.id] || '0 '
-											: row[column.id] || '0 ',
-									cellType: column.dataType,
-									columnName: column.parentHeader
-										? `${column.parentHeader} - ${column.header}`
-										: column.header,
-								}))
+										column.id.startsWith('discountedTickets');
+
+									let value = isMetricColumn
+										? row.weeks?.find((week) => week[column.id])?.[column.id] ?? 0
+										: row[column.id] ?? 0;
+
+									if (column.dataType === 'price') {
+										value = `$${value}`;
+									} else if (column.dataType === 'percent') {
+										value = `${value}`;
+									}
+
+									return {
+										value: value.toString(),
+										cellType: column.dataType,
+										columnName: column.parentHeader
+											? `${column.parentHeader} - ${column.header}`
+											: column.header,
+									};
+								})
 							),
 						},
 					});
@@ -839,7 +851,12 @@ const Discounts = () => {
 									columnHeaders: columns.map((column) => column.header),
 									rows: discountsData.map((row) =>
 										columns.map((column) => ({
-											value: row[column.id],
+											value:
+												column.dataType === 'price'
+													? `$${Number(row[column.id]).toFixed(2)}`
+													: column.dataType === 'percent'
+													? `${row[column.id]}%`
+													: row[column.id],
 											cellType: column.dataType,
 											columnName: column.header,
 										}))
@@ -925,11 +942,22 @@ const Discounts = () => {
 						name: column.header,
 						filterButton: true,
 					})),
-					data: discountsData.map((row) => columns.map((column) => row[column.id])),
+					data: discountsData.map((row) =>
+						columns.map((column) =>
+							column.dataType === 'price'
+								? `$${Number(row[column.id]).toFixed(2)}`
+								: column.dataType === 'percent'
+								? `${row[column.id]}%`
+								: row[column.id]
+						)
+					),
 				},
 			];
 
-			const filename = 'discounts';
+			const filename = `discounts_${selectedUnitName}_${dateFormat(
+				selectedFromDate,
+				'mm-dd-yyyy'
+			)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 			const spreadSheetTitle = 'Discounts';
 			const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
@@ -963,14 +991,23 @@ const Discounts = () => {
 					})),
 					data: discountsData.map((row) =>
 						flattenedColumns.map((column) => {
-							const value =
+							const isMetricColumn =
 								column.id.startsWith('discounted') ||
 								column.id.startsWith('salesGenerated') ||
 								column.id.startsWith('discountAmount') ||
-								column.id.startsWith('discountedTickets')
-									? row.weeks.find((week) => week[column.id])?.[column.id] || '0'
-									: row[column.id] || '0';
-							return value;
+								column.id.startsWith('discountedTickets');
+
+							let value = isMetricColumn
+								? row.weeks?.find((week) => week[column.id])?.[column.id] ?? 0
+								: row[column.id] ?? 0;
+
+							if (column.dataType === 'price') {
+								value = `$${value}`;
+							} else if (column.dataType === 'percent') {
+								value = `${value}%`;
+							}
+
+							return value.toString();
 						})
 					),
 				},

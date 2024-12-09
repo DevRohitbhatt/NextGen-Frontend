@@ -52,7 +52,9 @@ const CountsheetDesigner = () => {
 	};
 
 	useEffect(() => {
-		const channel = new BroadcastChannel('app_channel');
+		const searchParams = new URLSearchParams(location.search);
+		const type = searchParams.get('type');
+		const channel = new BroadcastChannel(`${type}_channel`);
 
 		channel.postMessage('ready');
 

@@ -239,7 +239,7 @@ const PurchaseAnalysis = () => {
 
 	useEffect(() => {
 		if (!isLocationReportRendered && key == 1) {
-			const channel = new BroadcastChannel('app_channel');
+			const channel = new BroadcastChannel('purchase_channel');
 
 			channel.postMessage('ready');
 
