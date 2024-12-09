@@ -40,6 +40,7 @@ const SalesVsLabor = () => {
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isDateLoading, setIsDateLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Sales Vs Labor Report, please try again later.'
@@ -151,7 +152,7 @@ const SalesVsLabor = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
+			setIsDateLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -168,7 +169,7 @@ const SalesVsLabor = () => {
 			}
 		} catch (error) {
 		} finally {
-			setIsLoading(false);
+			setIsDateLoading(false);
 		}
 	};
 

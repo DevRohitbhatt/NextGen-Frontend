@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	Loader,
@@ -37,7 +38,7 @@ const ActualFoodCost = () => {
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Actual Food Cost Report, please try again later.'
 	);
-	const navigate = useNavigate();
+
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
@@ -374,6 +375,12 @@ const ActualFoodCost = () => {
 	}, [checkedItemsLoaded]);
 
 	useEffect(() => {
+		if (actualFoodCostData.length > 0) {
+			handleShowHideDepartments();
+		}
+	}, [actualFoodCostData]);
+
+	useEffect(() => {
 		setViewBy(viewby);
 	}, [isTableRendered]);
 
@@ -543,6 +550,7 @@ const ActualFoodCost = () => {
 
 	const handleShowHideDepartments = () => {
 		setIsShowHideDepartments(false);
+
 		const newActualFoodCostData = actualFoodCostData.map((item) => {
 			const filteredSubRows = item.subRows
 				.map((subItem) => {
@@ -561,6 +569,7 @@ const ActualFoodCost = () => {
 			return { ...item, subRows: filteredSubRows };
 		});
 		setIsTableRendered(false);
+
 		setFilteredActualFoodCostData(newActualFoodCostData);
 	};
 
@@ -777,6 +786,8 @@ const ActualFoodCost = () => {
 	);
 
 	const handleCountsheet = async (fromDate, toDate, isEnding = false) => {
+		const begCountsheetChannel = new BroadcastChannel('begCountsheet_channel');
+		const endCountsheetChannel = new BroadcastChannel('endCountsheet_channel');
 		try {
 			const getData = {
 				url: 'getCountsheets',
@@ -815,25 +826,52 @@ const ActualFoodCost = () => {
 				return selectedCountsheet;
 			}, null);
 
-			navigate('/CountsheetDesigner', { state: { companyID: companyID, countsheet: countsheet } });
+			const dataToSend = { companyID: companyID, countsheet: countsheet, timestamp: Date.now() };
+
+			if (isEnding) {
+				endCountsheetChannel.onmessage = (event) => {
+					if (event.data === 'ready') {
+						endCountsheetChannel.postMessage(dataToSend);
+					}
+				};
+			} else {
+				begCountsheetChannel.onmessage = (event) => {
+					if (event.data === 'ready') {
+						begCountsheetChannel.postMessage(dataToSend);
+					}
+				};
+			}
+
+			window.open(
+				`${window.location.origin}/CountsheetDesigner?type=${isEnding ? 'endCountsheet' : 'begCountsheet'}`,
+				'_blank'
+			);
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
 		}
 	};
 
 	const handleViewPurchase = async (fromDate, toDate) => {
-		navigate('/PurchaseAnalysis', {
-			state: {
-				companyId: companyID,
-				alignmentID: alignmentID,
-				selectedUnit: selectedUnit,
-				selectedUnitName: selectedUnitName,
-				fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
-				toDate: dateFormat(toDate, 'yyyy-mm-dd'),
-				vendorId: 0,
-				unitsAndAreasList: unitsAndAreas,
-			},
-		});
+		const purchaseChannel = new BroadcastChannel('purchase_channel');
+		const dataToSend = {
+			companyId: companyID,
+			alignmentID: alignmentID,
+			selectedUnit: selectedUnit,
+			selectedUnitName: selectedUnitName,
+			fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
+			toDate: dateFormat(toDate, 'yyyy-mm-dd'),
+			vendorId: 0,
+			unitsAndAreasList: unitsAndAreas,
+			timestamp: Date.now(),
+		};
+
+		purchaseChannel.onmessage = (event) => {
+			if (event.data === 'ready') {
+				purchaseChannel.postMessage(dataToSend);
+			}
+		};
+
+		window.open(`${window.location.origin}/PurchaseAnalysis?pageKey=1`, '_blank');
 	};
 
 	return (
@@ -1113,7 +1151,11 @@ const ActualFoodCost = () => {
 									))}
 								</tbody>
 							</table>
-							<div className='flex justify-center mt-4'>
+							<div className='flex justify-between mt-4'>
+								<div className='flex items-center gap-1 accent-[var(--tw-primary)]'>
+									<input type='checkbox' />
+									Save as Company Defaults
+								</div>
 								<button
 									className='flex items-center gap-2 px-4 py-2 border-solid text-[var(--tw-primary)] focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
 									onClick={handleShowHideDepartments}

@@ -69,7 +69,6 @@ const ItemsSoldWithModifiers = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -85,8 +84,7 @@ const ItemsSoldWithModifiers = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -138,36 +136,44 @@ const ItemsSoldWithModifiers = () => {
 
 			// Conditional mapping based on salesType
 			if (viewValue === 0) {
-				newData = result.data.menuItemSoldModifierReportModels.map((category) => ({
-					category: category.itemFullDescription,
-					total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
-					totalItemQuantity: category.menuItemSoldModifierModels[0].totalItemQuantity,
-					subRows: category.menuItemSoldModifierModels?.map((item) => ({
-						itemId: item.itemId,
-						modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
-						modifierDisplayName: item.modifierDisplayName,
-						quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
-						modItemFrequency: item.modItemFrequency,
-					})),
-				}));
-			} else if (viewValue === 1) {
-				newData = result.data.menuItemSoldModifierReportModels.map((category) => ({
-					category: category.itemFullDescription,
-					total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
-					subRows: category.menuItemSoldModifierUnitReportModels.map((unit) => ({
-						totalItemQuantity: unit.menuItemSoldModifierModels[0].totalItemQuantity,
-						unitName: unit.unitName,
-						subRows: unit.menuItemSoldModifierModels.map((item) => ({
-							unitName: item.unitName,
+				newData = result.data.menuItemSoldModifierReportModels
+					.map((category) => ({
+						category: category.itemFullDescription,
+						total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
+						totalItemQuantity: category.menuItemSoldModifierModels[0].totalItemQuantity,
+						subRows: category.menuItemSoldModifierModels?.map((item) => ({
 							itemId: item.itemId,
-							quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
 							modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
 							modifierDisplayName: item.modifierDisplayName,
-							modQuantity: item.modQuantity,
+							quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
 							modItemFrequency: item.modItemFrequency,
 						})),
-					})),
-				}));
+					}))
+					.sort((a, b) =>
+						a.category.slice(0, 1).localeCompare(b.category.slice(0, 1), undefined, { numeric: true })
+					);
+			} else if (viewValue === 1) {
+				newData = result.data.menuItemSoldModifierReportModels
+					.map((category) => ({
+						category: category.itemFullDescription,
+						total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
+						subRows: category.menuItemSoldModifierUnitReportModels.map((unit) => ({
+							totalItemQuantity: unit.menuItemSoldModifierModels[0].totalItemQuantity,
+							unitName: unit.unitName,
+							subRows: unit.menuItemSoldModifierModels.map((item) => ({
+								unitName: item.unitName,
+								itemId: item.itemId,
+								quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
+								modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
+								modifierDisplayName: item.modifierDisplayName,
+								modQuantity: item.modQuantity,
+								modItemFrequency: item.modItemFrequency,
+							})),
+						})),
+					}))
+					.sort((a, b) =>
+						a.category.slice(0, 1).localeCompare(b.category.slice(0, 1), undefined, { numeric: true })
+					);
 			}
 
 			setColumns([
@@ -465,7 +471,7 @@ const ItemsSoldWithModifiers = () => {
 			setIsTableRendered={setIsTableRendered}
 			expandCollapseButtons={true}
 			detailOnTop={`${salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
-				menuItemSoldData[0]?.total?.toFixed(2) || 0
+				Number(menuItemSoldData[0]?.total?.toFixed(2)).toLocaleString('en-US') || 0
 			}`}
 		/>
 	);
