@@ -150,8 +150,10 @@ const BrumitDWP = () => {
 								if (row.itemName === 'Cash +/-') {
 									acc[key] =
 										row.unitGroups[key] < 0
-											? `-($${Math.abs(row.unitGroups[key]).toFixed(0)})`
-											: `$${row.unitGroups[key].toFixed(0)}`;
+											? `-($${Number(Math.abs(row.unitGroups[key]).toFixed(0)).toLocaleString(
+													'en-US'
+											  )})`
+											: `$${Number(row.unitGroups[key].toFixed(0)).toLocaleString('en-US')}`;
 								} else {
 									acc[key] = `${(row.unitGroups[key] * 100).toFixed(2)}%`;
 								}
@@ -232,8 +234,12 @@ const BrumitDWP = () => {
 							)}`,
 							header: (
 								<div className='w-full pl-6 text-left'>
-									{dateFormat(selectedFromDate, 'mm/dd/yyyy')} -{' '}
-									{dateFormat(selectedToDate, 'mm/dd/yyyy')}
+									{new Date(selectedFromDate).getTime() === new Date(selectedToDate).getTime()
+										? dateFormat(selectedFromDate, 'mm/dd/yyyy')
+										: `${dateFormat(selectedFromDate, 'mm/dd/yyyy')} - ${dateFormat(
+												selectedToDate,
+												'mm/dd/yyyy'
+										  )}`}
 								</div>
 							),
 							cell: ({ getValue, row }) =>
