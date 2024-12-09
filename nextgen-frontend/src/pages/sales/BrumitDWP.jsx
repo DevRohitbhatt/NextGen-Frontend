@@ -96,176 +96,192 @@ const BrumitDWP = () => {
 			};
 
 			const result = await getCall(getData);
-			const newData = result.data.map((row) => {
-				if (
-					[
-						'Net Sales',
-						'Net Sales Comparison vs. LY',
-						'Projected Sales Variance %',
-						'Delivery Sales',
-						'Check Count Comparison vs. LY',
-						'Order Average',
-						'Order Average Comparison +/- vs. LY',
-					].includes(row.itemName)
-				) {
-					return {
-						...Object.keys(row.unitGroups).reduce((acc, key) => {
-							if (row.itemName === 'Net Sales') {
-								acc[key] = `$${row.unitGroups[key].toFixed(0)}`;
-							} else if (
-								row.itemName === 'Order Average' ||
-								row.itemName === 'Order Average Comparison +/- vs. LY'
-							) {
-								acc[key] = `$${row.unitGroups[key]}`;
-							} else {
-								acc[key] = `${(row.unitGroups[key] * 100).toFixed(2)}%`;
-							}
-							return acc;
-						}, {}),
-						[row.dateRange]: row.itemName,
-					};
-				} else if (
-					[
-						'Cash +/-',
-						'Voids %',
-						'Refunds %',
-						'Make It Right %',
-						'Employee Meals %',
-						'Hero Discount %',
-						'Corp Meal %',
-						'Open Disc %',
-						'Total Coupon /Disc %',
-					].includes(row.itemName)
-				) {
-					return {
-						rowName: 'Cash Exceptions',
-						[row.dateRange]: row.itemName,
-						...Object.keys(row.unitGroups).reduce((acc, key) => {
-							if (row.itemName === 'Cash +/-') {
-								acc[key] = `$${row.unitGroups[key].toFixed(0)}`;
-							} else {
-								acc[key] = `${(row.unitGroups[key] * 100).toFixed(2)}%`;
-							}
-							return acc;
-						}, {}),
-					};
-				} else if (
-					[
-						'Matrix Variance Day +/-',
-						'Weekly Training Hours',
-						'Matrix Variance Week to Date +/-',
-						'Period Training Hours',
-						'Matrix Variance Period to Date +/-',
-						'OT Hours Day',
-						'OT Hours Week to Date',
-						'OT Hours Period to Date',
-					].includes(row.itemName)
-				) {
-					return {
-						rowName: 'Labor',
-						[row.dateRange]: row.itemName,
-						...row.unitGroups,
-					};
-				} else if (['Beef Efficiency %'].includes(row.itemName)) {
-					return {
-						rowName: 'Food Cost',
-						[row.dateRange]: row.itemName,
-						...row.unitGroups,
-					};
-				} else if (['LY Sales', 'TY Trans', 'LY Trans'].includes(row.itemName)) {
-					return {
-						rowName: 'Sales Details',
-						[row.dateRange]: row.itemName,
-						...Object.keys(row.unitGroups).reduce((acc, key) => {
-							if (row.itemName === 'LY Sales') {
-								acc[key] = `$${parseInt(row.unitGroups[key])}`;
-							} else {
-								acc[key] = row.unitGroups[key];
-							}
-							return acc;
-						}, {}),
-					};
-				} else {
-					return null;
-				}
-			});
-
-			const dwpData = newData
-				.reduce((acc, curr) => {
-					if (curr.rowName) {
-						const existingRow = acc.find((row) => row.rowName === curr.rowName);
-						if (existingRow) {
-							existingRow.subRows.push(curr);
-						} else {
-							acc.push({ rowName: curr.rowName, subRows: [curr] });
-						}
+			if (result.data.length === 0) {
+				setBrumitDWPData([]);
+			} else {
+				const newData = result.data.map((row) => {
+					if (
+						[
+							'Net Sales',
+							'Net Sales Comparison vs. LY',
+							'Projected Sales Variance %',
+							'Delivery Sales',
+							'Check Count Comparison vs. LY',
+							'Order Average',
+							'Order Average Comparison +/- vs. LY',
+						].includes(row.itemName)
+					) {
+						return {
+							...Object.keys(row.unitGroups).reduce((acc, key) => {
+								if (row.itemName === 'Net Sales') {
+									acc[key] = `$${Number(row.unitGroups[key].toFixed(0)).toLocaleString('en-US')}`;
+								} else if (
+									row.itemName === 'Order Average' ||
+									row.itemName === 'Order Average Comparison +/- vs. LY'
+								) {
+									acc[key] =
+										row.unitGroups[key] < 0
+											? `-($${Math.abs(row.unitGroups[key])})`
+											: `$${row.unitGroups[key]}`;
+								} else {
+									acc[key] = `${(row.unitGroups[key] * 100).toFixed(2)}%`;
+								}
+								return acc;
+							}, {}),
+							[row.dateRange]: row.itemName,
+						};
+					} else if (
+						[
+							'Cash +/-',
+							'Voids %',
+							'Refunds %',
+							'Make It Right %',
+							'Employee Meals %',
+							'Hero Discount %',
+							'Corp Meal %',
+							'Open Disc %',
+							'Total Coupon /Disc %',
+						].includes(row.itemName)
+					) {
+						return {
+							rowName: 'Cash Exceptions',
+							[row.dateRange]: row.itemName,
+							...Object.keys(row.unitGroups).reduce((acc, key) => {
+								if (row.itemName === 'Cash +/-') {
+									acc[key] =
+										row.unitGroups[key] < 0
+											? `-($${Math.abs(row.unitGroups[key]).toFixed(0)})`
+											: `$${row.unitGroups[key].toFixed(0)}`;
+								} else {
+									acc[key] = `${(row.unitGroups[key] * 100).toFixed(2)}%`;
+								}
+								return acc;
+							}, {}),
+						};
+					} else if (
+						[
+							'Matrix Variance Day +/-',
+							'Weekly Training Hours',
+							'Matrix Variance Week to Date +/-',
+							'Period Training Hours',
+							'Matrix Variance Period to Date +/-',
+							'OT Hours Day',
+							'OT Hours Week to Date',
+							'OT Hours Period to Date',
+						].includes(row.itemName)
+					) {
+						return {
+							rowName: 'Labor',
+							[row.dateRange]: row.itemName,
+							...row.unitGroups,
+						};
+					} else if (['Beef Efficiency %'].includes(row.itemName)) {
+						return {
+							rowName: 'Food Cost',
+							[row.dateRange]: row.itemName,
+							...row.unitGroups,
+						};
+					} else if (['LY Sales', 'TY Trans', 'LY Trans'].includes(row.itemName)) {
+						return {
+							rowName: 'Sales Details',
+							[row.dateRange]: row.itemName,
+							...Object.keys(row.unitGroups).reduce((acc, key) => {
+								if (row.itemName === 'LY Sales') {
+									acc[key] =
+										row.unitGroups[key] < 0
+											? `-($${Math.abs(parseInt(row.unitGroups[key]).toLocaleString('en-US'))})`
+											: `$${parseInt(row.unitGroups[key]).toLocaleString('en-US')}`;
+								} else {
+									acc[key] = row.unitGroups[key];
+								}
+								return acc;
+							}, {}),
+						};
 					} else {
-						acc.push(curr);
+						return null;
 					}
-					return acc;
-				}, [])
-				.sort((a, b) => {
-					if (!a.rowName && b.rowName) return -1;
-					if (a.rowName && !b.rowName) return 1;
-					return 0;
 				});
 
-			const generatedColumns = [
-				columnHelper.accessor(
-					`${dateFormat(selectedFromDate, 'mm/dd/yyyy')}-${dateFormat(selectedToDate, 'mm/dd/yyyy')}`,
-					{
-						id: `${dateFormat(selectedFromDate, 'mm/dd/yyyy')}-${dateFormat(selectedToDate, 'mm/dd/yyyy')}`,
-						header: (
-							<div className='w-full pl-6 text-left'>
-								{dateFormat(selectedFromDate, 'mm/dd/yyyy')} -{' '}
-								{dateFormat(selectedToDate, 'mm/dd/yyyy')}
-							</div>
-						),
-						cell: ({ getValue, row }) =>
-							row.getCanExpand() ? (
-								<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
-									{row.getIsExpanded() ? <IoIosArrowUp /> : <IoIosArrowDown />}
-									{row.original.rowName}
-								</div>
-							) : (
-								<div className='pl-6 text-left'>{getValue()}</div>
-							),
-					}
-				),
-				...Object.keys(dwpData[0] || {})
-					.filter(
-						(key) =>
-							![
-								`${dateFormat(selectedFromDate, 'mm/dd/yyyy')}-${dateFormat(
-									selectedToDate,
-									'mm/dd/yyyy'
-								)}`,
-								'rowName',
-							].includes(key)
-					)
+				const dwpData = newData
+					.reduce((acc, curr) => {
+						if (curr.rowName) {
+							const existingRow = acc.find((row) => row.rowName === curr.rowName);
+							if (existingRow) {
+								existingRow.subRows.push(curr);
+							} else {
+								acc.push({ rowName: curr.rowName, subRows: [curr] });
+							}
+						} else {
+							acc.push(curr);
+						}
+						return acc;
+					}, [])
 					.sort((a, b) => {
-						const aIsNumber = !isNaN(a.charAt(0));
-						const bIsNumber = !isNaN(b.charAt(0));
-						if (aIsNumber && !bIsNumber) return 1;
-						if (!aIsNumber && bIsNumber) return -1;
-					})
-					.map((key) =>
-						columnHelper.accessor(key, {
-							id: key,
-							header: key,
-							cell: ({ getValue }) => (
-								<div className={`${getValue()?.includes('-') ? 'text-[#D43F3A]' : ''}`}>
-									{getValue()}
+						if (!a.rowName && b.rowName) return -1;
+						if (a.rowName && !b.rowName) return 1;
+						return 0;
+					});
+
+				const generatedColumns = [
+					columnHelper.accessor(
+						`${dateFormat(selectedFromDate, 'mm/dd/yyyy')}-${dateFormat(selectedToDate, 'mm/dd/yyyy')}`,
+						{
+							id: `${dateFormat(selectedFromDate, 'mm/dd/yyyy')}-${dateFormat(
+								selectedToDate,
+								'mm/dd/yyyy'
+							)}`,
+							header: (
+								<div className='w-full pl-6 text-left'>
+									{dateFormat(selectedFromDate, 'mm/dd/yyyy')} -{' '}
+									{dateFormat(selectedToDate, 'mm/dd/yyyy')}
 								</div>
 							),
-							size: 100,
-						})
+							cell: ({ getValue, row }) =>
+								row.getCanExpand() ? (
+									<div className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}>
+										{row.getIsExpanded() ? <IoIosArrowUp /> : <IoIosArrowDown />}
+										{row.original.rowName}
+									</div>
+								) : (
+									<div className='pl-6 text-left'>{getValue()}</div>
+								),
+						}
 					),
-			];
+					...Object.keys(dwpData[0] || {})
+						.filter(
+							(key) =>
+								![
+									`${dateFormat(selectedFromDate, 'mm/dd/yyyy')}-${dateFormat(
+										selectedToDate,
+										'mm/dd/yyyy'
+									)}`,
+									'rowName',
+								].includes(key)
+						)
+						.sort((a, b) => {
+							const aIsNumber = !isNaN(a.charAt(0));
+							const bIsNumber = !isNaN(b.charAt(0));
+							if (aIsNumber && !bIsNumber) return 1;
+							if (!aIsNumber && bIsNumber) return -1;
+						})
+						.map((key) =>
+							columnHelper.accessor(key, {
+								id: key,
+								header: key,
+								cell: ({ getValue }) => (
+									<div className={`${String(getValue())?.includes('-') ? 'text-[#D43F3A]' : ''}`}>
+										{getValue()}
+									</div>
+								),
+								size: 100,
+							})
+						),
+				];
 
-			setColumns(generatedColumns);
+				setColumns(generatedColumns);
 
-			setBrumitDWPData(dwpData);
+				setBrumitDWPData(dwpData);
+			}
 			setIsLoading(false);
 		} catch (error) {
 			if (error.name === 'CanceledError') {
@@ -301,7 +317,7 @@ const BrumitDWP = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: 'Brumit DWP',
+				name: '',
 				colored: true,
 				columns: columns.map((column) => ({ name: column.id, filterButton: true })),
 				data: brumitDWPData.flatMap((row) =>
