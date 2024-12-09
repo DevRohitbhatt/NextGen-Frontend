@@ -66,7 +66,6 @@ const ItemsSoldTotals = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -82,8 +81,7 @@ const ItemsSoldTotals = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -142,10 +140,10 @@ const ItemsSoldTotals = () => {
 			? [
 					columnHelper.accessor('category', {
 						id: 'category',
-						header: 'Category',
+						header: <div className='w-full text-left'>Category</div>,
 						dataType: 'string',
 						size: 60,
-						cell: (info) => info.getValue() || '',
+						cell: (info) => <div className='text-left'>{info.getValue()}</div> || '',
 					}),
 			  ]
 			: []),
@@ -190,7 +188,7 @@ const ItemsSoldTotals = () => {
 												}
 											}, 0)
 											.toFixed(2);
-										return sum;
+										return Number(sum).toLocaleString('en-US');
 									} else {
 										return getValue();
 									}
@@ -200,7 +198,10 @@ const ItemsSoldTotals = () => {
 						) : (
 							<span>
 								Description: {row.original.item} (Count: {row.subRows.length}, Total Amount: ${' '}
-								{row.subRows.reduce((acc, curr) => acc + curr.original.discPrice, 0).toFixed(2)})
+								{Number(
+									row.subRows.reduce((acc, curr) => acc + curr.original.discPrice, 0).toFixed(2)
+								).toLocaleString('en-US')}
+								)
 							</span>
 						)}
 					</div>
@@ -223,9 +224,9 @@ const ItemsSoldTotals = () => {
 			: [
 					columnHelper.accessor('description', {
 						id: 'description',
-						header: 'Description',
+						header: <div className='w-full text-left'>Description</div>,
 						dataType: 'string',
-						cell: (info) => info.getValue() || '',
+						cell: (info) => <div className='text-left'>{info.getValue()}</div> || '',
 					}),
 			  ]),
 		columnHelper.accessor('quant', {
@@ -242,7 +243,11 @@ const ItemsSoldTotals = () => {
 			cell: ({ row, getValue }) =>
 				row.getCanExpand()
 					? ''
-					: `$${getValue() !== null && getValue() !== undefined ? getValue().toFixed(2) : '0.00'}`,
+					: `$${
+							getValue() !== null && getValue() !== undefined
+								? Number(getValue().toFixed(2)).toLocaleString('en-US')
+								: '0.00'
+					  }`,
 		}),
 		columnHelper.accessor('itemSoldPct', {
 			id: 'itemSoldPct',
@@ -707,7 +712,7 @@ const ItemsSoldTotals = () => {
 			setIsTableRendered={setIsTableRendered}
 			expandCollapseButtons={viewValue !== 2 ? true : false}
 			detailOnTop={`${salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
-				menuItemSoldData[0]?.total?.toFixed(2) || 0
+				Number(menuItemSoldData[0]?.total?.toFixed(2)).toLocaleString('en-US') || 0
 			}`}
 		/>
 	);

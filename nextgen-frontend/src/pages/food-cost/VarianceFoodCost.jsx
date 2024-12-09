@@ -65,15 +65,15 @@ const VarianceFoodCost = () => {
 	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
 	const [checkedItems, setCheckedItems] = useState([
 		{ name: 'DO NOT COUNT/DO NOT COUNT', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/BEVERAGES', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/BREAD', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/DAIRY', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/GROCERY', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/MEAT', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'FOOD/PRODUCE', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'FOOD/BEVERAGES', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/BREAD', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/DAIRY', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/GROCERY', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/MEAT', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'FOOD/PRODUCE', showOnReport: true, includeInGrandTotal: true },
 		{ name: 'PREP/PREP', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'SUPPLY/CLEANING', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'SUPPLY/PAPER', showOnReport: false, includeInGrandTotal: false },
+		{ name: 'SUPPLY/CLEANING', showOnReport: true, includeInGrandTotal: true },
+		{ name: 'SUPPLY/PAPER', showOnReport: true, includeInGrandTotal: true },
 	]);
 
 	//dropdown variables
@@ -89,6 +89,7 @@ const VarianceFoodCost = () => {
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 	const moreOptionsDropdown = useRef(null);
 	const [tableState, setTableState] = useState(false);
+	const channel = new BroadcastChannel('app_channel');
 
 	const viewMap = {
 		Weekly: 'WE',
@@ -327,6 +328,12 @@ const VarianceFoodCost = () => {
 	}, [checkedItemsLoaded]);
 
 	useEffect(() => {
+		if (varianceFoodCostData.length > 0) {
+			handleShowHideDepartments();
+		}
+	}, [varianceFoodCostData]);
+
+	useEffect(() => {
 		setViewBy(viewby);
 	}, [isTableRendered]);
 
@@ -434,24 +441,6 @@ const VarianceFoodCost = () => {
 					},
 				];
 
-				const updatedCheckedItems = checkedItems.map((item) => {
-					const [department, subDepartment] = item.name.split('/');
-					const match = result.data?.some(
-						(data) =>
-							data.department === department &&
-							data.subDepartments.some(
-								(subData) =>
-									subData.subDepartment === subDepartment ||
-									subData.subDepartment.includes(subDepartment)
-							)
-					);
-					return match
-						? { ...item, showOnReport: true, includeInGrandTotal: true }
-						: { ...item, showOnReport: false, includeInGrandTotal: false };
-				});
-
-				setCheckedItemsLoaded(true);
-				setCheckedItems(updatedCheckedItems);
 				setVarianceFoodCostData(newData);
 				setFilteredVarianceFoodCostData(newData);
 			}
@@ -520,25 +509,40 @@ const VarianceFoodCost = () => {
 				return selectedCountsheet;
 			}, null);
 
-			navigate('/CountsheetDesigner', { state: { companyID: companyID, countsheet: countsheet } });
+			const dataToSend = { companyID: companyID, countsheet: countsheet, timestamp: Date.now() };
+
+			channel.onmessage = (event) => {
+				if (event.data === 'ready') {
+					channel.postMessage(dataToSend);
+				}
+			};
+
+			window.open(`${window.location.origin}/CountsheetDesigner`, '_blank');
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
 		}
 	};
 
 	const handleViewPurchase = async (fromDate, toDate) => {
-		navigate('/PurchaseAnalysis', {
-			state: {
-				companyID: companyID,
-				alignmentID: alignmentID,
-				selectedUnit: selectedUnit,
-				selectedUnitName: selectedUnitName,
-				fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
-				toDate: dateFormat(toDate, 'yyyy-mm-dd'),
-				vendorId: 0,
-				unitsAndAreasList: unitsAndAreasList,
-			},
-		});
+		const dataToSend = {
+			companyId: companyID,
+			alignmentID: alignmentID,
+			selectedUnit: selectedUnit,
+			selectedUnitName: selectedUnitName,
+			fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
+			toDate: dateFormat(toDate, 'yyyy-mm-dd'),
+			vendorId: 0,
+			unitsAndAreasList: unitsAndAreasList,
+			timestamp: Date.now(),
+		};
+
+		channel.onmessage = (event) => {
+			if (event.data === 'ready') {
+				channel.postMessage(dataToSend);
+			}
+		};
+
+		window.open(`${window.location.origin}/PurchaseAnalysis?pageKey=1`, '_blank');
 	};
 
 	const handleShowHideDepartments = () => {
@@ -863,8 +867,7 @@ const VarianceFoodCost = () => {
 									title='From Date'
 									options={fromDateOptions}
 									selectedOption={isDateLoading ? 'Loading...' : selectedFromDate}
-									handleOptionChange={(date) => setSelectedFromDate(date)}
-									isLoading={isDateLoading}
+									onOptionChange={(date) => setSelectedFromDate(date)}
 								/>
 							</div>
 							<div className='w-44'>
@@ -872,8 +875,7 @@ const VarianceFoodCost = () => {
 									title='To Date'
 									options={toDateOptions}
 									selectedOption={isDateLoading ? 'Loading...' : selectedToDate}
-									handleOptionChange={(date) => setSelectedToDate(date)}
-									isLoading={isDateLoading}
+									onOptionChange={(date) => setSelectedToDate(date)}
 								/>
 							</div>
 						</div>

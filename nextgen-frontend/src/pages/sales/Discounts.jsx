@@ -242,7 +242,6 @@ const Discounts = () => {
 	//getDefaultDates
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -259,8 +258,6 @@ const Discounts = () => {
 			}
 		} catch (error) {
 			console.error('Error getting default dates: ', error);
-		} finally {
-			setIsLoading(false);
 		}
 	};
 

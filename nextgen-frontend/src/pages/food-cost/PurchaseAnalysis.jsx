@@ -66,6 +66,8 @@ const PurchaseAnalysis = () => {
 	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
+	const [receivedData, setReceivedData] = useState(null);
+
 	const [selectedGroupBy, setSelectedGroupBy] = useState('None');
 	const groupByOptions = [
 		{ name: 'None' },
@@ -78,8 +80,9 @@ const PurchaseAnalysis = () => {
 		{ name: 'Vendor - Department' },
 	];
 
-	//location for state
 	const location = useLocation();
+	const searchParams = new URLSearchParams(window.location.search);
+	const key = searchParams.get('pageKey');
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -235,17 +238,25 @@ const PurchaseAnalysis = () => {
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
 	useEffect(() => {
-		if (location.state && !isLocationReportRendered) {
-			console.log('location.state', location.state);
+		if (!isLocationReportRendered && key == 1) {
+			const channel = new BroadcastChannel('app_channel');
 
-			setSelectedUnit(location.state?.selectedUnit);
-			setSelectedUnitName(location.state.selectedUnitName);
-			setSelectedFromDate(new Date(location.state.fromDate));
-			setSelectedToDate(new Date(location.state.toDate));
-			setSelectedVendor(location.state.vendorId);
-			if (selectedUnit) {
-				fetchPurchaseAnalysisReport('Department');
-			}
+			channel.postMessage('ready');
+
+			channel.onmessage = (event) => {
+				if (event.data !== 'ready') {
+					setReceivedData(event.data);
+					setSelectedUnit(event.data?.selectedUnit);
+					setSelectedUnitName(event.data?.selectedUnitName);
+					setSelectedVendor(event.data?.vendorId);
+					setSelectedFromDate(new Date(event.data?.fromDate));
+					setSelectedToDate(new Date(event.data?.toDate));
+				}
+			};
+
+			return () => {
+				channel.close();
+			};
 		} else if (hasUnitChanged && isLocationReportRendered) {
 			handleGroupByChange(selectedGroupBy, true);
 			setHasUnitchanged(false);
@@ -253,10 +264,14 @@ const PurchaseAnalysis = () => {
 		}
 	}, [selectedUnit]);
 
-	//Default date get
+	useEffect(() => {
+		if (receivedData) {
+			fetchPurchaseAnalysisReport('Department');
+		}
+	}, [receivedData]);
+
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -266,19 +281,20 @@ const PurchaseAnalysis = () => {
 
 			const result = await getCall(getData, false);
 			if (result?.data?.weekMaxDate) {
-				const maxDate = new Date(result?.data?.weekMaxDate);
-				const minDate = new Date(result?.data?.weekMinDate);
+				const maxDate = new Date(result?.data?.periodMaxDate);
+				const minDate = new Date(result?.data?.periodMinDate);
 				setSelectedFromDate(minDate);
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
 	useEffect(() => {
-		getDefaultDates();
+		if (!key) {
+			getDefaultDates();
+		}
 	}, []);
 
 	const fetchData = async (companyId) => {
@@ -457,7 +473,7 @@ const PurchaseAnalysis = () => {
 						columnHeaders: columns.map((column) => column.header),
 						rows: purchasetData.map((row) =>
 							columns.map((column) => ({
-								value: row[column.id],
+								value: column.id === 'date' ? dateFormat(row[column.id], 'mm/dd/yyyy') : row[column.id],
 								cellType: column.dataType,
 								columnName: column.header,
 							}))
@@ -483,18 +499,14 @@ const PurchaseAnalysis = () => {
 					selectedGroupBy === 'None'
 						? purchasetData.map((row) =>
 								columns.map((column) =>
-									column.header === 'Date'
-										? dateFormat(row[column.id], 'mm/dd/yyyy hh:MM TT')
-										: row[column.id]
+									column.id === 'date' ? dateFormat(row[column.id], 'mm/dd/yyyy') : row[column.id]
 								)
 						  )
 						: purchasetData.map((row) =>
 								columns
 									.slice(1)
 									.map((column) =>
-										column.header === 'Date'
-											? dateFormat(row[column.id], 'mm/dd/yyyy hh:MM TT')
-											: row[column.id]
+										column.id === 'date' ? dateFormat(row[column.id], 'mm/dd/yyyy') : row[column.id]
 									)
 						  ),
 			},

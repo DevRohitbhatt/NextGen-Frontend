@@ -103,7 +103,6 @@ const ItemsSoldByHour = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -119,8 +118,7 @@ const ItemsSoldByHour = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -290,7 +288,9 @@ const ItemsSoldByHour = () => {
 			) {
 				setIsLoading(false);
 				setIsError(true);
-				setErrorMessage('Please select according to the Item Type you have chosen !');
+				itemValue === 0
+					? setErrorMessage('Please select a Menu Item!')
+					: setErrorMessage('Please select an Inventory Item!');
 				return false;
 			}
 			const getData = {
@@ -608,7 +608,7 @@ const ItemsSoldByHour = () => {
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 			detailOnTop={`${salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
-				menuItemSoldData[0]?.total?.toFixed(2) || 0
+				Number(menuItemSoldData[0]?.total?.toFixed(2)).toLocaleString('en-US') || 0
 			}`}
 		/>
 	);

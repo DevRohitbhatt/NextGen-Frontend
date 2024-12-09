@@ -10,6 +10,7 @@ import {
 	DateSelector,
 	CalendarModal,
 	Modal,
+	Loader,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -41,6 +42,7 @@ const CountsheetDesigner = () => {
 	const [selectedPriceInfoData, setSelectedPriceInfoData] = useState([]);
 	const [possibleErrorsModal, setPossibleErrorsModal] = useState(false);
 	const [possibleErrorsData, setPossibleErrorsData] = useState([]);
+	const [receivedData, setReceivedData] = useState(null);
 
 	const countTypeMap = {
 		WE: 'Weekly',
@@ -48,6 +50,30 @@ const CountsheetDesigner = () => {
 		MO: 'Monthly',
 		SH: 'Shift',
 	};
+
+	useEffect(() => {
+		const channel = new BroadcastChannel('app_channel');
+
+		channel.postMessage('ready');
+
+		channel.onmessage = (event) => {
+			if (event.data !== 'ready') {
+				setReceivedData(event.data);
+				setCountsheet(event.data?.countsheet);
+				setSelectedFromDate(new Date(event.data?.countsheet?.dateTime));
+			}
+		};
+
+		return () => {
+			channel.close();
+		};
+	}, []);
+
+	useEffect(() => {
+		if (receivedData) {
+			fetchCountsheetDetails();
+		}
+	}, [receivedData]);
 
 	const columns = useMemo(
 		() => [
@@ -99,13 +125,6 @@ const CountsheetDesigner = () => {
 		[]
 	);
 
-	useEffect(() => {
-		setCountsheet(location.state.countsheet);
-		setSelectedFromDate(new Date(location.state.countsheet?.dateTime));
-
-		fetchCountsheetDetails();
-	}, []);
-
 	const fetchCountsheetDetails = async () => {
 		try {
 			setIsLoading(true);
@@ -113,8 +132,8 @@ const CountsheetDesigner = () => {
 			const getData = {
 				url: 'countsheetDetails',
 				urlParams: {
-					companyId: location.state.companyID,
-					countsheetID: location.state.countsheet?.inventoryCountSheetID,
+					companyId: receivedData?.companyID,
+					countsheetID: countsheet?.inventoryCountSheetID,
 				},
 			};
 
@@ -362,13 +381,15 @@ const CountsheetDesigner = () => {
 				}`}</h3>
 			</div>
 
-			{isLoading ? (
-				<div>Loading...</div>
-			) : isError ? (
-				<div>{errorMessage}</div>
-			) : (
-				countsheetDetails.length > 0 && <div className='paged-table'>{Table}</div>
-			)}
+			<div className='relative w-full min-h-56'>
+				<Loader loading={isLoading} />
+				{!isLoading &&
+					(countsheetDetails.length > 0 ? (
+						<div className='paged-table'>{Table}</div>
+					) : (
+						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+					))}
+			</div>
 
 			<CalendarModal
 				handleClose={() => setShowDateModal(false)}

@@ -35,6 +35,7 @@ const Voids = () => {
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isDateLoading, setIsDateLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Voids Report, please try again later.'
@@ -46,10 +47,8 @@ const Voids = () => {
 	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
@@ -173,7 +172,7 @@ const Voids = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
+			setIsDateLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -190,7 +189,7 @@ const Voids = () => {
 			}
 		} catch (error) {
 		} finally {
-			setIsLoading(false);
+			setIsDateLoading(false);
 		}
 	};
 

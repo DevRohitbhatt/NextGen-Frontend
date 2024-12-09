@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	Loader,
@@ -83,6 +84,7 @@ const ActualFoodCost = () => {
 	const [isExportFilteredViewDropDownVisible, setIsExportFilteredViewDropDownVisible] = useState(false);
 	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
 	const [tableState, setTableState] = useState(false);
+	const channel = new BroadcastChannel('app_channel');
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -374,6 +376,12 @@ const ActualFoodCost = () => {
 	}, [checkedItemsLoaded]);
 
 	useEffect(() => {
+		if (actualFoodCostData.length > 0) {
+			handleShowHideDepartments();
+		}
+	}, [actualFoodCostData]);
+
+	useEffect(() => {
 		setViewBy(viewby);
 	}, [isTableRendered]);
 
@@ -543,6 +551,7 @@ const ActualFoodCost = () => {
 
 	const handleShowHideDepartments = () => {
 		setIsShowHideDepartments(false);
+
 		const newActualFoodCostData = actualFoodCostData.map((item) => {
 			const filteredSubRows = item.subRows
 				.map((subItem) => {
@@ -561,6 +570,7 @@ const ActualFoodCost = () => {
 			return { ...item, subRows: filteredSubRows };
 		});
 		setIsTableRendered(false);
+
 		setFilteredActualFoodCostData(newActualFoodCostData);
 	};
 
@@ -815,25 +825,40 @@ const ActualFoodCost = () => {
 				return selectedCountsheet;
 			}, null);
 
-			navigate('/CountsheetDesigner', { state: { companyID: companyID, countsheet: countsheet } });
+			const dataToSend = { companyID: companyID, countsheet: countsheet, timestamp: Date.now() };
+
+			channel.onmessage = (event) => {
+				if (event.data === 'ready') {
+					channel.postMessage(dataToSend);
+				}
+			};
+
+			window.open(`${window.location.origin}/CountsheetDesigner`, '_blank');
 		} catch (error) {
 			console.error('Error getting Countsheet data: ', error);
 		}
 	};
 
 	const handleViewPurchase = async (fromDate, toDate) => {
-		navigate('/PurchaseAnalysis', {
-			state: {
-				companyId: companyID,
-				alignmentID: alignmentID,
-				selectedUnit: selectedUnit,
-				selectedUnitName: selectedUnitName,
-				fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
-				toDate: dateFormat(toDate, 'yyyy-mm-dd'),
-				vendorId: 0,
-				unitsAndAreasList: unitsAndAreas,
-			},
-		});
+		const dataToSend = {
+			companyId: companyID,
+			alignmentID: alignmentID,
+			selectedUnit: selectedUnit,
+			selectedUnitName: selectedUnitName,
+			fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
+			toDate: dateFormat(toDate, 'yyyy-mm-dd'),
+			vendorId: 0,
+			unitsAndAreasList: unitsAndAreas,
+			timestamp: Date.now(),
+		};
+
+		channel.onmessage = (event) => {
+			if (event.data === 'ready') {
+				channel.postMessage(dataToSend);
+			}
+		};
+
+		window.open(`${window.location.origin}/PurchaseAnalysis?pageKey=1`, '_blank');
 	};
 
 	return (
