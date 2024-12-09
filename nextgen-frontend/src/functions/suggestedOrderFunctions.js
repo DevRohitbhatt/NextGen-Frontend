@@ -138,7 +138,7 @@ export const calculateSuggestedQuantities = (forecastTotal, suggestedOrderData, 
 						var extendedPrice = 0;
 						if (inventoryItem.invItemAvgSalesYieldPerMainUOM > 0) {
 							const qty =
-								(forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM) *
+								(forecastTotal / inventoryItem.invItemAvgSalesYieldPerMainUOM) /
 								vendorItem.mappingQuantityMultiplier *
 								(1 + vendorItem.safetyFactor / 100);
 							suggestedQty = formatNumberTwoDecimals(qty);

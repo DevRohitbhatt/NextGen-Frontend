@@ -101,7 +101,6 @@ const ItemsSoldByEmployee = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -117,8 +116,7 @@ const ItemsSoldByEmployee = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -147,6 +145,7 @@ const ItemsSoldByEmployee = () => {
 			id: 'unitName',
 			header: 'Unit',
 			dataType: 'number',
+			cell: (info) => info.getValue() || '',
 		}),
 
 		columnHelper.accessor('employeeId', {
@@ -157,21 +156,21 @@ const ItemsSoldByEmployee = () => {
 		}),
 		columnHelper.accessor('firstName', {
 			id: 'firstName',
-			header: 'First Name',
+			header: <div className='w-full text-left'>First Name</div>,
 			dataType: 'string',
-			cell: (info) => info.getValue() || '',
+			cell: (info) => <div className='text-left'>{info.getValue()}</div> || '',
 		}),
 		columnHelper.accessor('lastName', {
 			id: 'lastName',
-			header: 'Last Name',
+			header: <div className='w-full text-left'>Last Name</div>,
 			dataType: 'string',
-			cell: (info) => info.getValue() || '',
+			cell: (info) => <div className='text-left'>{info.getValue()}</div> || '',
 		}),
 		columnHelper.accessor('description', {
 			id: 'description',
-			header: 'Menu Item',
+			header: <div className='w-full text-left'>Menu Item</div>,
 			dataType: 'string',
-			cell: (info) => info.getValue() || '',
+			cell: (info) => <div className='text-left'>{info.getValue()}</div> || '',
 		}),
 		columnHelper.accessor('quant', {
 			id: 'quant',
@@ -291,7 +290,9 @@ const ItemsSoldByEmployee = () => {
 			) {
 				setIsLoading(false);
 				setIsError(true);
-				setErrorMessage('Please select according to the Item Type you have chosen !');
+				itemValue === 0
+					? setErrorMessage('Please select a Menu Item!')
+					: setErrorMessage('Please select an Inventory Item!');
 				return false; // Prevent API call
 			}
 
@@ -429,10 +430,16 @@ const ItemsSoldByEmployee = () => {
 											: calculateTotalCost(row.subRows, 'quant')
 								  } Total Amount: $${
 										selectedGroupByColumns.length === 1
-											? calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											? Number(
+													calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											  ).toLocaleString('en-US')
 											: row.depth === 0
-											? calculateNestedTotalCost(row.subRows, 'discPrice').toFixed(2)
-											: calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											? Number(
+													calculateNestedTotalCost(row.subRows, 'discPrice').toFixed(2)
+											  ).toLocaleString('en-US')
+											: Number(
+													calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											  ).toLocaleString('en-US')
 								  }) `
 								: '';
 
@@ -635,7 +642,7 @@ const ItemsSoldByEmployee = () => {
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 			detailOnTop={`${salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
-				menuItemSoldData[0]?.total?.toFixed(2) || 0
+				Number(menuItemSoldData[0]?.total?.toFixed(2)).toLocaleString('en-US') || 0
 			}`}
 		/>
 	);

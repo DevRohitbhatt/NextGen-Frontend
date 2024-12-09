@@ -36,6 +36,7 @@ const BusinessSummary = () => {
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isDateLoading, setIsDateLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Business Summary Report, please try again later.'
@@ -87,7 +88,7 @@ const BusinessSummary = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
+			setIsDateLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -104,7 +105,7 @@ const BusinessSummary = () => {
 			}
 		} catch (error) {
 		} finally {
-			setIsLoading(false);
+			setIsDateLoading(false);
 		}
 	};
 

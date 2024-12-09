@@ -67,7 +67,6 @@ const LaborCICOExceptions = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -83,8 +82,7 @@ const LaborCICOExceptions = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
