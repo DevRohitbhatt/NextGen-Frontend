@@ -47,6 +47,8 @@ const PurchaseAnalysis = () => {
 	);
 
 	const [isTableRendered, setIsTableRendered] = useState(false);
+	const [isLocationReportRendered, setIsLocationReportRendered] = useState(false);
+	const [hasUnitChanged, setHasUnitchanged] = useState(true);
 
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
@@ -55,14 +57,13 @@ const PurchaseAnalysis = () => {
 
 	//selected vendor state variables
 	const [selectedVendor, setSelectedVendor] = useState(0);
+	const [isVendorsLoading, setIsVendorsLoading] = useState(false);
 	const [selectedVendorName, setSelectedVendorName] = useState('All Vendors');
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [selectedGroupBy, setSelectedGroupBy] = useState('None');
@@ -96,32 +97,35 @@ const PurchaseAnalysis = () => {
 				dataType: 'string',
 				size: 200,
 				enableHiding: true,
+				filterFn: 'arrIncludesSome',
 			}),
 			columnHelper.accessor('date', {
 				id: 'date',
 				header: 'Date',
 				cell: ({ getValue }) => dateFormat(getValue(), 'mm-dd-yyyy'),
 				dataType: 'date',
-				filterFn: 'includesString',
+				filterFn: 'arrIncludesSome',
 				size: 100,
 			}),
 			columnHelper.accessor('name', {
 				id: 'name',
 				header: 'Vendor',
 				dataType: 'string',
+				filterFn: 'arrIncludesSome',
 				size: 100,
 			}),
 			columnHelper.accessor('vendorInvoiceReference', {
 				id: 'vendorInvoiceReference',
 				header: 'Invoice Ref #',
 				dataType: 'string',
+				filterFn: 'arrIncludesSome',
 				size: 120,
 			}),
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Invoice Total',
 				cell: ({ getValue }) => (getValue() ? `${getValue().toFixed(2)}` : ''),
-				filterFn: 'includesString',
+				filterFn: 'weakEquals',
 				dataType: 'number',
 				size: 120,
 			}),
@@ -129,12 +133,14 @@ const PurchaseAnalysis = () => {
 				id: 'companyGLCode',
 				header: 'GL Code',
 				dataType: 'string',
+				filterFn: 'arrIncludesSome',
 				size: 200,
 			}),
 			columnHelper.accessor('vendorItemDescription', {
 				id: 'vendorItemDescription',
 				header: 'Vendor Item',
 				dataType: 'string',
+				filterFn: 'arrIncludesSome',
 				size: 250,
 			}),
 			columnHelper.accessor('quantity', {
@@ -142,11 +148,13 @@ const PurchaseAnalysis = () => {
 				header: 'Item Quantity',
 				cell: ({ getValue }) => <div className='text-center'>{getValue() ?? 0}</div>,
 				dataType: 'number',
-				filterFn: 'includesString',
+				filterFn: 'weakEquals',
 				size: 100,
 				footer: ({ table }) => (
 					<div className='font-bold text-center'>
-						{parseInt(table.getCoreRowModel().rows.reduce((acc, row) => acc + row.original.quantity, 0))}
+						{parseInt(
+							table.getFilteredRowModel().rows.reduce((acc, row) => acc + row.original.quantity, 0)
+						)}
 					</div>
 				),
 			}),
@@ -155,7 +163,7 @@ const PurchaseAnalysis = () => {
 				header: 'Item Price',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				dataType: 'number',
-				filterFn: 'includesString',
+				filterFn: 'weakEquals',
 				size: 100,
 			}),
 			columnHelper.accessor('taxAmount', {
@@ -163,7 +171,7 @@ const PurchaseAnalysis = () => {
 				header: 'Item Tax',
 				cell: ({ getValue }) => (getValue() ? `$${getValue().toFixed(2)}` : '$0.00'),
 				dataType: 'number',
-				filterFn: 'includesString',
+				filterFn: 'weakEquals',
 				size: 100,
 			}),
 			columnHelper.accessor('extPrice', {
@@ -174,31 +182,34 @@ const PurchaseAnalysis = () => {
 					<div className='font-bold text-start'>
 						$
 						{table
-							.getCoreRowModel()
+							.getFilteredRowModel()
 							.rows.reduce((acc, row) => acc + row.original.extPrice, 0)
 							.toFixed(2)}
 					</div>
 				),
 				dataType: 'number',
-				filterFn: 'includesString',
+				filterFn: 'weakEquals',
 				size: 100,
 			}),
 			columnHelper.accessor('department', {
 				id: 'department',
 				header: 'Department',
 				dataType: 'string',
+				filterFn: 'arrIncludesSome',
 				size: 150,
 			}),
 			columnHelper.accessor('subdepartment', {
 				id: 'subdepartment',
 				header: 'Sub Department',
 				dataType: 'string',
+				filterFn: 'arrIncludesSome',
 				size: 150,
 			}),
 			columnHelper.accessor('inventoryItemDescription', {
 				id: 'inventoryItemDescription',
 				header: 'Inventory Item',
 				dataType: 'string',
+				filterFn: 'arrIncludesSome',
 				size: 300,
 			}),
 		],
@@ -224,15 +235,56 @@ const PurchaseAnalysis = () => {
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
 	useEffect(() => {
-		if (location.state) {
-			fetchPurchaseAnalysisReport();
+		if (location.state && !isLocationReportRendered) {
+			console.log('location.state', location.state);
+
+			setSelectedUnit(location.state?.selectedUnit);
+			setSelectedUnitName(location.state.selectedUnitName);
+			setSelectedFromDate(new Date(location.state.fromDate));
+			setSelectedToDate(new Date(location.state.toDate));
+			setSelectedVendor(location.state.vendorId);
+			if (selectedUnit) {
+				fetchPurchaseAnalysisReport('Department');
+			}
+		} else if (hasUnitChanged && isLocationReportRendered) {
+			handleGroupByChange(selectedGroupBy, true);
+			setHasUnitchanged(false);
+			setPurchaseData([]);
 		}
+	}, [selectedUnit]);
+
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
 	}, []);
 
 	const fetchData = async (companyId) => {
-		setIsLoading(true);
+		setIsVendorsLoading(true);
 		await Promise.all([fetchVendors(companyId)]);
-		setIsLoading(false);
+		setIsVendorsLoading(false);
 	};
 
 	// This function fetches the vendors.
@@ -242,7 +294,7 @@ const PurchaseAnalysis = () => {
 			const getData = {
 				url: 'vendors',
 				urlParams: {
-					companyID: companyID,
+					companyId: companyID,
 				},
 			};
 
@@ -255,7 +307,7 @@ const PurchaseAnalysis = () => {
 		}
 	};
 
-	const fetchPurchaseAnalysisReport = async () => {
+	const fetchPurchaseAnalysisReport = async (option) => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -264,18 +316,14 @@ const PurchaseAnalysis = () => {
 			const getData = {
 				url: 'PurchaseAnalysis',
 				urlParams: {
-					companyID: location.state?.companyID || companyID,
-					alignmentID: location.state?.alignmentID || alignmentID,
-					memberId: location.state?.memberID || selectedUnit,
-					fromDate: location.state?.fromDate || dateFormat(selectedFromDate, 'yyyy-mm-dd'),
-					toDate: location.state?.toDate || dateFormat(selectedToDate, 'yyyy-mm-dd'),
-					vendorId: location.state?.vendorId || selectedVendor,
+					companyID: companyID,
+					alignmentID: alignmentID,
+					memberId: selectedUnit,
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					vendorId: selectedVendor,
 				},
 			};
-
-			if (location.state?.memberID) {
-				setSelectedUnit(location.state.memberID);
-			}
 
 			const result = await getCall(getData);
 
@@ -290,6 +338,10 @@ const PurchaseAnalysis = () => {
 			setPurchaseData(newData);
 			setIsLoading(false);
 			setIsTableRendered(true);
+			if (option && isLocationReportRendered === false) {
+				handleGroupByChange(option);
+			}
+			setIsLocationReportRendered(true);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -316,20 +368,24 @@ const PurchaseAnalysis = () => {
 		setVendorShowModal(false);
 	};
 
-	const handleGroupByChange = (option) => {
-		setSelectedGroupBy(option);
+	const handleGroupByChange = (option, status) => {
+		if (option !== 'Department') {
+			setSelectedGroupBy(option);
+		}
 		const groupByColumns = {
 			None: [],
+			Department: ['department', 'subdepartment'],
 			'Unit - GLCode': ['unitName', 'companyGLCode'],
-			'Unit- Department': ['unitName', 'department'],
+			'Unit- Department': ['unitName', 'department', 'subdepartment'],
 			'Unit - Inventory Item': ['unitName', 'inventoryItemDescription'],
 			'Unit - Vendor Item - Inventory Item': ['unitName', 'vendorItemDescription', 'inventoryItemDescription'],
 			'Unit - Vendor - Invoice': ['unitName', 'name', 'vendorInvoiceReference'],
 			'Vendor - GLCode': ['name', 'companyGLCode'],
-			'Vendor - Department': ['name', 'department'],
+			'Vendor - Department': ['name', 'department', 'subdepartment'],
 		};
 
 		const selectedGroupByColumns = groupByColumns[option] || [];
+
 		const newColumns = memoizedColumns.map((column) =>
 			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
 		);
@@ -351,7 +407,11 @@ const PurchaseAnalysis = () => {
 						return (
 							<div
 								{...{
-									style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem`, width: '100%' },
+									style: {
+										cursor: 'pointer',
+										paddingLeft: `${row.depth * 2}rem`,
+										width: '100%',
+									},
 									className: 'flex items-center gap-2 font-bold absolute bg-white inset-0 capitalize',
 								}}
 							>
@@ -371,7 +431,7 @@ const PurchaseAnalysis = () => {
 
 		setColumns(newColumns);
 
-		if (isTableRendered) {
+		if (isTableRendered && !status) {
 			fetchPurchaseAnalysisReport();
 		}
 	};
@@ -381,7 +441,7 @@ const PurchaseAnalysis = () => {
 		const pdfData = {
 			title: 'Purchase Analysis Report',
 			subHeaders: [
-				`Unit:${selectedUnitName} | Vendor:${selectedVendorName} | Date Range:${dateFormat(
+				`Unit:${selectedUnitName}  |  Vendor:${selectedVendorName}  |  Date Range:${dateFormat(
 					selectedFromDate,
 					'mm-dd-yyyy'
 				)} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
@@ -414,14 +474,37 @@ const PurchaseAnalysis = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: `Vendor:${selectedVendorName}`,
-				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
-				data: purchasetData.map((row) => columns.map((column) => row[column.id])),
+				name: '',
+				columns:
+					selectedGroupBy === 'None'
+						? columns.map((column) => ({ name: column.header, filterButton: true }))
+						: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
+				data:
+					selectedGroupBy === 'None'
+						? purchasetData.map((row) =>
+								columns.map((column) =>
+									column.header === 'Date'
+										? dateFormat(row[column.id], 'mm/dd/yyyy hh:MM TT')
+										: row[column.id]
+								)
+						  )
+						: purchasetData.map((row) =>
+								columns
+									.slice(1)
+									.map((column) =>
+										column.header === 'Date'
+											? dateFormat(row[column.id], 'mm/dd/yyyy hh:MM TT')
+											: row[column.id]
+									)
+						  ),
 			},
 		];
 
-		const filename = 'PurchaseAnalysis';
-		const spreadSheetTitle = 'Purchase Analysis Report';
+		const filename = `PurchaseAnalysis_${selectedUnitName}_${dateFormat(
+			selectedFromDate,
+			'mm-dd-yyyy'
+		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
+		const spreadSheetTitle = 'Purchase Analysis';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
@@ -433,6 +516,7 @@ const PurchaseAnalysis = () => {
 			data={purchasetData}
 			isPaginated={true}
 			isFooter={true}
+			expandCollapseButtons={selectedGroupBy !== 'None' ? true : false}
 			enableColumnFilters={true}
 			headerPosition='flex-start'
 			dataPosition='text-start'
@@ -448,7 +532,7 @@ const PurchaseAnalysis = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Purchase Analysis Report</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Purchase Analysis</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
@@ -465,10 +549,11 @@ const PurchaseAnalysis = () => {
 							fromDate={selectedFromDate}
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
+							extraClass={'w-[219px]'}
 						/>
 						<VendorSelector
 							vendorID={selectedVendor}
-							vendorName={selectedVendorName}
+							vendorName={isVendorsLoading ? 'Loading...' : selectedVendorName}
 							setVendorName={setSelectedVendorName}
 							onClick={() => setVendorShowModal(true)}
 						/>
@@ -480,7 +565,7 @@ const PurchaseAnalysis = () => {
 								onOptionChange={handleGroupByChange}
 							/>
 						</div>
-						<div className='run-button' onClick={fetchPurchaseAnalysisReport}>
+						<div className='run-button' onClick={() => fetchPurchaseAnalysisReport()}>
 							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>

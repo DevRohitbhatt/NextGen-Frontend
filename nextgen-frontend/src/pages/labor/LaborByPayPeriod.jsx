@@ -28,8 +28,6 @@ const LaborByPayPeriod = () => {
 		unitsAndAreas: unitsAndAreasList,
 		defaultUnitID,
 		defaultUnitName,
-		groupOrUnitAccess,
-		groupOrUnitAccessName,
 	} = useSelector((state) => state.globalState);
 	const [laborByPayPeriodData, setLaborByPayPeriodData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
@@ -46,14 +44,12 @@ const LaborByPayPeriod = () => {
 	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
-	const [view, setView] = useState('Units');
+	const [view, setView] = useState('Employees');
 	const dropdownOptions = [
 		{ name: 'Units', row: 0 },
 		{ name: 'Employees', row: 1 },
@@ -95,7 +91,10 @@ const LaborByPayPeriod = () => {
 					row.getCanExpand() ? (
 						<div
 							{...{
-								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
+								style: {
+									cursor: 'pointer',
+									paddingLeft: `${row.depth * 2}rem`,
+								},
 								className: 'inline-block',
 							}}
 						>
@@ -151,6 +150,13 @@ const LaborByPayPeriod = () => {
 					}
 				},
 			}),
+			columnHelper.accessor('regHours', {
+				id: 'regHours',
+				header: 'Regular Hours',
+				dataType: 'number',
+				size: 140,
+				cell: ({ row }) => calculateSum(row, 'regHours'),
+			}),
 			columnHelper.accessor('overHours', {
 				id: 'overHours',
 				header: 'Overtime Hours',
@@ -173,7 +179,7 @@ const LaborByPayPeriod = () => {
 			columnHelper.accessor('preTaxTicketSales', {
 				id: 'preTaxTicketSales',
 				header: 'Pre-Tax Ticket Sales',
-				cell: ({ row }) => calculateSum(row, 'preTaxTicketSales'),
+				cell: ({ row }) => `$${Number(calculateSum(row, 'preTaxTicketSales')).toLocaleString('en-US')}`,
 				dataType: 'number',
 				size: 160,
 			}),
@@ -188,7 +194,7 @@ const LaborByPayPeriod = () => {
 				id: 'regPay',
 				header: 'Total Pay',
 				size: 120,
-				cell: ({ row }) => calculateSum(row, 'regPay'),
+				cell: ({ row }) => `$${Number(calculateSum(row, 'regPay')).toLocaleString('en-US')}`,
 				dataType: 'number',
 			}),
 		],
@@ -196,13 +202,41 @@ const LaborByPayPeriod = () => {
 	);
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
+
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
+	}, []);
 
 	const fetchLaborByPayPeriod = async () => {
 		try {
@@ -356,18 +390,54 @@ const LaborByPayPeriod = () => {
 			],
 			rows: data.flatMap((row) =>
 				row.subRows.map((subRow) => [
-					{ value: row.employeeId, cellType: 'number', columnName: 'Employee ID' },
-					{ value: `${row.firstName} ${row.lastName}`, cellType: 'string', columnName: 'Full Name' },
+					{
+						value: row.employeeId,
+						cellType: 'number',
+						columnName: 'Employee ID',
+					},
+					{
+						value: `${row.firstName} ${row.lastName}`,
+						cellType: 'string',
+						columnName: 'Full Name',
+					},
 					{ value: subRow.date, cellType: 'date', columnName: 'Date' },
 					{ value: subRow.jobCode, cellType: 'number', columnName: 'Job Code' },
-					{ value: subRow.jobDesc, cellType: 'string', columnName: 'Job Description' },
-					{ value: subRow.regHours, cellType: 'number', columnName: 'Regular Hours' },
-					{ value: subRow.overHours, cellType: 'number', columnName: 'Overtime Hours' },
+					{
+						value: subRow.jobDesc,
+						cellType: 'string',
+						columnName: 'Job Description',
+					},
+					{
+						value: subRow.regHours || '0 ',
+						cellType: 'number',
+						columnName: 'Regular Hours',
+					},
+					{
+						value: subRow.overHours || '0 ',
+						cellType: 'number',
+						columnName: 'Overtime Hours',
+					},
 					{ value: subRow.rate, cellType: 'number', columnName: 'Rate' },
-					{ value: subRow.declaredTips, cellType: 'number', columnName: 'Declared Tips' },
-					{ value: subRow.preTaxTicketSales, cellType: 'number', columnName: 'Pre-Tax Ticket Sales' },
-					{ value: subRow.declaredTipsPct, cellType: 'number', columnName: 'Declared Tips %' },
-					{ value: subRow.regPay, cellType: 'number', columnName: 'Regular Pay' },
+					{
+						value: subRow.declaredTips || '0 ',
+						cellType: 'number',
+						columnName: 'Declared Tips',
+					},
+					{
+						value: subRow.preTaxTicketSales || '0 ',
+						cellType: 'number',
+						columnName: 'Pre-Tax Ticket Sales',
+					},
+					{
+						value: subRow.declaredTipsPct || '0.00%',
+						cellType: 'number',
+						columnName: 'Declared Tips %',
+					},
+					{
+						value: subRow.regPay || '0 ',
+						cellType: 'number',
+						columnName: 'Regular Pay',
+					},
 				])
 			),
 		};
@@ -427,7 +497,7 @@ const LaborByPayPeriod = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: 'Labor By Pay Period Report',
+				name: '',
 				columns: [
 					{ name: 'Unit Name', filter: 'text' },
 					{ name: 'First Name', filter: 'text' },
@@ -454,7 +524,7 @@ const LaborByPayPeriod = () => {
 							date: period.date,
 							jobCode: period.jobCode,
 							jobDesc: period.jobDesc,
-							regHoursPeriod: period.regHours,
+							regHoursPeriod: period?.regHours.toFixed(2),
 							overHours: period.overHours,
 							rate: period.rate,
 							declaredTips: period.declaredTips,
@@ -467,7 +537,10 @@ const LaborByPayPeriod = () => {
 			},
 		];
 
-		const filename = 'laborByPayPeriodReport';
+		const filename = `laborByPayPeriodReport_${selectedUnitName}_${dateFormat(
+			selectedFromDate,
+			'mm-dd-yyyy'
+		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 		const spreadSheetTitle = 'Labor By Pay Period Report';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
@@ -510,6 +583,7 @@ const LaborByPayPeriod = () => {
 						fromDate={selectedFromDate}
 						isDateRange={true}
 						onClick={() => setShowDateModal(true)}
+						extraClass={'w-[219px]'}
 					/>
 					<div className='w-52'>
 						<Dropdown

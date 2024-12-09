@@ -42,10 +42,8 @@ const InventoryTransfer = () => {
 	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
@@ -122,6 +120,34 @@ const InventoryTransfer = () => {
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
 	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
+	}, []);
 
 	// Function to get the inventory transfer report
 	const fetchInventoryTransferReport = async () => {
@@ -292,7 +318,10 @@ const InventoryTransfer = () => {
 						columnHeaders: headers.map((header) => header.label),
 						rows: inventoryTransferReportData.data.map((row) =>
 							headers.map((header) => ({
-								value: row[header.key],
+								value:
+									header.key === 'transferTime'
+										? dateFormat(row[header.key], 'mm/dd/yyyy hh:MM TT')
+										: row[header.key],
 								cellType: header.cellType,
 								columnName: header.label,
 							}))
@@ -310,7 +339,11 @@ const InventoryTransfer = () => {
 		if (!inventoryTransferReportData?.data) return;
 		const csvHeaders = headers.map((header) => header.label);
 		const csvData = inventoryTransferReportData.data.map((row) =>
-			[headers.map((header) => row[header.key])].join(',')
+			[
+				headers.map((header) =>
+					header.key === 'transferTime' ? dateFormat(row[header.key], 'mm/dd/yyyy hh:MM TT') : row[header.key]
+				),
+			].join(',')
 		);
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
@@ -327,13 +360,25 @@ const InventoryTransfer = () => {
 
 		const data = [
 			{
-				name: 'Inventory Transfer Report',
-				columns: headers.map((header) => ({ name: header.label, filterButton: true })),
-				data: inventoryTransferReportData.data.map((row) => headers.map((header) => row[header.key])),
+				name: '',
+				columns: headers.map((header) => ({
+					name: header.label,
+					filterButton: true,
+				})),
+				data: inventoryTransferReportData.data.map((row) =>
+					headers.map((header) =>
+						header.key === 'transferTime'
+							? dateFormat(row[header.key], 'mm/dd/yyyy hh:MM TT')
+							: row[header.key]
+					)
+				),
 			},
 		];
 
-		const filename = 'InventoryTransferReport';
+		const filename = `InventoryTransferReport_${selectedUnitName}_${dateFormat(
+			selectedFromDate,
+			'mm-dd-yyyy'
+		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 		const spreadSheetTitle = 'Inventory Transfer Report';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
@@ -349,7 +394,7 @@ const InventoryTransfer = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Transfer Report</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Transfer</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
@@ -366,6 +411,7 @@ const InventoryTransfer = () => {
 							fromDate={selectedFromDate}
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
+							extraClass={'w-[219px]'}
 						/>
 
 						<div className='w-48'>

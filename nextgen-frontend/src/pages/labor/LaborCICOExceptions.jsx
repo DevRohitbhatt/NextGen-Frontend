@@ -64,6 +64,34 @@ const LaborCICOExceptions = () => {
 		stepsEnabled: false,
 	});
 
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
+	}, []);
+
 	// columns for tableHOC
 	const memoizedColumns = useMemo(
 		() => [
@@ -112,6 +140,7 @@ const LaborCICOExceptions = () => {
 			columnHelper.accessor('totalCost', {
 				id: 'totalCost',
 				header: 'Total Cost',
+				cell: ({ getValue }) => `$${getValue()}`,
 				dataType: 'number',
 				footer: ({ table }) => (
 					<div className='font-bold text-start'>
@@ -163,7 +192,7 @@ const LaborCICOExceptions = () => {
 						employeeName: data.employeeFullName,
 						jobDescription: data.jobDescription,
 						shiftName: data.shiftName,
-						reportType: data.reportType,
+						reportType: data.exceptionType,
 						exceptionDetail: data.exceptionDetail,
 						totalCost: Math.abs(data.totalAmount)?.toFixed(2),
 					}))
@@ -237,7 +266,11 @@ const LaborCICOExceptions = () => {
 						return (
 							<div
 								{...{
-									style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem`, width: '100%' },
+									style: {
+										cursor: 'pointer',
+										paddingLeft: `${row.depth * 2}rem`,
+										width: '100%',
+									},
 									className: 'flex items-center gap-2 font-bold absolute bg-white inset-0 capitalize',
 								}}
 							>
@@ -283,7 +316,7 @@ const LaborCICOExceptions = () => {
 						columnHeaders: columns.map((column) => column.header),
 						rows: laborCICOExceptionsData.map((row) =>
 							columns.map((column) => ({
-								value: row[column.id],
+								value: column.id === 'totalCost' ? '$' + row[column.id] : row[column.id],
 								cellType: column.dataType,
 								columnName: column.header,
 							}))
@@ -313,13 +346,19 @@ const LaborCICOExceptions = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: `Unit:${selectedUnitName}`,
-				columns: columns.map((column) => ({ name: column.header, filterButton: true })),
+				name: '',
+				columns: columns.map((column) => ({
+					name: column.header,
+					filterButton: true,
+				})),
 				data: laborCICOExceptionsData.map((row) => columns.map((column) => row[column.id])),
 			},
 		];
 
-		const filename = 'laborCICOExceptions';
+		const filename = `laborCICOExceptions_${selectedUnitName}_${dateFormat(
+			selectedFromDate,
+			'mm-dd-yyyy'
+		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 		const spreadSheetTitle = 'Labor Clock In - Clock Out Exceptions Report';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
@@ -363,6 +402,7 @@ const LaborCICOExceptions = () => {
 							fromDate={selectedFromDate}
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
+							extraClass={'w-[219px]'}
 						/>
 						<div className='w-36 group-by'>
 							<Dropdown

@@ -3,29 +3,7 @@ import { useEffect } from 'react';
 function useTableView(table, view, isTableRendered) {
 	useEffect(() => {
 		if (isTableRendered) {
-			// Use a timeout or check if the data is available
-			if (typeof view === 'number') {
-				expandParentRowsOnly(table, view);
-			}
-
-			switch (view) {
-				case 'Employees':
-				case 'Department':
-					expandParentRowsOnly(table, 1);
-					break;
-				case 'Sub Department':
-					expandParentRowsOnly(table, 2);
-					break;
-				case 'Employee Details':
-				case 'Inventory Item':
-					table.toggleAllRowsExpanded(true);
-					break;
-				case 'Units':
-					table.toggleAllRowsExpanded(false);
-					break;
-				default:
-					break;
-			}
+			expandParentRowsOnly(table, view);
 		}
 	}, [isTableRendered, view]);
 

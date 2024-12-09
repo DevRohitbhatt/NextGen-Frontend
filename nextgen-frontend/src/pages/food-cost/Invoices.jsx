@@ -60,10 +60,8 @@ const Invoices = () => {
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 	const [showPreviewModal, setShowPreviewModal] = useState(false);
 
@@ -158,6 +156,34 @@ const Invoices = () => {
 		}
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
+	}, []);
+
 	const fetchData = async (companyID) => {
 		await Promise.all([fetchVendors(companyID)]);
 	};
@@ -217,7 +243,7 @@ const Invoices = () => {
 	};
 
 	useEffect(() => {
-		if (selectedUnit) {
+		if (selectedUnit && selectedFromDate) {
 			fetchInvoiceReport();
 		}
 	}, [selectedUnit, selectedVendor, selectedFromDate, selectedToDate]);
@@ -352,7 +378,7 @@ const Invoices = () => {
 
 			const data = [
 				{
-					name: `Vendor:${selectedVendorName}`,
+					name: '',
 					columns: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
 					data: invoiceReportData.map((row) => columns.slice(1).map((column) => row[column.id])),
 				},
@@ -371,7 +397,7 @@ const Invoices = () => {
 
 			const data = [
 				{
-					name: `Search Results for '${searchKey}'`,
+					name: '',
 					columns: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
 					data: searchInvoiceData.map((row) => columns.slice(1).map((column) => row[column.id])),
 				},
@@ -446,6 +472,7 @@ const Invoices = () => {
 								fromDate={selectedFromDate}
 								isDateRange={true}
 								onClick={() => setShowDateModal(true)}
+								extraClass={'w-[219px]'}
 							/>
 						</div>
 					</div>

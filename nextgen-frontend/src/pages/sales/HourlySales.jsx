@@ -98,6 +98,34 @@ const HourlySales = () => {
 		}
 	}, [renderCount]);
 
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
+	}, []);
+
 	const fetchHourlySalesReport = async () => {
 		try {
 			setIsLoading(true);
@@ -198,39 +226,55 @@ const HourlySales = () => {
 
 			// Define readable hour labels
 			const hourLabels = Array.from({ length: 24 }, (_, i) =>
-				new Date(0, 0, 0, i).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+				new Date(0, 0, 0, i).toLocaleTimeString('en-US', {
+					hour: 'numeric',
+					hour12: true,
+				})
 			);
 
-			// Dynamically generate columns based on the received data
 			const generatedColumns = [
-				// Conditionally add Hour column only if reportType is not 'Hour and Day'
 				...(reportType === 'Hour and Day'
 					? [
 							columnHelper.accessor('Hour', {
 								id: 'Hour',
 								header: 'Hour',
+								pinDirection: 'left',
 								footer: 'Summary:',
-								size: 60,
+								size: 100,
 							}),
 					  ]
 					: [
 							columnHelper.accessor('UnitName', {
 								id: 'UnitName',
 								header: 'Unit Name',
+								cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
+								pinDirection: 'left',
+								size: 180,
 								footer: reportType === 'Unit, Hour and Day' ? null : 'Summary:',
 							}),
 					  ]),
 
-				// Conditionally add the Date and HoursSales column only if reportType is 'Unit, Hour and Day'
+				...(reportType === 'Hour and Day' && viewBy !== 'Hour'
+					? [
+							columnHelper.accessor('Mins', {
+								id: 'Mins',
+								header: 'Mins',
+								pinDirection: 'left',
+							}),
+					  ]
+					: []),
+
 				...(reportType === 'Unit, Hour and Day'
 					? [
 							columnHelper.accessor('Date', {
 								id: 'Date',
 								header: 'Date',
+								pinDirection: 'left',
 							}),
 							columnHelper.accessor('HoursSales', {
 								id: 'HoursSales',
 								header: 'Hours w/Sales',
+								pinDirection: 'left',
 							}),
 					  ]
 					: []),
@@ -238,35 +282,44 @@ const HourlySales = () => {
 				columnHelper.accessor('Total', {
 					id: 'Total',
 					header: 'Total',
-					size: 120,
+					pinDirection: 'left',
+					cell: ({ getValue }) => Number(getValue()).toLocaleString('en-US'),
+					size: 100,
 					footer: ({ table }) =>
 						reportType === 'Unit, Hour and Day' ? null : (
 							<div className='text-center'>
-								{`$ ${table
-									.getRowModel()
-									.rows.reduce((acc, row) => acc + row.original.Total, 0)
-									.toFixed(2)}`}
+								{`$ ${Number(
+									table
+										.getRowModel()
+										.rows.reduce((acc, row) => acc + row.original.Total, 0)
+										.toFixed(2)
+								).toLocaleString('en-US')}`}
 							</div>
 						),
 				}),
-				columnHelper.accessor('Avg', {
-					id: 'Avg',
-					header: 'Avg',
-					cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
-					size: 120,
-					footer: ({ table }) =>
-						reportType === 'Unit, Hour and Day' ? null : (
-							<div className='text-center'>
-								{`$ ${table
-									.getRowModel()
-									.rows.reduce((acc, row) => acc + row.original.Avg, 0)
-									.toFixed(2)}`}
-							</div>
-						),
-				}),
+				...(reportType === 'Hour and Day'
+					? [
+							columnHelper.accessor('Avg', {
+								id: 'Avg',
+								header: 'Avg',
+								pinDirection: 'left',
+								cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+								size: 100,
+								footer: ({ table }) => (
+									<div className='text-center'>
+										{`$ ${table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original.Avg, 0)
+											.toFixed(2)}`}
+									</div>
+								),
+							}),
+					  ]
+					: []),
 				...Object.keys(newData[0] || {})
 					.filter(
-						(key) => !['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour', 'Avg'].includes(key)
+						(key) =>
+							!['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour', 'Avg', 'Mins'].includes(key)
 					)
 					.filter((key) =>
 						reportType !== 'Hour and Day' ? key.startsWith('Hour') || key.startsWith('SalesYN') : !null
@@ -283,9 +336,14 @@ const HourlySales = () => {
 								: item,
 							dataType: 'number',
 							size: 120,
-							cell: ({ getValue }) => (getValue() === null ? 0 : getValue() === '00' ? 0 : getValue()),
+							cell: ({ getValue }) =>
+								getValue() === null
+									? 0
+									: getValue() === '00'
+									? 0
+									: Number(getValue()).toLocaleString('en-US'),
 							footer: ({ table }) =>
-								reportType !== 'Hour and Day' ? null : item === 'Mins' ? (
+								reportType !== 'Hour and Day' ? null : item === '' ? (
 									''
 								) : (
 									<div className='text-center'>
@@ -384,7 +442,9 @@ const HourlySales = () => {
 							columnChunk.map((column) => ({
 								value:
 									row[column.id] - Math.floor(row[column.id]) !== 0
-										? row[column.id].toFixed(2)
+										? typeof row[column.id] === 'number'
+											? row[column.id].toFixed(2)
+											: row[column.id]
 										: row[column.id] || '0 ',
 								cellType: '',
 								columnName: column.header,
@@ -410,14 +470,19 @@ const HourlySales = () => {
 				data: hourlySalesData.map((subRow) =>
 					columns.map((column) =>
 						subRow[column.id] - Math.floor(subRow[column.id]) !== 0
-							? subRow[column.id].toFixed(2)
+							? typeof subRow[column.id] === 'number'
+								? subRow[column.id].toFixed(2)
+								: subRow[column.id]
 							: subRow[column.id] || '0'
 					)
 				),
 			},
 		];
 
-		const filename = 'hourlySales';
+		const filename = `HourlySales_${selectedUnitName}_${dateFormat(selectedFromDate, 'mm-dd-yyyy')}_to_${dateFormat(
+			selectedToDate,
+			'mm-dd-yyyy'
+		)}`;
 		const spreadSheetTitle = 'Hourly Sales';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
@@ -467,7 +532,7 @@ const HourlySales = () => {
 						</div>
 					</div>
 					<div className='flex items-center space-x-2'>
-						<div className='w-40 salesType-selector'>
+						<div className='w-44 salesType-selector'>
 							<Dropdown
 								title='Sales Type'
 								options={salesTypeOptions}
@@ -485,7 +550,7 @@ const HourlySales = () => {
 								isEditable={isDOWEditable}
 							/>
 						</div>
-						<div className='w-36 viewType-selector'>
+						<div className='w-44 viewType-selector'>
 							<Dropdown
 								title='View By'
 								options={viewByOptions}

@@ -287,6 +287,12 @@ const EmployeeInformation = () => {
 		}
 	}, [defaultUnitID, defaultUnitName]);
 
+	useEffect(() => {
+		if (selectedUnit) {
+			fetchEmployeeInformation(companyID, alignmentID, selectedUnit);
+		}
+	}, [selectedUnit]);
+
 	// Fetching Employee Information
 	const fetchEmployeeInformation = async (companyId, alignmentId, selectedUnit) => {
 		try {
@@ -337,9 +343,6 @@ const EmployeeInformation = () => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setShowUnitModal(false);
-		setIsLoading(true);
-		await fetchEmployeeInformation(companyID, alignmentID, unitID);
-		setIsLoading(false);
 	};
 
 	// function	to handle the view change
@@ -458,13 +461,13 @@ const EmployeeInformation = () => {
 
 		const data = [
 			{
-				name: `Employee Information Report | ${view}`,
+				name: '',
 				columns: headers.map((header) => ({ name: header.label, filterButton: true })),
 				data: filteredEmployeeInformationData.data.map((row) => headers.map((header) => row[header.key])),
 			},
 		];
 
-		const filename = 'Employee Information Report';
+		const filename = `Employee_Information_${selectedUnitName}_${dateFormat(new Date(), 'mm-dd-yyyy')}`;
 		const spreadSheetTitle = 'Employee Information Report';
 		const date = dateFormat(new Date(), 'mm/dd/yyyy');
 

@@ -16,14 +16,20 @@ const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
+const Discounts = lazy(() => import('./sales/Discounts'));
 const HourlySales = lazy(() => import('./sales/HourlySales'));
 const BrumitDWP = lazy(() => import('./sales/BrumitDWP'));
+const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
+const SalesVsLabor = lazy(() => import('./sales/SalesVsLabor'));
+const BusinessSummary = lazy(() => import('./sales/BusinessSummary'));
+const MenuGrossProfit = lazy(() => import('./sales/MenuGrossProfit'));
 
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
 const LaborCICO = lazy(() => import('./labor/LaborCICO'));
 const LaborCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
+const LaborAnalysis = lazy(() => import('./labor/LaborAnalysis'));
 
 export {
 	PrepChart,
@@ -37,12 +43,18 @@ export {
 	LaborCICO,
 	LaborCICOExceptions,
 	Voids,
+	Discounts,
 	HourlySales,
 	BrumitDWP,
+	MenuItemsSold,
+	SalesVsLabor,
+	BusinessSummary,
+	MenuGrossProfit,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
+	LaborAnalysis,
 };

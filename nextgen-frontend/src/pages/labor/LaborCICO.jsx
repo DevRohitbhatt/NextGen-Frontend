@@ -26,9 +26,7 @@ const LaborCICO = () => {
 		companyID,
 		alignmentID,
 		unitsAndAreas: unitsAndAreasList,
-		groupOrUnitAccess,
 		defaultUnitID,
-		groupOrUnitAccessName,
 		defaultUnitName,
 	} = useSelector((state) => state.globalState);
 
@@ -48,15 +46,13 @@ const LaborCICO = () => {
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [groupBy, setGroupBy] = useState('Employee');
 	const groupOptions = [{ name: 'Employee' }, { name: 'Job Description' }];
-	const [viewby, setViewBy] = useState('Unit');
+	const [viewby, setViewBy] = useState('Employees');
 	const viewOptions = useMemo(() => {
 		if (groupBy === 'Job Description') {
 			return [
@@ -80,6 +76,34 @@ const LaborCICO = () => {
 		stepsEnabled: false,
 	});
 
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			setIsLoading(true);
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
+	}, []);
+
 	// columns for tableHOC
 	const columns = useMemo(() => {
 		const baseColumns = [
@@ -89,7 +113,10 @@ const LaborCICO = () => {
 					row.getCanExpand() ? (
 						<div
 							{...{
-								style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
+								style: {
+									cursor: 'pointer',
+									paddingLeft: `${row.depth * 2}rem`,
+								},
 								className: 'inline-block',
 							}}
 						>
@@ -216,13 +243,13 @@ const LaborCICO = () => {
 	};
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	const handleRunClick = () => {
 		fetchLaborCICOData(groupBy);
@@ -250,7 +277,10 @@ const LaborCICO = () => {
 				unitName: unit.unitName,
 				subRows: unit.employees.map((employee) => ({
 					...(groupByOption === 'Employee'
-						? { employeeID: employee.employeeID, name: `${employee.firstName} ${employee.lastName}` }
+						? {
+								employeeID: employee.employeeID,
+								name: `${employee.firstName} ${employee.lastName}`,
+						  }
 						: { jobDescription: employee.jobDesc }),
 
 					// Conditional subRows logic
@@ -265,20 +295,31 @@ const LaborCICO = () => {
 									timeOut: dateFormat(data.businessDateOut, 'hh:MM TT'),
 									invalid: data.invalid,
 							  }))
-							: [
-									{
-										employeeID: employee.employeeID,
-										name: `${employee.firstName} ${employee.lastName}`,
-										subRows: employee.employees.map((data) => ({
-											totalMinutes: data.minutesTotal,
-											totalHours: data.hoursTotal?.toFixed(2),
-											date: dateFormat(data.businessDateIn, 'mm-dd-yyyy'),
-											timeIn: dateFormat(data.businessDateIn, 'hh:MM TT'),
-											timeOut: dateFormat(data.businessDateOut, 'hh:MM TT'),
-											invalid: data.invalid,
-										})),
-									},
-							  ],
+							: employee.employees
+									.map((item) => ({
+										employeeID: item.employeeID,
+										name: `${item.firstName} ${item.lastName}`,
+										subRows: employee.employees
+											.filter(
+												(data) =>
+													`${item.firstName} ${item.lastName}` ===
+													`${data.firstName} ${data.lastName}`
+											)
+											.map((data) => ({
+												totalMinutes: data.minutesTotal,
+												totalHours: data.hoursTotal?.toFixed(2),
+												date: dateFormat(data.businessDateIn, 'mm-dd-yyyy'),
+												timeIn: dateFormat(data.businessDateIn, 'hh:MM TT'),
+												timeOut: dateFormat(data.businessDateOut, 'hh:MM TT'),
+												invalid: data.invalid,
+											})),
+									}))
+									.filter(
+										(data, index, self) =>
+											self.findIndex(
+												(t) => t.employeeID === data.employeeID && t.name === data.name
+											) === index
+									),
 				})),
 			}));
 
@@ -362,9 +403,21 @@ const LaborCICO = () => {
 				columnName: 'Employee ID',
 			},
 			{ value: name, cellType: 'string', columnName: 'Name' },
-			{ value: jobDescription, cellType: 'string', columnName: 'Job Description' },
-			{ value: subRow.totalMinutes, cellType: 'number', columnName: 'Total Minutes' },
-			{ value: subRow.totalHours, cellType: 'number', columnName: 'Total Hours' },
+			{
+				value: jobDescription,
+				cellType: 'string',
+				columnName: 'Job Description',
+			},
+			{
+				value: subRow.totalMinutes,
+				cellType: 'number',
+				columnName: 'Total Minutes',
+			},
+			{
+				value: subRow.totalHours,
+				cellType: 'number',
+				columnName: 'Total Hours',
+			},
 			{ value: subRow.date, cellType: 'date', columnName: 'Date' },
 			{ value: subRow.timeIn, cellType: 'string', columnName: 'Time In' },
 			{ value: subRow.timeOut, cellType: 'string', columnName: 'Time Out' },
@@ -459,7 +512,7 @@ const LaborCICO = () => {
 	const handleExcelClick = () => {
 		const data = [
 			{
-				name: 'Labor Clock In - Clock Out',
+				name: '',
 				columns: columns.slice(1).map((column) => ({ name: column.header, filter: column.dataType })),
 				data: laborCICOData.flatMap((unit) =>
 					unit.subRows.flatMap((employee) =>
@@ -496,7 +549,10 @@ const LaborCICO = () => {
 			},
 		];
 
-		const filename = 'laborCICO';
+		const filename = `laborCICO_${selectedUnitName}_${dateFormat(selectedFromDate, 'mm-dd-yyyy')}_to_${dateFormat(
+			selectedToDate,
+			'mm-dd-yyyy'
+		)}`;
 		const spreadSheetTitle = 'Labor Clock In - Clock Out';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
@@ -562,6 +618,7 @@ const LaborCICO = () => {
 							fromDate={selectedFromDate}
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
+							extraClass={'w-[219px]'}
 						/>
 						<div className='run-button' onClick={handleRunClick}>
 							<div className='py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
