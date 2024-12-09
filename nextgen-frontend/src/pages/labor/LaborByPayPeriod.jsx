@@ -190,11 +190,11 @@ const LaborByPayPeriod = () => {
 				cell: ({ row }) => calculateSum(row, 'declaredTipsPct'),
 				dataType: 'number',
 			}),
-			columnHelper.accessor('regPay', {
-				id: 'regPay',
+			columnHelper.accessor('pay', {
+				id: 'pay',
 				header: 'Total Pay',
 				size: 120,
-				cell: ({ row }) => `$${Number(calculateSum(row, 'regPay')).toLocaleString('en-US')}`,
+				cell: ({ row }) => `$${Number(calculateSum(row, 'pay')).toLocaleString('en-US')}`,
 				dataType: 'number',
 			}),
 		],
@@ -213,7 +213,6 @@ const LaborByPayPeriod = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -229,8 +228,7 @@ const LaborByPayPeriod = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -272,6 +270,7 @@ const LaborByPayPeriod = () => {
 						preTaxTicketSales: period.preTaxTicketSales,
 						declaredTipsPct: period.declaredTipsPct,
 						regPay: period.regPay,
+						pay: period.pay,
 					})),
 				})),
 			}));
@@ -434,7 +433,7 @@ const LaborByPayPeriod = () => {
 						columnName: 'Declared Tips %',
 					},
 					{
-						value: subRow.regPay || '0 ',
+						value: subRow.pay || '0 ',
 						cellType: 'number',
 						columnName: 'Regular Pay',
 					},
@@ -478,7 +477,7 @@ const LaborByPayPeriod = () => {
 						period.declaredTips,
 						period.preTaxTicketSales,
 						period.declaredTipsPct,
-						period.regPay,
+						period.pay,
 					].join(',')
 				)
 			)
@@ -530,7 +529,7 @@ const LaborByPayPeriod = () => {
 							declaredTips: period.declaredTips,
 							preTaxTicketSales: period.preTaxTicketSales,
 							declaredTipsPct: period.declaredTipsPct,
-							regPay: period.regPay,
+							regPay: period.pay,
 						}))
 					)
 				),
