@@ -215,19 +215,22 @@ const Discounts = () => {
 				}),
 				columnHelper.accessor('menuItem', {
 					id: 'menuItem',
-					header: 'Menu Item',
+					header: <div className='w-full text-left'>Menu Item</div>,
+					cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 					dataType: 'string',
 					size: 180,
 				}),
 				columnHelper.accessor('discountType', {
 					id: 'discountType',
-					header: 'Discount Type',
+					header: <div className='w-full text-left'>Discount Type</div>,
+					cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 					dataType: 'string',
 					size: 120,
 				}),
 				columnHelper.accessor('employee', {
 					id: 'employee',
-					header: 'Employee',
+					header: <div className='w-full text-left'>Employee</div>,
+					cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 					dataType: 'string',
 					size: 80,
 				})

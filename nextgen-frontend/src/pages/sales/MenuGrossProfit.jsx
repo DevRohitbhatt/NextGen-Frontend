@@ -679,7 +679,7 @@ const MenuGrossProfit = () => {
 						onClose={() => setIsCategoryModalOpen(false)}
 						title={'Select The Categories To Show On The Report'}
 					>
-						<div className='p-4 w-[] space-y-4 '>
+						<div className='p-4 w-[32rem] space-y-4 '>
 							<div className='flex justify-between'>
 								<button
 									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
