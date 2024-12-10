@@ -184,7 +184,7 @@ const LaborCICOExceptions = () => {
 
 			const newData = result.data.flatMap((unit) =>
 				unit.employees.flatMap((employee) =>
-					employee.employees.map((data) => ({
+					employee.cicoExceptions.map((data) => ({
 						unitName: unit.unitName,
 						businessDate: dateFormat(data.businessDate, 'mm-dd-yyyy'),
 						employeeName: data.employeeFullName,
