@@ -483,8 +483,6 @@ const VarianceFoodCost = () => {
 	};
 
 	const fetchCountsheets = async (isEnding = false) => {
-		const begCountsheetChannel = new BroadcastChannel('begCountsheet_channel');
-		const endCountsheetChannel = new BroadcastChannel('endCountsheet_channel');
 		try {
 			const getData = {
 				url: 'getCountsheets',
@@ -523,24 +521,10 @@ const VarianceFoodCost = () => {
 				return selectedCountsheet;
 			}, null);
 
-			const dataToSend = { companyID: companyID, countsheet: countsheet, timestamp: Date.now() };
-
-			if (isEnding) {
-				endCountsheetChannel.onmessage = (event) => {
-					if (event.data === 'ready') {
-						endCountsheetChannel.postMessage(dataToSend);
-					}
-				};
-			} else {
-				begCountsheetChannel.onmessage = (event) => {
-					if (event.data === 'ready') {
-						begCountsheetChannel.postMessage(dataToSend);
-					}
-				};
-			}
-
 			window.open(
-				`${window.location.origin}/CountsheetDesigner?type=${isEnding ? 'endCountsheet' : 'begCountsheet'}`,
+				`${window.location.origin}/CountsheetDesigner?companyID=${companyID}&countsheet=${encodeURIComponent(
+					JSON.stringify(countsheet)
+				)}`,
 				'_blank'
 			);
 		} catch (error) {
@@ -549,7 +533,6 @@ const VarianceFoodCost = () => {
 	};
 
 	const handleViewPurchase = async (fromDate, toDate) => {
-		const purchaseChannel = new BroadcastChannel('purchase_channel');
 		const dataToSend = {
 			companyId: companyID,
 			alignmentID: alignmentID,
@@ -558,17 +541,15 @@ const VarianceFoodCost = () => {
 			fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
 			toDate: dateFormat(toDate, 'yyyy-mm-dd'),
 			vendorId: 0,
-			unitsAndAreasList: unitsAndAreasList,
 			timestamp: Date.now(),
 		};
 
-		purchaseChannel.onmessage = (event) => {
-			if (event.data === 'ready') {
-				purchaseChannel.postMessage(dataToSend);
-			}
-		};
-
-		window.open(`${window.location.origin}/PurchaseAnalysis?pageKey=1`, '_blank');
+		window.open(
+			`${window.location.origin}/PurchaseAnalysis?companyID=${companyID}&countsheet=${encodeURIComponent(
+				JSON.stringify(dataToSend)
+			)}`,
+			'_blank'
+		);
 	};
 
 	const handleShowHideDepartments = () => {

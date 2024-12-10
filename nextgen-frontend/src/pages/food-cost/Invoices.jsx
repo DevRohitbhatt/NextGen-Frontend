@@ -223,14 +223,8 @@ const Invoices = () => {
 			};
 
 			const result = await getCall(getData);
-			const newData = {
-				...result,
-				data: result.data.map((row) => ({
-					...row,
-					subrows: row.voids,
-				})),
-			};
-			setInvoiceReportData(newData.data);
+
+			setInvoiceReportData(result.data);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
