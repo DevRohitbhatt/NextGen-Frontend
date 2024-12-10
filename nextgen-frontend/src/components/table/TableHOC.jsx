@@ -34,7 +34,7 @@ const getCommonPinningStyles = (column, row) => {
 				: undefined,
 		left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
 		right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
-		position: isPinned ? 'sticky' : 'relative',
+		position: isPinned ? 'sticky' : '',
 		width: column.getSize(),
 		zIndex: isPinned ? 1 : 0,
 		backgroundColor: 'white',
@@ -336,7 +336,7 @@ function TableHOC({
 
 					{/* footer */}
 					{isFooter && (
-						<tfoot className='sticky z-[2] bg-white -bottom-1 shadow-[0_1px_0_var(--tw-primary)_inset]'>
+						<tfoot className='sticky z-[2] bg-white h-fit -bottom-1 shadow-[0_1px_0_var(--tw-primary)_inset]'>
 							{table.getFooterGroups().map((footerGroup) => (
 								<>
 									<tr className='' key={footerGroup.id}>
