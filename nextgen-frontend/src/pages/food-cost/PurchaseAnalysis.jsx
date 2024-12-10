@@ -290,7 +290,7 @@ const PurchaseAnalysis = () => {
 	};
 
 	useEffect(() => {
-		if (!key) {
+		if (!window.location.search) {
 			getDefaultDates();
 		}
 	}, []);

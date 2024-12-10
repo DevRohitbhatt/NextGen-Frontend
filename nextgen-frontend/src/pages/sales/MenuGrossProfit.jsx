@@ -26,9 +26,7 @@ const MenuGrossProfit = () => {
 		companyID,
 		alignmentID,
 		unitsAndAreas: unitsAndAreasList,
-		groupOrUnitAccess,
 		defaultUnitID,
-		groupOrUnitAccessName,
 		defaultUnitName,
 	} = useSelector((state) => state.globalState);
 
@@ -82,30 +80,31 @@ const MenuGrossProfit = () => {
 			id: 'itemID',
 			header: 'Item ID',
 			dataType: 'string',
-			footer: 'Grand Total:',
+			footer: ({ table }) => {
+				return (
+					<div className='h-10'>
+						<div
+							style={{ cursor: 'pointer', width: '100%' }}
+							className='absolute inset-0 flex items-center justify-between gap-6 leading-5 capitalize shadow-[0_1px_0_var(--tw-primary)_inset] bg-white '
+						>
+							<div>Grand Total:</div>
+							<div>Total Gross Sales: ${table.getCoreRowModel().rows[0].original.totalGrossSales}</div>
+							<div>Gross Food Cost: ${table.getCoreRowModel().rows[0].original.grossFoodCost}</div>
+							<div>Gross Profit: ${table.getCoreRowModel().rows[0].original.grossProfitFooter}</div>
+							<div>Total Net Sales: ${table.getCoreRowModel().rows[0].original.totalNetSales}</div>
+							<div>Net Food Cost: ${table.getCoreRowModel().rows[0].original.netFoodCost}</div>
+							<div>Net Profit: ${table.getCoreRowModel().rows[0].original.netProfit}</div>
+						</div>
+					</div>
+				);
+			},
 		}),
 		columnHelper.accessor('itemName', {
 			id: 'itemName',
 			header: () => <div className='w-full text-left'>Item Name</div>,
 			cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 			dataType: 'string',
-			footer: ({ table }) => {
-				return (
-					<div
-						style={{ cursor: 'pointer', width: '100%' }}
-						className='absolute inset-0 flex items-center justify-between gap-6 leading-5 capitalize shadow-[0_1px_0_var(--tw-primary)_inset] bg-white'
-					>
-						<div>Grand Total:</div>
-						<div>Total Gross Sales: ${table.getCoreRowModel().rows[0].original.totalGrossSales}</div>
-						<div>Gross Food Cost: ${table.getCoreRowModel().rows[0].original.grossFoodCost}</div>
-						<div>Gross Profit: ${table.getCoreRowModel().rows[0].original.grossProfitFooter}</div>
-						<div>Total Net Sales: ${table.getCoreRowModel().rows[0].original.totalNetSales}</div>
-						<div>Net Food Cost: ${table.getCoreRowModel().rows[0].original.netFoodCost}</div>
-						<div>Net Profit: ${table.getCoreRowModel().rows[0].original.netProfit}</div>
-					</div>
-				);
-			},
-			size: 300,
+			size: 150,
 		}),
 		columnHelper.accessor('itemPrice', {
 			id: 'itemPrice',
@@ -230,13 +229,13 @@ const MenuGrossProfit = () => {
 	];
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	useEffect(() => {
 		handleGroupByCategory();
@@ -415,12 +414,15 @@ const MenuGrossProfit = () => {
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
 		const pdfData = {
-			title: 'Menu Gross Profit Report',
+			title: 'Menu Gross Profit',
 			subHeaders: [
-				`Unit:${selectedUnitName} | Date Range: ${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
-					selectedToDate,
+				`Generated on ${dateFormat(
+					new Date(),
+					'mm/dd/yyyy'
+				)}  |  Unit:${selectedUnitName}  |  Date Range: ${dateFormat(
+					selectedFromDate,
 					'mm-dd-yyyy'
-				)}`,
+				)} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
 			],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
@@ -530,10 +532,16 @@ const MenuGrossProfit = () => {
 			selectedFromDate,
 			'mm-dd-yyyy'
 		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
-		const spreadSheetTitle = 'Menu Gross Profit Report';
+		const spreadSheetTitle = `Menu Gross Profit`;
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
-		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
+		exportToExcel(
+			data,
+			filename,
+			spreadSheetTitle,
+			date,
+			`${selectedUnitName}  |  Generated on ${dateFormat(new Date(), 'mm/dd/yyyy')}`
+		);
 	};
 
 	const Table = (

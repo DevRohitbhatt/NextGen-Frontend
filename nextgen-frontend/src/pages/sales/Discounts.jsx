@@ -1070,6 +1070,7 @@ const Discounts = () => {
 								options={isDiscountTypesLoading ? [{ name: 'Loading...' }] : discountTypeOptions}
 								selectedOption={isDiscountTypesLoading ? 'Loading...' : discountType}
 								onOptionChange={handleReportTypeChange}
+								isSearch={true}
 							/>
 						</div>
 						<div className='w-44 group-by'>
