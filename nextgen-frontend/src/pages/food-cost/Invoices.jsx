@@ -113,6 +113,7 @@ const Invoices = () => {
 					<div
 						className='flex space-x-2 text-lg'
 						onClick={(e) => {
+							console.log(row);
 							e.stopPropagation(),
 								e.preventDefault(),
 								handleInvoicesDetailsModal(row.original.qsrInvoiceID);
@@ -631,7 +632,7 @@ const Invoices = () => {
 								<tbody>
 									{/* Repeat this row for each item */}
 									{invoiceItemDetails.map((item) => (
-										<tr className='even:bg-gray-50'>
+										<tr className='even:bg-gray-50' key={item.vendorItemReference}>
 											<td className='p-2 text-center border border-gray-300'>
 												{item.vendorItemReference}
 											</td>
@@ -648,33 +649,10 @@ const Invoices = () => {
 												${item.taxAmount.toFixed(2)}
 											</td>
 											<td className='p-2 text-center border border-gray-300'>
-												${item.price + item.taxAmount.toFixed(2)}
+												${((item.price * item.quantity) + item.taxAmount).toFixed(2)}
 											</td>
 										</tr>
 									))}
-									{/* <tr className="even:bg-gray-50">
-                  <td className="p-2 text-center border border-gray-300">
-                    5447738
-                  </td>
-                  <td className="p-2 border border-gray-300">
-                    SYRUP COKE ZERO SUGAR 2.5 GAL
-                  </td>
-                  <td className="p-2 text-center border border-gray-300">CA</td>
-                  <td className="p-2 text-center border border-gray-300">
-                    1 / 2.5GAL
-                  </td>
-                  <td className="p-2 text-center border border-gray-300">1</td>
-                  <td className="p-2 text-center border border-gray-300">
-                    $54.95
-                  </td>
-                  <td className="p-2 text-center border border-gray-300">
-                    $0.00
-                  </td>
-                  <td className="p-2 text-center border border-gray-300">
-                    $54.95
-                  </td>
-                </tr> */}
-									{/* End of item row */}
 								</tbody>
 							</table>
 						</div>
