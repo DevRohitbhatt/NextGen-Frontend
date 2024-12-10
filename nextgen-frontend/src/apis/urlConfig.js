@@ -14,6 +14,9 @@ const urlConfig = {
   saveSuggestedOrder: "/api/suggestedorder/savesuggestedorder",
   submitSuggestedOrder: "/api/suggestedorder/submitsuggestedorderheader",
 
+  //invoices details
+  getInvoiceDetailsData: "/api/foodcost/getInvoiceDetailsData",
+  getVendorInvoiceItems : "/api/foodcost/getVendorInvoiceItems",
   //inventory items apis
   getInventoryItemsOrderLimits:
     "/api/inventoryitems/getinventoryitemsorderlimits",
@@ -56,18 +59,18 @@ const urlConfig = {
   MenuItemSoldModifiersData: "api/sales/getMenuItemSoldModifiersData",
   salesVsLabor: "api/sales/SalesVsLaborReport",
   businessSummary: "api/sales/GetBusinessSummaryReportData",
-	discounts: 'api/sales/GetDiscountReportData',
-	discountTypes: 'api/sales/GetDiscountTypesReportData',
-	menuGrossProfit: 'api/sales/getMenuGrossProfitReport',
-	menuGrossProfitRecipeInfo: 'api/sales/GetMenuGrossProfitRecipePopupReport',
+  discounts: "api/sales/GetDiscountReportData",
+  discountTypes: "api/sales/GetDiscountTypesReportData",
+  menuGrossProfit: "api/sales/getMenuGrossProfitReport",
+  menuGrossProfitRecipeInfo: "api/sales/GetMenuGrossProfitRecipePopupReport",
 
   //labor apis
   employeeInformation: "api/labor/getEmployeeInformation",
   laborByPayPeriod: "api/labor/getLaborByPayPeriodReportData",
   laborCICOExceptions: "api/labor/getLaborCICOExceptionReportData",
   laborCICO: "api/labor/getLaborCICOReportData",
-	laborAnalysis: 'api/labor/getLaborAnalysisData',
-	getJobDetails: 'api/labor/getJobDetails',
+  laborAnalysis: "api/labor/getLaborAnalysisData",
+  getJobDetails: "api/labor/getJobDetails",
 
   //Menu item
   MenuItemsByCompanyID: "api/menus/getMenuItemsByCompanyID",

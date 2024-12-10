@@ -53,23 +53,16 @@ const CountsheetDesigner = () => {
 
 	useEffect(() => {
 		const searchParams = new URLSearchParams(location.search);
-		const type = searchParams.get('type');
-		const channel = new BroadcastChannel(`${type}_channel`);
+		const companyID = searchParams.get('companyID');
+		const countsheetData = searchParams.get('countsheet');
 
-		channel.postMessage('ready');
-
-		channel.onmessage = (event) => {
-			if (event.data !== 'ready') {
-				setReceivedData(event.data);
-				setCountsheet(event.data?.countsheet);
-				setSelectedFromDate(new Date(event.data?.countsheet?.dateTime));
-			}
-		};
-
-		return () => {
-			channel.close();
-		};
-	}, []);
+		if (countsheetData) {
+			const parsedData = JSON.parse(countsheetData);
+			setReceivedData({ companyID, countsheet: parsedData });
+			setCountsheet(parsedData);
+			setSelectedFromDate(new Date(parsedData.dateTime));
+		}
+	}, [location.search]);
 
 	useEffect(() => {
 		if (receivedData) {

@@ -154,6 +154,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('actualNumber', {
 			id: 'actualNumber',
 			header: 'Actual #',
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -161,23 +162,20 @@ const VarianceFoodCost = () => {
 			id: 'actualDollar',
 			header: 'Actual $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'actualDollar', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'actualDollar', getValue),
 			size: 90,
 		}),
 		columnHelper.accessor('actualPct', {
 			id: 'actualPct',
 			header: 'Actual %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `${calculateSum(row, 'actualPct', getValue, false)}%`,
+			cell: ({ row, getValue }) => calculateSum(row, 'actualPct', getValue, true),
 			size: 90,
 		}),
 		columnHelper.accessor('idealNumber', {
 			id: 'idealNumber',
 			header: 'Ideal #',
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -185,23 +183,20 @@ const VarianceFoodCost = () => {
 			id: 'idealDollar',
 			header: 'Ideal $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'idealDollar', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'idealDollar', getValue),
 			size: 90,
 		}),
 		columnHelper.accessor('idealPct', {
 			id: 'idealPct',
 			header: 'Ideal %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `${calculateSum(row, 'idealPct', getValue, false)}%`,
+			cell: ({ row, getValue }) => calculateSum(row, 'idealPct', getValue, true),
 			size: 90,
 		}),
 		columnHelper.accessor('varianceNumber', {
 			id: 'varianceNumber',
 			header: 'Variance #',
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 100,
 		}),
@@ -209,23 +204,20 @@ const VarianceFoodCost = () => {
 			id: 'varianceDollar',
 			header: 'Variance $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'varianceDollar', getValue);
-				return value < 0 ? `-$${Math.abs(value)}` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'varianceDollar', getValue),
 			size: 100,
 		}),
 		columnHelper.accessor('variancePct', {
 			id: 'variancePct',
 			header: 'Variance %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `${calculateSum(row, 'variancePct', getValue, false)}%`,
+			cell: ({ row, getValue }) => calculateSum(row, 'variancePct', getValue, true),
 			size: 100,
 		}),
 		columnHelper.accessor('wasteNumber', {
 			id: 'wasteNumber',
 			header: 'Waste #',
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -233,17 +225,14 @@ const VarianceFoodCost = () => {
 			id: 'wasteDollar',
 			header: 'Waste $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'wasteDollar', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'wasteDollar', getValue),
 			size: 90,
 		}),
 		columnHelper.accessor('wastePct', {
 			id: 'wastePct',
 			header: 'Waste %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `${calculateSum(row, 'wastePct', getValue, false)}%`,
+			cell: ({ row, getValue }) => calculateSum(row, 'wastePct', getValue, true),
 			size: 90,
 		}),
 		columnHelper.accessor('comparisonName', {
@@ -281,7 +270,7 @@ const VarianceFoodCost = () => {
 											(subsubAcc, subsubsubrow) =>
 												subsubAcc +
 												(item.includeInGrandTotal && subsubsubrow.original[field]
-													? Number(subsubsubrow.original[field]) * (isPercentage ? 100 : 1)
+													? Number(subsubsubrow.original[field])
 													: 0),
 											0
 										)
@@ -293,23 +282,47 @@ const VarianceFoodCost = () => {
 									return (
 										subAcc +
 										(item.includeInGrandTotal && subSubrow.original[field]
-											? Number(subSubrow.original[field]) * (isPercentage ? 100 : 1)
+											? Number(subSubrow.original[field])
 											: 0)
 									);
 								}
 							}, 0)
 						);
 					} else {
-						return (
-							acc +
-							(subrow.original[field] ? Number(subrow.original[field]) * (isPercentage ? 100 : 1) : 0)
-						);
+						return acc + (subrow.original[field] ? Number(subrow.original[field]) : 0);
 					}
 				}, 0)
 				.toFixed(2);
-			return parseFloat(sum).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+			if (isPercentage) {
+				return `${parseFloat(sum).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return sum < 0
+				? `-$${Math.abs(parseFloat(sum)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(sum).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 		} else {
-			return getValue()?.toFixed(2);
+			const value = getValue();
+			if (!value) return isPercentage ? '0.00%' : '$0.00';
+			if (isPercentage) {
+				return `${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return value < 0
+				? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(value).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`;
 		}
 	};
 
@@ -470,8 +483,6 @@ const VarianceFoodCost = () => {
 	};
 
 	const fetchCountsheets = async (isEnding = false) => {
-		const begCountsheetChannel = new BroadcastChannel('begCountsheet_channel');
-		const endCountsheetChannel = new BroadcastChannel('endCountsheet_channel');
 		try {
 			const getData = {
 				url: 'getCountsheets',
@@ -510,24 +521,10 @@ const VarianceFoodCost = () => {
 				return selectedCountsheet;
 			}, null);
 
-			const dataToSend = { companyID: companyID, countsheet: countsheet, timestamp: Date.now() };
-
-			if (isEnding) {
-				endCountsheetChannel.onmessage = (event) => {
-					if (event.data === 'ready') {
-						endCountsheetChannel.postMessage(dataToSend);
-					}
-				};
-			} else {
-				begCountsheetChannel.onmessage = (event) => {
-					if (event.data === 'ready') {
-						begCountsheetChannel.postMessage(dataToSend);
-					}
-				};
-			}
-
 			window.open(
-				`${window.location.origin}/CountsheetDesigner?type=${isEnding ? 'endCountsheet' : 'begCountsheet'}`,
+				`${window.location.origin}/CountsheetDesigner?companyID=${companyID}&countsheet=${encodeURIComponent(
+					JSON.stringify(countsheet)
+				)}`,
 				'_blank'
 			);
 		} catch (error) {
@@ -536,7 +533,6 @@ const VarianceFoodCost = () => {
 	};
 
 	const handleViewPurchase = async (fromDate, toDate) => {
-		const purchaseChannel = new BroadcastChannel('purchase_channel');
 		const dataToSend = {
 			companyId: companyID,
 			alignmentID: alignmentID,
@@ -545,17 +541,15 @@ const VarianceFoodCost = () => {
 			fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
 			toDate: dateFormat(toDate, 'yyyy-mm-dd'),
 			vendorId: 0,
-			unitsAndAreasList: unitsAndAreasList,
 			timestamp: Date.now(),
 		};
 
-		purchaseChannel.onmessage = (event) => {
-			if (event.data === 'ready') {
-				purchaseChannel.postMessage(dataToSend);
-			}
-		};
-
-		window.open(`${window.location.origin}/PurchaseAnalysis?pageKey=1`, '_blank');
+		window.open(
+			`${window.location.origin}/PurchaseAnalysis?companyID=${companyID}&countsheet=${encodeURIComponent(
+				JSON.stringify(dataToSend)
+			)}`,
+			'_blank'
+		);
 	};
 
 	const handleShowHideDepartments = () => {
@@ -850,6 +844,8 @@ const VarianceFoodCost = () => {
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 			setTableState={setTableState}
+			headerPosition='left'
+			dataPosition='text-left'
 		/>
 	);
 

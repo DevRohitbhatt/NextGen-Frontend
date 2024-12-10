@@ -109,8 +109,9 @@ const LaborByPayPeriod = () => {
 			}),
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
-				header: 'Unit Name',
+				header: <div className='w-full text-left'>Unit Name</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 				size: 300,
 			}),
 			columnHelper.accessor('employeeId', {
@@ -121,7 +122,8 @@ const LaborByPayPeriod = () => {
 			}),
 			columnHelper.accessor((row) => (row.firstName && row.lastName ? `${row.firstName} ${row.lastName}` : ''), {
 				id: 'fullName',
-				header: 'Full Name',
+				header: <div className='w-full text-left'>Full Name</div>,
+				cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 				dataType: 'string',
 			}),
 			columnHelper.accessor('date', {

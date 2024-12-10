@@ -70,7 +70,7 @@ const addTable = (worksheet, table, index, lastColumn, lastRow) => {
 	const tableData = table.data.map((row) => (table.colored ? row.map((cell) => cell.value) : Object.values(row)));
 	const tableRef = `${String.fromCharCode(64 + startColumn)}${startRow + headerRowOffset}`;
 	worksheet.addTable({
-		name: table.name || `Table${index + 1}`,
+		name: table.name ? table.name.replace(/[^a-zA-Z0-9]/g, '') : `Table${index + 1}`,
 		ref: tableRef,
 		headerRow: true,
 		totalsRow: false,

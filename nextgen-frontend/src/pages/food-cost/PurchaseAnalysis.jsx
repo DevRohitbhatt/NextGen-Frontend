@@ -238,25 +238,23 @@ const PurchaseAnalysis = () => {
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
 
 	useEffect(() => {
-		if (!isLocationReportRendered && key == 1) {
-			const channel = new BroadcastChannel('purchase_channel');
+		if (!isLocationReportRendered) {
+			const searchParams = new URLSearchParams(window.location.search);
+			const countsheetParam = searchParams.get('countsheet');
 
-			channel.postMessage('ready');
-
-			channel.onmessage = (event) => {
-				if (event.data !== 'ready') {
-					setReceivedData(event.data);
-					setSelectedUnit(event.data?.selectedUnit);
-					setSelectedUnitName(event.data?.selectedUnitName);
-					setSelectedVendor(event.data?.vendorId);
-					setSelectedFromDate(new Date(event.data?.fromDate));
-					setSelectedToDate(new Date(event.data?.toDate));
+			if (countsheetParam) {
+				try {
+					const decodedData = JSON.parse(decodeURIComponent(countsheetParam));
+					setReceivedData(decodedData);
+					setSelectedUnit(decodedData.selectedUnit);
+					setSelectedUnitName(decodedData.selectedUnitName);
+					setSelectedVendor(decodedData.vendorId);
+					setSelectedFromDate(new Date(decodedData.fromDate));
+					setSelectedToDate(new Date(decodedData.toDate));
+				} catch (error) {
+					console.error('Error parsing countsheet data:', error);
 				}
-			};
-
-			return () => {
-				channel.close();
-			};
+			}
 		} else if (hasUnitChanged && isLocationReportRendered) {
 			handleGroupByChange(selectedGroupBy, true);
 			setHasUnitchanged(false);
@@ -292,7 +290,7 @@ const PurchaseAnalysis = () => {
 	};
 
 	useEffect(() => {
-		if (!key) {
+		if (!window.location.search) {
 			getDefaultDates();
 		}
 	}, []);

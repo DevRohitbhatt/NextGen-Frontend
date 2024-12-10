@@ -165,10 +165,7 @@ const ActualFoodCost = () => {
 			id: 'begCountCost',
 			header: 'Beg $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'begCountCost', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'begCountCost', getValue),
 			size: 90,
 		}),
 		columnHelper.accessor('purchaseDisplayUnits', {
@@ -183,17 +180,14 @@ const ActualFoodCost = () => {
 			id: 'purchaseCost',
 			header: 'Pur $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'purchaseCost', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'purchaseCost', getValue),
 			size: 60,
 		}),
 		columnHelper.accessor('iTinCountDisplayUnits', {
 			id: 'iTinCountDisplayUnits',
 			header: 'Trans In #',
 			showDepth: 3,
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 60,
 		}),
@@ -201,17 +195,14 @@ const ActualFoodCost = () => {
 			id: 'iTinCountCost',
 			header: 'Trans In $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'iTinCountCost', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'iTinCountCost', getValue),
 			size: 60,
 		}),
 		columnHelper.accessor('iToutCountDisplayUnits', {
 			id: 'iToutCountDisplayUnits',
 			header: 'Trans Out #',
 			showDepth: 3,
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 80,
 		}),
@@ -219,17 +210,14 @@ const ActualFoodCost = () => {
 			id: 'iToutCountCost',
 			header: 'Trans Out $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'iToutCountCost', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'iToutCountCost', getValue),
 			size: 80,
 		}),
 		columnHelper.accessor('endCountDisplayUnits', {
 			id: 'endCountDisplayUnits',
 			header: 'End #',
 			showDepth: 3,
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 60,
 		}),
@@ -237,17 +225,14 @@ const ActualFoodCost = () => {
 			id: 'endCountCost',
 			header: 'End $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'endCountCost', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'endCountCost', getValue),
 			size: 60,
 		}),
 		columnHelper.accessor('usageCountDisplayUnits', {
 			id: 'usageCountDisplayUnits',
 			header: 'Actual Usage #',
 			showDepth: 3,
-			cell: ({ row, getValue }) => (row.getCanExpand() ? getValue() : getValue()?.toFixed(2)),
+			cell: ({ getValue }) => getValue()?.toFixed(2),
 			dataType: 'number',
 			size: 80,
 		}),
@@ -255,17 +240,14 @@ const ActualFoodCost = () => {
 			id: 'usageCost',
 			header: 'Actual Usage $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'usageCost', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'usageCost', getValue),
 			size: 80,
 		}),
 		columnHelper.accessor('usageCostPct', {
 			id: 'usageCostPct',
 			header: 'Actual Usage %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `${calculateSum(row, 'usageCostPct', getValue, false)}%`,
+			cell: ({ row, getValue }) => calculateSum(row, 'usageCostPct', getValue, true),
 			size: 90,
 		}),
 		columnHelper.accessor('wasteCountDisplayUnits', {
@@ -280,17 +262,14 @@ const ActualFoodCost = () => {
 			id: 'wasteCountCost',
 			header: 'Waste $',
 			dataType: 'number',
-			cell: ({ row, getValue }) => {
-				const value = calculateSum(row, 'wasteCountCost', getValue);
-				return value < 0 ? `-($${Math.abs(value)})` : `$${value}`;
-			},
+			cell: ({ row, getValue }) => calculateSum(row, 'wasteCountCost', getValue),
 			size: 80,
 		}),
 		columnHelper.accessor('wasteCostPct', {
 			id: 'wasteCostPct',
 			header: 'Waste %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => `${calculateSum(row, 'wasteCostPct', getValue, false)}%`,
+			cell: ({ row, getValue }) => calculateSum(row, 'wasteCostPct', getValue, true),
 			size: 90,
 		}),
 		columnHelper.accessor('comparisonName', {
@@ -328,7 +307,7 @@ const ActualFoodCost = () => {
 											(subsubAcc, subsubsubrow) =>
 												subsubAcc +
 												(item.includeInGrandTotal && subsubsubrow.original[field]
-													? Number(subsubsubrow.original[field]) * (isPercentage ? 100 : 1)
+													? Number(subsubsubrow.original[field])
 													: 0),
 											0
 										)
@@ -341,23 +320,47 @@ const ActualFoodCost = () => {
 									return (
 										subAcc +
 										(item?.includeInGrandTotal && subSubrow.original[field]
-											? Number(subSubrow.original[field]) * (isPercentage ? 100 : 1)
+											? Number(subSubrow.original[field])
 											: 0)
 									);
 								}
 							}, 0)
 						);
 					} else {
-						return (
-							acc +
-							(subrow.original[field] ? Number(subrow.original[field]) * (isPercentage ? 100 : 1) : 0)
-						);
+						return acc + (subrow.original[field] ? Number(subrow.original[field]) : 0);
 					}
 				}, 0)
 				.toFixed(2);
-			return parseFloat(sum).toFixed(2).toLocaleString('en-US');
+			if (isPercentage) {
+				return `${parseFloat(sum).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return sum < 0
+				? `-$${Math.abs(parseFloat(sum)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(sum).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 		} else {
-			return getValue()?.toFixed(2);
+			const value = getValue();
+			if (!value) return isPercentage ? '0.00%' : '$0.00';
+			if (isPercentage) {
+				return `${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return value < 0
+				? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(value).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`;
 		}
 	};
 
@@ -782,12 +785,12 @@ const ActualFoodCost = () => {
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 			setTableState={setTableState}
+			headerPosition='left'
+			dataPosition='text-left'
 		/>
 	);
 
 	const handleCountsheet = async (fromDate, toDate, isEnding = false) => {
-		const begCountsheetChannel = new BroadcastChannel('begCountsheet_channel');
-		const endCountsheetChannel = new BroadcastChannel('endCountsheet_channel');
 		try {
 			const getData = {
 				url: 'getCountsheets',
@@ -826,24 +829,10 @@ const ActualFoodCost = () => {
 				return selectedCountsheet;
 			}, null);
 
-			const dataToSend = { companyID: companyID, countsheet: countsheet, timestamp: Date.now() };
-
-			if (isEnding) {
-				endCountsheetChannel.onmessage = (event) => {
-					if (event.data === 'ready') {
-						endCountsheetChannel.postMessage(dataToSend);
-					}
-				};
-			} else {
-				begCountsheetChannel.onmessage = (event) => {
-					if (event.data === 'ready') {
-						begCountsheetChannel.postMessage(dataToSend);
-					}
-				};
-			}
-
 			window.open(
-				`${window.location.origin}/CountsheetDesigner?type=${isEnding ? 'endCountsheet' : 'begCountsheet'}`,
+				`${window.location.origin}/CountsheetDesigner?companyID=${companyID}&countsheet=${encodeURIComponent(
+					JSON.stringify(countsheet)
+				)}`,
 				'_blank'
 			);
 		} catch (error) {
@@ -852,7 +841,6 @@ const ActualFoodCost = () => {
 	};
 
 	const handleViewPurchase = async (fromDate, toDate) => {
-		const purchaseChannel = new BroadcastChannel('purchase_channel');
 		const dataToSend = {
 			companyId: companyID,
 			alignmentID: alignmentID,
@@ -861,17 +849,15 @@ const ActualFoodCost = () => {
 			fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
 			toDate: dateFormat(toDate, 'yyyy-mm-dd'),
 			vendorId: 0,
-			unitsAndAreasList: unitsAndAreas,
 			timestamp: Date.now(),
 		};
 
-		purchaseChannel.onmessage = (event) => {
-			if (event.data === 'ready') {
-				purchaseChannel.postMessage(dataToSend);
-			}
-		};
-
-		window.open(`${window.location.origin}/PurchaseAnalysis?pageKey=1`, '_blank');
+		window.open(
+			`${window.location.origin}/PurchaseAnalysis?companyID=${companyID}&countsheet=${encodeURIComponent(
+				JSON.stringify(dataToSend)
+			)}`,
+			'_blank'
+		);
 	};
 
 	return (
