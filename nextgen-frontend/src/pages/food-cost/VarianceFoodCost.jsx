@@ -844,6 +844,8 @@ const VarianceFoodCost = () => {
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 			setTableState={setTableState}
+			headerPosition='left'
+			dataPosition='text-left'
 		/>
 	);
 
