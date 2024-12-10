@@ -33,7 +33,7 @@ const Discounts = () => {
 	} = useSelector((state) => state.globalState);
 
 	const [discountsData, setDiscountsData] = useState([]);
-	const [discountTypes, setDiscountTypes] = useState([]);
+	const [discountTypesData, setDiscountTypesData] = useState([]);
 	const [columns, setColumns] = useState([]);
 	const [summaryColumns, setSummaryColumns] = useState([]);
 	const [isDiscountTypesLoading, setIsDiscountTypesLoading] = useState(false);
@@ -64,8 +64,9 @@ const Discounts = () => {
 		{ name: 'Detail' },
 	];
 	const [discountType, setDiscountType] = useState('All-All Discounts');
-	const discountTypeOptions = discountTypes?.map((type) => ({
+	const discountTypeOptions = discountTypesData?.map((type) => ({
 		name: `${type.type} - ${type.name}`,
+		type: type.type,
 	}));
 	discountTypeOptions.unshift(
 		{ name: 'All-All Discounts' },
@@ -89,6 +90,7 @@ const Discounts = () => {
 			columnHelper.accessor('discountType', {
 				id: 'discountType',
 				header: 'Discount Type',
+				cell: ({ getValue }) => getValue(),
 				dataType: 'string',
 				size: 250,
 			}),
@@ -349,10 +351,8 @@ const Discounts = () => {
 	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
 	useEffect(() => {
-		if (selectedUnit) {
-			fetchDiscountTypes();
-		}
-	}, [selectedUnit]);
+		fetchDiscountTypes();
+	}, []);
 
 	const fetchDiscountTypes = async () => {
 		try {
@@ -366,11 +366,11 @@ const Discounts = () => {
 			};
 
 			const result = await getCall(getData);
-			const discountTypes = result.data.map((type) => ({
+			const discountTypesData = result.data.map((type) => ({
 				name: type.TypeItemName,
 				type: type.TypeName,
 			}));
-			setDiscountTypes(discountTypes);
+			setDiscountTypesData(discountTypesData);
 			setIsDiscountTypesLoading(false);
 		} catch (error) {
 			console.error('Error getting Discount Types: ', error);
@@ -397,14 +397,13 @@ const Discounts = () => {
 			const result = await getCall(getData);
 
 			if (viewBy === 'Summary') {
+				const filterItems = discountTypesData.filter(
+					(item) => item.type === discountTypeOptions.find((option) => option.name === discountType)?.type
+				);
 				const filterData =
 					discountType === 'All-All Discounts'
 						? result.data
-						: result.data.filter(
-								(row) =>
-									row.typeName ===
-									discountTypeOptions.find((option) => option.name === discountType)?.type
-						  );
+						: result.data.filter((row) => filterItems.find((item) => item.name === row.discountType));
 				setDiscountsData(filterData);
 
 				const uniqueWeeks = Array.from(
@@ -425,7 +424,8 @@ const Discounts = () => {
 				const generatedColumns = [
 					columnHelper.accessor('discountType', {
 						id: 'discountType',
-						header: 'Discount Name',
+						header: <div className='w-full text-left'>Discount Name</div>,
+						cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 						dataType: 'string',
 					}),
 					columnHelper.group({
@@ -613,15 +613,15 @@ const Discounts = () => {
 					}
 				});
 
+				const filterItems = discountTypesData.filter(
+					(item) => item.type === discountTypeOptions.find((option) => option.name === discountType)?.type
+				);
+
 				const filterData =
 					discountType === 'All-All Discounts'
 						? newData.sort((a, b) => new Date(a.date) - new Date(b.date))
 						: newData
-								.filter(
-									(row) =>
-										row.typeName ===
-										discountTypeOptions.find((option) => option.name === discountType)?.type
-								)
+								.filter((row) => filterItems.find((item) => item.name === row.discountType))
 								.sort((a, b) => new Date(a.date) - new Date(b.date));
 
 				handleGroupByChange(viewBy === 'Summary' || viewBy === 'Detail' ? groupBy : viewBy, columns);
@@ -702,7 +702,9 @@ const Discounts = () => {
 						) : column.header === 'Disc Amount' ? (
 							`$${getValue()}`
 						) : (
-							getValue()
+							<div className={`${column.header === 'Discount Type' ? 'text-left px-6' : ''}`}>
+								{getValue()}
+							</div>
 						);
 					},
 				});
@@ -855,7 +857,7 @@ const Discounts = () => {
 												column.dataType === 'price'
 													? `$${Number(row[column.id]).toFixed(2)}`
 													: column.dataType === 'percent'
-													? `${row[column.id]}%`
+													? `${row[column.id]}`
 													: row[column.id],
 											cellType: column.dataType,
 											columnName: column.header,
