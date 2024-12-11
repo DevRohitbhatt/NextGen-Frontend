@@ -19,6 +19,16 @@ import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import itemSoldTotals from '../../../assets/introJSSteps/menuItemSold/itemSoldTotals';
 import { createColumnHelper } from '@tanstack/react-table';
 
+const tooltips = {
+	item: "Menu Item ID",
+	description:"Menu Item Name",
+	quantity:"Number of menu items sold during the selected date range.",
+	amount:"$ Amount Sold",
+	itemSoldPercent: "The item’s percentage of total sales.",
+	avgItemQuantity: "The average quantity sold per day during the selected date range.",	
+	avgItemAmount: "The average price of the item."
+  };
+
 const columnHelper = createColumnHelper();
 
 const ItemsSoldTotals = () => {
@@ -151,6 +161,7 @@ const ItemsSoldTotals = () => {
 			id: 'itemId',
 			header: 'Item',
 			dataType: 'string',
+			tooltip: tooltips.item,
 			cell: ({ getValue, row }) =>
 				row.getCanExpand() ? (
 					<div
@@ -227,6 +238,7 @@ const ItemsSoldTotals = () => {
 						header: <div className='w-full text-left'>Description</div>,
 						dataType: 'string',
 						cell: (info) => <div className='text-left'>{info.getValue()}</div> || '',
+						tooltip: tooltips.description,
 					}),
 			  ]),
 		columnHelper.accessor('quant', {
@@ -235,11 +247,13 @@ const ItemsSoldTotals = () => {
 			dataType: 'number',
 			size: 60,
 			cell: (info) => info.getValue() || '',
+			tooltip: tooltips.quantity,
 		}),
 		columnHelper.accessor('discPrice', {
 			id: 'discPrice',
 			header: 'Amount',
 			dataType: 'number',
+			tooltip: tooltips.amount,
 			cell: ({ row, getValue }) =>
 				row.getCanExpand()
 					? ''
@@ -258,12 +272,14 @@ const ItemsSoldTotals = () => {
 				const value = info.getValue();
 				return value != null ? `${parseFloat(value).toFixed(2)}%` : '';
 			},
+			tooltip: tooltips.itemSoldPercent,
 		}),
 		columnHelper.accessor('quantity_Avg', {
 			id: 'quantity_Avg',
 			header: 'Avg Item Quantity',
 			dataType: 'number',
 			cell: (info) => info.getValue() || '',
+			tooltip: tooltips.avgItemQuantity,
 		}),
 		columnHelper.accessor('discPrice_Avg', {
 			id: 'discPrice_Avg',
@@ -273,6 +289,7 @@ const ItemsSoldTotals = () => {
 				row.getCanExpand()
 					? ''
 					: `$${getValue() !== null && getValue() !== undefined ? getValue().toFixed(2) : '0.00'}`,
+			tooltip: tooltips.avgItemAmount,
 		}),
 	];
 

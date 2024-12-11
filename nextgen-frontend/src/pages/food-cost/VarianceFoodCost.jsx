@@ -21,6 +21,19 @@ import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
 
+const tooltips = {
+	actualUsageDollar: "The value of the inventory used during the selected date range using the calculation: \n\n Beg $ + Pur $ + Tr In $ – Tr Out $ – End $ / Comparison Sales",	
+	actualUsagePercent: "Actual Usage $ / Comparison Sales \n\n Tip: Negative Usage indicates a “growth” in inventory, possibly due to missing purchases or missing counts.",
+	idealDollar: "The expected value of the ideal inventory used during the selected date range. \n\n Tip: Only items included in the recipes will be included in ideal calculations.",
+	idealPercent: "Ideal $ / Comparison Sales",	
+	varianceUsageDollar: "The calculated difference between the Actual $ and the Ideal $.",
+	varrianceUsagePercent: "The calculated difference between the Actual % and the Ideal %. \n\n Tip: Run and troubleshoot the Actual FC report after counting to ensure accuracy with this report.",
+	wasteDollar: "The inventory value of items entered in waste countsheets during the selected date range.",
+	wasterPercent:"Waste $ / Comparison Sales $",
+	comparisonName:"Names the sales value used for comparison against inventory. &#013; (Default is Net Sales)",
+	comparisonSales:"Comparison Sales configured for this Department and/or Sub-department. i.e., Net Sales, Department Sales, etc."
+  };
+
 const columnHelper = createColumnHelper();
 
 const VarianceFoodCost = () => {
@@ -164,6 +177,7 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'actualDollar', getValue),
 			size: 90,
+			tooltip: tooltips.actualUsageDollar
 		}),
 		columnHelper.accessor('actualPct', {
 			id: 'actualPct',
@@ -171,6 +185,7 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'actualPct', getValue, true),
 			size: 90,
+			tooltip: tooltips.actualUsagePercent
 		}),
 		columnHelper.accessor('idealNumber', {
 			id: 'idealNumber',
@@ -185,6 +200,7 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'idealDollar', getValue),
 			size: 90,
+			tooltip: tooltips.idealDollar
 		}),
 		columnHelper.accessor('idealPct', {
 			id: 'idealPct',
@@ -192,6 +208,7 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'idealPct', getValue, true),
 			size: 90,
+			tooltip: tooltips.idealPercent
 		}),
 		columnHelper.accessor('varianceNumber', {
 			id: 'varianceNumber',
@@ -206,6 +223,7 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'varianceDollar', getValue),
 			size: 100,
+			tooltip: tooltips.varianceUsageDollar
 		}),
 		columnHelper.accessor('variancePct', {
 			id: 'variancePct',
@@ -213,6 +231,7 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'variancePct', getValue, true),
 			size: 100,
+			tooltip: tooltips.varrianceUsagePercent
 		}),
 		columnHelper.accessor('wasteNumber', {
 			id: 'wasteNumber',
@@ -227,6 +246,7 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'wasteDollar', getValue),
 			size: 90,
+			tooltip: tooltips.wasteDollar
 		}),
 		columnHelper.accessor('wastePct', {
 			id: 'wastePct',
@@ -234,12 +254,14 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'wastePct', getValue, true),
 			size: 90,
+			tooltip: tooltips.wasterPercent
 		}),
 		columnHelper.accessor('comparisonName', {
 			id: 'comparisonName',
 			header: 'Comparison Name',
 			dataType: 'string',
 			size: 160,
+			tooltip: tooltips.comparisonName
 		}),
 		columnHelper.accessor('comparisonSales', {
 			id: 'comparisonSales',
@@ -248,6 +270,7 @@ const VarianceFoodCost = () => {
 			cell: ({ getValue }) =>
 				getValue() !== undefined ? `$${parseFloat(getValue()?.toFixed(2)).toLocaleString('en-US')}` : '',
 			size: 150,
+			tooltip: tooltips.comparisonSales
 		}),
 	];
 

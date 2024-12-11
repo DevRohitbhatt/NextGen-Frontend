@@ -21,6 +21,21 @@ import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
 import { useNavigate } from 'react-router-dom';
 import dateFormat from 'dateformat';
 
+const tooltips = {
+	begDollar: "The inventory value from the beginning countsheet of the selected date range. \n\n Tip: Double-check the mapping if an item’s value is considerably higher or lower than expected.",
+	purDollar:"The value of invoiced purchases received during the selected date range. \n\n Tip: Missing purchases can mean invoice(s) weren’t entered or it was mapped incorrectly.",
+	transInDollar:"The inventory value of items from all transfers IN during the selected date range. \n\n $’s calculated using the latest pricing from the transferring location.",
+	transOutDollar:"The inventory value of items from all transfers OUT during the selected date range. \n\n $’s calculated using the latest pricing from your location.",
+	endDollar: "The inventory value from the ending count sheet of the selected date range. \n\n Tip: Double-check the mapping if an item’s value is considerably higher or lower than expected.",
+	actualUsageDollar: "The value of the inventory used during the selected date range using the calculation: \n\n Beg $ + Pur $ + Tr In $ – Tr Out $ – End $ / Comparison Sales",	
+	actualUsagePercent: "Actual Usage $ / Comparison Sales $ \n\n Tip: Negative Usage indicates a “growth” in inventory, possibly due to missing purchases or missing counts.",
+	wasteDollar: "The inventory value of items entered in waste countsheets during the selected date range.",
+	wasterPercent:"Waste $ / Comparison Sales $",
+	comparisonName:"Names the sales value used for comparison against inventory. \n\n (Default is Net Sales)",
+	comparisonSales:"Comparison Sales configured for this Department and/or Sub-department. i.e., Net Sales, Department Sales, etc.",
+	direction: "above",
+  };
+
 const columnHelper = createColumnHelper();
 
 const ActualFoodCost = () => {
@@ -167,6 +182,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'begCountCost', getValue),
 			size: 90,
+			tooltip: tooltips.begDollar
 		}),
 		columnHelper.accessor('purchaseDisplayUnits', {
 			id: 'purchaseDisplayUnits',
@@ -182,6 +198,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'purchaseCost', getValue),
 			size: 60,
+			tooltip: tooltips.purDollar
 		}),
 		columnHelper.accessor('iTinCountDisplayUnits', {
 			id: 'iTinCountDisplayUnits',
@@ -197,6 +214,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'iTinCountCost', getValue),
 			size: 60,
+			tooltip: tooltips.transInDollar
 		}),
 		columnHelper.accessor('iToutCountDisplayUnits', {
 			id: 'iToutCountDisplayUnits',
@@ -212,6 +230,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'iToutCountCost', getValue),
 			size: 80,
+			tooltip: tooltips.transOutDollar
 		}),
 		columnHelper.accessor('endCountDisplayUnits', {
 			id: 'endCountDisplayUnits',
@@ -227,6 +246,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'endCountCost', getValue),
 			size: 60,
+			tooltip: tooltips.endDollar
 		}),
 		columnHelper.accessor('usageCountDisplayUnits', {
 			id: 'usageCountDisplayUnits',
@@ -242,6 +262,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'usageCost', getValue),
 			size: 80,
+			tooltip: tooltips.actualUsageDollar
 		}),
 		columnHelper.accessor('usageCostPct', {
 			id: 'usageCostPct',
@@ -249,6 +270,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'usageCostPct', getValue, true),
 			size: 90,
+			tooltip: tooltips.actualUsagePercent
 		}),
 		columnHelper.accessor('wasteCountDisplayUnits', {
 			id: 'wasteCountDisplayUnits',
@@ -264,6 +286,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'wasteCountCost', getValue),
 			size: 80,
+			tooltip: tooltips.wasteDollar
 		}),
 		columnHelper.accessor('wasteCostPct', {
 			id: 'wasteCostPct',
@@ -271,12 +294,14 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'wasteCostPct', getValue, true),
 			size: 90,
+			tooltip: tooltips.wasterPercent
 		}),
 		columnHelper.accessor('comparisonName', {
 			id: 'comparisonName',
 			header: 'Comparison Name',
 			dataType: 'string',
 			size: 100,
+			tooltip: tooltips.comparisonName
 		}),
 		columnHelper.accessor('comparisonSales', {
 			id: 'comparisonSales',
@@ -285,6 +310,7 @@ const ActualFoodCost = () => {
 			cell: ({ getValue }) =>
 				getValue() !== undefined ? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}` : '',
 			size: 100,
+			tooltip: tooltips.comparisonSales
 		}),
 	];
 

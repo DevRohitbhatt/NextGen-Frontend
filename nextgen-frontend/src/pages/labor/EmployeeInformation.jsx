@@ -15,6 +15,13 @@ import {
 	PdfBuilder,
 } from '../../components';
 
+const tooltips = {
+	employeeID: "An ID assigned to an employee in the POS. Typically used for clocking in and out. \n\n NOTE: All data is polled directly from the POS and can not be edited or deleted in QSR.",
+	uniqueID: "A Unique ID assigned to an employee. Typically used for payroll or HR. \n\n NOTE: All data is polled directly from the POS and can not be edited or deleted in QSR.",
+	payRate: "$/HR set for the employee in the POS. \n\n NOTE: All data is polled directly from the POS and can not be edited or deleted in QSR. ",	
+	direction: "above",
+  };
+
 const EmployeeInformation = () => {
 	const {
 		companyID,
@@ -70,7 +77,7 @@ const EmployeeInformation = () => {
 			key: 'employeeId',
 			label: 'Employee ID',
 			cellType: 'string',
-			toolTip: '',
+			toolTip: tooltips.employeeID,
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
@@ -80,7 +87,7 @@ const EmployeeInformation = () => {
 			key: 'ssn',
 			label: 'Unique ID',
 			cellType: 'string',
-			toolTip: '',
+			toolTip: tooltips.uniqueID,
 			toolTipDirection: '',
 			minWidth: '130px',
 			maxWidth: '200px',
@@ -120,7 +127,7 @@ const EmployeeInformation = () => {
 			key: 'payRate',
 			label: 'Pay Rate',
 			cellType: 'string',
-			toolTip: '',
+			toolTip: tooltips.payRate,
 			toolTipDirection: '',
 			minWidth: '100px',
 			maxWidth: '150px',
