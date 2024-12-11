@@ -375,7 +375,7 @@ const CountsheetDesigner = () => {
 				<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${
 					countsheet?.saveDateTime?.split('T')[1]
 				}`}</h3>
-				{!showCommentModal && comment !== undefined ? (
+				{!showCommentModal && comment !== undefined && comment.length > 0 ? (
 					<p className='flex-1 truncate max-w-[800px]'>
 						Comment:{' '}
 						<span onClick={() => setShowCommentModal(true)} className='underline cursor-pointer '>
