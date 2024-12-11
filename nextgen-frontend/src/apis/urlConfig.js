@@ -7,6 +7,7 @@ const urlConfig = {
   unitsAndArea: "/api/unitsandareas/getbyid",
   vendors: "/api/vendor/getvendorsbycompanyID",
   getAllPeriodDates: "/api/company/settings/getAllPeriodDates",
+  getAllPayPeriodDates: "/api/company/settings/getAllPayPeriodDates",
   //suggested order apis
   orderList: "/api/order/GetOrderList",
   getOrderItem: "/api/suggestedorder/getvendorinventoryitems",
