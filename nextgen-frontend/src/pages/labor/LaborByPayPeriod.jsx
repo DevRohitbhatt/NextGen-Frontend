@@ -652,6 +652,7 @@ const LaborByPayPeriod = () => {
 					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
 					selectedFromDate={selectedFromDate}
 					selectedToDate={selectedToDate}
+					periodDatesEndpoint='getAllPayPeriodDates'
 				/>
 			</div>
 		</div>
