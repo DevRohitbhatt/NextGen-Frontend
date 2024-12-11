@@ -88,9 +88,11 @@ const Countsheets = () => {
 				id: 'action',
 				cell: ({ row }) => (
 					<Link
-						to='/CountsheetDesigner'
+						to={`/CountsheetDesigner?companyID=${row.original.companyId}&countsheet=${encodeURIComponent(
+							JSON.stringify(row.original)
+						)}`}
+						target='_blank'
 						className='underline cursor-pointer'
-						state={{ companyID: row.original.companyId, countsheet: row.original }}
 					>
 						Open
 					</Link>
