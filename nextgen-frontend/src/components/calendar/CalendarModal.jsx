@@ -18,6 +18,7 @@ const CalendarModal = ({
   modalOpen,
   isDateRange,
   handleDateSelection,
+  periodDatesEndpoint = "getAllPeriodDates",
 }) => {
   const { companyID } = useSelector((state) => state.globalState);
   const [initialFromDate, setInitialFromDate] = useState(selectedFromDate);
@@ -58,7 +59,7 @@ const CalendarModal = ({
   const getDynamicDates = async () => {
     try {
       const getData = {
-        fullUrl: "api/company/settings/getAllPeriodDates",
+        fullUrl: "api/company/settings/" + periodDatesEndpoint,
         urlParams: {
           companyId: companyID,
         },
@@ -175,7 +176,7 @@ const CalendarModal = ({
                           setLocalFromDate(date);
                         }}
                         selectedFromDate={localFromDate}
-						date={localFromDate}
+                        date={localFromDate}
                       />
                     </div>
                     <div>
@@ -183,7 +184,7 @@ const CalendarModal = ({
                       <CalendarSelector
                         handleDateChange={(date) => setLocalToDate(date)}
                         selectedToDate={localToDate}
-						date={localToDate}
+                        date={localToDate}
                       />
                     </div>
                     <div className="yeardiv">
