@@ -846,8 +846,8 @@ const ActualFoodCost = () => {
 			alignmentID: alignmentID,
 			selectedUnit: selectedUnit,
 			selectedUnitName: selectedUnitName,
-			fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
-			toDate: dateFormat(toDate, 'yyyy-mm-dd'),
+			fromDate: fromDate,
+			toDate: toDate,
 			vendorId: 0,
 			timestamp: Date.now(),
 		};

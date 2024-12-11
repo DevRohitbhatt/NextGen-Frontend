@@ -81,8 +81,6 @@ const PurchaseAnalysis = () => {
 	];
 
 	const location = useLocation();
-	const searchParams = new URLSearchParams(window.location.search);
-	const key = searchParams.get('pageKey');
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({

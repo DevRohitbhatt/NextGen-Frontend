@@ -169,7 +169,11 @@ const LaborByPayPeriod = () => {
         header: "Regular Hours",
         dataType: "number",
         size: 140,
-        cell: ({ row }) => calculateSum(row, "regHours"),
+        cell: ({ row }) => {
+          let regHours = calculateSum(row, "regHours");
+          regHours = parseFloat(regHours).toFixed(2);
+          return regHours;
+        },
       }),
       columnHelper.accessor("overHours", {
         id: "overHours",
@@ -668,7 +672,6 @@ const LaborByPayPeriod = () => {
             ))}
         </div>
       )}
-
       <div>
         <UnitModal
           unitData={unitsAndAreasList}
@@ -690,6 +693,7 @@ const LaborByPayPeriod = () => {
           handleToDateChange={(toDate) => setSelectedToDate(toDate)}
           selectedFromDate={selectedFromDate}
           selectedToDate={selectedToDate}
+          periodDatesEndpoint="getAllPayPeriodDates"
         />
       </div>
     </div>
