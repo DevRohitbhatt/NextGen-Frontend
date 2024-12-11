@@ -21,6 +21,7 @@ const CountsheetDesigner = () => {
 	const [countsheet, setCountsheet] = useState({});
 	const [countsheetDetails, setCountsheetDetails] = useState([]);
 	const [showCommentModal, setShowCommentModal] = useState(false);
+	const [comment, setComment] = useState();
 
 	// State variables for loading and error handling
 	const [isLoading, setIsLoading] = useState(true);
@@ -370,10 +371,20 @@ const CountsheetDesigner = () => {
 					/>
 				</div>
 			</header>
-			<div>
+			<div className='flex gap-4'>
 				<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${
 					countsheet?.saveDateTime?.split('T')[1]
 				}`}</h3>
+				{!showCommentModal && comment !== undefined ? (
+					<p className='flex-1 truncate max-w-[800px]'>
+						Comment:{' '}
+						<span onClick={() => setShowCommentModal(true)} className='underline cursor-pointer '>
+							{comment}
+						</span>
+					</p>
+				) : (
+					''
+				)}
 			</div>
 
 			<div className='relative w-full min-h-56'>
@@ -407,6 +418,9 @@ const CountsheetDesigner = () => {
 						className='w-full h-full block p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border-2 border-[var(--tw-primary)] focus:outline-[var(--tw-primary)] caret-[var(--tw-primary)]'
 						name=''
 						id=''
+						value={comment}
+						onChange={(e) => setComment(e.target.value)}
+						placeholder='Enter your comment here...'
 					></textarea>
 				</div>
 			</Modal>
