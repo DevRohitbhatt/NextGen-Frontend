@@ -440,7 +440,7 @@ const LaborByPayPeriod = () => {
             columnName: "Job Description",
           },
           {
-            value: subRow.regHours || "0 ",
+            value: subRow?.regHours.toFixed(2) || "0 ",
             cellType: "number",
             columnName: "Regular Hours",
           },
