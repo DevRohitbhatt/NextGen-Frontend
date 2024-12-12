@@ -388,14 +388,11 @@ const EmployeeInformation = () => {
 				{
 					const currentDate = new Date();
 					const currentMonth = currentDate.getMonth();
-					console.log(employeeInformationData.data);
 					const birthDaysData = employeeInformationData.data.filter((data) => {
 						const birthDate = new Date(data.birthDate);
 						const birthMonth = birthDate.getMonth();
 						return birthMonth === currentMonth;
 					});
-
-					console.log(birthDaysData);
 
 					setFilteredEmployeeInformationData({ data: birthDaysData });
 				}
