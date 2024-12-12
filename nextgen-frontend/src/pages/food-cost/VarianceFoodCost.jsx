@@ -35,8 +35,6 @@ const VarianceFoodCost = () => {
 	const [filteredVarianceFoodCostData, setFilteredVarianceFoodCostData] = useState([]);
 	const [isTableRendered, setIsTableRendered] = useState(true);
 
-	const navigate = useNavigate();
-
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
 	const [isDateLoading, setIsDateLoading] = useState(false);
