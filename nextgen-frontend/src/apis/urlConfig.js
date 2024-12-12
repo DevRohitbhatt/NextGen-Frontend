@@ -8,6 +8,7 @@ const urlConfig = {
   vendors: "/api/vendor/getvendorsbycompanyID",
   getAllPeriodDates: "/api/company/settings/getAllPeriodDates",
   getAllPayPeriodDates: "/api/company/settings/getAllPayPeriodDates",
+
   //suggested order apis
   orderList: "/api/order/GetOrderList",
   getOrderItem: "/api/suggestedorder/getvendorinventoryitems",
@@ -17,7 +18,7 @@ const urlConfig = {
 
   //invoices details
   getInvoiceDetailsData: "/api/foodcost/getInvoiceDetailsData",
-  getVendorInvoiceItems : "/api/foodcost/getVendorInvoiceItems",
+  getVendorInvoiceItems: "/api/foodcost/getVendorInvoiceItems",
   //inventory items apis
   getInventoryItemsOrderLimits:
     "/api/inventoryitems/getinventoryitemsorderlimits",
@@ -48,7 +49,10 @@ const urlConfig = {
   Countsheet_PricingInfo: "api/foodcost/getCountSheetsPriceInfo",
   countsheetPossibleError: "api/foodcost/getCountSheetsPossibleError",
   PurchaseAnalysis: "api/foodcost/getPurchaseAnalysisData",
-
+  GetActualFoodCostBreakdownIdealReportData:
+    "/api/foodcost/GetActualFoodCostBreakdownIdealReportData",
+  GetActualFoodCostBreakdownReportData:
+    "/api/foodcost/GetActualFoodCostBreakdownReportData",
   //Sales apis
   hourlySales: "api/sales/GetSalesHourlyReportData",
   voids: "api/sales/getVoidsReportData",
