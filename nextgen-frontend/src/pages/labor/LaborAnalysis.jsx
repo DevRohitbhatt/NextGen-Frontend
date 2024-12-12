@@ -39,6 +39,7 @@ const LaborAnalysis = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalData, setModalData] = useState([]);
 	const [modalColumns, setModalColumns] = useState([]);
+	const [isTableRendered, setIsTableRendered] = useState(true);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
@@ -134,7 +135,7 @@ const LaborAnalysis = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-
+			setIsTableRendered(false);
 			const getData = {
 				url: 'laborAnalysis',
 				urlParams: {
@@ -449,7 +450,16 @@ const LaborAnalysis = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={laborAnalysisReportData} expandCollapseButtons={true} />;
+	const Table = (
+		<TableHOC
+			columns={columns}
+			data={laborAnalysisReportData}
+			expandCollapseButtons={true}
+			view={1}
+			isTableRendered={isTableRendered}
+			setIsTableRendered={setIsTableRendered}
+		/>
+	);
 	const modalTable = <TableHOC columns={modalColumns} data={laborAnalysisModalData} />;
 
 	return (

@@ -141,7 +141,7 @@ function TableHOC({
 		if (table.getRowModel().rows.length > 0 && !isTableRendered && setIsTableRendered) {
 			setIsTableRendered(true);
 		}
-	}, [table.getRowModel().rows.length, isTableRendered, setIsTableRendered]);
+	}, [table, isTableRendered, setIsTableRendered]);
 
 	return (
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3'>

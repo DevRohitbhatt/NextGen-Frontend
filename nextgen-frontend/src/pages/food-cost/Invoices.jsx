@@ -3,6 +3,7 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector, useDispatch } from 'react-redux';
 import invoices from '../../assets/introJSSteps/invoices';
+import { Link } from 'react-router-dom';
 import { setVendorsList } from '../../reducer/slices/globalState';
 import {
 	UnitSelector,
@@ -17,6 +18,7 @@ import {
 	ExcelExport as exportToExcel,
 	TableHOC,
 	Modal,
+	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
@@ -42,6 +44,12 @@ const Invoices = () => {
 	const [searchKey, setSearchKey] = useState('');
 	const [searchInvoiceData, setSearchInvoiceData] = useState([]);
 	const [invoiceDetailLoading, setInvoiceDetailsLoading] = useState(false);
+	const [showAddInvoicesModal, setShowAddInvoicesModal] = useState();
+	const [unitDropdownData, setUnitDropdownData] = useState([]);
+	const [vendorDropdownData, setVendorDropdownData] = useState([]);
+	const [selectedDropdownUnit, setSelectedDropdownUnit] = useState();
+	const [selectedDropdownVendor, setSelectedDropdownVendor] = useState();
+
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
@@ -62,6 +70,7 @@ const Invoices = () => {
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState();
 	const [selectedToDate, setSelectedToDate] = useState();
+	const [showWarnings, setShowWarnings] = useState(false);
 	const [showDateModal, setShowDateModal] = useState(false);
 	const [showPreviewModal, setShowPreviewModal] = useState(false);
 	const [invoiceHeaderDetails, setInvoiceHeaderDetails] = useState([]);
@@ -72,6 +81,27 @@ const Invoices = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
+
+	useEffect(() => {
+		if (unitsAndAreas && vendorsList) {
+			const unitsList =
+				unitsAndAreas?.units?.map((unit) => {
+					return {
+						id: unit.unitID,
+						name: unit.unitName,
+					};
+				}) || [];
+			const vendorsListData =
+				vendorsList?.data?.map((vendor) => {
+					return {
+						id: vendor.vendorID,
+						name: vendor.vendorName,
+					};
+				}) || [];
+			setUnitDropdownData(unitsList);
+			setVendorDropdownData(vendorsListData);
+		}
+	}, [unitsAndAreas, vendorsList]);
 
 	//Open invoicesDetails
 	const handleInvoicesDetailsModal = async (id) => {
@@ -99,6 +129,7 @@ const Invoices = () => {
 			setInvoiceItemDetails(invoiceItemrResult.data);
 			setInvoiceHeaderDetails(result.data);
 		} catch (error) {
+			console.error('Error getting default dates: ', error);
 		} finally {
 			setInvoiceDetailsLoading(false);
 		}
@@ -343,6 +374,44 @@ const Invoices = () => {
 		}, 500);
 	};
 
+	const openInvoiceEditor = (row) => {
+		window.open(
+			`/InvoiceEditor?unitName=${row.unitName}&vendorName=${row.name}&date=${row.date}&invoiceID=${row.qsrInvoiceID}&lastEditedBy=${row.lastEditedBy}&invoiceReference=${row.vendorInvoiceReference}&totalAmount=${row.totalAmountIncludingTax}`,
+			'_blank'
+		);
+	};
+
+	const handleAddNewInvoice = async () => {
+		try {
+			const getData = {
+				url: 'getVendorItems',
+				urlParams: {
+					companyID: companyID,
+					unitID: unitDropdownData?.find((unit) => unit.name === selectedDropdownUnit)?.id,
+					vendorID: vendorDropdownData?.find((vendor) => vendor.name === selectedDropdownVendor)?.id,
+				},
+			};
+
+			const result = await getCall(getData);
+
+			if (result.data.length > 0) {
+				window.open(
+					`/InvoiceEditor?unitID=${
+						unitDropdownData?.find((unit) => unit.name === selectedDropdownUnit)?.id
+					}&unitName=${selectedDropdownUnit}&vendorID=${
+						vendorDropdownData?.find((vendor) => vendor.name === selectedDropdownVendor)?.id
+					}&vendorName=${selectedDropdownVendor}&date=${new Date()}`,
+					'_blank'
+				);
+			} else {
+				setShowAddInvoicesModal(false);
+				setShowWarnings(true);
+			}
+		} catch (error) {
+			console.error('Error getting Invoice data: ', error);
+		}
+	};
+
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
 		if (isBrowseInvoicesClicked) {
@@ -461,7 +530,7 @@ const Invoices = () => {
 					isPaginated={true}
 					dataPosition='left'
 					headerPosition='left'
-					onCallBack={(e) => {}}
+					onCallBack={(row) => openInvoiceEditor(row)}
 				/>
 			)
 		) : searchKey.length === 0 ? (
@@ -522,6 +591,9 @@ const Invoices = () => {
 							includeExcel={true}
 							handleExcelClick={handleExcelClick}
 							includeHelp={true}
+							includeAdd={true}
+							addTitle={'Add New Invoice'}
+							handleAddClick={() => setShowAddInvoicesModal(true)}
 							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 						/>
 					</div>
@@ -664,32 +736,50 @@ const Invoices = () => {
 											</td>
 										</tr>
 									))}
-									{/* <tr className="even:bg-gray-50">
-                  <td className="p-2 text-center border border-gray-300">
-                    5447738
-                  </td>
-                  <td className="p-2 border border-gray-300">
-                    SYRUP COKE ZERO SUGAR 2.5 GAL
-                  </td>
-                  <td className="p-2 text-center border border-gray-300">CA</td>
-                  <td className="p-2 text-center border border-gray-300">
-                    1 / 2.5GAL
-                  </td>
-                  <td className="p-2 text-center border border-gray-300">1</td>
-                  <td className="p-2 text-center border border-gray-300">
-                    $54.95
-                  </td>
-                  <td className="p-2 text-center border border-gray-300">
-                    $0.00
-                  </td>
-                  <td className="p-2 text-center border border-gray-300">
-                    $54.95
-                  </td>
-                </tr> */}
-									{/* End of item row */}
 								</tbody>
 							</table>
 						</div>
+					</div>
+				</Modal>
+				<Modal
+					isOpen={showAddInvoicesModal}
+					title={'Add New Invoice'}
+					onClose={() => {
+						setShowAddInvoicesModal(!showAddInvoicesModal);
+					}}
+				>
+					<div className='flex flex-col items-center gap-3 p-4 min-w-72'>
+						<Dropdown
+							title='Unit'
+							options={unitDropdownData}
+							selectedOption={selectedDropdownUnit}
+							onOptionChange={(unit) => setSelectedDropdownUnit(unit)}
+							isSearch={true}
+						/>
+						<Dropdown
+							title='Vendor'
+							options={vendorDropdownData}
+							selectedOption={selectedDropdownVendor}
+							onOptionChange={(unit) => setSelectedDropdownVendor(unit)}
+							isSearch={true}
+						/>
+						<button
+							className={`flex items-center gap-2 px-4 py-3 border-solid focus:outline-none relative rounded-none border transition-colors duration-[0.25s] delay-[0.0833s] mt-2 ${
+								!selectedDropdownUnit || !selectedDropdownVendor
+									? 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3] text-[#D3D3D3] hover:text-[#D3D3D3] cursor-not-allowed'
+									: 'border-[var(--tw-primary)] hover:bg-[var(--tw-primary)] text-[var(--tw-primary)] hover:text-white shadow-[inset_0_0_0_1px_var(--tw-primary)] tailwind-button'
+							}`}
+							onClick={handleAddNewInvoice}
+						>
+							New Invoice
+						</button>
+					</div>
+				</Modal>
+				<Modal title={'No Vendor Item'} isOpen={showWarnings} onClose={() => setShowWarnings(false)}>
+					<div className='p-4 w-[440px]'>
+						<p className='text-center text-[var(--tw-primary)]'>
+							{`There should be at least one vendor item in the vendor '${selectedDropdownVendor}' prior to creating a new Invoice.`}
+						</p>
 					</div>
 				</Modal>
 			</div>

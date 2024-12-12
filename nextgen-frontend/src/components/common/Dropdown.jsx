@@ -54,7 +54,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable =
 		>
 			<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>{title}</h3>
 			<div
-				className={`flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
+				className={`flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl min-h-[52px] ${
 					isEditable
 						? ' hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] cursor-pointer'
 						: 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
