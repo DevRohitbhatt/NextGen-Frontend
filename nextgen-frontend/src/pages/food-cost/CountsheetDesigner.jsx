@@ -342,89 +342,72 @@ const CountsheetDesigner = () => {
             Insert Comment
           </div>
 
-          <div className="relative flex items-center justify-center py-3 mt-8 text-center capitalize cursor-pointer w-28 whitespace-nowrap rounded-3xl ">
-            <div
-              onClick={() => setIsDropdownVisible(!isDropdownVisible)}
-              className="items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid"
-            >
-              <span className="cursor-pointer select-none"> More...</span>
-            </div>
-            {isDropdownVisible && (
-              <div
-                className="absolute top-[90%] left-0 rounded-xl text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] z-10 p-2"
-                ref={moreOptionsDropdown}
-              >
-                <div className="mb-2 option ">
-                  <button
-                    className="w-[100%] bg-[#f9f9f9]"
-                    onClick={getPriceInfo}
-                  >
-                    Pricing Info
-                  </button>
-                </div>
-                <div className="mb-2 option ">
-                  <button
-                    className="w-[100%] bg-[#f9f9f9]"
-                    onClick={getPossibleErrors}
-                  >
-                    Possible Errors
-                  </button>
-                </div>
-                <div className="mb-2 option ">
-                  <button className="w-[100%] bg-[#f9f9f9]">
-                    Countsheet History
-                  </button>
-                </div>
-                <div className="mb-2 option">
-                  <button className="w-[100%] bg-[#f9f9f9]">Copy Counts</button>
-                </div>
-                <div className="mb-2 option">
-                  <button className="w-[100%] bg-[#f9f9f9]">
-                    Clear Countsheet
-                  </button>
-                </div>
-                <div className="mb-2 option">
-                  <button className="w-[100%] bg-[#f9f9f9]">
-                    Delete Countsheet
-                  </button>
-                </div>
-                <div className="mb-2 option">
-                  <button className="w-[100%] bg-[#f9f9f9]">
-                    Lock Countsheet
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <div>
-          <ExportOptions
-            includeExcel={true}
-            handleExcelClick={handleExcelClick}
-            includePrint={true}
-            handlePrintClick={handlePrintClick}
-            includeSave={true}
-          />
-        </div>
-      </header>
-      <div className="flex gap-4">
-        <h3>{`Last saved by ${countsheet?.userName} - ${
-          countsheet?.saveDateTime?.split("T")[0]
-        } ${countsheet?.saveDateTime?.split("T")[1]}`}</h3>
-        {!showCommentModal && comment !== undefined && comment.length > 0 ? (
-          <p className="flex-1 truncate max-w-[800px]">
-            Comment:{" "}
-            <span
-              onClick={() => setShowCommentModal(true)}
-              className="underline cursor-pointer "
-            >
-              {comment}
-            </span>
-          </p>
-        ) : (
-          ""
-        )}
-      </div>
+					<div className='relative flex items-center justify-center py-3 mt-8 text-center capitalize cursor-pointer w-28 whitespace-nowrap rounded-3xl '>
+						<div
+							onClick={() => setIsDropdownVisible(!isDropdownVisible)}
+							className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
+						>
+							<span className='cursor-pointer select-none'> More...</span>
+						</div>
+						{isDropdownVisible && (
+							<div
+								className='absolute top-[90%] left-0 rounded-xl text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] z-10 p-2'
+								ref={moreOptionsDropdown}
+							>
+								<div className='mb-2 option '>
+									<button className='w-[100%] bg-[#f9f9f9]' onClick={getPriceInfo}>
+										Pricing Info
+									</button>
+								</div>
+								<div className='mb-2 option '>
+									<button className='w-[100%] bg-[#f9f9f9]' onClick={getPossibleErrors}>
+										Possible Errors
+									</button>
+								</div>
+								<div className='mb-2 option '>
+									<button className='w-[100%] bg-[#f9f9f9]'>Countsheet History</button>
+								</div>
+								<div className='mb-2 option'>
+									<button className='w-[100%] bg-[#f9f9f9]'>Copy Counts</button>
+								</div>
+								<div className='mb-2 option'>
+									<button className='w-[100%] bg-[#f9f9f9]'>Clear Countsheet</button>
+								</div>
+								<div className='mb-2 option'>
+									<button className='w-[100%] bg-[#f9f9f9]'>Delete Countsheet</button>
+								</div>
+								<div className='mb-2 option'>
+									<button className='w-[100%] bg-[#f9f9f9]'>Lock Countsheet</button>
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+				<div>
+					<ExportOptions
+						includeExcel={true}
+						handleExcelClick={handleExcelClick}
+						includePrint={true}
+						handlePrintClick={handlePrintClick}
+						includeSave={true}
+					/>
+				</div>
+			</header>
+			<div className='flex gap-4'>
+				<h3>{`Last saved by ${countsheet?.userName} - ${countsheet?.saveDateTime?.split('T')[0]} ${
+					countsheet?.saveDateTime?.split('T')[1]
+				}`}</h3>
+				{!showCommentModal && comment !== undefined && comment.length > 0 ? (
+					<p className='flex-1 truncate max-w-[800px]'>
+						Comment:{' '}
+						<span onClick={() => setShowCommentModal(true)} className='underline cursor-pointer '>
+							{comment}
+						</span>
+					</p>
+				) : (
+					''
+				)}
+			</div>
 
       <div className="relative w-full min-h-56">
         <Loader loading={isLoading} />
