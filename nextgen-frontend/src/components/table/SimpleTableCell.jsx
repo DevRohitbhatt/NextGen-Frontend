@@ -4,6 +4,9 @@ import styled from "styled-components";
 
 const TableCell = styled.td`
   padding: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const Select = styled.select`
@@ -138,7 +141,7 @@ export default function Cell({
       value,
       row
     });
-  } else return <TableCell key={cellIndex}>{value}</TableCell>;
+  } else return <TableCell key={cellIndex} title={value}>{value}</TableCell>;
 }
 
 Cell.propTypes = {
