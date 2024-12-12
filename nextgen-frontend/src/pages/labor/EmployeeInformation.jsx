@@ -388,13 +388,13 @@ const EmployeeInformation = () => {
 				{
 					const currentDate = new Date();
 					const currentMonth = currentDate.getMonth() + 1;
-					const currentDay = currentDate.getDate();
+					const currentYear = currentDate.getFullYear();
 
 					const birthDaysData = employeeInformationData.data.filter((data) => {
 						const birthDate = new Date(data.birthDate);
 						const birthMonth = birthDate.getMonth() + 1;
-						const birthDay = birthDate.getDate();
-						return birthMonth === currentMonth && birthDay === currentDay;
+						const birthYear = birthDate.getFullYear();
+						return birthMonth === currentMonth && birthYear === currentYear;
 					});
 
 					setFilteredEmployeeInformationData({ data: birthDaysData });

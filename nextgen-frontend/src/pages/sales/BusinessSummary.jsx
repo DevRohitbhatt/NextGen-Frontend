@@ -104,6 +104,7 @@ const BusinessSummary = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
+			console.error('Error getting default dates: ', error);
 		} finally {
 			setIsDateLoading(false);
 		}
@@ -112,6 +113,18 @@ const BusinessSummary = () => {
 	useEffect(() => {
 		getDefaultDates();
 	}, []);
+
+	const formattingData = (value) => {
+		return value < 0
+			? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`
+			: `$${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`;
+	};
 
 	const fetchBusinessSummaryReport = async () => {
 		try {
@@ -144,7 +157,7 @@ const BusinessSummary = () => {
 						...Object.fromEntries(
 							Object.entries(data.dateValues).map(([key, value]) => [
 								key,
-								Number.isInteger(value) ? value : value.toFixed(2),
+								Number.isInteger(value) ? value : value,
 							])
 						),
 						total: Number(
@@ -158,7 +171,6 @@ const BusinessSummary = () => {
 					return updatedData;
 				});
 
-				// Calculate the total for Variable Labor %, Check Average and Food Cost %
 				newData.forEach((data) => {
 					if (
 						data.description === 'Variable Lbr %' ||
@@ -169,15 +181,25 @@ const BusinessSummary = () => {
 						const foodCostPct = newData.find((item) => item.description === 'Food Cost %');
 						const netSales = newData.find((item) => item.description === salesType);
 						const transactions = newData.find((item) => item.description === 'Transactions');
+						const netSalesTotal = parseFloat(netSales.total.replace(/[$,]/g, ''));
+						const transactionTotal = parseFloat(transactions.total.replace(/[$,]/g, ''));
+						const variableLaborTotal = parseFloat(String(variableLabor.total).replace(/[$,]/g, ''));
+
 						if (variableLabor && netSales && data.description === 'Variable Lbr %') {
-							data.total = ((variableLabor.total / netSales.total) * 100).toFixed(2) + ' %';
+							data.total = ((variableLaborTotal / netSalesTotal) * 100).toFixed(2) + ' %';
 							Object.keys(data)
 								.filter((key) => !['description', 'total'].includes(key))
 								.forEach((key) => {
 									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
 								});
 						} else if (data.description === 'Check Average') {
-							data.total = (netSales.total / transactions.total).toFixed(2);
+							const value = netSalesTotal / transactionTotal;
+							data.total = value;
+							Object.keys(data)
+								.filter((key) => !['description'].includes(key))
+								.forEach((key) => {
+									data[key] = formattingData(data[key]);
+								});
 						} else if (foodCostPct && data.description === 'Food Cost %') {
 							data.total =
 								(
@@ -190,6 +212,12 @@ const BusinessSummary = () => {
 									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
 								});
 						}
+					} else {
+						Object.keys(data)
+							.filter((key) => !['description'].includes(key))
+							.forEach((key) => {
+								data[key] = formattingData(data[key]);
+							});
 					}
 					return data;
 				});
@@ -210,15 +238,15 @@ const BusinessSummary = () => {
 					...Object.keys(newData[0])
 						.filter((key) => !['description', 'total'].includes(key))
 						.map((item) =>
-							columnHelper.accessor(item, {
+							columnHelper.accessor((row) => row[item], {
 								id: item,
 								header: summaryBy === 'Day' ? dateFormat(item, 'dddd mm/dd/yy') : item,
 								dataType: 'number',
 								cell: ({ getValue }) =>
 									typeof getValue() === 'string' && getValue().includes('%')
 										? getValue()
-										: Number(getValue()),
-								size: summaryBy === 'Day' ? 90 : 120,
+										: getValue(),
+								size: summaryBy === 'Day' ? 120 : 120,
 							})
 						),
 				];
@@ -370,7 +398,9 @@ const BusinessSummary = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={businessSummaryData} />;
+	const Table = (
+		<TableHOC columns={columns} data={businessSummaryData} headerPosition='left' dataPosition='text-left' />
+	);
 
 	return (
 		<>
