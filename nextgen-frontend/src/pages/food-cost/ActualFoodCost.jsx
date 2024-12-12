@@ -1386,22 +1386,22 @@ const ActualFoodCost = () => {
                   <td className="border p-[3px] text-left text-sm">
                     Actual Usage
                   </td>
-                  <td className="border p-2 text-right">{costBreakActualDetails?.usageCases?.toFixed(2)}</td>
-                  <td className="border p-2 text-right">${costBreakActualDetails?.usageCost?.toFixed(2)}</td>
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">{costBreakActualDetails?.usageCases?.toFixed(2)}</td>
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">${costBreakActualDetails?.usageCost?.toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td className="border p-[3px] text-left text-sm">
                     Ideal Usage
                   </td>
-                  <td className="border p-2 text-right">{calculateMasterItemQuantityTotalSum(costBreakdownIdealDetails,"MasterItemQuantityTotal").toFixed(2)}</td>
-                  <td className="border p-2 text-right">${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}</td>
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">{calculateMasterItemQuantityTotalSum(costBreakdownIdealDetails,"MasterItemQuantityTotal").toFixed(2)}</td>
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td className="border p-[3px] text-left text-sm">
                     Variance Usage
                   </td>
                   <td className="border p-[3px] text-right text-sm">{totalVariancecs()}</td>
-                  <td className="border p-2 text-right">${totalVariance()}</td>
+                  <td className="border p-[3px]  text-nowrap text-sm text-right">${totalVariance()}</td>
                 </tr>
               </tbody>
             </table>

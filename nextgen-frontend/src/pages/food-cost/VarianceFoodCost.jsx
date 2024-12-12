@@ -97,6 +97,7 @@ const VarianceFoodCost = () => {
     []
   );
   const [isBreakDownModal, setIsBreakDownModal] = useState(false);
+  const [breakDownIdealDetails, setBreakDownIdealDetails] = useState([]);
   const [countType, setCountType] = useState("WE");
   const countDropdownOptions = [
     { name: "Daily" },
@@ -494,6 +495,9 @@ const VarianceFoodCost = () => {
                     wastePct: foodCost.salesNet
                       ? (foodCost.wasteCountCost / foodCost.salesNet) * 100
                       : 0,
+					  qsrInventoryItemID: foodCost?.qsrInventoryItemID
+                    ? foodCost?.qsrInventoryItemID
+                    : "",
                   })
                 ),
               })),
@@ -939,8 +943,56 @@ const VarianceFoodCost = () => {
       setTableState={setTableState}
       headerPosition="left"
       dataPosition="text-left"
+	  onCallBack={(e) => {
+        getGetActualFoodCostBreakdownIdealReportData(e);
+      }}
     />
   );
+
+  const getGetActualFoodCostBreakdownIdealReportData = async (row) => {
+    let { qsrInventoryItemID = "" } = row;
+	console.log(row)
+    setCostBreakActualDetails(row);
+    try {
+      setIsBreakDownModal(true);
+      const getData = {
+        url: "GetVarianceFoodCostBreakdownIdealReportData",
+        urlParams: {
+			companyId: companyID,
+			alignmenId: alignmentID,
+			memberId: selectedUnit,
+			fromDate: selectedFromDate,
+			toDate: selectedToDate,
+			QSRInventoryItemID: qsrInventoryItemID,
+        },
+      };
+
+      const result = await getCall(getData);
+
+      const getDataBreakDown = {
+        url: "GetVarianceFoodCostBreakdownReportData",
+        urlParams: {
+			companyId: companyID,
+			alignmenId: alignmentID,
+			memberId: selectedUnit,
+			fromDate: selectedFromDate,
+			toDate: selectedToDate,
+			QSRInventoryItemID: qsrInventoryItemID,
+        },
+      };
+
+      const resultBreakDown = await getCall(getDataBreakDown);
+      if (resultBreakDown.data) {
+        setBreakDownIdealDetails(resultBreakDown.data);
+      }
+
+      if (result.data) {
+        setCostBreakDownIdeatDetails(result.data);
+      }
+    } catch (error) {
+      console.log("er", error);
+    }
+  };
 
   const renderBreakdownModal = () => {
     const sumOfCost = (value, valu2) => {
@@ -1330,10 +1382,10 @@ const VarianceFoodCost = () => {
                   <td className="border p-[3px] text-left text-sm">
                     Actual Usage
                   </td>
-                  <td className="border p-2 text-right">
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
                     {costBreakActualDetails?.usageCases?.toFixed(2)}
                   </td>
-                  <td className="border p-2 text-right">
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
                     ${costBreakActualDetails?.usageCost?.toFixed(2)}
                   </td>
                 </tr>
@@ -1341,13 +1393,13 @@ const VarianceFoodCost = () => {
                   <td className="border p-[3px] text-left text-sm">
                     Ideal Usage
                   </td>
-                  <td className="border p-2 text-right">
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
                     {calculateMasterItemQuantityTotalSum(
                       costBreakdownIdealDetails,
                       "MasterItemQuantityTotal"
                     ).toFixed(2)}
                   </td>
-                  <td className="border p-2 text-right">
+                  <td className="border p-[3px]  text-nowrap text-sm text-right text-right">
                     ${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
                   </td>
                 </tr>
@@ -1358,7 +1410,7 @@ const VarianceFoodCost = () => {
                   <td className="border p-[3px] text-right text-sm">
                     {totalVariancecs()}
                   </td>
-                  <td className="border p-2 text-right">${totalVariance()}</td>
+                  <td className="border p-[3px]  text-nowrap text-sm text-right">${totalVariance()}</td>
                 </tr>
               </tbody>
             </table>

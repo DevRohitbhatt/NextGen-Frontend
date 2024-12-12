@@ -53,6 +53,8 @@ const urlConfig = {
     "/api/foodcost/GetActualFoodCostBreakdownIdealReportData",
   GetActualFoodCostBreakdownReportData:
     "/api/foodcost/GetActualFoodCostBreakdownReportData",
+    GetVarianceFoodCostBreakdownReportData : "/api/foodcost/GetVarianceFoodCostBreakdownActualReportData",
+    GetVarianceFoodCostBreakdownIdealReportData :"/api/foodcost/GetVarianceFoodCostBreakdownIdealReportData",
   //Sales apis
   hourlySales: "api/sales/GetSalesHourlyReportData",
   voids: "api/sales/getVoidsReportData",
