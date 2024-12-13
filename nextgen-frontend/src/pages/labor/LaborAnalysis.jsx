@@ -384,8 +384,6 @@ const LaborAnalysis = () => {
 			body: buildPDFBody(),
 		};
 
-		console.log('=====>', JSON.stringify(pdfData));
-
 		PdfBuilder(pdfData);
 	};
 

@@ -49,7 +49,14 @@ const urlConfig = {
   Countsheet_PricingInfo: "api/foodcost/getCountSheetsPriceInfo",
   countsheetPossibleError: "api/foodcost/getCountSheetsPossibleError",
   PurchaseAnalysis: "api/foodcost/getPurchaseAnalysisData",
-
+  GetActualFoodCostBreakdownIdealReportData:
+    "/api/foodcost/GetActualFoodCostBreakdownIdealReportData",
+  GetActualFoodCostBreakdownReportData:
+    "/api/foodcost/GetActualFoodCostBreakdownReportData",
+    GetVarianceFoodCostBreakdownReportData : "/api/foodcost/GetVarianceFoodCostBreakdownActualReportData",
+    GetVarianceFoodCostBreakdownIdealReportData :"/api/foodcost/GetVarianceFoodCostBreakdownIdealReportData",
+    SaveCountSheetDesignerComment: "/api/foodcost/SaveCountSheetDesignerComment",
+    GetVarianceFoodCostPopupReportData:"/api/foodcost/GetVarianceFoodCostPopupReportData",
   //Sales apis
   hourlySales: "api/sales/GetSalesHourlyReportData",
   voids: "api/sales/getVoidsReportData",
