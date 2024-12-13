@@ -120,7 +120,14 @@ const Discounts = () => {
 			columnHelper.accessor('salesGenerated', {
 				id: 'salesGenerated',
 				header: 'Sales $ Generated',
-				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
+				cell: ({ row, getValue }) =>
+					row.getCanExpand()
+						? ''
+						: `$${
+								getValue() !== null && getValue() !== undefined
+									? (getValue().toFixed(2))
+									: '0.00'
+							}`,
 				dataType: 'price',
 				footer: ({ table }) => (
 					<div className='text-center'>${calculateFooterSum(table, 'salesGenerated')}</div>

@@ -245,7 +245,7 @@ const ItemsSoldTotals = () => {
 					? ''
 					: `$${
 							getValue() !== null && getValue() !== undefined
-								? Number(getValue().toFixed(2)).toLocaleString('en-US')
+								? (getValue().toFixed(2))
 								: '0.00'
 					  }`,
 		}),
