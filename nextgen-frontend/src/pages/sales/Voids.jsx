@@ -101,23 +101,35 @@ const Voids = () => {
 			}),
 			columnHelper.accessor('voidReason', {
 				id: 'voidReason',
-				header: 'Void Reason',
+				header: <div className='w-full text-left'>Void Reason</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left pr-3'>{getValue()}</div>;
+				}
 			}),
 			columnHelper.accessor('employeeName', {
 				id: 'employeeName',
-				header: 'Employee',
+				header: <div className='w-full text-left'>Employee</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				}
 			}),
 			columnHelper.accessor('managerName', {
 				id: 'managerName',
-				header: 'Manager',
+				header: <div className='w-full text-left'>Manager</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				}
 			}),
 			columnHelper.accessor('fullDescription', {
 				id: 'fullDescription',
-				header: 'Description',
+				header: <div className='w-full text-left'>Description</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				},
 				size: 200,
 			}),
 			columnHelper.accessor('posCheckId', {
@@ -127,8 +139,11 @@ const Voids = () => {
 			}),
 			columnHelper.accessor('tableName', {
 				id: 'tableName',
-				header: 'Table Name',
+				header: <div className='w-full text-left'>Table Name</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				}
 			}),
 			columnHelper.accessor('revenueID', {
 				id: 'revenueID',
@@ -158,8 +173,11 @@ const Voids = () => {
 			}),
 			columnHelper.accessor('tendersUsed', {
 				id: 'tendersUsed',
-				header: 'Tenders',
+				header: <div className='w-full text-left'>Tenders</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				},
 			}),
 		],
 		[]
