@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState, useRef } from "react";
-import { getCall } from "../../apis/network";
-import { Steps } from "intro.js-react";
-import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { getCall } from '../../apis/network';
+import { Steps } from 'intro.js-react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
   Loader,
   UnitSelector,
@@ -15,12 +15,12 @@ import {
   TableHOC,
   Dropdown,
   Modal,
-} from "../../components";
-import { createColumnHelper } from "@tanstack/react-table";
-import actualFoodCosts from "../../assets/introJSSteps/actualFoodCosts";
-import { useNavigate } from "react-router-dom";
-import dateFormat from "dateformat";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+} from '../../components';
+import { createColumnHelper } from '@tanstack/react-table';
+import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
+import { useNavigate } from 'react-router-dom';
+import dateFormat from 'dateformat';
+import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
 const columnHelper = createColumnHelper();
 
@@ -43,12 +43,12 @@ const ActualFoodCost = () => {
   const [isDateLoading, setIsDateLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState(
-    "There was an error trying to load the Actual Food Cost Report, please try again later."
+    'There was an error trying to load the Actual Food Cost Report, please try again later.'
   );
 
   //selected unit state variables
   const [selectedUnit, setSelectedUnit] = useState();
-  const [selectedUnitName, setSelectedUnitName] = useState("Loading...");
+  const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
   const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
   //calendar state variables
@@ -70,35 +70,35 @@ const ActualFoodCost = () => {
   const [isShowHideDepartments, setIsShowHideDepartments] = useState(false);
   const [checkedItems, setCheckedItems] = useState([
     {
-      name: "DO NOT COUNT/DO NOT COUNT",
+      name: 'DO NOT COUNT/DO NOT COUNT',
       showOnReport: false,
       includeInGrandTotal: false,
     },
-    { name: "FOOD/BEVERAGES", showOnReport: true, includeInGrandTotal: true },
-    { name: "FOOD/BREAD", showOnReport: true, includeInGrandTotal: true },
-    { name: "FOOD/DAIRY", showOnReport: true, includeInGrandTotal: true },
-    { name: "FOOD/GROCERY", showOnReport: true, includeInGrandTotal: true },
-    { name: "FOOD/MEAT", showOnReport: true, includeInGrandTotal: true },
-    { name: "FOOD/PRODUCE", showOnReport: true, includeInGrandTotal: true },
-    { name: "PREP/PREP", showOnReport: false, includeInGrandTotal: false },
-    { name: "SUPPLY/CLEANING", showOnReport: true, includeInGrandTotal: true },
-    { name: "SUPPLY/PAPER", showOnReport: true, includeInGrandTotal: true },
+    { name: 'FOOD/BEVERAGES', showOnReport: true, includeInGrandTotal: true },
+    { name: 'FOOD/BREAD', showOnReport: true, includeInGrandTotal: true },
+    { name: 'FOOD/DAIRY', showOnReport: true, includeInGrandTotal: true },
+    { name: 'FOOD/GROCERY', showOnReport: true, includeInGrandTotal: true },
+    { name: 'FOOD/MEAT', showOnReport: true, includeInGrandTotal: true },
+    { name: 'FOOD/PRODUCE', showOnReport: true, includeInGrandTotal: true },
+    { name: 'PREP/PREP', showOnReport: false, includeInGrandTotal: false },
+    { name: 'SUPPLY/CLEANING', showOnReport: true, includeInGrandTotal: true },
+    { name: 'SUPPLY/PAPER', showOnReport: true, includeInGrandTotal: true },
   ]);
 
   //dropdown variables
-  const [view, setView] = useState("Weekly");
-  const [countType, setCountType] = useState("WE");
+  const [view, setView] = useState('Weekly');
+  const [countType, setCountType] = useState('WE');
   const dropdownOptions = [
-    { name: "Daily" },
-    { name: "Monthly" },
-    { name: "Shift" },
-    { name: "Weekly" },
+    { name: 'Daily' },
+    { name: 'Monthly' },
+    { name: 'Shift' },
+    { name: 'Weekly' },
   ];
-  const [viewby, setViewBy] = useState("Department");
+  const [viewby, setViewBy] = useState('Department');
   const viewOptions = [
-    { name: "Department", row: 1 },
-    { name: "Sub Department", row: 2 },
-    { name: "Inventory Item", row: 3 },
+    { name: 'Department', row: 1 },
+    { name: 'Sub Department', row: 2 },
+    { name: 'Inventory Item', row: 3 },
   ];
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [costBreakActualDetails, setCostBreakActualDetails] = useState({});
@@ -121,15 +121,15 @@ const ActualFoodCost = () => {
   });
   const moreOptionsDropdown = useRef(null);
   const viewMap = {
-    Weekly: "WE",
-    Daily: "DA",
-    Monthly: "MO",
-    Shift: "SH",
+    Weekly: 'WE',
+    Daily: 'DA',
+    Monthly: 'MO',
+    Shift: 'SH',
   };
 
   const handleViewChange = (option) => {
     setView(option);
-    setCountType(viewMap[option] || "");
+    setCountType(viewMap[option] || '');
   };
   const handleTotalViewChange = (option) => {
     setViewBy(option);
@@ -139,12 +139,12 @@ const ActualFoodCost = () => {
 
   const generatedColumns = [
     columnHelper.display({
-      id: "actions",
+      id: 'actions',
       cell: ({ row }) =>
         row.getCanExpand() ? (
           <div
             {...{
-              style: { cursor: "pointer", paddingLeft: `${row.depth * 2}rem` },
+              style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
             }}
           >
             {row.getIsExpanded() ? (
@@ -154,170 +154,170 @@ const ActualFoodCost = () => {
             )}
           </div>
         ) : null,
-      size: "80",
+      size: '80',
     }),
-    columnHelper.accessor("department", {
-      id: "department",
-      header: "Department",
-      dataType: "string",
+    columnHelper.accessor('department', {
+      id: 'department',
+      header: 'Department',
+      dataType: 'string',
     }),
-    columnHelper.accessor("subDepartment", {
-      id: "subDepartment",
-      header: "Sub Department",
+    columnHelper.accessor('subDepartment', {
+      id: 'subDepartment',
+      header: 'Sub Department',
       showDepth: 2,
-      dataType: "string",
+      dataType: 'string',
     }),
-    columnHelper.accessor("description", {
-      id: "description",
-      header: "Description",
+    columnHelper.accessor('description', {
+      id: 'description',
+      header: 'Description',
       showDepth: 3,
-      dataType: "string",
+      dataType: 'string',
       size: 300,
     }),
-    columnHelper.accessor("countDisplayUnitName", {
-      id: "countDisplayUnitName",
-      header: "UOM",
+    columnHelper.accessor('countDisplayUnitName', {
+      id: 'countDisplayUnitName',
+      header: 'UOM',
       showDepth: 3,
-      dataType: "string",
+      dataType: 'string',
       size: 200,
     }),
-    columnHelper.accessor("begCountDisplayUnits", {
-      id: "begCountDisplayUnits",
-      header: "Beg #",
+    columnHelper.accessor('begCountDisplayUnits', {
+      id: 'begCountDisplayUnits',
+      header: 'Beg #',
       showDepth: 3,
-      dataType: "number",
+      dataType: 'number',
       cell: ({ getValue }) => getValue()?.toFixed(2),
       size: 90,
     }),
-    columnHelper.accessor("begCountCost", {
-      id: "begCountCost",
-      header: "Beg $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "begCountCost", getValue),
+    columnHelper.accessor('begCountCost', {
+      id: 'begCountCost',
+      header: 'Beg $',
+      dataType: 'number',
+      cell: ({ row, getValue }) => calculateSum(row, 'begCountCost', getValue),
       size: 90,
     }),
-    columnHelper.accessor("purchaseDisplayUnits", {
-      id: "purchaseDisplayUnits",
-      header: "Pur #",
+    columnHelper.accessor('purchaseDisplayUnits', {
+      id: 'purchaseDisplayUnits',
+      header: 'Pur #',
       showDepth: 3,
       cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
+      dataType: 'number',
       size: 60,
     }),
-    columnHelper.accessor("purchaseCost", {
-      id: "purchaseCost",
-      header: "Pur $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "purchaseCost", getValue),
+    columnHelper.accessor('purchaseCost', {
+      id: 'purchaseCost',
+      header: 'Pur $',
+      dataType: 'number',
+      cell: ({ row, getValue }) => calculateSum(row, 'purchaseCost', getValue),
       size: 60,
     }),
-    columnHelper.accessor("iTinCountDisplayUnits", {
-      id: "iTinCountDisplayUnits",
-      header: "Trans In #",
+    columnHelper.accessor('iTinCountDisplayUnits', {
+      id: 'iTinCountDisplayUnits',
+      header: 'Trans In #',
       showDepth: 3,
       cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
+      dataType: 'number',
       size: 60,
     }),
-    columnHelper.accessor("iTinCountCost", {
-      id: "iTinCountCost",
-      header: "Trans In $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "iTinCountCost", getValue),
+    columnHelper.accessor('iTinCountCost', {
+      id: 'iTinCountCost',
+      header: 'Trans In $',
+      dataType: 'number',
+      cell: ({ row, getValue }) => calculateSum(row, 'iTinCountCost', getValue),
       size: 60,
     }),
-    columnHelper.accessor("iToutCountDisplayUnits", {
-      id: "iToutCountDisplayUnits",
-      header: "Trans Out #",
+    columnHelper.accessor('iToutCountDisplayUnits', {
+      id: 'iToutCountDisplayUnits',
+      header: 'Trans Out #',
       showDepth: 3,
       cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
+      dataType: 'number',
       size: 80,
     }),
-    columnHelper.accessor("iToutCountCost", {
-      id: "iToutCountCost",
-      header: "Trans Out $",
-      dataType: "number",
+    columnHelper.accessor('iToutCountCost', {
+      id: 'iToutCountCost',
+      header: 'Trans Out $',
+      dataType: 'number',
       cell: ({ row, getValue }) =>
-        calculateSum(row, "iToutCountCost", getValue),
+        calculateSum(row, 'iToutCountCost', getValue),
       size: 80,
     }),
-    columnHelper.accessor("endCountDisplayUnits", {
-      id: "endCountDisplayUnits",
-      header: "End #",
+    columnHelper.accessor('endCountDisplayUnits', {
+      id: 'endCountDisplayUnits',
+      header: 'End #',
       showDepth: 3,
       cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
+      dataType: 'number',
       size: 60,
     }),
-    columnHelper.accessor("endCountCost", {
-      id: "endCountCost",
-      header: "End $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "endCountCost", getValue),
+    columnHelper.accessor('endCountCost', {
+      id: 'endCountCost',
+      header: 'End $',
+      dataType: 'number',
+      cell: ({ row, getValue }) => calculateSum(row, 'endCountCost', getValue),
       size: 60,
     }),
-    columnHelper.accessor("usageCountDisplayUnits", {
-      id: "usageCountDisplayUnits",
-      header: "Actual Usage #",
+    columnHelper.accessor('usageCountDisplayUnits', {
+      id: 'usageCountDisplayUnits',
+      header: 'Actual Usage #',
       showDepth: 3,
       cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
+      dataType: 'number',
       size: 80,
     }),
-    columnHelper.accessor("usageCost", {
-      id: "usageCost",
-      header: "Actual Usage $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "usageCost", getValue),
+    columnHelper.accessor('usageCost', {
+      id: 'usageCost',
+      header: 'Actual Usage $',
+      dataType: 'number',
+      cell: ({ row, getValue }) => calculateSum(row, 'usageCost', getValue),
       size: 80,
     }),
-    columnHelper.accessor("usageCostPct", {
-      id: "usageCostPct",
-      header: "Actual Usage %",
-      dataType: "number",
+    columnHelper.accessor('usageCostPct', {
+      id: 'usageCostPct',
+      header: 'Actual Usage %',
+      dataType: 'number',
       cell: ({ row, getValue }) =>
-        calculateSum(row, "usageCostPct", getValue, true),
+        calculateSum(row, 'usageCostPct', getValue, true),
       size: 90,
     }),
-    columnHelper.accessor("wasteCountDisplayUnits", {
-      id: "wasteCountDisplayUnits",
-      header: "Waste #",
+    columnHelper.accessor('wasteCountDisplayUnits', {
+      id: 'wasteCountDisplayUnits',
+      header: 'Waste #',
       showDepth: 3,
       cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
+      dataType: 'number',
       size: 80,
     }),
-    columnHelper.accessor("wasteCountCost", {
-      id: "wasteCountCost",
-      header: "Waste $",
-      dataType: "number",
+    columnHelper.accessor('wasteCountCost', {
+      id: 'wasteCountCost',
+      header: 'Waste $',
+      dataType: 'number',
       cell: ({ row, getValue }) =>
-        calculateSum(row, "wasteCountCost", getValue),
+        calculateSum(row, 'wasteCountCost', getValue),
       size: 80,
     }),
-    columnHelper.accessor("wasteCostPct", {
-      id: "wasteCostPct",
-      header: "Waste %",
-      dataType: "number",
+    columnHelper.accessor('wasteCostPct', {
+      id: 'wasteCostPct',
+      header: 'Waste %',
+      dataType: 'number',
       cell: ({ row, getValue }) =>
-        calculateSum(row, "wasteCostPct", getValue, true),
+        calculateSum(row, 'wasteCostPct', getValue, true),
       size: 90,
     }),
-    columnHelper.accessor("comparisonName", {
-      id: "comparisonName",
-      header: "Comparison Name",
-      dataType: "string",
+    columnHelper.accessor('comparisonName', {
+      id: 'comparisonName',
+      header: 'Comparison Name',
+      dataType: 'string',
       size: 100,
     }),
-    columnHelper.accessor("comparisonSales", {
-      id: "comparisonSales",
-      header: "Comparison Net Sales",
-      dataType: "number",
+    columnHelper.accessor('comparisonSales', {
+      id: 'comparisonSales',
+      header: 'Comparison Net Sales',
+      dataType: 'number',
       cell: ({ getValue }) =>
         getValue() !== undefined
-          ? `$${parseFloat(getValue().toFixed(2)).toLocaleString("en-US")}`
-          : "",
+          ? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}`
+          : '',
       size: 100,
     }),
   ];
@@ -334,7 +334,7 @@ const ActualFoodCost = () => {
                 if (subSubrow.getCanExpand()) {
                   const item = checkedItems.find(
                     (item) =>
-                      item.name.split("/")[1] ===
+                      item.name.split('/')[1] ===
                       subSubrow.original.subDepartment
                   );
                   return (
@@ -352,7 +352,7 @@ const ActualFoodCost = () => {
                 } else {
                   let item = checkedItems.find(
                     (item) =>
-                      item?.name.split("/")[1] === subrow.original.subDepartment
+                      item?.name.split('/')[1] === subrow.original.subDepartment
                   );
 
                   return (
@@ -373,35 +373,35 @@ const ActualFoodCost = () => {
         }, 0)
         .toFixed(2);
       if (isPercentage) {
-        return `${parseFloat(sum).toLocaleString("en-US", {
+        return `${parseFloat(sum).toLocaleString('en-US', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}%`;
       }
       return sum < 0
-        ? `-$${Math.abs(parseFloat(sum)).toLocaleString("en-US", {
+        ? `-$${Math.abs(parseFloat(sum)).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}`
-        : `$${parseFloat(sum).toLocaleString("en-US", {
+        : `$${parseFloat(sum).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}`;
     } else {
       const value = getValue();
-      if (!value) return isPercentage ? "0.00%" : "$0.00";
+      if (!value) return isPercentage ? '0.00%' : '$0.00';
       if (isPercentage) {
-        return `${parseFloat(value).toLocaleString("en-US", {
+        return `${parseFloat(value).toLocaleString('en-US', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}%`;
       }
       return value < 0
-        ? `-$${Math.abs(parseFloat(value)).toLocaleString("en-US", {
+        ? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}`
-        : `$${parseFloat(value).toLocaleString("en-US", {
+        : `$${parseFloat(value).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}`;
@@ -436,7 +436,7 @@ const ActualFoodCost = () => {
       try {
         setIsDateLoading(true);
         const getData = {
-          url: "getCountsheetDates",
+          url: 'getCountsheetDates',
           urlParams: {
             companyId: companyID,
             unitId: selectedUnit,
@@ -447,10 +447,10 @@ const ActualFoodCost = () => {
         const result = await getCall(getData);
 
         const fromOptions = result.data.fromDates.map((option) => ({
-          name: dateFormat(option, "mm-dd-yyyy"),
+          name: dateFormat(option, 'mm-dd-yyyy'),
         }));
         const toOptions = result.data.toDates.map((option) => ({
-          name: dateFormat(option, "mm-dd-yyyy"),
+          name: dateFormat(option, 'mm-dd-yyyy'),
         }));
 
         if (fromOptions.length === 1 || toOptions.length === 1) {
@@ -464,7 +464,7 @@ const ActualFoodCost = () => {
         setToDateOptions(toOptions);
         setIsDateLoading(false);
       } catch (error) {
-        console.error("Error in fetching date options", error);
+        console.error('Error in fetching date options', error);
       } finally {
         setIsDateLoading(false);
       }
@@ -481,13 +481,13 @@ const ActualFoodCost = () => {
       setIsTableRendered(false);
 
       const getData = {
-        url: "ActualFoodCost",
+        url: 'ActualFoodCost',
         urlParams: {
           companyId: companyID,
           alignmentId: alignmentID,
           memberId: selectedUnit,
-          fromDate: dateFormat(selectedFromDate, "yyyy-mm-dd"),
-          toDate: dateFormat(selectedToDate, "yyyy-mm-dd"),
+          fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+          toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
           countType: countType,
         },
       };
@@ -498,12 +498,12 @@ const ActualFoodCost = () => {
       } else {
         const newData = [
           {
-            department: "TOTAL",
+            department: 'TOTAL',
             subRows: result.data.map((department) => ({
               department: department.department,
               comparisonName:
                 department.subDepartments[0]?.actualFoodCosts[0]
-                  ?.comparisonName || "",
+                  ?.comparisonName || '',
               comparisonSales:
                 department.subDepartments[0]?.actualFoodCosts[0]
                   ?.comparisonSales || 0,
@@ -511,7 +511,7 @@ const ActualFoodCost = () => {
                 subDepartment: subDepartment.subDepartment,
                 comparisonName:
                   department.subDepartments[0]?.actualFoodCosts[0]
-                    ?.comparisonName || "",
+                    ?.comparisonName || '',
                 comparisonSales:
                   department.subDepartments[0]?.actualFoodCosts[0]
                     ?.comparisonSales || 0,
@@ -551,7 +551,7 @@ const ActualFoodCost = () => {
                   yieldPerCountDisplayUnit: foodCost.yieldPerCountDisplayUnit,
                   qsrInventoryItemID: foodCost?.qsrInventoryItemID
                     ? foodCost?.qsrInventoryItemID
-                    : "",
+                    : '',
                 })),
               })),
             })),
@@ -566,9 +566,9 @@ const ActualFoodCost = () => {
       setIsError(true);
       setIsLoading(false);
       setErrorMessage(
-        "There was an issue loading your data, please try again later."
+        'There was an issue loading your data, please try again later.'
       );
-      console.error("Error getting Actual Food Cost data: ", error);
+      console.error('Error getting Actual Food Cost data: ', error);
     }
   };
 
@@ -585,7 +585,7 @@ const ActualFoodCost = () => {
   };
 
   const handleShowColumns = (status, type) => {
-    if (type === "#") {
+    if (type === '#') {
       setShowQuantities(!showQuantities);
     } else {
       setShowDollarAmounts(!showDollarAmounts);
@@ -637,25 +637,25 @@ const ActualFoodCost = () => {
   // Function to handle the PDF export
   const handlePDFClick = (type) => {
     if (!columns || columns.length === 0) {
-      console.error("Columns are not defined or empty");
+      console.error('Columns are not defined or empty');
       return;
     }
 
     if (!actualFoodCostData || actualFoodCostData.length === 0) {
-      console.error("Actual report data is not defined or empty");
+      console.error('Actual report data is not defined or empty');
       return;
     }
 
     const pdfData = {
-      title: "Actual Food Cost Report",
+      title: 'Actual Food Cost Report',
       subHeaders: [
-        `${dateFormat(selectedFromDate, "mm-dd-yyyy")} to ${dateFormat(
+        `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
           selectedToDate,
-          "mm-dd-yyyy"
+          'mm-dd-yyyy'
         )} | ${selectedUnitName}`,
       ],
-      exportType: "pdf",
-      pageOrientation: "landscape",
+      exportType: 'pdf',
+      pageOrientation: 'landscape',
       body: buildPDFBody(type),
     };
 
@@ -666,7 +666,7 @@ const ActualFoodCost = () => {
     const rowsPerTable = 28;
     const body = [];
     const data =
-      type === "filtered" ? filteredActualFoodCostData : actualFoodCostData;
+      type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData;
 
     data.forEach((row) => {
       row.subRows.forEach((subRow) => {
@@ -680,49 +680,49 @@ const ActualFoodCost = () => {
         const totalRows = allRows.length;
 
         const allColumns = [
-          { id: "subDepartment", header: "Sub Department", dataType: "string" },
-          { id: "description", header: "Description", dataType: "string" },
-          { id: "countDisplayUnitName", header: "UOM", dataType: "string" },
-          { id: "begCountDisplayUnits", header: "Beg #", dataType: "number" },
-          { id: "begCountCost", header: "Beg $", dataType: "number" },
-          { id: "purchaseDisplayUnits", header: "Pur #", dataType: "number" },
-          { id: "purchaseCost", header: "Pur $", dataType: "number" },
+          { id: 'subDepartment', header: 'Sub Department', dataType: 'string' },
+          { id: 'description', header: 'Description', dataType: 'string' },
+          { id: 'countDisplayUnitName', header: 'UOM', dataType: 'string' },
+          { id: 'begCountDisplayUnits', header: 'Beg #', dataType: 'number' },
+          { id: 'begCountCost', header: 'Beg $', dataType: 'number' },
+          { id: 'purchaseDisplayUnits', header: 'Pur #', dataType: 'number' },
+          { id: 'purchaseCost', header: 'Pur $', dataType: 'number' },
           {
-            id: "iTinCountDisplayUnits",
-            header: "Trans In#",
-            dataType: "number",
+            id: 'iTinCountDisplayUnits',
+            header: 'Trans In#',
+            dataType: 'number',
           },
-          { id: "iTinCountCost", header: "Trans In $", dataType: "number" },
+          { id: 'iTinCountCost', header: 'Trans In $', dataType: 'number' },
           {
-            id: "iToutCountDisplayUnits",
-            header: "Trans Out#",
-            dataType: "number",
+            id: 'iToutCountDisplayUnits',
+            header: 'Trans Out#',
+            dataType: 'number',
           },
-          { id: "iToutCountCost", header: "Trans Out $", dataType: "number" },
-          { id: "endCountDisplayUnits", header: "End #", dataType: "number" },
-          { id: "endCountCost", header: "End $", dataType: "number" },
+          { id: 'iToutCountCost', header: 'Trans Out $', dataType: 'number' },
+          { id: 'endCountDisplayUnits', header: 'End #', dataType: 'number' },
+          { id: 'endCountCost', header: 'End $', dataType: 'number' },
           {
-            id: "usageCountDisplayUnits",
-            header: "Actual Usage #",
-            dataType: "number",
+            id: 'usageCountDisplayUnits',
+            header: 'Actual Usage #',
+            dataType: 'number',
           },
-          { id: "usageCost", header: "Actual Usage $", dataType: "number" },
-          { id: "usageCostPct", header: "Actual Usage %", dataType: "number" },
+          { id: 'usageCost', header: 'Actual Usage $', dataType: 'number' },
+          { id: 'usageCostPct', header: 'Actual Usage %', dataType: 'number' },
           {
-            id: "wasteCountDisplayUnits",
-            header: "Waste #",
-            dataType: "number",
+            id: 'wasteCountDisplayUnits',
+            header: 'Waste #',
+            dataType: 'number',
           },
-          { id: "wasteCountCost", header: "Waste $", dataType: "number" },
+          { id: 'wasteCountCost', header: 'Waste $', dataType: 'number' },
           {
-            id: "comparisonName",
-            header: "Comparison Name",
-            dataType: "string",
+            id: 'comparisonName',
+            header: 'Comparison Name',
+            dataType: 'string',
           },
           {
-            id: "comparisonSales",
-            header: "Comparison Sales",
-            dataType: "number",
+            id: 'comparisonSales',
+            header: 'Comparison Sales',
+            dataType: 'number',
           },
         ];
 
@@ -734,20 +734,20 @@ const ActualFoodCost = () => {
 
           chunkedColumns.forEach((columnChunk) => {
             body.push({
-              type: "table/SeperatePage",
+              type: 'table/SeperatePage',
               title: subRow.department,
-              widths: columnChunk.map(() => "auto"),
+              widths: columnChunk.map(() => 'auto'),
               dataTypes: columnChunk.map((column) => column.dataType),
               data: {
                 columnHeaders: columnChunk.map((column) => column.header),
                 rows: allRows.slice(i, i + rowsPerTable).map((row) =>
                   columnChunk.map((column) => ({
                     value:
-                      column.header?.includes("$") ||
-                      column.header === "Comparison Sales"
+                      column.header?.includes('$') ||
+                      column.header === 'Comparison Sales'
                         ? `$${parseFloat(
                             formatCellValue(row[column.id], column.dataType)
-                          ).toLocaleString("en-US")}`
+                          ).toLocaleString('en-US')}`
                         : formatCellValue(row[column.id], column.dataType),
                     cellType: column.dataType,
                     columnName: column.header,
@@ -764,9 +764,9 @@ const ActualFoodCost = () => {
   };
 
   const formatCellValue = (value, dataType) => {
-    if (value === undefined || value === null) return "";
-    if (dataType === "number") {
-      return typeof value === "number" ? value.toFixed(2) : value;
+    if (value === undefined || value === null) return '';
+    if (dataType === 'number') {
+      return typeof value === 'number' ? value.toFixed(2) : value;
     }
     return value;
   };
@@ -779,32 +779,32 @@ const ActualFoodCost = () => {
   const handleExcelClick = (type) => {
     const data = [
       {
-        name: "",
+        name: '',
         columns: [
-          { name: "Department", filter: "text" },
-          { name: "Sub Department", filter: "text" },
-          { name: "Description", filter: "text" },
-          { name: "UOM", filter: "text" },
-          { name: "Beg #", filter: "text" },
-          { name: "Beg $", filter: "text" },
-          { name: "Pur #", filter: "text" },
-          { name: "Pur $", filter: "text" },
-          { name: "Trans In#", filter: "text" },
-          { name: "Trans In $", filter: "text" },
-          { name: "Trans Out #", filter: "text" },
-          { name: "Trans Out $", filter: "text" },
-          { name: "End #", filter: "text" },
-          { name: "End $", filter: "text" },
-          { name: "Actual Usage #", filter: "text" },
-          { name: "Actual Usage $", filter: "text" },
-          { name: "Actual Usage %", filter: "text" },
-          { name: "Waste #", filter: "text" },
-          { name: "Waste $", filter: "text" },
-          { name: "Waste %", filter: "text" },
-          { name: "Comparison Name", filter: "text" },
-          { name: "Comparison Sales", filter: "text" },
+          { name: 'Department', filter: 'text' },
+          { name: 'Sub Department', filter: 'text' },
+          { name: 'Description', filter: 'text' },
+          { name: 'UOM', filter: 'text' },
+          { name: 'Beg #', filter: 'text' },
+          { name: 'Beg $', filter: 'text' },
+          { name: 'Pur #', filter: 'text' },
+          { name: 'Pur $', filter: 'text' },
+          { name: 'Trans In#', filter: 'text' },
+          { name: 'Trans In $', filter: 'text' },
+          { name: 'Trans Out #', filter: 'text' },
+          { name: 'Trans Out $', filter: 'text' },
+          { name: 'End #', filter: 'text' },
+          { name: 'End $', filter: 'text' },
+          { name: 'Actual Usage #', filter: 'text' },
+          { name: 'Actual Usage $', filter: 'text' },
+          { name: 'Actual Usage %', filter: 'text' },
+          { name: 'Waste #', filter: 'text' },
+          { name: 'Waste $', filter: 'text' },
+          { name: 'Waste %', filter: 'text' },
+          { name: 'Comparison Name', filter: 'text' },
+          { name: 'Comparison Sales', filter: 'text' },
         ],
-        data: (type === "filtered"
+        data: (type === 'filtered'
           ? filteredActualFoodCostData
           : actualFoodCostData
         ).flatMap((row) =>
@@ -842,12 +842,12 @@ const ActualFoodCost = () => {
 
     const filename = `ActualFoodCost_${selectedUnitName}_${dateFormat(
       selectedFromDate,
-      "mm-dd-yyyy"
-    )}_to_${dateFormat(selectedToDate, "mm-dd-yyyy")}`;
-    const spreadSheetTitle = "Actual Food Cost";
-    const date = `${dateFormat(selectedFromDate, "mm-dd-yyyy")} to ${dateFormat(
+      'mm-dd-yyyy'
+    )}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
+    const spreadSheetTitle = 'Actual Food Cost';
+    const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
       selectedToDate,
-      "mm-dd-yyyy"
+      'mm-dd-yyyy'
     )}`;
 
     exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
@@ -864,9 +864,9 @@ const ActualFoodCost = () => {
   };
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -889,15 +889,15 @@ const ActualFoodCost = () => {
   const handleCountsheet = async (fromDate, toDate, isEnding = false) => {
     try {
       const getData = {
-        url: "getCountsheets",
+        url: 'getCountsheets',
         urlParams: {
           companyID: companyID,
           alignmentID: alignmentID,
           memberID: selectedUnit,
-          fromDate: dateFormat(fromDate, "yyyy-mm-dd"),
+          fromDate: dateFormat(fromDate, 'yyyy-mm-dd'),
           toDate: dateFormat(
             new Date(new Date(toDate).setDate(new Date(toDate).getDate() + 1)),
-            "yyyy-mm-dd"
+            'yyyy-mm-dd'
           ),
         },
       };
@@ -936,10 +936,10 @@ const ActualFoodCost = () => {
         }/CountsheetDesigner?companyID=${companyID}&countsheet=${encodeURIComponent(
           JSON.stringify(countsheet)
         )}`,
-        "_blank"
+        '_blank'
       );
     } catch (error) {
-      console.error("Error getting Countsheet data: ", error);
+      console.error('Error getting Countsheet data: ', error);
     }
   };
 
@@ -961,18 +961,18 @@ const ActualFoodCost = () => {
       }/PurchaseAnalysis?companyID=${companyID}&countsheet=${encodeURIComponent(
         JSON.stringify(dataToSend)
       )}`,
-      "_blank"
+      '_blank'
     );
   };
 
   const getGetActualFoodCostBreakdownIdealReportData = async (row) => {
-    let { qsrInventoryItemID = "" } = row;
+    let { qsrInventoryItemID = '' } = row;
     setCostBreakActualDetails(row);
-    console.log("======>", JSON.stringify(row));
+    console.log('======>', JSON.stringify(row));
     try {
       setIsBreakDownModal(true);
       const getData = {
-        url: "GetActualFoodCostBreakdownIdealReportData",
+        url: 'GetActualFoodCostBreakdownIdealReportData',
         urlParams: {
           companyID: companyID,
           alignmentID: alignmentID,
@@ -986,7 +986,7 @@ const ActualFoodCost = () => {
       const result = await getCall(getData);
 
       const getDataBreakDown = {
-        url: "GetActualFoodCostBreakdownReportData",
+        url: 'GetActualFoodCostBreakdownReportData',
         urlParams: {
           companyID: companyID,
           alignmentID: alignmentID,
@@ -1006,7 +1006,7 @@ const ActualFoodCost = () => {
         setCostBreakDownIdeatDetails(result.data);
       }
     } catch (error) {
-      console.log("er", error);
+      console.log('er', error);
     }
   };
 
@@ -1022,9 +1022,9 @@ const ActualFoodCost = () => {
       setShowAndHideBreakDown({ ...oldShow });
     };
 
-    const calculateMasterItemQuantityTotalSum = (data,name) => {
+    const calculateMasterItemQuantityTotalSum = (data, name) => {
       if (!data || !Array.isArray(data)) {
-        throw new Error("Invalid input data. Ensure the data is an array.");
+        throw new Error('Invalid input data. Ensure the data is an array.');
       }
 
       // Use the reduce function to calculate the sum
@@ -1038,39 +1038,48 @@ const ActualFoodCost = () => {
 
     function calculateTotalCost(data) {
       if (!data || !Array.isArray(data)) {
-          throw new Error("Invalid input data. Ensure the data is an array.");
+        throw new Error('Invalid input data. Ensure the data is an array.');
       }
-  
+
       // Use the reduce function to calculate the total cost
       const totalCost = data.reduce((sum, item) => {
-          const quantity = parseFloat(item.MasterItemQuantityTotal);
-          const cost = parseFloat(item.MasterItemIdealUOMCost);
-  
-          // Add to the sum only if both values are valid numbers
-          return sum + (isNaN(quantity) || isNaN(cost) ? 0 : quantity * cost);
+        const quantity = parseFloat(item.MasterItemQuantityTotal);
+        const cost = parseFloat(item.MasterItemIdealUOMCost);
+
+        // Add to the sum only if both values are valid numbers
+        return sum + (isNaN(quantity) || isNaN(cost) ? 0 : quantity * cost);
       }, 0);
-  
+
       return totalCost;
-  }
+    }
 
-  const totalVariance = ()=>{
-    let totalVarica = costBreakActualDetails?.usageCost?.toFixed(2) - calculateTotalCost(costBreakdownIdealDetails).toFixed(2)
-    return totalVarica.toFixed(2)
-  }
+    const totalVariance = () => {
+      let totalVarica =
+        costBreakActualDetails?.usageCost?.toFixed(2) -
+        calculateTotalCost(costBreakdownIdealDetails).toFixed(2);
+      return totalVarica.toFixed(2);
+    };
 
-  const totalVariancecs = () =>{
-    let totalCs = costBreakActualDetails?.usageCases?.toFixed(2) - calculateMasterItemQuantityTotalSum(costBreakdownIdealDetails,"MasterItemQuantityTotal").toFixed(2)
-    return totalCs.toFixed(2)
-  }
+    const totalVariancecs = () => {
+      let totalCs =
+        costBreakActualDetails?.usageCases?.toFixed(2) -
+        calculateMasterItemQuantityTotalSum(
+          costBreakdownIdealDetails,
+          'MasterItemQuantityTotal'
+        ).toFixed(2);
+      return totalCs.toFixed(2);
+    };
 
     return (
       <div className="max-w-5xl mx-auto my-0 p-1 rounded-lg shadow-lg border bg-white min-w-[750px]">
         {/* Header */}
         <div className="text-center  ">
-          <p className="text-gray-600 text-sm">{costBreakActualDetails.description}</p>
           <p className="text-gray-600 text-sm">
-            Store #{selectedUnit} {selectedFromDate} to {selectedToDate} (
-            {view})
+            {costBreakActualDetails.description}
+          </p>
+          <p className="text-gray-600 text-sm">
+            Store #{selectedUnit} {selectedFromDate} to {selectedToDate} ({view}
+            )
           </p>
         </div>
 
@@ -1078,11 +1087,11 @@ const ActualFoodCost = () => {
         <div className="my-1">
           <h3
             onClick={(e) => {
-              e.preventDefault(), openCollapse("Actual");
+              e.preventDefault(), openCollapse('Actual');
             }}
             className="text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
           >
-            <span>Actual</span>{" "}
+            <span>Actual</span>{' '}
             <span className="m-1 ">
               {showAndHideBreakDown.Actual == true ? (
                 <IoIosArrowUp />
@@ -1127,7 +1136,7 @@ const ActualFoodCost = () => {
                   <tr
                     className="cursor-pointer"
                     onClick={(e) => {
-                      e.preventDefault(), openCollapse("purchaseBetween");
+                      e.preventDefault(), openCollapse('purchaseBetween');
                     }}
                   >
                     <td className="border text-left  p-[3px]  text-nowrap text-sm ">
@@ -1140,8 +1149,8 @@ const ActualFoodCost = () => {
                           <div className="p-1">
                             <CiSquarePlus />
                           </div>
-                        )}{" "}
-                        Purchases between {selectedFromDate} and{" "}
+                        )}{' '}
+                        Purchases between {selectedFromDate} and{' '}
                         {selectedToDate}
                       </div>
                     </td>
@@ -1160,13 +1169,27 @@ const ActualFoodCost = () => {
                       <td colSpan={4}>
                         <table className="w-[97%] ml-[3%]">
                           <thead className="bg-gray-100">
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Vendor</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Date</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Invoices #</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">#</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">UOM</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Price</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Total</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Vendor
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Date
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Invoices #
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              #
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              UOM
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Price
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Total
+                            </th>
                           </thead>
                           <tbody>
                             {breakDownIdealDetails.map((item) => (
@@ -1175,7 +1198,7 @@ const ActualFoodCost = () => {
                                   {item.VendorName}
                                 </td>
                                 <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                                  {dateFormat(item.InvoiceDate, "mm-dd-yyyy")}
+                                  {dateFormat(item.InvoiceDate, 'mm-dd-yyyy')}
                                 </td>
                                 <td className="border text-right  p-[3px]  text-nowrap text-sm">
                                   {item.VendorInvoiceReference}
@@ -1194,7 +1217,11 @@ const ActualFoodCost = () => {
                                 </td>
                               </tr>
                             ))}
-                            {breakDownIdealDetails.length === 0 && <td colSpan={7}>There is no any purchases in this period.</td> }
+                            {breakDownIdealDetails.length === 0 && (
+                              <td colSpan={7}>
+                                There is no any purchases in this period.
+                              </td>
+                            )}
                           </tbody>
                         </table>
                       </td>
@@ -1205,7 +1232,7 @@ const ActualFoodCost = () => {
                       <div className="flex align-middle">
                         <div className="p-1">
                           <CiSquarePlus />
-                        </div>{" "}
+                        </div>{' '}
                         Transferred In
                       </div>
                     </td>
@@ -1224,7 +1251,7 @@ const ActualFoodCost = () => {
                       <div className="flex align-middle">
                         <div className="p-1">
                           <CiSquarePlus />
-                        </div>{" "}
+                        </div>{' '}
                         Transferred Out
                       </div>
                     </td>
@@ -1243,7 +1270,7 @@ const ActualFoodCost = () => {
                       <div className="flex align-middle">
                         <div className="p-1">
                           <CiSquarePlus />
-                        </div>{" "}
+                        </div>{' '}
                         Ending On-Hand Count: {selectedToDate}
                       </div>
                     </td>
@@ -1264,7 +1291,7 @@ const ActualFoodCost = () => {
                       className="border p-[3px]  text-nowrap text-sm text-left"
                       colSpan={2}
                     >
-                      Actual Usage{" "}
+                      Actual Usage{' '}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
                       {costBreakActualDetails?.usageCases?.toFixed(2)}
@@ -1283,27 +1310,25 @@ const ActualFoodCost = () => {
         <div className="my-1">
           <h3
             onClick={(e) => {
-              e.preventDefault(), openCollapse("ideal");
+              e.preventDefault(), openCollapse('ideal');
             }}
             className="text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
-            >
-              <span>Ideal</span>{" "}
-              <span className="m-1 ">
-                {showAndHideBreakDown.ideal == true ? (
-                  <IoIosArrowUp />
-                ) : (
-                  <IoIosArrowDown />
-                )}
-              </span>
+          >
+            <span>Ideal</span>{' '}
+            <span className="m-1 ">
+              {showAndHideBreakDown.ideal == true ? (
+                <IoIosArrowUp />
+              ) : (
+                <IoIosArrowDown />
+              )}
+            </span>
           </h3>
           {showAndHideBreakDown.ideal == true && (
             <div className="tableHOC pr-1 max-h-[20vh] overflow-auto">
               <table className="w-full border-collapse ">
                 <thead className="bg-gray-100 sticky top-0">
                   <tr>
-                    <th className=" p-[3px] text-left text-sm">
-                      Menu Item
-                    </th>
+                    <th className=" p-[3px] text-left text-sm">Menu Item</th>
                     <th className=" p-[3px] text-left text-nowrap text-sm">
                       Recipe
                     </th>
@@ -1311,7 +1336,7 @@ const ActualFoodCost = () => {
                       # Sold
                     </th>
                     <th className=" p-[3px] text-right text-nowrap text-sm">
-                      #{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName}{" "}
+                      #{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName}{' '}
                       in Recipe
                     </th>
                     <th className=" p-[3px] text-right text-nowrap text-sm">
@@ -1362,13 +1387,17 @@ const ActualFoodCost = () => {
                       className="border p-[3px]  text-nowrap text-sm text-left"
                       colSpan={5}
                     >
-                      Ideal Usage{" "}
+                      Ideal Usage{' '}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      {calculateMasterItemQuantityTotalSum(costBreakdownIdealDetails,"MasterItemQuantityTotal").toFixed(2)}
+                      {calculateMasterItemQuantityTotalSum(
+                        costBreakdownIdealDetails,
+                        'MasterItemQuantityTotal'
+                      ).toFixed(2)}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      ${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
+                      $
+                      {calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
                     </td>
                   </tr>
                 </tfoot>
@@ -1381,18 +1410,18 @@ const ActualFoodCost = () => {
         <div className="my-1">
           <h3
             onClick={(e) => {
-              e.preventDefault(), openCollapse("Variance");
+              e.preventDefault(), openCollapse('Variance');
             }}
             className="text-base font-semibold bg-orange-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
-            >
-              <span> Variance</span>
-              <span className="m-1 ">
-                {showAndHideBreakDown.Variance == true ? (
-                  <IoIosArrowUp />
-                ) : (
-                  <IoIosArrowDown />
-                )}
-              </span>
+          >
+            <span> Variance</span>
+            <span className="m-1 ">
+              {showAndHideBreakDown.Variance == true ? (
+                <IoIosArrowUp />
+              ) : (
+                <IoIosArrowDown />
+              )}
+            </span>
           </h3>
           {showAndHideBreakDown.Variance == true && (
             <table className="w-full border-collapse border">
@@ -1410,22 +1439,37 @@ const ActualFoodCost = () => {
                   <td className="border p-[3px] text-left text-sm">
                     Actual Usage
                   </td>
-                  <td className="border p-[3px]  text-nowrap text-sm  text-right">{costBreakActualDetails?.usageCases?.toFixed(2)}</td>
-                  <td className="border p-[3px]  text-nowrap text-sm  text-right">${costBreakActualDetails?.usageCost?.toFixed(2)}</td>
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
+                    {costBreakActualDetails?.usageCases?.toFixed(2)}
+                  </td>
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
+                    ${costBreakActualDetails?.usageCost?.toFixed(2)}
+                  </td>
                 </tr>
                 <tr>
                   <td className="border p-[3px] text-left text-sm">
                     Ideal Usage
                   </td>
-                  <td className="border p-[3px]  text-nowrap text-sm  text-right">{calculateMasterItemQuantityTotalSum(costBreakdownIdealDetails,"MasterItemQuantityTotal").toFixed(2)}</td>
-                  <td className="border p-[3px]  text-nowrap text-sm  text-right">${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}</td>
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
+                    {calculateMasterItemQuantityTotalSum(
+                      costBreakdownIdealDetails,
+                      'MasterItemQuantityTotal'
+                    ).toFixed(2)}
+                  </td>
+                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
+                    ${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
+                  </td>
                 </tr>
                 <tr>
                   <td className="border p-[3px] text-left text-sm">
                     Variance Usage
                   </td>
-                  <td className="border p-[3px] text-right text-sm">{totalVariancecs()}</td>
-                  <td className="border p-[3px]  text-nowrap text-sm text-right">${totalVariance()}</td>
+                  <td className="border p-[3px] text-right text-sm">
+                    {totalVariancecs()}
+                  </td>
+                  <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    ${totalVariance()}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1465,7 +1509,7 @@ const ActualFoodCost = () => {
                   title="From Date"
                   options={fromDateOptions}
                   selectedOption={
-                    isDateLoading ? "Loading..." : selectedFromDate
+                    isDateLoading ? 'Loading...' : selectedFromDate
                   }
                   onOptionChange={(date) => setSelectedFromDate(date)}
                 />
@@ -1474,7 +1518,7 @@ const ActualFoodCost = () => {
                 <Dropdown
                   title="To Date"
                   options={toDateOptions}
-                  selectedOption={isDateLoading ? "Loading..." : selectedToDate}
+                  selectedOption={isDateLoading ? 'Loading...' : selectedToDate}
                   onOptionChange={(date) => setSelectedToDate(date)}
                 />
               </div>
@@ -1594,7 +1638,7 @@ const ActualFoodCost = () => {
                     Object.keys(tableState.expanded).some((key) =>
                       /^\d+\.\d+\.\d+$/.test(key)
                     )) ||
-                    viewby === "Inventory Item") && (
+                    viewby === 'Inventory Item') && (
                     <div className="flex items-center mt-[31px] gap-3">
                       <div>
                         <input
@@ -1602,7 +1646,7 @@ const ActualFoodCost = () => {
                           type="checkbox"
                           checked={showQuantities}
                           onChange={(e) =>
-                            handleShowColumns(e.target.checked, "#")
+                            handleShowColumns(e.target.checked, '#')
                           }
                         />
                         Show Quantities
@@ -1613,7 +1657,7 @@ const ActualFoodCost = () => {
                           type="checkbox"
                           checked={showDollarAmounts}
                           onChange={(e) =>
-                            handleShowColumns(e.target.checked, "$")
+                            handleShowColumns(e.target.checked, '$')
                           }
                         />
                         Show Dollar Amounts
@@ -1631,7 +1675,7 @@ const ActualFoodCost = () => {
                     className="items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid"
                   >
                     <span className="cursor-pointer">
-                      {" "}
+                      {' '}
                       Export Filtered View
                     </span>
                   </div>
@@ -1642,7 +1686,7 @@ const ActualFoodCost = () => {
                     >
                       <div
                         className="mb-2 option"
-                        onClick={() => handleExcelClick("filtered")}
+                        onClick={() => handleExcelClick('filtered')}
                       >
                         <button className="w-[100%] bg-[#f9f9f9]">
                           Export to Excel
@@ -1650,7 +1694,7 @@ const ActualFoodCost = () => {
                       </div>
                       <div
                         className="option mb-2 w-[258px]"
-                        onClick={() => handlePDFClick("filtered")}
+                        onClick={() => handlePDFClick('filtered')}
                       >
                         <button className="w-[100%] bg-[#f9f9f9]">
                           Export to PDF
@@ -1680,7 +1724,7 @@ const ActualFoodCost = () => {
                 ))}
             </div>
           </>
-        )}{" "}
+        )}{' '}
         <div>
           <UnitModal
             unitData={unitsAndAreas}
@@ -1704,7 +1748,7 @@ const ActualFoodCost = () => {
             selectedToDate={selectedToDate}
           />
           <Modal
-            title={"Show/Hide Departments"}
+            title={'Show/Hide Departments'}
             isOpen={isShowHideDepartments}
             onClose={() => setIsShowHideDepartments(false)}
           >
@@ -1774,14 +1818,14 @@ const ActualFoodCost = () => {
             </div>
           </Modal>
           <Modal
-            title={"Food Cost Breakdown"}
+            title={'Food Cost Breakdown'}
             isOpen={isBreakDownModal}
             onClose={() => setIsBreakDownModal(false)}
           >
             {renderBreakdownModal()}
           </Modal>
           <Modal
-            title={"Warning"}
+            title={'Warning'}
             isOpen={showWarnings}
             onClose={() => setShowWarnings(false)}
           >
@@ -1789,7 +1833,7 @@ const ActualFoodCost = () => {
               <p className="text-center">
                 {`Not enough countsheets of ${Object.keys(viewMap).find(
                   (key) => viewMap[key] === countType
-                )} type to compare for ${selectedUnitName}.`}{" "}
+                )} type to compare for ${selectedUnitName}.`}{' '}
                 <br /> Please select a different type or a different date range.
               </p>
             </div>
