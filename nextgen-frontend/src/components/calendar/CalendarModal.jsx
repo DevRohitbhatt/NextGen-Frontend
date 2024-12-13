@@ -75,6 +75,7 @@ const CalendarModal = ({
   const buildCalendarTable = (year) => {
     const rows = dynamicData.data
       .filter((entry) => entry.yearID === year) // Filter periods by selected year
+      .sort((a, b) => a.periodID - b.periodID) // Sort periods by periodID
       .map((entry) => [
         { value: entry.periodID.toString(), cellType: "" },
         { value: formatDate(new Date(entry.periodMinDate)), cellType: "" },

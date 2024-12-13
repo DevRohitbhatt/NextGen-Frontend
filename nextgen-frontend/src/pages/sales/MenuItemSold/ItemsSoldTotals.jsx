@@ -529,7 +529,7 @@ const ItemsSoldTotals = () => {
             },
             { value: subRow.quant, cellType: "number", columnName: "Quantity" },
             {
-              value: subRow.discPrice,
+              value: formattingData(subRow.discPrice),
               cellType: "number",
               columnName: "Amount",
             },
@@ -585,7 +585,7 @@ const ItemsSoldTotals = () => {
                 columnName: "Quantity",
               },
               {
-                value: subRow.discPrice,
+                value: formattingData(subRow.discPrice),
                 cellType: "number",
                 columnName: "Amount",
               },

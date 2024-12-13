@@ -17,7 +17,7 @@ import {
 	PdfBuilder,
 } from '../../components';
 
-const InventoryTransfer = () => {
+const InventoryTransferReport = () => {
 	const {
 		companyID,
 		alignmentID,
@@ -86,7 +86,7 @@ const InventoryTransfer = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
-			width: '150px',
+			width: '170px',
 		},
 		{
 			key: 'inventoryItem',
@@ -140,6 +140,7 @@ const InventoryTransfer = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
+			console.error('Error getting default dates: ', error);
 		} finally {
 			setIsLoading(false);
 		}
@@ -210,7 +211,7 @@ const InventoryTransfer = () => {
 					cellType: 'string',
 					toolTip: '',
 					toolTipDirection: '',
-					width: '150px',
+					width: '170px',
 				},
 				{
 					key: 'inventoryItem',
@@ -394,7 +395,7 @@ const InventoryTransfer = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Transfer</h2>
+				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Transfer Report</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
@@ -496,4 +497,4 @@ const InventoryTransfer = () => {
 	);
 };
 
-export default InventoryTransfer;
+export default InventoryTransferReport;
