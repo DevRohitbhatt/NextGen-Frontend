@@ -348,7 +348,7 @@ const Voids = () => {
 			columnHeaders: columns.map((column) => column.header),
 			rows: data.map((row) =>
 				columns.map((column) => ({
-					value: row[column.id],
+					value: column.header.includes('Price') ? formattingData(row[column.id]) : row[column.id],
 					cellType: '',
 					columnName: column.id,
 				}))
