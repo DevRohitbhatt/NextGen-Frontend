@@ -1,5 +1,7 @@
 const urlConfig = {
   //Company apis
+ 
+
   getCompanySetting: '/api/company/settings/getsetting',
   getAllCompanySettings: '/api/company/settings/getallsettings',
   getUserRoleSettings: '/api/companysetting/getUserRoleSettings',
@@ -37,19 +39,26 @@ const urlConfig = {
   getPrepChartTemplateInventoryList: '/api/prepcharttemplate/getinventorylist',
 
   //food cost apis
-  inventoryTransferReportData: 'api/foodcost/getInventoryTransferReportData',
-  InventoryWeeksOnHand: 'api/foodcost/getInventoryWeeksOnHandReportData',
-  ActualFoodCost: 'api/foodcost/getActualFoodCostReportData',
-  varianceFoodCost: 'api/foodcost/getVarianceFoodCostReportData',
-  invoiceReport: '/api/foodcost/getInvoiceReportData',
-  invoiceSearchReport: 'api/foodcost/GetInvoiceSearchReportData',
-  getCountsheetDates: 'api/foodcost/getCountSheetDates',
-  getCountsheets: 'api/foodcost/GetCountSheets',
-  countsheetDetails: 'api/foodcost/GetCountsheetDetails',
-  Countsheet_PricingInfo: 'api/foodcost/getCountSheetsPriceInfo',
-  countsheetPossibleError: 'api/foodcost/getCountSheetsPossibleError',
-  PurchaseAnalysis: 'api/foodcost/getPurchaseAnalysisData',
-
+  inventoryTransferReportData: "api/foodcost/getInventoryTransferReportData",
+  InventoryWeeksOnHand: "api/foodcost/getInventoryWeeksOnHandReportData",
+  ActualFoodCost: "api/foodcost/getActualFoodCostReportData",
+  varianceFoodCost: "api/foodcost/getVarianceFoodCostReportData",
+  invoiceReport: "/api/foodcost/getInvoiceReportData",
+  invoiceSearchReport: "api/foodcost/GetInvoiceSearchReportData",
+  getCountsheetDates: "api/foodcost/getCountSheetDates",
+  getCountsheets: "api/foodcost/GetCountSheets",
+  countsheetDetails: "api/foodcost/GetCountsheetDetails",
+  Countsheet_PricingInfo: "api/foodcost/getCountSheetsPriceInfo",
+  countsheetPossibleError: "api/foodcost/getCountSheetsPossibleError",
+  PurchaseAnalysis: "api/foodcost/getPurchaseAnalysisData",
+  GetActualFoodCostBreakdownIdealReportData:
+    "/api/foodcost/GetActualFoodCostBreakdownIdealReportData",
+  GetActualFoodCostBreakdownReportData:
+    "/api/foodcost/GetActualFoodCostBreakdownReportData",
+    GetVarianceFoodCostBreakdownReportData : "/api/foodcost/GetVarianceFoodCostBreakdownActualReportData",
+    GetVarianceFoodCostBreakdownIdealReportData :"/api/foodcost/GetVarianceFoodCostBreakdownIdealReportData",
+    SaveCountSheetDesignerComment: "/api/foodcost/SaveCountSheetDesignerComment",
+    GetVarianceFoodCostPopupReportData:"/api/foodcost/GetVarianceFoodCostPopupReportData",
   //Sales apis
   hourlySales: 'api/sales/GetSalesHourlyReportData',
   voids: 'api/sales/getVoidsReportData',

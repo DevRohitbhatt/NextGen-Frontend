@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-import { getCall } from "../../apis/network";
+import { getCall, postCall } from "../../apis/network";
 import { useLocation } from "react-router-dom";
 import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
 import {
@@ -13,10 +13,13 @@ import {
   Loader,
 } from "../../components";
 import { createColumnHelper } from "@tanstack/react-table";
+import { useSelector } from "react-redux";
+import dateFormat from "dateformat";
 
 const columnHelper = createColumnHelper();
 
 const CountsheetDesigner = () => {
+  const { userID ,companyID} = useSelector((state) => state.globalState);
   const location = useLocation();
   const [countsheet, setCountsheet] = useState({});
   const [countsheetDetails, setCountsheetDetails] = useState([]);
@@ -59,6 +62,7 @@ const CountsheetDesigner = () => {
 
     if (countsheetData) {
       const parsedData = JSON.parse(countsheetData);
+      setComment(parsedData?.comment ? parsedData?.comment : "" )
       setReceivedData({ companyID, countsheet: parsedData });
       setCountsheet(parsedData);
       setSelectedFromDate(new Date(parsedData.dateTime));
@@ -302,6 +306,28 @@ const CountsheetDesigner = () => {
   const selectedData = (item) => {
     setSelectedRow(item);
   };
+
+  const saveCountSheetDesigner = async () => {
+    try {
+      const getData = {
+        url: "SaveCountSheetDesignerComment",
+        urlParams: {
+          companyId: companyID,
+          InventoryCountSheetID:countsheet?.inventoryCountSheetID,
+          unitId: countsheet?.unitId,
+          countsheetDate: dateFormat(selectedFromDate, 'mm-dd-yyyy'),
+          Comment: comment,
+          UserID: userID,
+        },
+      };
+
+      const result = await postCall(getData);
+      console.log("===>",result)
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
   const Table = (
     <>
       <div className="rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3">
@@ -437,16 +463,16 @@ const CountsheetDesigner = () => {
           setShowCommentModal(!showCommentModal);
         }}
       >
-        <div className="h-32 m-4 w-96">
+        <div className="h-44 m-4 w-96 ">
           <textarea
-            className="w-full h-full block p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border-2 border-[var(--tw-primary)] focus:outline-[var(--tw-primary)] caret-[var(--tw-primary)] resize-none"
+            className="w-full h-32 block p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border-2 border-[var(--tw-primary)] focus:outline-[var(--tw-primary)] caret-[var(--tw-primary)] resize-none"
             name=""
             id=""
-			
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Enter your comment here..."
           ></textarea>
+          <button onClick={(e)=>{e.preventDefault(),setShowCommentModal(!showCommentModal); }} className="flex items-center w-[100px] justify-center gap-[10px] px-5 py-[10px] border-solid font-medium focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[var(--tw-primary)] bg-white my-3 mx-auto">Update</button>
         </div>
       </Modal>
 
