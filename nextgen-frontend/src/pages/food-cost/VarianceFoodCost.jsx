@@ -1,24 +1,24 @@
-import { useEffect, useState, useRef } from 'react';
-import { getCall } from '../../apis/network';
-import { Steps } from 'intro.js-react';
-import { useSelector } from 'react-redux';
-import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
+import { useEffect, useState, useRef } from "react";
+import { getCall } from "../../apis/network";
+import { Steps } from "intro.js-react";
+import { useSelector } from "react-redux";
+import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
 import {
-	Loader,
-	UnitSelector,
-	CalendarModal,
-	UnitModal,
-	ExportOptions,
-	PdfBuilder,
-	ExcelExport as exportToExcel,
-	TableHOC,
-	Dropdown,
-	Modal,
-} from '../../components';
-import { createColumnHelper } from '@tanstack/react-table';
-import dateFormat from 'dateformat';
-import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
-import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
+  Loader,
+  UnitSelector,
+  CalendarModal,
+  UnitModal,
+  ExportOptions,
+  PdfBuilder,
+  ExcelExport as exportToExcel,
+  TableHOC,
+  Dropdown,
+  Modal,
+} from "../../components";
+import { createColumnHelper } from "@tanstack/react-table";
+import dateFormat from "dateformat";
+import varianceFoodCost from "./../../assets/introJSSteps/varianceFoodCost";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 const columnHelper = createColumnHelper();
 
@@ -40,12 +40,12 @@ const VarianceFoodCost = () => {
   const [isDateLoading, setIsDateLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState(
-    'There was an error trying to load the Variance Food Cost Report, please try again later.'
+    "There was an error trying to load the Variance Food Cost Report, please try again later."
   );
 
   //selected unit state variables
   const [selectedUnit, setSelectedUnit] = useState();
-  const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
+  const [selectedUnitName, setSelectedUnitName] = useState("Loading...");
   const [showModal, setShowUnitModal] = useState(false); // State to manage modal visibility
   const [breakDownSupportData, setBreakDownSupportData] = useState([]);
   //calendar state variables
@@ -66,23 +66,23 @@ const VarianceFoodCost = () => {
   const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
   const [checkedItems, setCheckedItems] = useState([
     {
-      name: 'DO NOT COUNT/DO NOT COUNT',
+      name: "DO NOT COUNT/DO NOT COUNT",
       showOnReport: false,
       includeInGrandTotal: false,
     },
-    { name: 'FOOD/BEVERAGES', showOnReport: true, includeInGrandTotal: true },
-    { name: 'FOOD/BREAD', showOnReport: true, includeInGrandTotal: true },
-    { name: 'FOOD/DAIRY', showOnReport: true, includeInGrandTotal: true },
-    { name: 'FOOD/GROCERY', showOnReport: true, includeInGrandTotal: true },
-    { name: 'FOOD/MEAT', showOnReport: true, includeInGrandTotal: true },
-    { name: 'FOOD/PRODUCE', showOnReport: true, includeInGrandTotal: true },
-    { name: 'PREP/PREP', showOnReport: false, includeInGrandTotal: false },
-    { name: 'SUPPLY/CLEANING', showOnReport: true, includeInGrandTotal: true },
-    { name: 'SUPPLY/PAPER', showOnReport: true, includeInGrandTotal: true },
+    { name: "FOOD/BEVERAGES", showOnReport: true, includeInGrandTotal: true },
+    { name: "FOOD/BREAD", showOnReport: true, includeInGrandTotal: true },
+    { name: "FOOD/DAIRY", showOnReport: true, includeInGrandTotal: true },
+    { name: "FOOD/GROCERY", showOnReport: true, includeInGrandTotal: true },
+    { name: "FOOD/MEAT", showOnReport: true, includeInGrandTotal: true },
+    { name: "FOOD/PRODUCE", showOnReport: true, includeInGrandTotal: true },
+    { name: "PREP/PREP", showOnReport: false, includeInGrandTotal: false },
+    { name: "SUPPLY/CLEANING", showOnReport: true, includeInGrandTotal: true },
+    { name: "SUPPLY/PAPER", showOnReport: true, includeInGrandTotal: true },
   ]);
 
   //dropdown variables
-  const [view, setView] = useState('Weekly');
+  const [view, setView] = useState("Weekly");
   const [showAndHideBreakDown, setShowAndHideBreakDown] = useState({
     ideal: true,
     Actual: true,
@@ -95,28 +95,28 @@ const VarianceFoodCost = () => {
   );
   const [isBreakDownModal, setIsBreakDownModal] = useState(false);
   const [breakDownIdealDetails, setBreakDownIdealDetails] = useState([]);
-  const [countType, setCountType] = useState('WE');
+  const [countType, setCountType] = useState("WE");
   const countDropdownOptions = [
-    { name: 'Daily' },
-    { name: 'Monthly' },
-    { name: 'Shift' },
-    { name: 'Weekly' },
+    { name: "Daily" },
+    { name: "Monthly" },
+    { name: "Shift" },
+    { name: "Weekly" },
   ];
-  const [viewby, setViewBy] = useState('Department');
+  const [viewby, setViewBy] = useState("Department");
   const viewOptions = [
-    { name: 'Department', row: 1 },
-    { name: 'Sub Department', row: 2 },
-    { name: 'Inventory Item', row: 3 },
+    { name: "Department", row: 1 },
+    { name: "Sub Department", row: 2 },
+    { name: "Inventory Item", row: 3 },
   ];
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const moreOptionsDropdown = useRef(null);
   const [tableState, setTableState] = useState(false);
 
   const viewMap = {
-    Weekly: 'WE',
-    Monthly: 'MO',
-    Daily: 'DA',
-    Shift: 'SH',
+    Weekly: "WE",
+    Monthly: "MO",
+    Daily: "DA",
+    Shift: "SH",
   };
 
   //IntroJS variables for the help steps
@@ -129,267 +129,286 @@ const VarianceFoodCost = () => {
   // columns for tableHOC
   const [columns, setColumns] = useState([]);
 
-	const generatedColumns = [
-		columnHelper.display({
-			id: 'actions',
-			cell: ({ row }) =>
-				row.getCanExpand() && row.depth === 0 ? (
-					<div
-						{...{
-							style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
-							className: 'flex items-center gap-2 font-bold capitalize',
-						}}
-					>
-						{row.getIsExpanded() ? (
-							<CiSquareMinus className='text-[20px]' />
-						) : (
-							<CiSquarePlus className='text-[20px]' />
-						)}
-						{row.original.finalDepartment}
-					</div>
-				) : null,
-			groupBy: true,
-			size: '80',
-		}),
-		columnHelper.accessor('department', {
-			id: 'department',
-			header: 'Department',
-			cell: ({ row }) =>
-				row.getCanExpand() ? (
-					<div
-						{...{
-							style: { cursor: 'pointer', width: '100%' },
-							className: 'flex items-center gap-2 font-bold capitalize',
-						}}
-					>
-						{row.getIsExpanded() ? (
-							<CiSquareMinus className='text-[20px]' />
-						) : (
-							<CiSquarePlus className='text-[20px]' />
-						)}
-						{row.original.department}
-					</div>
-				) : null,
-			groupBy: true,
-			dataType: 'string',
-		}),
-		columnHelper.accessor('subDepartment', {
-			id: 'subDepartment',
-			header: 'Sub Department',
-			cell: ({ row }) =>
-				row.getCanExpand() ? (
-					<div
-						{...{
-							style: { cursor: 'pointer', width: '100%' },
-							className: 'flex items-center gap-2 font-bold capitalize',
-						}}
-					>
-						{row.getIsExpanded() ? (
-							<CiSquareMinus className='text-[20px]' />
-						) : (
-							<CiSquarePlus className='text-[20px]' />
-						)}
-						{row.original.subDepartment}
-					</div>
-				) : null,
-			groupBy: true,
-			showDepth: 2,
-			dataType: 'string',
-		}),
-		columnHelper.accessor('description', {
-			id: 'description',
-			header: 'Description',
-			showDepth: 3,
-			dataType: 'string',
-			size: 300,
-		}),
-		columnHelper.accessor('countDisplayUnitName', {
-			id: 'countDisplayUnitName',
-			header: 'UOM',
-			showDepth: 3,
-			dataType: 'string',
-			size: 200,
-		}),
-		columnHelper.accessor('actualNumber', {
-			id: 'actualNumber',
-			header: 'Actual #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
-			dataType: 'number',
-			size: 90,
-		}),
-		columnHelper.accessor('actualDollar', {
-			id: 'actualDollar',
-			header: 'Actual $',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'actualDollar', getValue),
-			size: 90,
-		}),
-		columnHelper.accessor('actualPct', {
-			id: 'actualPct',
-			header: 'Actual %',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'actualPct', getValue, true),
-			size: 90,
-		}),
-		columnHelper.accessor('idealNumber', {
-			id: 'idealNumber',
-			header: 'Ideal #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
-			dataType: 'number',
-			size: 90,
-		}),
-		columnHelper.accessor('idealDollar', {
-			id: 'idealDollar',
-			header: 'Ideal $',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'idealDollar', getValue),
-			size: 90,
-		}),
-		columnHelper.accessor('idealPct', {
-			id: 'idealPct',
-			header: 'Ideal %',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'idealPct', getValue, true),
-			size: 90,
-		}),
-		columnHelper.accessor('varianceNumber', {
-			id: 'varianceNumber',
-			header: 'Variance #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
-			dataType: 'number',
-			size: 100,
-		}),
-		columnHelper.accessor('varianceDollar', {
-			id: 'varianceDollar',
-			header: 'Variance $',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'varianceDollar', getValue),
-			size: 100,
-		}),
-		columnHelper.accessor('variancePct', {
-			id: 'variancePct',
-			header: 'Variance %',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'variancePct', getValue, true),
-			size: 100,
-		}),
-		columnHelper.accessor('wasteNumber', {
-			id: 'wasteNumber',
-			header: 'Waste #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
-			dataType: 'number',
-			size: 90,
-		}),
-		columnHelper.accessor('wasteDollar', {
-			id: 'wasteDollar',
-			header: 'Waste $',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'wasteDollar', getValue),
-			size: 90,
-		}),
-		columnHelper.accessor('wastePct', {
-			id: 'wastePct',
-			header: 'Waste %',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'wastePct', getValue, true),
-			size: 90,
-		}),
-		columnHelper.accessor('comparisonName', {
-			id: 'comparisonName',
-			header: 'Comparison Name',
-			cell: ({ row, getValue }) =>
-				row.getCanExpand() ? row.original?.comparisonName : getValue() !== undefined ? getValue() : '',
-			dataType: 'string',
-			size: 160,
-		}),
-		columnHelper.accessor('comparisonSales', {
-			id: 'comparisonSales',
-			header: 'Comparison Sales',
-			dataType: 'number',
-			cell: ({ row, getValue }) =>
-				row.getCanExpand()
-					? `$${row.original?.comparisonSales?.toFixed(2)}`
-					: getValue() !== undefined
-					? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}`
-					: '',
-			size: 150,
-		}),
-	];
+  const generatedColumns = [
+    columnHelper.display({
+      id: "actions",
+      cell: ({ row }) =>
+        row.getCanExpand() && row.depth === 0 ? (
+          <div
+            {...{
+              style: { cursor: "pointer", paddingLeft: `${row.depth * 2}rem` },
+              className: "flex items-center gap-2 font-bold capitalize",
+            }}
+          >
+            {row.getIsExpanded() ? (
+              <CiSquareMinus className="text-[20px]" />
+            ) : (
+              <CiSquarePlus className="text-[20px]" />
+            )}
+            {row.original.finalDepartment}
+          </div>
+        ) : null,
+      groupBy: true,
+      size: "80",
+    }),
+    columnHelper.accessor("department", {
+      id: "department",
+      header: "Department",
+      cell: ({ row }) =>
+        row.getCanExpand() ? (
+          <div
+            {...{
+              style: { cursor: "pointer", width: "100%" },
+              className: "flex items-center gap-2 font-bold capitalize",
+            }}
+          >
+            {row.getIsExpanded() ? (
+              <CiSquareMinus className="text-[20px]" />
+            ) : (
+              <CiSquarePlus className="text-[20px]" />
+            )}
+            {row.original.department}
+          </div>
+        ) : null,
+      groupBy: true,
+      dataType: "string",
+    }),
+    columnHelper.accessor("subDepartment", {
+      id: "subDepartment",
+      header: "Sub Department",
+      cell: ({ row }) =>
+        row.getCanExpand() ? (
+          <div
+            {...{
+              style: { cursor: "pointer", width: "100%" },
+              className: "flex items-center gap-2 font-bold capitalize",
+            }}
+          >
+            {row.getIsExpanded() ? (
+              <CiSquareMinus className="text-[20px]" />
+            ) : (
+              <CiSquarePlus className="text-[20px]" />
+            )}
+            {row.original.subDepartment}
+          </div>
+        ) : null,
+      groupBy: true,
+      showDepth: 2,
+      dataType: "string",
+    }),
+    columnHelper.accessor("description", {
+      id: "description",
+      header: "Description",
+      showDepth: 3,
+      dataType: "string",
+      size: 300,
+    }),
+    columnHelper.accessor("countDisplayUnitName", {
+      id: "countDisplayUnitName",
+      header: "UOM",
+      showDepth: 3,
+      dataType: "string",
+      size: 200,
+    }),
+    columnHelper.accessor("actualNumber", {
+      id: "actualNumber",
+      header: "Actual #",
+      cell: ({ getValue }) => getValue()?.toFixed(2),
+      dataType: "number",
+      size: 90,
+    }),
+    columnHelper.accessor("actualDollar", {
+      id: "actualDollar",
+      header: "Actual $",
+      dataType: "number",
+      cell: ({ row, getValue }) => calculateSum(row, "actualDollar", getValue),
+      size: 90,
+    }),
+    columnHelper.accessor("actualPct", {
+      id: "actualPct",
+      header: "Actual %",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "actualPct", getValue, true),
+      size: 90,
+    }),
+    columnHelper.accessor("idealNumber", {
+      id: "idealNumber",
+      header: "Ideal #",
+      cell: ({ getValue }) => getValue()?.toFixed(2),
+      dataType: "number",
+      size: 90,
+    }),
+    columnHelper.accessor("idealDollar", {
+      id: "idealDollar",
+      header: "Ideal $",
+      dataType: "number",
+      cell: ({ row, getValue }) => calculateSum(row, "idealDollar", getValue),
+      size: 90,
+    }),
+    columnHelper.accessor("idealPct", {
+      id: "idealPct",
+      header: "Ideal %",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "idealPct", getValue, true),
+      size: 90,
+    }),
+    columnHelper.accessor("varianceNumber", {
+      id: "varianceNumber",
+      header: "Variance #",
+      cell: ({ getValue }) => getValue()?.toFixed(2),
+      dataType: "number",
+      size: 100,
+    }),
+    columnHelper.accessor("varianceDollar", {
+      id: "varianceDollar",
+      header: "Variance $",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "varianceDollar", getValue),
+      size: 100,
+    }),
+    columnHelper.accessor("variancePct", {
+      id: "variancePct",
+      header: "Variance %",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "variancePct", getValue, true),
+      size: 100,
+    }),
+    columnHelper.accessor("wasteNumber", {
+      id: "wasteNumber",
+      header: "Waste #",
+      cell: ({ getValue }) => getValue()?.toFixed(2),
+      dataType: "number",
+      size: 90,
+    }),
+    columnHelper.accessor("wasteDollar", {
+      id: "wasteDollar",
+      header: "Waste $",
+      dataType: "number",
+      cell: ({ row, getValue }) => calculateSum(row, "wasteDollar", getValue),
+      size: 90,
+    }),
+    columnHelper.accessor("wastePct", {
+      id: "wastePct",
+      header: "Waste %",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "wastePct", getValue, true),
+      size: 90,
+    }),
+    columnHelper.accessor("comparisonName", {
+      id: "comparisonName",
+      header: "Comparison Name",
+      cell: ({ row, getValue }) =>
+        row.getCanExpand()
+          ? row.original?.comparisonName
+          : getValue() !== undefined
+          ? getValue()
+          : "",
+      dataType: "string",
+      size: 160,
+    }),
+    columnHelper.accessor("comparisonSales", {
+      id: "comparisonSales",
+      header: "Comparison Sales",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        row.getCanExpand()
+          ? `$${row.original?.comparisonSales?.toFixed(2)}`
+          : getValue() !== undefined
+          ? `$${parseFloat(getValue().toFixed(2)).toLocaleString("en-US")}`
+          : "",
+      size: 150,
+    }),
+  ];
 
-	// calculate the sum of the subrows
-	const calculateSum = (row, field, getValue, isPercentage = false) => {
-		if (row.getCanExpand()) {
-			const sum = row.subRows
-				.reduce((acc, subrow) => {
-					if (subrow.getCanExpand()) {
-						return (
-							acc +
-							subrow.subRows.reduce((subAcc, subSubrow) => {
-								if (subSubrow.getCanExpand()) {
-									const item = checkedItems.find(
-										(item) => item.name.split('/')[1] === subSubrow.original.subDepartment
-									);
-									return (
-										subAcc +
-										subSubrow.subRows.reduce(
-											(subsubAcc, subsubsubrow) =>
-												subsubAcc +
-												(item?.includeInGrandTotal && subsubsubrow.original[field]
-													? Number(subsubsubrow.original[field])
-													: 0),
-											0
-										)
-									);
-								} else {
-									const item = checkedItems.find(
-										(item) => item.name.split('/')[1] === subrow.original.subDepartment
-									);
-									return (
-										subAcc +
-										(item?.includeInGrandTotal && subSubrow.original[field]
-											? Number(subSubrow.original[field])
-											: 0)
-									);
-								}
-							}, 0)
-						);
-					} else {
-						return acc + (subrow.original[field] ? Number(subrow.original[field]) : 0);
-					}
-				}, 0)
-				.toFixed(2);
-			if (isPercentage) {
-				return `${parseFloat(sum).toLocaleString('en-US', {
-					minimumFractionDigits: 2,
-					maximumFractionDigits: 2,
-				})}%`;
-			}
-			return sum < 0
-				? `-$${Math.abs(parseFloat(sum)).toLocaleString('en-US', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2,
-				  })}`
-				: `$${parseFloat(sum).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-		} else {
-			const value = getValue();
-			if (!value) return isPercentage ? '0.00%' : '$0.00';
-			if (isPercentage) {
-				return `${parseFloat(value).toLocaleString('en-US', {
-					minimumFractionDigits: 2,
-					maximumFractionDigits: 2,
-				})}%`;
-			}
-			return value < 0
-				? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2,
-				  })}`
-				: `$${parseFloat(value).toLocaleString('en-US', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2,
-				  })}`;
-		}
-	};
+  // calculate the sum of the subrows
+  const calculateSum = (row, field, getValue, isPercentage = false) => {
+    if (row.getCanExpand()) {
+      const sum = row.subRows
+        .reduce((acc, subrow) => {
+          if (subrow.getCanExpand()) {
+            return (
+              acc +
+              subrow.subRows.reduce((subAcc, subSubrow) => {
+                if (subSubrow.getCanExpand()) {
+                  const item = checkedItems.find(
+                    (item) =>
+                      item.name.split("/")[1] ===
+                      subSubrow.original.subDepartment
+                  );
+                  return (
+                    subAcc +
+                    subSubrow.subRows.reduce(
+                      (subsubAcc, subsubsubrow) =>
+                        subsubAcc +
+                        (item?.includeInGrandTotal &&
+                        subsubsubrow.original[field]
+                          ? Number(subsubsubrow.original[field])
+                          : 0),
+                      0
+                    )
+                  );
+                } else {
+                  const item = checkedItems.find(
+                    (item) =>
+                      item.name.split("/")[1] === subrow.original.subDepartment
+                  );
+                  return (
+                    subAcc +
+                    (item?.includeInGrandTotal && subSubrow.original[field]
+                      ? Number(subSubrow.original[field])
+                      : 0)
+                  );
+                }
+              }, 0)
+            );
+          } else {
+            return (
+              acc +
+              (subrow.original[field] ? Number(subrow.original[field]) : 0)
+            );
+          }
+        }, 0)
+        .toFixed(2);
+      if (isPercentage) {
+        return `${parseFloat(sum).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}%`;
+      }
+      return sum < 0
+        ? `-$${Math.abs(parseFloat(sum)).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`
+        : `$${parseFloat(sum).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`;
+    } else {
+      const value = getValue();
+      if (!value) return isPercentage ? "0.00%" : "$0.00";
+      if (isPercentage) {
+        return `${parseFloat(value).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}%`;
+      }
+      return value < 0
+        ? `-$${Math.abs(parseFloat(value)).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`
+        : `$${parseFloat(value).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`;
+    }
+  };
 
   useEffect(() => {
     if (defaultUnitID) {
@@ -419,7 +438,7 @@ const VarianceFoodCost = () => {
       try {
         setIsDateLoading(true);
         const getData = {
-          url: 'getCountsheetDates',
+          url: "getCountsheetDates",
           urlParams: {
             companyId: companyID,
             unitId: selectedUnit,
@@ -430,10 +449,10 @@ const VarianceFoodCost = () => {
         const result = await getCall(getData);
 
         const fromOptions = result.data.fromDates.map((option) => ({
-          name: dateFormat(option, 'mm-dd-yyyy'),
+          name: dateFormat(option, "mm-dd-yyyy"),
         }));
         const toOptions = result.data.toDates.map((option) => ({
-          name: dateFormat(option, 'mm-dd-yyyy'),
+          name: dateFormat(option, "mm-dd-yyyy"),
         }));
 
         if (fromOptions.length === 1 || toOptions.length === 1) {
@@ -447,7 +466,7 @@ const VarianceFoodCost = () => {
         setToDateOptions(toOptions);
         setIsDateLoading(false);
       } catch (error) {
-        console.error('Error in fetching date options', error);
+        console.error("Error in fetching date options", error);
       } finally {
         setIsDateLoading(false);
       }
@@ -463,48 +482,54 @@ const VarianceFoodCost = () => {
       setIsError(false);
       setIsTableRendered(false);
       const getData = {
-        url: 'varianceFoodCost',
+        url: "varianceFoodCost",
         urlParams: {
           companyID: companyID,
           alignmentID: alignmentID,
           memberId: selectedUnit,
-          fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
-          toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+          fromDate: dateFormat(selectedFromDate, "yyyy-mm-dd"),
+          toDate: dateFormat(selectedToDate, "yyyy-mm-dd"),
           countType: countType,
         },
       };
 
       const result = await getCall(getData);
 
-			if (result?.data && result?.data?.length === 0) {
-				setVarianceFoodCostData([]);
-			} else {
-				const newData = result.data?.flatMap((department) =>
-					department.subDepartments.flatMap((subDepartment) =>
-						subDepartment.varianceFoodCostModels.map((item) => ({
-							finalDepartment: 'TOTAL',
-							comparisonName: item.comparisonName || 'Net Sales',
-							comparisonSales: item.comparisonSales || 0,
-							department: item.department,
-							subDepartment: item.subDepartment,
-							description: item.description,
-							countDisplayUnitName: item.countDisplayUnitName,
-							actualNumber: item.actualQuant,
-							actualDollar: item.actualCost,
-							actualPct: item.actualCostPct * 100,
-							idealNumber: item.idealQuant,
-							idealDollar: item.idealCost,
-							idealPct: item.salesNet ? (item.idealCost / item.salesNet) * 100 : 0,
-							varianceNumber: item.varianceQuant,
-							varianceDollar: item.varianceCost,
-							variancePct: item.salesNet ? (item.varianceCost / item.salesNet) * 100 : 0,
-							wasteNumber: item.wasteCountCases,
-							wasteDollar: item.wasteCountCost,
-							wastePct: item.salesNet ? (item.wasteCountCost / item.salesNet) * 100 : 0,
+      if (result?.data && result?.data?.length === 0) {
+        setVarianceFoodCostData([]);
+      } else {
+        const newData = result.data?.flatMap((department) =>
+          department.subDepartments.flatMap((subDepartment) =>
+            subDepartment.varianceFoodCostModels.map((item) => ({
+              finalDepartment: "TOTAL",
+              comparisonName: item.comparisonName || "Net Sales",
+              comparisonSales: item.comparisonSales || 0,
+              department: item.department,
+              subDepartment: item.subDepartment,
+              description: item.description,
+              countDisplayUnitName: item.countDisplayUnitName,
+              actualNumber: item.actualQuant,
+              actualDollar: item.actualCost,
+              actualPct: item.actualCostPct * 100,
+              idealNumber: item.idealQuant,
+              idealDollar: item.idealCost,
+              idealPct: item.salesNet
+                ? (item.idealCost / item.salesNet) * 100
+                : 0,
+              varianceNumber: item.varianceQuant,
+              varianceDollar: item.varianceCost,
+              variancePct: item.salesNet
+                ? (item.varianceCost / item.salesNet) * 100
+                : 0,
+              wasteNumber: item.wasteCountCases,
+              wasteDollar: item.wasteCountCost,
+              wastePct: item.salesNet
+                ? (item.wasteCountCost / item.salesNet) * 100
+                : 0,
               qsrInventoryItemID: item.qsrInventoryItemID,
-						}))
-					)
-				);
+            }))
+          )
+        );
 
         setVarianceFoodCostData(newData);
         setFilteredVarianceFoodCostData(newData);
@@ -514,9 +539,9 @@ const VarianceFoodCost = () => {
       setIsError(true);
       setIsLoading(false);
       setErrorMessage(
-        'There was an issue loading your data, please try again later.'
+        "There was an issue loading your data, please try again later."
       );
-      console.error('Error getting Variance Food Cost Report data: ', error);
+      console.error("Error getting Variance Food Cost Report data: ", error);
     }
   };
 
@@ -540,19 +565,19 @@ const VarianceFoodCost = () => {
   const fetchCountsheets = async (isEnding = false) => {
     try {
       const getData = {
-        url: 'getCountsheets',
+        url: "getCountsheets",
         urlParams: {
           companyID: companyID,
           alignmentID: alignmentID,
           memberID: selectedUnit,
-          fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+          fromDate: dateFormat(selectedFromDate, "yyyy-mm-dd"),
           toDate: dateFormat(
             new Date(
               new Date(selectedToDate).setDate(
                 new Date(selectedToDate).getDate() + 1
               )
             ),
-            'yyyy-mm-dd'
+            "yyyy-mm-dd"
           ),
         },
       };
@@ -591,17 +616,17 @@ const VarianceFoodCost = () => {
         }/CountsheetDesigner?companyID=${companyID}&countsheet=${encodeURIComponent(
           JSON.stringify(countsheet)
         )}`,
-        '_blank'
+        "_blank"
       );
     } catch (error) {
-      console.error('Error getting Countsheet data: ', error);
+      console.error("Error getting Countsheet data: ", error);
     }
   };
 
   const handleViewPurchase = async (fromDate, toDate) => {
     const dataToSend = {
       companyId: companyID,
-      alignmentID: alignmentID,
+      alignmentId: alignmentID,
       selectedUnit: selectedUnit,
       selectedUnitName: selectedUnitName,
       fromDate: fromDate,
@@ -616,24 +641,25 @@ const VarianceFoodCost = () => {
       }/PurchaseAnalysis?companyID=${companyID}&countsheet=${encodeURIComponent(
         JSON.stringify(dataToSend)
       )}`,
-      '_blank'
+      "_blank"
     );
   };
 
-	const handleShowHideDepartments = () => {
-		setIsShowHideDepartmentsModalVisible(false);
-		const newVarianceFoodCostData = varianceFoodCostData.filter((item) =>
-			checkedItems.some(
-				(checkedItem) =>
-					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
-			)
-		);
-		setIsTableRendered(false);
-		setFilteredVarianceFoodCostData(newVarianceFoodCostData);
-	};
+  const handleShowHideDepartments = () => {
+    setIsShowHideDepartmentsModalVisible(false);
+    const newVarianceFoodCostData = varianceFoodCostData.filter((item) =>
+      checkedItems.some(
+        (checkedItem) =>
+          checkedItem.name === `${item.department}/${item.subDepartment}` &&
+          checkedItem.showOnReport
+      )
+    );
+    setIsTableRendered(false);
+    setFilteredVarianceFoodCostData(newVarianceFoodCostData);
+  };
 
   const handleShowColumns = (status, type) => {
-    if (type === '#') {
+    if (type === "#") {
       setShowQuantities(!showQuantities);
     } else {
       setShowDollarAmounts(!showDollarAmounts);
@@ -641,7 +667,6 @@ const VarianceFoodCost = () => {
 
     const updatedColumns = columns.map((column) => {
       if (column.header && column.header.includes(type)) {
-
         return {
           ...column,
           show: status,
@@ -660,154 +685,181 @@ const VarianceFoodCost = () => {
   // Function to handle the PDF export
   const handlePDFClick = () => {
     if (!columns || columns.length === 0) {
-      console.error('Columns are not defined or empty');
+      console.error("Columns are not defined or empty");
       return;
     }
 
     if (!varianceFoodCostData || varianceFoodCostData.length === 0) {
-      console.error('Variance Food Cost report data is not defined or empty');
+      console.error("Variance Food Cost report data is not defined or empty");
       return;
     }
 
     const pdfData = {
-      title: 'Variance Food Cost Report',
+      title: "Variance Food Cost Report",
       subHeaders: [
-        `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
+        `${dateFormat(selectedFromDate, "mm-dd-yyyy")} to ${dateFormat(
           selectedToDate,
-          'mm-dd-yyyy'
+          "mm-dd-yyyy"
         )} | ${selectedUnitName}`,
       ],
-      exportType: 'pdf',
-      pageOrientation: 'landscape',
+      exportType: "pdf",
+      pageOrientation: "landscape",
       body: buildPDFBody(),
     };
 
-		console.log('pdfData', pdfData);
+    console.log("pdfData", pdfData);
 
-		PdfBuilder(pdfData);
-	};
+    PdfBuilder(pdfData);
+  };
 
-	const buildPDFBody = () => {
-		const formatNumber = (num, prefix = '') => ({
-			value: `${prefix}${num.toFixed(2).toLocaleString('en-US')}`,
-			cellType: 'number',
-		});
+  const buildPDFBody = () => {
+    const formatNumber = (num, prefix = "") => ({
+      value: `${prefix}${num.toFixed(2).toLocaleString("en-US")}`,
+      cellType: "number",
+    });
 
-		const formatPercent = (num) => ({
-			value: `${Number(num).toFixed(2).toLocaleString('en-US')}%`,
-			cellType: 'number',
-		});
+    const formatPercent = (num) => ({
+      value: `${Number(num).toFixed(2).toLocaleString("en-US")}%`,
+      cellType: "number",
+    });
 
-		const body = [
-			{
-				type: 'table',
+    const body = [
+      {
+        type: "table",
 
-				widths: new Array(columns.slice(1).length).fill('auto'),
-				dataTypes: columns.slice(1).map((column) => column.dataType),
-				data: {
-					columnHeaders: [
-						'Department',
-						'Sub Department',
-						'Description',
-						'UOM',
-						'Actual #',
-						'Actual $',
-						'Actual %',
-						'Ideal #',
-						'Ideal $',
-						'Ideal %',
-						'Variance #',
-						'Variance $',
-						'Variance %',
-						'Waste #',
-						'Waste $',
-						'Waste %',
-						'Comparison Name',
-						'Comparison Sales',
-					],
-					rows: varianceFoodCostData.map((row) => [
-						{ value: row.department, cellType: 'string', columnName: 'Department' },
-						{ value: row.subDepartment, cellType: 'string', columnName: 'Sub Department' },
-						{ value: row.description, cellType: 'string', columnName: 'Description' },
-						{ value: row.countDisplayUnitName, cellType: 'string', columnName: 'UOM' },
-						{ ...formatNumber(row.actualNumber), columnName: 'Actual #' },
-						{ ...formatNumber(row.actualDollar, '$'), columnName: 'Actual $' },
-						{ ...formatPercent(row.actualPct), columnName: 'Actual %' },
-						{ ...formatNumber(row.idealNumber), columnName: 'Ideal #' },
-						{ ...formatNumber(row.idealDollar, '$'), columnName: 'Ideal $' },
-						{ ...formatPercent(row.idealPct), columnName: 'Ideal %' },
-						{ ...formatNumber(row.varianceNumber), columnName: 'Variance #' },
-						{ ...formatNumber(row.varianceDollar, '$'), columnName: 'Variance $' },
-						{ ...formatPercent(row.variancePct), columnName: 'Variance %' },
-						{ ...formatNumber(row.wasteNumber), columnName: 'Waste #' },
-						{ ...formatNumber(row.wasteDollar, '$'), columnName: 'Waste $' },
-						{ ...formatPercent(row.wastePct), columnName: 'Waste %' },
-						{ value: row.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
-						{ value: row.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
-					]),
-				},
-			},
-		];
+        widths: new Array(columns.slice(1).length).fill("auto"),
+        dataTypes: columns.slice(1).map((column) => column.dataType),
+        data: {
+          columnHeaders: [
+            "Department",
+            "Sub Department",
+            "Description",
+            "UOM",
+            "Actual #",
+            "Actual $",
+            "Actual %",
+            "Ideal #",
+            "Ideal $",
+            "Ideal %",
+            "Variance #",
+            "Variance $",
+            "Variance %",
+            "Waste #",
+            "Waste $",
+            "Waste %",
+            "Comparison Name",
+            "Comparison Sales",
+          ],
+          rows: varianceFoodCostData.map((row) => [
+            {
+              value: row.department,
+              cellType: "string",
+              columnName: "Department",
+            },
+            {
+              value: row.subDepartment,
+              cellType: "string",
+              columnName: "Sub Department",
+            },
+            {
+              value: row.description,
+              cellType: "string",
+              columnName: "Description",
+            },
+            {
+              value: row.countDisplayUnitName,
+              cellType: "string",
+              columnName: "UOM",
+            },
+            { ...formatNumber(row.actualNumber), columnName: "Actual #" },
+            { ...formatNumber(row.actualDollar, "$"), columnName: "Actual $" },
+            { ...formatPercent(row.actualPct), columnName: "Actual %" },
+            { ...formatNumber(row.idealNumber), columnName: "Ideal #" },
+            { ...formatNumber(row.idealDollar, "$"), columnName: "Ideal $" },
+            { ...formatPercent(row.idealPct), columnName: "Ideal %" },
+            { ...formatNumber(row.varianceNumber), columnName: "Variance #" },
+            {
+              ...formatNumber(row.varianceDollar, "$"),
+              columnName: "Variance $",
+            },
+            { ...formatPercent(row.variancePct), columnName: "Variance %" },
+            { ...formatNumber(row.wasteNumber), columnName: "Waste #" },
+            { ...formatNumber(row.wasteDollar, "$"), columnName: "Waste $" },
+            { ...formatPercent(row.wastePct), columnName: "Waste %" },
+            {
+              value: row.comparisonName,
+              cellType: "string",
+              columnName: "Comparison Name",
+            },
+            {
+              value: row.comparisonSales,
+              cellType: "number",
+              columnName: "Comparison Sales",
+            },
+          ]),
+        },
+      },
+    ];
 
-		return body;
-	};
+    return body;
+  };
 
-	// Function to handle the Excel export
-	const handleExcelClick = () => {
-		const data = [
-			{
-				name: '',
-				columns: [
-					{ name: 'Department', filter: 'text' },
-					{ name: 'Sub Department', filter: 'text' },
-					{ name: 'Description', filter: 'text' },
-					{ name: 'UOM', filter: 'text' },
-					{ name: 'Actual #', filter: 'number' },
-					{ name: 'Actual $', filter: 'number' },
-					{ name: 'Actual %', filter: 'number' },
-					{ name: 'Ideal #', filter: 'number' },
-					{ name: 'Ideal $', filter: 'number' },
-					{ name: 'Ideal %', filter: 'number' },
-					{ name: 'Variance #', filter: 'number' },
-					{ name: 'Variance $', filter: 'number' },
-					{ name: 'Variance %', filter: 'number' },
-					{ name: 'Waste #', filter: 'number' },
-					{ name: 'Waste $', filter: 'number' },
-					{ name: 'Waste %', filter: 'number' },
-					{ name: 'Comparison Name', filter: 'text' },
-					{ name: 'Comparison Sales', filter: 'number' },
-				],
-				data: varianceFoodCostData.map((row) => ({
-					Department: row.department,
-					'Sub Department': row.subDepartment,
-					Description: row.description,
-					UOM: row.countDisplayUnitName,
-					'Actual #': row.actualNumber?.toFixed(2),
-					'Actual $': row.actualDollar?.toFixed(2),
-					'Actual %': row.actualPct?.toFixed(2),
-					'Ideal #': row.idealNumber?.toFixed(2),
-					'Ideal $': row.idealDollar?.toFixed(2),
-					'Ideal %': row.idealPct?.toFixed(2),
-					'Variance #': row.varianceNumber?.toFixed(2),
-					'Variance $': row.varianceDollar?.toFixed(2),
-					'Variance %': row.variancePct?.toFixed(2),
-					'Waste #': row.wasteNumber?.toFixed(2),
-					'Waste $': row.wasteDollar?.toFixed(2),
-					'Waste %': row.wastePct?.toFixed(2),
-					'Comparison Name': row.comparisonName,
-					'Comparison Sales': row.comparisonSales?.toFixed(2),
-				})),
-			},
-		];
+  // Function to handle the Excel export
+  const handleExcelClick = () => {
+    const data = [
+      {
+        name: "",
+        columns: [
+          { name: "Department", filter: "text" },
+          { name: "Sub Department", filter: "text" },
+          { name: "Description", filter: "text" },
+          { name: "UOM", filter: "text" },
+          { name: "Actual #", filter: "number" },
+          { name: "Actual $", filter: "number" },
+          { name: "Actual %", filter: "number" },
+          { name: "Ideal #", filter: "number" },
+          { name: "Ideal $", filter: "number" },
+          { name: "Ideal %", filter: "number" },
+          { name: "Variance #", filter: "number" },
+          { name: "Variance $", filter: "number" },
+          { name: "Variance %", filter: "number" },
+          { name: "Waste #", filter: "number" },
+          { name: "Waste $", filter: "number" },
+          { name: "Waste %", filter: "number" },
+          { name: "Comparison Name", filter: "text" },
+          { name: "Comparison Sales", filter: "number" },
+        ],
+        data: varianceFoodCostData.map((row) => ({
+          Department: row.department,
+          "Sub Department": row.subDepartment,
+          Description: row.description,
+          UOM: row.countDisplayUnitName,
+          "Actual #": row.actualNumber?.toFixed(2),
+          "Actual $": row.actualDollar?.toFixed(2),
+          "Actual %": row.actualPct?.toFixed(2),
+          "Ideal #": row.idealNumber?.toFixed(2),
+          "Ideal $": row.idealDollar?.toFixed(2),
+          "Ideal %": row.idealPct?.toFixed(2),
+          "Variance #": row.varianceNumber?.toFixed(2),
+          "Variance $": row.varianceDollar?.toFixed(2),
+          "Variance %": row.variancePct?.toFixed(2),
+          "Waste #": row.wasteNumber?.toFixed(2),
+          "Waste $": row.wasteDollar?.toFixed(2),
+          "Waste %": row.wastePct?.toFixed(2),
+          "Comparison Name": row.comparisonName,
+          "Comparison Sales": row.comparisonSales?.toFixed(2),
+        })),
+      },
+    ];
 
     const filename = `varianceFoodCost_${selectedUnitName}_${dateFormat(
       selectedFromDate,
-      'mm-dd-yyyy'
-    )}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
-    const spreadSheetTitle = 'Variance Food Cost';
-    const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
+      "mm-dd-yyyy"
+    )}_to_${dateFormat(selectedToDate, "mm-dd-yyyy")}`;
+    const spreadSheetTitle = "Variance Food Cost";
+    const date = `${dateFormat(selectedFromDate, "mm-dd-yyyy")} to ${dateFormat(
       selectedToDate,
-      'mm-dd-yyyy'
+      "mm-dd-yyyy"
     )}`;
 
     exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
@@ -823,9 +875,9 @@ const VarianceFoodCost = () => {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -846,12 +898,12 @@ const VarianceFoodCost = () => {
   );
 
   const getGetActualFoodCostBreakdownIdealReportData = async (row) => {
-    let { qsrInventoryItemID = '' } = row;
+    let { qsrInventoryItemID = "" } = row;
     setCostBreakActualDetails(row);
     try {
       setIsBreakDownModal(true);
       const getData = {
-        url: 'GetVarianceFoodCostBreakdownIdealReportData',
+        url: "GetVarianceFoodCostBreakdownIdealReportData",
         urlParams: {
           companyId: companyID,
           alignmenId: alignmentID,
@@ -865,7 +917,7 @@ const VarianceFoodCost = () => {
       const result = await getCall(getData);
 
       const getDataBreakDown = {
-        url: 'GetVarianceFoodCostBreakdownReportData',
+        url: "GetVarianceFoodCostBreakdownReportData",
         urlParams: {
           companyId: companyID,
           alignmenId: alignmentID,
@@ -878,7 +930,7 @@ const VarianceFoodCost = () => {
 
       const resultBreakDown = await getCall(getDataBreakDown);
       const getSupportData = {
-        url: 'GetVarianceFoodCostPopupReportData',
+        url: "GetVarianceFoodCostPopupReportData",
         urlParams: {
           companyId: companyID,
           alignmentId: alignmentID,
@@ -902,7 +954,7 @@ const VarianceFoodCost = () => {
         setCostBreakDownIdeatDetails(result.data);
       }
     } catch (error) {
-      console.log('er', error);
+      console.log("er", error);
     }
   };
 
@@ -920,7 +972,7 @@ const VarianceFoodCost = () => {
 
     const calculateMasterItemQuantityTotalSum = (data, name) => {
       if (!data || !Array.isArray(data)) {
-        throw new Error('Invalid input data. Ensure the data is an array.');
+        throw new Error("Invalid input data. Ensure the data is an array.");
       }
 
       // Use the reduce function to calculate the sum
@@ -934,7 +986,7 @@ const VarianceFoodCost = () => {
 
     function calculateTotalCost(data) {
       if (!data || !Array.isArray(data)) {
-        throw new Error('Invalid input data. Ensure the data is an array.');
+        throw new Error("Invalid input data. Ensure the data is an array.");
       }
 
       // Use the reduce function to calculate the total cost
@@ -961,7 +1013,7 @@ const VarianceFoodCost = () => {
         breakDownSupportData[0]?.usageCases?.toFixed(2) -
         calculateMasterItemQuantityTotalSum(
           costBreakdownIdealDetails,
-          'MasterItemQuantityTotal'
+          "MasterItemQuantityTotal"
         ).toFixed(2);
       return totalCs.toFixed(2);
     };
@@ -983,11 +1035,11 @@ const VarianceFoodCost = () => {
         <div className="my-[5px]">
           <h3
             onClick={(e) => {
-              e.preventDefault(), openCollapse('Actual');
+              e.preventDefault(), openCollapse("Actual");
             }}
             className="text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
           >
-            <span>Actual</span>{' '}
+            <span>Actual</span>{" "}
             <span className="m-1 ">
               {showAndHideBreakDown.Actual == true ? (
                 <IoIosArrowUp />
@@ -1032,7 +1084,7 @@ const VarianceFoodCost = () => {
                   <tr
                     className="cursor-pointer"
                     onClick={(e) => {
-                      e.preventDefault(), openCollapse('purchaseBetween');
+                      e.preventDefault(), openCollapse("purchaseBetween");
                     }}
                   >
                     <td className="border text-left  p-[3px]  text-nowrap text-sm ">
@@ -1045,8 +1097,8 @@ const VarianceFoodCost = () => {
                           <div className="p-1">
                             <CiSquarePlus />
                           </div>
-                        )}{' '}
-                        Purchases between {selectedFromDate} and{' '}
+                        )}{" "}
+                        Purchases between {selectedFromDate} and{" "}
                         {selectedToDate}
                       </div>
                     </td>
@@ -1099,7 +1151,7 @@ const VarianceFoodCost = () => {
                                   {item.VendorName}
                                 </td>
                                 <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                                  {dateFormat(item.InvoiceDate, 'mm-dd-yyyy')}
+                                  {dateFormat(item.InvoiceDate, "mm-dd-yyyy")}
                                 </td>
                                 <td className="border text-right  p-[3px]  text-nowrap text-sm">
                                   {item.VendorInvoiceReference}
@@ -1128,7 +1180,7 @@ const VarianceFoodCost = () => {
                       <div className="flex align-middle">
                         <div className="p-1">
                           <CiSquarePlus />
-                        </div>{' '}
+                        </div>{" "}
                         Transferred In
                       </div>
                     </td>
@@ -1147,7 +1199,7 @@ const VarianceFoodCost = () => {
                       <div className="flex align-middle">
                         <div className="p-1">
                           <CiSquarePlus />
-                        </div>{' '}
+                        </div>{" "}
                         Transferred Out
                       </div>
                     </td>
@@ -1166,7 +1218,7 @@ const VarianceFoodCost = () => {
                       <div className="flex align-middle">
                         <div className="p-1">
                           <CiSquarePlus />
-                        </div>{' '}
+                        </div>{" "}
                         Ending On-Hand Count: {selectedToDate}
                       </div>
                     </td>
@@ -1187,7 +1239,7 @@ const VarianceFoodCost = () => {
                       className="border p-[3px]  text-nowrap text-sm text-left"
                       colSpan={2}
                     >
-                      Actual Usage{' '}
+                      Actual Usage{" "}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
                       {breakDownSupportData[0]?.usageCases?.toFixed(2)}
@@ -1206,11 +1258,11 @@ const VarianceFoodCost = () => {
         <div className="">
           <h3
             onClick={(e) => {
-              e.preventDefault(), openCollapse('ideal');
+              e.preventDefault(), openCollapse("ideal");
             }}
             className="text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
           >
-            <span>Ideal</span>{' '}
+            <span>Ideal</span>{" "}
             <span className="m-1 ">
               {showAndHideBreakDown.ideal == true ? (
                 <IoIosArrowUp />
@@ -1232,7 +1284,7 @@ const VarianceFoodCost = () => {
                       # Sold
                     </th>
                     <th className=" p-[3px] text-right text-nowrap text-sm">
-                      #{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName}{' '}
+                      #{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName}{" "}
                       in Recipe
                     </th>
                     <th className=" p-[3px] text-right text-nowrap text-sm">
@@ -1283,12 +1335,12 @@ const VarianceFoodCost = () => {
                       className=" p-[3px]  text-nowrap text-sm text-left"
                       colSpan={5}
                     >
-                      Ideal Usage{' '}
+                      Ideal Usage{" "}
                     </td>
                     <td className=" p-[3px]  text-nowrap text-sm text-right">
                       {calculateMasterItemQuantityTotalSum(
                         costBreakdownIdealDetails,
-                        'MasterItemQuantityTotal'
+                        "MasterItemQuantityTotal"
                       ).toFixed(2)}
                     </td>
                     <td className=" p-[3px]  text-nowrap text-sm text-right">
@@ -1306,7 +1358,7 @@ const VarianceFoodCost = () => {
         <div className="mt-[6px]">
           <h3
             onClick={(e) => {
-              e.preventDefault(), openCollapse('Variance');
+              e.preventDefault(), openCollapse("Variance");
             }}
             className="text-base font-semibold bg-orange-100 py-[3px] px-1 rounded-t-md flex justify-between cursor-pointer"
           >
@@ -1349,7 +1401,7 @@ const VarianceFoodCost = () => {
                   <td className="border p-[3px]  text-nowrap text-sm  text-right">
                     {calculateMasterItemQuantityTotalSum(
                       costBreakdownIdealDetails,
-                      'MasterItemQuantityTotal'
+                      "MasterItemQuantityTotal"
                     ).toFixed(2)}
                   </td>
                   <td className="border p-[3px]  text-nowrap text-sm text-right text-right">
@@ -1404,7 +1456,7 @@ const VarianceFoodCost = () => {
                   title="From Date"
                   options={fromDateOptions}
                   selectedOption={
-                    isDateLoading ? 'Loading...' : selectedFromDate
+                    isDateLoading ? "Loading..." : selectedFromDate
                   }
                   onOptionChange={(date) => setSelectedFromDate(date)}
                 />
@@ -1413,7 +1465,7 @@ const VarianceFoodCost = () => {
                 <Dropdown
                   title="To Date"
                   options={toDateOptions}
-                  selectedOption={isDateLoading ? 'Loading...' : selectedToDate}
+                  selectedOption={isDateLoading ? "Loading..." : selectedToDate}
                   onOptionChange={(date) => setSelectedToDate(date)}
                 />
               </div>
@@ -1528,7 +1580,7 @@ const VarianceFoodCost = () => {
                   Object.keys(tableState.expanded).some((key) =>
                     /^\d+\.\d+\.\d+$/.test(key)
                   )) ||
-                  viewby === 'Inventory Item') && (
+                  viewby === "Inventory Item") && (
                   <div className="flex items-center mt-[31px] gap-3">
                     <div>
                       <input
@@ -1536,7 +1588,7 @@ const VarianceFoodCost = () => {
                         type="checkbox"
                         checked={showQuantities}
                         onChange={(e) =>
-                          handleShowColumns(e.target.checked, '#')
+                          handleShowColumns(e.target.checked, "#")
                         }
                       />
                       Show Quantities
@@ -1547,7 +1599,7 @@ const VarianceFoodCost = () => {
                         type="checkbox"
                         checked={showDollarAmounts}
                         onChange={(e) =>
-                          handleShowColumns(e.target.checked, '$')
+                          handleShowColumns(e.target.checked, "$")
                         }
                       />
                       Show Dollar Amounts
@@ -1595,7 +1647,7 @@ const VarianceFoodCost = () => {
             selectedToDate={selectedToDate}
           />
           <Modal
-            title={'Show/Hide Departments'}
+            title={"Show/Hide Departments"}
             isOpen={isShowHideDepartmentsModalVisible}
             onClose={() => setIsShowHideDepartmentsModalVisible(false)}
           >
@@ -1665,7 +1717,7 @@ const VarianceFoodCost = () => {
             </div>
           </Modal>
           <Modal
-            title={'Warning'}
+            title={"Warning"}
             isOpen={showWarnings}
             onClose={() => setShowWarnings(false)}
           >
@@ -1673,13 +1725,13 @@ const VarianceFoodCost = () => {
               <p className="text-center">
                 {`Not enough countsheets of ${Object.keys(viewMap).find(
                   (key) => viewMap[key] === countType
-                )} type to compare for ${selectedUnitName}.`}{' '}
+                )} type to compare for ${selectedUnitName}.`}{" "}
                 <br /> Please select a different type or a different date range.
               </p>
             </div>
           </Modal>
           <Modal
-            title={'Food Cost Breakdown'}
+            title={"Food Cost Breakdown"}
             isOpen={isBreakDownModal}
             onClose={() => setIsBreakDownModal(false)}
           >

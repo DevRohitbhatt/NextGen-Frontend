@@ -50,6 +50,8 @@ const PurchaseAnalysis = () => {
 	const [isLocationReportRendered, setIsLocationReportRendered] = useState(false);
 	const [hasUnitChanged, setHasUnitchanged] = useState(true);
 
+	const [selectedCompany, setSelectedCompany] = useState(null);
+	const [selectedAlignment, setSelectedAlignment] = useState(null);
 	//selected unit state variables
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
@@ -225,15 +227,21 @@ const PurchaseAnalysis = () => {
 		if (groupOrUnitAccessName || defaultUnitName) {
 			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+		if (companyID) {
+			setSelectedCompany(companyID);
+		}
+		if (alignmentID) {
+			setSelectedAlignment(alignmentID);
+		}
+	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName, companyID, alignmentID]);
 
 	useEffect(() => {
-		if (companyID && alignmentID && (groupOrUnitAccess || selectedUnit)) {
-			fetchData(companyID, alignmentID, groupOrUnitAccess || selectedUnit);
+		if (selectedCompany && selectedAlignment && (groupOrUnitAccess || selectedUnit)) {
+			fetchData(selectedCompany, selectedAlignment, groupOrUnitAccess || selectedUnit);
 		} else {
 			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
 		}
-	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
+	}, [selectedCompany, selectedAlignment, groupOrUnitAccess, selectedUnit]);
 
 	useEffect(() => {
 		if (!isLocationReportRendered) {
@@ -243,7 +251,10 @@ const PurchaseAnalysis = () => {
 			if (countsheetParam) {
 				try {
 					const decodedData = JSON.parse(decodeURIComponent(countsheetParam));
+					console.log('decodedData:', decodedData);
 					setReceivedData(decodedData);
+					setSelectedCompany(decodedData.companyId);
+					setSelectedAlignment(decodedData.alignmentId);
 					setSelectedUnit(decodedData.selectedUnit);
 					setSelectedUnitName(decodedData.selectedUnitName);
 					setSelectedVendor(decodedData.vendorId);
@@ -271,7 +282,7 @@ const PurchaseAnalysis = () => {
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
-					companyId: companyID,
+					companyId: selectedCompany,
 				},
 			};
 
@@ -288,10 +299,10 @@ const PurchaseAnalysis = () => {
 	};
 
 	useEffect(() => {
-		if (!window.location.search) {
+		if (!window.location.search && selectedCompany) {
 			getDefaultDates();
 		}
-	}, []);
+	}, [selectedCompany]);
 
 	const fetchData = async (companyId) => {
 		setIsVendorsLoading(true);
@@ -328,8 +339,8 @@ const PurchaseAnalysis = () => {
 			const getData = {
 				url: 'PurchaseAnalysis',
 				urlParams: {
-					companyID: companyID,
-					alignmentID: alignmentID,
+					companyID: selectedCompany,
+					alignmentID: selectedAlignment,
 					memberId: selectedUnit,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
@@ -544,8 +555,8 @@ const PurchaseAnalysis = () => {
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
-							companyID={companyID}
-							alignmentID={alignmentID}
+							companyID={selectedCompany}
+							alignmentID={selectedAlignment}
 							memberID={selectedUnit}
 							memberName={selectedUnitName}
 							includeAreas={true}
