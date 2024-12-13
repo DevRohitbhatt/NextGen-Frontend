@@ -1076,9 +1076,9 @@ const VarianceFoodCost = () => {
       <div className="max-w-5xl mx-auto my-0 p-[4px]  shadow-lg border bg-white min-w-[750px]">
         {/* Header */}
         <div className="text-center  ">
-          <p>{breakDownSupportData[0]?.description}</p>
-          <p className="text-gray-600">
-            Store #{selectedUnit} - {selectedToDate} to {selectedFromDate} (
+          <p className="text-gray-600 text-sm">{breakDownSupportData[0]?.description}</p>
+          <p className="text-gray-600 text-sm">
+            Store #{selectedUnit} - {selectedFromDate} to {selectedToDate} (
             {view})
           </p>
         </div>
@@ -1122,7 +1122,7 @@ const VarianceFoodCost = () => {
                         <div className="p-1">
                           <CiSquarePlus />
                         </div>
-                        Beginning On-Hand Count: {selectedToDate}
+                        Beginning On-Hand Count: {selectedFromDate}
                       </div>
                     </td>
                     <td className="border   p-[3px]  text-nowrap text-sm text-center"></td>
@@ -1150,8 +1150,8 @@ const VarianceFoodCost = () => {
                             <CiSquarePlus />
                           </div>
                         )}{" "}
-                        Purchases between {selectedToDate} and{" "}
-                        {selectedFromDate}
+                        Purchases between {selectedFromDate} and{" "}
+                        {selectedToDate}
                       </div>
                     </td>
                     <td className="border   p-[3px]  text-nowrap text-sm text-center">
@@ -1167,8 +1167,8 @@ const VarianceFoodCost = () => {
                   {showAndHideBreakDown.purchaseBetween == true && (
                     <tr>
                       <td colSpan={4}>
-                        <table className="w-full">
-                          <thead>
+                        <table className="w-[97%] ml-[3%]">
+                          <thead className="bg-gray-100">
                             <th className="border text-left  p-[3px]  text-nowrap text-sm">
                               Vendor
                             </th>
@@ -1176,7 +1176,7 @@ const VarianceFoodCost = () => {
                               Date
                             </th>
                             <th className="border text-left  p-[3px]  text-nowrap text-sm">
-                              Invoices#
+                              Invoices #
                             </th>
                             <th className="border text-left  p-[3px]  text-nowrap text-sm">
                               #
@@ -1192,6 +1192,7 @@ const VarianceFoodCost = () => {
                             </th>
                           </thead>
                           <tbody>
+                          {breakDownIdealDetails.length === 0 && <td colSpan={7}>There is no any purchases in this period.</td> }
                             {breakDownIdealDetails.map((item) => (
                               <tr>
                                 <td className="border text-left  p-[3px]  text-nowrap text-sm">
@@ -1266,7 +1267,7 @@ const VarianceFoodCost = () => {
                         <div className="p-1">
                           <CiSquarePlus />
                         </div>{" "}
-                        Ending On-Hand Count: {selectedFromDate}
+                        Ending On-Hand Count: {selectedToDate}
                       </div>
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-center">
@@ -1382,7 +1383,7 @@ const VarianceFoodCost = () => {
                       className=" p-[3px]  text-nowrap text-sm text-left"
                       colSpan={5}
                     >
-                      Actual Usage{" "}
+                      Ideal Usage{" "}
                     </td>
                     <td className=" p-[3px]  text-nowrap text-sm text-right">
                       {calculateMasterItemQuantityTotalSum(

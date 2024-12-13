@@ -1162,7 +1162,7 @@ const ActualFoodCost = () => {
                           <thead className="bg-gray-100">
                             <th className="border text-left  p-[3px]  text-nowrap text-sm">Vendor</th>
                             <th className="border text-left  p-[3px]  text-nowrap text-sm">Date</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Invoices#</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Invoices #</th>
                             <th className="border text-left  p-[3px]  text-nowrap text-sm">#</th>
                             <th className="border text-left  p-[3px]  text-nowrap text-sm">UOM</th>
                             <th className="border text-left  p-[3px]  text-nowrap text-sm">Price</th>
@@ -1187,10 +1187,10 @@ const ActualFoodCost = () => {
                                   {item.UnitOfMeasure}
                                 </td>
                                 <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                                  {item.Price.toFixed(2)}
+                                  ${item.Price.toFixed(2)}
                                 </td>
                                 <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                                  {item.TotalPrice.toFixed(2)}
+                                  ${item.TotalPrice.toFixed(2)}
                                 </td>
                               </tr>
                             ))}
