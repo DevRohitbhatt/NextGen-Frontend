@@ -20,6 +20,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import actualFoodCosts from "../../assets/introJSSteps/actualFoodCosts";
 import { useNavigate } from "react-router-dom";
 import dateFormat from "dateformat";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 const columnHelper = createColumnHelper();
 
@@ -1063,27 +1064,35 @@ const ActualFoodCost = () => {
   }
 
     return (
-      <div className="max-w-5xl mx-auto my-1 p-4 rounded-lg shadow-lg border bg-white min-w-[750px]">
+      <div className="max-w-5xl mx-auto my-0 p-1 rounded-lg shadow-lg border bg-white min-w-[750px]">
         {/* Header */}
         <div className="text-center  ">
-          <p className="text-gray-600">
-            Store #{selectedUnit} - {selectedToDate} to {selectedFromDate} (
+          <p className="text-gray-600 text-sm">{costBreakActualDetails.description}</p>
+          <p className="text-gray-600 text-sm">
+            Store #{selectedUnit} {selectedFromDate} to {selectedToDate} (
             {view})
           </p>
         </div>
 
         {/* Actual Section */}
-        <div className="my-6">
+        <div className="my-1">
           <h3
             onClick={(e) => {
               e.preventDefault(), openCollapse("Actual");
             }}
-            className="text-lg font-semibold bg-blue-100 py-2 px-4 rounded-t-md"
+            className="text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
           >
-            Actual
+            <span>Actual</span>{" "}
+            <span className="m-1 ">
+              {showAndHideBreakDown.Actual == true ? (
+                <IoIosArrowUp />
+              ) : (
+                <IoIosArrowDown />
+              )}
+            </span>
           </h3>
           {showAndHideBreakDown.Actual == true && (
-            <div className="tableHOC pr-1  overflow-auto">
+            <div className="">
               <table className="w-full border-collapse border">
                 <thead className="bg-gray-100">
                   <tr>
@@ -1104,7 +1113,7 @@ const ActualFoodCost = () => {
                         <div className="p-1">
                           <CiSquarePlus />
                         </div>
-                        Beginning On-Hand Count: {selectedToDate}
+                        Beginning On-Hand Count: {selectedFromDate}
                       </div>
                     </td>
                     <td className="border   p-[3px]  text-nowrap text-sm text-center"></td>
@@ -1132,8 +1141,8 @@ const ActualFoodCost = () => {
                             <CiSquarePlus />
                           </div>
                         )}{" "}
-                        Purchases between {selectedToDate} and{" "}
-                        {selectedFromDate}
+                        Purchases between {selectedFromDate} and{" "}
+                        {selectedToDate}
                       </div>
                     </td>
                     <td className="border   p-[3px]  text-nowrap text-sm text-center">
@@ -1147,17 +1156,17 @@ const ActualFoodCost = () => {
                     </td>
                   </tr>
                   {showAndHideBreakDown.purchaseBetween == true && (
-                    <tr>
+                    <tr className="ml-[10px] ">
                       <td colSpan={4}>
-                        <table className="w-full">
-                          <thead>
-                            <th>Vendor</th>
-                            <th>date</th>
-                            <th>Invoices#</th>
-                            <th>#</th>
-                            <th>UOM</th>
-                            <th>Price</th>
-                            <th>Total</th>
+                        <table className="w-[97%] ml-[3%]">
+                          <thead className="bg-gray-100">
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Vendor</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Date</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Invoices#</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">#</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">UOM</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Price</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Total</th>
                           </thead>
                           <tbody>
                             {breakDownIdealDetails.map((item) => (
@@ -1185,6 +1194,7 @@ const ActualFoodCost = () => {
                                 </td>
                               </tr>
                             ))}
+                            {breakDownIdealDetails.length === 0 && <td colSpan={7}>There is no any purchases in this period.</td> }
                           </tbody>
                         </table>
                       </td>
@@ -1234,7 +1244,7 @@ const ActualFoodCost = () => {
                         <div className="p-1">
                           <CiSquarePlus />
                         </div>{" "}
-                        Ending On-Hand Count: {selectedFromDate}
+                        Ending On-Hand Count: {selectedToDate}
                       </div>
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-center">
@@ -1270,40 +1280,47 @@ const ActualFoodCost = () => {
         </div>
 
         {/* Ideal Section */}
-        <div className="my-6">
+        <div className="my-1">
           <h3
             onClick={(e) => {
               e.preventDefault(), openCollapse("ideal");
             }}
-            className="text-lg font-semibold bg-green-100 py-2 px-4 rounded-t-md"
-          >
-            Ideal
+            className="text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
+            >
+              <span>Ideal</span>{" "}
+              <span className="m-1 ">
+                {showAndHideBreakDown.ideal == true ? (
+                  <IoIosArrowUp />
+                ) : (
+                  <IoIosArrowDown />
+                )}
+              </span>
           </h3>
           {showAndHideBreakDown.ideal == true && (
             <div className="tableHOC pr-1 max-h-[20vh] overflow-auto">
-              <table className="w-full border-collapse border">
+              <table className="w-full border-collapse ">
                 <thead className="bg-gray-100 sticky top-0">
                   <tr>
-                    <th className="border p-[3px] text-left text-sm">
+                    <th className=" p-[3px] text-left text-sm">
                       Menu Item
                     </th>
-                    <th className="border p-[3px] text-left text-nowrap text-sm">
+                    <th className=" p-[3px] text-left text-nowrap text-sm">
                       Recipe
                     </th>
-                    <th className="border p-[3px] text-right text-nowrap text-sm">
+                    <th className=" p-[3px] text-right text-nowrap text-sm">
                       # Sold
                     </th>
-                    <th className="border p-[3px] text-right text-nowrap text-sm">
+                    <th className=" p-[3px] text-right text-nowrap text-sm">
                       #{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName}{" "}
                       in Recipe
                     </th>
-                    <th className="border p-[3px] text-right text-nowrap text-sm">
+                    <th className=" p-[3px] text-right text-nowrap text-sm">
                       # {costBreakdownIdealDetails[0]?.MasterItemUOM}
                     </th>
-                    <th className="border p-[3px] text-righ text-nowrapt text-sm">
+                    <th className=" p-[3px] text-righ text-nowrapt text-sm">
                       Total # {costBreakdownIdealDetails[0]?.MasterItemUOM}
                     </th>
-                    <th className="border p-[3px] text-right text-nowrap text-sm">
+                    <th className=" p-[3px] text-right text-nowrap text-sm">
                       Cost
                     </th>
                   </tr>
@@ -1345,7 +1362,7 @@ const ActualFoodCost = () => {
                       className="border p-[3px]  text-nowrap text-sm text-left"
                       colSpan={5}
                     >
-                      Actual Usage{" "}
+                      Ideal Usage{" "}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
                       {calculateMasterItemQuantityTotalSum(costBreakdownIdealDetails,"MasterItemQuantityTotal").toFixed(2)}
@@ -1361,14 +1378,21 @@ const ActualFoodCost = () => {
         </div>
 
         {/* Variance Section */}
-        <div className="my-6">
+        <div className="my-1">
           <h3
             onClick={(e) => {
               e.preventDefault(), openCollapse("Variance");
             }}
-            className="text-lg font-semibold bg-orange-100 py-2 px-4 rounded-t-md"
-          >
-            Variance
+            className="text-base font-semibold bg-orange-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
+            >
+              <span> Variance</span>
+              <span className="m-1 ">
+                {showAndHideBreakDown.Variance == true ? (
+                  <IoIosArrowUp />
+                ) : (
+                  <IoIosArrowDown />
+                )}
+              </span>
           </h3>
           {showAndHideBreakDown.Variance == true && (
             <table className="w-full border-collapse border">
