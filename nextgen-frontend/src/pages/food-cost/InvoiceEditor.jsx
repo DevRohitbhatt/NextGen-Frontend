@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getCall } from '../../apis/network';
+import { useSelector } from 'react-redux';
 import {
 	ExportOptions,
 	PdfBuilder,
@@ -9,16 +10,25 @@ import {
 	CalendarModal,
 	Modal,
 	Loader,
+	TableHOC,
 } from '../../components';
 import dateFormat from 'dateformat';
+import { FiEdit2 } from 'react-icons/fi';
+import { TiDelete } from 'react-icons/ti';
 import { createColumnHelper } from '@tanstack/react-table';
+import EditableTableHOC from '../../components/table/EditableTableHOC';
+
+const columnHelper = createColumnHelper();
 
 const InvoiceEditor = () => {
 	const location = useLocation();
+	const { companyID } = useSelector((state) => state.globalState);
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState();
 	const [selectedVendor, setSelectedVendor] = useState(0);
 	const [selectedVendorName, setSelectedVendorName] = useState();
+	const [vendorItems, setVendorItems] = useState([]);
+
 	const [invoiceDetails, setInvoiceDetails] = useState([]);
 	const [showCommentModal, setShowCommentModal] = useState(false);
 	const [comment, setComment] = useState();
@@ -57,6 +67,12 @@ const InvoiceEditor = () => {
 		setSelectedDate(new Date(searchParams.get('date')));
 	}, [location.search]);
 
+	useEffect(() => {
+		if (selectedUnit && selectedVendor) {
+			fetchVendorItems();
+		}
+	}, [selectedUnit, selectedVendor]);
+
 	const handleClickOutside = (event) => {
 		if (moreOptionsDropdown.current && !moreOptionsDropdown.current.contains(event.target)) {
 			setIsDropdownVisible(false);
@@ -66,7 +82,55 @@ const InvoiceEditor = () => {
 		}
 	};
 
-	console.log('selectedDate', selectedDate);
+	const columns = [
+		columnHelper.display({
+			id: 'actions',
+			size: '80',
+		}),
+		columnHelper.accessor('qsrItemID', {
+			id: 'qsrItemID',
+			header: 'Item Ref#',
+		}),
+		columnHelper.accessor('description', {
+			id: 'description',
+			header: 'Description',
+		}),
+		columnHelper.accessor('unitOfMeasure', {
+			id: 'unitOfMeasure',
+			header: 'UOM',
+		}),
+		columnHelper.accessor('packSize', {
+			id: 'packSize',
+			header: 'Pack Size',
+		}),
+		columnHelper.accessor('orderQty', {
+			id: 'orderQty',
+			header: 'Quantity',
+		}),
+	];
+
+	const fetchVendorItems = async () => {
+		try {
+			const getData = {
+				url: 'getVendorItems',
+				urlParams: {
+					companyID: companyID,
+					unitID: selectedUnit,
+					vendorID: selectedVendor,
+				},
+			};
+
+			const result = await getCall(getData);
+
+			setVendorItems(result.data);
+		} catch (error) {
+			console.error('Error getting Invoice data: ', error);
+		}
+	};
+
+	const Table = <EditableTableHOC data={vendorItems} columns={columns} setData={setVendorItems} />;
+
+	console.log('vendorItems', vendorItems);
 
 	return (
 		<div className='w-[85%] mx-auto h-full'>
@@ -179,17 +243,17 @@ const InvoiceEditor = () => {
 				)}
 			</div>
 
-			<div className='relative w-full h-96'>
+			<div className='relative w-full'>
 				<Loader loading={isLoading} />
 				{!isLoading &&
-					(invoiceDetails.length > 0 ? (
+					(vendorItems.length > 0 ? (
 						<div className='paged-table'>{Table}</div>
 					) : (
 						<div className='mt-10 text-xl font-medium text-center'>No data available</div>
 					))}
 			</div>
 
-			<div className='flex items-center justify-between rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+			<div className='flex mt-6 items-center justify-between rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center gap-2'>
 					<button className='flex items-center gap-2 px-4 py-3 border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[var(--tw-primary)]'>
 						Add Item
