@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	Loader,
@@ -10,7 +9,6 @@ import {
 	CalendarModal,
 	UnitModal,
 	ExportOptions,
-	DateSelector,
 	PdfBuilder,
 	ExcelExport as exportToExcel,
 	TableHOC,
@@ -86,7 +84,7 @@ const VarianceFoodCost = () => {
 	];
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 	const moreOptionsDropdown = useRef(null);
-	const [tableState, setTableState] = useState(false);
+	const [tableState, setTableState] = useState();
 
 	const viewMap = {
 		Weekly: 'WE',
@@ -109,10 +107,11 @@ const VarianceFoodCost = () => {
 		columnHelper.display({
 			id: 'actions',
 			cell: ({ row }) =>
-				row.getCanExpand() ? (
+				row.getCanExpand() && row.depth === 0 ? (
 					<div
 						{...{
 							style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
+							className: 'flex items-center gap-2 font-bold capitalize',
 						}}
 					>
 						{row.getIsExpanded() ? (
@@ -120,18 +119,54 @@ const VarianceFoodCost = () => {
 						) : (
 							<CiSquarePlus className='text-[20px]' />
 						)}
+						{row.original.finalDepartment}
 					</div>
 				) : null,
+			groupBy: true,
 			size: '80',
 		}),
 		columnHelper.accessor('department', {
 			id: 'department',
 			header: 'Department',
+			cell: ({ row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', width: '100%' },
+							className: 'flex items-center gap-2 font-bold capitalize',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.original.department}
+					</div>
+				) : null,
+			groupBy: true,
 			dataType: 'string',
 		}),
 		columnHelper.accessor('subDepartment', {
 			id: 'subDepartment',
 			header: 'Sub Department',
+			cell: ({ row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', width: '100%' },
+							className: 'flex items-center gap-2 font-bold capitalize',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.original.subDepartment}
+					</div>
+				) : null,
+			groupBy: true,
 			showDepth: 2,
 			dataType: 'string',
 		}),
@@ -267,7 +302,7 @@ const VarianceFoodCost = () => {
 										subSubrow.subRows.reduce(
 											(subsubAcc, subsubsubrow) =>
 												subsubAcc +
-												(item.includeInGrandTotal && subsubsubrow.original[field]
+												(item?.includeInGrandTotal && subsubsubrow.original[field]
 													? Number(subsubsubrow.original[field])
 													: 0),
 											0
@@ -279,7 +314,7 @@ const VarianceFoodCost = () => {
 									);
 									return (
 										subAcc +
-										(item.includeInGrandTotal && subSubrow.original[field]
+										(item?.includeInGrandTotal && subSubrow.original[field]
 											? Number(subSubrow.original[field])
 											: 0)
 									);
@@ -412,44 +447,31 @@ const VarianceFoodCost = () => {
 			if (result?.data && result?.data?.length === 0) {
 				setVarianceFoodCostData([]);
 			} else {
-				const newData = [
-					{
-						department: 'TOTAL',
-						subRows: result.data.map((department) => ({
-							department: department.department,
-							comparisonName:
-								department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonName || 'Net Sales',
-							comparisonSales:
-								department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonSales || 0,
-							subRows: department.subDepartments.map((subDepartment) => ({
-								subDepartment: subDepartment.subDepartment,
-								comparisonName: 'Net Sales',
-								comparisonSales:
-									department.subDepartments[0]?.varianceFoodCostModels[0]?.comparisonSales || 0,
-								subRows: subDepartment.varianceFoodCostModels.map((foodCost) => ({
-									description: foodCost.description,
-									countDisplayUnitName: foodCost.countDisplayUnitName,
-									actualNumber: foodCost.actualQuant,
-									actualDollar: foodCost.actualCost,
-									actualPct: foodCost.actualCostPct * 100,
-									idealNumber: foodCost.idealQuant,
-									idealDollar: foodCost.idealCost,
-									idealPct: foodCost.salesNet ? (foodCost.idealCost / foodCost.salesNet) * 100 : 0,
-									varianceNumber: foodCost.varianceQuant,
-									varianceDollar: foodCost.varianceCost,
-									variancePct: foodCost.salesNet
-										? (foodCost.varianceCost / foodCost.salesNet) * 100
-										: 0,
-									wasteNumber: foodCost.wasteCountCases,
-									wasteDollar: foodCost.wasteCountCost,
-									wastePct: foodCost.salesNet
-										? (foodCost.wasteCountCost / foodCost.salesNet) * 100
-										: 0,
-								})),
-							})),
-						})),
-					},
-				];
+				const newData = result.data?.flatMap((department) =>
+					department.subDepartments.flatMap((subDepartment) =>
+						subDepartment.varianceFoodCostModels.map((item) => ({
+							finalDepartment: 'TOTAL',
+							comparisonName: item.comparisonName || 'Net Sales',
+							comparisonSales: item.comparisonSales || 0,
+							department: item.department,
+							subDepartment: item.subDepartment,
+							description: item.description,
+							countDisplayUnitName: item.countDisplayUnitName,
+							actualNumber: item.actualQuant,
+							actualDollar: item.actualCost,
+							actualPct: item.actualCostPct * 100,
+							idealNumber: item.idealQuant,
+							idealDollar: item.idealCost,
+							idealPct: item.salesNet ? (item.idealCost / item.salesNet) * 100 : 0,
+							varianceNumber: item.varianceQuant,
+							varianceDollar: item.varianceCost,
+							variancePct: item.salesNet ? (item.varianceCost / item.salesNet) * 100 : 0,
+							wasteNumber: item.wasteCountCases,
+							wasteDollar: item.wasteCountCost,
+							wastePct: item.salesNet ? (item.wasteCountCost / item.salesNet) * 100 : 0,
+						}))
+					)
+				);
 
 				setVarianceFoodCostData(newData);
 				setFilteredVarianceFoodCostData(newData);
@@ -552,23 +574,12 @@ const VarianceFoodCost = () => {
 
 	const handleShowHideDepartments = () => {
 		setIsShowHideDepartmentsModalVisible(false);
-		const newVarianceFoodCostData = varianceFoodCostData.map((item) => {
-			const filteredSubRows = item.subRows
-				.map((subItem) => {
-					const filteredSubSubRows = subItem.subRows.filter(
-						(subSubItem) =>
-							!checkedItems.some(
-								(checkedItem) =>
-									checkedItem.name === `${subItem.department}/${subSubItem.subDepartment}` &&
-									!checkedItem.showOnReport
-							)
-					);
-					const updatedSubItem = { ...subItem, subRows: filteredSubSubRows };
-					return filteredSubSubRows.length > 0 ? updatedSubItem : null;
-				})
-				.filter((subItem) => subItem !== null);
-			return { ...item, subRows: filteredSubRows };
-		});
+		const newVarianceFoodCostData = varianceFoodCostData.filter((item) =>
+			checkedItems.some(
+				(checkedItem) =>
+					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
+			)
+		);
 		setIsTableRendered(false);
 		setFilteredVarianceFoodCostData(newVarianceFoodCostData);
 	};
@@ -624,136 +635,74 @@ const VarianceFoodCost = () => {
 			body: buildPDFBody(),
 		};
 
+		console.log('pdfData', pdfData);
+
 		PdfBuilder(pdfData);
 	};
 
 	const buildPDFBody = () => {
-		let body = [];
-		varianceFoodCostData.flatMap((row) => [
-			(body = row.subRows.flatMap((subRow) => {
-				return {
-					type: 'table',
-					title: '',
-					widths: [
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
-						'auto',
+		const formatNumber = (num, prefix = '') => ({
+			value: `${prefix}${num.toFixed(2).toLocaleString('en-US')}`,
+			cellType: 'number',
+		});
+
+		const formatPercent = (num) => ({
+			value: `${Number(num).toFixed(2).toLocaleString('en-US')}%`,
+			cellType: 'number',
+		});
+
+		const body = [
+			{
+				type: 'table',
+
+				widths: new Array(columns.slice(1).length).fill('auto'),
+				dataTypes: columns.slice(1).map((column) => column.dataType),
+				data: {
+					columnHeaders: [
+						'Department',
+						'Sub Department',
+						'Description',
+						'UOM',
+						'Actual #',
+						'Actual $',
+						'Actual %',
+						'Ideal #',
+						'Ideal $',
+						'Ideal %',
+						'Variance #',
+						'Variance $',
+						'Variance %',
+						'Waste #',
+						'Waste $',
+						'Waste %',
+						'Comparison Name',
+						'Comparison Sales',
 					],
-					dataTypes: [
-						'string',
-						'string',
-						'string',
-						'string',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-						'number',
-					],
-					data: formatPDFData(subRow, subRow.department),
-				};
-			})),
-		]);
+					rows: varianceFoodCostData.map((row) => [
+						{ value: row.department, cellType: 'string', columnName: 'Department' },
+						{ value: row.subDepartment, cellType: 'string', columnName: 'Sub Department' },
+						{ value: row.description, cellType: 'string', columnName: 'Description' },
+						{ value: row.countDisplayUnitName, cellType: 'string', columnName: 'UOM' },
+						{ ...formatNumber(row.actualNumber), columnName: 'Actual #' },
+						{ ...formatNumber(row.actualDollar, '$'), columnName: 'Actual $' },
+						{ ...formatPercent(row.actualPct), columnName: 'Actual %' },
+						{ ...formatNumber(row.idealNumber), columnName: 'Ideal #' },
+						{ ...formatNumber(row.idealDollar, '$'), columnName: 'Ideal $' },
+						{ ...formatPercent(row.idealPct), columnName: 'Ideal %' },
+						{ ...formatNumber(row.varianceNumber), columnName: 'Variance #' },
+						{ ...formatNumber(row.varianceDollar, '$'), columnName: 'Variance $' },
+						{ ...formatPercent(row.variancePct), columnName: 'Variance %' },
+						{ ...formatNumber(row.wasteNumber), columnName: 'Waste #' },
+						{ ...formatNumber(row.wasteDollar, '$'), columnName: 'Waste $' },
+						{ ...formatPercent(row.wastePct), columnName: 'Waste %' },
+						{ value: row.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
+						{ value: row.comparisonSales, cellType: 'number', columnName: 'Comparison Sales' },
+					]),
+				},
+			},
+		];
+
 		return body;
-	};
-
-	const formatPDFData = (data, department) => {
-		const newData = {
-			columnHeaders: [
-				'Department',
-				'Sub Department',
-				'Description',
-				'UOM',
-				'Actual #',
-				'Actual $',
-				'Actual %',
-				'Ideal #',
-				'Ideal $',
-				'Ideal %',
-				'Variance #',
-				'Variance $',
-				'Variance %',
-				'Waste #',
-				'Waste $',
-				'Waste %',
-				'Comparison Name',
-				'Comparison Sales',
-			],
-			rows: data.subRows.flatMap((subRow) => {
-				const commonSubRowData = {
-					department: { value: department, cellType: 'string', columnName: 'Department' },
-					subDepartment: { value: subRow.subDepartment, cellType: 'string', columnName: 'Sub Department' },
-					comparison: {
-						name: { value: subRow.comparisonName, cellType: 'string', columnName: 'Comparison Name' },
-						sales: {
-							value: `$${subRow.comparisonSales.toLocaleString('en-US')}`,
-							cellType: 'number',
-							columnName: 'Comparison Sales',
-						},
-					},
-				};
-
-				return subRow.subRows.map((item) => {
-					const formatNumber = (num, prefix = '') => ({
-						value: `${prefix}${num.toFixed(2).toLocaleString('en-US')}`,
-						cellType: 'number',
-					});
-
-					const formatPercent = (num) => ({
-						value: `${Number(num).toFixed(2).toLocaleString('en-US')}%`,
-						cellType: 'number',
-					});
-
-					return [
-						commonSubRowData.department,
-						commonSubRowData.subDepartment,
-						{ value: item.description, cellType: 'string', columnName: 'Description' },
-						{ value: item.countDisplayUnitName, cellType: 'string', columnName: 'UOM' },
-						{ ...formatNumber(item.actualNumber), columnName: 'Actual #' },
-						{ ...formatNumber(item.actualDollar, '$'), columnName: 'Actual $' },
-						{ ...formatPercent(item.actualPct), columnName: 'Actual %' },
-						{ ...formatNumber(item.idealNumber), columnName: 'Ideal #' },
-						{ ...formatNumber(item.idealDollar, '$'), columnName: 'Ideal $' },
-						{ ...formatPercent(item.idealPct), columnName: 'Ideal %' },
-						{ ...formatNumber(item.varianceNumber), columnName: 'Variance #' },
-						{ ...formatNumber(item.varianceDollar, '$'), columnName: 'Variance $' },
-						{ ...formatPercent(item.variancePct), columnName: 'Variance %' },
-						{ ...formatNumber(item.wasteNumber), columnName: 'Waste #' },
-						{ ...formatNumber(item.wasteDollar, '$'), columnName: 'Waste $' },
-						{ ...formatPercent(item.wastePct), columnName: 'Waste %' },
-						commonSubRowData.comparison.name,
-						commonSubRowData.comparison.sales,
-					];
-				});
-			}),
-		};
-
-		return newData;
 	};
 
 	// Function to handle the Excel export
@@ -781,33 +730,26 @@ const VarianceFoodCost = () => {
 					{ name: 'Comparison Name', filter: 'text' },
 					{ name: 'Comparison Sales', filter: 'number' },
 				],
-				data: varianceFoodCostData.flatMap((row) =>
-					// Skip the top-level "Total" department and go to the inner "FOOD" department
-					row.subRows.flatMap((department) =>
-						department.subRows.flatMap((subDepartment) =>
-							subDepartment.subRows.map((item) => ({
-								Department: department.department,
-								'Sub Department': subDepartment.subDepartment,
-								Description: item.description,
-								UOM: item.countDisplayUnitName,
-								'Actual #': item.actualNumber?.toFixed(2),
-								'Actual $': item.actualDollar?.toFixed(2),
-								'Actual %': item.actualPct?.toFixed(2),
-								'Ideal #': item.idealNumber?.toFixed(2),
-								'Ideal $': item.idealDollar?.toFixed(2),
-								'Ideal %': item.idealPct?.toFixed(2),
-								'Variance #': item.varianceNumber?.toFixed(2),
-								'Variance $': item.varianceDollar?.toFixed(2),
-								'Variance %': item.variancePct?.toFixed(2),
-								'Waste #': item.wasteNumber?.toFixed(2),
-								'Waste $': item.wasteDollar?.toFixed(2),
-								'Waste %': item.wastePct?.toFixed(2),
-								'Comparison Name': subDepartment.comparisonName,
-								'Comparison Sales': subDepartment.comparisonSales?.toFixed(2),
-							}))
-						)
-					)
-				),
+				data: varianceFoodCostData.map((row) => ({
+					Department: row.department,
+					'Sub Department': row.subDepartment,
+					Description: row.description,
+					UOM: row.countDisplayUnitName,
+					'Actual #': row.actualNumber?.toFixed(2),
+					'Actual $': row.actualDollar?.toFixed(2),
+					'Actual %': row.actualPct?.toFixed(2),
+					'Ideal #': row.idealNumber?.toFixed(2),
+					'Ideal $': row.idealDollar?.toFixed(2),
+					'Ideal %': row.idealPct?.toFixed(2),
+					'Variance #': row.varianceNumber?.toFixed(2),
+					'Variance $': row.varianceDollar?.toFixed(2),
+					'Variance %': row.variancePct?.toFixed(2),
+					'Waste #': row.wasteNumber?.toFixed(2),
+					'Waste $': row.wasteDollar?.toFixed(2),
+					'Waste %': row.wastePct?.toFixed(2),
+					'Comparison Name': row.comparisonName,
+					'Comparison Sales': row.comparisonSales?.toFixed(2),
+				})),
 			},
 		];
 
@@ -979,8 +921,7 @@ const VarianceFoodCost = () => {
 										</div>
 									)}
 								</div>
-								{((tableState?.expanded &&
-									Object.keys(tableState.expanded).some((key) => /^\d+\.\d+\.\d+$/.test(key))) ||
+								{((tableState?.expanded && Object.keys(tableState.expanded).length > 2) ||
 									viewby === 'Inventory Item') && (
 									<div className='flex items-center mt-[31px] gap-3'>
 										<div>

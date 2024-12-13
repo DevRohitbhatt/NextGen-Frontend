@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	Loader,
@@ -18,7 +17,6 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
-import { useNavigate } from 'react-router-dom';
 import dateFormat from 'dateformat';
 
 const columnHelper = createColumnHelper();
@@ -113,10 +111,11 @@ const ActualFoodCost = () => {
 		columnHelper.display({
 			id: 'actions',
 			cell: ({ row }) =>
-				row.getCanExpand() ? (
+				row.getCanExpand() && row.depth === 0 ? (
 					<div
 						{...{
 							style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
+							className: 'flex items-center gap-2 font-bold capitalize',
 						}}
 					>
 						{row.getIsExpanded() ? (
@@ -124,18 +123,54 @@ const ActualFoodCost = () => {
 						) : (
 							<CiSquarePlus className='text-[20px]' />
 						)}
+						{row.original.finalDepartment}
 					</div>
 				) : null,
+			groupBy: true,
 			size: '80',
 		}),
 		columnHelper.accessor('department', {
 			id: 'department',
 			header: 'Department',
+			cell: ({ row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', width: '100%' },
+							className: 'flex items-center gap-2 font-bold capitalize',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.original.department}
+					</div>
+				) : null,
+			groupBy: true,
 			dataType: 'string',
 		}),
 		columnHelper.accessor('subDepartment', {
 			id: 'subDepartment',
 			header: 'Sub Department',
+			cell: ({ row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', width: '100%' },
+							className: 'flex items-center gap-2 font-bold capitalize',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.original.subDepartment}
+					</div>
+				) : null,
+			groupBy: true,
 			showDepth: 2,
 			dataType: 'string',
 		}),
@@ -246,7 +281,7 @@ const ActualFoodCost = () => {
 		columnHelper.accessor('usageCostPct', {
 			id: 'usageCostPct',
 			header: 'Actual Usage %',
-			dataType: 'number',
+			dataType: 'percent',
 			cell: ({ row, getValue }) => calculateSum(row, 'usageCostPct', getValue, true),
 			size: 90,
 		}),
@@ -268,7 +303,7 @@ const ActualFoodCost = () => {
 		columnHelper.accessor('wasteCostPct', {
 			id: 'wasteCostPct',
 			header: 'Waste %',
-			dataType: 'number',
+			dataType: 'percent',
 			cell: ({ row, getValue }) => calculateSum(row, 'wasteCostPct', getValue, true),
 			size: 90,
 		}),
@@ -452,56 +487,48 @@ const ActualFoodCost = () => {
 			if (result?.data && result?.data?.length === 0) {
 				setActualFoodCostData([]);
 			} else {
-				const newData = [
-					{
-						department: 'TOTAL',
-						subRows: result.data.map((department) => ({
-							department: department.department,
-							comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
-							comparisonSales: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonSales || 0,
-							subRows: department.subDepartments.map((subDepartment) => ({
-								subDepartment: subDepartment.subDepartment,
-								comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
-								comparisonSales: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonSales || 0,
-								subRows: subDepartment.actualFoodCosts.map((foodCost) => ({
-									description: foodCost.description,
-									caseUnitName: foodCost.caseUnitName,
-									countDisplayUnitName: foodCost.countDisplayUnitName,
-									begCountDisplayUnits: foodCost.begCountDisplayUnits,
-									begCountCases: foodCost.begCountCases,
-									begCountCost: foodCost.begCountCost,
-									purchaseCases: foodCost.purchaseCases,
-									purchaseDisplayUnits: foodCost.purchaseDisplayUnits,
-									purchaseCost: foodCost.purchaseCost,
-									iTinCountDisplayUnits: foodCost.iTinCountDisplayUnits,
-									iTinCountCases: foodCost.iTinCountCases,
-									iTinCountCost: foodCost.iTinCountCost,
-									iToutCountDisplayUnits: foodCost.iToutCountDisplayUnits,
-									iToutCountCases: foodCost.iToutCountCases,
-									iToutCountCost: foodCost.iToutCountCost,
-									wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
-									wasteCountCases: foodCost.wasteCountCases,
-									wasteCountCost: foodCost.wasteCountCost,
-									wasteCostPct: foodCost.salesNet
-										? (foodCost.wasteCountCost / foodCost.salesNet) * 100
-										: 0,
-									endCountDisplayUnits: foodCost.endCountDisplayUnits,
-									endCountCases: foodCost.endCountCases,
-									endCountCost: foodCost.endCountCost,
-									usageCases: foodCost.usageCases,
-									usageCountDisplayUnits: foodCost.usageCountDisplayUnits,
-									usageCost: foodCost.usageCost,
-									usageCostPct: foodCost.usageCostPct * 100,
-									salesNet: foodCost.salesNet,
-									comparisonName: foodCost.comparisonName,
-									comparisonSales: foodCost.comparisonSales,
-									yieldPerCase: foodCost.yieldPerCase,
-									yieldPerCountDisplayUnit: foodCost.yieldPerCountDisplayUnit,
-								})),
-							})),
-						})),
-					},
-				];
+				const newData = result.data?.flatMap((department) =>
+					department.subDepartments.flatMap((subDepartment) =>
+						subDepartment.actualFoodCosts.map((foodCost) => ({
+							finalDepartment: 'TOTAL',
+							department: foodCost.department,
+							subDepartment: foodCost.subDepartment,
+							comparisonName: foodCost?.comparisonName || '',
+							comparisonSales: foodCost?.comparisonSales || 0,
+							description: foodCost.description,
+							caseUnitName: foodCost.caseUnitName,
+							countDisplayUnitName: foodCost.countDisplayUnitName,
+							begCountDisplayUnits: foodCost.begCountDisplayUnits,
+							begCountCases: foodCost.begCountCases,
+							begCountCost: foodCost.begCountCost,
+							purchaseCases: foodCost.purchaseCases,
+							purchaseDisplayUnits: foodCost.purchaseDisplayUnits,
+							purchaseCost: foodCost.purchaseCost,
+							iTinCountDisplayUnits: foodCost.iTinCountDisplayUnits,
+							iTinCountCases: foodCost.iTinCountCases,
+							iTinCountCost: foodCost.iTinCountCost,
+							iToutCountDisplayUnits: foodCost.iToutCountDisplayUnits,
+							iToutCountCases: foodCost.iToutCountCases,
+							iToutCountCost: foodCost.iToutCountCost,
+							wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
+							wasteCountCases: foodCost.wasteCountCases,
+							wasteCountCost: foodCost.wasteCountCost,
+							wasteCostPct: foodCost.salesNet ? (foodCost.wasteCountCost / foodCost.salesNet) * 100 : 0,
+							endCountDisplayUnits: foodCost.endCountDisplayUnits,
+							endCountCases: foodCost.endCountCases,
+							endCountCost: foodCost.endCountCost,
+							usageCases: foodCost.usageCases,
+							usageCountDisplayUnits: foodCost.usageCountDisplayUnits,
+							usageCost: foodCost.usageCost,
+							usageCostPct: foodCost.usageCostPct * 100,
+							salesNet: foodCost.salesNet,
+							yieldPerCase: foodCost.yieldPerCase,
+							yieldPerCountDisplayUnit: foodCost.yieldPerCountDisplayUnit,
+						}))
+					)
+				);
+
+				console.log('newData', newData);
 
 				setActualFoodCostData(newData);
 				setFilteredActualFoodCostData(newData);
@@ -554,23 +581,12 @@ const ActualFoodCost = () => {
 	const handleShowHideDepartments = () => {
 		setIsShowHideDepartments(false);
 
-		const newActualFoodCostData = actualFoodCostData.map((item) => {
-			const filteredSubRows = item.subRows
-				.map((subItem) => {
-					const filteredSubSubRows = subItem.subRows.filter(
-						(subSubItem) =>
-							!checkedItems.some(
-								(checkedItem) =>
-									checkedItem.name === `${subItem.department}/${subSubItem.subDepartment}` &&
-									!checkedItem.showOnReport
-							)
-					);
-					const updatedSubItem = { ...subItem, subRows: filteredSubSubRows };
-					return filteredSubSubRows.length > 0 ? updatedSubItem : null;
-				})
-				.filter((subItem) => subItem !== null);
-			return { ...item, subRows: filteredSubRows };
-		});
+		const newActualFoodCostData = actualFoodCostData.filter((item) =>
+			checkedItems.some(
+				(checkedItem) =>
+					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
+			)
+		);
 		setIsTableRendered(false);
 
 		setFilteredActualFoodCostData(newActualFoodCostData);
@@ -606,75 +622,42 @@ const ActualFoodCost = () => {
 
 	const buildPDFBody = (type) => {
 		const rowsPerTable = 28;
-		const body = [];
+
 		const data = type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData;
 
-		data.forEach((row) => {
-			row.subRows.forEach((subRow) => {
-				const allRows = subRow.subRows.flatMap((subDept) =>
-					subDept.subRows.map((item) => ({
-						subDepartment: subDept.subDepartment,
-						...item,
-					}))
-				);
+		const headers = columns.slice(1);
+		const body = [];
 
-				const totalRows = allRows.length;
+		// Loop through the data and create tables
+		for (let i = 0; i < data.length; i += rowsPerTable) {
+			// Split columns into chunks of 13
+			const chunkedColumns = [];
+			for (let j = 0; j < headers.length; j += 13) {
+				chunkedColumns.push(headers.slice(j, j + 13));
+			}
 
-				const allColumns = [
-					{ id: 'subDepartment', header: 'Sub Department', dataType: 'string' },
-					{ id: 'description', header: 'Description', dataType: 'string' },
-					{ id: 'countDisplayUnitName', header: 'UOM', dataType: 'string' },
-					{ id: 'begCountDisplayUnits', header: 'Beg #', dataType: 'number' },
-					{ id: 'begCountCost', header: 'Beg $', dataType: 'number' },
-					{ id: 'purchaseDisplayUnits', header: 'Pur #', dataType: 'number' },
-					{ id: 'purchaseCost', header: 'Pur $', dataType: 'number' },
-					{ id: 'iTinCountDisplayUnits', header: 'Trans In#', dataType: 'number' },
-					{ id: 'iTinCountCost', header: 'Trans In $', dataType: 'number' },
-					{ id: 'iToutCountDisplayUnits', header: 'Trans Out#', dataType: 'number' },
-					{ id: 'iToutCountCost', header: 'Trans Out $', dataType: 'number' },
-					{ id: 'endCountDisplayUnits', header: 'End #', dataType: 'number' },
-					{ id: 'endCountCost', header: 'End $', dataType: 'number' },
-					{ id: 'usageCountDisplayUnits', header: 'Actual Usage #', dataType: 'number' },
-					{ id: 'usageCost', header: 'Actual Usage $', dataType: 'number' },
-					{ id: 'usageCostPct', header: 'Actual Usage %', dataType: 'number' },
-					{ id: 'wasteCountDisplayUnits', header: 'Waste #', dataType: 'number' },
-					{ id: 'wasteCountCost', header: 'Waste $', dataType: 'number' },
-					{ id: 'comparisonName', header: 'Comparison Name', dataType: 'string' },
-					{ id: 'comparisonSales', header: 'Comparison Sales', dataType: 'number' },
-				];
-
-				for (let i = 0; i < totalRows; i += rowsPerTable) {
-					const chunkedColumns = [];
-					for (let j = 0; j < allColumns.length; j += 13) {
-						chunkedColumns.push(allColumns.slice(j, j + 13));
-					}
-
-					chunkedColumns.forEach((columnChunk) => {
-						body.push({
-							type: 'table/SeperatePage',
-							title: subRow.department,
-							widths: columnChunk.map(() => 'auto'),
-							dataTypes: columnChunk.map((column) => column.dataType),
-							data: {
-								columnHeaders: columnChunk.map((column) => column.header),
-								rows: allRows.slice(i, i + rowsPerTable).map((row) =>
-									columnChunk.map((column) => ({
-										value:
-											column.header?.includes('$') || column.header === 'Comparison Sales'
-												? `$${parseFloat(
-														formatCellValue(row[column.id], column.dataType)
-												  ).toLocaleString('en-US')}`
-												: formatCellValue(row[column.id], column.dataType),
-										cellType: column.dataType,
-										columnName: column.header,
-									}))
-								),
-							},
-						});
-					});
-				}
+			// Create a table for each chunk of columns
+			chunkedColumns.forEach((columnChunk) => {
+				body.push({
+					type: 'table/SeperatePage',
+					widths: columnChunk.map(() => 'auto'),
+					dataTypes: columnChunk.map((column) => column.dataType),
+					data: {
+						columnHeaders: columnChunk.map((column) => column.header),
+						rows: data.slice(i, i + rowsPerTable).map((row) =>
+							columnChunk.map((column) => ({
+								value:
+									column.header?.includes('$') || column.header === 'Comparison Sales'
+										? formattingData(row[column.id])
+										: formatCellValue(row[column.id], column.dataType),
+								cellType: column.dataType,
+								columnName: column.header,
+							}))
+						),
+					},
+				});
 			});
-		});
+		}
 
 		return body;
 	};
@@ -684,7 +667,22 @@ const ActualFoodCost = () => {
 		if (dataType === 'number') {
 			return typeof value === 'number' ? value.toFixed(2) : value;
 		}
+		if (dataType === 'percent') {
+			return typeof value === 'number' ? value.toFixed(2) : value;
+		}
 		return value;
+	};
+
+	const formattingData = (value) => {
+		return value < 0
+			? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`
+			: `$${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`;
 	};
 
 	const togglePopup = () => {
@@ -720,36 +718,30 @@ const ActualFoodCost = () => {
 					{ name: 'Comparison Name', filter: 'text' },
 					{ name: 'Comparison Sales', filter: 'text' },
 				],
-				data: (type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData).flatMap((row) =>
-					row.subRows.flatMap((department) =>
-						department.subRows.flatMap((subDepartment) =>
-							subDepartment.subRows.map((item) => ({
-								department: department.department,
-								subDepartment: subDepartment.subDepartment,
-								description: item.description,
-								UOM: item.countDisplayUnitName,
-								begNumber: item.begCountDisplayUnits?.toFixed(2),
-								begDollar: item.begCountCost?.toFixed(2),
-								purNumber: item.purchaseDisplayUnits?.toFixed(2),
-								purDollar: item.purchaseCost?.toFixed(2),
-								trInNumber: item.iTinCountDisplayUnits?.toFixed(2),
-								trInDollar: item.iTinCountCost?.toFixed(2),
-								trOutNumber: item.iToutCountDisplayUnits?.toFixed(2),
-								trOutDollar: item.iToutCountCost?.toFixed(2),
-								endNumber: item.endCountDisplayUnits?.toFixed(2),
-								endDollar: item.endCountCost?.toFixed(2),
-								useNumber: item.usageCountDisplayUnits?.toFixed(2),
-								useDollar: item.usageCost?.toFixed(2),
-								usePct: item.usageCostPct?.toFixed(2),
-								wasteNumber: item.wasteCountDisplayUnits?.toFixed(2),
-								wasteDollar: item.wasteCountCost?.toFixed(2),
-								wasteCostPct: item.wasteCostPct?.toFixed(2),
-								comparisonName: item.comparisonName,
-								comparisonSales: item.comparisonSales?.toFixed(2),
-							}))
-						)
-					)
-				),
+				data: (type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData).map((row) => ({
+					department: row.department,
+					subDepartment: row.subDepartment,
+					description: row.description,
+					UOM: row.countDisplayUnitName,
+					begNumber: row.begCountDisplayUnits?.toFixed(2),
+					begDollar: row.begCountCost?.toFixed(2),
+					purNumber: row.purchaseDisplayUnits?.toFixed(2),
+					purDollar: row.purchaseCost?.toFixed(2),
+					trInNumber: row.iTinCountDisplayUnits?.toFixed(2),
+					trInDollar: row.iTinCountCost?.toFixed(2),
+					trOutNumber: row.iToutCountDisplayUnits?.toFixed(2),
+					trOutDollar: row.iToutCountCost?.toFixed(2),
+					endNumber: row.endCountDisplayUnits?.toFixed(2),
+					endDollar: row.endCountCost?.toFixed(2),
+					useNumber: row.usageCountDisplayUnits?.toFixed(2),
+					useDollar: row.usageCost?.toFixed(2),
+					usePct: row.usageCostPct?.toFixed(2),
+					wasteNumber: row.wasteCountDisplayUnits?.toFixed(2),
+					wasteDollar: row.wasteCountCost?.toFixed(2),
+					wasteCostPct: row.wasteCostPct?.toFixed(2),
+					comparisonName: row.comparisonName,
+					comparisonSales: row.comparisonSales?.toFixed(2),
+				})),
 			},
 		];
 
@@ -995,8 +987,7 @@ const ActualFoodCost = () => {
 											</div>
 										)}
 									</div>
-									{((tableState?.expanded &&
-										Object.keys(tableState.expanded).some((key) => /^\d+\.\d+\.\d+$/.test(key))) ||
+									{((tableState?.expanded && Object.keys(tableState.expanded).length > 2) ||
 										viewby === 'Inventory Item') && (
 										<div className='flex items-center mt-[31px] gap-3'>
 											<div>
