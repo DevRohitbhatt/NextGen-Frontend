@@ -310,6 +310,8 @@ const ActualFoodCost = () => {
 		columnHelper.accessor('comparisonName', {
 			id: 'comparisonName',
 			header: 'Comparison Name',
+			cell: ({ row, getValue }) =>
+				row.getCanExpand() ? row.original?.comparisonName : getValue() !== undefined ? getValue() : '',
 			dataType: 'string',
 			size: 100,
 		}),
@@ -317,8 +319,12 @@ const ActualFoodCost = () => {
 			id: 'comparisonSales',
 			header: 'Comparison Net Sales',
 			dataType: 'number',
-			cell: ({ getValue }) =>
-				getValue() !== undefined ? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}` : '',
+			cell: ({ row, getValue }) =>
+				row.getCanExpand()
+					? `$${row.original?.comparisonSales?.toFixed(2)}`
+					: getValue() !== undefined
+					? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}`
+					: '',
 			size: 100,
 		}),
 	];
