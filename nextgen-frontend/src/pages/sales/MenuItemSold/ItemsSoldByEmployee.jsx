@@ -502,8 +502,6 @@ const ItemsSoldByEmployee = () => {
 			body: buildPDFBody(),
 		};
 
-		console.log('PDF Data: ', pdfData);
-
 		PdfBuilder(pdfData);
 	};
 

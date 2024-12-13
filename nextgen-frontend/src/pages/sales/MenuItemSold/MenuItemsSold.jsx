@@ -37,7 +37,6 @@ const MenuItemsSold = () => {
 			};
 
 			const result = await getCall(getData);
-			console.log('user role settings', result);
 			const value = result.data.find((item) => item.name === '$_SHOW_MODIFIERS_IN_REPORTS')?.value;
 			if (value === 'Y') {
 				setShowItemsWithModifiers(true);

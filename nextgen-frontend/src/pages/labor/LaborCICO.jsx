@@ -249,8 +249,6 @@ const LaborCICO = () => {
             return acc;
         }
       }, 0);
-      if (row.original.name == 'Adam  Miller')
-        console.log(sum, row);
       return isDecimal ? sum.toFixed(2) : sum;
     } else {
       return getValue();
