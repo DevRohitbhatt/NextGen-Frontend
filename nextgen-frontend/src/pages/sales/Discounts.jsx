@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import discounts from '../../assets/introJSSteps/discounts';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -500,7 +501,10 @@ const Discounts = () => {
 									{
 										id: `discountAmount_${weekId}`,
 										header: 'Disc Amount',
-										cell: ({ getValue }) => `$${getValue()}`,
+										cell: ({ getValue }) => {
+											let discAmount = formattingData(getValue());
+											return discAmount
+											},
 										dataType: 'number',
 										footer: ({ table }) => (
 											<div className='text-center'>

@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -141,6 +142,11 @@ const Voids = () => {
 				id: 'price',
 				header: 'Price',
 				size: 100,
+				cell: ({ getValue }) => {
+					console.log(getValue())
+					let price = getValue() !== undefined ? formattingData(getValue()) : ""
+					return price
+				},
 				footer: ({ table }) =>
 					`$${table
 						.getCoreRowModel()
