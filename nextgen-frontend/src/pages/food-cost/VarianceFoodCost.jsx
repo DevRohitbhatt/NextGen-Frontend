@@ -20,6 +20,7 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import varianceFoodCost from "./../../assets/introJSSteps/varianceFoodCost";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 const columnHelper = createColumnHelper();
 
@@ -1088,9 +1089,16 @@ const VarianceFoodCost = () => {
             onClick={(e) => {
               e.preventDefault(), openCollapse("Actual");
             }}
-            className="text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md"
+            className="text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
           >
-            Actual
+            <span>Actual</span>{" "}
+            <span className="m-1 ">
+              {showAndHideBreakDown.Actual == true ? (
+                <IoIosArrowUp />
+              ) : (
+                <IoIosArrowDown />
+              )}
+            </span>
           </h3>
           {showAndHideBreakDown.Actual == true && (
             <div className="">
@@ -1161,13 +1169,27 @@ const VarianceFoodCost = () => {
                       <td colSpan={4}>
                         <table className="w-full">
                           <thead>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Vendor</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Date</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Invoices#</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">#</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">UOM</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Price</th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Total</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Vendor
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Date
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Invoices#
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              #
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              UOM
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Price
+                            </th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                              Total
+                            </th>
                           </thead>
                           <tbody>
                             {breakDownIdealDetails.map((item) => (
@@ -1285,18 +1307,23 @@ const VarianceFoodCost = () => {
             onClick={(e) => {
               e.preventDefault(), openCollapse("ideal");
             }}
-            className="text-base font-semibold bg-green-100 py-[3px] px-1 rounded-t-md"
+            className="text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
           >
-            Ideal
+            <span>Ideal</span>{" "}
+            <span className="m-1 ">
+              {showAndHideBreakDown.ideal == true ? (
+                <IoIosArrowUp />
+              ) : (
+                <IoIosArrowDown />
+              )}
+            </span>
           </h3>
           {showAndHideBreakDown.ideal == true && (
             <div className="tableHOC pr-1 max-h-[20vh] overflow-auto">
               <table className="w-full border-collapse ">
                 <thead className="bg-gray-100 sticky top-[0px]">
                   <tr>
-                    <th className=" p-[3px] text-left text-sm">
-                      Menu Item
-                    </th>
+                    <th className=" p-[3px] text-left text-sm">Menu Item</th>
                     <th className=" p-[3px] text-left text-nowrap text-sm">
                       Recipe
                     </th>
@@ -1380,9 +1407,16 @@ const VarianceFoodCost = () => {
             onClick={(e) => {
               e.preventDefault(), openCollapse("Variance");
             }}
-            className="text-base font-semibold bg-orange-100 py-[3px] px-1 rounded-t-md"
+            className="text-base font-semibold bg-orange-100 py-[3px] px-1 rounded-t-md flex justify-between cursor-pointer"
           >
-            Variance
+            <span> Variance</span>
+            <span className="m-1 ">
+              {showAndHideBreakDown.Variance == true ? (
+                <IoIosArrowUp />
+              ) : (
+                <IoIosArrowDown />
+              )}
+            </span>
           </h3>
           {showAndHideBreakDown.Variance == true && (
             <table className="w-full border-collapse border">
