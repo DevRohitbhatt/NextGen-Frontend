@@ -226,20 +226,31 @@ const LaborCICO = () => {
                 return (
                   subAcc +
                   subSubrow.subRows.reduce(
-                    (subsubAcc, subsubsubrow) =>
-                      subsubAcc + Number(subsubsubrow.original[field]),
-                    0
+                    (subsubAcc, subsubsubrow) => {
+                      if (subsubsubrow.original.invalid && subsubsubrow.original.invalid === 'N')
+                        subsubAcc + Number(subsubsubrow.original[field])
+                      else
+                        return subsubAcc;
+                    }
                   )
                 );
               } else {
-                return subAcc + Number(subSubrow.original[field]);
+                if (subSubrow.original.invalid && subSubrow.original.invalid === 'N')
+                  return subAcc + Number(subSubrow.original[field]);
+                else
+                  return subAcc;
               }
             }, 0)
           );
         } else {
-          return acc + Number(subrow.original[field]);
+          if (subrow.original.invalid && subrow.original.invalid === 'N')
+            return acc + Number(subrow.original[field]);
+          else
+            return acc;
         }
       }, 0);
+      if (row.original.name == 'Adam  Miller')
+        console.log(sum, row);
       return isDecimal ? sum.toFixed(2) : sum;
     } else {
       return getValue();
