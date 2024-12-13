@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from 'react';
 import {
   UnitSelector,
   CalendarModal,
@@ -10,15 +10,15 @@ import {
   TableHOC,
   Dropdown,
   Loader,
-} from "../../../components";
-import { getCall } from "../../../apis/network";
-import { Steps } from "intro.js-react";
-import dateFormat from "dateformat";
-import { useSelector } from "react-redux";
-import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
-import itemSoldTotals from "../../../assets/introJSSteps/menuItemSold/itemSoldTotals";
-import { createColumnHelper } from "@tanstack/react-table";
-import { formattingData } from "../../../functions/formatingCurrency";
+} from '../../../components';
+import { getCall } from '../../../apis/network';
+import { Steps } from 'intro.js-react';
+import dateFormat from 'dateformat';
+import { useSelector } from 'react-redux';
+import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
+import itemSoldTotals from '../../../assets/introJSSteps/menuItemSold/itemSoldTotals';
+import { createColumnHelper } from '@tanstack/react-table';
+import { formattingData } from '../../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -39,12 +39,12 @@ const ItemsSoldTotals = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState(
-    "Error loading data, please try again later."
+    'Error loading data, please try again later.'
   );
 
   //selected unit state variables
   const [selectedUnit, setSelectedUnit] = useState();
-  const [selectedUnitName, setSelectedUnitName] = useState("Loading...");
+  const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
   const [showModal, setUnitShowModal] = useState(false);
 
   //calendar state variables
@@ -53,11 +53,11 @@ const ItemsSoldTotals = () => {
   const [showDateModal, setShowDateModal] = useState(false);
 
   //dropdown variables
-  const [viewWeek, setViewWeek] = useState("All");
+  const [viewWeek, setViewWeek] = useState('All');
   const [viewWeekValue, setViewWeekValue] = useState(0);
-  const [view, setView] = useState("summary");
+  const [view, setView] = useState('summary');
   const [viewValue, setViewValue] = useState(0);
-  const [salesType, setSalesType] = useState("SalesNet");
+  const [salesType, setSalesType] = useState('SalesNet');
 
   //IntroJS variables for the help steps
   const [introSteps, setIntroSteps] = useState({
@@ -70,7 +70,7 @@ const ItemsSoldTotals = () => {
   const getDefaultDates = async () => {
     try {
       const getData = {
-        url: "getCurrentPeriodDates",
+        url: 'getCurrentPeriodDates',
         urlParams: {
           companyId: companyID,
         },
@@ -84,7 +84,7 @@ const ItemsSoldTotals = () => {
         setSelectedToDate(maxDate);
       }
     } catch (error) {
-      console.error("Error getting default dates: ", error);
+      console.error('Error getting default dates: ', error);
     }
   };
 
@@ -93,14 +93,14 @@ const ItemsSoldTotals = () => {
   }, []);
 
   const dropdownOptions = [
-    { name: "All" },
-    { name: "Sunday" },
-    { name: "Monday" },
-    { name: "Tuesday" },
-    { name: "Wednesday" },
-    { name: "Thursday" },
-    { name: "Friday" },
-    { name: "Saturday" },
+    { name: 'All' },
+    { name: 'Sunday' },
+    { name: 'Monday' },
+    { name: 'Tuesday' },
+    { name: 'Wednesday' },
+    { name: 'Thursday' },
+    { name: 'Friday' },
+    { name: 'Saturday' },
   ];
 
   const dayValueMap = {
@@ -141,30 +141,30 @@ const ItemsSoldTotals = () => {
   const columns = [
     ...(viewValue === 2
       ? [
-          columnHelper.accessor("category", {
-            id: "category",
+          columnHelper.accessor('category', {
+            id: 'category',
             header: <div className="w-full text-left">Category</div>,
-            dataType: "string",
+            dataType: 'string',
             size: 60,
             cell: (info) =>
-              <div className="text-left">{info.getValue()}</div> || "",
+              <div className="text-left">{info.getValue()}</div> || '',
           }),
         ]
       : []),
-    columnHelper.accessor("itemId", {
-      id: "itemId",
-      header: "Item",
-      dataType: "string",
+    columnHelper.accessor('itemId', {
+      id: 'itemId',
+      header: 'Item',
+      dataType: 'string',
       cell: ({ getValue, row }) =>
         row.getCanExpand() ? (
           <div
             {...{
               style: {
-                cursor: "pointer",
+                cursor: 'pointer',
                 paddingLeft: `${row.depth * 2}rem`,
               },
               className:
-                "flex items-center gap-2 font-bold absolute inset-0 w-96]",
+                'flex items-center gap-2 font-bold absolute inset-0 w-96]',
             }}
           >
             {row.getIsExpanded() ? (
@@ -194,7 +194,7 @@ const ItemsSoldTotals = () => {
                         }
                       }, 0)
                       .toFixed(2);
-                    return Number(sum).toLocaleString("en-US");
+                    return Number(sum).toLocaleString('en-US');
                   } else {
                     return getValue();
                   }
@@ -204,91 +204,91 @@ const ItemsSoldTotals = () => {
             ) : (
               <span>
                 Description: {row.original.item} (Count: {row.subRows.length},
-                Total Amount: ${" "}
+                Total Amount: ${' '}
                 {Number(
                   row.subRows
                     .reduce((acc, curr) => acc + curr.original.discPrice, 0)
                     .toFixed(2)
-                ).toLocaleString("en-US")}
+                ).toLocaleString('en-US')}
                 )
               </span>
             )}
           </div>
         ) : getValue() ? (
-          getValue() || ""
+          getValue() || ''
         ) : (
-          ""
+          ''
         ),
     }),
 
     ...(viewValue === 1
       ? [
-          columnHelper.accessor("unitName", {
-            id: "unitName",
-            header: "Unit",
-            dataType: "string",
-            cell: (info) => info.getValue() || "",
+          columnHelper.accessor('unitName', {
+            id: 'unitName',
+            header: 'Unit',
+            dataType: 'string',
+            cell: (info) => info.getValue() || '',
           }),
         ]
       : [
-          columnHelper.accessor("description", {
-            id: "description",
+          columnHelper.accessor('description', {
+            id: 'description',
             header: <div className="w-full text-left">Description</div>,
-            dataType: "string",
+            dataType: 'string',
             cell: (info) =>
-              <div className="text-left">{info.getValue()}</div> || "",
+              <div className="text-left">{info.getValue()}</div> || '',
           }),
         ]),
-    columnHelper.accessor("quant", {
-      id: "quant",
-      header: "Quantity",
-      dataType: "number",
+    columnHelper.accessor('quant', {
+      id: 'quant',
+      header: 'Quantity',
+      dataType: 'number',
       size: 60,
-      cell: (info) => info.getValue() || "",
+      cell: (info) => info.getValue() || '',
     }),
-    columnHelper.accessor("discPrice", {
-      id: "discPrice",
-      header: "Amount",
-      dataType: "number",
-      cell: ({ row, getValue }) =>{
-     let amount =   row.getCanExpand()
-          ? ""
+    columnHelper.accessor('discPrice', {
+      id: 'discPrice',
+      header: 'Amount',
+      dataType: 'number',
+      cell: ({ row, getValue }) => {
+        let amount = row.getCanExpand()
+          ? ''
           : `${
               getValue() !== null && getValue() !== undefined
-                ?formattingData(getValue())
-                : "0.00"
-            }`
-			
-		return amount
-		},
+                ? formattingData(getValue())
+                : '0.00'
+            }`;
+
+        return amount;
+      },
     }),
-    columnHelper.accessor("itemSoldPct", {
-      id: "itemSoldPct",
-      header: "Item Sold %",
-      dataType: "number",
+    columnHelper.accessor('itemSoldPct', {
+      id: 'itemSoldPct',
+      header: 'Item Sold %',
+      dataType: 'number',
       size: 60,
       cell: (info) => {
         const value = info.getValue();
-        return value != null ? `${parseFloat(value).toFixed(2)}%` : "";
+        return value != null ? `${parseFloat(value).toFixed(2)}%` : '';
       },
     }),
-    columnHelper.accessor("quantity_Avg", {
-      id: "quantity_Avg",
-      header: "Avg Item Quantity",
-      dataType: "number",
-      cell: (info) => info.getValue() || "",
+    columnHelper.accessor('quantity_Avg', {
+      id: 'quantity_Avg',
+      header: 'Avg Item Quantity',
+      dataType: 'number',
+      cell: (info) => info.getValue() || '',
     }),
-    columnHelper.accessor("discPrice_Avg", {
-      id: "discPrice_Avg",
-      header: "Avg Item Amount",
-      dataType: "number",
+    columnHelper.accessor('discPrice_Avg', {
+      id: 'discPrice_Avg',
+      header: 'Avg Item Amount',
+      dataType: 'number',
       cell: ({ row, getValue }) =>
         row.getCanExpand()
-          ? ""
+          ? ''
           : `$${
               getValue() !== null && getValue() !== undefined
                 ? getValue().toFixed(2)
-                : "0.00"
+                : '0.00'
             }`,
     }),
   ];
@@ -315,21 +315,21 @@ const ItemsSoldTotals = () => {
 
       // Define the URL mapping based on viewValue
       const urlMapping = {
-        0: "MenuItemSoldSummaryReport",
-        1: "MenuItemSoldUnitReport",
-        2: "MenuItemSoldSellersReport",
+        0: 'MenuItemSoldSummaryReport',
+        1: 'MenuItemSoldUnitReport',
+        2: 'MenuItemSoldSellersReport',
       };
 
       // Get the URL based on viewValue
-      const url = urlMapping[viewValue] || "MenuItemSoldSummaryReport"; // Default URL if viewValue is not found
+      const url = urlMapping[viewValue] || 'MenuItemSoldSummaryReport'; // Default URL if viewValue is not found
       const getData = {
         url: url,
         urlParams: {
           companyId: companyID,
           alignmentId: alignmentID,
           memberId: selectedUnit,
-          fromDate: dateFormat(selectedFromDate, "yyyy-mm-dd"),
-          toDate: dateFormat(selectedToDate, "yyyy-mm-dd"),
+          fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+          toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
           groupingId: viewValue,
           DOW: viewWeekValue,
           columnName: salesType,
@@ -381,7 +381,7 @@ const ItemsSoldTotals = () => {
         newData = result.data.menuItemSoldTotalsModels.map((item) => ({
           unitName: item.unitName,
           total:
-            salesType === "SalesNet"
+            salesType === 'SalesNet'
               ? result.data.total
               : result.data.grossTotal,
           category: item.grouping1,
@@ -401,9 +401,9 @@ const ItemsSoldTotals = () => {
       setIsError(true);
       setIsLoading(false);
       setErrorMessage(
-        "There was an issue loading your data, please try again later."
+        'There was an issue loading your data, please try again later.'
       );
-      console.error("Error getting Menu Item Sold Report data: ", error);
+      console.error('Error getting Menu Item Sold Report data: ', error);
     }
   };
 
@@ -421,27 +421,27 @@ const ItemsSoldTotals = () => {
 
   const handlePDFClick = () => {
     if (!columns || columns.length === 0) {
-      console.error("Columns are not defined or empty");
+      console.error('Columns are not defined or empty');
       return;
     }
 
     if (!menuItemSoldData || menuItemSoldData.length === 0) {
-      console.error("Menu Items Sold report data is not defined or empty");
+      console.error('Menu Items Sold report data is not defined or empty');
       return;
     }
 
     const pdfData = {
-      title: "Menu Items Sold",
+      title: 'Menu Items Sold',
       subHeaders: [
-        `${dateFormat(selectedFromDate, "mm-dd-yyyy")} to ${dateFormat(
+        `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
           selectedToDate,
-          "mm-dd-yyyy"
+          'mm-dd-yyyy'
         )} | ${selectedUnitName} | ${viewWeek} | ${
-          salesType === "SalesNet" ? "Net Sales:" : "Gross Sales:"
+          salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'
         } $${menuItemSoldData[0]?.total?.toFixed(2)}`,
       ],
-      exportType: "pdf",
-      pageOrientation: "landscape",
+      exportType: 'pdf',
+      pageOrientation: 'landscape',
       body: buildPDFBody(),
     };
 
@@ -453,23 +453,23 @@ const ItemsSoldTotals = () => {
       viewValue === 2
         ? [
             {
-              type: "table",
-              title: "Items Sold Totals | Top Sellers",
-              widths: ["auto", "auto", "auto", "auto", "auto", "auto", "auto"],
+              type: 'table',
+              title: 'Items Sold Totals | Top Sellers',
+              widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
               dataTypes: [
-                "string",
-                "string",
-                "number",
-                "number",
-                "number",
-                "number",
-                "number",
+                'string',
+                'string',
+                'number',
+                'number',
+                'number',
+                'number',
+                'number',
               ],
               data: {
                 columnHeaders: columns.slice(1).map((column) => column.header),
                 rows: menuItemSoldData.map((row) =>
                   columns.slice(1).map((column) => ({
-                    value: row[column.id] != null ? row[column.id] : "", // Ensure value is not null or undefined
+                    value: row[column.id] != null ? row[column.id] : '', // Ensure value is not null or undefined
                     cellType: column.dataType,
                     columnName: column.header,
                   }))
@@ -478,28 +478,28 @@ const ItemsSoldTotals = () => {
             },
           ]
         : menuItemSoldData.map((row) => {
-            const title = row.category || "";
+            const title = row.category || '';
             return {
-              type: "table",
+              type: 'table',
               title: title,
               widths: [
-                "auto",
-                "auto",
-                "auto",
-                "auto",
-                "auto",
-                "auto",
-                "auto",
-                ...(viewValue === 1 ? ["auto"] : []),
+                'auto',
+                'auto',
+                'auto',
+                'auto',
+                'auto',
+                'auto',
+                'auto',
+                ...(viewValue === 1 ? ['auto'] : []),
               ],
               dataTypes: [
-                "string",
-                "string",
-                "number",
-                "number",
-                "number",
-                "number",
-                "number",
+                'string',
+                'string',
+                'number',
+                'number',
+                'number',
+                'number',
+                'number',
               ],
               data: formatPDFData(row.subRows),
             };
@@ -512,97 +512,97 @@ const ItemsSoldTotals = () => {
     return viewValue === 0
       ? {
           columnHeaders: [
-            "Item ID",
-            "Description",
-            "Quantity",
-            "Amount",
-            "Item Sold %",
-            "Average Item Quantity",
-            "Average Item Amount",
+            'Item ID',
+            'Description',
+            'Quantity',
+            'Amount',
+            'Item Sold %',
+            'Average Item Quantity',
+            'Average Item Amount',
           ],
           rows: data.map((subRow) => [
-            { value: subRow.itemId, cellType: "string", columnName: "Item ID" },
+            { value: subRow.itemId, cellType: 'string', columnName: 'Item ID' },
             {
               value: subRow.description,
-              cellType: "string",
-              columnName: "Description",
+              cellType: 'string',
+              columnName: 'Description',
             },
-            { value: subRow.quant, cellType: "number", columnName: "Quantity" },
+            { value: subRow.quant, cellType: 'number', columnName: 'Quantity' },
             {
               value: formattingData(subRow.discPrice),
-              cellType: "number",
-              columnName: "Amount",
+              cellType: 'number',
+              columnName: 'Amount',
             },
             {
               value: subRow.itemSoldPct.toFixed(2),
-              cellType: "number",
-              columnName: "Item Sold %",
+              cellType: 'number',
+              columnName: 'Item Sold %',
             },
             {
               value: subRow.quantity_Avg,
-              cellType: "number",
-              columnName: "Average Item Quantity",
+              cellType: 'number',
+              columnName: 'Average Item Quantity',
             },
             {
               value: subRow.discPrice_Avg.toFixed(2),
-              cellType: "number",
-              columnName: "Average Item Amount",
+              cellType: 'number',
+              columnName: 'Average Item Amount',
             },
           ]),
         }
       : viewValue === 1
       ? {
           columnHeaders: [
-            "Unit Name",
-            "Item ID",
-            "Description",
-            "Quantity",
-            "Amount",
-            "Item Sold %",
-            "Average Item Quantity",
-            "Average Item Amount",
+            'Unit Name',
+            'Item ID',
+            'Description',
+            'Quantity',
+            'Amount',
+            'Item Sold %',
+            'Average Item Quantity',
+            'Average Item Amount',
           ],
           rows: data.flatMap((unit) =>
             unit.subRows.map((subRow) => [
               {
                 value: subRow.unitName,
-                cellType: "string",
-                columnName: "Unit Name",
+                cellType: 'string',
+                columnName: 'Unit Name',
               },
               {
                 value: subRow.itemId,
-                cellType: "string",
-                columnName: "Item ID",
+                cellType: 'string',
+                columnName: 'Item ID',
               },
               {
                 value: subRow.description,
-                cellType: "string",
-                columnName: "Description",
+                cellType: 'string',
+                columnName: 'Description',
               },
               {
                 value: subRow.quant,
-                cellType: "number",
-                columnName: "Quantity",
+                cellType: 'number',
+                columnName: 'Quantity',
               },
               {
                 value: formattingData(subRow.discPrice),
-                cellType: "number",
-                columnName: "Amount",
+                cellType: 'number',
+                columnName: 'Amount',
               },
               {
                 value: subRow.itemSoldPct.toFixed(2),
-                cellType: "number",
-                columnName: "Item Sold %",
+                cellType: 'number',
+                columnName: 'Item Sold %',
               },
               {
                 value: subRow.quantity_Avg,
-                cellType: "number",
-                columnName: "Average Item Quantity",
+                cellType: 'number',
+                columnName: 'Average Item Quantity',
               },
               {
                 value: subRow.discPrice_Avg.toFixed(2),
-                cellType: "number",
-                columnName: "Average Item Amount",
+                cellType: 'number',
+                columnName: 'Average Item Amount',
               },
             ])
           ),
@@ -612,14 +612,14 @@ const ItemsSoldTotals = () => {
 
   const handleCSVClick = () => {
     const csvHeaders = [
-      "Category",
-      "Item",
-      "Description",
-      "Quantity",
-      "Amount",
-      "Item Sold %",
-      "Average Item Quantity",
-      "Average Item Amount",
+      'Category',
+      'Item',
+      'Description',
+      'Quantity',
+      'Amount',
+      'Item Sold %',
+      'Average Item Quantity',
+      'Average Item Amount',
     ];
     const csvData =
       viewValue === 0
@@ -634,7 +634,7 @@ const ItemsSoldTotals = () => {
                 subRow.itemSoldPct.toFixed(2),
                 subRow.quantity_Avg,
                 subRow.discPrice_Avg.toFixed(2),
-              ].join(",")
+              ].join(',')
             )
           )
         : viewValue === 1
@@ -650,7 +650,7 @@ const ItemsSoldTotals = () => {
                   item.itemSoldPct.toFixed(2),
                   item.quantity_Avg,
                   item.discPrice_Avg.toFixed(2),
-                ].join(",")
+                ].join(',')
               )
             )
           )
@@ -664,35 +664,35 @@ const ItemsSoldTotals = () => {
               item.itemSoldPct,
               item.quantity_Avg,
               item.discPrice_Avg.toFixed(2),
-            ].join(",")
+            ].join(',')
           );
 
     if (csvHeaders.length > 0 && csvData.length > 0) {
-      const csvString = [csvHeaders.join(","), ...csvData].join("\n");
-      const blob = new Blob([csvString], { type: "text/csv" });
+      const csvString = [csvHeaders.join(','), ...csvData].join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
-      const tempLink = document.createElement("a");
+      const tempLink = document.createElement('a');
       tempLink.href = url;
-      tempLink.setAttribute("download", "menuItemSold.csv");
+      tempLink.setAttribute('download', 'menuItemSold.csv');
       tempLink.click();
     } else {
-      console.error("No data available for CSV export");
+      console.error('No data available for CSV export');
     }
   };
 
   const handleExcelClick = () => {
     const data = [
       {
-        name: "",
+        name: '',
         columns: [
-          { name: "Category", filter: "text" },
-          { name: "Item", filter: "text" },
-          { name: "Description", filter: "text" },
-          { name: "Quantity", filter: "text" },
-          { name: "Amount", filter: "text" },
-          { name: "Item Sold %", filter: "text" },
-          { name: "Average Item Quantity", filter: "text" },
-          { name: "Average Item Amount", filter: "text" },
+          { name: 'Category', filter: 'text' },
+          { name: 'Item', filter: 'text' },
+          { name: 'Description', filter: 'text' },
+          { name: 'Quantity', filter: 'text' },
+          { name: 'Amount', filter: 'text' },
+          { name: 'Item Sold %', filter: 'text' },
+          { name: 'Average Item Quantity', filter: 'text' },
+          { name: 'Average Item Amount', filter: 'text' },
         ],
         data:
           viewValue === 0
@@ -703,9 +703,9 @@ const ItemsSoldTotals = () => {
                   Description: item.description,
                   Quantity: item.quant,
                   Amount: item.discPrice,
-                  "Item Sold %": Number(item.itemSoldPct).toFixed(2),
-                  "Average Item Quantity": item.quantity_Avg,
-                  "Average Item Amount": item.discPrice_Avg,
+                  'Item Sold %': Number(item.itemSoldPct).toFixed(2),
+                  'Average Item Quantity': item.quantity_Avg,
+                  'Average Item Amount': item.discPrice_Avg,
                 }))
               )
             : viewValue === 1
@@ -717,9 +717,9 @@ const ItemsSoldTotals = () => {
                     Description: item.description,
                     Quantity: item.quant,
                     Amount: item.discPrice,
-                    "Item Sold %": Number(item.itemSoldPct).toFixed(2),
-                    "Average Item Quantity": item.quantity_Avg,
-                    "Average Item Amount": item.discPrice_Avg,
+                    'Item Sold %': Number(item.itemSoldPct).toFixed(2),
+                    'Average Item Quantity': item.quantity_Avg,
+                    'Average Item Amount': item.discPrice_Avg,
                   }))
                 )
               )
@@ -729,21 +729,21 @@ const ItemsSoldTotals = () => {
                 Description: item.description,
                 Quantity: item.quant,
                 Amount: item.discPrice,
-                "Item Sold %": Number(item.itemSoldPct).toFixed(2),
-                "Average Item Quantity": item.quantity_Avg,
-                "Average Item Amount": item.discPrice_Avg,
+                'Item Sold %': Number(item.itemSoldPct).toFixed(2),
+                'Average Item Quantity': item.quantity_Avg,
+                'Average Item Amount': item.discPrice_Avg,
               })),
       },
     ];
 
     const filename = `MenuItemSold_${selectedUnitName}_${dateFormat(
       selectedFromDate,
-      "mm-dd-yyyy"
-    )}_to_${dateFormat(selectedToDate, "mm-dd-yyyy")}`;
-    const spreadSheetTitle = "Menu Item Sold | Items Sold Totals";
-    const date = `${dateFormat(selectedFromDate, "mm-dd-yyyy")} to ${dateFormat(
+      'mm-dd-yyyy'
+    )}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
+    const spreadSheetTitle = 'Menu Item Sold | Items Sold Totals';
+    const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
       selectedToDate,
-      "mm-dd-yyyy"
+      'mm-dd-yyyy'
     )}`;
 
     exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
@@ -758,10 +758,10 @@ const ItemsSoldTotals = () => {
       setIsTableRendered={setIsTableRendered}
       expandCollapseButtons={viewValue !== 2 ? true : false}
       detailOnTop={`${
-        salesType === "SalesNet" ? "Net Sales:" : "Gross Sales:"
+        salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'
       } $${
         Number(menuItemSoldData[0]?.total?.toFixed(2)).toLocaleString(
-          "en-US"
+          'en-US'
         ) || 0
       }`}
     />
@@ -793,7 +793,7 @@ const ItemsSoldTotals = () => {
               fromDate={selectedFromDate}
               isDateRange={true}
               onClick={() => setShowDateModal(true)}
-              extraClass={"w-[219px]"}
+              extraClass={'w-[219px]'}
             />
 
             <div className="w-44">
@@ -840,8 +840,8 @@ const ItemsSoldTotals = () => {
                     id="summary"
                     name="reportType"
                     value="summary"
-                    checked={view === "summary"}
-                    onChange={() => handleViewChange("summary")}
+                    checked={view === 'summary'}
+                    onChange={() => handleViewChange('summary')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
                   <label htmlFor="summary" className="ml-2">
@@ -854,8 +854,8 @@ const ItemsSoldTotals = () => {
                     id="byUnit"
                     name="reportType"
                     value="byUnit"
-                    checked={view === "byUnit"}
-                    onChange={() => handleViewChange("byUnit")}
+                    checked={view === 'byUnit'}
+                    onChange={() => handleViewChange('byUnit')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
                   <label htmlFor="byUnit" className="ml-2">
@@ -868,8 +868,8 @@ const ItemsSoldTotals = () => {
                     id="topSellers"
                     name="reportType"
                     value="topSellers"
-                    checked={view === "topSellers"}
-                    onChange={() => handleViewChange("topSellers")}
+                    checked={view === 'topSellers'}
+                    onChange={() => handleViewChange('topSellers')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
                   <label htmlFor="topSellers" className="ml-2">
@@ -891,8 +891,8 @@ const ItemsSoldTotals = () => {
                     id="Net"
                     name="salesType"
                     value="Net"
-                    checked={salesType === "SalesNet"}
-                    onChange={() => handleSalesChange("SalesNet")}
+                    checked={salesType === 'SalesNet'}
+                    onChange={() => handleSalesChange('SalesNet')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
                   <label htmlFor="Net" className="ml-2">
@@ -905,8 +905,8 @@ const ItemsSoldTotals = () => {
                     id="Gross"
                     name="salesType"
                     value="Gross"
-                    checked={salesType === "SalesGross"}
-                    onChange={() => handleSalesChange("SalesGross")}
+                    checked={salesType === 'SalesGross'}
+                    onChange={() => handleSalesChange('SalesGross')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
                   <label htmlFor="Gross" className="ml-2">
