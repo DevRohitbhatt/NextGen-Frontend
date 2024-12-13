@@ -50,7 +50,7 @@ const VarianceFoodCost = () => {
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setSelectedUnitName] = useState("Loading...");
   const [showModal, setShowUnitModal] = useState(false); // State to manage modal visibility
-
+  const [breakDownSupportData, setBreakDownSupportData] = useState([]);
   //calendar state variables
   const [selectedFromDate, setSelectedFromDate] = useState();
   const [fromDateOptions, setFromDateOptions] = useState([]);
@@ -495,9 +495,9 @@ const VarianceFoodCost = () => {
                     wastePct: foodCost.salesNet
                       ? (foodCost.wasteCountCost / foodCost.salesNet) * 100
                       : 0,
-					  qsrInventoryItemID: foodCost?.qsrInventoryItemID
-                    ? foodCost?.qsrInventoryItemID
-                    : "",
+                    qsrInventoryItemID: foodCost?.qsrInventoryItemID
+                      ? foodCost?.qsrInventoryItemID
+                      : "",
                   })
                 ),
               })),
@@ -943,7 +943,7 @@ const VarianceFoodCost = () => {
       setTableState={setTableState}
       headerPosition="left"
       dataPosition="text-left"
-	  onCallBack={(e) => {
+      onCallBack={(e) => {
         getGetActualFoodCostBreakdownIdealReportData(e);
       }}
     />
@@ -951,19 +951,19 @@ const VarianceFoodCost = () => {
 
   const getGetActualFoodCostBreakdownIdealReportData = async (row) => {
     let { qsrInventoryItemID = "" } = row;
-	console.log(row)
+    console.log(row);
     setCostBreakActualDetails(row);
     try {
       setIsBreakDownModal(true);
       const getData = {
         url: "GetVarianceFoodCostBreakdownIdealReportData",
         urlParams: {
-			companyId: companyID,
-			alignmenId: alignmentID,
-			memberId: selectedUnit,
-			fromDate: selectedFromDate,
-			toDate: selectedToDate,
-			QSRInventoryItemID: qsrInventoryItemID,
+          companyId: companyID,
+          alignmenId: alignmentID,
+          memberId: selectedUnit,
+          fromDate: selectedFromDate,
+          toDate: selectedToDate,
+          QSRInventoryItemID: qsrInventoryItemID,
         },
       };
 
@@ -972,16 +972,33 @@ const VarianceFoodCost = () => {
       const getDataBreakDown = {
         url: "GetVarianceFoodCostBreakdownReportData",
         urlParams: {
-			companyId: companyID,
-			alignmenId: alignmentID,
-			memberId: selectedUnit,
-			fromDate: selectedFromDate,
-			toDate: selectedToDate,
-			QSRInventoryItemID: qsrInventoryItemID,
+          companyId: companyID,
+          alignmenId: alignmentID,
+          memberId: selectedUnit,
+          fromDate: selectedFromDate,
+          toDate: selectedToDate,
+          QSRInventoryItemID: qsrInventoryItemID,
         },
       };
 
       const resultBreakDown = await getCall(getDataBreakDown);
+      const getSupportData = {
+        url: "GetVarianceFoodCostPopupReportData",
+        urlParams: {
+          companyId: companyID,
+          alignmentId: alignmentID,
+          memberId: selectedUnit,
+          fromDate: selectedFromDate,
+          toDate: selectedToDate,
+          QSRInventoryItemID: qsrInventoryItemID,
+          countType: view,
+        },
+      };
+
+      const resultgetSupportData = await getCall(getSupportData);
+      if (resultgetSupportData.data) {
+        setBreakDownSupportData(resultgetSupportData.data);
+      }
       if (resultBreakDown.data) {
         setBreakDownIdealDetails(resultBreakDown.data);
       }
@@ -1039,14 +1056,14 @@ const VarianceFoodCost = () => {
 
     const totalVariance = () => {
       let totalVarica =
-        costBreakActualDetails?.usageCost?.toFixed(2) -
+        breakDownSupportData[0]?.usageCost?.toFixed(2) -
         calculateTotalCost(costBreakdownIdealDetails).toFixed(2);
       return totalVarica.toFixed(2);
     };
 
     const totalVariancecs = () => {
       let totalCs =
-        costBreakActualDetails?.usageCases?.toFixed(2) -
+        breakDownSupportData[0]?.usageCases?.toFixed(2) -
         calculateMasterItemQuantityTotalSum(
           costBreakdownIdealDetails,
           "MasterItemQuantityTotal"
@@ -1055,9 +1072,10 @@ const VarianceFoodCost = () => {
     };
 
     return (
-      <div className="max-w-5xl mx-auto my-1 p-4 rounded-lg shadow-lg border bg-white min-w-[750px]">
+      <div className="max-w-5xl mx-auto my-0 p-[4px]  shadow-lg border bg-white min-w-[750px]">
         {/* Header */}
         <div className="text-center  ">
+          <p>{breakDownSupportData[0]?.description}</p>
           <p className="text-gray-600">
             Store #{selectedUnit} - {selectedToDate} to {selectedFromDate} (
             {view})
@@ -1065,17 +1083,17 @@ const VarianceFoodCost = () => {
         </div>
 
         {/* Actual Section */}
-        <div className="my-6">
+        <div className="my-[5px]">
           <h3
             onClick={(e) => {
               e.preventDefault(), openCollapse("Actual");
             }}
-            className="text-lg font-semibold bg-blue-100 py-2 px-4 rounded-t-md"
+            className="text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md"
           >
             Actual
           </h3>
           {showAndHideBreakDown.Actual == true && (
-            <div className="tableHOC pr-1  overflow-auto">
+            <div className="">
               <table className="w-full border-collapse border">
                 <thead className="bg-gray-100">
                   <tr>
@@ -1101,10 +1119,10 @@ const VarianceFoodCost = () => {
                     </td>
                     <td className="border   p-[3px]  text-nowrap text-sm text-center"></td>
                     <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                      {costBreakActualDetails?.begCountDisplayUnits?.toFixed(4)}
+                      {breakDownSupportData[0]?.begCountCases?.toFixed(4)}
                     </td>
                     <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                      ${costBreakActualDetails?.begCountCost?.toFixed(2)}
+                      ${breakDownSupportData[0]?.begCountCost?.toFixed(2)}
                     </td>
                   </tr>
                   <tr
@@ -1132,10 +1150,10 @@ const VarianceFoodCost = () => {
                       +
                     </td>
                     <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                      {costBreakActualDetails?.purchaseCases?.toFixed(4)}
+                      {breakDownSupportData[0]?.purchaseCases?.toFixed(4)}
                     </td>
                     <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                      ${costBreakActualDetails?.purchaseCost?.toFixed(2)}
+                      ${breakDownSupportData[0]?.purchaseCost?.toFixed(2)}
                     </td>
                   </tr>
                   {showAndHideBreakDown.purchaseBetween == true && (
@@ -1143,13 +1161,13 @@ const VarianceFoodCost = () => {
                       <td colSpan={4}>
                         <table className="w-full">
                           <thead>
-                            <th>Vendor</th>
-                            <th>date</th>
-                            <th>Invoices#</th>
-                            <th>#</th>
-                            <th>UOM</th>
-                            <th>Price</th>
-                            <th>Total</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Vendor</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Date</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Invoices#</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">#</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">UOM</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Price</th>
+                            <th className="border text-left  p-[3px]  text-nowrap text-sm">Total</th>
                           </thead>
                           <tbody>
                             {breakDownIdealDetails.map((item) => (
@@ -1170,10 +1188,10 @@ const VarianceFoodCost = () => {
                                   {item.UnitOfMeasure}
                                 </td>
                                 <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                                  {item.Price.toFixed(2)}
+                                  ${item.Price.toFixed(2)}
                                 </td>
                                 <td className="border text-right  p-[3px]  text-nowrap text-sm">
-                                  {item.TotalPrice.toFixed(2)}
+                                  ${item.TotalPrice.toFixed(2)}
                                 </td>
                               </tr>
                             ))}
@@ -1195,10 +1213,10 @@ const VarianceFoodCost = () => {
                       +
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      {costBreakActualDetails?.iTinCountCases}
+                      {breakDownSupportData[0]?.iTinCountCases}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      ${costBreakActualDetails?.iTinCountCost}
+                      ${breakDownSupportData[0]?.iTinCountCost}
                     </td>
                   </tr>
                   <tr>
@@ -1214,10 +1232,10 @@ const VarianceFoodCost = () => {
                       -
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      {costBreakActualDetails?.iToutCountCases}
+                      {breakDownSupportData[0]?.iToutCountCases}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      ${costBreakActualDetails?.iToutCountCost}
+                      ${breakDownSupportData[0]?.iToutCountCost}
                     </td>
                   </tr>
                   <tr>
@@ -1233,10 +1251,10 @@ const VarianceFoodCost = () => {
                       -
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      {costBreakActualDetails?.endCountCases}
+                      {breakDownSupportData[0]?.endCountCases}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      ${costBreakActualDetails?.endCountCost}
+                      ${breakDownSupportData[0]?.endCountCost}
                     </td>
                   </tr>
                 </tbody>
@@ -1249,10 +1267,10 @@ const VarianceFoodCost = () => {
                       Actual Usage{" "}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      {costBreakActualDetails?.usageCases?.toFixed(2)}
+                      {breakDownSupportData[0]?.usageCases?.toFixed(2)}
                     </td>
                     <td className="border p-[3px]  text-nowrap text-sm text-right">
-                      ${costBreakActualDetails?.usageCost?.toFixed(2)}
+                      ${breakDownSupportData[0]?.usageCost?.toFixed(2)}
                     </td>
                   </tr>
                 </tfoot>
@@ -1262,40 +1280,40 @@ const VarianceFoodCost = () => {
         </div>
 
         {/* Ideal Section */}
-        <div className="my-6">
+        <div className="">
           <h3
             onClick={(e) => {
               e.preventDefault(), openCollapse("ideal");
             }}
-            className="text-lg font-semibold bg-green-100 py-2 px-4 rounded-t-md"
+            className="text-base font-semibold bg-green-100 py-[3px] px-1 rounded-t-md"
           >
             Ideal
           </h3>
           {showAndHideBreakDown.ideal == true && (
             <div className="tableHOC pr-1 max-h-[20vh] overflow-auto">
-              <table className="w-full border-collapse border">
-                <thead className="bg-gray-100 sticky top-0">
+              <table className="w-full border-collapse ">
+                <thead className="bg-gray-100 sticky top-[0px]">
                   <tr>
-                    <th className="border p-[3px] text-left text-sm">
+                    <th className=" p-[3px] text-left text-sm">
                       Menu Item
                     </th>
-                    <th className="border p-[3px] text-left text-nowrap text-sm">
+                    <th className=" p-[3px] text-left text-nowrap text-sm">
                       Recipe
                     </th>
-                    <th className="border p-[3px] text-right text-nowrap text-sm">
+                    <th className=" p-[3px] text-right text-nowrap text-sm">
                       # Sold
                     </th>
-                    <th className="border p-[3px] text-right text-nowrap text-sm">
+                    <th className=" p-[3px] text-right text-nowrap text-sm">
                       #{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName}{" "}
                       in Recipe
                     </th>
-                    <th className="border p-[3px] text-right text-nowrap text-sm">
+                    <th className=" p-[3px] text-right text-nowrap text-sm">
                       # {costBreakdownIdealDetails[0]?.MasterItemUOM}
                     </th>
-                    <th className="border p-[3px] text-righ text-nowrapt text-sm">
+                    <th className=" p-[3px] text-righ text-nowrapt text-sm">
                       Total # {costBreakdownIdealDetails[0]?.MasterItemUOM}
                     </th>
-                    <th className="border p-[3px] text-right text-nowrap text-sm">
+                    <th className=" p-[3px] text-right text-nowrap text-sm">
                       Cost
                     </th>
                   </tr>
@@ -1334,18 +1352,18 @@ const VarianceFoodCost = () => {
                 <tfoot>
                   <tr className="bg-gray-200 sticky bottom-0">
                     <td
-                      className="border p-[3px]  text-nowrap text-sm text-left"
+                      className=" p-[3px]  text-nowrap text-sm text-left"
                       colSpan={5}
                     >
                       Actual Usage{" "}
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className=" p-[3px]  text-nowrap text-sm text-right">
                       {calculateMasterItemQuantityTotalSum(
                         costBreakdownIdealDetails,
                         "MasterItemQuantityTotal"
                       ).toFixed(2)}
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className=" p-[3px]  text-nowrap text-sm text-right">
                       $
                       {calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
                     </td>
@@ -1357,12 +1375,12 @@ const VarianceFoodCost = () => {
         </div>
 
         {/* Variance Section */}
-        <div className="my-6">
+        <div className="mt-[6px]">
           <h3
             onClick={(e) => {
               e.preventDefault(), openCollapse("Variance");
             }}
-            className="text-lg font-semibold bg-orange-100 py-2 px-4 rounded-t-md"
+            className="text-base font-semibold bg-orange-100 py-[3px] px-1 rounded-t-md"
           >
             Variance
           </h3>
@@ -1383,10 +1401,10 @@ const VarianceFoodCost = () => {
                     Actual Usage
                   </td>
                   <td className="border p-[3px]  text-nowrap text-sm  text-right">
-                    {costBreakActualDetails?.usageCases?.toFixed(2)}
+                    {breakDownSupportData[0]?.usageCases?.toFixed(2)}
                   </td>
                   <td className="border p-[3px]  text-nowrap text-sm  text-right">
-                    ${costBreakActualDetails?.usageCost?.toFixed(2)}
+                    ${breakDownSupportData[0]?.usageCost?.toFixed(2)}
                   </td>
                 </tr>
                 <tr>
@@ -1410,7 +1428,9 @@ const VarianceFoodCost = () => {
                   <td className="border p-[3px] text-right text-sm">
                     {totalVariancecs()}
                   </td>
-                  <td className="border p-[3px]  text-nowrap text-sm text-right">${totalVariance()}</td>
+                  <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    ${totalVariance()}
+                  </td>
                 </tr>
               </tbody>
             </table>
