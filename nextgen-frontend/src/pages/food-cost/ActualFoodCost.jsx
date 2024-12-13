@@ -968,7 +968,6 @@ const ActualFoodCost = () => {
   const getGetActualFoodCostBreakdownIdealReportData = async (row) => {
     let { qsrInventoryItemID = '' } = row;
     setCostBreakActualDetails(row);
-    console.log('======>', JSON.stringify(row));
     try {
       setIsBreakDownModal(true);
       const getData = {

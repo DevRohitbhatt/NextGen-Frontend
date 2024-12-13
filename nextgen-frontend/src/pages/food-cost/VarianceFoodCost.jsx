@@ -653,7 +653,6 @@ const VarianceFoodCost = () => {
 
     const updatedColumns = columns.map((column) => {
       if (column.header && column.header.includes(type)) {
-        console.log(column);
 
         return {
           ...column,
@@ -952,7 +951,6 @@ const VarianceFoodCost = () => {
 
   const getGetActualFoodCostBreakdownIdealReportData = async (row) => {
     let { qsrInventoryItemID = '' } = row;
-    console.log(row);
     setCostBreakActualDetails(row);
     try {
       setIsBreakDownModal(true);

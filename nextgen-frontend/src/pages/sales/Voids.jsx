@@ -143,7 +143,6 @@ const Voids = () => {
 				header: 'Price',
 				size: 100,
 				cell: ({ getValue }) => {
-					console.log(getValue())
 					let price = getValue() !== undefined ? formattingData(getValue()) : ""
 					return price
 				},
@@ -416,8 +415,6 @@ const Voids = () => {
 				),
 			},
 		];
-
-		console.log('data', data);
 
 		const filename = 'voids';
 		const spreadSheetTitle = 'Voids';

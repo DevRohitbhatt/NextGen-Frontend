@@ -113,7 +113,6 @@ const Invoices = () => {
 					<div
 						className='flex space-x-2 text-lg'
 						onClick={(e) => {
-							console.log(row);
 							e.stopPropagation(),
 								e.preventDefault(),
 								handleInvoicesDetailsModal(row.original.qsrInvoiceID);
