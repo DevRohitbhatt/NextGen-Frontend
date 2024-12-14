@@ -212,11 +212,19 @@ const BusinessSummary = () => {
 						const variableLaborTotal = parseFloat(String(variableLabor.total).replace(/[$,]/g, ''));
 
 						if (variableLabor && netSales && data.description === 'Variable Lbr %') {
-							data.total = ((variableLaborTotal / netSalesTotal) * 100).toFixed(2) + ' %';
+							data.total =
+								((variableLaborTotal / netSalesTotal) * 100).toLocaleString('en-US', {
+									maximumFractionDigits: 2,
+									minimumFractionDigits: 2,
+								}) + ' %';
 							Object.keys(data)
 								.filter((key) => !['description', 'total'].includes(key))
 								.forEach((key) => {
-									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
+									data[key] =
+										Number(data[key]).toLocaleString('en-US', {
+											maximumFractionDigits: 2,
+											minimumFractionDigits: 2,
+										}) + ' %';
 								});
 						} else if (data.description === 'Check Average') {
 							const value = netSalesTotal / transactionTotal;
@@ -231,11 +239,18 @@ const BusinessSummary = () => {
 								(
 									foodCostPct.total /
 									Object.keys(data).filter((key) => !['description', 'total'].includes(key)).length
-								).toFixed(2) + ' %';
+								).toLocaleString('en-US', {
+									maximumFractionDigits: 2,
+									minimumFractionDigits: 2,
+								}) + ' %';
 							Object.keys(data)
 								.filter((key) => !['description', 'total'].includes(key))
 								.forEach((key) => {
-									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
+									data[key] =
+										parseFloat(data[key]).toLocaleString('en-US', {
+											maximumFractionDigits: 2,
+											minimumFractionDigits: 2,
+										}) + ' %';
 								});
 						}
 					} else {
