@@ -32,6 +32,7 @@ const BusinessSummary = () => {
 	} = useSelector((state) => state.globalState);
 
 	const [businessSummaryData, setBusinessSummaryData] = useState([]);
+	const [useGrossSalesInBusinessSummary, setUseGrossSalesInBusinessSummary] = useState(false);
 	const [columns, setColumns] = useState([]);
 
 	//loading and error state variables
@@ -114,6 +115,30 @@ const BusinessSummary = () => {
 		getDefaultDates();
 	}, []);
 
+	useEffect(() => {
+		if (companyID) {
+			const fetchCompanySettings = async () => {
+				try {
+					const getData = {
+						url: 'getAllCompanySettings',
+						urlParams: {
+							companyID: companyID,
+						},
+					};
+
+					const result = await getCall(getData);
+					const status = result.data.find((setting) => setting.name === 'UseGrossSalesInBusinessSummary')
+						? true
+						: false;
+					setUseGrossSalesInBusinessSummary(status);
+				} catch (error) {
+					console.error('Error getting company settings: ', error);
+				}
+			};
+			fetchCompanySettings();
+		}
+	}, [companyID]);
+
 	const formattingData = (value) => {
 		return value < 0
 			? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
@@ -141,6 +166,7 @@ const BusinessSummary = () => {
 					DOW: DOWTypeOptions.findIndex((option) => option.name === DOWType),
 					summaryBy,
 					salesType: salesType === 'Net Sales' ? 'SalesNet' : 'SalesGross',
+					UseGrossSales: useGrossSalesInBusinessSummary,
 				},
 			};
 
