@@ -99,6 +99,7 @@ function TableHOC({
 		debugTable: false,
 	});
 
+	console.log(view);
 	useTableView(table, view, isTableRendered);
 
 	useEffect(() => {

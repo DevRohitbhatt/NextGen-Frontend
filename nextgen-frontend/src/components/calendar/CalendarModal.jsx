@@ -44,7 +44,7 @@ const CalendarModal = ({
       setLocalToDate(selectedToDate);
     }
     getDynamicDates();
-  }, [modalOpen, selectedFromDate, selectedToDate]);
+  }, [modalOpen, selectedFromDate, selectedToDate, companyID]);
 
   // useEffect(() => {
   // 	buildCalendarTable(selectedYear);

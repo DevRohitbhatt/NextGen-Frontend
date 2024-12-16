@@ -912,7 +912,7 @@ const ActualFoodCost = () => {
   const handleViewPurchase = async (fromDate, toDate) => {
     const dataToSend = {
       companyId: companyID,
-      alignmentID: alignmentID,
+      alignmentId: alignmentID,
       selectedUnit: selectedUnit,
       selectedUnitName: selectedUnitName,
       fromDate: fromDate,
