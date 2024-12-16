@@ -32,6 +32,7 @@ const BusinessSummary = () => {
 	} = useSelector((state) => state.globalState);
 
 	const [businessSummaryData, setBusinessSummaryData] = useState([]);
+	const [useGrossSalesInBusinessSummary, setUseGrossSalesInBusinessSummary] = useState(false);
 	const [columns, setColumns] = useState([]);
 
 	//loading and error state variables
@@ -114,6 +115,30 @@ const BusinessSummary = () => {
 		getDefaultDates();
 	}, []);
 
+	useEffect(() => {
+		if (companyID) {
+			const fetchCompanySettings = async () => {
+				try {
+					const getData = {
+						url: 'getAllCompanySettings',
+						urlParams: {
+							companyID: companyID,
+						},
+					};
+
+					const result = await getCall(getData);
+					const status = result.data.find((setting) => setting.name === 'UseGrossSalesInBusinessSummary')
+						? true
+						: false;
+					setUseGrossSalesInBusinessSummary(status);
+				} catch (error) {
+					console.error('Error getting company settings: ', error);
+				}
+			};
+			fetchCompanySettings();
+		}
+	}, [companyID]);
+
 	const formattingData = (value) => {
 		return value < 0
 			? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
@@ -141,6 +166,7 @@ const BusinessSummary = () => {
 					DOW: DOWTypeOptions.findIndex((option) => option.name === DOWType),
 					summaryBy,
 					salesType: salesType === 'Net Sales' ? 'SalesNet' : 'SalesGross',
+					UseGrossSales: useGrossSalesInBusinessSummary,
 				},
 			};
 
@@ -186,11 +212,19 @@ const BusinessSummary = () => {
 						const variableLaborTotal = parseFloat(String(variableLabor.total).replace(/[$,]/g, ''));
 
 						if (variableLabor && netSales && data.description === 'Variable Lbr %') {
-							data.total = ((variableLaborTotal / netSalesTotal) * 100).toFixed(2) + ' %';
+							data.total =
+								((variableLaborTotal / netSalesTotal) * 100).toLocaleString('en-US', {
+									maximumFractionDigits: 2,
+									minimumFractionDigits: 2,
+								}) + ' %';
 							Object.keys(data)
 								.filter((key) => !['description', 'total'].includes(key))
 								.forEach((key) => {
-									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
+									data[key] =
+										Number(data[key]).toLocaleString('en-US', {
+											maximumFractionDigits: 2,
+											minimumFractionDigits: 2,
+										}) + ' %';
 								});
 						} else if (data.description === 'Check Average') {
 							const value = netSalesTotal / transactionTotal;
@@ -205,11 +239,18 @@ const BusinessSummary = () => {
 								(
 									foodCostPct.total /
 									Object.keys(data).filter((key) => !['description', 'total'].includes(key)).length
-								).toFixed(2) + ' %';
+								).toLocaleString('en-US', {
+									maximumFractionDigits: 2,
+									minimumFractionDigits: 2,
+								}) + ' %';
 							Object.keys(data)
 								.filter((key) => !['description', 'total'].includes(key))
 								.forEach((key) => {
-									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
+									data[key] =
+										parseFloat(data[key]).toLocaleString('en-US', {
+											maximumFractionDigits: 2,
+											minimumFractionDigits: 2,
+										}) + ' %';
 								});
 						}
 					} else {
