@@ -605,6 +605,7 @@ const ItemsSoldByHour = () => {
 			data={menuItemSoldData}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
+			largeHeader= {true}
 			detailOnTop={`${salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
 				Number(menuItemSoldData[0]?.total?.toFixed(2)).toLocaleString('en-US') || 0
 			}`}

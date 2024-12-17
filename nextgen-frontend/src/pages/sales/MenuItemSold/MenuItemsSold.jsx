@@ -53,8 +53,8 @@ const MenuItemsSold = () => {
 	}, []);
 
 	return (
-		<div className='w-[85%] mx-auto'>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'> Menu Items Sold </h2>
+		<div className='w-[98%] mx-auto'>
+			<h2 className='my-4 text-[20px] leading-tight text-left pageTitle'> Menu Items Sold </h2>
 			<div className='flex gap-4'>
 				{[
 					'ItemsSoldTotals',

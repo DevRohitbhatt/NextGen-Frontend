@@ -757,6 +757,7 @@ const ItemsSoldTotals = () => {
       isTableRendered={isTableRendered}
       setIsTableRendered={setIsTableRendered}
       expandCollapseButtons={viewValue !== 2 ? true : false}
+      largeHeader= {true}
       detailOnTop={`${
         salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'
       } $${
@@ -806,7 +807,7 @@ const ItemsSoldTotals = () => {
             </div>
 
             <div className="run-button" onClick={fetchItemsSoldTotalsData}>
-              <div className="py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
+              <div className="py-3 ml-2 text-[16px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
                 Run
               </div>
             </div>

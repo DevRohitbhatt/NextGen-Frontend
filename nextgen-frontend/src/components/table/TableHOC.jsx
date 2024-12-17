@@ -57,6 +57,7 @@ function TableHOC({
 	dataPosition = 'text-center',
 	detailOnTop,
 	onCallBack,
+	largeHeader= false,
 }) {
 	const [expanded, setExpanded] = useState({});
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -178,7 +179,7 @@ function TableHOC({
 			</div>
 
 			{/* table */}
-			<div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
+			<div className={`tableHOC pr-1 ${isPaginated ? 'max-h-[63vh]' : largeHeader ? 'max-h-[50vh]': 'max-h-[65vh]'}  overflow-auto`}>
 				<table className='w-full border-collapse table-auto select-none'>
 					{isHeader && (
 						<thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
@@ -190,7 +191,7 @@ function TableHOC({
 												<th
 													key={header.id}
 													colSpan={header.colSpan}
-													className='py-2'
+													className='py-2 text-[14px]'
 													style={{
 														minWidth: header.getSize(),
 														width: 'auto',
@@ -206,7 +207,7 @@ function TableHOC({
 																<div
 																	{...{
 																		className: header.column.getCanSort()
-																			? `cursor-pointer flex gap-1 items-center text-${headerPosition}`
+																			? `cursor-pointer flex gap-1 items-center text-[14px] text-${headerPosition}`
 																			: '',
 																		onClick:
 																			header.column.getToggleSortingHandler(),
@@ -230,7 +231,7 @@ function TableHOC({
 															<div
 																{...{
 																	className: header.column.getCanSort()
-																		? `cursor-pointer flex gap-1 items-center text-${headerPosition}`
+																		? `cursor-pointer text-[14px] flex gap-1 items-center text-${headerPosition}`
 																		: '',
 																	onClick: header.column.getToggleSortingHandler(),
 																}}
@@ -268,7 +269,7 @@ function TableHOC({
 													<th
 														key={header.id}
 														colSpan={header.colSpan}
-														className='p-1 py-2 text-right border-b border-gray-300 cursor-pointer'
+														className='p-1 py-2 text-right border-b border-gray-300 cursor-pointer text-[12px]'
 														style={{ width: header.getSize() }}
 													>
 														{header.isPlaceholder ? null : (
@@ -312,7 +313,7 @@ function TableHOC({
 										return (
 											<td
 												key={cell.id}
-												className={`${dataPosition} text-nowrap`}
+												className={`${dataPosition} text-nowrap text-[12px]`}
 												style={
 													cell.column.columnDef.pinDirection
 														? getCommonPinningStyles(cell.column)
@@ -344,7 +345,7 @@ function TableHOC({
 										{footerGroup.headers.map((footer) => (
 											<td
 												key={footer.id}
-												className='p-2 text-left cursor-pointer shadow-[0_1px_0_var(--tw-primary)_inset] '
+												className='p-2 text-left cursor-pointer shadow-[0_1px_0_var(--tw-primary)_inset] text-[14px]'
 												style={{
 													width: footer.getSize(),
 													...getCommonPinningStyles(footer.column, 'footer'),

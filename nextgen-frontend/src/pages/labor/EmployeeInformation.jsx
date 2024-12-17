@@ -472,15 +472,15 @@ const EmployeeInformation = () => {
 	};
 
 	return (
-		<div className='w-[85%] mx-auto'>
+		<div className='w-[98%] mx-auto'>
 			<Steps
 				enabled={introSteps.stepsEnabled}
 				steps={introSteps.steps}
 				initialStep={introSteps.initialStep}
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Employee Information</h2>
-			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+			<h2 className='my-4 text-[20px] leading-tight text-left pageTitle'>Employee Information</h2>
+			<header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center'>
 					<UnitSelector
 						companyId={companyID}
@@ -526,7 +526,7 @@ const EmployeeInformation = () => {
 										data={filteredEmployeeInformationData.data}
 										headers={headers}
 										onRowClick={() => {}}
-										itemsPerPageOptions={[10, 25, 50, 100]}
+										itemsPerPageOptions={[20, 30, 50, 100]}
 									/>
 								</div>
 							) : !selectedUnit ? (

@@ -13,11 +13,11 @@ export default function DateSelector({
       {!fromDate || (isDateRange && !toDate) ? ( // Check if dates are undefined
         <div className={`flex flex-col justify-center m-1 rounded-3xl date-selector ${extraClass}`}>
           {isEditable ? (
-            <h3 className="mb-1 ml-2 text-xl font-semibold text-nowrap">
+            <h3 className="mb-1 ml-2 text-[18px] font-semibold text-nowrap">
               Select Date
             </h3>
           ) : (
-            <h3 className="mb-1 ml-2 text-xl font-semibold text-nowrap">
+            <h3 className="mb-1 ml-2 text-[18px] font-semibold text-nowrap">
               Date
             </h3>
           )}
@@ -31,11 +31,11 @@ export default function DateSelector({
           className="flex flex-col justify-center m-1 rounded-3xl date-selector"
         >
           {isEditable ? (
-            <h3 className="mb-1 ml-2 text-xl font-semibold text-nowrap">
+            <h3 className="mb-1 ml-2 text-[18px] font-semibold text-nowrap">
               Select Date
             </h3>
           ) : (
-            <h3 className="mb-1 ml-2 text-xl font-semibold text-nowrap">
+            <h3 className="mb-1 ml-2 text-[18px] font-semibold text-nowrap">
               Date
             </h3>
           )}
@@ -55,11 +55,11 @@ export default function DateSelector({
           className="flex flex-col justify-center m-1 rounded-3xl date-selector"
         >
           {isEditable ? (
-            <h3 className="mb-1 ml-2 text-xl font-semibold text-nowrap">
+            <h3 className="mb-1 ml-2 text-[18px] font-semibold text-nowrap">
               Select Date
             </h3>
           ) : (
-            <h3 className="mb-1 ml-2 text-xl font-semibold text-nowrap">
+            <h3 className="mb-1 ml-2 text-[18px] font-semibold text-nowrap">
               Date Range
             </h3>
           )}

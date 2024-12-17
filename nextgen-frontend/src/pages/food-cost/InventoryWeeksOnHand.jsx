@@ -354,7 +354,7 @@ const InventoryWeeksOnHand = () => {
 
 	return (
 		<>
-			<div className='w-10/12 mx-auto pageContainer'>
+			<div className='w-[98%] mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}

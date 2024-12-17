@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Tooltip, SimpleTableRow as Row } from '../index.js';
 import { FaInfoCircle } from 'react-icons/fa';
 
-const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 10, 20], isPaginated = true, isFooter = false, footerData = {}}) => {
+const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [20, 30, 50], isPaginated = true, isFooter = false, footerData = {}}) => {
 
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage, setItemsPerPage] = useState(itemsPerPageOptions[0]);
@@ -87,14 +87,14 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 
 	return (
 		<div>
-			<div className=' simpleTableContainer m-5 pr-1 max-h-[60vh] overflow-x-auto '>
+			<div className=' simpleTableContainer m-5 pr-1 max-h-[65vh] overflow-x-auto '>
 				<table className='w-full border-collapse table-fixed'>
 					<thead className='sticky top-0 bg-white border-b border-gray-300'>
 						<tr className=''>
 							{headers.map((header, index) => (
 								<React.Fragment key={index}>
 									<th
-										className='gap-3 p-2 text-left border-b border-gray-300 cursor-pointer'
+										className='gap-3 p-2 text-left border-b border-gray-300 cursor-pointer text-[14px]'
 										style={{width: header?.width ? header?.width : 'auto',}}
 										onClick={() => handleSort(header.key)}
 									>
@@ -126,7 +126,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 						<tr>
 							{headers.map((header, index) => (
 								<React.Fragment key={index}>
-									<th className='p-2 border-b border-gray-300'>
+									<th className='p-2 border-b border-gray-300 text-[14px]'>
 										<input
 											type='text'
 											className='box-border w-full p-1 border-2 border-gray-300 border-solid hover:border-[var(--tw-primary)] focus:border-[var(--tw-primary)] focus:outline-none'
@@ -143,7 +143,7 @@ const TableComponent = ({ data, headers, onRowClick, itemsPerPageOptions = [5, 1
 							const sortedDataArray = sortedData();
 							return (sortedDataArray.length === 0 ? (
 								<tr>
-									<td colSpan={headers.length} className='py-4 text-center'>
+									<td colSpan={headers.length} className='py-4 text-center text-[12px]'>
 										No data found for the given parameters.
 									</td>
 								</tr>
