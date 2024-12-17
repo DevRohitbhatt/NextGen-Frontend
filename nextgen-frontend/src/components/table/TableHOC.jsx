@@ -179,7 +179,7 @@ function TableHOC({
 			</div>
 
 			{/* table */}
-			<div className={`tableHOC pr-1 ${isPaginated ? 'max-h-[63vh]' : largeHeader ? 'max-h-[50vh]': 'max-h-[65vh]'}  overflow-auto`}>
+			<div className={`tableHOC pr-1 ${isPaginated ? 'max-h-[54vh]' : largeHeader ? 'max-h-[41vh]': 'max-h-[56vh]'}  overflow-auto`}>
 				<table className='w-full border-collapse table-auto select-none'>
 					{isHeader && (
 						<thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
@@ -297,7 +297,7 @@ function TableHOC({
 							return (
 								<tr
 									key={row.id}
-									className={`h-[35px] font-normal border-y relative hover:bg-gray-100 ${
+									className={`h-[28px] font-normal border-y relative hover:bg-gray-100 ${
 										row.getCanExpand() ? 'cursor-pointer' : 'cursor-default'
 									}`}
 									onClick={(e) => {
