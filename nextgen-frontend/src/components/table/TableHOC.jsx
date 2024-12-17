@@ -179,7 +179,7 @@ function TableHOC({
 			</div>
 
 			{/* table */}
-			<div className={`tableHOC pr-1 ${isPaginated ? 'max-h-[54vh]' : largeHeader ? 'max-h-[41vh]': 'max-h-[56vh]'}  overflow-auto`}>
+			<div className={`tableHOC pr-1 ${isPaginated ? 'max-h-[58vh]' : largeHeader ? 'max-h-[48vh]': 'max-h-[60vh]'}  overflow-auto`}>
 				<table className='w-full border-collapse table-auto select-none'>
 					{isHeader && (
 						<thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>

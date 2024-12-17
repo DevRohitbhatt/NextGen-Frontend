@@ -712,7 +712,7 @@ const ItemsSoldByEmployee = () => {
 							Group By Unit
 						</div>
 						<div className='run-button' onClick={fetchSoldByEmpData}>
-							<div className='py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7 text-[14px]'>
 								Run
 							</div>
 						</div>
