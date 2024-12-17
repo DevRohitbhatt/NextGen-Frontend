@@ -52,6 +52,7 @@ const Invoices = () => {
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isNewInvoiceLoading, setIsNewInvoiceLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load your Invoices, please try again later.'
@@ -140,7 +141,7 @@ const Invoices = () => {
 		() => [
 			columnHelper.display({
 				id: 'actions',
-				cell: ({ getValue, row }) => (
+				cell: ({ row }) => (
 					<div
 						className='flex space-x-2 text-lg'
 						onClick={(e) => {
@@ -376,19 +377,24 @@ const Invoices = () => {
 
 	const openInvoiceEditor = (row) => {
 		window.open(
-			`/InvoiceEditor?unitName=${row.unitName}&vendorName=${row.name}&date=${row.date}&invoiceID=${row.qsrInvoiceID}&lastEditedBy=${row.lastEditedBy}&invoiceReference=${row.vendorInvoiceReference}&totalAmount=${row.totalAmountIncludingTax}`,
+			`/InvoiceEditor?unitID=${row.unitID}&unitName=${row.unitName}&vendorID=${row.vendorID}&vendorName=${row.name}&date=${row.date}&invoiceID=${row.qsrInvoiceID}&lastEditedBy=${row.lastEditedBy}&invoiceReference=${row.vendorInvoiceReference}&totalAmount=${row.totalAmountIncludingTax}&newInvoice=false`,
 			'_blank'
 		);
 	};
 
 	const handleAddNewInvoice = async () => {
 		try {
+			setIsNewInvoiceLoading(true);
+			setShowAddInvoicesModal(false);
 			const getData = {
 				url: 'getVendorItems',
 				urlParams: {
 					companyID: companyID,
 					unitID: unitDropdownData?.find((unit) => unit.name === selectedDropdownUnit)?.id,
 					vendorID: vendorDropdownData?.find((vendor) => vendor.name === selectedDropdownVendor)?.id,
+					mode: 'EDITORVIEW',
+					includePriceInfo: 'Y',
+					otherOptions: '',
 				},
 			};
 
@@ -400,13 +406,14 @@ const Invoices = () => {
 						unitDropdownData?.find((unit) => unit.name === selectedDropdownUnit)?.id
 					}&unitName=${selectedDropdownUnit}&vendorID=${
 						vendorDropdownData?.find((vendor) => vendor.name === selectedDropdownVendor)?.id
-					}&vendorName=${selectedDropdownVendor}&date=${new Date()}`,
+					}&vendorName=${selectedDropdownVendor}&date=${new Date()}&newInvoice=true`,
 					'_blank'
 				);
 			} else {
 				setShowAddInvoicesModal(false);
 				setShowWarnings(true);
 			}
+			setIsNewInvoiceLoading(false);
 		} catch (error) {
 			console.error('Error getting Invoice data: ', error);
 		}
@@ -622,6 +629,8 @@ const Invoices = () => {
 					</div>
 				)}
 
+				{isNewInvoiceLoading && <Loader loading={isNewInvoiceLoading} />}
+
 				<div>
 					<UnitModal
 						unitData={unitsAndAreas}
@@ -713,9 +722,8 @@ const Invoices = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{/* Repeat this row for each item */}
-									{invoiceItemDetails.map((item) => (
-										<tr className='even:bg-gray-50'>
+									{invoiceItemDetails.map((item, index) => (
+										<tr key={index} className='even:bg-gray-50'>
 											<td className='p-2 text-center border border-gray-300'>
 												{item.vendorItemReference}
 											</td>
@@ -748,7 +756,7 @@ const Invoices = () => {
 						setShowAddInvoicesModal(!showAddInvoicesModal);
 					}}
 				>
-					<div className='flex flex-col items-center gap-3 p-4 min-w-72'>
+					<div className='flex flex-col items-center gap-3 p-4 min-w-96'>
 						<Dropdown
 							title='Unit'
 							options={unitDropdownData}
@@ -769,7 +777,7 @@ const Invoices = () => {
 									? 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3] text-[#D3D3D3] hover:text-[#D3D3D3] cursor-not-allowed'
 									: 'border-[var(--tw-primary)] hover:bg-[var(--tw-primary)] text-[var(--tw-primary)] hover:text-white shadow-[inset_0_0_0_1px_var(--tw-primary)] tailwind-button'
 							}`}
-							onClick={handleAddNewInvoice}
+							onClick={!selectedDropdownUnit || !selectedDropdownVendor ? null : handleAddNewInvoice}
 						>
 							New Invoice
 						</button>
