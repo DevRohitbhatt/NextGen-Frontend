@@ -609,7 +609,7 @@ const PurchaseAnalysis = () => {
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-4 text-[20px] leading-tight text-left pageTitle">
+        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
           Purchase Analysis
         </h2>
         <header className="optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">

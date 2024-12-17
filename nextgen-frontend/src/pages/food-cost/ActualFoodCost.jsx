@@ -1532,10 +1532,10 @@ const ActualFoodCost = () => {
                       onOptionChange={handleTotalViewChange}
                     />
                   </div>
-                  <div className="flex items-center justify-center w-28  py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] ">
+                  <div className="flex items-center justify-center w-28  py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[28px] ">
                     <div
                       onClick={togglePopup}
-                      className="items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid"
+                      className="items-center justify-center w-full px-6 py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid text-[16px]"
                     >
                       <span className="cursor-pointer "> More....</span>
                     </div>

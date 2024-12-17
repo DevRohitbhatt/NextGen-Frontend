@@ -647,7 +647,7 @@ const LaborCICO = () => {
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-4 text-[20px] leading-tight text-left pageTitle">
+        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
           Clock In - Clock Out
         </h2>
         <header className="optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
@@ -669,7 +669,7 @@ const LaborCICO = () => {
               extraClass={"w-[219px]"}
             />
             <div className="run-button" onClick={handleRunClick}>
-              <div className="py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7 text-[16px]">
+              <div className="py-2 ml-1  font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7 text-[14px]">
                 Run
               </div>
             </div>

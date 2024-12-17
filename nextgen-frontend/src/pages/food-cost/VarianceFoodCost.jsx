@@ -1436,7 +1436,7 @@ const VarianceFoodCost = () => {
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-4 text-[20px] leading-tight text-left pageTitle">
+        <h2 className="my-2 text-[20px] leading-tight text-left pageTitle">
           Variance Food Cost
         </h2>
         <header className="optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
@@ -1479,7 +1479,7 @@ const VarianceFoodCost = () => {
               />
             </div>
             <div className="run-button" onClick={fetchVarianceFoodCost}>
-              <div className="py-3 ml-3 text-[16px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
+              <div className="py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
                 Run
               </div>
             </div>
@@ -1514,16 +1514,16 @@ const VarianceFoodCost = () => {
                   />
                 </div>
                 {/* start  */}
-                <div className="flex items-center justify-center w-28 py-3 text-center capitalize cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] ">
+                <div className="flex items-center justify-center w-28 py-3 text-center capitalize cursor-pointer whitespace-nowrap rounded-3xl  mt-[28px] ">
                   <div
                     onClick={() => setIsDropdownVisible(!isDropdownVisible)}
-                    className="items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid"
+                    className="items-center justify-center w-full px-6 py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid"
                   >
                     <span className="cursor-pointer mt-[47px]"> More....</span>
                   </div>
                   {isDropdownVisible && (
                     <div
-                      className="more-container !mt-[32px]"
+                      className="more-container !mt-[28px]"
                       ref={moreOptionsDropdown}
                     >
                       <div
