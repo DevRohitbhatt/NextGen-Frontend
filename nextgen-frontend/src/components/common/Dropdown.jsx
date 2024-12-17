@@ -52,9 +52,9 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable =
 			className='relative flex flex-col justify-center w-full mx-1 dropdown-selector rounded-3xl'
 			ref={dropdownRef}
 		>
-			<h3 className='mb-1 ml-2 text-[18px] font-semibold text-nowrap'>{title}</h3>
+			<h3 className='mb-1 ml-2 text-[16px] font-semibold text-nowrap'>{title}</h3>
 			<div
-				className={`flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
+				className={`flex items-center justify-between w-full px-6 py-2 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
 					isEditable
 						? ' hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] cursor-pointer'
 						: 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
@@ -72,7 +72,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable =
 						}}
 					/>
 				) : (
-					<p className='truncate'>{selectedOption}</p>
+					<p className='truncate text-[14px]'>{selectedOption}</p>
 				)}
 				<span className={`ml-2 transition ease-linear delay-300 transform `}>
 					{isOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
