@@ -361,7 +361,7 @@ const InventoryWeeksOnHand = () => {
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Weeks On Hand</h2>
+				<h2 className='my-4 text-[20px] leading-tight text-left pageTitle'>Inventory Weeks On Hand</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
@@ -381,7 +381,7 @@ const InventoryWeeksOnHand = () => {
 							onOptionChange={handleUsageChange}
 						/>
 						<div className='run-button' onClick={fetchInventoryWeeksOnHandReport}>
-							<div className='py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-3 ml-1 text-[16px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
