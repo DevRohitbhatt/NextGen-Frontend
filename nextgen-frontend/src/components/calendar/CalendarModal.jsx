@@ -62,7 +62,7 @@ const CalendarModal = ({
 	useEffect(() => {
 		if (dynamicData) {
 			const newData = allDatesData
-				?.filter((entry) => new Date(entry.periodMaxDate).getFullYear() === selectedYear)
+				?.filter((entry) => entry.yearID === selectedYear)
 				.map((entry) => ({
 					periodID: entry.periodID,
 					periodMinDate: dateFormat(new Date(entry.periodMinDate), 'mm/dd/yyyy'),
@@ -86,6 +86,7 @@ const CalendarModal = ({
 
 			if (result && result.data) {
 				const newData = result?.data.map((entry) => ({
+					yearID: entry.yearID,
 					periodID: entry.periodID,
 					periodMinDate: dateFormat(new Date(entry.periodMinDate), 'mm/dd/yyyy'),
 					periodMaxDate: dateFormat(new Date(entry.periodMaxDate), 'mm/dd/yyyy'),
