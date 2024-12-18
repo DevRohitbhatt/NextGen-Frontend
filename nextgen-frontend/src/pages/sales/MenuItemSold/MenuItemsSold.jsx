@@ -66,8 +66,8 @@ const MenuItemsSold = () => {
 					.map((tab) => (
 						<button
 							key={tab}
-							className={`flex items-center gap-2 px-4 py-3 border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
-								activeTab === tab ? 'bg-[var(--tw-primary)]  text-white' : 'text-[var(--tw-primary)]'
+							className={`flex items-center gap-2 px-4 py-2 border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+								activeTab === tab ? 'bg-[var(--tw-primary)] text-[14px] text-white' : 'text-[var(--tw-primary)]'
 							}`}
 							onClick={() => setActiveTab(tab)}
 						>

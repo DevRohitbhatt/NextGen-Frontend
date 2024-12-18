@@ -1545,16 +1545,16 @@ const ActualFoodCost = () => {
                         ref={moreOptionsDropdown}
                       >
                         <div
-                          className="option mb-2 w-[258px]"
+                          className="option mb-2 w-[200px] text-[14px]"
                           onClick={() => setIsShowHideDepartments(true)}
                         >
-                          <button className="w-[100%] bg-[#f9f9f9]">
+                          <button className="w-[100%] bg-[#f9f9f9] text-[14px]">
                             Show/Hide Departments
                           </button>
                         </div>
-                        <div className="option mb-2 w-[258px]">
+                        <div className="option mb-2 w-[200px] text-[14px]">
                           <button
-                            className="w-[100%] bg-[#f9f9f9]"
+                            className="w-[100%] bg-[#f9f9f9] text-[14px]"
                             onClick={() => {
                               handleCountsheet(
                                 selectedFromDate,
@@ -1566,9 +1566,9 @@ const ActualFoodCost = () => {
                             View Beginning Countsheet
                           </button>
                         </div>
-                        <div className="option mb-2 w-[258px] bg-[#f9f9f9]">
+                        <div className="option mb-2 w-[200px] bg-[#f9f9f9] text-[14px]">
                           <button
-                            className="w-[100%]"
+                            className="w-[100%] text-[14px]"
                             onClick={() => {
                               handleCountsheet(
                                 selectedFromDate,
@@ -1581,9 +1581,9 @@ const ActualFoodCost = () => {
                             View Ending Countsheet
                           </button>
                         </div>
-                        <div className="option">
+                        <div className="option text-[14px]">
                           <button
-                            className="w-[100%] bg-[#f9f9f9]"
+                            className="w-[100%] bg-[#f9f9f9] text-[14px]"
                             onClick={() => {
                               handleViewPurchase(
                                 selectedFromDate,
@@ -1635,9 +1635,9 @@ const ActualFoodCost = () => {
                         !isExportFilteredViewDropDownVisible
                       )
                     }
-                    className="items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid"
+                    className="items-center justify-center w-full px-6 py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid"
                   >
-                    <span className="cursor-pointer">
+                    <span className="cursor-pointer text-[14px]">
                       {" "}
                       Export Filtered View
                     </span>

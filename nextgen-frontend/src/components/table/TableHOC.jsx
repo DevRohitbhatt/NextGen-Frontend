@@ -150,10 +150,10 @@ function TableHOC({
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3'>
 			<div className='flex items-center gap-2'>
 				{expandCollapseButtons && (
-					<div className='flex items-center my-4 space-x-4'>
+					<div className='flex items-center my-2 space-x-4'>
 						<button
 							onClick={() => table.toggleAllRowsExpanded(true)}
-							className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+							className={`flex items-center w-[150px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[14px] ${
 								table.getIsAllRowsExpanded()
 									? 'bg-[var(--tw-primary)] text-white'
 									: 'text-[var(--tw-primary)]'
@@ -164,7 +164,7 @@ function TableHOC({
 						</button>
 						<button
 							onClick={() => table.toggleAllRowsExpanded(false)}
-							className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+							className={`flex items-center w-[150px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[14px] ${
 								table.getIsAllRowsExpanded()
 									? 'text-[var(--tw-primary)]'
 									: 'bg-[var(--tw-primary)] text-white'
@@ -175,7 +175,7 @@ function TableHOC({
 						</button>
 					</div>
 				)}
-				<div className='text-xl font-bold'>{detailOnTop}</div>
+				<div className='text-[16px] font-bold'>{detailOnTop}</div>
 			</div>
 
 			{/* table */}
@@ -415,7 +415,7 @@ function TableHOC({
 							table.setPageSize(Number(e.target.value));
 						}}
 					>
-						{[10, 20, 25].map((pageSize) => (
+						{[20, 30, 50].map((pageSize) => (
 							<option key={pageSize} value={pageSize}>
 								{`${pageSize} per page`}
 							</option>

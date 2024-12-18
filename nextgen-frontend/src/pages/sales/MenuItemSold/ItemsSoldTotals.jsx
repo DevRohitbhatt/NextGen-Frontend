@@ -830,10 +830,10 @@ const ItemsSoldTotals = () => {
         </div>
         <div className="flex mt-2">
           <div className="mt-2 view-selector">
-            <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
+            <label className="block ml-2 mb-1 mt-[-12px] text-[16px] font-semibold">
               View
             </label>
-            <div className="p-3 border-2 border-solid rounded-[1.5rem] checkbox-group hover:border-primary">
+            <div className="p-2 border-2 border-solid rounded-[1.5rem] checkbox-group hover:border-primary">
               <div className="flex flex-row space-x-6">
                 <div className="flex items-center cursor-pointer">
                   <input
@@ -845,7 +845,7 @@ const ItemsSoldTotals = () => {
                     onChange={() => handleViewChange('summary')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
-                  <label htmlFor="summary" className="ml-2">
+                  <label htmlFor="summary" className="ml-2 text-[14px]">
                     Summary
                   </label>
                 </div>
@@ -859,7 +859,7 @@ const ItemsSoldTotals = () => {
                     onChange={() => handleViewChange('byUnit')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
-                  <label htmlFor="byUnit" className="ml-2">
+                  <label htmlFor="byUnit" className="ml-2 text-[14px]">
                     By Unit
                   </label>
                 </div>
@@ -873,7 +873,7 @@ const ItemsSoldTotals = () => {
                     onChange={() => handleViewChange('topSellers')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
-                  <label htmlFor="topSellers" className="ml-2">
+                  <label htmlFor="topSellers" className="ml-2 text-[14px]">
                     Top Sellers
                   </label>
                 </div>
@@ -881,10 +881,10 @@ const ItemsSoldTotals = () => {
             </div>
           </div>
           <div className="pl-2 mt-2 sale-selector">
-            <label className="block ml-2 mb-1 mt-[-12px] text-lg font-semibold">
+            <label className="block ml-2 mb-1 mt-[-12px]  font-semibold text-[16px]">
               Sales
             </label>
-            <div className="p-3 border-2 border-solid rounded-[1.5rem] checkbox-group hover:border-primary">
+            <div className="p-2 border-2 border-solid rounded-[1.5rem] checkbox-group hover:border-primary">
               <div className="flex flex-row space-x-6">
                 <div className="flex items-center cursor-pointer">
                   <input
@@ -896,7 +896,7 @@ const ItemsSoldTotals = () => {
                     onChange={() => handleSalesChange('SalesNet')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
-                  <label htmlFor="Net" className="ml-2">
+                  <label htmlFor="Net" className="ml-2 text-[14px]">
                     Net
                   </label>
                 </div>
@@ -910,7 +910,7 @@ const ItemsSoldTotals = () => {
                     onChange={() => handleSalesChange('SalesGross')}
                     className="cursor-pointer accent-[var(--tw-primary)]"
                   />
-                  <label htmlFor="Gross" className="ml-2">
+                  <label htmlFor="Gross" className="ml-2 text-[14px]">
                     Gross
                   </label>
                 </div>

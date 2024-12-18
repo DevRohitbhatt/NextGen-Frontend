@@ -605,7 +605,7 @@ const LaborCICO = () => {
   const detailOnTop = (
     <div className="flex items-center space-x-2 text-base font-normal">
       {/* Add any additional details or components you want to display on top */}
-      <div className="text-xl font-bold">Expand To:</div>
+      <div className="text-[14px] font-bold">Expand To:</div>
       <div className="w-52">
         <Dropdown
           options={viewOptions}
@@ -613,7 +613,7 @@ const LaborCICO = () => {
           onOptionChange={(option) => setViewBy(option)}
         />
       </div>
-      <div className="text-xl font-bold">Group By:</div>
+      <div className="text-[14px] font-bold">Group By:</div>
       <div className="w-48 group-by">
         <Dropdown
           options={groupOptions}

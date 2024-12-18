@@ -682,13 +682,13 @@ const MenuGrossProfit = () => {
 						<div className='p-4 w-[32rem] space-y-4 '>
 							<div className='flex justify-between'>
 								<button
-									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
+									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[14px]'
 									onClick={() => setSelectedCategories(Categories)}
 								>
 									Select All
 								</button>
 								<button
-									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
+									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[14px]'
 									onClick={() => setSelectedCategories([])}
 								>
 									Select None
@@ -696,14 +696,14 @@ const MenuGrossProfit = () => {
 							</div>
 							<div className='flex flex-col space-y-2'>
 								{Categories.map((category) => (
-									<div key={category} className='flex items-center rounded'>
+									<div key={category} className='flex items-center rounded text-[14px]'>
 										<input
 											type='checkbox'
 											className='w-4 h-4 accent-[var(--tw-primary)] hover:brightness-150 bg-gray-100 border-gray-300'
 											checked={selectedCategories.includes(category)}
 											onChange={() => handleCategoryChange(category)}
 										/>
-										<label className='text-lg font-medium ms-2'>{category}</label>
+										<label className=' font-medium ms-2 text-[14px]'>{category}</label>
 									</div>
 								))}
 							</div>

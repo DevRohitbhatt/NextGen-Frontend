@@ -1519,26 +1519,26 @@ const VarianceFoodCost = () => {
                     onClick={() => setIsDropdownVisible(!isDropdownVisible)}
                     className="items-center justify-center w-full px-6 py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid"
                   >
-                    <span className="cursor-pointer mt-[47px]"> More....</span>
+                    <span className="cursor-pointer mt-[47px] text-[14px]"> More....</span>
                   </div>
                   {isDropdownVisible && (
                     <div
-                      className="more-container !mt-[28px]"
+                      className="more-container !mt-[28px] "
                       ref={moreOptionsDropdown}
                     >
                       <div
-                        className="option mb-2 w-[258px]"
+                        className="option mb-2 w-[200px] text-[14px]"
                         onClick={() =>
                           setIsShowHideDepartmentsModalVisible(true)
                         }
                       >
-                        <button className="w-[100%] bg-[#f9f9f9]">
+                        <button className="w-[100%] bg-[#f9f9f9] text-[14px]">
                           Show/Hide Departments
                         </button>
                       </div>
-                      <div className="option mb-2 w-[258px]">
+                      <div className="option mb-2 w-[200px] text-[14px]">
                         <button
-                          className="w-[100%] bg-[#f9f9f9]"
+                          className="w-[100%] bg-[#f9f9f9] text-[14px]"
                           onClick={() => {
                             fetchCountsheets(); // For Beginning Countsheet
                             setIsDropdownVisible(false);
@@ -1547,9 +1547,9 @@ const VarianceFoodCost = () => {
                           View Beginning Countsheet
                         </button>
                       </div>
-                      <div className="option mb-2 w-[258px]">
+                      <div className="option mb-2 w-[200px] text-[14px]">
                         <button
-                          className="w-[100%] bg-[#f9f9f9]"
+                          className="w-[100%] bg-[#f9f9f9] text-[14px]"
                           onClick={() => {
                             fetchCountsheets(true); // For Ending Countsheet
                             setIsDropdownVisible(false);
@@ -1558,7 +1558,7 @@ const VarianceFoodCost = () => {
                           View Ending Countsheet
                         </button>
                       </div>
-                      <div className="option">
+                      <div className="option text-[14px]">
                         <button
                           className="w-[100%] bg-[#f9f9f9]"
                           onClick={() => {
@@ -1582,9 +1582,9 @@ const VarianceFoodCost = () => {
                   )) ||
                   viewby === "Inventory Item") && (
                   <div className="flex items-center mt-[31px] gap-3">
-                    <div>
+                    <div className="text-[14px]">
                       <input
-                        className="mr-1 accent-[var(--tw-primary)]"
+                        className="mr-1 accent-[var(--tw-primary)] text-[14px]"
                         type="checkbox"
                         checked={showQuantities}
                         onChange={(e) =>
@@ -1593,9 +1593,9 @@ const VarianceFoodCost = () => {
                       />
                       Show Quantities
                     </div>
-                    <div>
+                    <div className="text-[14px]">
                       <input
-                        className="mr-1 accent-[var(--tw-primary)]"
+                        className="mr-1 accent-[var(--tw-primary)] text-[14px] "
                         type="checkbox"
                         checked={showDollarAmounts}
                         onChange={(e) =>

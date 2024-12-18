@@ -410,7 +410,7 @@ const InventoryWeeksOnHand = () => {
 							(inventoryWeeksOnHandReportData.length > 0 ? (
 								<div className='mt-4'>
 									{total > 0 && (
-										<div className='text-2xl font-medium min-w-fit'>{`Total $: ${total}`}</div>
+										<div className='text-[16px] font-medium min-w-fit'>{`Total $: ${total}`}</div>
 									)}
 									{Table}
 								</div>
