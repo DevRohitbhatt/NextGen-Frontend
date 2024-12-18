@@ -444,22 +444,36 @@ const ActualFoodCost = () => {
 	}, [isTableRendered]);
 
 	useEffect(() => {
-		if (selectedFromDate > selectedToDate) {
+		if (selectedToDate < selectedFromDate) {
 			const toDate = new Date(selectedToDate);
-			const fromDate = new Date(toDate);
-			fromDate.setDate(toDate.getDate() - 6);
-			setSelectedFromDate(dateFormat(fromDate, 'mm-dd-yyyy'));
+			const newFromDate = fromDateOptions
+				.map((option) => new Date(option.name))
+				.filter((date) => date < toDate)
+				.sort((a, b) => b - a)[0];
+			if (newFromDate) {
+				setSelectedFromDate(dateFormat(newFromDate, 'mm-dd-yyyy'));
+			}
 		}
 	}, [selectedToDate]);
 
 	useEffect(() => {
-		if (selectedToDate < selectedFromDate) {
+		if (selectedFromDate > selectedToDate) {
 			const fromDate = new Date(selectedFromDate);
-			const toDate = new Date(fromDate);
-			toDate.setDate(fromDate.getDate() + 6);
-			setSelectedToDate(dateFormat(toDate, 'mm-dd-yyyy'));
+			const toDate = new Date(selectedToDate);
+
+			if (fromDate > toDate) {
+				const newToDate = toDateOptions
+					.map((option) => new Date(option.name))
+					.filter((date) => date > fromDate)
+					.sort((a, b) => a - b)[0];
+				if (newToDate) {
+					setSelectedToDate(dateFormat(newToDate, 'mm-dd-yyyy'));
+				}
+			}
 		}
 	}, [selectedFromDate]);
+
+	console.log('todateoptions', toDateOptions);
 
 	useEffect(() => {
 		const fetchDates = async () => {
