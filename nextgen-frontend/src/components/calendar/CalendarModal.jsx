@@ -70,7 +70,7 @@ const CalendarModal = ({
 				}));
 			setDynamicData(newData);
 		}
-	}, [selectedYear, dynamicData]);
+	}, [selectedYear]);
 
 	const getDynamicDates = async () => {
 		try {
