@@ -407,7 +407,7 @@ const VarianceFoodCost = () => {
 	}, [isTableRendered]);
 
 	useEffect(() => {
-		if (selectedToDate < selectedFromDate) {
+		if (new Date(selectedToDate) < new Date(selectedFromDate)) {
 			const toDate = new Date(selectedToDate);
 			const newFromDate = fromDateOptions
 				.map((option) => new Date(option.name))
@@ -420,7 +420,7 @@ const VarianceFoodCost = () => {
 	}, [selectedToDate]);
 
 	useEffect(() => {
-		if (selectedFromDate > selectedToDate) {
+		if (new Date(selectedFromDate) > new Date(selectedToDate)) {
 			const fromDate = new Date(selectedFromDate);
 			const toDate = new Date(selectedToDate);
 
@@ -435,6 +435,7 @@ const VarianceFoodCost = () => {
 			}
 		}
 	}, [selectedFromDate]);
+
 	useEffect(() => {
 		const fetchDates = async () => {
 			try {
