@@ -85,7 +85,7 @@ const CalendarSelector = ({
               onChange={handleInputChange}
               value={selectedDate}
               onClickDay={toggleCalendar}
-			   calendarType="US"
+              calendarType="gregory"
             />
           </div>
         </div>
