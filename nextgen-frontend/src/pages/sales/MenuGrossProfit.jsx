@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import menuGrossProfit from '../../assets/introJSSteps/menuGrossProfit';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -109,7 +110,7 @@ const MenuGrossProfit = () => {
 		columnHelper.accessor('itemPrice', {
 			id: 'itemPrice',
 			header: 'Item Price',
-			cell: ({ getValue }) => `$${getValue()}`,
+			cell: ({ getValue }) => `${formattingData(parseFloat(getValue()))}`,
 			dataType: 'string',
 			size: 100,
 		}),
@@ -135,14 +136,14 @@ const MenuGrossProfit = () => {
 		columnHelper.accessor('itemSales', {
 			id: 'itemSales',
 			header: 'Item Sales',
-			cell: ({ getValue }) => `$${getValue().toFixed(2)}`,
+			cell: ({ getValue }) => `${formattingData(parseFloat(getValue()))}`,
 			dataType: 'string',
 			size: 100,
 		}),
 		columnHelper.accessor('grossProfit', {
 			id: 'grossProfit',
 			header: 'Gross Profit',
-			cell: ({ getValue }) => `$${getValue()}`,
+			cell: ({ getValue }) => `${formattingData(parseFloat(getValue()))}`,
 			dataType: 'string',
 			size: 100,
 		}),

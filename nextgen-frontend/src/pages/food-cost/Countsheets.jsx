@@ -117,11 +117,17 @@ const Countsheets = () => {
 			columnHelper.accessor('dateTime', {
 				id: 'dateTime',
 				header: 'Date',
+				cell: ({getValue})=>{
+				let isDate  = dateFormat(getValue(), 'mm/dd/yyyy ddd HH:MM TT')
+			
+				return isDate
+				},
 				size: 180,
 			}),
 			columnHelper.accessor(
 				(row) => {
-					const formattedDate = `${row.userName} - ${dateFormat(row.saveDateTime, 'mm/dd/yyyy h:MM TT')}`;
+					let dateis = dateFormat(row.saveDateTime, 'mm/dd/yyyy h:MM TT');
+					const formattedDate = `${row.userName} - ${dateis}`;
 					// Combine formatted date and time
 					return formattedDate;
 				},

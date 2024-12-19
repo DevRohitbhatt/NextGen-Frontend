@@ -18,7 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import discounts from '../../assets/introJSSteps/discounts';
-import { formattingData } from '../../functions/formatingCurrency';
+import { formattingData, formattingDataWithoutDollr } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -98,7 +98,7 @@ const Discounts = () => {
 				header: 'Discounted Checks',
 				dataType: 'number',
 				footer: ({ table }) => (
-					<div className='text-center'>{calculateFooterSum(table, 'discountedChecks')}</div>
+					<div className='text-center'>{calculateFooterSum(table, 'discountedChecks').toLocaleString("en-US")}</div>
 				),
 			}),
 			columnHelper.accessor('totalDiscountAmount', {
@@ -457,9 +457,10 @@ const Discounts = () => {
 								id: 'totalDiscountedChecks',
 								header: 'Disc Checks',
 								dataType: 'number',
+								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 								footer: ({ table }) => (
 									<div className='text-center'>
-										{calculateFooterSum(table, 'totalDiscountedChecks')}
+										{formattingDataWithoutDollr(calculateFooterSum(table, 'totalDiscountedChecks'))}
 									</div>
 								),
 							}),
@@ -467,9 +468,10 @@ const Discounts = () => {
 								id: 'totalDiscountedItems',
 								header: 'Disc Items',
 								dataType: 'number',
+								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 								footer: ({ table }) => (
 									<div className='text-center'>
-										{calculateFooterSum(table, 'totalDiscountedItems')}
+										{formattingDataWithoutDollr(calculateFooterSum(table, 'totalDiscountedItems'))}
 									</div>
 								),
 							}),
@@ -488,10 +490,10 @@ const Discounts = () => {
 							columnHelper.accessor('totaldiscountedTickets', {
 								id: 'totaldiscountedTickets',
 								header: 'Disc Cost %',
-								cell: ({ getValue }) => `${getValue()}%`,
+								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
 								dataType: 'percent',
 								footer: ({ table }) => (
-									<div className='text-center'>{calculatePctFooter(table, 'total')}%</div>
+									<div className='text-center'>{formattingDataWithoutDollr(calculatePctFooter(table, 'total'))}%</div>
 								),
 							}),
 						],
@@ -531,9 +533,10 @@ const Discounts = () => {
 										id: `discountedChecks_${weekId}`,
 										header: 'Disc Checks',
 										dataType: 'number',
+										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
-												{calculateFooterSum(table, `discountedChecks_${weekId}`)}
+												{formattingDataWithoutDollr(calculateFooterSum(table, `discountedChecks_${weekId}`))}
 											</div>
 										),
 									}
@@ -547,9 +550,10 @@ const Discounts = () => {
 										id: `discountedItems_${weekId}`,
 										header: 'Disc Items',
 										dataType: 'number',
+										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
-												{calculateFooterSum(table, `discountedItems_${weekId}`)}
+												{formattingDataWithoutDollr(calculateFooterSum(table, `discountedItems_${weekId}`))}
 											</div>
 										),
 									}

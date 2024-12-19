@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborByPayPeriod from "../../assets/introJSSteps/laborByPayPeriod";
+import { formattingData } from "../../functions/formatingCurrency";
 
 const columnHelper = createColumnHelper();
 
@@ -202,11 +203,11 @@ const LaborByPayPeriod = () => {
             row,
             "preTaxTicketSales"
           );
-          preTaxTicketSalesCalculate = parseFloat(
+          preTaxTicketSalesCalculate = formattingData(parseFloat(
             preTaxTicketSalesCalculate
-          ).toFixed(2);
+          ));
 
-          return `$${preTaxTicketSalesCalculate.toLocaleString("en-US")}`;
+          return `${preTaxTicketSalesCalculate.toLocaleString("en-US")}`;
         },
         dataType: "number",
         size: 160,
@@ -215,7 +216,7 @@ const LaborByPayPeriod = () => {
         id: "declaredTipsPct",
         header: "Tips %",
         size: 80,
-        cell: ({ row }) => calculateSum(row, "declaredTipsPct"),
+        cell: ({ row }) => parseFloat(calculateSum(row, "declaredTipsPct")).toFixed(2) + "%",
         dataType: "number",
       }),
       columnHelper.accessor("pay", {
@@ -223,7 +224,7 @@ const LaborByPayPeriod = () => {
         header: "Total Pay",
         size: 120,
         cell: ({ row }) =>
-          `$${Number(calculateSum(row, "pay")).toLocaleString("en-US")}`,
+          `${formattingData(parseFloat(calculateSum(row, "pay")))}`,
         dataType: "number",
       }),
     ],

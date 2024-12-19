@@ -17,6 +17,7 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -279,17 +280,17 @@ const HourlySales = () => {
 					id: 'Total',
 					header: 'Total',
 					pinDirection: 'left',
-					cell: ({ getValue }) => Number(getValue()).toLocaleString('en-US'),
+					cell: ({ getValue }) => formattingData(parseFloat(getValue())),
 					size: 100,
 					footer: ({ table }) =>
 						reportType === 'Unit, Hour and Day' ? null : (
 							<div className='text-center'>
-								{`$ ${Number(
+								{`${formattingData(parseFloat(
 									table
 										.getRowModel()
 										.rows.reduce((acc, row) => acc + row.original.Total, 0)
 										.toFixed(2)
-								).toLocaleString('en-US')}`}
+								))}`}
 							</div>
 						),
 				}),
@@ -299,14 +300,13 @@ const HourlySales = () => {
 								id: 'Avg',
 								header: 'Avg',
 								pinDirection: 'left',
-								cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+								cell: ({ getValue }) => (getValue() !== 0 ? formattingData(parseFloat(getValue())) : "$0.00"),
 								size: 100,
 								footer: ({ table }) => (
 									<div className='text-center'>
-										{`$ ${table
+										{`${formattingData(parseFloat(table
 											.getRowModel()
-											.rows.reduce((acc, row) => acc + row.original.Avg, 0)
-											.toFixed(2)}`}
+											.rows.reduce((acc, row) => acc + row.original.Avg, 0)))}`}
 									</div>
 								),
 							}),
@@ -337,16 +337,15 @@ const HourlySales = () => {
 									? 0
 									: getValue() === '00'
 									? 0
-									: Number(getValue()).toLocaleString('en-US'),
+									: formattingData(parseFloat((getValue()))),
 							footer: ({ table }) =>
 								reportType !== 'Hour and Day' ? null : item === '' ? (
 									''
 								) : (
 									<div className='text-center'>
-										{`${salesType !== 'Transaction' ? '$' : ''} ${table
+										{`${salesType !== 'Transaction' ? '' : ''} ${formattingData(parseFloat((table
 											.getRowModel()
-											.rows.reduce((acc, row) => acc + row.original[item], 0)
-											.toFixed(2)}`}
+											.rows.reduce((acc, row) => acc + row.original[item], 0))))}`}
 									</div>
 								),
 						})

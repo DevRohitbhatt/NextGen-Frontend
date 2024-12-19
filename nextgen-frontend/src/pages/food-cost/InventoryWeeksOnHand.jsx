@@ -14,6 +14,7 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
+import { formattingData } from '../../functions/formatingCurrency.js';
 
 const columnHelper = createColumnHelper();
 
@@ -79,6 +80,7 @@ const InventoryWeeksOnHand = () => {
 				size: 120,
 				filterFn: 'arrIncludesSome',
 				isFilterMenu: true,
+				cell: ({ getValue }) => <div className='w-full text-left'>{getValue()}</div>
 			}),
 			columnHelper.accessor('subDepartment', {
 				id: 'subDepartment',
@@ -87,6 +89,7 @@ const InventoryWeeksOnHand = () => {
 				size: 120,
 				filterFn: 'arrIncludesSome',
 				isFilterMenu: true,
+				cell: ({ getValue }) => <div className='w-full text-left'>{getValue()}</div>
 			}),
 			columnHelper.accessor('latestCountDate', {
 				id: 'latestCountDate',
@@ -95,6 +98,7 @@ const InventoryWeeksOnHand = () => {
 				size: 120,
 				filterFn: 'arrIncludesSome',
 				isFilterMenu: true,
+				cell: ({ getValue }) => <div className='w-full text-left'>{getValue()}</div>
 			}),
 			columnHelper.accessor('caseUnitOfMeasureName', {
 				id: 'caseUnitOfMeasureName',
@@ -103,6 +107,7 @@ const InventoryWeeksOnHand = () => {
 				size: 150,
 				filterFn: 'arrIncludesSome',
 				isFilterMenu: true,
+				cell: ({ getValue }) => <div className='w-full text-left'>{getValue()}</div>
 			}),
 			columnHelper.accessor('casesOnHandAtLastCount', {
 				id: 'casesOnHandAtLastCount',
@@ -410,7 +415,7 @@ const InventoryWeeksOnHand = () => {
 							(inventoryWeeksOnHandReportData.length > 0 ? (
 								<div className='mt-4'>
 									{total > 0 && (
-										<div className='text-[16px] font-medium min-w-fit'>{`Total $: ${total}`}</div>
+										<div className='text-[16px] font-medium min-w-fit'>{`Total : ${formattingData(parseFloat(total))}`}</div>
 									)}
 									{Table}
 								</div>
