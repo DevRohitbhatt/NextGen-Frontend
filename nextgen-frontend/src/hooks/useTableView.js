@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 function useTableView(table, view, isTableRendered) {
 	useEffect(() => {
+		console.log(view);
 		if (isTableRendered) {
 			expandParentRowsOnly(table, view);
 		}

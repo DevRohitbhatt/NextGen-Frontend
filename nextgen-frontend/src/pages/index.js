@@ -5,7 +5,7 @@ const PrepChart = lazy(() => import('./food-cost/PrepChart/PrepChart'));
 const PrepChartTemplate = lazy(() => import('./food-cost/PrepChart/PrepChartTemplate'));
 const SuggestedOrder = lazy(() => import('./food-cost/SuggestedOrder/SuggestedOrder'));
 const SuggestedOrderList = lazy(() => import('./food-cost/SuggestedOrder/SuggestedOrderList'));
-const InventoryTransfer = lazy(() => import('./food-cost/InventoryTransfer'));
+const InventoryTransferReport = lazy(() => import('./food-cost/InventoryTransferReport'));
 const InventoryWeeksOnHand = lazy(() => import('./food-cost/InventoryWeeksOnHand'));
 const ActualFoodCost = lazy(() => import('./food-cost/ActualFoodCost'));
 const VarianceFoodCost = lazy(() => import('./food-cost/VarianceFoodCost'));
@@ -18,27 +18,45 @@ const CookChartTemplate = lazy(() => import('./food-cost/CookChartTemplate'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
+const Discounts = lazy(() => import('./sales/Discounts'));
+const HourlySales = lazy(() => import('./sales/HourlySales'));
+const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
+const SalesVsLabor = lazy(() => import('./sales/SalesVsLabor'));
+const BusinessSummary = lazy(() => import('./sales/BusinessSummary'));
+const MenuGrossProfit = lazy(() => import('./sales/MenuGrossProfit'));
 
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
+const LaborCICO = lazy(() => import('./labor/LaborCICO'));
+const LaborCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
+const LaborAnalysis = lazy(() => import('./labor/LaborAnalysis'));
 
 export {
 	PrepChart,
 	PrepChartTemplate,
 	SuggestedOrder,
 	SuggestedOrderList,
-	InventoryTransfer,
+	InventoryTransferReport,
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
+	LaborCICO,
+	LaborCICOExceptions,
 	Voids,
+	Discounts,
+	HourlySales,
+	MenuItemsSold,
+	SalesVsLabor,
+	BusinessSummary,
+	MenuGrossProfit,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
+	LaborAnalysis,
 	CookChart,
 	CookChartTemplate
 };

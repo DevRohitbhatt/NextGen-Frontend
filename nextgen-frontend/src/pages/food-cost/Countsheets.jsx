@@ -46,10 +46,12 @@ const Countsheets = () => {
 	const [showCommentModal, setShowCommentModal] = useState(false);
 	const [commentValue, setCommentValue] = useState('');
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const fromDateset = new Date();
+	fromDateset.setDate(fromDateset.getDate() - 14);
+	const toDateset = new Date();
+	toDateset.setDate(toDateset.getDate() + 3);
+	const [selectedFromDate, setSelectedFromDate] = useState(fromDateset);
+	const [selectedToDate, setSelectedToDate] = useState(toDateset);
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
@@ -86,9 +88,11 @@ const Countsheets = () => {
 				id: 'action',
 				cell: ({ row }) => (
 					<Link
-						to='/CountsheetDesigner'
+						to={`/CountsheetDesigner?companyID=${row.original.companyId}&countsheet=${encodeURIComponent(
+							JSON.stringify(row.original)
+						)}`}
+						target='_blank'
 						className='underline cursor-pointer'
-						state={{ companyId: row.original.companyId, countsheet: row.original }}
 					>
 						Open
 					</Link>

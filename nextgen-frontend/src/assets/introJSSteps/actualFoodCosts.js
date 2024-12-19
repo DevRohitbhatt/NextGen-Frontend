@@ -13,10 +13,10 @@ export default function ActualFoodCosts() {
 		},
 		{
 			element: '.date-selector',
-			intro: '-Select the date, or date range, you wish to display Actual Food Cost Report Report',
+			intro: '-Select the date, or date range, you wish to display Actual Food Cost Report',
 		},
 		{
-			element: '.dropdown-selector',
+			element: '.countType-selector',
 			intro: 'You can select the Actual Food Cost Report based on the following options: Weeks, Days, Months, or Shifts.',
 		},
 		{

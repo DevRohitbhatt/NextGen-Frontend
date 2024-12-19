@@ -2,8 +2,14 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import * as Styled from '../styles/DateModalStyles.jsx';
 import { FaTimes } from 'react-icons/fa';
-import { TableBuilder as Table, YearSelector, CalendarSelector } from '../index.js';
+import { YearSelector, CalendarSelector, Loader } from '../index.js';
 import Calendar from 'react-calendar';
+import { getCall } from '../../apis/network.js';
+import { useSelector } from 'react-redux';
+import { createColumnHelper } from '@tanstack/react-table';
+import dateFormat from 'dateformat';
+
+const columnHelper = createColumnHelper();
 
 const CalendarModal = ({
 	handleClose,
@@ -12,20 +18,33 @@ const CalendarModal = ({
 	modalOpen,
 	isDateRange,
 	handleDateSelection,
+	periodDatesEndpoint = 'getAllPeriodDates',
 }) => {
+	const { companyID } = useSelector((state) => state.globalState);
 	const [initialFromDate, setInitialFromDate] = useState(selectedFromDate);
 	const [initialToDate, setInitialToDate] = useState(selectedToDate);
 	const [localFromDate, setLocalFromDate] = useState(selectedFromDate);
 	const [localToDate, setLocalToDate] = useState(selectedToDate);
 	const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 	const [showCalendar, setShowCalendar] = useState(false);
-	const [CalendarTable, setCalendarTable] = useState({
-		columnHeaders: ['Period', 'From', 'To'],
-		columnWidths: '1.5fr 2fr 2fr',
-		dataTypes: ['string', 'string', 'string'],
-		rows: [],
-		width: '100%',
-	});
+	const [dynamicData, setDynamicData] = useState([]);
+	const [allDatesData, setAllDatesData] = useState([]);
+	const [isDatesLoading, setIsDatesLoading] = useState(true);
+
+	const columns = [
+		columnHelper.accessor('periodID', {
+			id: 'periodID',
+			header: 'Period',
+		}),
+		columnHelper.accessor('periodMinDate', {
+			id: 'periodMinDate',
+			header: 'From',
+		}),
+		columnHelper.accessor('periodMaxDate', {
+			id: 'periodMaxDate',
+			header: 'To',
+		}),
+	];
 
 	useEffect(() => {
 		if (modalOpen) {
@@ -34,46 +53,56 @@ const CalendarModal = ({
 			setLocalFromDate(selectedFromDate);
 			setLocalToDate(selectedToDate);
 		}
-	}, [modalOpen, selectedFromDate, selectedToDate]);
+	}, [modalOpen, selectedFromDate, selectedToDate, companyID]);
 
 	useEffect(() => {
-		buildCalendarTable(selectedYear);
-	}, [selectedYear]);
+		getDynamicDates();
+	}, []);
 
-	const buildCalendarTable = (year) => {
-		const rows = [];
-		let startDate = new Date(year, 0, 1);
-
-		for (let i = 0; i < 12; i++) {
-			const endDate = new Date(startDate);
-			endDate.setDate(startDate.getDate() + 27);
-
-			rows.push([
-				{ value: (i + 1).toString(), cellType: '' },
-				{ value: formatDate(startDate), cellType: '' },
-				{ value: formatDate(endDate), cellType: '' },
-			]);
-
-			startDate = new Date(endDate);
-			startDate.setDate(startDate.getDate() + 1);
+	useEffect(() => {
+		if (dynamicData) {
+			const newData = allDatesData
+				?.filter((entry) => entry.yearID === selectedYear)
+				.map((entry) => ({
+					periodID: entry.periodID,
+					periodMinDate: dateFormat(new Date(entry.periodMinDate), 'mm/dd/yyyy'),
+					periodMaxDate: dateFormat(new Date(entry.periodMaxDate), 'mm/dd/yyyy'),
+				}));
+			setDynamicData(newData);
 		}
+	}, [selectedYear, allDatesData]);
 
-		setCalendarTable((prevState) => ({
-			...prevState,
-			rows: rows,
-		}));
-	};
+	const getDynamicDates = async () => {
+		try {
+			setIsDatesLoading(true);
+			const getData = {
+				fullUrl: 'api/company/settings/' + periodDatesEndpoint,
+				urlParams: {
+					companyId: companyID,
+				},
+			};
 
-	const formatDate = (date) => {
-		const month = (date.getMonth() + 1).toString().padStart(2, '0');
-		const day = date.getDate().toString().padStart(2, '0');
-		const year = date.getFullYear();
-		return `${month}/${day}/${year}`;
+			const result = await getCall(getData);
+
+			if (result && result.data) {
+				const newData = result?.data.map((entry) => ({
+					yearID: entry.yearID,
+					periodID: entry.periodID,
+					periodMinDate: dateFormat(new Date(entry.periodMinDate), 'mm/dd/yyyy'),
+					periodMaxDate: dateFormat(new Date(entry.periodMaxDate), 'mm/dd/yyyy'),
+				}));
+
+				setAllDatesData(result.data);
+				setDynamicData(newData);
+			}
+			setIsDatesLoading(false);
+		} catch (error) {
+			console.error('Error fetching dynamic dates', error);
+		}
 	};
 
 	const handleYearChange = (newYear) => {
 		setSelectedYear(newYear);
-		buildCalendarTable(newYear);
 	};
 
 	const handleInputChange = (date) => {
@@ -105,13 +134,23 @@ const CalendarModal = ({
 		handleClose();
 	};
 
+	const getDatesFromRows = (dates) => {
+		let fromdate = new Date(dates?.periodMinDate);
+		let todate = new Date(dates?.periodMaxDate);
+		setLocalFromDate(fromdate);
+		setLocalToDate(todate);
+	};
+
 	return (
 		<>
 			{modalOpen && (
 				<div className='fixed bg-[#00000073] w-full h-dvh left-0 top-0 z-10'>
 					<div
-						className={`fixed bg-white rounded-lg shadow-lg overflow-hidden lg:left-1/3   top-[6%] ${isDateRange ? '' : 'lg:w-96 mx-2 lg:mx-0'
-							}`}
+						className={`fixed bg-white rounded-lg shadow-lg overflow-hidden lg:left-1/3   top-[6%] 
+              ${
+                isDateRange ? '' : 'lg:w-96 mx-2 lg:mx-0'
+							}`
+            } 
 					>
 						<div className='flex items-center justify-between px-4 py-2 text-white bg-[var(--tw-primary)]'>
 							{isDateRange ? (
@@ -133,6 +172,7 @@ const CalendarModal = ({
 									value={localFromDate}
 									onClickDay={toggleCalendar}
 									className='tailwind-calendar'
+									calendarType='US'
 								/>
 							) : (
 								<>
@@ -140,8 +180,11 @@ const CalendarModal = ({
 										<div>
 											<span className='text-xs font-bold'>From:</span>
 											<CalendarSelector
-												handleDateChange={(date) => setLocalFromDate(date)}
+												handleDateChange={(date) => {
+													setLocalFromDate(date);
+												}}
 												selectedFromDate={localFromDate}
+												date={localFromDate}
 											/>
 										</div>
 										<div>
@@ -149,6 +192,7 @@ const CalendarModal = ({
 											<CalendarSelector
 												handleDateChange={(date) => setLocalToDate(date)}
 												selectedToDate={localToDate}
+												date={localToDate}
 											/>
 										</div>
 										<div className='yeardiv'>
@@ -157,18 +201,56 @@ const CalendarModal = ({
 										</div>
 									</div>
 
-									<div className='w-full px-4 m-auto'>
-										<Table
-											columnHeaders={CalendarTable.columnHeaders}
-											columnwidths={CalendarTable.columnWidths}
-											dataTypes={CalendarTable.dataTypes}
-											rows={CalendarTable.rows}
-											width={CalendarTable.width}
-											className='CalendarTable'
-											height={'300px'}
-											scrollable={true}
-										/>
-									</div>
+									{isDatesLoading ? (
+										<div className='h-48 p-4 m-auto'>
+											<Loader loading={isDatesLoading} />
+										</div>
+									) : (
+										<div className='px-4 py-4 bg-white '>
+											<div className='m-auto overflow-y-auto text-sm border tableHOC h-96 rounded-2xl'>
+												<table className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
+													<thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
+														<tr>
+															{columns.map((column) => (
+																<th
+																	key={column.id}
+																	scope='col'
+																	className='py-2 font-medium tracking-wider text-center'
+																>
+																	{column.header}
+																</th>
+															))}
+														</tr>
+													</thead>
+													<tbody className='bg-white divide-y divide-gray-200'>
+														{dynamicData.map((row, rowIndex) => (
+															<tr
+																key={rowIndex}
+																className={`cursor-pointer ${
+																	row.periodMinDate ===
+																		dateFormat(localFromDate, 'mm/dd/yyyy') &&
+																	row.periodMaxDate ===
+																		dateFormat(localToDate, 'mm/dd/yyyy')
+																		? 'bg-[var(--tw-primary)] text-white hover:bg-[var(--tw-primary)]'
+																		: 'hover:bg-gray-100 '
+																}`}
+																onClick={() => getDatesFromRows(row)}
+															>
+																{columns.map((column) => (
+																	<td
+																		key={column.id}
+																		className='py-1 text-center whitespace-nowrap'
+																	>
+																		{row[column.id]}
+																	</td>
+																))}
+															</tr>
+														))}
+													</tbody>
+												</table>
+											</div>
+										</div>
+									)}
 								</>
 							)}
 						</div>
@@ -192,6 +274,7 @@ CalendarModal.propTypes = {
 	modalOpen: PropTypes.bool,
 	isDateRange: PropTypes.bool,
 	handleDateSelection: PropTypes.func,
+	periodDatesEndpoint: PropTypes.string,
 };
 
 export default CalendarModal;

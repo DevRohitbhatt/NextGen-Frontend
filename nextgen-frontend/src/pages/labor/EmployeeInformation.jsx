@@ -287,6 +287,12 @@ const EmployeeInformation = () => {
 		}
 	}, [defaultUnitID, defaultUnitName]);
 
+	useEffect(() => {
+		if (selectedUnit) {
+			fetchEmployeeInformation(companyID, alignmentID, selectedUnit);
+		}
+	}, [selectedUnit]);
+
 	// Fetching Employee Information
 	const fetchEmployeeInformation = async (companyId, alignmentId, selectedUnit) => {
 		try {
@@ -314,7 +320,7 @@ const EmployeeInformation = () => {
 					if (date) {
 						if (date.includes('/')) {
 							const [month, day, year] = date.split('/');
-							return `${month}-${day}-${year.substring(2)}`;
+							return `${month}/${day}/${year}`;
 						} else {
 							return date;
 						}
@@ -337,9 +343,6 @@ const EmployeeInformation = () => {
 		setSelectedUnitName(unitName);
 		setSelectedUnit(unitID);
 		setShowUnitModal(false);
-		setIsLoading(true);
-		await fetchEmployeeInformation(companyID, alignmentID, unitID);
-		setIsLoading(false);
 	};
 
 	// function	to handle the view change
@@ -384,14 +387,11 @@ const EmployeeInformation = () => {
 			case 'Birth Days':
 				{
 					const currentDate = new Date();
-					const currentMonth = currentDate.getMonth() + 1;
-					const currentDay = currentDate.getDate();
-
+					const currentMonth = currentDate.getMonth();
 					const birthDaysData = employeeInformationData.data.filter((data) => {
 						const birthDate = new Date(data.birthDate);
-						const birthMonth = birthDate.getMonth() + 1;
-						const birthDay = birthDate.getDate();
-						return birthMonth === currentMonth && birthDay === currentDay;
+						const birthMonth = birthDate.getMonth();
+						return birthMonth === currentMonth;
 					});
 
 					setFilteredEmployeeInformationData({ data: birthDaysData });
@@ -412,131 +412,44 @@ const EmployeeInformation = () => {
 			subHeaders: [dateFormat(new Date(), 'mm/dd/yyyy')],
 			exportType: 'pdf',
 			pageOrientation: 'landscape',
-			body: [
-				{
-					type: 'table',
-					widths: headers.map(() => 'auto'),
-					dataTypes: headers.map((header) => header.cellType),
-					data: {
-						columnHeaders: headers.map((header) => header.label),
-						rows: filteredEmployeeInformationData.data.map((row) => [
-							{
-								value: row.unitName,
-								cellType: '',
-								columnName: 'Unit Name',
-							},
-							{
-								value: row.employeeId,
-								cellType: '',
-								columnName: 'Employee ID',
-							},
-							{
-								value: row.uniqueId,
-								cellType: '',
-								columnName: 'Unique ID',
-							},
-							{
-								value: row.lastName,
-								cellType: '',
-								columnName: 'Last Name',
-							},
-							{
-								value: row.firstName,
-								cellType: '',
-								columnName: 'First Name',
-							},
-							{
-								value: row.middleName,
-								cellType: '',
-								columnName: 'Middle Name',
-							},
-							{
-								value: row.payRate,
-								cellType: '',
-								columnName: 'Pay Rate',
-							},
-							{
-								value: row.address,
-								cellType: '',
-								columnName: 'Address',
-							},
-							{
-								value: row.address2,
-								cellType: '',
-								columnName: 'Address 2',
-							},
-							{
-								value: row.city,
-								cellType: '',
-								columnName: 'City',
-							},
-							{
-								value: row.state,
-								cellType: '',
-								columnName: 'State',
-							},
-							{
-								value: row.zip,
-								cellType: '',
-								columnName: 'Zip',
-							},
-							{
-								value: row.phone,
-								cellType: '',
-								columnName: 'Phone',
-							},
-							{
-								value: row.maritalStatus,
-								cellType: '',
-								columnName: 'Marital Status',
-							},
-							{
-								value: row.dependants,
-								cellType: '',
-								columnName: 'Dependants',
-							},
-							{
-								value: row.phantomEmployee,
-								cellType: '',
-								columnName: 'Phantom Employee',
-							},
-							{
-								value: row.cellPhone,
-								cellType: '',
-								columnName: 'Cell Phone',
-							},
-							{
-								value: row.email,
-								cellType: '',
-								columnName: 'Email',
-							},
-							{
-								value: row.payrollID,
-								cellType: '',
-								columnName: 'Payroll ID',
-							},
-							{
-								value: row.birthDate,
-								cellType: '',
-								columnName: 'Birth Date',
-							},
-							{
-								value: row.startDate,
-								cellType: '',
-								columnName: 'Start Date',
-							},
-							{
-								value: row.termDate,
-								cellType: '',
-								columnName: 'Term Date',
-							},
-						]),
-					},
-				},
-			],
+			body: generateBody(),
 		};
 
 		PdfBuilder(pdfData);
+	};
+
+	const generateBody = () => {
+		const rowsPerTable = 28; // Define how many rows you want per table
+		const totalRows = filteredEmployeeInformationData.data.length; // Get total number of rows
+		const body = []; // Initialize the body array
+
+		// Loop through the data and create tables
+		for (let i = 0; i < totalRows; i += rowsPerTable) {
+			const chunkedColumns = [];
+			for (let j = 0; j < headers.length; j += 13) {
+				chunkedColumns.push(headers.slice(j, j + 13));
+			}
+			chunkedColumns.forEach((columnChunk) => {
+				body.push({
+					type: 'table/SeperatePage',
+					widths: columnChunk.map(() => 'auto'),
+					dataTypes: columnChunk.map((column) => column.dataType),
+					data: {
+						columnHeaders: columnChunk.map((column) => column.label),
+						rows: filteredEmployeeInformationData.data.slice(i, i + rowsPerTable).map((row) =>
+							columnChunk.map((column) => ({
+								value: row[column.key] || '0 ',
+								cellType: '',
+								columnName: column.label,
+							}))
+						),
+					},
+				});
+			});
+		}
+
+		// Now the `body` array contains all the tables for the report
+		return body;
 	};
 
 	// Function to handle the Excel export
@@ -545,13 +458,13 @@ const EmployeeInformation = () => {
 
 		const data = [
 			{
-				name: `Employee Information Report | ${view}`,
+				name: '',
 				columns: headers.map((header) => ({ name: header.label, filterButton: true })),
 				data: filteredEmployeeInformationData.data.map((row) => headers.map((header) => row[header.key])),
 			},
 		];
 
-		const filename = 'Employee Information Report';
+		const filename = `Employee_Information_${selectedUnitName}_${dateFormat(new Date(), 'mm-dd-yyyy')}`;
 		const spreadSheetTitle = 'Employee Information Report';
 		const date = dateFormat(new Date(), 'mm/dd/yyyy');
 
@@ -613,6 +526,7 @@ const EmployeeInformation = () => {
 										data={filteredEmployeeInformationData.data}
 										headers={headers}
 										onRowClick={() => {}}
+										itemsPerPageOptions={[10, 25, 50, 100]}
 									/>
 								</div>
 							) : !selectedUnit ? (

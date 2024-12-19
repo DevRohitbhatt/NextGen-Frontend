@@ -15,6 +15,5 @@ export default {
 			},
 		},
 	},
-
 	plugins: [tailwindScrollbar({ nocompatible: true })],
 };

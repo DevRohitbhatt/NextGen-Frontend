@@ -14,17 +14,26 @@ import {
 	PrepChartTemplate,
 	SuggestedOrderList,
 	SuggestedOrder,
-	InventoryTransfer,
+	InventoryTransferReport,
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
+	LaborCICO,
+	LaborCICOExceptions,
 	Voids,
+	Discounts,
+	HourlySales,
+	SalesVsLabor,
+	BusinessSummary,
+	MenuGrossProfit,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
+	MenuItemsSold,
+	LaborAnalysis,
 	CookChart,
 	CookChartTemplate
 } from './pages';
@@ -119,7 +128,7 @@ const App = () => {
 								<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
 
 								{/* Food Cost */}
-								<Route path='/InventoryTransfer' index element={<InventoryTransfer />} />
+								<Route path='/InventoryTransferReport' index element={<InventoryTransferReport />} />
 								<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
 								<Route path='/ActualFoodCost' index element={<ActualFoodCost />} />
 								<Route path='/VarianceFoodCost' index element={<VarianceFoodCost />} />
@@ -132,10 +141,19 @@ const App = () => {
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
+								<Route path='/Discounts' element={<Discounts />} />
+								<Route path='/HourlySales' element={<HourlySales />} />
+								<Route path='/MenuItemsSold' element={<MenuItemsSold />} />
+								<Route path='/SalesVsLabor' element={<SalesVsLabor />} />
+								<Route path='/BusinessSummary' element={<BusinessSummary />} />
+								<Route path='/MenuGrossProfit' element={<MenuGrossProfit />} />
 
-								{/* Labour */}
+								{/* Labor */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
 								<Route path='/LaborByPayPeriod' element={<LaborByPayPeriod />} />
+								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
+								<Route path='/LaborCICO' element={<LaborCICO />} />
+								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
 								
 							</Routes>
 						</Suspense>

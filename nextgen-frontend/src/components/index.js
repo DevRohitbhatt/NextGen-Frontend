@@ -4,6 +4,7 @@ export { default as CalendarModal } from './calendar/CalendarModal';
 export { default as DateRangePicker } from './calendar/DateRangePicker';
 export { default as DateSelector } from './calendar/DateSelector';
 export { default as YearSelector } from './calendar/YearSelector';
+export { default as DateDropdown } from './calendar/DateDropdown';
 
 // common components
 export { default as Dropdown } from './common/Dropdown';
@@ -15,6 +16,7 @@ export { default as SearchBar } from './common/SearchBar';
 export { default as Modal } from './common/Modal';
 export { default as ModalSearchBar } from './common/ModalSearchBar';
 export { default as Loader } from './common/Loader';
+export { default as SelectionModal } from './common/SelectionModal';
 
 // ExportOptions components
 export { default as PdfBuilder } from './exportOptions/PdfBuilder';
@@ -45,5 +47,14 @@ export { default as TableCell } from './table/TableCell';
 export { default as TreeNode } from './table/TreeNode';
 export { default as TreeTable } from './table/TreeTableBuilder';
 export { default as TableHOC } from './table/TableHOC';
-export {default as DndTable } from './table/DndTable'
-export {default as ForcastedSales} from './forcastedSales/ForcastedSales'
+export { default as DndTable } from './table/DndTable'
+export {default as ForcastedSales} from './forcastedSales/ForcastedSales';
+
+//menu components
+export { default as Menu } from './menu/Menu';
+
+// inventory components
+export { default as Inventory } from './Inventory/Inventory';
+
+//chart components
+export { default as LineChart } from './Charts/LineChart';

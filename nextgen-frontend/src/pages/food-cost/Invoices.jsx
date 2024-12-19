@@ -41,7 +41,7 @@ const Invoices = () => {
 	const [isBrowseInvoicesClicked, setIsBrowseInvoicesClicked] = useState(true);
 	const [searchKey, setSearchKey] = useState('');
 	const [searchInvoiceData, setSearchInvoiceData] = useState([]);
-
+	const [invoiceDetailLoading, setInvoiceDetailsLoading] = useState(false);
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
@@ -60,13 +60,12 @@ const Invoices = () => {
 	const [showVendorModal, setVendorShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 	const [showPreviewModal, setShowPreviewModal] = useState(false);
-
+	const [invoiceHeaderDetails, setInvoiceHeaderDetails] = useState([]);
+	const [invoiceItemDetails, setInvoiceItemDetails] = useState([]);
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
 		steps: invoices(),
@@ -74,16 +73,49 @@ const Invoices = () => {
 		stepsEnabled: false,
 	});
 
+	//Open invoicesDetails
+	const handleInvoicesDetailsModal = async (id) => {
+		setShowPreviewModal(true);
+		setInvoiceDetailsLoading(true);
+		try {
+			const getData = {
+				url: 'getInvoiceDetailsData',
+				urlParams: {
+					companyId: companyID,
+					invoiceID: id,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			const invoiceItemrGetData = {
+				url: 'getVendorInvoiceItems',
+				urlParams: {
+					companyId: companyID,
+					invoiceID: id,
+				},
+			};
+
+			const invoiceItemrResult = await getCall(invoiceItemrGetData, false);
+			setInvoiceItemDetails(invoiceItemrResult.data);
+			setInvoiceHeaderDetails(result.data);
+		} catch (error) {
+		} finally {
+			setInvoiceDetailsLoading(false);
+		}
+	};
+
 	// columns for tableHOC
 	const columns = useMemo(
 		() => [
 			columnHelper.display({
 				id: 'actions',
-				cell: () => (
+				cell: ({ getValue, row }) => (
 					<div
 						className='flex space-x-2 text-lg'
 						onClick={(e) => {
-							e.stopPropagation(), setShowPreviewModal(true);
+							e.stopPropagation(),
+								e.preventDefault(),
+								handleInvoicesDetailsModal(row.original.qsrInvoiceID);
 						}}
 					>
 						<SlEye />
@@ -122,6 +154,18 @@ const Invoices = () => {
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Total',
+				cell: ({ getValue }) => {
+					const value = getValue();
+					return value < 0
+						? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2,
+						  })}`
+						: `$${parseFloat(value).toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2,
+						  })}`;
+				},
 				dataType: 'number',
 				size: 60,
 			}),
@@ -157,6 +201,32 @@ const Invoices = () => {
 			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
 		}
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
+
+	//Default date get
+	const getDefaultDates = async () => {
+		try {
+			const getData = {
+				url: 'getCurrentPeriodDates',
+				urlParams: {
+					companyId: companyID,
+				},
+			};
+
+			const result = await getCall(getData, false);
+			if (result?.data?.weekMaxDate) {
+				const maxDate = new Date(result?.data?.weekMaxDate);
+				const minDate = new Date(result?.data?.weekMinDate);
+				setSelectedFromDate(minDate);
+				setSelectedToDate(maxDate);
+			}
+		} catch (error) {
+			console.error('Error getting default dates: ', error);
+		}
+	};
+
+	useEffect(() => {
+		getDefaultDates();
+	}, []);
 
 	const fetchData = async (companyID) => {
 		await Promise.all([fetchVendors(companyID)]);
@@ -199,14 +269,8 @@ const Invoices = () => {
 			};
 
 			const result = await getCall(getData);
-			const newData = {
-				...result,
-				data: result.data.map((row) => ({
-					...row,
-					subrows: row.voids,
-				})),
-			};
-			setInvoiceReportData(newData.data);
+
+			setInvoiceReportData(result.data);
 			setIsLoading(false);
 		} catch (error) {
 			setIsError(true);
@@ -217,7 +281,7 @@ const Invoices = () => {
 	};
 
 	useEffect(() => {
-		if (selectedUnit) {
+		if (selectedUnit && selectedFromDate) {
 			fetchInvoiceReport();
 		}
 	}, [selectedUnit, selectedVendor, selectedFromDate, selectedToDate]);
@@ -352,7 +416,7 @@ const Invoices = () => {
 
 			const data = [
 				{
-					name: `Vendor:${selectedVendorName}`,
+					name: '',
 					columns: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
 					data: invoiceReportData.map((row) => columns.slice(1).map((column) => row[column.id])),
 				},
@@ -371,7 +435,7 @@ const Invoices = () => {
 
 			const data = [
 				{
-					name: `Search Results for '${searchKey}'`,
+					name: '',
 					columns: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
 					data: searchInvoiceData.map((row) => columns.slice(1).map((column) => row[column.id])),
 				},
@@ -446,6 +510,7 @@ const Invoices = () => {
 								fromDate={selectedFromDate}
 								isDateRange={true}
 								onClick={() => setShowDateModal(true)}
+								extraClass={'w-[219px]'}
 							/>
 						</div>
 					</div>
@@ -523,62 +588,85 @@ const Invoices = () => {
 					isOpen={showPreviewModal}
 					title={'Invoice Details'}
 					onClose={() => {
+						setInvoiceHeaderDetails([]);
+						setInvoiceItemDetails([]);
 						setShowPreviewModal(!showPreviewModal);
 					}}
 				>
-					<div className='w-full max-w-5xl p-6 overflow-auto bg-white rounded-lg shadow-lg'>
+					<div className='w-full max-w-5xl p-6 overflow-auto bg-white rounded-lg shadow-lg min-w-[940px] min-h-[400px]'>
 						<div className='my-4'>
 							<div className='text-sm'>
-								<span className='font-semibold'>Unit:</span> 2290 Walmart Missouri City
-								<span className='mx-2 font-semibold'>Vendor:</span> Sysco
+								<span className='font-semibold'>Unit:</span>{' '}
+								{invoiceHeaderDetails[0]?.unitName && invoiceHeaderDetails[0]?.unitName}
+								<span className='mx-2 font-semibold'>Vendor:</span>{' '}
+								{invoiceHeaderDetails[0]?.vendorName && invoiceHeaderDetails[0]?.vendorName}
 								<span className='mx-2 font-semibold'>Date:</span> Mon 09/30/2024
-								<span className='mx-2 font-semibold'>Invoice Reference:</span> 867060211
-								<span className='mx-2 font-semibold'>Total:</span> $2539.40
+								<span className='mx-2 font-semibold'>Invoice Reference:</span>{' '}
+								{invoiceHeaderDetails[0]?.vendorInvoiceReference &&
+									invoiceHeaderDetails[0]?.vendorInvoiceReference}
+								<span className='mx-2 font-semibold'>Total:</span> $
+								{invoiceHeaderDetails[0]?.totalAmountIncludingTax &&
+									invoiceHeaderDetails[0]?.totalAmountIncludingTax}
 							</div>
 							<div className='mt-1 text-sm'>
-								<span className='font-semibold'>Created By:</span> Data Import
-								<span className='mx-2 font-semibold'>Last Edited By:</span> Data Import
+								<span className='font-semibold'>Created By:</span>{' '}
+								{invoiceHeaderDetails[0]?.originalFirstName &&
+								invoiceHeaderDetails[0]?.originalFirstName !== 'Unknown'
+									? invoiceHeaderDetails[0]?.originalFirstName +
+									  ' ' +
+									  invoiceHeaderDetails[0]?.originalLastName
+									: invoiceHeaderDetails[0]?.userFirstName +
+									  ' ' +
+									  invoiceHeaderDetails[0]?.userLastName}
+								<span className='mx-2 font-semibold'>Last Edited By:</span>{' '}
+								{invoiceHeaderDetails[0]?.userFirstName &&
+									invoiceHeaderDetails[0]?.userFirstName +
+										' ' +
+										invoiceHeaderDetails[0]?.userLastName}
 							</div>
 						</div>
-
-						<table className='w-full text-sm border border-collapse border-gray-300'>
-							<thead>
-								<tr className='text-left bg-blue-200'>
-									<th className='p-2 border border-gray-300'>Item Ref#</th>
-									<th className='p-2 border border-gray-300'>Description</th>
-									<th className='p-2 border border-gray-300'>UOM</th>
-									<th className='p-2 border border-gray-300'>Pack/Size</th>
-									<th className='p-2 border border-gray-300'>Qty</th>
-									<th className='p-2 border border-gray-300'>Price</th>
-									<th className='p-2 border border-gray-300'>Tax</th>
-									<th className='p-2 border border-gray-300'>Line Total</th>
-								</tr>
-							</thead>
-							<tbody>
-								{/* Repeat this row for each item */}
-								<tr className='even:bg-gray-50'>
-									<td className='p-2 text-center border border-gray-300'>2765127</td>
-									<td className='p-2 border border-gray-300'>MIX SMOOTHIE STWBRY PUREE</td>
-									<td className='p-2 text-center border border-gray-300'>CA</td>
-									<td className='p-2 text-center border border-gray-300'>6 / 35OZ</td>
-									<td className='p-2 text-center border border-gray-300'>1</td>
-									<td className='p-2 text-center border border-gray-300'>$35.04</td>
-									<td className='p-2 text-center border border-gray-300'>$0.00</td>
-									<td className='p-2 text-center border border-gray-300'>$35.04</td>
-								</tr>
-								<tr className='even:bg-gray-50'>
-									<td className='p-2 text-center border border-gray-300'>5447738</td>
-									<td className='p-2 border border-gray-300'>SYRUP COKE ZERO SUGAR 2.5 GAL</td>
-									<td className='p-2 text-center border border-gray-300'>CA</td>
-									<td className='p-2 text-center border border-gray-300'>1 / 2.5GAL</td>
-									<td className='p-2 text-center border border-gray-300'>1</td>
-									<td className='p-2 text-center border border-gray-300'>$54.95</td>
-									<td className='p-2 text-center border border-gray-300'>$0.00</td>
-									<td className='p-2 text-center border border-gray-300'>$54.95</td>
-								</tr>
-								{/* End of item row */}
-							</tbody>
-						</table>
+						<div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
+							<Loader loading={invoiceDetailLoading} />
+							<table className='w-full text-sm border border-collapse border-gray-300'>
+								<thead>
+									<tr className='text-left bg-blue-200'>
+										<th className='p-2 border border-gray-300'>Item Ref#</th>
+										<th className='p-2 border border-gray-300'>Description</th>
+										<th className='p-2 border border-gray-300'>UOM</th>
+										<th className='p-2 border border-gray-300'>Pack/Size</th>
+										<th className='p-2 border border-gray-300'>Qty</th>
+										<th className='p-2 border border-gray-300'>Price</th>
+										<th className='p-2 border border-gray-300'>Tax</th>
+										<th className='p-2 border border-gray-300'>Line Total</th>
+									</tr>
+								</thead>
+								<tbody>
+									{/* Repeat this row for each item */}
+									{invoiceItemDetails.map((item) => (
+										<tr className='even:bg-gray-50' key={item.vendorItemReference}>
+											<td className='p-2 text-center border border-gray-300'>
+												{item.vendorItemReference}
+											</td>
+											<td className='p-2 border border-gray-300'>{item.description}</td>
+											<td className='p-2 text-center border border-gray-300'>
+												{item.unitOfMeasure}
+											</td>
+											<td className='p-2 text-center border border-gray-300'>{item.size}</td>
+											<td className='p-2 text-center border border-gray-300'>{item.quantity}</td>
+											<td className='p-2 text-center border border-gray-300'>
+												${item.price.toFixed(2)}
+											</td>
+											<td className='p-2 text-center border border-gray-300'>
+												${item.taxAmount.toFixed(2)}
+											</td>
+											<td className='p-2 text-center border border-gray-300'>
+												${((item.price * item.quantity) + item.taxAmount).toFixed(2)}
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</Modal>
 			</div>
