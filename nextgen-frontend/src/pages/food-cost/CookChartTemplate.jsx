@@ -306,6 +306,9 @@ const CookChartTemplate = (props) => {
     try {
       const postData = {
         fullUrl: "api/cookdrop/savecookdroptemplate",
+        urlParams: {
+          companyID: companyStateId
+        },
         bodyData: body,
       };
 
@@ -696,7 +699,9 @@ const CookChartTemplate = (props) => {
       try {
         const postData = {
           fullUrl: "api/cookdrop/savecookdropcookitem",
-          urlParams: {},
+          urlParams: {
+            companyID: companyStateId,
+          },
           bodyData: body,
         };
 
