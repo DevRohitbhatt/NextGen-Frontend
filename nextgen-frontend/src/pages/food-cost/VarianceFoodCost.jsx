@@ -29,7 +29,7 @@ const tooltips = {
 	varrianceUsagePercent: "The calculated difference between the Actual % and the Ideal %. \n\n Tip: Run and troubleshoot the Actual FC report after counting to ensure accuracy with this report.",
 	wasteDollar: "The inventory value of items entered in waste countsheets during the selected date range.",
 	wasterPercent:"Waste $ / Comparison Sales $",
-	comparisonName:"Names the sales value used for comparison against inventory. &#013; (Default is Net Sales)",
+	comparisonName:"Names the sales value used for comparison against inventory. \n\n (Default is Net Sales)",
 	comparisonSales:"Comparison Sales configured for this Department and/or Sub-department. i.e., Net Sales, Department Sales, etc."
   };
 

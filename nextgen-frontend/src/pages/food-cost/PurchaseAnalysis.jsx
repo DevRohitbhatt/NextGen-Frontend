@@ -23,6 +23,11 @@ import { useLocation } from "react-router-dom";
 import dateFormat from "dateformat";
 import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
 
+const tooltips = {
+	glCode: "Accounting code assigned to the vendor item. \n\nNOTE: GL Codes only populate for Accounting Automation customers.",	
+	direction: "above",
+  };
+
 const columnHelper = createColumnHelper();
 
 const PurchaseAnalysis = () => {
@@ -139,6 +144,7 @@ const PurchaseAnalysis = () => {
         dataType: "string",
         filterFn: "arrIncludesSome",
         size: 200,
+        tooltip: tooltips.glCode
       }),
       columnHelper.accessor("vendorItemDescription", {
         id: "vendorItemDescription",

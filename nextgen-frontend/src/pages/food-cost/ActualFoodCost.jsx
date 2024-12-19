@@ -26,7 +26,7 @@ const tooltips = {
 	transInDollar:"The inventory value of items from all transfers IN during the selected date range. \n\n $’s calculated using the latest pricing from the transferring location.",
 	transOutDollar:"The inventory value of items from all transfers OUT during the selected date range. \n\n $’s calculated using the latest pricing from your location.",
 	endDollar: "The inventory value from the ending count sheet of the selected date range. \n\n Tip: Double-check the mapping if an item’s value is considerably higher or lower than expected.",
-	actualUsageDollar: "The value of the inventory used during the selected date range using the calculation: \n\n Beg $ + Pur $ + Tr In $ – Tr Out $ – End $ / Comparison Sales",	
+	actualUsageDollar: "The value of the inventory used during the selected date range, calculated by: \n\n Beg $ + Pur $ + Tr In $ – Tr Out $ – End $ / Comparison Sales",	
 	actualUsagePercent: "Actual Usage $ / Comparison Sales $ \n\n Tip: Negative Usage indicates a “growth” in inventory, possibly due to missing purchases or missing counts.",
 	wasteDollar: "The inventory value of items entered in waste countsheets during the selected date range.",
 	wasterPercent:"Waste $ / Comparison Sales $",

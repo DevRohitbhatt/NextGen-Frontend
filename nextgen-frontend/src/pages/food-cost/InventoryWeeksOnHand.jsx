@@ -15,6 +15,14 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 
+const tooltips = {
+	uom: "References each inventory item’s main UOM.",
+	usedEstimate: "Calculated average use per week. Amounts may vary depending on the selected Usage Estimation Model.",
+	salesYieldWeeklyAverage: "Average Usage % * Estimated Weekly Sales Average",	
+	inventoryWeeksOnHandNow: "An estimation of how many weeks the current inventory amount might last.",
+	direction: "above",
+  };
+
 const columnHelper = createColumnHelper();
 
 const InventoryWeeksOnHand = () => {
@@ -103,6 +111,7 @@ const InventoryWeeksOnHand = () => {
 				size: 150,
 				filterFn: 'arrIncludesSome',
 				isFilterMenu: true,
+				tooltip: tooltips.uom
 			}),
 			columnHelper.accessor('casesOnHandAtLastCount', {
 				id: 'casesOnHandAtLastCount',
@@ -167,6 +176,7 @@ const InventoryWeeksOnHand = () => {
 				dataType: 'number',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
+				tooltip: tooltips.usedEstimate
 			}),
 			columnHelper.accessor('estimatedCasesOnHandNow', {
 				id: 'estimatedCasesOnHandNow',
@@ -208,6 +218,7 @@ const InventoryWeeksOnHand = () => {
 				dataType: 'string',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
+				tooltip: tooltips.salesYieldWeeklyAverage
 			}),
 			columnHelper.accessor('inventoryWeeksOnHandNow', {
 				id: 'inventoryWeeksOnHandNow',
@@ -216,6 +227,7 @@ const InventoryWeeksOnHand = () => {
 				dataType: 'number',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
+				tooltip: tooltips.inventoryWeeksOnHandNow
 			}),
 		],
 		[]

@@ -19,6 +19,13 @@ import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborCICO from "../../assets/introJSSteps/laborCICO";
 
+const tooltips = {
+	employeeID: "The ID assigned to the employee. Originates from the POS employee information.",
+	jobDescription: "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
+	invalid: "Y = Edited CICO \n\nN = Original CICO \n\nNOTE: This info is only available for Focus POS.",	
+	direction: "above",
+  };
+
 const columnHelper = createColumnHelper();
 
 const LaborCICO = () => {
@@ -140,6 +147,7 @@ const LaborCICO = () => {
         id: "employeeID",
         header: "Employee ID",
         dataType: "number",
+        tooltip: tooltips.employeeID
       }),
       columnHelper.accessor("name", {
         id: "name",
@@ -150,6 +158,7 @@ const LaborCICO = () => {
         id: "jobDescription",
         header: "Job Description",
         dataType: "string",
+        tooltip: tooltips.jobDescription
       }),
     ];
 
@@ -158,11 +167,13 @@ const LaborCICO = () => {
         id: "jobDescription",
         header: "Job Description",
         dataType: "string",
+        tooltip: tooltips.jobDescription
       }),
       columnHelper.accessor("employeeID", {
         id: "employeeID",
         header: "Employee ID",
         dataType: "number",
+        tooltip: tooltips.employeeID
       }),
       columnHelper.accessor("name", {
         id: "name",
@@ -205,6 +216,7 @@ const LaborCICO = () => {
         id: "invalid",
         header: "Invalid",
         dataType: "boolean",
+        tooltip: tooltips.invalid
       }),
     ];
 
