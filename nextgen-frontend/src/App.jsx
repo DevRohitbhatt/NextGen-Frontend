@@ -14,7 +14,7 @@ import {
 	PrepChartTemplate,
 	SuggestedOrderList,
 	SuggestedOrder,
-	InventoryTransfer,
+	InventoryTransferReport,
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
@@ -126,7 +126,7 @@ const App = () => {
 								<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
 
 								{/* Food Cost */}
-								<Route path='/InventoryTransfer' index element={<InventoryTransfer />} />
+								<Route path='/InventoryTransferReport' index element={<InventoryTransferReport />} />
 								<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
 								<Route path='/ActualFoodCost' index element={<ActualFoodCost />} />
 								<Route path='/VarianceFoodCost' index element={<VarianceFoodCost />} />

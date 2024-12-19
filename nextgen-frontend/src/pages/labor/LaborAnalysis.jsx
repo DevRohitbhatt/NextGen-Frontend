@@ -55,7 +55,7 @@ const LaborAnalysis = () => {
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState('');
 	const [selectedToDate, setSelectedToDate] = useState();
-
+	const [isTableRendered, setIsTableRendered] = useState(true);
 	//dropdown state variables
 	const [jobDetails, setJobDetails] = useState([]);
 	const [jobDescription, setJobDescription] = useState('All');
@@ -134,7 +134,7 @@ const LaborAnalysis = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-
+			setIsTableRendered(false)
 			const getData = {
 				url: 'laborAnalysis',
 				urlParams: {
@@ -384,8 +384,6 @@ const LaborAnalysis = () => {
 			body: buildPDFBody(),
 		};
 
-		console.log('=====>', JSON.stringify(pdfData));
-
 		PdfBuilder(pdfData);
 	};
 
@@ -449,7 +447,7 @@ const LaborAnalysis = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={laborAnalysisReportData} expandCollapseButtons={true} />;
+	const Table = <TableHOC columns={columns} data={laborAnalysisReportData} expandCollapseButtons={true}  view={1} isTableRendered={isTableRendered} setIsTableRendered={setIsTableRendered} />;
 	const modalTable = <TableHOC columns={modalColumns} data={laborAnalysisModalData} />;
 
 	return (

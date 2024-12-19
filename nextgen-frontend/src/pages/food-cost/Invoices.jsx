@@ -113,7 +113,6 @@ const Invoices = () => {
 					<div
 						className='flex space-x-2 text-lg'
 						onClick={(e) => {
-							console.log(row);
 							e.stopPropagation(),
 								e.preventDefault(),
 								handleInvoicesDetailsModal(row.original.qsrInvoiceID);
@@ -155,6 +154,18 @@ const Invoices = () => {
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Total',
+				cell: ({ getValue }) => {
+					const value = getValue();
+					return value < 0
+						? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2,
+						  })}`
+						: `$${parseFloat(value).toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2,
+						  })}`;
+				},
 				dataType: 'number',
 				size: 60,
 			}),

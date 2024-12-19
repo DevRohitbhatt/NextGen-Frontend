@@ -2,11 +2,13 @@ const urlConfig = {
   //Company apis
   getCompanySetting: "/api/company/settings/getsetting",
   getAllCompanySettings: "/api/company/settings/getallsettings",
-  companyUnitDates: "api/companysetting/getCompanyUnitDates",
+  getUserRoleSettings: "/api/company/settings/getUserRoleSettings",
+  getAllWeekStartAndEndDates: "api/company/settings/GetAllWeekStartAndEndDates",
   getCurrentPeriodDates: "/api/company/settings/getCurrentPeriodDates",
   unitsAndArea: "/api/unitsandareas/getbyid",
   vendors: "/api/vendor/getvendorsbycompanyID",
   getAllPeriodDates: "/api/company/settings/getAllPeriodDates",
+  getAllPayPeriodDates: "/api/company/settings/getAllPayPeriodDates",
   //suggested order apis
   orderList: "/api/order/GetOrderList",
   getOrderItem: "/api/suggestedorder/getvendorinventoryitems",
@@ -16,7 +18,7 @@ const urlConfig = {
 
   //invoices details
   getInvoiceDetailsData: "/api/foodcost/getInvoiceDetailsData",
-  getVendorInvoiceItems : "/api/foodcost/getVendorInvoiceItems",
+  getVendorInvoiceItems: "/api/foodcost/getVendorInvoiceItems",
   //inventory items apis
   getInventoryItemsOrderLimits:
     "/api/inventoryitems/getinventoryitemsorderlimits",
@@ -47,7 +49,14 @@ const urlConfig = {
   Countsheet_PricingInfo: "api/foodcost/getCountSheetsPriceInfo",
   countsheetPossibleError: "api/foodcost/getCountSheetsPossibleError",
   PurchaseAnalysis: "api/foodcost/getPurchaseAnalysisData",
-
+  GetActualFoodCostBreakdownIdealReportData:
+    "/api/foodcost/GetActualFoodCostBreakdownIdealReportData",
+  GetActualFoodCostBreakdownReportData:
+    "/api/foodcost/GetActualFoodCostBreakdownReportData",
+    GetVarianceFoodCostBreakdownReportData : "/api/foodcost/GetVarianceFoodCostBreakdownActualReportData",
+    GetVarianceFoodCostBreakdownIdealReportData :"/api/foodcost/GetVarianceFoodCostBreakdownIdealReportData",
+    SaveCountSheetDesignerComment: "/api/foodcost/SaveCountSheetDesignerComment",
+    GetVarianceFoodCostPopupReportData:"/api/foodcost/GetVarianceFoodCostPopupReportData",
   //Sales apis
   hourlySales: "api/sales/GetSalesHourlyReportData",
   voids: "api/sales/getVoidsReportData",
