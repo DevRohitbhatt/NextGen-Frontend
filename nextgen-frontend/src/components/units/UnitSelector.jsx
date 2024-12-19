@@ -66,12 +66,12 @@ export default function UnitSelector({
 					className='flex flex-col justify-center mx-1 rounded-3xl unit-selector'
 				>
 					{isEditable ? (
-						<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>Select Unit(s)</h3>
+						<h3 className='mb-1 ml-2 lg:text-xl text-base font-semibold text-nowrap'>Select Unit(s)</h3>
 					) : (
-						<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>Units</h3>
+						<h3 className='mb-1 ml-2 lg:text-xl text-base font-semibold text-nowrap'>Units</h3>
 					)}
 					<div
-						className={`px-6 py-3 text-center capitalize border-2 border-solid  text-nowrap rounded-3xl ${
+						className={`lg:px-6 lg:py-3 px-2 py-2 lg:text-base text-sm text-center lg:capitalize lg:border-2 border-[1px]  border-solid  text-nowrap rounded-3xl ${
 							isEditable
 								? ' hover:border-[var(--tw-primary)] cursor-pointer'
 								: 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
