@@ -32,7 +32,7 @@ const CookChart = () => {
     unitsAndAreas: unitsAndAreasList,
     defaultUnitID,
     defaultUnitName,
-    userID
+    userID,
   } = useSelector((state) => state.globalState);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -44,9 +44,7 @@ const CookChart = () => {
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setSelectedUnitName] = useState("Loading...");
   const [showUnitModal, setShowUnitModal] = useState(false);
-  const [selectedFromDate, setSelectedFromDate] = useState(
-    new Date()
-  );
+  const [selectedFromDate, setSelectedFromDate] = useState(new Date());
   const [selectedToDate, setSelectedToDate] = useState(new Date());
   const [showDateModal, setShowDateModal] = useState(false);
   const [originalData, setOriginalData] = useState(null);
@@ -72,7 +70,7 @@ const CookChart = () => {
     if (companyID) {
       setCompanyStateId(() => companyID);
     }
-  }, [defaultUnitID, defaultUnitName,companyID]);
+  }, [defaultUnitID, defaultUnitName, companyID]);
   // TransformData
   const transformCookDropData = (data) => {
     const headers = data[0].lstItems.map((item) => ({
@@ -106,8 +104,7 @@ const CookChart = () => {
   };
 
   useEffect(() => {
-    if(selectedUnit){
-
+    if (selectedUnit) {
       getCookChartData();
     }
   }, [selectedUnit, selectedFromDate]);
@@ -120,9 +117,9 @@ const CookChart = () => {
         fullUrl: "api/cookdrop/getcookdropchart",
         urlParams: {
           companyId: companyStateId,
-          templateName : 'Default',
+          templateName: "Default",
           unitId: selectedUnit,
-          userID : userID,
+          userID: userID,
           date: dateFormat(selectedFromDate, "mm/dd/yyyy"),
         },
       };
@@ -142,7 +139,7 @@ const CookChart = () => {
         const { headers, rows } = transformCookDropData(result.data);
         console.log("rows", rows);
         setCookChartData({ headers, rows });
-      }else{
+      } else {
         setCookChartData({});
         setOriginalData([]);
       }
@@ -319,7 +316,6 @@ const CookChart = () => {
   };
 
   const prepareExcelData = async (cookDropChartData) => {
-   
     const headers = cookDropChartData.lstItems.map((item) => ({
       name: `${item.itemName} (${item.unitOfMeasure}, ${item.safetyFactor}%)`,
     }));
@@ -357,7 +353,6 @@ const CookChart = () => {
   };
 
   const handleExcelExport = async () => {
-   
     const changedData = cookDropTableRef.current?.getChangedData();
     const cookDropChartData = await applyChangesToOriginalData(
       originalData,
@@ -386,17 +381,42 @@ const CookChart = () => {
     <>
       <Loader loading={isLoading} />
       <ToastContainer />
-      <div className="w-[85%] mx-auto">
+      <div className="w-[100%] lg:w-[85%] mx-auto">
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-4 text-2xl leading-tight text-left pageTitle">
+        <h2 className="lg:my-4 lg:text-2xl lg:leading-tight lg:text-left pageTitle hidden">
           Cook Drop Chart
         </h2>
-        <header className="xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center">
+        <div className="lg:hidden bg-[#EFEFEF] h-[28px] justify-between align-middle flex mb-5">
+          <h2 className="lg:hidden my-auto text-[12px] leading-tight text-left pageTitle font-bold ml-[5px] ">
+            Cook Drop Chart
+          </h2>
+          <div className="block lg:hidden my-auto mr-2">
+            <ExportOptions
+              includePDF={true}
+              includeSave={true}
+              includeExcel={true}
+              includePrint={true}
+              includeHelp={true}
+              handleHelpClick={() =>
+                setIntroSteps({ ...introSteps, stepsEnabled: true })
+              }
+              handleSaveClick={() => {
+                handleSaveClick();
+              }}
+              handlePDFClick={() => handlePdfExport("pdf")}
+              handlePrintClick={() => {
+                handlePdfExport("print");
+              }}
+              handleExcelClick={() => handleExcelExport()}
+            />
+          </div>
+        </div>
+        <header className="xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center lg:mx-0 mx-2">
           <div className="flex items-center space-x-3 ">
             <UnitSelector
               companyId={companyID}
@@ -428,7 +448,7 @@ const CookChart = () => {
               ""
             )}
           </div>
-          <div>
+          <div className="lg:block hidden">
             <ExportOptions
               includePDF={true}
               includeSave={true}
@@ -459,7 +479,7 @@ const CookChart = () => {
         ) : (
           !isLoading &&
           (true ? (
-            <div className="paged-table">
+            <div className="paged-table lg:m-0 m-2">
               <div className="rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3">
                 <div className="tableHOC pr-1 max-h-[60vh] overflow-auto">
                   <Loader loading={isLoading} />
