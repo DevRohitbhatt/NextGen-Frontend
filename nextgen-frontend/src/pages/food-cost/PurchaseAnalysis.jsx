@@ -129,7 +129,7 @@ const PurchaseAnalysis = () => {
       columnHelper.accessor("totalAmountIncludingTax", {
         id: "totalAmountIncludingTax",
         header: "Invoice Total",
-        cell: ({ getValue }) => (getValue() ? `${getValue().toFixed(2)}` : ""),
+        cell: ({ getValue }) => (getValue() ? `${formattingData(getValue())}` : ""),
         filterFn: "weakEquals",
         dataType: "number",
         size: 120,

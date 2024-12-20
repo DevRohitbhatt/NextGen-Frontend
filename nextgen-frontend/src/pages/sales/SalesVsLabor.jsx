@@ -20,7 +20,7 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import salesVsLabor from "../../assets/introJSSteps/salesVsLabor";
-import { formattingData } from "../../functions/formatingCurrency";
+import { formattingData, formattingDataWithoutDollr } from "../../functions/formatingCurrency";
 
 const columnHelper = createColumnHelper();
 
@@ -134,11 +134,11 @@ const SalesVsLabor = () => {
       columnHelper.accessor("variableLaborMinutes", {
         id: "variableLaborMinutes",
         header: "Variable Labor Minutes",
-        cell: ({ row }) => calculateSum(row, "variableLaborMinutes"),
+        cell: ({ row }) => formattingDataWithoutDollr(calculateSum(row, "variableLaborMinutes")),
         dataType: "number",
         footer: ({ table }) => (
           <div className="text-center">
-            {calculateFooterSum(table, "variableLaborMinutes")}
+            {formattingDataWithoutDollr(calculateFooterSum(table, "variableLaborMinutes"))}
           </div>
         ),
         size: 60,
@@ -152,12 +152,12 @@ const SalesVsLabor = () => {
             row,
             "variableLaborHours"
           );
-          return parseFloat(calculatevariableLaborHours).toFixed(2);
+          return formattingDataWithoutDollr(parseFloat(calculatevariableLaborHours));
         },
         dataType: "number",
         footer: ({ table }) => (
           <div className="text-center">
-            {calculateFooterSum(table, "variableLaborHours")}
+            {formattingDataWithoutDollr(calculateFooterSum(table, "variableLaborHours"))}
           </div>
         ),
         size: 60,

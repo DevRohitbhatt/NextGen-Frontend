@@ -346,7 +346,7 @@ const BusinessSummary = () => {
 			pageOrientation: 'landscape',
 			body: generateBody(),
 		};
-
+		
 		PdfBuilder(pdfData);
 	};
 
@@ -374,7 +374,7 @@ const BusinessSummary = () => {
 									typeof row[column.id] === 'string' &&
 									(row[column.id].includes('%') || column.id === 'description')
 										? row[column.id]
-										: Number(row[column.id]).toLocaleString('en-US'),
+										: row[column.id],
 								cellType: '',
 								columnName: column.header,
 							}))
@@ -395,7 +395,7 @@ const BusinessSummary = () => {
 				.map((column) =>
 					typeof row[column.id] === 'string' && (row[column.id].includes('%') || column.id === 'description')
 						? `"${row[column.id]}"`
-						: `"${Number(row[column.id]).toLocaleString('en-US')}"`
+						: `"${row[column.id]}"`
 				)
 				.join(',')
 		);
@@ -423,7 +423,7 @@ const BusinessSummary = () => {
 						typeof row[column.id] === 'string' &&
 						(row[column.id].includes('%') || column.id === 'description')
 							? row[column.id]
-							: Number(row[column.id]).toLocaleString('en-US')
+							: row[column.id]
 					)
 				),
 			},

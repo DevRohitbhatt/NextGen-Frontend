@@ -16,6 +16,7 @@ import {
 	SimpleTable as Table,
 	PdfBuilder,
 } from '../../components';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const InventoryTransferReport = () => {
 	const {
@@ -168,6 +169,8 @@ const InventoryTransferReport = () => {
 			};
 
 			const result = await getCall(getData);
+			
+			await result?.data?.length && result?.data.forEach((item)=> item.transferValue = formattingData(item.transferValue))
 			setInventoryTransferReportData(result);
 			changeHeadersBasedOnReportType();
 			setIsLoading(false);
@@ -234,6 +237,7 @@ const InventoryTransferReport = () => {
 					toolTip: '',
 					toolTipDirection: '',
 					width: '125px',
+				
 				},
 			]);
 		} else {
