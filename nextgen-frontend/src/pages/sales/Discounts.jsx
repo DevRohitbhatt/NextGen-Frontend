@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import discounts from '../../assets/introJSSteps/discounts';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -103,7 +104,9 @@ const Discounts = () => {
 			columnHelper.accessor('totalDiscountAmount', {
 				id: 'totalDiscountAmount',
 				header: 'Total Discount Amount',
-				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
+				cell: ({ getValue }) => {
+					return `${formattingData(getValue())}`
+				},
 				dataType: 'price',
 				footer: ({ table }) => (
 					<div className='text-center'>${calculateFooterSum(table, 'totalDiscountAmount')}</div>
@@ -120,7 +123,14 @@ const Discounts = () => {
 			columnHelper.accessor('salesGenerated', {
 				id: 'salesGenerated',
 				header: 'Sales $ Generated',
-				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
+				cell: ({ row, getValue }) =>
+					row.getCanExpand()
+						? ''
+						: `${
+								getValue() !== null && getValue() !== undefined
+									? formattingData(getValue())
+									: '0.00'
+							}`,
 				dataType: 'price',
 				footer: ({ table }) => (
 					<div className='text-center'>${calculateFooterSum(table, 'salesGenerated')}</div>
@@ -283,7 +293,7 @@ const Discounts = () => {
 					return acc + parseFloat(subrow.original[accessor]);
 				}
 			}, 0);
-			return accessor === 'variableLaborMinutes' ? sum : sum.toFixed(2);
+			return accessor === 'variableLaborMinutes' ? sum : formattingData(sum);
 		} else {
 			return row.original[accessor];
 		}
@@ -435,7 +445,7 @@ const Discounts = () => {
 							columnHelper.accessor('totalDiscountAmount', {
 								id: 'totalDiscountAmount',
 								header: 'Disc Amount',
-								cell: ({ getValue }) => `$${getValue()}`,
+								cell: ({ getValue }) => `${formattingData(getValue())}`,
 								dataType: 'number',
 								footer: ({ table }) => (
 									<div className='text-center'>
@@ -467,7 +477,7 @@ const Discounts = () => {
 							columnHelper.accessor('totalSalesGenerated', {
 								id: 'totalSalesGenerated',
 								header: 'Sales $ Gen',
-								cell: ({ getValue }) => `$${getValue()}`,
+								cell: ({ getValue }) => `${formattingData(getValue())}`,
 								dataType: 'price',
 								footer: ({ table }) => (
 									<div className='text-center'>
@@ -500,7 +510,10 @@ const Discounts = () => {
 									{
 										id: `discountAmount_${weekId}`,
 										header: 'Disc Amount',
-										cell: ({ getValue }) => `$${getValue()}`,
+										cell: ({ getValue }) => {
+											let discAmount = formattingData(getValue());
+											return discAmount
+											},
 										dataType: 'number',
 										footer: ({ table }) => (
 											<div className='text-center'>

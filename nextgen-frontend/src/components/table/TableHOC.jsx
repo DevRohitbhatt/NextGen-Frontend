@@ -99,17 +99,19 @@ function TableHOC({
 		debugTable: false,
 	});
 
+	console.log(view);
 	useTableView(table, view, isTableRendered);
 
 	useEffect(() => {
 		if (setTableState) {
 			setTableState(table.getState());
 		}
+
 		table.getAllColumns().map((column) => {
 			if (column.columnDef.show === false) {
 				column.toggleVisibility(false);
 			} else {
-				if (table.getExpandedDepth() < column.columnDef.showDepth) {
+				if (Object.keys(table.getState().expanded)?.length < column.columnDef.showDepth) {
 					column.toggleVisibility(false);
 				} else {
 					column.toggleVisibility(true);
@@ -320,8 +322,7 @@ function TableHOC({
 												{cell.getIsGrouped() ? (
 													// If it's a grouped cell, add an expander and row count
 													<div className='flex items-center gap-2'>
-														{flexRender(cell.column.columnDef.cell, cell.getContext())} (
-														{row.subRows.length})
+														{flexRender(cell.column.columnDef.cell, cell.getContext())}
 													</div>
 												) : cell.getIsPlaceholder() ? null : (
 													flexRender(cell.column.columnDef.cell, cell.getContext())

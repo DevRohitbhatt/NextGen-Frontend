@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	Loader,
@@ -18,8 +17,8 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
-import { useNavigate } from 'react-router-dom';
 import dateFormat from 'dateformat';
+import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
 const columnHelper = createColumnHelper();
 
@@ -50,14 +49,23 @@ const ActualFoodCost = () => {
 	const [selectedToDate, setSelectedToDate] = useState();
 	const [toDateOptions, setToDateOptions] = useState([]);
 	const [showDateModal, setShowDateModal] = useState(false);
-
+	const [isBreakDownModal, setIsBreakDownModal] = useState(false);
 	const [showQuantities, setShowQuantities] = useState(true);
 	const [showDollarAmounts, setShowDollarAmounts] = useState(true);
 	const [showWarnings, setShowWarnings] = useState(false);
-
+	const [showAndHideBreakDown, setShowAndHideBreakDown] = useState({
+		ideal: true,
+		Actual: true,
+		Variance: true,
+		purchaseBetween: false,
+	});
 	const [isShowHideDepartments, setIsShowHideDepartments] = useState(false);
 	const [checkedItems, setCheckedItems] = useState([
-		{ name: 'DO NOT COUNT/DO NOT COUNT', showOnReport: false, includeInGrandTotal: false },
+		{
+			name: 'DO NOT COUNT/DO NOT COUNT',
+			showOnReport: false,
+			includeInGrandTotal: false,
+		},
 		{ name: 'FOOD/BEVERAGES', showOnReport: true, includeInGrandTotal: true },
 		{ name: 'FOOD/BREAD', showOnReport: true, includeInGrandTotal: true },
 		{ name: 'FOOD/DAIRY', showOnReport: true, includeInGrandTotal: true },
@@ -80,7 +88,9 @@ const ActualFoodCost = () => {
 		{ name: 'Inventory Item', row: 3 },
 	];
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-
+	const [costBreakActualDetails, setCostBreakActualDetails] = useState({});
+	const [costBreakdownIdealDetails, setCostBreakDownIdeatDetails] = useState([]);
+	const [breakDownIdealDetails, setBreakDownIdealDetails] = useState([]);
 	const [isExportFilteredViewDropDownVisible, setIsExportFilteredViewDropDownVisible] = useState(false);
 	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
 	const [tableState, setTableState] = useState(false);
@@ -113,10 +123,11 @@ const ActualFoodCost = () => {
 		columnHelper.display({
 			id: 'actions',
 			cell: ({ row }) =>
-				row.getCanExpand() ? (
+				row.getCanExpand() && row.depth === 0 ? (
 					<div
 						{...{
 							style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
+							className: 'flex items-center gap-2 font-bold capitalize',
 						}}
 					>
 						{row.getIsExpanded() ? (
@@ -124,18 +135,54 @@ const ActualFoodCost = () => {
 						) : (
 							<CiSquarePlus className='text-[20px]' />
 						)}
+						{row.original.finalDepartment}
 					</div>
 				) : null,
+			groupBy: true,
 			size: '80',
 		}),
 		columnHelper.accessor('department', {
 			id: 'department',
 			header: 'Department',
+			cell: ({ row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', width: '100%' },
+							className: 'flex items-center gap-2 font-bold capitalize',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.original.department}
+					</div>
+				) : null,
+			groupBy: true,
 			dataType: 'string',
 		}),
 		columnHelper.accessor('subDepartment', {
 			id: 'subDepartment',
 			header: 'Sub Department',
+			cell: ({ row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', width: '100%' },
+							className: 'flex items-center gap-2 font-bold capitalize',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.original.subDepartment}
+					</div>
+				) : null,
+			groupBy: true,
 			showDepth: 2,
 			dataType: 'string',
 		}),
@@ -246,7 +293,7 @@ const ActualFoodCost = () => {
 		columnHelper.accessor('usageCostPct', {
 			id: 'usageCostPct',
 			header: 'Actual Usage %',
-			dataType: 'number',
+			dataType: 'percent',
 			cell: ({ row, getValue }) => calculateSum(row, 'usageCostPct', getValue, true),
 			size: 90,
 		}),
@@ -268,13 +315,15 @@ const ActualFoodCost = () => {
 		columnHelper.accessor('wasteCostPct', {
 			id: 'wasteCostPct',
 			header: 'Waste %',
-			dataType: 'number',
+			dataType: 'percent',
 			cell: ({ row, getValue }) => calculateSum(row, 'wasteCostPct', getValue, true),
 			size: 90,
 		}),
 		columnHelper.accessor('comparisonName', {
 			id: 'comparisonName',
 			header: 'Comparison Name',
+			cell: ({ row, getValue }) =>
+				row.getCanExpand() ? row.original?.comparisonName : getValue() !== undefined ? getValue() : '',
 			dataType: 'string',
 			size: 100,
 		}),
@@ -282,8 +331,12 @@ const ActualFoodCost = () => {
 			id: 'comparisonSales',
 			header: 'Comparison Net Sales',
 			dataType: 'number',
-			cell: ({ getValue }) =>
-				getValue() !== undefined ? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}` : '',
+			cell: ({ row, getValue }) =>
+				row.getCanExpand()
+					? `$${row.original?.comparisonSales?.toFixed(2)}`
+					: getValue() !== undefined
+					? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}`
+					: '',
 			size: 100,
 		}),
 	];
@@ -342,7 +395,10 @@ const ActualFoodCost = () => {
 						minimumFractionDigits: 2,
 						maximumFractionDigits: 2,
 				  })}`
-				: `$${parseFloat(sum).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+				: `$${parseFloat(sum).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`;
 		} else {
 			const value = getValue();
 			if (!value) return isPercentage ? '0.00%' : '$0.00';
@@ -386,6 +442,38 @@ const ActualFoodCost = () => {
 	useEffect(() => {
 		setViewBy(viewby);
 	}, [isTableRendered]);
+
+	useEffect(() => {
+		if (new Date(selectedToDate) < new Date(selectedFromDate)) {
+			const toDate = new Date(selectedToDate);
+			const newFromDate = fromDateOptions
+				.map((option) => new Date(option.name))
+				.filter((date) => date < toDate)
+				.sort((a, b) => b - a)[0];
+			if (newFromDate) {
+				setSelectedFromDate(dateFormat(newFromDate, 'mm-dd-yyyy'));
+			}
+		}
+	}, [selectedToDate]);
+
+	useEffect(() => {
+		if (new Date(selectedFromDate) > new Date(selectedToDate)) {
+			const fromDate = new Date(selectedFromDate);
+			const toDate = new Date(selectedToDate);
+
+			if (fromDate > toDate) {
+				const newToDate = toDateOptions
+					.map((option) => new Date(option.name))
+					.filter((date) => date > fromDate)
+					.sort((a, b) => a - b)[0];
+				if (newToDate) {
+					setSelectedToDate(dateFormat(newToDate, 'mm-dd-yyyy'));
+				}
+			}
+		}
+	}, [selectedFromDate]);
+
+	console.log('todateoptions', toDateOptions);
 
 	useEffect(() => {
 		const fetchDates = async () => {
@@ -452,56 +540,47 @@ const ActualFoodCost = () => {
 			if (result?.data && result?.data?.length === 0) {
 				setActualFoodCostData([]);
 			} else {
-				const newData = [
-					{
-						department: 'TOTAL',
-						subRows: result.data.map((department) => ({
-							department: department.department,
-							comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
-							comparisonSales: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonSales || 0,
-							subRows: department.subDepartments.map((subDepartment) => ({
-								subDepartment: subDepartment.subDepartment,
-								comparisonName: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonName || '',
-								comparisonSales: department.subDepartments[0]?.actualFoodCosts[0]?.comparisonSales || 0,
-								subRows: subDepartment.actualFoodCosts.map((foodCost) => ({
-									description: foodCost.description,
-									caseUnitName: foodCost.caseUnitName,
-									countDisplayUnitName: foodCost.countDisplayUnitName,
-									begCountDisplayUnits: foodCost.begCountDisplayUnits,
-									begCountCases: foodCost.begCountCases,
-									begCountCost: foodCost.begCountCost,
-									purchaseCases: foodCost.purchaseCases,
-									purchaseDisplayUnits: foodCost.purchaseDisplayUnits,
-									purchaseCost: foodCost.purchaseCost,
-									iTinCountDisplayUnits: foodCost.iTinCountDisplayUnits,
-									iTinCountCases: foodCost.iTinCountCases,
-									iTinCountCost: foodCost.iTinCountCost,
-									iToutCountDisplayUnits: foodCost.iToutCountDisplayUnits,
-									iToutCountCases: foodCost.iToutCountCases,
-									iToutCountCost: foodCost.iToutCountCost,
-									wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
-									wasteCountCases: foodCost.wasteCountCases,
-									wasteCountCost: foodCost.wasteCountCost,
-									wasteCostPct: foodCost.salesNet
-										? (foodCost.wasteCountCost / foodCost.salesNet) * 100
-										: 0,
-									endCountDisplayUnits: foodCost.endCountDisplayUnits,
-									endCountCases: foodCost.endCountCases,
-									endCountCost: foodCost.endCountCost,
-									usageCases: foodCost.usageCases,
-									usageCountDisplayUnits: foodCost.usageCountDisplayUnits,
-									usageCost: foodCost.usageCost,
-									usageCostPct: foodCost.usageCostPct * 100,
-									salesNet: foodCost.salesNet,
-									comparisonName: foodCost.comparisonName,
-									comparisonSales: foodCost.comparisonSales,
-									yieldPerCase: foodCost.yieldPerCase,
-									yieldPerCountDisplayUnit: foodCost.yieldPerCountDisplayUnit,
-								})),
-							})),
-						})),
-					},
-				];
+				const newData = result.data?.flatMap((department) =>
+					department.subDepartments.flatMap((subDepartment) =>
+						subDepartment.actualFoodCosts.map((foodCost) => ({
+							finalDepartment: 'TOTAL',
+							department: foodCost.department,
+							subDepartment: foodCost.subDepartment,
+							comparisonName: foodCost?.comparisonName || '',
+							comparisonSales: foodCost?.comparisonSales || 0,
+							description: foodCost.description,
+							caseUnitName: foodCost.caseUnitName,
+							countDisplayUnitName: foodCost.countDisplayUnitName,
+							begCountDisplayUnits: foodCost.begCountDisplayUnits,
+							begCountCases: foodCost.begCountCases,
+							begCountCost: foodCost.begCountCost,
+							purchaseCases: foodCost.purchaseCases,
+							purchaseDisplayUnits: foodCost.purchaseDisplayUnits,
+							purchaseCost: foodCost.purchaseCost,
+							iTinCountDisplayUnits: foodCost.iTinCountDisplayUnits,
+							iTinCountCases: foodCost.iTinCountCases,
+							iTinCountCost: foodCost.iTinCountCost,
+							iToutCountDisplayUnits: foodCost.iToutCountDisplayUnits,
+							iToutCountCases: foodCost.iToutCountCases,
+							iToutCountCost: foodCost.iToutCountCost,
+							wasteCountDisplayUnits: foodCost.wasteCountDisplayUnits,
+							wasteCountCases: foodCost.wasteCountCases,
+							wasteCountCost: foodCost.wasteCountCost,
+							wasteCostPct: foodCost.salesNet ? (foodCost.wasteCountCost / foodCost.salesNet) * 100 : 0,
+							endCountDisplayUnits: foodCost.endCountDisplayUnits,
+							endCountCases: foodCost.endCountCases,
+							endCountCost: foodCost.endCountCost,
+							usageCases: foodCost.usageCases,
+							usageCountDisplayUnits: foodCost.usageCountDisplayUnits,
+							usageCost: foodCost.usageCost,
+							usageCostPct: foodCost.usageCostPct * 100,
+							salesNet: foodCost.salesNet,
+							yieldPerCase: foodCost.yieldPerCase,
+							yieldPerCountDisplayUnit: foodCost.yieldPerCountDisplayUnit,
+							qsrInventoryItemID: foodCost.qsrInventoryItemID,
+						}))
+					)
+				);
 
 				setActualFoodCostData(newData);
 				setFilteredActualFoodCostData(newData);
@@ -554,23 +633,12 @@ const ActualFoodCost = () => {
 	const handleShowHideDepartments = () => {
 		setIsShowHideDepartments(false);
 
-		const newActualFoodCostData = actualFoodCostData.map((item) => {
-			const filteredSubRows = item.subRows
-				.map((subItem) => {
-					const filteredSubSubRows = subItem.subRows.filter(
-						(subSubItem) =>
-							!checkedItems.some(
-								(checkedItem) =>
-									checkedItem.name === `${subItem.department}/${subSubItem.subDepartment}` &&
-									!checkedItem.showOnReport
-							)
-					);
-					const updatedSubItem = { ...subItem, subRows: filteredSubSubRows };
-					return filteredSubSubRows.length > 0 ? updatedSubItem : null;
-				})
-				.filter((subItem) => subItem !== null);
-			return { ...item, subRows: filteredSubRows };
-		});
+		const newActualFoodCostData = actualFoodCostData.filter((item) =>
+			checkedItems.some(
+				(checkedItem) =>
+					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
+			)
+		);
 		setIsTableRendered(false);
 
 		setFilteredActualFoodCostData(newActualFoodCostData);
@@ -606,75 +674,42 @@ const ActualFoodCost = () => {
 
 	const buildPDFBody = (type) => {
 		const rowsPerTable = 28;
-		const body = [];
+
 		const data = type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData;
 
-		data.forEach((row) => {
-			row.subRows.forEach((subRow) => {
-				const allRows = subRow.subRows.flatMap((subDept) =>
-					subDept.subRows.map((item) => ({
-						subDepartment: subDept.subDepartment,
-						...item,
-					}))
-				);
+		const headers = columns.slice(1);
+		const body = [];
 
-				const totalRows = allRows.length;
+		// Loop through the data and create tables
+		for (let i = 0; i < data.length; i += rowsPerTable) {
+			// Split columns into chunks of 13
+			const chunkedColumns = [];
+			for (let j = 0; j < headers.length; j += 13) {
+				chunkedColumns.push(headers.slice(j, j + 13));
+			}
 
-				const allColumns = [
-					{ id: 'subDepartment', header: 'Sub Department', dataType: 'string' },
-					{ id: 'description', header: 'Description', dataType: 'string' },
-					{ id: 'countDisplayUnitName', header: 'UOM', dataType: 'string' },
-					{ id: 'begCountDisplayUnits', header: 'Beg #', dataType: 'number' },
-					{ id: 'begCountCost', header: 'Beg $', dataType: 'number' },
-					{ id: 'purchaseDisplayUnits', header: 'Pur #', dataType: 'number' },
-					{ id: 'purchaseCost', header: 'Pur $', dataType: 'number' },
-					{ id: 'iTinCountDisplayUnits', header: 'Trans In#', dataType: 'number' },
-					{ id: 'iTinCountCost', header: 'Trans In $', dataType: 'number' },
-					{ id: 'iToutCountDisplayUnits', header: 'Trans Out#', dataType: 'number' },
-					{ id: 'iToutCountCost', header: 'Trans Out $', dataType: 'number' },
-					{ id: 'endCountDisplayUnits', header: 'End #', dataType: 'number' },
-					{ id: 'endCountCost', header: 'End $', dataType: 'number' },
-					{ id: 'usageCountDisplayUnits', header: 'Actual Usage #', dataType: 'number' },
-					{ id: 'usageCost', header: 'Actual Usage $', dataType: 'number' },
-					{ id: 'usageCostPct', header: 'Actual Usage %', dataType: 'number' },
-					{ id: 'wasteCountDisplayUnits', header: 'Waste #', dataType: 'number' },
-					{ id: 'wasteCountCost', header: 'Waste $', dataType: 'number' },
-					{ id: 'comparisonName', header: 'Comparison Name', dataType: 'string' },
-					{ id: 'comparisonSales', header: 'Comparison Sales', dataType: 'number' },
-				];
-
-				for (let i = 0; i < totalRows; i += rowsPerTable) {
-					const chunkedColumns = [];
-					for (let j = 0; j < allColumns.length; j += 13) {
-						chunkedColumns.push(allColumns.slice(j, j + 13));
-					}
-
-					chunkedColumns.forEach((columnChunk) => {
-						body.push({
-							type: 'table/SeperatePage',
-							title: subRow.department,
-							widths: columnChunk.map(() => 'auto'),
-							dataTypes: columnChunk.map((column) => column.dataType),
-							data: {
-								columnHeaders: columnChunk.map((column) => column.header),
-								rows: allRows.slice(i, i + rowsPerTable).map((row) =>
-									columnChunk.map((column) => ({
-										value:
-											column.header?.includes('$') || column.header === 'Comparison Sales'
-												? `$${parseFloat(
-														formatCellValue(row[column.id], column.dataType)
-												  ).toLocaleString('en-US')}`
-												: formatCellValue(row[column.id], column.dataType),
-										cellType: column.dataType,
-										columnName: column.header,
-									}))
-								),
-							},
-						});
-					});
-				}
+			// Create a table for each chunk of columns
+			chunkedColumns.forEach((columnChunk) => {
+				body.push({
+					type: 'table/SeperatePage',
+					widths: columnChunk.map(() => 'auto'),
+					dataTypes: columnChunk.map((column) => column.dataType),
+					data: {
+						columnHeaders: columnChunk.map((column) => column.header),
+						rows: data.slice(i, i + rowsPerTable).map((row) =>
+							columnChunk.map((column) => ({
+								value:
+									column.header?.includes('$') || column.header === 'Comparison Sales'
+										? formattingData(row[column.id])
+										: formatCellValue(row[column.id], column.dataType),
+								cellType: column.dataType,
+								columnName: column.header,
+							}))
+						),
+					},
+				});
 			});
-		});
+		}
 
 		return body;
 	};
@@ -684,7 +719,22 @@ const ActualFoodCost = () => {
 		if (dataType === 'number') {
 			return typeof value === 'number' ? value.toFixed(2) : value;
 		}
+		if (dataType === 'percent') {
+			return typeof value === 'number' ? value.toFixed(2) : value;
+		}
 		return value;
+	};
+
+	const formattingData = (value) => {
+		return value < 0
+			? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`
+			: `$${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`;
 	};
 
 	const togglePopup = () => {
@@ -720,36 +770,30 @@ const ActualFoodCost = () => {
 					{ name: 'Comparison Name', filter: 'text' },
 					{ name: 'Comparison Sales', filter: 'text' },
 				],
-				data: (type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData).flatMap((row) =>
-					row.subRows.flatMap((department) =>
-						department.subRows.flatMap((subDepartment) =>
-							subDepartment.subRows.map((item) => ({
-								department: department.department,
-								subDepartment: subDepartment.subDepartment,
-								description: item.description,
-								UOM: item.countDisplayUnitName,
-								begNumber: item.begCountDisplayUnits?.toFixed(2),
-								begDollar: item.begCountCost?.toFixed(2),
-								purNumber: item.purchaseDisplayUnits?.toFixed(2),
-								purDollar: item.purchaseCost?.toFixed(2),
-								trInNumber: item.iTinCountDisplayUnits?.toFixed(2),
-								trInDollar: item.iTinCountCost?.toFixed(2),
-								trOutNumber: item.iToutCountDisplayUnits?.toFixed(2),
-								trOutDollar: item.iToutCountCost?.toFixed(2),
-								endNumber: item.endCountDisplayUnits?.toFixed(2),
-								endDollar: item.endCountCost?.toFixed(2),
-								useNumber: item.usageCountDisplayUnits?.toFixed(2),
-								useDollar: item.usageCost?.toFixed(2),
-								usePct: item.usageCostPct?.toFixed(2),
-								wasteNumber: item.wasteCountDisplayUnits?.toFixed(2),
-								wasteDollar: item.wasteCountCost?.toFixed(2),
-								wasteCostPct: item.wasteCostPct?.toFixed(2),
-								comparisonName: item.comparisonName,
-								comparisonSales: item.comparisonSales?.toFixed(2),
-							}))
-						)
-					)
-				),
+				data: (type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData).map((row) => ({
+					department: row.department,
+					subDepartment: row.subDepartment,
+					description: row.description,
+					UOM: row.countDisplayUnitName,
+					begNumber: row.begCountDisplayUnits?.toFixed(2),
+					begDollar: row.begCountCost?.toFixed(2),
+					purNumber: row.purchaseDisplayUnits?.toFixed(2),
+					purDollar: row.purchaseCost?.toFixed(2),
+					trInNumber: row.iTinCountDisplayUnits?.toFixed(2),
+					trInDollar: row.iTinCountCost?.toFixed(2),
+					trOutNumber: row.iToutCountDisplayUnits?.toFixed(2),
+					trOutDollar: row.iToutCountCost?.toFixed(2),
+					endNumber: row.endCountDisplayUnits?.toFixed(2),
+					endDollar: row.endCountCost?.toFixed(2),
+					useNumber: row.usageCountDisplayUnits?.toFixed(2),
+					useDollar: row.usageCost?.toFixed(2),
+					usePct: row.usageCostPct?.toFixed(2),
+					wasteNumber: row.wasteCountDisplayUnits?.toFixed(2),
+					wasteDollar: row.wasteCountCost?.toFixed(2),
+					wasteCostPct: row.wasteCostPct?.toFixed(2),
+					comparisonName: row.comparisonName,
+					comparisonSales: row.comparisonSales?.toFixed(2),
+				})),
 			},
 		];
 
@@ -787,6 +831,9 @@ const ActualFoodCost = () => {
 			setTableState={setTableState}
 			headerPosition='left'
 			dataPosition='text-left'
+			onCallBack={(e) => {
+				getGetActualFoodCostBreakdownIdealReportData(e);
+			}}
 		/>
 	);
 
@@ -843,7 +890,7 @@ const ActualFoodCost = () => {
 	const handleViewPurchase = async (fromDate, toDate) => {
 		const dataToSend = {
 			companyId: companyID,
-			alignmentID: alignmentID,
+			alignmentId: alignmentID,
 			selectedUnit: selectedUnit,
 			selectedUnitName: selectedUnitName,
 			fromDate: fromDate,
@@ -857,6 +904,458 @@ const ActualFoodCost = () => {
 				JSON.stringify(dataToSend)
 			)}`,
 			'_blank'
+		);
+	};
+
+	const getGetActualFoodCostBreakdownIdealReportData = async (row) => {
+		let { qsrInventoryItemID = '' } = row;
+		setCostBreakActualDetails(row);
+		try {
+			setIsBreakDownModal(true);
+			const getData = {
+				url: 'GetActualFoodCostBreakdownIdealReportData',
+				urlParams: {
+					companyID: companyID,
+					alignmentID: alignmentID,
+					memberID: selectedUnit,
+					fromDate: selectedFromDate,
+					toDate: selectedToDate,
+					QSRInventoryItemID: qsrInventoryItemID,
+				},
+			};
+
+			const result = await getCall(getData);
+
+			const getDataBreakDown = {
+				url: 'GetActualFoodCostBreakdownReportData',
+				urlParams: {
+					companyID: companyID,
+					alignmentID: alignmentID,
+					memberID: selectedUnit,
+					fromDate: selectedFromDate,
+					toDate: selectedToDate,
+					QSRInventoryItemID: qsrInventoryItemID,
+				},
+			};
+
+			const resultBreakDown = await getCall(getDataBreakDown);
+			if (resultBreakDown.data) {
+				setBreakDownIdealDetails(resultBreakDown.data);
+			}
+
+			if (result.data) {
+				setCostBreakDownIdeatDetails(result.data);
+			}
+		} catch (error) {
+			console.log('er', error);
+		}
+	};
+
+	const renderBreakdownModal = () => {
+		const sumOfCost = (value, valu2) => {
+			let sum = value * valu2;
+			return sum.toFixed(2);
+		};
+
+		const openCollapse = (name) => {
+			let oldShow = showAndHideBreakDown;
+			oldShow[name] = oldShow[name] ? false : true;
+			setShowAndHideBreakDown({ ...oldShow });
+		};
+
+		const calculateMasterItemQuantityTotalSum = (data, name) => {
+			if (!data || !Array.isArray(data)) {
+				throw new Error('Invalid input data. Ensure the data is an array.');
+			}
+
+			// Use the reduce function to calculate the sum
+			const totalSum = data.reduce((sum, item) => {
+				const quantity = parseFloat(item[name]);
+				return sum + (isNaN(quantity) ? 0 : quantity);
+			}, 0);
+
+			return totalSum;
+		};
+
+		function calculateTotalCost(data) {
+			if (!data || !Array.isArray(data)) {
+				throw new Error('Invalid input data. Ensure the data is an array.');
+			}
+
+			// Use the reduce function to calculate the total cost
+			const totalCost = data.reduce((sum, item) => {
+				const quantity = parseFloat(item.MasterItemQuantityTotal);
+				const cost = parseFloat(item.MasterItemIdealUOMCost);
+
+				// Add to the sum only if both values are valid numbers
+				return sum + (isNaN(quantity) || isNaN(cost) ? 0 : quantity * cost);
+			}, 0);
+
+			return totalCost;
+		}
+
+		const totalVariance = () => {
+			let totalVarica =
+				costBreakActualDetails?.usageCost?.toFixed(2) -
+				calculateTotalCost(costBreakdownIdealDetails).toFixed(2);
+			return totalVarica.toFixed(2);
+		};
+
+		const totalVariancecs = () => {
+			let totalCs =
+				costBreakActualDetails?.usageCases?.toFixed(2) -
+				calculateMasterItemQuantityTotalSum(costBreakdownIdealDetails, 'MasterItemQuantityTotal').toFixed(2);
+			return totalCs.toFixed(2);
+		};
+
+		return (
+			<div className='max-w-5xl mx-auto my-0 p-1 rounded-lg shadow-lg border bg-white min-w-[750px]'>
+				{/* Header */}
+				<div className='text-center '>
+					<p className='text-sm text-gray-600'>{costBreakActualDetails.description}</p>
+					<p className='text-sm text-gray-600'>
+						Store #{selectedUnit} {selectedFromDate} to {selectedToDate} ({view})
+					</p>
+				</div>
+
+				{/* Actual Section */}
+				<div className='my-1'>
+					<h3
+						onClick={(e) => {
+							e.preventDefault(), openCollapse('Actual');
+						}}
+						className='text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
+					>
+						<span>Actual</span>{' '}
+						<span className='m-1 '>
+							{showAndHideBreakDown.Actual == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
+						</span>
+					</h3>
+					{showAndHideBreakDown.Actual == true && (
+						<div className=''>
+							<table className='w-full border border-collapse'>
+								<thead className='bg-gray-100'>
+									<tr>
+										<th className='p-2 text-left border'></th>
+										<td></td>
+										<th className='border text-right  p-[3px]  text-nowrap text-sm'># UOM</th>
+										<th className='border text-right  p-[3px]  text-nowrap text-sm'>Value</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td className='border text-left  p-[3px]  text-nowrap text-sm'>
+											<div className='flex align-middle'>
+												<div className='p-1'>
+													<CiSquarePlus />
+												</div>
+												Beginning On-Hand Count: {selectedFromDate}
+											</div>
+										</td>
+										<td className='border   p-[3px]  text-nowrap text-sm text-center'></td>
+										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+											{costBreakActualDetails?.begCountDisplayUnits?.toFixed(4)}
+										</td>
+										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+											${costBreakActualDetails?.begCountCost?.toFixed(2)}
+										</td>
+									</tr>
+									<tr
+										className='cursor-pointer'
+										onClick={(e) => {
+											e.preventDefault(), openCollapse('purchaseBetween');
+										}}
+									>
+										<td className='border text-left  p-[3px]  text-nowrap text-sm '>
+											<div className='flex align-middle'>
+												{showAndHideBreakDown.purchaseBetween ? (
+													<div className='p-1'>
+														<CiSquareMinus />
+													</div>
+												) : (
+													<div className='p-1'>
+														<CiSquarePlus />
+													</div>
+												)}{' '}
+												Purchases between {selectedFromDate} and {selectedToDate}
+											</div>
+										</td>
+										<td className='border   p-[3px]  text-nowrap text-sm text-center'>+</td>
+										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+											{costBreakActualDetails?.purchaseCases?.toFixed(4)}
+										</td>
+										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+											${costBreakActualDetails?.purchaseCost?.toFixed(2)}
+										</td>
+									</tr>
+									{showAndHideBreakDown.purchaseBetween == true && (
+										<tr className='ml-[10px] '>
+											<td colSpan={4}>
+												<table className='w-[97%] ml-[3%]'>
+													<thead className='bg-gray-100'>
+														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+															Vendor
+														</th>
+														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+															Date
+														</th>
+														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+															Invoices #
+														</th>
+														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+															#
+														</th>
+														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+															UOM
+														</th>
+														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+															Price
+														</th>
+														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+															Total
+														</th>
+													</thead>
+													<tbody>
+														{breakDownIdealDetails.map((item) => (
+															<tr>
+																<td className='border text-left  p-[3px]  text-nowrap text-sm'>
+																	{item.VendorName}
+																</td>
+																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																	{dateFormat(item.InvoiceDate, 'mm-dd-yyyy')}
+																</td>
+																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																	{item.VendorInvoiceReference}
+																</td>
+																<td className='border text-center  p-[3px]  text-nowrap text-sm'>
+																	{item.Quantity.toFixed(6)}
+																</td>
+																<td className='border text-center  p-[3px]  text-nowrap text-sm'>
+																	{item.UnitOfMeasure}
+																</td>
+																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																	${item.Price.toFixed(2)}
+																</td>
+																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																	${item.TotalPrice.toFixed(2)}
+																</td>
+															</tr>
+														))}
+														{breakDownIdealDetails.length === 0 && (
+															<td colSpan={7}>
+																There is no any purchases in this period.
+															</td>
+														)}
+													</tbody>
+												</table>
+											</td>
+										</tr>
+									)}
+									<tr>
+										<td className='border p-[3px]  text-nowrap text-sm'>
+											<div className='flex align-middle'>
+												<div className='p-1'>
+													<CiSquarePlus />
+												</div>{' '}
+												Transferred In
+											</div>
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-center'>+</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											{costBreakActualDetails?.iTinCountCases}
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											${costBreakActualDetails?.iTinCountCost}
+										</td>
+									</tr>
+									<tr>
+										<td className='border p-[3px]  text-nowrap text-sm'>
+											<div className='flex align-middle'>
+												<div className='p-1'>
+													<CiSquarePlus />
+												</div>{' '}
+												Transferred Out
+											</div>
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											{costBreakActualDetails?.iToutCountCases}
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											${costBreakActualDetails?.iToutCountCost}
+										</td>
+									</tr>
+									<tr>
+										<td className='border p-[3px]  text-nowrap text-sm'>
+											<div className='flex align-middle'>
+												<div className='p-1'>
+													<CiSquarePlus />
+												</div>{' '}
+												Ending On-Hand Count: {selectedToDate}
+											</div>
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											{costBreakActualDetails?.endCountCases}
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											${costBreakActualDetails?.endCountCost}
+										</td>
+									</tr>
+								</tbody>
+								<tfoot>
+									<tr className='bg-gray-200'>
+										<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={2}>
+											Actual Usage{' '}
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											{costBreakActualDetails?.usageCases?.toFixed(2)}
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											${costBreakActualDetails?.usageCost?.toFixed(2)}
+										</td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+					)}
+				</div>
+
+				{/* Ideal Section */}
+				<div className='my-1'>
+					<h3
+						onClick={(e) => {
+							e.preventDefault(), openCollapse('ideal');
+						}}
+						className='text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
+					>
+						<span>Ideal</span>{' '}
+						<span className='m-1 '>
+							{showAndHideBreakDown.ideal == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
+						</span>
+					</h3>
+					{showAndHideBreakDown.ideal == true && (
+						<div className='tableHOC pr-1 max-h-[20vh] overflow-auto'>
+							<table className='w-full border-collapse '>
+								<thead className='sticky top-0 bg-gray-100'>
+									<tr>
+										<th className=' p-[3px] text-left text-sm'>Menu Item</th>
+										<th className=' p-[3px] text-left text-nowrap text-sm'>Recipe</th>
+										<th className=' p-[3px] text-right text-nowrap text-sm'># Sold</th>
+										<th className=' p-[3px] text-right text-nowrap text-sm'>
+											#{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName} in Recipe
+										</th>
+										<th className=' p-[3px] text-right text-nowrap text-sm'>
+											# {costBreakdownIdealDetails[0]?.MasterItemUOM}
+										</th>
+										<th className=' p-[3px] text-righ text-nowrapt text-sm'>
+											Total # {costBreakdownIdealDetails[0]?.MasterItemUOM}
+										</th>
+										<th className=' p-[3px] text-right text-nowrap text-sm'>Cost</th>
+									</tr>
+								</thead>
+								<tbody>
+									{costBreakdownIdealDetails.map((item) => (
+										<tr>
+											<td className='border p-[3px] text-sm'>{item.MenuItemDescription}</td>
+											<td className='border p-[3px] text-sm'>{item.VariantLabel}</td>
+											<td className='border p-[3px] text-right text-sm'>
+												{item.MenuItemQuantitySold}
+											</td>
+											<td className='border p-[3px] text-right text-sm'>
+												{item.MasterItemRecipeUOMPerRecipe}
+											</td>
+											<td className='border p-[3px] text-right text-sm'>
+												{item.MasterItemQuantityPerRecipe.toFixed(4)}
+											</td>
+											<td className='border p-[3px] text-right text-sm'>
+												{item.MasterItemQuantityTotal.toFixed(2)}
+											</td>
+											<td className='border p-[3px] text-right text-sm'>
+												${sumOfCost(item.MasterItemQuantityTotal, item.MasterItemIdealUOMCost)}
+											</td>
+										</tr>
+									))}
+								</tbody>
+								<tfoot>
+									<tr className='sticky bottom-0 bg-gray-200'>
+										<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={5}>
+											Ideal Usage{' '}
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											{calculateMasterItemQuantityTotalSum(
+												costBreakdownIdealDetails,
+												'MasterItemQuantityTotal'
+											).toFixed(2)}
+										</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
+										</td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+					)}
+				</div>
+
+				{/* Variance Section */}
+				<div className='my-1'>
+					<h3
+						onClick={(e) => {
+							e.preventDefault(), openCollapse('Variance');
+						}}
+						className='text-base font-semibold bg-orange-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
+					>
+						<span> Variance</span>
+						<span className='m-1 '>
+							{showAndHideBreakDown.Variance == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
+						</span>
+					</h3>
+					{showAndHideBreakDown.Variance == true && (
+						<table className='w-full border border-collapse'>
+							<thead className='bg-gray-100'>
+								<tr>
+									<th className='border p-[3px] text-left text-sm'>Details</th>
+									<th className='border p-[3px] text-left text-sm'>
+										#{costBreakdownIdealDetails[0]?.MasterItemUOM}
+									</th>
+									<th className='border p-[3px] text-left text-sm'>Cost</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td className='border p-[3px] text-left text-sm'>Actual Usage</td>
+									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
+										{costBreakActualDetails?.usageCases?.toFixed(2)}
+									</td>
+									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
+										${costBreakActualDetails?.usageCost?.toFixed(2)}
+									</td>
+								</tr>
+								<tr>
+									<td className='border p-[3px] text-left text-sm'>Ideal Usage</td>
+									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
+										{calculateMasterItemQuantityTotalSum(
+											costBreakdownIdealDetails,
+											'MasterItemQuantityTotal'
+										).toFixed(2)}
+									</td>
+									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
+										${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
+									</td>
+								</tr>
+								<tr>
+									<td className='border p-[3px] text-left text-sm'>Variance Usage</td>
+									<td className='border p-[3px] text-right text-sm'>{totalVariancecs()}</td>
+									<td className='border p-[3px]  text-nowrap text-sm text-right'>
+										${totalVariance()}
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					)}
+				</div>
+			</div>
 		);
 	};
 
@@ -995,8 +1494,7 @@ const ActualFoodCost = () => {
 											</div>
 										)}
 									</div>
-									{((tableState?.expanded &&
-										Object.keys(tableState.expanded).some((key) => /^\d+\.\d+\.\d+$/.test(key))) ||
+									{((tableState?.expanded && Object.keys(tableState.expanded).length > 2) ||
 										viewby === 'Inventory Item') && (
 										<div className='flex items-center mt-[31px] gap-3'>
 											<div>
@@ -1150,6 +1648,13 @@ const ActualFoodCost = () => {
 								</button>
 							</div>
 						</div>
+					</Modal>
+					<Modal
+						title={'Food Cost Breakdown'}
+						isOpen={isBreakDownModal}
+						onClose={() => setIsBreakDownModal(false)}
+					>
+						{renderBreakdownModal()}
 					</Modal>
 					<Modal title={'Warning'} isOpen={showWarnings} onClose={() => setShowWarnings(false)}>
 						<div className='p-4 w-[340px]'>

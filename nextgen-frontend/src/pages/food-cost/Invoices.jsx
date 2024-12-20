@@ -723,7 +723,7 @@ const Invoices = () => {
 								</thead>
 								<tbody>
 									{invoiceItemDetails.map((item, index) => (
-										<tr key={index} className='even:bg-gray-50'>
+										<tr key={index} className='even:bg-gray-50' key={item.vendorItemReference}>
 											<td className='p-2 text-center border border-gray-300'>
 												{item.vendorItemReference}
 											</td>
@@ -740,7 +740,7 @@ const Invoices = () => {
 												${item.taxAmount.toFixed(2)}
 											</td>
 											<td className='p-2 text-center border border-gray-300'>
-												${item.price + item.taxAmount.toFixed(2)}
+												${(item.price * item.quantity + item.taxAmount).toFixed(2)}
 											</td>
 										</tr>
 									))}

@@ -320,7 +320,7 @@ const EmployeeInformation = () => {
 					if (date) {
 						if (date.includes('/')) {
 							const [month, day, year] = date.split('/');
-							return `${month}-${day}-${year.substring(2)}`;
+							return `${month}/${day}/${year}`;
 						} else {
 							return date;
 						}
@@ -387,14 +387,11 @@ const EmployeeInformation = () => {
 			case 'Birth Days':
 				{
 					const currentDate = new Date();
-					const currentMonth = currentDate.getMonth() + 1;
-					const currentYear = currentDate.getFullYear();
-
+					const currentMonth = currentDate.getMonth();
 					const birthDaysData = employeeInformationData.data.filter((data) => {
 						const birthDate = new Date(data.birthDate);
-						const birthMonth = birthDate.getMonth() + 1;
-						const birthYear = birthDate.getFullYear();
-						return birthMonth === currentMonth && birthYear === currentYear;
+						const birthMonth = birthDate.getMonth();
+						return birthMonth === currentMonth;
 					});
 
 					setFilteredEmployeeInformationData({ data: birthDaysData });
@@ -529,6 +526,7 @@ const EmployeeInformation = () => {
 										data={filteredEmployeeInformationData.data}
 										headers={headers}
 										onRowClick={() => {}}
+										itemsPerPageOptions={[10, 25, 50, 100]}
 									/>
 								</div>
 							) : !selectedUnit ? (

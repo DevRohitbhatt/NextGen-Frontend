@@ -86,7 +86,7 @@ const InventoryTransferReport = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
-			width: '150px',
+			width: '170px',
 		},
 		{
 			key: 'inventoryItem',
@@ -211,7 +211,7 @@ const InventoryTransferReport = () => {
 					cellType: 'string',
 					toolTip: '',
 					toolTipDirection: '',
-					width: '150px',
+					width: '170px',
 				},
 				{
 					key: 'inventoryItem',

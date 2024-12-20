@@ -13,7 +13,6 @@ export default function Menu({ onClick, companyId, menuName, setMenuName, menuId
 				};
 
 				const result = await getCall(getData);
-				console.log('Menu', result);
 
 				if (result.data.units.length > 0) {
 					const unitName = result.data.units.find((unit) => unit.unitID === menuId).unitName;

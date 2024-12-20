@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -100,23 +101,35 @@ const Voids = () => {
 			}),
 			columnHelper.accessor('voidReason', {
 				id: 'voidReason',
-				header: 'Void Reason',
+				header: <div className='w-full text-left'>Void Reason</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left pr-3'>{getValue()}</div>;
+				}
 			}),
 			columnHelper.accessor('employeeName', {
 				id: 'employeeName',
-				header: 'Employee',
+				header: <div className='w-full text-left'>Employee</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				}
 			}),
 			columnHelper.accessor('managerName', {
 				id: 'managerName',
-				header: 'Manager',
+				header: <div className='w-full text-left'>Manager</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				}
 			}),
 			columnHelper.accessor('fullDescription', {
 				id: 'fullDescription',
-				header: 'Description',
+				header: <div className='w-full text-left'>Description</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				},
 				size: 200,
 			}),
 			columnHelper.accessor('posCheckId', {
@@ -126,8 +139,11 @@ const Voids = () => {
 			}),
 			columnHelper.accessor('tableName', {
 				id: 'tableName',
-				header: 'Table Name',
+				header: <div className='w-full text-left'>Table Name</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				}
 			}),
 			columnHelper.accessor('revenueID', {
 				id: 'revenueID',
@@ -141,6 +157,10 @@ const Voids = () => {
 				id: 'price',
 				header: 'Price',
 				size: 100,
+				cell: ({ getValue }) => {
+					let price = getValue() !== undefined ? formattingData(getValue()) : ""
+					return price
+				},
 				footer: ({ table }) =>
 					`$${table
 						.getCoreRowModel()
@@ -153,8 +173,11 @@ const Voids = () => {
 			}),
 			columnHelper.accessor('tendersUsed', {
 				id: 'tendersUsed',
-				header: 'Tenders',
+				header: <div className='w-full text-left'>Tenders</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				},
 			}),
 		],
 		[]
@@ -342,7 +365,7 @@ const Voids = () => {
 			columnHeaders: columns.map((column) => column.header),
 			rows: data.map((row) =>
 				columns.map((column) => ({
-					value: row[column.id],
+					value: column.header.includes('Price') ? formattingData(row[column.id]) : row[column.id],
 					cellType: '',
 					columnName: column.id,
 				}))
@@ -410,8 +433,6 @@ const Voids = () => {
 				),
 			},
 		];
-
-		console.log('data', data);
 
 		const filename = 'voids';
 		const spreadSheetTitle = 'Voids';
