@@ -77,6 +77,41 @@ const BrumitDWP = () => {
 		}
 	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
+	const formattingDataWithoutDollr = (value) => {
+		return value < 0
+			? `-${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`
+			: `${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`;
+	  };
+	  const formattingDataWithout = (value) => {
+		return value < 0
+			? `-${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 0,
+			  })}`
+			: `${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 0,
+					maximumFractionDigits: 0,
+			  })}`;
+	  };
+
+	  const formattingData = (value) => {
+		return value < 0
+			? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`
+			: `$${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`;
+	};
+
 	const fetchBrumitDWP = async () => {
 		const signal = cancelApiObject['brumitDWP'].handleRequestCancellation().signal;
 		try {
@@ -121,10 +156,10 @@ const BrumitDWP = () => {
 								) {
 									acc[key] =
 										row.unitGroups[key] < 0
-											? `-($${Math.abs(row.unitGroups[key])})`
-											: `$${row.unitGroups[key]}`;
+											? `${formattingData(Math.abs(row.unitGroups[key]))}`
+											: `${formattingData(row.unitGroups[key])}`;
 								} else {
-									acc[key] = `${(row.unitGroups[key] * 100).toFixed(2)}%`;
+									acc[key] = `${formattingDataWithoutDollr((row.unitGroups[key] * 100))}%`;
 								}
 								return acc;
 							}, {}),
@@ -143,6 +178,7 @@ const BrumitDWP = () => {
 							'Total Coupon /Disc %',
 						].includes(row.itemName)
 					) {
+						
 						return {
 							rowName: 'Cash Exceptions',
 							[row.dateRange]: row.itemName,
@@ -150,12 +186,10 @@ const BrumitDWP = () => {
 								if (row.itemName === 'Cash +/-') {
 									acc[key] =
 										row.unitGroups[key] < 0
-											? `-($${Number(Math.abs(row.unitGroups[key]).toFixed(0)).toLocaleString(
-													'en-US'
-											  )})`
-											: `$${Number(row.unitGroups[key].toFixed(0)).toLocaleString('en-US')}`;
+											? `${formattingData(row.unitGroups[key])}`
+											: `${formattingData(row.unitGroups[key])}`;
 								} else {
-									acc[key] = `${(row.unitGroups[key] * 100).toFixed(2)}%`;
+									acc[key] = `${formattingDataWithoutDollr(row.unitGroups[key] * 100)}%`;
 								}
 								return acc;
 							}, {}),
@@ -175,13 +209,33 @@ const BrumitDWP = () => {
 						return {
 							rowName: 'Labor',
 							[row.dateRange]: row.itemName,
-							...row.unitGroups,
+							...Object.keys(row.unitGroups).reduce((acc, key) => {
+								if (row.itemName === 'Cash +/-') {
+									acc[key] =
+										row.unitGroups[key] < 0
+											? `${formattingData(row.unitGroups[key])}`
+											: `${formattingData(row.unitGroups[key])}`;
+								} else {
+									acc[key] = `${formattingDataWithoutDollr(row.unitGroups[key])}`;
+								}
+								return acc;
+							}, {}),
 						};
 					} else if (['Beef Efficiency %'].includes(row.itemName)) {
 						return {
 							rowName: 'Food Cost',
 							[row.dateRange]: row.itemName,
-							...row.unitGroups,
+							...Object.keys(row.unitGroups).reduce((acc, key) => {
+								if (row.itemName === 'Cash +/-') {
+									acc[key] =
+										row.unitGroups[key] < 0
+											? `${formattingData(row.unitGroups[key])}`
+											: `${formattingData(row.unitGroups[key])}`;
+								} else {
+									acc[key] = `${formattingDataWithoutDollr(row.unitGroups[key] * 100)}%`;
+								}
+								return acc;
+							}, {}),
 						};
 					} else if (['LY Sales', 'TY Trans', 'LY Trans'].includes(row.itemName)) {
 						return {
@@ -191,10 +245,10 @@ const BrumitDWP = () => {
 								if (row.itemName === 'LY Sales') {
 									acc[key] =
 										row.unitGroups[key] < 0
-											? `-($${Math.abs(parseInt(row.unitGroups[key]).toLocaleString('en-US'))})`
-											: `$${parseInt(row.unitGroups[key]).toLocaleString('en-US')}`;
+											? `-$${Math.round(row.unitGroups[key]).toLocaleString('en-US')}`
+											: `$${Math.round(row.unitGroups[key]).toLocaleString('en-US')}`;
 								} else {
-									acc[key] = row.unitGroups[key];
+									acc[key] = formattingDataWithout(parseInt(row.unitGroups[key]));
 								}
 								return acc;
 							}, {}),
@@ -344,7 +398,7 @@ const BrumitDWP = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={brumitDWPData} expandCollapseButtons={true} />;
+	const Table = <TableHOC columns={columns} data={brumitDWPData} view={1} expandCollapseButtons={true} />;
 
 	return (
 		<div className='w-[98%] mx-auto'>
