@@ -82,8 +82,8 @@ const LaborCICOExceptions = () => {
 
       const result = await getCall(getData, false);
       if (result?.data?.weekMaxDate) {
-        const maxDate = new Date(result?.data?.weekMaxDate);
-        const minDate = new Date(result?.data?.weekMinDate);
+        const maxDate = new Date(result?.data?.payPeriodMaxDate);
+        const minDate = new Date(result?.data?.payPeriodMinDate);
         setSelectedFromDate(minDate);
         setSelectedToDate(maxDate);
       }
