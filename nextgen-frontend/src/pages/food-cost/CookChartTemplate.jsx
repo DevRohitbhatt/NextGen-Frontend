@@ -17,7 +17,12 @@ import EditAndAddDndTable from "../../components/table/EditAndAddDndTable";
 import HoverBorderButton from "../../components/buttons/HoverBorderButton";
 import { deleteCall, getCall, postCall } from "../../apis/network";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { FaChevronDown, FaChevronUp, FaEdit, FaPlusCircle } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaEdit,
+  FaPlusCircle,
+} from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import {
   convertMinutesToHHMM,
@@ -255,13 +260,12 @@ const CookChartTemplate = (props) => {
         },
       };
       const result = await getCall(getData, false);
-     
+
       setCookAllData(result.data);
       setFilteredData(result.data);
     } catch (error) {
     } finally {
       setIsLoading(false);
-      
     }
   };
   //Edit  item data call
@@ -307,7 +311,7 @@ const CookChartTemplate = (props) => {
       const postData = {
         fullUrl: "api/cookdrop/savecookdroptemplate",
         urlParams: {
-          companyID: companyStateId
+          companyID: companyStateId,
         },
         bodyData: body,
       };
@@ -377,7 +381,7 @@ const CookChartTemplate = (props) => {
       try {
         const postData = {
           fullUrl: "api/cookdrop/savecookdropcookitem",
-          urlParams: {},
+          urlParams: { companyID: companyStateId },
           bodyData: body,
         };
 
@@ -773,7 +777,9 @@ const CookChartTemplate = (props) => {
                 <th className="lg:px-4 lg:py-2 px-2 py-2 text-left text-sm text-nowrap">
                   Source Type
                 </th>
-                <th className="lg:px-4 lg:py-2 px-2 py-2 text-left text-sm text-nowrap">UOM</th>
+                <th className="lg:px-4 lg:py-2 px-2 py-2 text-left text-sm text-nowrap">
+                  UOM
+                </th>
                 <th className="lg:px-4 lg:py-2 px-2 py-2 text-left text-sm  text-nowrap">
                   Mix Multiplier
                 </th>
@@ -1088,10 +1094,9 @@ const CookChartTemplate = (props) => {
     }
   };
 
-  const addUsingMobile = (data) =>{
-   
-    let resultData = data
-    console.log(data)
+  const addUsingMobile = (data) => {
+    let resultData = data;
+    console.log(data);
     setRightTableData((prev) => [
       ...prev,
       {
@@ -1103,18 +1108,15 @@ const CookChartTemplate = (props) => {
         )}, Hold ${formatTime(resultData.holdTimeSeconds)}, Safety ${
           resultData.safetyFactor
         }%`,
-        items: resultData.listCookDropCookItemDetails.map(
-          (detail) => ({
-            id: detail.inventoryOrMenuItemID,
-            inventoryOrMenuItemName: detail.inventoryOrMenuItemName,
-            qty: detail.cookItemQuantity,
-          })
-        ),
+        items: resultData.listCookDropCookItemDetails.map((detail) => ({
+          id: detail.inventoryOrMenuItemID,
+          inventoryOrMenuItemName: detail.inventoryOrMenuItemName,
+          qty: detail.cookItemQuantity,
+        })),
         cookDropCookItemID: resultData.cookDropCookItemID,
       },
     ]);
-
-  }
+  };
 
   return (
     <>
@@ -1223,7 +1225,7 @@ const CookChartTemplate = (props) => {
                         {filteredData.map((item, index) => (
                           <div className="mt-[15px]">
                             <Draggable
-                              key={item.cookDropCookItemID+"l"}
+                              key={item.cookDropCookItemID + "l"}
                               draggableId={item.cookDropCookItemID}
                               index={index}
                             >
@@ -1249,17 +1251,17 @@ const CookChartTemplate = (props) => {
                                         )}, Safety ${item.safetyFactor}%`}
                                       </p>
                                     </div>
-                                    
-                                  <span
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      e.preventDefault();
-                                      addUsingMobile(item);
-                                    }}
-                                    className="absolute top-1/2 text-xl right-20 font-bold transform -translate-y-1/2 text-blue-600 hover:text-blue-800 cursor-pointer  z-9"
-                                  >
-                                    <FaPlusCircle />
-                                  </span>
+
+                                    <span
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        addUsingMobile(item);
+                                      }}
+                                      className="absolute top-1/2 text-xl right-20 font-bold transform -translate-y-1/2 text-blue-600 hover:text-blue-800 cursor-pointer  z-9"
+                                    >
+                                      <FaPlusCircle />
+                                    </span>
                                     <span
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -1344,7 +1346,9 @@ const CookChartTemplate = (props) => {
                         className="w-[100%] sticky top-0 cook-template"
                       >
                         <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px] sticky top-0 ">
-                          <h2 className="text-base font-bold mb-4 ">Template</h2>
+                          <h2 className="text-base font-bold mb-4 ">
+                            Template
+                          </h2>
                           <div className=" tableHOC overflow-auto h-[90vh]">
                             {rightTableData.length === 0 && (
                               <p className="text-gray-500">
@@ -1353,7 +1357,7 @@ const CookChartTemplate = (props) => {
                             )}
                             {rightTableData.map((table) => (
                               <div
-                                key={table.cookDropCookItemID+"R"}
+                                key={table.cookDropCookItemID + "R"}
                                 className=" mb-4 relative bg-gray-100 p-1 rounded-lg tableHOC overflow-auto"
                               >
                                 <div
