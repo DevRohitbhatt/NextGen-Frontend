@@ -3,6 +3,7 @@ import HhmmssSelector from "../common/HhmmssSelector";
 import EditAndAddDndTable from "../table/EditAndAddDndTable";
 import { postCall } from "../../apis/network";
 import ReactDOM from "react-dom";
+import { toast } from "react-toastify";
 
 export const CreateItemModal = ({addHeaderFields,
     projectAheadOptions,
@@ -22,7 +23,8 @@ export const CreateItemModal = ({addHeaderFields,
     addInventoryItems,
     getAddNewCookData,
     getCookAllItemData,
-    openCreateItemModal
+    openCreateItemModal,
+    companyStateId
 }) => {
     let {
       cookItemName,
@@ -83,6 +85,7 @@ export const CreateItemModal = ({addHeaderFields,
     };
 
     const savedData = async (saved) => {
+      debugger
       setSaveDisable(true);
       let values = saved.map((item) => {
         let newItem = { ...item };
@@ -135,6 +138,7 @@ export const CreateItemModal = ({addHeaderFields,
           toast.error("Failed to save", { autoClose: 1500 });
         }
       } catch (error) {
+        console.log("errrrrr",error)
         toast.error("Failed to save", { autoClose: 1500 });
       } finally {
         setSaveDisable(false);
@@ -439,6 +443,8 @@ export const CreateItemModal = ({addHeaderFields,
     getAddNewCookData,
     setEditSourceType,
     addInventoryItems,
+    openEditItemModal,
+    setOpenEditItemModal
  }) => {
     let {
       cookItemName,

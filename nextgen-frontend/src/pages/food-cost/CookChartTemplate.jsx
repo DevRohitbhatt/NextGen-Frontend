@@ -1130,6 +1130,7 @@ const CookChartTemplate = (props) => {
           getAddNewCookData={getAddNewCookData}
           getCookAllItemData={getCookAllItemData}
           openCreateItemModal={openCreateItemModal}
+          companyStateId={companyStateId}
 
         />
       </Modal>
@@ -1158,6 +1159,9 @@ const CookChartTemplate = (props) => {
         setEditSourceType={setEditSourceType}
         addInventoryItems={addInventoryItems}
         setSaveDisable={setSaveDisable}
+        companyStateId={companyStateId}
+        setOpenEditItemModal={setOpenEditItemModal}
+        openEditItemModal={openEditItemModal}
         />
       </Modal>
     </>

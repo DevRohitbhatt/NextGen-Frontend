@@ -255,7 +255,7 @@ const EditAndAddDndTable = ({
       );
       if (isCookItemQuantityValid && isCookItemQuantityValid.length > 0 ) {
         setIsEmptyUomQty(isCookItemQuantityValid)
-        toast.error("Qty of UOM is Empty", { autoClose: 1500 });
+        toast.error("Unit Of Measure must have a value", { autoClose: 1500 });
       } else {
         onSave(templateItems);
       }
