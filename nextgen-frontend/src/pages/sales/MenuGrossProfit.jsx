@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import menuGrossProfit from '../../assets/introJSSteps/menuGrossProfit';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -109,7 +110,7 @@ const MenuGrossProfit = () => {
 		columnHelper.accessor('itemPrice', {
 			id: 'itemPrice',
 			header: 'Item Price',
-			cell: ({ getValue }) => `$${getValue()}`,
+			cell: ({ getValue }) => `${formattingData(parseFloat(getValue()))}`,
 			dataType: 'string',
 			size: 100,
 		}),
@@ -135,14 +136,14 @@ const MenuGrossProfit = () => {
 		columnHelper.accessor('itemSales', {
 			id: 'itemSales',
 			header: 'Item Sales',
-			cell: ({ getValue }) => `$${getValue().toFixed(2)}`,
+			cell: ({ getValue }) => `${formattingData(parseFloat(getValue()))}`,
 			dataType: 'string',
 			size: 100,
 		}),
 		columnHelper.accessor('grossProfit', {
 			id: 'grossProfit',
 			header: 'Gross Profit',
-			cell: ({ getValue }) => `$${getValue()}`,
+			cell: ({ getValue }) => `${formattingData(parseFloat(getValue()))}`,
 			dataType: 'string',
 			size: 100,
 		}),
@@ -555,14 +556,14 @@ const MenuGrossProfit = () => {
 
 	return (
 		<>
-			<div className='w-[85%] mx-auto'>
+			<div className='w-[98%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Menu Gross Profit</h2>
+				<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Menu Gross Profit</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
@@ -582,12 +583,12 @@ const MenuGrossProfit = () => {
 							extraClass={'w-[219px]'}
 						/>
 						<div className='categories-button' onClick={() => setIsCategoryModalOpen(true)}>
-							<div className='py-3 ml-2 text-lg text-center capitalize border-2 border-solid cursor-pointer px-8 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-2 text-[14px] text-center capitalize border-2 border-solid cursor-pointer px-8 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Select Categories
 							</div>
 						</div>
 						<div className='run-button' onClick={fetchMenuGrossProfitData}>
-							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
@@ -608,29 +609,29 @@ const MenuGrossProfit = () => {
 					<div className='flex items-center rounded'>
 						<input
 							type='checkbox'
-							className='w-4 h-4 accent-[var(--tw-primary)] hover:brightness-150 bg-gray-100 border-gray-300'
+							className='w-4 h-4 text-[14px] accent-[var(--tw-primary)] hover:brightness-150 bg-gray-100 border-gray-300'
 							checked={showItemsWithSales}
 							onClick={() => setShowItemsWithSales(!showItemsWithSales)}
 						/>
-						<label className='text-lg font-medium ms-2'>Show Items With Sales of $0</label>
+						<label className='text-[14px] font-medium ms-2'>Show Items With Sales of $0</label>
 					</div>
 					<div className='flex items-center rounded'>
 						<input
 							type='checkbox'
-							className='w-4 h-4 accent-[var(--tw-primary)] hover:brightness-150 bg-gray-100 border-gray-300'
+							className='w-4 h-4 accent-[var(--tw-primary)] hover:brightness-150 bg-gray-100 border-gray-300 text-[14px] '
 							checked={showItemsWithNoRecipeCost}
 							onClick={() => setShowItemsWithNoRecipeCost(!showItemsWithNoRecipeCost)}
 						/>
-						<label className='text-lg font-medium ms-2'>Show Items With No Recipe Cost</label>
+						<label className='text-[14px]  font-medium ms-2'>Show Items With No Recipe Cost</label>
 					</div>
 					<div className='flex items-center rounded'>
 						<input
 							type='checkbox'
-							className='w-4 h-4 accent-[var(--tw-primary)] hover:brightness-150 bg-gray-100 border-gray-300'
+							className='w-4 h-4 accent-[var(--tw-primary)] hover:brightness-150 bg-gray-100 border-gray-300 text-[14px] '
 							checked={isGroupByCategory}
 							onClick={(e) => handleGroupByCategory(e)}
 						/>
-						<label className='text-lg font-medium ms-2'>Group Items By Category</label>
+						<label className='text-[14px]  font-medium ms-2'>Group Items By Category</label>
 					</div>
 				</div>
 
@@ -682,13 +683,13 @@ const MenuGrossProfit = () => {
 						<div className='p-4 w-[32rem] space-y-4 '>
 							<div className='flex justify-between'>
 								<button
-									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
+									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[14px]'
 									onClick={() => setSelectedCategories(Categories)}
 								>
 									Select All
 								</button>
 								<button
-									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
+									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[14px]'
 									onClick={() => setSelectedCategories([])}
 								>
 									Select None
@@ -696,14 +697,14 @@ const MenuGrossProfit = () => {
 							</div>
 							<div className='flex flex-col space-y-2'>
 								{Categories.map((category) => (
-									<div key={category} className='flex items-center rounded'>
+									<div key={category} className='flex items-center rounded text-[14px]'>
 										<input
 											type='checkbox'
 											className='w-4 h-4 accent-[var(--tw-primary)] hover:brightness-150 bg-gray-100 border-gray-300'
 											checked={selectedCategories.includes(category)}
 											onChange={() => handleCategoryChange(category)}
 										/>
-										<label className='text-lg font-medium ms-2'>{category}</label>
+										<label className=' font-medium ms-2 text-[14px]'>{category}</label>
 									</div>
 								))}
 							</div>

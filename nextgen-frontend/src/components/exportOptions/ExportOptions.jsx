@@ -9,7 +9,7 @@ const ExportButton = ({ isInclude, handleClick, iconName, title, className }) =>
     <div
       className={`
 				${className}
-				lg:p-2 border-2 flex justify-center items-center border-solid lg:w-[60px] lg:h-[60px] w-[28px] h-[28px] border-[var(--tw-primary)] lg:text-4xl text-[16px] rounded-full hover:bg-[var(--tw-primary)] text-[var(--tw-primary)] hover:text-white cursor-pointer ${
+				p-2 border-2 flex justify-center items-center border-solid w-[40px] h-[40px] border-[var(--tw-primary)] text-4xl rounded-full hover:bg-[var(--tw-primary)] text-[var(--tw-primary)] hover:text-white cursor-pointer ${
 					isInclude ? "block" : "hidden"
 				}`
 			}

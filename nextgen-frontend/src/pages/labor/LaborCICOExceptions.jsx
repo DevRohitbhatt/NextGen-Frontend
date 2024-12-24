@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborCICOExceptions from "../../assets/introJSSteps/laborCICOExceptions";
+import { formattingData } from "../../functions/formatingCurrency";
 
 const columnHelper = createColumnHelper();
 
@@ -145,18 +146,19 @@ const LaborCICOExceptions = () => {
         header: "Total Cost",
         cell: ({ getValue }) => `$${getValue()}`,
         dataType: "number",
-        footer: ({ table }) => (
+        footer: ({ table }) =>{ 
+          let totalCost = table
+          .getCoreRowModel()
+          .rows.reduce(
+            (acc, row) => acc + parseFloat(row.original.totalCost),
+            0
+          )
+          totalCost = formattingData(totalCost)
+          return(
           <div className="font-bold text-start">
-            $
-            {table
-              .getCoreRowModel()
-              .rows.reduce(
-                (acc, row) => acc + parseFloat(row.original.totalCost),
-                0
-              )
-              .toFixed(2)}
+            {totalCost}
           </div>
-        ),
+        )},
       }),
     ],
     []
@@ -412,17 +414,17 @@ const LaborCICOExceptions = () => {
 
   return (
     <>
-      <div className="w-[85%] mx-auto">
+      <div className="w-[98%] mx-auto">
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-4 text-2xl leading-tight text-left pageTitle">
+        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
           Clock In - Clock Out Exceptions
         </h2>
-        <header className="optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
+        <header className="optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
           <div className="flex items-center space-x-1">
             <UnitSelector
               companyId={companyID}
@@ -449,7 +451,7 @@ const LaborCICOExceptions = () => {
               />
             </div>
             <div className="run-button" onClick={fetchLaborCICOExceptionsData}>
-              <div className="py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
+              <div className="py-2 ml-2 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
                 Run
               </div>
             </div>

@@ -17,7 +17,7 @@
 #root {
 	width: 100%;
 	margin: auto;
-	padding: 2rem 0px;
+	padding-top: 9px;
 }
 
 a {
@@ -357,16 +357,15 @@ svg.clearIcone {
 }
 .more-container {
 	position: absolute;
-	top: 288px;
+	top: 207px;
 	/* left: 100%; */
 	background-color: #fff;
 	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 	z-index: 6;
-	width: 275px !important;
 	margin-top: 22px;
 	padding: 8px;
 	display: table-cell;
-	margin-left: 169px;
+	margin-left: 110px;
 }
 .display-flex {
 	display: flex;

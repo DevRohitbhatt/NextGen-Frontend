@@ -29,7 +29,7 @@ const ModalHeader = styled.div`
 	background-color: ${(props) => props.theme.primary};
 	color: white;
 	font-weight: 600;
-	font-size: 20px;
+	font-size: 16px;
 	border-top-left-radius: 15px;
 	border-top-right-radius: 15px;
 `;
