@@ -1,17 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getCall, postCall } from "../../apis/network";
 import { Steps } from "intro.js-react";
 import { useSelector } from "react-redux";
-import voidsReport from "../../assets/introJSSteps/voidsReport";
 import {
-  Dropdown,
   Loader,
   UnitSelector,
   CalendarModal,
   UnitModal,
   ExportOptions,
   ExcelExport as exportToExcel,
-  ForcastedSales,
   DateSelector,
   PdfBuilder,
 } from "../../components";
@@ -23,6 +20,7 @@ import dateFormat from "dateformat";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import cookChart from "../../assets/introJSSteps/cookChart";
+import ForecastedSales from "../../components/forcastedSales/ForecastedSales";
 const columnHelper = createColumnHelper();
 
 const CookChart = () => {
@@ -55,9 +53,9 @@ const CookChart = () => {
     stepsEnabled: false,
   });
   const [cookChartData, setCookChartData] = useState({});
-  const [forCastedSalesValue, setForcastedSalesValue] = useState("");
+  const [forecastedSalesValue, setForecastedSalesValue] = useState("");
   const cookDropTableRef = useRef(); // ref for getting CookDropTable
-  const [isChangedForcaste, setIsChangedForcaste] = useState(false);
+  const [isForecastAltered, setIsForecastAltered] = useState(false);
   const [companyStateId, setCompanyStateId] = useState("");
 
   useEffect(() => {
@@ -73,7 +71,7 @@ const CookChart = () => {
   }, [defaultUnitID, defaultUnitName, companyID]);
   // TransformData
   const transformCookDropData = (data) => {
-    const headers = data[0].lstItems.map((item) => ({
+    const headers = data[0].cookItems.map((item) => ({
       itemName: item.itemName,
       unitOfMeasure: item.unitOfMeasure,
       safetyFactor: item.safetyFactor,
@@ -83,8 +81,8 @@ const CookChart = () => {
     const rows = {};
 
     // Iterate over each item and cook drop count to build rows based on cookDropTime
-    data[0].lstItems.forEach((item) => {
-      item.lstItemCount.forEach((count) => {
+    data[0].cookItems.forEach((item) => {
+      item.cookItemCounts.forEach((count) => {
         const time = count.cookDropTime.slice(0, 5); // Format time to HH:MM
 
         if (!rows[time]) {
@@ -126,12 +124,12 @@ const CookChart = () => {
 
       const result = await getCall(getData, false);
       if (result?.data && result?.data.length) {
-        setForcastedSalesValue(result.data[0].forecastedSales);
+        setForecastedSalesValue(result.data[0].forecastedSales);
         console.log(
           result.data[0].forecastedSales !==
             result.data[0].originalForecastedSales
         );
-        setIsChangedForcaste(
+        setIsForecastAltered(
           result.data[0].forecastedSales !==
             result.data[0].originalForecastedSales
         );
@@ -156,12 +154,12 @@ const CookChart = () => {
 
     for (const [time, fields] of Object.entries(changedData)) {
       fields.forEach((field) => {
-        const matchingItem = updatedData.lstItems.find(
+        const matchingItem = updatedData.cookItems.find(
           (item) => item.cookDropChartItemID === field.cookDropChartItemID
         );
 
         if (matchingItem) {
-          const matchingCount = matchingItem.lstItemCount.find(
+          const matchingCount = matchingItem.cookItemCounts.find(
             (count) => count.cookDropTime.slice(0, 5) === time
           );
 
@@ -194,7 +192,7 @@ const CookChart = () => {
 
   const prepareDynamicPdfData = (data, mode) => {
     // Extract headers
-    const headers = data.lstItems.map((item) => ({
+    const headers = data.cookItems.map((item) => ({
       text: item.itemName,
       unit: item.unitOfMeasure,
       safetyFactor: `${item.safetyFactor}%`,
@@ -203,8 +201,8 @@ const CookChart = () => {
     // Extract rows based on `cookDropTime`
     const rows = {};
 
-    data.lstItems.forEach((item) => {
-      item.lstItemCount.forEach((count) => {
+    data.cookItems.forEach((item) => {
+      item.cookItemCounts.forEach((count) => {
         const time = count.cookDropTime.slice(0, 5); // Extract HH:MM from time
         if (!rows[time]) {
           rows[time] = [];
@@ -281,7 +279,7 @@ const CookChart = () => {
     );
     console.log("Updated CookDrop Data:", JSON.stringify(transformedData));
 
-    transformedData.forecastedSales = forCastedSalesValue;
+    transformedData.forecastedSales = forecastedSalesValue;
     const postData = {
       fullUrl: "api/cookdrop/savecookdropchart",
       urlParams: {},
@@ -316,15 +314,15 @@ const CookChart = () => {
   };
 
   const prepareExcelData = async (cookDropChartData) => {
-    const headers = cookDropChartData.lstItems.map((item) => ({
+    const headers = cookDropChartData.cookItems.map((item) => ({
       name: `${item.itemName} (${item.unitOfMeasure}, ${item.safetyFactor}%)`,
     }));
 
     const rows = {};
 
     // Group rows by cookDropTime
-    cookDropChartData.lstItems.forEach((item) => {
-      item.lstItemCount.forEach((count) => {
+    cookDropChartData.cookItems.forEach((item) => {
+      item.cookItemCounts.forEach((count) => {
         const time = count.cookDropTime.slice(0, 5); // Format time to HH:MM
         if (!rows[time]) {
           rows[time] = [];
@@ -433,14 +431,14 @@ const CookChart = () => {
               onClick={handleDateSelectorClick}
               isDateRange={false}
             />
-            <ForcastedSales
-              value={forCastedSalesValue}
+            <ForecastedSales
+              value={forecastedSalesValue}
               onChange={(e) => {
                 console.log(e.target.value.split("$")[1]),
-                  setForcastedSalesValue(e.target.value.split("$")[1]);
+                  setForecastedSalesValue(e.target.value.split("$")[1]);
               }}
             />
-            {isChangedForcaste ? (
+            {isForecastAltered ? (
               <p className="relative text-xs xl:text-sm py-2 overflow-hidden flex flex-row justify-start mt-6">
                 *Changed
               </p>

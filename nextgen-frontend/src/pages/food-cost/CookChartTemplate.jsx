@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   CalendarModal,
-  Dropdown,
   ExportOptions,
-  ForcastedSales,
   Loader,
   Modal,
   SearchBar,
@@ -31,7 +29,7 @@ import {
 import HhmmssSelector from "../../components/common/HhmmssSelector";
 import ReactDOM from "react-dom";
 import cookChartTemplates from "../../assets/introJSSteps/cookChartTemplate";
-import { CiCirclePlus } from "react-icons/ci";
+import { Link } from "react-router-dom";
 
 const CookChartTemplate = (props) => {
   const {
@@ -42,7 +40,7 @@ const CookChartTemplate = (props) => {
     defaultUnitName,
     userID,
   } = useSelector((state) => state.globalState);
-
+  const [isSave, setIsSave] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState(
@@ -60,17 +58,17 @@ const CookChartTemplate = (props) => {
   const [openCreateItemModal, setOpenCreateItemModal] = useState(false);
   const [openEditItemModal, setOpenEditItemModal] = useState(false);
   const [cookAllData, setCookAllData] = useState([]);
-  const [editCookData, SetEditCookData] = useState([]);
+  const [editCookData, setEditCookData] = useState([]);
   const [allDataFeilds, setAllDataFeilds] = useState({});
   const [filteredData, setFilteredData] = useState(cookAllData);
   const [addMenuItems, setAddMenuItems] = useState([]);
-  const [addIntryItems, setAddIntryItems] = useState([]);
+  const [addInventoryItems, setAddInventoryItems] = useState([]);
   const [sourceType, setSourceType] = useState("Menu");
   const [editsourceType, setEditSourceType] = useState("Menu");
   const [sourceTypeDropDown, setSourceTypeDropDown] = useState(false);
   const [showFullTable, setShowFullTable] = useState({});
   const [rightTableData, setRightTableData] = useState([]);
-  const [addHeadrFeilds, setAddHeadrFeilds] = useState({
+  const [addHeaderFields, setAddHeaderFields] = useState({
     cookItemName: "",
     unitOfMeasure: "",
     cookInterval: 0,
@@ -94,8 +92,10 @@ const CookChartTemplate = (props) => {
   const leftColumnRef = useRef(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [saveDisable, setSaveDisable] = useState(false);
-  const [initDataLoading, setInitDataLodading] = useState(false);
-  const [isHeaderLoade, setIsHeaderLoade] = useState(false);
+  const [initDataLoading, setInitDataLoading] = useState(false);
+  const [isHeaderLoaded, setIsHeaderLoaded] = useState(false);
+  const projectAheadOptions = [{ name: "y" }, { name: "n" }];
+  const [view, setView] = useState("y");
   const [introSteps, setIntroSteps] = useState({
     steps: cookChartTemplates(),
     initialStep: 0,
@@ -127,7 +127,7 @@ const CookChartTemplate = (props) => {
       setCompanyStateId(() => companyID);
     }
     if (userID) {
-      setAddHeadrFeilds((prev) => ({
+      setAddHeaderFields((prev) => ({
         ...prev,
         createdBy: userID,
         deletedBy: userID,
@@ -206,11 +206,11 @@ const CookChartTemplate = (props) => {
 
   //Create new item data call
   const getAddNewCookData = async (type) => {
-    setInitDataLodading(true);
+    setInitDataLoading(true);
     if (type === "Menu") {
       try {
         const getData = {
-          fullUrl: "api/cookdrop/getmenuitems",
+          fullUrl: "api/menus/getMenuItemsByCompanyID",
           urlParams: {
             companyId: companyStateId,
           },
@@ -218,13 +218,13 @@ const CookChartTemplate = (props) => {
 
         const result = await getCall(getData);
         if (result?.data && result?.data.length) {
-          result.data.forEach((items) => (items.menuID = items.menuID + ""));
+          result.data.forEach((items) => (items.menuID = items.itemID + ""));
           setAddMenuItems(result.data);
         }
       } catch (error) {
         console.error(error);
       } finally {
-        setInitDataLodading(false);
+        setInitDataLoading(false);
       }
     } else if (type === "Inventory") {
       try {
@@ -240,12 +240,11 @@ const CookChartTemplate = (props) => {
           result.data.forEach(
             (items) => (items.menuID = items.inventoryItemID + "")
           );
-          setAddIntryItems(result.data);
+          setAddInventoryItems(result.data);
         }
       } catch (error) {
-        console.error(error);
       } finally {
-        setInitDataLodading(false);
+        setInitDataLoading(false);
       }
     }
   };
@@ -270,7 +269,7 @@ const CookChartTemplate = (props) => {
   };
   //Edit  item data call
   const getEditCookData = async (id) => {
-    setIsHeaderLoade(true);
+    setIsHeaderLoaded(true);
     try {
       const getData = {
         fullUrl: "api/cookdrop/getcookdropcookitembyid",
@@ -283,20 +282,29 @@ const CookChartTemplate = (props) => {
       result.data[0].listCookDropCookItemDetails.forEach(
         (items) => (items.menuID = items.inventoryOrMenuItemID + "")
       );
-      SetEditCookData(result.data[0].listCookDropCookItemDetails);
+      setEditCookData(result.data[0].listCookDropCookItemDetails);
 
       return result;
     } catch (error) {
     } finally {
-      setIsHeaderLoade(false);
+      setIsHeaderLoaded(false);
     }
   };
 
-  const saveTemplateData = async () => {
-    toast.info("Saving data...", { autoClose: 1000 });
+
+  const handleSave = () => {
+    setIsSave(true);
+    setShowUnitModal(true);
+  };
+ const handleUnitSaveSelection = (units) => {
+  debugger
+    toast.info('Saving data...', { autoClose: false });
+    saveTemplateData(units);
+  };
+  const saveTemplateData = async (units) => {
     let body = {
       companyID: companyStateId,
-      memberID: selectedUnit,
+      unitID: units.map((unit) => unit.id),
       templateName: "Default",
       cookDropTemplateID: null,
       createdBy: userID,
@@ -444,7 +452,7 @@ const CookChartTemplate = (props) => {
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={isHeaderLoade ? "Loading..." : cookItemName}
+                    value={isHeaderLoaded ? "Loading..." : cookItemName}
                     className="bg-gray-200 p-2 w-full rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "cookItemName");
@@ -462,7 +470,7 @@ const CookChartTemplate = (props) => {
                       }));
                     }}
                     enableSeconds={false}
-                    initDataLoading={isHeaderLoade}
+                    initDataLoading={isHeaderLoaded}
                   />
                 </td>
                 <td className="px-2 py-2 ">
@@ -475,7 +483,7 @@ const CookChartTemplate = (props) => {
                         ["cookTimeSeconds"]: e,
                       }));
                     }}
-                    initDataLoading={isHeaderLoade}
+                    initDataLoading={isHeaderLoaded}
                   />
                 </td>
                 <td className="px-2 py-2 ">
@@ -488,13 +496,13 @@ const CookChartTemplate = (props) => {
                         ["holdTimeSeconds"]: e,
                       }));
                     }}
-                    initDataLoading={isHeaderLoade}
+                    initDataLoading={isHeaderLoaded}
                   />
                 </td>
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={isHeaderLoade ? "Loading..." : safetyFactor}
+                    value={isHeaderLoaded ? "Loading..." : safetyFactor}
                     className="bg-gray-200 p-2 w-[105px]  rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "safetyFactor");
@@ -504,7 +512,7 @@ const CookChartTemplate = (props) => {
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={isHeaderLoade ? "Loading..." : projectAhead}
+                    value={isHeaderLoaded ? "Loading..." : projectAhead}
                     className="bg-gray-200 p-2 w-[130px] rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "projectAhead");
@@ -521,7 +529,7 @@ const CookChartTemplate = (props) => {
                         ["laborFixedSeconds"]: e,
                       }));
                     }}
-                    initDataLoading={isHeaderLoade}
+                    initDataLoading={isHeaderLoaded}
                   />
                 </td>
                 <td className="px-2 py-2 ">
@@ -534,7 +542,7 @@ const CookChartTemplate = (props) => {
                         ["laborVarSeconds"]: e,
                       }));
                     }}
-                    initDataLoading={isHeaderLoade}
+                    initDataLoading={isHeaderLoaded}
                   />
                 </td>
                 <td className="px-2 py-2 ">
@@ -586,7 +594,7 @@ const CookChartTemplate = (props) => {
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={isHeaderLoade ? "Loading..." : unitOfMeasure}
+                    value={isHeaderLoaded ? "Loading..." : unitOfMeasure}
                     className="bg-gray-200 p-2 w-[90px] rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "unitOfMeasure");
@@ -596,7 +604,7 @@ const CookChartTemplate = (props) => {
                 <td className="px-2 py-2">
                   <input
                     type="text"
-                    value={isHeaderLoade ? "Loading..." : mixMultiplier}
+                    value={isHeaderLoaded ? "Loading..." : mixMultiplier}
                     className="bg-gray-200 p-2 w-[115px] rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "mixMultiplier");
@@ -627,7 +635,7 @@ const CookChartTemplate = (props) => {
             isPaginationEnabled={addMenuItems.length > 0}
             onCancel={() => setOpenEditItemModal(!openEditItemModal)}
             initDataLoading={initDataLoading}
-            initialTemplateLoade={isHeaderLoade}
+            initialTemplateLoade={isHeaderLoaded}
             isSaveDisable={saveDisable}
           />
         ) : (
@@ -637,7 +645,7 @@ const CookChartTemplate = (props) => {
             tableTwoName="List of item"
             tableOneHeaders={["Inventory ID", "Description"]}
             tableTwoHeaders={["Inventory ID", "Description"]}
-            initialTableOneData={addIntryItems}
+            initialTableOneData={addInventoryItems}
             initialTemplateItems={
               sourceType == editsourceType ? editCookData : []
             }
@@ -646,7 +654,7 @@ const CookChartTemplate = (props) => {
             onSave={(saved) => {
               savedData(saved);
             }}
-            isPaginationEnabled={addIntryItems.length > 0}
+            isPaginationEnabled={addInventoryItems.length > 0}
             onCancel={() => setOpenEditItemModal(!openEditItemModal)}
             initDataLoading={initDataLoading}
             isSaveDisable={saveDisable}
@@ -668,11 +676,30 @@ const CookChartTemplate = (props) => {
       holdTimeSeconds,
       laborFixedSeconds,
       laborVarSeconds,
-    } = addHeadrFeilds;
+    } = addHeaderFields;
+    const [invalidFields, setInvalidFields] = useState({});
+
+    const validateFields = () => {
+      const invalid = {};
+
+      if (!cookItemName.trim()) invalid.cookItemName = true;
+      if (!cookInterval) invalid.cookInterval = true;
+      if (!safetyFactor) invalid.safetyFactor = true;
+      if (!projectAhead.trim()) invalid.projectAhead = true;
+      if (!unitOfMeasure.trim()) invalid.unitOfMeasure = true;
+      if (!mixMultiplier) invalid.mixMultiplier = true;
+
+      setInvalidFields(invalid);
+      return Object.keys(invalid).length === 0; // Return true if all fields are valid
+    };
 
     const onChangeHeaderValues = (e, name) => {
-      let value = e.target.value;
-      setAddHeadrFeilds((prev) => ({
+      const value = e.target.value.trim();
+
+      // Clear the error for the current field
+      setInvalidFields((prev) => ({ ...prev, [name]: false }));
+
+      setAddHeaderFields((prev) => ({
         ...prev,
         [name]: value,
       }));
@@ -682,6 +709,18 @@ const CookChartTemplate = (props) => {
       setSourceType(type);
       setSourceTypeDropDown(false);
       getAddNewCookData(type);
+    };
+
+    const handleSave = (data) => {
+      debugger;
+      if (validateFields()) {
+        // Proceed with save if fields are valid
+        savedData(data);
+      } else {
+        toast.error("Please fill out all required fields.", {
+          autoClose: 1500,
+        });
+      }
     };
 
     const savedData = async (saved) => {
@@ -697,7 +736,7 @@ const CookChartTemplate = (props) => {
         delete newItem.description;
         return newItem;
       });
-      let body = addHeadrFeilds;
+      let body = addHeaderFields;
       body.listCookDropCookItemDetails = values;
       body.sourceType = sourceType;
       try {
@@ -713,7 +752,7 @@ const CookChartTemplate = (props) => {
         if (result?.error == null) {
           await getCookAllItemData();
           toast.success("Saved...", { autoClose: 1500 });
-          setAddHeadrFeilds({
+          setAddHeaderFields({
             cookItemName: "",
             unitOfMeasure: "",
             cookInterval: 0,
@@ -737,7 +776,6 @@ const CookChartTemplate = (props) => {
           toast.error("Failed to save", { autoClose: 1500 });
         }
       } catch (error) {
-        console.log(error);
         toast.error("Failed to save", { autoClose: 1500 });
       } finally {
         setSaveDisable(false);
@@ -791,7 +829,9 @@ const CookChartTemplate = (props) => {
                   <input
                     type="text"
                     value={cookItemName}
-                    className="bg-gray-200 p-2 w-full rounded-full  border-none "
+                    className={`bg-gray-200 p-2 w-full rounded-full  border-none  ${
+                      invalidFields.cookItemName ? "border-red-500" : ""
+                    }`}
                     onChange={(e) => {
                       onChangeHeaderValues(e, "cookItemName");
                     }}
@@ -802,7 +842,7 @@ const CookChartTemplate = (props) => {
                     enableSeconds={false}
                     initialSeconds={cookInterval * 60}
                     onTimeChange={(e) => {
-                      setAddHeadrFeilds((prev) => ({
+                      setAddHeaderFields((prev) => ({
                         ...prev,
                         ["cookInterval"]: e / 60,
                       }));
@@ -813,7 +853,7 @@ const CookChartTemplate = (props) => {
                   <HhmmssSelector
                     initialSeconds={cookTimeSeconds}
                     onTimeChange={(e) => {
-                      setAddHeadrFeilds((prev) => ({
+                      setAddHeaderFields((prev) => ({
                         ...prev,
                         ["cookTimeSeconds"]: e,
                       }));
@@ -824,7 +864,7 @@ const CookChartTemplate = (props) => {
                   <HhmmssSelector
                     initialSeconds={holdTimeSeconds}
                     onTimeChange={(e) => {
-                      setAddHeadrFeilds((prev) => ({
+                      setAddHeaderFields((prev) => ({
                         ...prev,
                         ["holdTimeSeconds"]: e,
                       }));
@@ -842,20 +882,39 @@ const CookChartTemplate = (props) => {
                   />
                 </td>
                 <td className="px-2 py-2 ">
-                  <input
+                  {/* <input
                     type="text"
                     value={projectAhead}
                     className="bg-gray-200 p-2 w-[130px] rounded-full  border-none "
                     onChange={(e) => {
                       onChangeHeaderValues(e, "projectAhead");
                     }}
-                  />
+                  /> */}
+                  {/* <Dropdown
+								title=''
+								options={projectAheadOptions}
+								selectedOption={view}
+								onOptionChange={(o)=>console.log(o)}
+							/> */}
+                  <div className="border  mx-0 ml-0 lg:text-[16px] text-[12px] bg-gray-200 p-2 w-[105px] rounded-full  border-none ">
+                    <select
+                      value={projectAhead}
+                      onChange={(e) => {
+                        onChangeHeaderValues(e, "projectAhead");
+                      }}
+                      style={{ outline: "none" }}
+                      className="  mx-4 lg:text-[16px] text-[12px] bg-gray-200 p-0 w-[80%] rounded-full  border-none "
+                    >
+                      <option value={"y"}>Y</option>
+                      <option value={"n"}>N</option>
+                    </select>
+                  </div>
                 </td>
                 <td className="px-2 py-2 ">
                   <HhmmssSelector
                     initialSeconds={laborFixedSeconds}
                     onTimeChange={(e) => {
-                      setAddHeadrFeilds((prev) => ({
+                      setAddHeaderFields((prev) => ({
                         ...prev,
                         ["laborFixedSeconds"]: e,
                       }));
@@ -866,7 +925,7 @@ const CookChartTemplate = (props) => {
                   <HhmmssSelector
                     initialSeconds={laborVarSeconds}
                     onTimeChange={(e) => {
-                      setAddHeadrFeilds((prev) => ({
+                      setAddHeaderFields((prev) => ({
                         ...prev,
                         ["laborVarSeconds"]: e,
                       }));
@@ -966,7 +1025,7 @@ const CookChartTemplate = (props) => {
             dorpabaleidTwo={"itemstemplate"}
             isPaginationEnabled={addMenuItems.length > 100}
             onSave={(saved) => {
-              savedData(saved);
+              handleSave(saved);
             }}
             onCancel={() => setOpenCreateItemModal(!openCreateItemModal)}
             isSaveDisable={saveDisable}
@@ -979,15 +1038,15 @@ const CookChartTemplate = (props) => {
             tableTwoName="Items"
             tableOneHeaders={["Inventory ID", "Description"]}
             tableTwoHeaders={["Inventory ID", "Description"]}
-            initialTableOneData={addIntryItems}
+            initialTableOneData={addInventoryItems}
             dorpabaleidOne={"inventory"}
             dorpabaleidTwo={"inventorytemplate"}
             onSave={(saved) => {
-              savedData(saved);
+              handleSave(saved);
             }}
             onCancel={() => setOpenCreateItemModal(!openCreateItemModal)}
             isSaveDisable={saveDisable}
-            isPaginationEnabled={addIntryItems.length > 100}
+            isPaginationEnabled={addInventoryItems.length > 100}
             initDataLoading={initDataLoading}
           />
         )}
@@ -1094,9 +1153,9 @@ const CookChartTemplate = (props) => {
     }
   };
 
-  const addUsingMobile = (data) => {
+ 
+  const addTemplateUsingMobile = (data) => {
     let resultData = data;
-    console.log(data);
     setRightTableData((prev) => [
       ...prev,
       {
@@ -1139,7 +1198,7 @@ const CookChartTemplate = (props) => {
             includeSave={true}
             includeHelp={true}
             handleSaveClick={() => {
-              saveTemplateData();
+              handleSave();
             }}
             handleHelpClick={() =>
               setIntroSteps({ ...introSteps, stepsEnabled: true })
@@ -1153,9 +1212,15 @@ const CookChartTemplate = (props) => {
               alignmentId={alignmentID}
               memberID={selectedUnit}
               memberName={selectedUnitName}
-              includeAreas={true}
               setMemberName={setSelectedUnitName}
               onClick={() => setShowUnitModal(true)}
+              handleClose={() => setShowUnitModal(false)}
+              isSaveUnit={isSave}
+              isMultiUnit={isSave}
+              includeAreas={false}
+              // handleSaveButtonClick={!isSave ? handleOkButtonClick : () => {}}
+            handleUnitSaveSelection={handleUnitSaveSelection}
+            handleUnitSelection={handleUnitSelection}
             />
           </div>
           <div className="hidden lg:block">
@@ -1163,7 +1228,7 @@ const CookChartTemplate = (props) => {
               includeSave={true}
               includeHelp={true}
               handleSaveClick={() => {
-                saveTemplateData();
+                handleSave();
               }}
               handleHelpClick={() =>
                 setIntroSteps({ ...introSteps, stepsEnabled: true })
@@ -1256,7 +1321,7 @@ const CookChartTemplate = (props) => {
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         e.preventDefault();
-                                        addUsingMobile(item);
+                                        addTemplateUsingMobile(item);
                                       }}
                                       className="absolute top-1/2 text-xl right-20 font-bold transform -translate-y-1/2 text-blue-600 hover:text-blue-800 cursor-pointer  z-9"
                                     >
@@ -1352,7 +1417,7 @@ const CookChartTemplate = (props) => {
                           <div className=" tableHOC overflow-auto h-[90vh]">
                             {rightTableData.length === 0 && (
                               <p className="text-gray-500">
-                                Drop the Cook Items tables here
+                                Drop the Cook Items here
                               </p>
                             )}
                             {rightTableData.map((table) => (
@@ -1602,9 +1667,21 @@ const CookChartTemplate = (props) => {
                         {...provided.droppableProps}
                         className="w-[55%] sticky top-0 cook-template"
                       >
-                        <div className="rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px] sticky top-0 ">
+                        <div className="absolute right-[-20px]">
+                          <Link to={"/CookChart"} className="text-[#213547]">
+                            <HoverBorderButton
+                              extraClass={
+                                "!mt-[5px] !mb-[20px]  create-New-CookItem "
+                              }
+                              // onClick={() => handleOpenCreateItemModal()}
+                            >
+                              Display Chart
+                            </HoverBorderButton>
+                          </Link>
+                        </div>
+                        <div className="rounded-2xl mt-[70px]  shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] p-[15px] sticky top-0 ">
                           <h2 className="text-2xl font-bold mb-4 ">Template</h2>
-                          <div className=" tableHOC overflow-auto h-[90vh]">
+                          <div className=" tableHOC overflow-auto h-[70vh]">
                             {rightTableData.length === 0 && (
                               <p className="text-gray-500">
                                 Drop the Cook Items tables here
@@ -1716,11 +1793,16 @@ const CookChartTemplate = (props) => {
             memberID={selectedUnit}
             memberName={selectedUnitName}
             show={showUnitModal}
-            includeAreas={false}
+          
             handleClose={() => {
               setShowUnitModal(false);
             }}
             handleUnitSelection={handleUnitSelection}
+            isSaveUnit={isSave}
+            isMultiUnit={isSave}
+            includeAreas={isSave}
+            // handleSaveButtonClick={!isSave ? handleOkButtonClick : () => {}}
+          handleUnitSaveSelection={handleUnitSaveSelection}
           />
           <CalendarModal
             handleClose={() => setShowDateModal(false)}

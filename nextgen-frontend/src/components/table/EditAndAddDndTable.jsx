@@ -17,6 +17,7 @@ const DraggableRow = ({
   extraHeaders,
   onQuantityChange,
   addToClick,
+  isEmptyUomQty = [],
 }) => {
   const [timeoutId, setTimeoutId] = useState(null);
 
@@ -54,7 +55,7 @@ const DraggableRow = ({
         <>
           <td className="lg:px-4 px-0 py-[2px] lg:w-[20%] w-full">
             <input
-              className="  border rounded-full pr-[18px] lg:pl-[10px] pl-[5px] outline-none lg:w-[60%] sm:w-[50%] w-full"
+              className={`border rounded-full pr-[18px] lg:pl-[10px] pl-[5px] outline-none lg:w-[60%] sm:w-[50%] w-full ${isEmptyUomQty.length && isEmptyUomQty.find((prod)=> prod.uniqueKey === item.uniqueKey) ? 'border-red-500' : ""}`}
               value={item.cookItemQuantity || ""}
               onChange={(e) => onQuantityChange(item.uniqueKey, e.target.value)}
               type="text"
@@ -107,7 +108,7 @@ const EditAndAddDndTable = ({
   const [filteredItems, setFilteredItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
-
+  const [isEmptyUomQty, setIsEmptyUomQty] = useState([])
   useEffect(() => {
     setItems(initialTableOneData);
     setFilteredItems(initialTableOneData); // Initialize filteredItems
@@ -253,10 +254,12 @@ const EditAndAddDndTable = ({
   const handleSave = () => {
     toast.info("Saving data...", { autoClose: 1000 });
     if (onSave) {
-      let isvulnerab = templateItems.find(
+      let isEmpty = templateItems.filter(
         (item) => item?.cookItemQuantity === undefined
       );
-      if (isvulnerab) {
+      
+      if (isEmpty) {
+        setIsEmptyUomQty(isEmpty)
         toast.error("Qty of UOM is Empty", { autoClose: 1500 });
       } else {
         onSave(templateItems);
@@ -465,6 +468,7 @@ const EditAndAddDndTable = ({
                                 onDelete={handleDelete}
                                 extraHeaders={tableTwoHeaders}
                                 onQuantityChange={handleQuantityChange}
+                                isEmptyUomQty={isEmptyUomQty}
                               />
                             </tr>
                           )}

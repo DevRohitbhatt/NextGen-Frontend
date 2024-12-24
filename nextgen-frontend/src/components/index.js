@@ -48,7 +48,7 @@ export { default as TreeNode } from './table/TreeNode';
 export { default as TreeTable } from './table/TreeTableBuilder';
 export { default as TableHOC } from './table/TableHOC';
 export { default as DndTable } from './table/DndTable'
-export {default as ForcastedSales} from './forcastedSales/ForcastedSales';
+export {default as ForcastedSales} from './forcastedSales/ForecastedSales';
 
 //menu components
 export { default as Menu } from './menu/Menu';

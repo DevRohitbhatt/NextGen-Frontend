@@ -1,9 +1,9 @@
 import React from "react";
 
-const ForcastedSales = ({ value, onChange }) => {
+const ForecastedSales = ({ value, onChange }) => {
     return (
         <div className='flex flex-col justify-center m-1 rounded-3xl '>
-            <h3 className='mb-1 ml-2 lg:text-xl text-[10px] font-semibold text-nowrap'>Forcasted Sales</h3>
+            <h3 className='mb-1 ml-2 lg:text-xl text-[10px] font-semibold text-nowrap'>Forecasted Sales</h3>
             <input
                 onChange={onChange}
                 value={`$${value ? value : ""}`}
@@ -12,4 +12,4 @@ const ForcastedSales = ({ value, onChange }) => {
     )
 }
 
-export default ForcastedSales;
+export default ForecastedSales;

@@ -6,7 +6,7 @@ import React, {
 } from "react";
 
 const CookDropTableHeader = ({ headerData }) => {
-  const headers = headerData && headerData.length > 0 ? headerData : [];
+  const headers = headerData || [];
 
   return (
     <thead className="bg-white sticky top-0 z-10">
@@ -36,9 +36,7 @@ const CookDropTableHeader = ({ headerData }) => {
                       <tr>
                         <th className="text-[11px]">Safety Factor</th>
                       </tr>
-                      {/* <tr>
-                                        <th >Mix</th>
-                                    </tr> */}
+                     
                     </thead>
                   </table>
                 </th>
@@ -64,7 +62,7 @@ const CookDropTableHeader = ({ headerData }) => {
             <div className="text-[11px]  font-medium  p-0  text-center text-nowrap indent-0  align-middle">
               {header?.safetyFactor ? header?.safetyFactor : ""}%
             </div>
-            {/* <div className='text-[14px] font-medium p-0  text-center text-nowrap indent-0  align-middle'>{header?.mix ? header?.mix : ""}%</div> */}
+     
           </th>
         ))}
       </tr>
@@ -218,14 +216,18 @@ const CookDropTableFooter = ({ rows }) => {
         {/* Column totals */}
 
         {columnTotals.map((total, index) => (
-          <>
-            <td
-              key={index}
-              className=" lg:px-4 lg:py-2 shadow-[0_-1px_0_var(--tw-primary)_inset]  text-center font-bold text-[11px]"
-            >
-              <div className="flex justify-center space-x-1"><span className="w-8 text-center text-[11px]">{total}</span> <span className="w-[5px]"></span><span className="w-8 text-center text-[11px]"> </span><span className="w-[5px]"></span><span className="w-8 text-center text-[11px]"></span></div>
-            </td>
-          </>
+          <td
+            key={index}
+            className=" lg:px-4 lg:py-2 shadow-[0_-1px_0_var(--tw-primary)_inset]  text-center font-bold text-[11px]"
+          >
+            <div className="flex justify-center space-x-1">
+              <span className="w-8 text-center text-[11px]">{total}</span>{" "}
+              <span className="w-[5px]"></span>
+              <span className="w-8 text-center text-[11px]"> </span>
+              <span className="w-[5px]"></span>
+              <span className="w-8 text-center text-[11px]"></span>
+            </div>
+          </td>
         ))}
       </tr>
     </tfoot>
