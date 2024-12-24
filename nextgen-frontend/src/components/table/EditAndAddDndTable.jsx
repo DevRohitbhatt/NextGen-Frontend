@@ -97,11 +97,7 @@ const EditAndAddDndTable = ({
   isPaginationEnabled, // New prop to control pagination
 }) => {
   const [items, setItems] = useState([]);
-  const [templateItems, setTemplateItems] = useState(
-    initialTemplateItems && initialTemplateItems.length > 0
-      ? initialTemplateItems
-      : []
-  );
+  const [templateItems, setTemplateItems] = useState(initialTemplateItems || [] );
   const [draggingId, setDraggingId] = useState(null);
   const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -254,12 +250,11 @@ const EditAndAddDndTable = ({
   const handleSave = () => {
     toast.info("Saving data...", { autoClose: 1000 });
     if (onSave) {
-      let isEmpty = templateItems.filter(
+      let isCookItemQuantityValid = templateItems.filter(
         (item) => item?.cookItemQuantity === undefined
       );
-      
-      if (isEmpty) {
-        setIsEmptyUomQty(isEmpty)
+      if (isCookItemQuantityValid && isCookItemQuantityValid.length > 0 ) {
+        setIsEmptyUomQty(isCookItemQuantityValid)
         toast.error("Qty of UOM is Empty", { autoClose: 1500 });
       } else {
         onSave(templateItems);
@@ -485,7 +480,7 @@ const EditAndAddDndTable = ({
       </div>
       <div className="flex  w-full justify-end">
         <HoverBorderButton
-          isSaveDisable={isSaveDisable}
+          isDisable={isSaveDisable}
           extraClass={"my-[0px]"}
           onClick={handleSave}
         >

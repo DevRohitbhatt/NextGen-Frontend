@@ -40,7 +40,7 @@ const HhmmssSelector = (props) => {
     }
   };
 
-  const activeFocuse = (name) => {
+  const changeFocusToNext = (name) => {
     if (name === "hh") {
       hhRef.current.select();
     } else if (name === "mm") {
@@ -73,7 +73,6 @@ const HhmmssSelector = (props) => {
 
   useEffect(() => {
     if (props.initialSeconds) {
-      console.log("pawandeep");
       const hours = String(Math.floor(props.initialSeconds / 3600)).padStart(
         2,
         "0"
@@ -96,8 +95,7 @@ const HhmmssSelector = (props) => {
   }, [hh, mm, ss]);
   return (
     <div
-      className={`bg-gray-200 py-2 w-full rounded-full  border-none box-content flex  
-      `}
+      className={`bg-gray-200 py-2 w-full rounded-full box-content flex ${props.showErrorFeild ? 'border border-red-500' :  'border-none' }`}
     >
       {props.initDataLoading ? (
         <div className="w-[95px]">Loading...</div>
@@ -112,7 +110,7 @@ const HhmmssSelector = (props) => {
             }}
             ref={hhRef}
             onFocus={() => {
-              activeFocuse("hh");
+              changeFocusToNext("hh");
             }}
             onKeyDown={(e) => {
               onKeyDownCapture(e, "hh");
@@ -134,7 +132,7 @@ const HhmmssSelector = (props) => {
             maxLength={2}
             ref={mmRef}
             onFocus={() => {
-              activeFocuse("mm");
+              changeFocusToNext("mm");
             }}
             onKeyDown={(e) => {
               onKeyDownCapture(e, "mm");
@@ -155,7 +153,7 @@ const HhmmssSelector = (props) => {
               }}
               ref={ssRef}
               onFocus={() => {
-                activeFocuse("ss");
+                changeFocusToNext("ss");
               }}
               onKeyDown={(e) => {
                 onKeyDownCapture(e, "ss");
