@@ -14,7 +14,7 @@ const CookDropTableHeader = ({ headerData }) => {
         {headers.length > 0 &&
           headers.map((header, index) => (
             <>
-              {index === 0 ? (
+              {index === 0 && (
                 <th
                   key={header + index + ""}
                   className="main-header first-header text-nowrap lg:px-[20px] px-2 bg-gray-300 rounded-tl-[10px] sticky left-0 z-10 shadow-[0_-1px_0_var(--tw-primary)_inset]"
@@ -31,23 +31,23 @@ const CookDropTableHeader = ({ headerData }) => {
                         </th>
                       </tr>
                       <tr>
-                        <th className="text-[11px]">Unit</th>
+                        <th className="text-[11px] mt-[5px]">Unit</th>
                       </tr>
                       <tr>
-                        <th className="text-[11px]">Safety Factor</th>
+                        <th className="text-[11px] mb-[5px] mt-[3px]">Safety Factor</th>
                       </tr>
                      
                     </thead>
                   </table>
                 </th>
 
-              ):
+              )}
               <th
               key={index}
-              className="p-2 font-semibold text-center text-nowrap shadow-[0_-1px_0_var(--tw-primary)_inset] text-[11px]"
+              className="p-2 font-semibold text-center text-nowrap shadow-[0_-1px_0_var(--tw-primary)_inset] text-[11px] "
             >
               {header.itemName}
-            </th> }
+            </th> 
               
             </>
           ))}
@@ -61,7 +61,7 @@ const CookDropTableHeader = ({ headerData }) => {
             <div className="p-0 text-[11px] font-medium  font-semibold text-center text-nowrap indent-0  align-middle ">
               {header?.unitOfMeasure ? header?.unitOfMeasure : ""}
             </div>
-            <div className="text-[11px]  font-medium  p-0  text-center text-nowrap indent-0  align-middle">
+            <div className="text-[11px] mt-[3px] font-medium  p-0  text-center text-nowrap indent-0  align-middle">
               {header?.safetyFactor ? header?.safetyFactor : ""}%
             </div>
      

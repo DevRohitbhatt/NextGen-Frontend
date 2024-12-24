@@ -85,7 +85,6 @@ export const CreateItemModal = ({addHeaderFields,
     };
 
     const savedData = async (saved) => {
-      debugger
       setSaveDisable(true);
       let values = saved.map((item) => {
         let newItem = { ...item };

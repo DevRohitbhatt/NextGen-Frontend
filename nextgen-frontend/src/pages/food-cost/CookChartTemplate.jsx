@@ -11,7 +11,6 @@ import {
 import { Steps } from "intro.js-react";
 import { useSelector } from "react-redux";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import EditAndAddDndTable from "../../components/table/EditAndAddDndTable";
 import HoverBorderButton from "../../components/buttons/HoverBorderButton";
 import { deleteCall, getCall, postCall } from "../../apis/network";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
@@ -26,11 +25,9 @@ import {
   convertMinutesToHHMM,
   formatTime,
 } from "../../functions/utils/timeConvertFunction";
-import HhmmssSelector from "../../components/common/HhmmssSelector";
-import ReactDOM from "react-dom";
 import cookChartTemplates from "../../assets/introJSSteps/cookChartTemplate";
 import { Link } from "react-router-dom";
-import { CreateEditItemModal, CreateItemModal } from "../../components/cookdrop/CreateItemModal";
+import { CreateEditItemModal, CreateItemModal } from "../../components/cookdrop/CookDropModal";
 
 const CookChartTemplate = (props) => {
   const {
@@ -297,8 +294,7 @@ const CookChartTemplate = (props) => {
     setShowUnitModal(true);
   };
   const handleUnitSaveSelection = (units) => {
-    debugger;
-    toast.info("Saving data...", { autoClose: false });
+    toast.info("Saving data...", { autoClose: 1500 });
     saveTemplateData(units);
   };
   const saveTemplateData = async (units) => {
@@ -332,6 +328,8 @@ const CookChartTemplate = (props) => {
       }
     } catch (error) {
       toast.error("Failed to save", { autoClose: 1000 });
+    }finally{
+      isSave(false)
     }
   };
 
@@ -505,11 +503,7 @@ const CookChartTemplate = (props) => {
               setMemberName={setSelectedUnitName}
               onClick={() => setShowUnitModal(true)}
               handleClose={() => setShowUnitModal(false)}
-              isSaveUnit={isSave}
-              isMultiUnit={isSave}
               includeAreas={false}
-              handleUnitSaveSelection={handleUnitSaveSelection}
-              handleUnitSelection={handleUnitSelection}
             />
           </div>
           <div className="hidden lg:block">
