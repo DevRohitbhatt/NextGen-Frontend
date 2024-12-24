@@ -5,9 +5,11 @@ const HhmmssSelector = (props) => {
   const [hh, setHh] = useState("00");
   const [mm, setMm] = useState("00");
   const [ss, setSs] = useState("00");
+
   const hhRef = useRef(null);
   const mmRef = useRef(null);
   const ssRef = useRef(null);
+
   const calculateTotalSeconds = () => {
     const hours = parseInt(hh) || 0;
     const minutes = parseInt(mm) || 0;
@@ -15,6 +17,7 @@ const HhmmssSelector = (props) => {
     const totalSeconds = hours * 3600 + minutes * 60 + seconds;
     props.onTimeChange(totalSeconds);
   };
+
   const hour = (e, name) => {
     const value = e.target.value;
     setHh(value);
@@ -24,6 +27,7 @@ const HhmmssSelector = (props) => {
       }
     }
   };
+
   const minute = (e, name) => {
     const value = e.target.value;
     if (parseInt(value) < 60) {
@@ -33,43 +37,81 @@ const HhmmssSelector = (props) => {
       }
     }
   };
+
   const sec = (e, name) => {
     const value = e.target.value;
     if (parseInt(value) < 60) {
       setSs(e.target.value);
     }
   };
+  const handleFieldInteraction = (action, field) => {
+    const fieldRefs = {
+      hh: hhRef.current,
+      mm: mmRef.current,
+      ss: ssRef.current,
+    };
 
-  const changeFocusToNext = (name) => {
-    if (name === "hh") {
-      hhRef.current.select();
-    } else if (name === "mm") {
-      mmRef.current.select();
-    } else if (name === "ss") {
-      ssRef.current.select();
+    const fieldValues = {
+      hh: hh,
+      mm: mm,
+      ss: ss,
+    };
+
+    if (action === "focus") {
+      // Focus the selected field
+      fieldRefs[field]?.select();
+    }
+
+    if (action === "keydown" && fieldValues[field]?.length === 1) {
+      // Add padding if the field value is a single digit
+      const paddedValue = "0" + fieldValues[field];
+      if (field === "hh") setHh(paddedValue);
+      else if (field === "mm") setMm(paddedValue);
+      else if (field === "ss") setSs(paddedValue);
+    }
+
+    if (action === "blur") {
+      // Add padding on blur if the field value is a single digit
+      setTimeout(() => {
+        if (fieldValues[field]?.length === 1) {
+          const paddedValue = "0" + fieldValues[field];
+          if (field === "hh") setHh(paddedValue);
+          else if (field === "mm") setMm(paddedValue);
+          else if (field === "ss") setSs(paddedValue);
+        }
+      }, 100);
     }
   };
-  const onKeyDownCapture = (e, name) => {
-    if (e.code == "Tab" && name === "hh" && hh.length == 1) {
-      setHh("0" + hh);
-    } else if (e.code == "Tab" && name === "mm" && mm.length == 1) {
-      setMm("0" + mm);
-    } else if (e.code == "Tab" && name === "ss" && ss.length == 1) {
-      setSs("0" + ss);
-    }
-  };
+  // const changeFocusToNext = (name) => {
+  //   if (name === "hh") {
+  //     hhRef.current.select();
+  //   } else if (name === "mm") {
+  //     mmRef.current.select();
+  //   } else if (name === "ss") {
+  //     ssRef.current.select();
+  //   }
+  // };
+  // const onKeyDownCapture = (e, name) => {
+  //   if (e.code == "Tab" && name === "hh" && hh.length == 1) {
+  //     setHh("0" + hh);
+  //   } else if (e.code == "Tab" && name === "mm" && mm.length == 1) {
+  //     setMm("0" + mm);
+  //   } else if (e.code == "Tab" && name === "ss" && ss.length == 1) {
+  //     setSs("0" + ss);
+  //   }
+  // };
 
-  const onBlureHandle = (name) => {
-    setTimeout(() => {
-      if (name === "hh" && hhRef.current.value.length == 1) {
-        setHh("0" + hh);
-      } else if (name === "mm" && mmRef.current.value.length == 1) {
-        setMm("0" + mm);
-      } else if (name === "ss" && ssRef.current.value.length == 1) {
-        setSs("0" + ss);
-      }
-    }, 100);
-  };
+  // const onBlureHandle = (name) => {
+  //   setTimeout(() => {
+  //     if (name === "hh" && hhRef.current.value.length == 1) {
+  //       setHh("0" + hh);
+  //     } else if (name === "mm" && mmRef.current.value.length == 1) {
+  //       setMm("0" + mm);
+  //     } else if (name === "ss" && ssRef.current.value.length == 1) {
+  //       setSs("0" + ss);
+  //     }
+  //   }, 100);
+  // };
 
   useEffect(() => {
     if (props.initialSeconds) {
@@ -95,7 +137,9 @@ const HhmmssSelector = (props) => {
   }, [hh, mm, ss]);
   return (
     <div
-      className={`bg-gray-200 py-2 w-full rounded-full box-content flex ${props.showErrorFeild ? 'border border-red-500' :  'border-none' }`}
+      className={`bg-gray-200 py-2 w-full rounded-full box-content flex ${
+        props.showErrorFeild ? "border border-red-500" : "border-none"
+      }`}
     >
       {props.initDataLoading ? (
         <div className="w-[95px]">Loading...</div>
@@ -110,14 +154,12 @@ const HhmmssSelector = (props) => {
             }}
             ref={hhRef}
             onFocus={() => {
-              changeFocusToNext("hh");
+              handleFieldInteraction("focus", "hh");
             }}
-            onKeyDown={(e) => {
-              onKeyDownCapture(e, "hh");
-            }}
-            onBlur={(e) => {
-              onBlureHandle("hh");
-            }}
+            onKeyDown={(e) =>
+              e.code === "Tab" && handleFieldInteraction("keydown", "hh")
+            }
+            onBlur={() => handleFieldInteraction("blur", "hh")}
           />
           <p className="mx-[3px]">:</p>
           <input
@@ -131,15 +173,11 @@ const HhmmssSelector = (props) => {
             }}
             maxLength={2}
             ref={mmRef}
-            onFocus={() => {
-              changeFocusToNext("mm");
-            }}
-            onKeyDown={(e) => {
-              onKeyDownCapture(e, "mm");
-            }}
-            onBlur={(e) => {
-              onBlureHandle("mm");
-            }}
+            onFocus={() => handleFieldInteraction("focus", "mm")}
+            onKeyDown={(e) =>
+              e.code === "Tab" && handleFieldInteraction("keydown", "mm")
+            }
+            onBlur={() => handleFieldInteraction("blur", "mm")}
           />
           {enableSeconds && <p className="mx-[3px]">:</p>}
           {enableSeconds && (
@@ -152,15 +190,9 @@ const HhmmssSelector = (props) => {
                 sec(e);
               }}
               ref={ssRef}
-              onFocus={() => {
-                changeFocusToNext("ss");
-              }}
-              onKeyDown={(e) => {
-                onKeyDownCapture(e, "ss");
-              }}
-              onBlur={(e) => {
-                onBlureHandle("ss");
-              }}
+              onFocus={() => handleFieldInteraction("focus", "ss")}
+              onKeyDown={(e) => e.code === "Tab" && handleFieldInteraction("keydown", "ss")}
+              onBlur={() => handleFieldInteraction("blur", "ss")}
             />
           )}
         </>
