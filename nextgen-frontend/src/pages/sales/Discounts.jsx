@@ -18,7 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import discounts from '../../assets/introJSSteps/discounts';
-import { formattingData } from '../../functions/formatingCurrency';
+import { formattingData, formattingDataWithoutDollr } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -98,7 +98,7 @@ const Discounts = () => {
 				header: 'Discounted Checks',
 				dataType: 'number',
 				footer: ({ table }) => (
-					<div className='text-center'>{calculateFooterSum(table, 'discountedChecks')}</div>
+					<div className='text-center'>{calculateFooterSum(table, 'discountedChecks').toLocaleString("en-US")}</div>
 				),
 			}),
 			columnHelper.accessor('totalDiscountAmount', {
@@ -457,9 +457,10 @@ const Discounts = () => {
 								id: 'totalDiscountedChecks',
 								header: 'Disc Checks',
 								dataType: 'number',
+								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 								footer: ({ table }) => (
 									<div className='text-center'>
-										{calculateFooterSum(table, 'totalDiscountedChecks')}
+										{formattingDataWithoutDollr(calculateFooterSum(table, 'totalDiscountedChecks'))}
 									</div>
 								),
 							}),
@@ -467,9 +468,10 @@ const Discounts = () => {
 								id: 'totalDiscountedItems',
 								header: 'Disc Items',
 								dataType: 'number',
+								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 								footer: ({ table }) => (
 									<div className='text-center'>
-										{calculateFooterSum(table, 'totalDiscountedItems')}
+										{formattingDataWithoutDollr(calculateFooterSum(table, 'totalDiscountedItems'))}
 									</div>
 								),
 							}),
@@ -488,10 +490,10 @@ const Discounts = () => {
 							columnHelper.accessor('totaldiscountedTickets', {
 								id: 'totaldiscountedTickets',
 								header: 'Disc Cost %',
-								cell: ({ getValue }) => `${getValue()}%`,
+								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
 								dataType: 'percent',
 								footer: ({ table }) => (
-									<div className='text-center'>{calculatePctFooter(table, 'total')}%</div>
+									<div className='text-center'>{formattingDataWithoutDollr(calculatePctFooter(table, 'total'))}%</div>
 								),
 							}),
 						],
@@ -531,9 +533,10 @@ const Discounts = () => {
 										id: `discountedChecks_${weekId}`,
 										header: 'Disc Checks',
 										dataType: 'number',
+										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
-												{calculateFooterSum(table, `discountedChecks_${weekId}`)}
+												{formattingDataWithoutDollr(calculateFooterSum(table, `discountedChecks_${weekId}`))}
 											</div>
 										),
 									}
@@ -547,9 +550,10 @@ const Discounts = () => {
 										id: `discountedItems_${weekId}`,
 										header: 'Disc Items',
 										dataType: 'number',
+										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
-												{calculateFooterSum(table, `discountedItems_${weekId}`)}
+												{formattingDataWithoutDollr(calculateFooterSum(table, `discountedItems_${weekId}`))}
 											</div>
 										),
 									}
@@ -1046,15 +1050,15 @@ const Discounts = () => {
 
 	return (
 		<>
-			<div className='w-[85%] mx-auto'>
+			<div className='w-[98%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Discounts</h2>
-				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+				<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Discounts</h2>
+				<header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
 							companyId={companyID}
@@ -1099,7 +1103,7 @@ const Discounts = () => {
 							/>
 						</div>
 						<div className='run-button' onClick={fetchDiscountsReportData}>
-							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

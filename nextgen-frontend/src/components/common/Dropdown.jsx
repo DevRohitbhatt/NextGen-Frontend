@@ -52,9 +52,9 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable =
 			className='relative flex flex-col justify-center w-full mx-1 dropdown-selector rounded-3xl'
 			ref={dropdownRef}
 		>
-			<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>{title}</h3>
+			<h3 className='mb-1 ml-2 text-[16px] font-semibold text-nowrap'>{title}</h3>
 			<div
-				className={`flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
+				className={`flex items-center justify-between w-full px-6 py-2 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
 					isEditable
 						? ' hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] cursor-pointer'
 						: 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
@@ -72,17 +72,17 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable =
 						}}
 					/>
 				) : (
-					<p className='truncate'>{selectedOption}</p>
+					<p className='truncate text-[14px]'>{selectedOption}</p>
 				)}
 				<span className={`ml-2 transition ease-linear delay-300 transform `}>
 					{isOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
 				</span>
 			</div>
 			{isOpen && (
-				<ul className='absolute top-full left-0 rounded-lg text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] z-10 mt-[1px] w-full overflow-y-auto max-h-96 tableHOC overflow-hidden'>
+				<ul className='absolute top-full left-0 rounded-lg text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] z-30 mt-[1px] w-full overflow-y-auto max-h-96 tableHOC overflow-hidden'>
 					{newOptions.map((option, index) => (
 						<li
-							className='cursor-pointer bg-[#f9f9f9] rounded-md px-5 py-1 mb-2 font-semibold text-gray-800 hover:border border border-transparent hover:border-[var(--tw-primary)] mx-2 my-2'
+							className='cursor-pointer bg-[#f9f9f9] rounded-md px-5 py-1 mb-2 font-semibold text-gray-800 hover:border border border-transparent hover:border-[var(--tw-primary)] mx-2 my-2 text-[14px]'
 							key={index}
 							onClick={() => handleOptionClick(option.name)}
 						>
