@@ -45,16 +45,18 @@ const CloseButton = styled(FaRegWindowClose)`
 	}
 `;
 
-export default function Modal({ children, isOpen, setIsOpen, onClose, title }) {
-	return isOpen ? (
-		<ModalContainer isOpen={isOpen}>
-			<ModalContent>
-				<ModalHeader>
-					{title}
-					<CloseButton onClick={onClose} />
-				</ModalHeader>
-				{children}
-			</ModalContent>
-		</ModalContainer>
-	) : null;
+
+export default function Modal ({ children, isOpen, setIsOpen, onClose, title }) {
+  return (
+    isOpen ? (
+        <ModalContainer className='lg:!pt-[100px] !p-[10px] sm:!pt-[80px]'  isOpen={isOpen}>
+					<ModalContent className='lg:!max-w-[80%] !max-w-full'>
+							<ModalHeader>{title}
+									<CloseButton onClick={onClose}/>
+							</ModalHeader>
+							{children}
+					</ModalContent>
+        </ModalContainer>
+    ) : null
+  );
 }
