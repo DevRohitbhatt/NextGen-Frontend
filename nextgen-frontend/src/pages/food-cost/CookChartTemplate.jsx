@@ -1162,6 +1162,7 @@ const CookChartTemplate = (props) => {
         companyStateId={companyStateId}
         setOpenEditItemModal={setOpenEditItemModal}
         openEditItemModal={openEditItemModal}
+        getCookAllItemData={getCookAllItemData}
         />
       </Modal>
     </>

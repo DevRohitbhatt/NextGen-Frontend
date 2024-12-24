@@ -444,7 +444,10 @@ export const CreateItemModal = ({addHeaderFields,
     setEditSourceType,
     addInventoryItems,
     openEditItemModal,
-    setOpenEditItemModal
+    setOpenEditItemModal,
+    setSaveDisable,
+    companyStateId,
+    getCookAllItemData
  }) => {
     let {
       cookItemName,
@@ -458,7 +461,7 @@ export const CreateItemModal = ({addHeaderFields,
       laborFixedSeconds,
       laborVarSeconds,
       sourceType,
-      setSaveDisable
+      
     } = allDataFeilds;
     const handleSourceTypeChange = async (type) => {
       await getAddNewCookData(type);
@@ -506,6 +509,7 @@ export const CreateItemModal = ({addHeaderFields,
           toast.error("Failed to save", { autoClose: 1500 });
         }
       } catch (error) {
+        console.log("---er",error)
         toast.error("Failed to save", { autoClose: 1500 });
       } finally {
         setSaveDisable(false);
