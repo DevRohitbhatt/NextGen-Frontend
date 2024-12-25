@@ -575,18 +575,18 @@ const Invoices = () => {
 								setMemberName={setSelectedUnitName}
 								onClick={() => setShowUnitModal(true)}
 							/>
-							<VendorSelector
-								vendorID={selectedVendor}
-								vendorName={selectedVendorName}
-								setVendorName={setSelectedVendorName}
-								onClick={() => setVendorShowModal(true)}
-							/>
 							<DateSelector
 								toDate={selectedToDate}
 								fromDate={selectedFromDate}
 								isDateRange={true}
 								onClick={() => setShowDateModal(true)}
 								extraClass={'w-[219px]'}
+							/>
+							<VendorSelector
+								vendorID={selectedVendor}
+								vendorName={selectedVendorName}
+								setVendorName={setSelectedVendorName}
+								onClick={() => setVendorShowModal(true)}
 							/>
 						</div>
 					</div>

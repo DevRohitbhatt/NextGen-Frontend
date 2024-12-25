@@ -5,6 +5,9 @@ import { RxCross2 } from 'react-icons/rx';
 import { FaCheck } from 'react-icons/fa6';
 import Modal from '../common/Modal';
 import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import CurrencyInput from 'react-currency-input-field';
 
 export const TableCell = ({ getValue, row, column, table }) => {
 	const initialValue = getValue();
@@ -15,20 +18,21 @@ export const TableCell = ({ getValue, row, column, table }) => {
 		setValue(initialValue);
 	}, [initialValue]);
 	const onBlur = () => {
-		tableMeta?.updateData(row.index, column.id, value);
+		tableMeta?.updateData(
+			row.index,
+			column.id,
+			columnMeta?.dataType === 'currency' ? parseFloat(value || '0.00').toFixed(2) : value || 0
+		);
 	};
 	const onSelectChange = (e) => {
 		const newValue = e.target.value;
 		setValue(newValue);
-		console.log('newValue', newValue);
 
 		const isDuplicate = table.options.data.find((row, index) => index !== row.index && row.mainItem === newValue);
-		if (!isDuplicate) {
-			tableMeta?.updateData(row.index, column.id, newValue);
-		} else {
-			alert('Item is already present');
-			setValue(initialValue);
+		if (isDuplicate) {
+			toast.warn('Item is already present');
 		}
+		tableMeta?.updateData(row.index, column.id, newValue);
 	};
 	if (tableMeta?.editedRows[row.id]) {
 		return columnMeta?.type === 'select' ? (
@@ -43,11 +47,27 @@ export const TableCell = ({ getValue, row, column, table }) => {
 					</option>
 				))}
 			</select>
+		) : columnMeta?.dataType === 'currency' ? (
+			<CurrencyInput
+				value={value || '0'}
+				decimalsLimit={2}
+				decimalScale={2}
+				fixedDecimalLength={2}
+				onValueChange={(value) => setValue(value || '0')}
+				onBlur={() => {
+					setValue(value || '0.00');
+					onBlur();
+				}}
+				className='py-1 text-center'
+			/>
 		) : (
 			<input
 				value={value}
 				onChange={(e) => setValue(e.target.value)}
-				onBlur={onBlur}
+				onBlur={() => {
+					setValue(value || '0');
+					onBlur();
+				}}
 				className='py-1 text-center'
 				type={columnMeta?.type || 'text'}
 			/>
@@ -81,6 +101,7 @@ export const EditCell = ({ row, table }) => {
 						className='border hover:border-[green] focus:outline-none'
 						onClick={setEditedRows}
 						name='done'
+						title='Done'
 					>
 						<FaCheck className='text-[green]' />
 					</button>
@@ -88,6 +109,7 @@ export const EditCell = ({ row, table }) => {
 						onClick={setEditedRows}
 						className='border hover:border-[red] focus:outline-none'
 						name='cancel'
+						title='Cancel'
 					>
 						<RxCross2 className='text-[red]' />
 					</button>
@@ -98,10 +120,16 @@ export const EditCell = ({ row, table }) => {
 						onClick={setEditedRows}
 						className='border hover:border-[blue] focus:outline-none'
 						name='edit'
+						title='Edit'
 					>
 						<FiEdit2 className='text-[blue]' />
 					</button>
-					<button onClick={deleteRow} className='border hover:border-[red] focus:outline-none' name='delete'>
+					<button
+						onClick={deleteRow}
+						className='border hover:border-[red] focus:outline-none'
+						name='delete'
+						title='Delete'
+					>
 						<RxCross2 className='text-[red]' />
 					</button>
 				</div>
@@ -139,6 +167,8 @@ const EditableTableHOC = ({
 	headerPosition = 'justify-center',
 	isAddNew = false,
 	setIsAddNew,
+	isEditModeOn,
+	setEditModeOn,
 }) => {
 	const [originalData, setOriginalData] = useState(() => [...data]);
 	const [editedRows, setEditedRows] = useState({});
@@ -187,6 +217,20 @@ const EditableTableHOC = ({
 		}
 	}, [data]);
 
+	useEffect(() => {
+		Object.keys(editedRows).forEach((key) => {
+			if (editedRows[key]) {
+				setEditModeOn(true);
+				return;
+			} else {
+				setEditModeOn(false);
+			}
+		});
+		if (Object.keys(editedRows).length === 0) {
+			setEditModeOn(false);
+		}
+	}, [editedRows]);
+
 	return (
 		<div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
 			<table className='w-full border-collapse table-auto select-none'>
@@ -215,6 +259,11 @@ const EditableTableHOC = ({
 						<tr key={row.id} className='h-[35px] font-normal border-y relative hover:bg-gray-100'>
 							{row.getVisibleCells().map((cell) => (
 								<td className={`${cell.column.columnDef.dataPosition} text-nowrap`} key={cell.id}>
+									{cell.column.columnDef.meta?.dataType === 'currency'
+										? table.options.meta?.editedRows[row.id]
+											? ''
+											: '$'
+										: ''}
 									{flexRender(cell.column.columnDef.cell, cell.getContext())}
 								</td>
 							))}
@@ -232,6 +281,19 @@ EditableTableHOC.propTypes = {
 	headerPosition: PropTypes.string,
 	isAddNew: PropTypes.bool,
 	setIsAddNew: PropTypes.func,
+};
+
+TableCell.propTypes = {
+	getValue: PropTypes.func.isRequired,
+	row: PropTypes.object.isRequired,
+	column: PropTypes.shape({
+		columnDef: PropTypes.shape({
+			meta: PropTypes.shape({
+				dataType: PropTypes.string,
+			}),
+		}),
+	}).isRequired,
+	table: PropTypes.object.isRequired,
 };
 
 export default EditableTableHOC;

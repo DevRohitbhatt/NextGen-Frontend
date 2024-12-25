@@ -48,6 +48,7 @@ function TableHOC({
 	isPaginated = false,
 	isFooter = false,
 	view,
+	tableHeight = '60vh',
 	isTableRendered,
 	setIsTableRendered,
 	setTableState,
@@ -178,7 +179,7 @@ function TableHOC({
 			</div>
 
 			{/* table */}
-			<div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
+			<div className={`tableHOC pr-1 max-h-[${tableHeight}] overflow-auto`}>
 				<table className='w-full border-collapse table-auto select-none'>
 					{isHeader && (
 						<thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
