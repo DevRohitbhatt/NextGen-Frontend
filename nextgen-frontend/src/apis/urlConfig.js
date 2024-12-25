@@ -53,6 +53,7 @@ const urlConfig = {
 	SaveCountSheetDesignerComment: '/api/foodcost/SaveCountSheetDesignerComment',
 	GetVarianceFoodCostPopupReportData: '/api/foodcost/GetVarianceFoodCostPopupReportData',
 	getGrossProfitCategoryItems: '/api/sales/GetGrossProfitCategoryItems',
+	getShowHideDepartments: '/api/foodcost/GetActualFoodCostShowHideDepartment',
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',

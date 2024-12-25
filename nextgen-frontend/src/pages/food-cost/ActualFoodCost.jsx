@@ -430,6 +430,8 @@ const ActualFoodCost = () => {
 	}, [defaultUnitID, defaultUnitName]);
 
 	useEffect(() => {
+		console.log('checkedItemsLoaded', checkedItemsLoaded);
+
 		setColumns(generatedColumns);
 	}, [checkedItemsLoaded]);
 
@@ -473,7 +475,34 @@ const ActualFoodCost = () => {
 		}
 	}, [selectedFromDate]);
 
-	console.log('todateoptions', toDateOptions);
+	useEffect(() => {
+		const fetchShowHideDepartments = async () => {
+			try {
+				setCheckedItemsLoaded(false);
+				const getData = {
+					url: 'getShowHideDepartments',
+					urlParams: {
+						companyId: companyID,
+					},
+				};
+
+				const result = await getCall(getData);
+
+				const checkedItems = result.data.map((item) => ({
+					name: `${item.department}/${item.subdepartment}`,
+					showOnReport: item.includeInReport,
+					includeInGrandTotal: item.includeInTotal,
+				}));
+
+				setCheckedItems(checkedItems);
+				setCheckedItemsLoaded(true);
+			} catch (error) {
+				console.error('Error getting Show Hide Departments data: ', error);
+			}
+		};
+
+		fetchShowHideDepartments();
+	}, []);
 
 	useEffect(() => {
 		const fetchDates = async () => {
@@ -639,8 +668,9 @@ const ActualFoodCost = () => {
 					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
 			)
 		);
-		setIsTableRendered(false);
 
+		setIsTableRendered(false);
+		setColumns(generatedColumns);
 		setFilteredActualFoodCostData(newActualFoodCostData);
 	};
 

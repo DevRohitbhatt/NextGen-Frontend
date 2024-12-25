@@ -728,7 +728,7 @@ const MenuGrossProfit = () => {
 									Select None
 								</button>
 							</div>
-							<div className='flex flex-col space-y-2'>
+							<div className='flex flex-col space-y-2 overflow-auto max-h-96 tableHOC'>
 								{categories.map((category) => (
 									<div key={category} className='flex items-center rounded'>
 										<input

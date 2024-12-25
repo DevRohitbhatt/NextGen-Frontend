@@ -202,7 +202,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('actualNumber', {
 			id: 'actualNumber',
 			header: 'Actual #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
+			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -223,7 +223,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('idealNumber', {
 			id: 'idealNumber',
 			header: 'Ideal #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
+			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -244,7 +244,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('varianceNumber', {
 			id: 'varianceNumber',
 			header: 'Variance #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
+			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 100,
 		}),
@@ -265,7 +265,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('wasteNumber', {
 			id: 'wasteNumber',
 			header: 'Waste #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
+			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -435,6 +435,35 @@ const VarianceFoodCost = () => {
 			}
 		}
 	}, [selectedFromDate]);
+
+	useEffect(() => {
+		const fetchShowHideDepartments = async () => {
+			try {
+				setCheckedItemsLoaded(false);
+				const getData = {
+					url: 'getShowHideDepartments',
+					urlParams: {
+						companyId: companyID,
+					},
+				};
+
+				const result = await getCall(getData);
+
+				const checkedItems = result.data.map((item) => ({
+					name: `${item.department}/${item.subdepartment}`,
+					showOnReport: item.includeInReport,
+					includeInGrandTotal: item.includeInTotal,
+				}));
+
+				setCheckedItems(checkedItems);
+				setCheckedItemsLoaded(true);
+			} catch (error) {
+				console.error('Error getting Show Hide Departments data: ', error);
+			}
+		};
+
+		fetchShowHideDepartments();
+	}, []);
 
 	useEffect(() => {
 		const fetchDates = async () => {
@@ -636,6 +665,7 @@ const VarianceFoodCost = () => {
 			)
 		);
 		setIsTableRendered(false);
+		setColumns(generatedColumns);
 		setFilteredVarianceFoodCostData(newVarianceFoodCostData);
 	};
 
