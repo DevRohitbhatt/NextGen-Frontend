@@ -156,89 +156,95 @@ const InvoiceEditor = () => {
 		}
 	};
 
-	const columns = [
-		columnHelper.display({
-			id: 'actions',
-			cell: EditCell,
-			size: '80',
-		}),
-		columnHelper.accessor('mainItem', {
-			id: 'mainItem',
-			cell: TableCell,
-			header: (
-				<div className='flex gap-20'>
-					<span>Item Ref#</span> <span>Description</span>
-				</div>
-			),
-			size: '300',
-			dataPosition: 'text-left',
-			meta: {
-				type: 'select',
-				options: vendorItems.map((item) => ({
-					value: `${item.vendorItemReference} - ${item.description}`,
-					label: `${item.vendorItemReference} - ${item.description}`,
-				})),
-			},
-		}),
-		columnHelper.accessor('unitOfMeasure', {
-			id: 'unitOfMeasure',
-			header: 'UOM',
-			dataPosition: 'text-center',
-		}),
-		columnHelper.accessor('packSize', {
-			id: 'packSize',
-			header: 'Pack Size',
-			dataPosition: 'text-center',
-		}),
-		columnHelper.accessor('orderQty', {
-			id: 'orderQty',
-			header: (
-				<div className='flex items-center justify-center gap-1'>
-					Quantity <input className='accent-[var(--tw-primary)]' type='checkbox' name='quantity' id='' />
-				</div>
-			),
-			cell: TableCell,
-			dataPosition: 'text-center',
-		}),
-		columnHelper.accessor('price', {
-			id: 'price',
-			header: (
-				<div className='flex items-center justify-center gap-1'>
-					Price <input className='accent-[var(--tw-primary)]' type='checkbox' name='price' id='' />
-				</div>
-			),
-			cell: TableCell,
-			dataPosition: 'text-center',
-			meta: {
-				dataType: 'currency',
-			},
-		}),
-		columnHelper.accessor('tax', {
-			id: 'tax',
-			header: (
-				<div className='flex items-center justify-center gap-1'>
-					Tax <input className='accent-[var(--tw-primary)]' type='checkbox' name='tax' id='' />
-				</div>
-			),
-			cell: TableCell,
-			dataPosition: 'text-center',
-			meta: {
-				dataType: 'currency',
-			},
-		}),
-		columnHelper.accessor('lineTotal', {
-			id: 'lineTotal',
-			header: 'Line Total',
-			cell: ({ row }) =>
-				formattingData(
-					(
-						parseFloat(row.original.price.replace(/,/g, '')) * parseFloat(row.original.orderQty) +
-						parseFloat(row.original.tax.replace(/,/g, ''))
-					).toFixed(2)
+	const columns = useMemo(
+		() => [
+			columnHelper.display({
+				id: 'actions',
+				cell: EditCell,
+				size: '80',
+			}),
+			columnHelper.accessor('mainItem', {
+				id: 'mainItem',
+				cell: TableCell,
+				header: (
+					<div className='flex gap-20'>
+						<span>Item Ref#</span> <span>Description</span>
+					</div>
 				),
-			dataPosition: 'text-center',
-		}),
-	];
+				size: '300',
+				dataPosition: 'text-left',
+				meta: {
+					type: 'select',
+					isNew: isAddNew,
+					options: vendorItems.map((item) => ({
+						value: `${item.vendorItemReference} - ${item.description}`,
+						label: `${item.vendorItemReference} - ${item.description}`,
+					})),
+				},
+			}),
+			columnHelper.accessor('unitOfMeasure', {
+				id: 'unitOfMeasure',
+				header: 'UOM',
+				dataPosition: 'text-center',
+			}),
+			columnHelper.accessor('packSize', {
+				id: 'packSize',
+				header: 'Pack/Size',
+				dataPosition: 'text-center',
+			}),
+			columnHelper.accessor('orderQty', {
+				id: 'orderQty',
+				header: (
+					<div className='flex items-center justify-center gap-1'>
+						Quantity{' '}
+						<input className='accent-[var(--tw-primary)]' type='checkbox' checked name='quantity' id='' />
+					</div>
+				),
+				cell: TableCell,
+				dataPosition: 'text-center',
+			}),
+			columnHelper.accessor('price', {
+				id: 'price',
+				header: (
+					<div className='flex items-center justify-center gap-1'>
+						Price{' '}
+						<input className='accent-[var(--tw-primary)]' type='checkbox' checked name='price' id='' />
+					</div>
+				),
+				cell: TableCell,
+				dataPosition: 'text-center',
+				meta: {
+					dataType: 'currency',
+				},
+			}),
+			columnHelper.accessor('tax', {
+				id: 'tax',
+				header: (
+					<div className='flex items-center justify-center gap-1'>
+						Tax <input className='accent-[var(--tw-primary)]' type='checkbox' checked name='tax' id='' />
+					</div>
+				),
+				cell: TableCell,
+				dataPosition: 'text-center',
+				meta: {
+					dataType: 'currency',
+				},
+			}),
+			columnHelper.accessor('lineTotal', {
+				id: 'lineTotal',
+				header: 'Line Total',
+				cell: ({ row }) =>
+					formattingData(
+						(
+							parseFloat(row.original.price.replace(/,/g, '')) * parseFloat(row.original.orderQty) +
+							parseFloat(row.original.tax.replace(/,/g, ''))
+						).toFixed(2)
+					),
+				dataPosition: 'text-center',
+			}),
+		],
+		[isAddNew, vendorItems]
+	);
 
 	const summaryColumns = useMemo(() => {
 		const calculateFooterTotal = (table, accessor) =>
@@ -386,7 +392,7 @@ const InvoiceEditor = () => {
 				vendorItemReference: item.vendorItemReference || '',
 				description: item.description || '',
 				unitOfMeasure: item.unitOfMeasure || '',
-				packSize: item.size || '0.00',
+				packSize: item.size || '',
 				orderQty: item.quantity || '0',
 				price: item.price.toFixed(2) || '0.00',
 				tax: item.taxAmount.toFixed(2) || '0.00',
@@ -527,7 +533,7 @@ const InvoiceEditor = () => {
 			vendorItemReference: newVendorItem.vendorItemReference || '',
 			description: newVendorItem.description || '',
 			unitOfMeasure: newVendorItem.unitOfMeasure || '',
-			packSize: `${newVendorItem.pack}/${newVendorItem.size}` || '0.00',
+			packSize: `${newVendorItem.pack}/${newVendorItem.size}` || '',
 			orderQty: newVendorItem.orderQty || '0',
 			price: '0.00',
 			tax: '0.00',
@@ -537,7 +543,7 @@ const InvoiceEditor = () => {
 		setInvoiceVendorItems((old) => [...old, newRow]);
 	};
 
-	const handlePrintClick = () => {
+	const handlePDFClick = () => {
 		if (!columns || columns.length === 0) {
 			console.error('Columns are not defined or empty');
 			return;
@@ -556,7 +562,7 @@ const InvoiceEditor = () => {
 				`Date: ${dateFormat(selectedDate, 'mm-dd-yyyy')}`,
 				`Invoice Reference: ${invoiceDetails.vendorInvoiceReference}`,
 			],
-			exportType: 'print',
+			exportType: 'pdf',
 			pageOrientation: 'portrait',
 			body: [
 				{
@@ -857,8 +863,8 @@ const InvoiceEditor = () => {
 					<ExportOptions
 						includeExcel={true}
 						handleExcelClick={handleExcelClick}
-						includePrint={true}
-						handlePrintClick={handlePrintClick}
+						includePDF={true}
+						handlePDFClick={handlePDFClick}
 						includeSave={true}
 						handleSaveClick={handleSaveClick}
 						saveTitle='Save Invoice'
@@ -1025,7 +1031,21 @@ const InvoiceEditor = () => {
 			>
 				<div className='max-w-md p-6 mx-auto '>
 					<h3 className='font-medium'>Vendor: {selectedVendorName}</h3>
-					<form className='space-y-4'>
+					<form
+						className='space-y-4'
+						onSubmit={(e) => {
+							e.preventDefault();
+							if (
+								!newVendorItem.vendorItemReference ||
+								!newVendorItem.description ||
+								!newVendorItem.unitOfMeasure
+							) {
+								toast.error('Please fill in all required fields!');
+								return;
+							}
+							createNewVendorItem();
+						}}
+					>
 						<div className='grid grid-cols-2 gap-4'>
 							<div>
 								<label className='block'>Vendor Item Reference*</label>
@@ -1033,12 +1053,16 @@ const InvoiceEditor = () => {
 									type='text'
 									name='vendorItemReference'
 									className='w-full p-2 mt-1 border caret-[var(--tw-primary)] rounded-md focus:outline-[var(--tw-primary)]'
+									required
 									onChange={handleNewVendorItemChange}
 								/>
 							</div>
 							<div>
 								<label className='block'>Accounting Code</label>
-								<select className='w-full p-2 mt-1 border caret-[var(--tw-primary)] rounded-md focus:outline-[var(--tw-primary)]'>
+								<select
+									className='w-full p-2 mt-1 border caret-[var(--tw-primary)] rounded-md focus:outline-[var(--tw-primary)]'
+									disabled
+								>
 									<option value=''>Select</option>
 								</select>
 							</div>
@@ -1051,6 +1075,7 @@ const InvoiceEditor = () => {
 									type='text'
 									name='description'
 									className='w-full p-2 mt-1 border caret-[var(--tw-primary)] rounded-md focus:outline-[var(--tw-primary)]'
+									required
 									onChange={handleNewVendorItemChange}
 								/>
 							</div>
@@ -1060,6 +1085,7 @@ const InvoiceEditor = () => {
 									type='text'
 									name='unitOfMeasure'
 									className='w-full p-2 mt-1 border caret-[var(--tw-primary)] rounded-md focus:outline-[var(--tw-primary)]'
+									required
 									onChange={handleNewVendorItemChange}
 								/>
 							</div>
@@ -1088,15 +1114,15 @@ const InvoiceEditor = () => {
 
 						<div className='flex justify-center mt-4 space-x-4'>
 							<button
-								type='button'
+								type='submit'
 								className='flex items-center gap-2 px-4 py-2 border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[var(--tw-primary)]'
-								onClick={createNewVendorItem}
 							>
 								Create
 							</button>
 							<button
 								type='button'
 								className='flex items-center gap-2 px-4 py-2 border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[var(--tw-primary)]'
+								onClick={() => setIsCreateNewVendorItemModalOpen(false)}
 							>
 								Cancel
 							</button>
@@ -1113,7 +1139,7 @@ const InvoiceEditor = () => {
 					<div className='grid grid-cols-2 gap-4 text-sm pb-2 border-b-2 border-solid border-[#f9f9f9]'>
 						<div>
 							<p>
-								<span className='font-bold'>Vendor:</span>{' '}
+								<span className='font-bold'>Vendor:</span>
 								<span className=''>{selectedVendorName}</span>
 							</p>
 							<p>
@@ -1142,11 +1168,13 @@ const InvoiceEditor = () => {
 					</div>
 					<div className='flex items-center gap-2 w-96 text-nowrap'>
 						<span className='font-bold'>Summarize By:</span>
-						<Dropdown
-							options={summaryOptions}
-							selectedOption={selectedSummaryOption}
-							onOptionChange={(option) => setSelectedSummaryOption(option)}
-						/>
+						<div className='w-96'>
+							<Dropdown
+								options={summaryOptions}
+								selectedOption={selectedSummaryOption}
+								onOptionChange={(option) => setSelectedSummaryOption(option)}
+							/>
+						</div>
 					</div>
 
 					<div className='mt-4 min-h-64'>

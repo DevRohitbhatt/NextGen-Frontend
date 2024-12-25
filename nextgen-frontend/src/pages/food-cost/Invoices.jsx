@@ -23,6 +23,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { SlEye } from 'react-icons/sl';
+import { formattingData } from './../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -233,6 +234,12 @@ const Invoices = () => {
 			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
 		}
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
+
+	useEffect(() => {
+		if (selectedUnit) {
+			setSelectedDropdownUnit(unitDropdownData?.find((unit) => unit.id === selectedUnit)?.name);
+		}
+	}, [selectedUnit]);
 
 	//Default date get
 	const getDefaultDates = async () => {
@@ -675,35 +682,62 @@ const Invoices = () => {
 					}}
 				>
 					<div className='w-full max-w-5xl p-6 overflow-auto bg-white rounded-lg shadow-lg min-w-[940px] min-h-[400px]'>
-						<div className='my-4'>
-							<div className='text-sm'>
-								<span className='font-semibold'>Unit:</span>{' '}
-								{invoiceHeaderDetails[0]?.unitName && invoiceHeaderDetails[0]?.unitName}
-								<span className='mx-2 font-semibold'>Vendor:</span>{' '}
-								{invoiceHeaderDetails[0]?.vendorName && invoiceHeaderDetails[0]?.vendorName}
-								<span className='mx-2 font-semibold'>Date:</span> Mon 09/30/2024
-								<span className='mx-2 font-semibold'>Invoice Reference:</span>{' '}
-								{invoiceHeaderDetails[0]?.vendorInvoiceReference &&
-									invoiceHeaderDetails[0]?.vendorInvoiceReference}
-								<span className='mx-2 font-semibold'>Total:</span> $
-								{invoiceHeaderDetails[0]?.totalAmountIncludingTax &&
-									invoiceHeaderDetails[0]?.totalAmountIncludingTax}
+						<div className='flex justify-between my-4'>
+							<div className='flex gap-4 text-sm'>
+								<span className='flex flex-col'>
+									Unit:
+									<span className='font-semibold'>
+										{invoiceHeaderDetails[0]?.unitName && invoiceHeaderDetails[0]?.unitName}
+									</span>
+								</span>
+								<span className='flex flex-col'>
+									Vendor:
+									<span className='font-semibold'>
+										{invoiceHeaderDetails[0]?.vendorName && invoiceHeaderDetails[0]?.vendorName}
+									</span>
+								</span>
+								<span className='flex flex-col'>
+									Date:{' '}
+									<span className='font-semibold'>
+										{dateFormat(invoiceHeaderDetails[0]?.date, 'ddd yyyy-mm-dd')}
+									</span>
+								</span>
+								<span className='flex flex-col'>
+									Invoice Reference:
+									<span className='font-semibold'>
+										{invoiceHeaderDetails[0]?.vendorInvoiceReference}
+									</span>
+								</span>
+								<span className='flex flex-col'>
+									Total:
+									<span className='font-semibold'>
+										{formattingData(invoiceHeaderDetails[0]?.totalAmountIncludingTax)}
+									</span>
+								</span>
 							</div>
 							<div className='mt-1 text-sm'>
-								<span className='font-semibold'>Created By:</span>{' '}
-								{invoiceHeaderDetails[0]?.originalFirstName &&
-								invoiceHeaderDetails[0]?.originalFirstName !== 'Unknown'
-									? invoiceHeaderDetails[0]?.originalFirstName +
-									  ' ' +
-									  invoiceHeaderDetails[0]?.originalLastName
-									: invoiceHeaderDetails[0]?.userFirstName +
-									  ' ' +
-									  invoiceHeaderDetails[0]?.userLastName}
-								<span className='mx-2 font-semibold'>Last Edited By:</span>{' '}
-								{invoiceHeaderDetails[0]?.userFirstName &&
-									invoiceHeaderDetails[0]?.userFirstName +
-										' ' +
-										invoiceHeaderDetails[0]?.userLastName}
+								<span className='flex gap-1'>
+									Created By:{' '}
+									<span>
+										{invoiceHeaderDetails[0]?.originalFirstName &&
+										invoiceHeaderDetails[0]?.originalFirstName !== 'Unknown'
+											? invoiceHeaderDetails[0]?.originalFirstName +
+											  ' ' +
+											  invoiceHeaderDetails[0]?.originalLastName
+											: invoiceHeaderDetails[0]?.userFirstName +
+											  ' ' +
+											  invoiceHeaderDetails[0]?.userLastName}
+									</span>
+								</span>{' '}
+								<span className=''>
+									Last Edited By:{' '}
+									<span>
+										{invoiceHeaderDetails[0]?.userFirstName &&
+											invoiceHeaderDetails[0]?.userFirstName +
+												' ' +
+												invoiceHeaderDetails[0]?.userLastName}
+									</span>
+								</span>{' '}
 							</div>
 						</div>
 						<div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
@@ -722,8 +756,8 @@ const Invoices = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{invoiceItemDetails.map((item, index) => (
-										<tr key={index} className='even:bg-gray-50' key={item.vendorItemReference}>
+									{invoiceItemDetails.map((item) => (
+										<tr className='even:bg-gray-50' key={item.vendorItemReference}>
 											<td className='p-2 text-center border border-gray-300'>
 												{item.vendorItemReference}
 											</td>
@@ -734,13 +768,13 @@ const Invoices = () => {
 											<td className='p-2 text-center border border-gray-300'>{item.size}</td>
 											<td className='p-2 text-center border border-gray-300'>{item.quantity}</td>
 											<td className='p-2 text-center border border-gray-300'>
-												${item.price.toFixed(2)}
+												{formattingData(item.price)}
 											</td>
 											<td className='p-2 text-center border border-gray-300'>
-												${item.taxAmount.toFixed(2)}
+												{formattingData(item.taxAmount)}
 											</td>
 											<td className='p-2 text-center border border-gray-300'>
-												${(item.price * item.quantity + item.taxAmount).toFixed(2)}
+												{formattingData(item.price * item.quantity + item.taxAmount)}
 											</td>
 										</tr>
 									))}

@@ -36,7 +36,12 @@ export const TableCell = ({ getValue, row, column, table }) => {
 	};
 	if (tableMeta?.editedRows[row.id]) {
 		return columnMeta?.type === 'select' ? (
-			<select className='py-1 text-left' onChange={onSelectChange} value={initialValue}>
+			<select
+				disabled={columnMeta?.isNew ? false : true}
+				className='py-1 text-left'
+				onChange={onSelectChange}
+				value={initialValue}
+			>
 				{columnMeta?.options?.map((option) => (
 					<option
 						className='cursor-pointer bg-[#f9f9f9] rounded-md px-5 py-1 mb-2 font-semibold text-gray-800 hover:border border border-transparent hover:border-[var(--tw-primary)] mx-2 my-2'
