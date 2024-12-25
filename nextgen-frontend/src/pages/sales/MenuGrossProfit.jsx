@@ -18,6 +18,8 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import menuGrossProfit from '../../assets/introJSSteps/menuGrossProfit';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const columnHelper = createColumnHelper();
 
@@ -35,6 +37,7 @@ const MenuGrossProfit = () => {
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isCategoryLoading, setIsCategoryLoading] = useState(false);
 	const [isRecipeInfoLoading, setIsRecipeInfoLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
@@ -51,8 +54,8 @@ const MenuGrossProfit = () => {
 	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
-	const Categories = ['Beverage', 'Food', 'Non Revenue', 'Wings'];
-	const [selectedCategories, setSelectedCategories] = useState(Categories);
+	const [categories, setCategories] = useState([]);
+	const [selectedCategories, setSelectedCategories] = useState([]);
 	const [isGroupByCategory, setIsGroupByCategory] = useState(true);
 	const [showItemsWithSales, setShowItemsWithSales] = useState(false);
 	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -229,6 +232,34 @@ const MenuGrossProfit = () => {
 	];
 
 	useEffect(() => {
+		const fetchCategoryItems = async () => {
+			try {
+				setIsCategoryLoading(true);
+				const getData = {
+					url: 'getGrossProfitCategoryItems',
+					urlParams: {
+						companyId: companyID,
+						alignmentId: alignmentID,
+						memberId: selectedUnit,
+						fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+						toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					},
+				};
+
+				const result = await getCall(getData);
+				const newCategories = [...new Set(result.data.map((category) => category.categoryName))];
+				setCategories(newCategories);
+				setSelectedCategories(newCategories);
+				setIsCategoryLoading(false);
+			} catch (error) {
+				console.error('Error getting categories: ', error);
+			}
+		};
+
+		if (selectedUnit && selectedFromDate && selectedToDate) fetchCategoryItems();
+	}, [selectedUnit, selectedFromDate, selectedToDate]);
+
+	useEffect(() => {
 		if (defaultUnitID) {
 			setSelectedUnit(defaultUnitID);
 		}
@@ -241,7 +272,6 @@ const MenuGrossProfit = () => {
 		handleGroupByCategory();
 	}, []);
 
-	//Default date get
 	const getDefaultDates = async () => {
 		try {
 			const getData = {
@@ -269,6 +299,10 @@ const MenuGrossProfit = () => {
 
 	const fetchMenuGrossProfitData = async () => {
 		try {
+			if (categories.length === 0) {
+				toast.error('Categories are not available, please try again later.');
+				return;
+			}
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
@@ -583,7 +617,7 @@ const MenuGrossProfit = () => {
 						/>
 						<div className='categories-button' onClick={() => setIsCategoryModalOpen(true)}>
 							<div className='py-3 ml-2 text-lg text-center capitalize border-2 border-solid cursor-pointer px-8 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
-								Select Categories
+								{isCategoryLoading ? 'Loading...' : 'Select Categories'}
 							</div>
 						</div>
 						<div className='run-button' onClick={fetchMenuGrossProfitData}>
@@ -683,7 +717,7 @@ const MenuGrossProfit = () => {
 							<div className='flex justify-between'>
 								<button
 									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
-									onClick={() => setSelectedCategories(Categories)}
+									onClick={() => setSelectedCategories(categories)}
 								>
 									Select All
 								</button>
@@ -695,7 +729,7 @@ const MenuGrossProfit = () => {
 								</button>
 							</div>
 							<div className='flex flex-col space-y-2'>
-								{Categories.map((category) => (
+								{categories.map((category) => (
 									<div key={category} className='flex items-center rounded'>
 										<input
 											type='checkbox'
