@@ -344,7 +344,7 @@ const ActualFoodCost = () => {
 										subSubrow.subRows.reduce(
 											(subsubAcc, subsubsubrow) =>
 												subsubAcc +
-												(item.includeInGrandTotal && subsubsubrow.original[field]
+												(item?.includeInGrandTotal && subsubsubrow.original[field]
 													? Number(subsubsubrow.original[field])
 													: 0),
 											0
