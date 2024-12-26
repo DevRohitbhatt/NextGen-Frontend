@@ -98,18 +98,22 @@ const Discounts = () => {
 				header: 'Discounted Checks',
 				dataType: 'number',
 				footer: ({ table }) => (
-					<div className='text-center'>{calculateFooterSum(table, 'discountedChecks').toLocaleString("en-US")}</div>
+					<div className='text-center'>
+						{calculateFooterSum(table, 'discountedChecks').toLocaleString('en-US')}
+					</div>
 				),
 			}),
 			columnHelper.accessor('totalDiscountAmount', {
 				id: 'totalDiscountAmount',
 				header: 'Total Discount Amount',
 				cell: ({ getValue }) => {
-					return `${formattingData(getValue())}`
+					return `${formattingData(getValue())}`;
 				},
 				dataType: 'price',
 				footer: ({ table }) => (
-					<div className='text-center'>${calculateFooterSum(table, 'totalDiscountAmount')}</div>
+					<div className='text-center'>
+						{formattingData(calculateFooterSum(table, 'totalDiscountAmount'))}
+					</div>
 				),
 			}),
 			columnHelper.accessor('discountedItems', {
@@ -126,22 +130,20 @@ const Discounts = () => {
 				cell: ({ row, getValue }) =>
 					row.getCanExpand()
 						? ''
-						: `${
-								getValue() !== null && getValue() !== undefined
-									? formattingData(getValue())
-									: '0.00'
-							}`,
+						: `${getValue() !== null && getValue() !== undefined ? formattingData(getValue()) : '0.00'}`,
 				dataType: 'price',
 				footer: ({ table }) => (
-					<div className='text-center'>${calculateFooterSum(table, 'salesGenerated')}</div>
+					<div className='text-center'>{formattingData(calculateFooterSum(table, 'salesGenerated'))}</div>
 				),
 			}),
 			columnHelper.accessor('discountedTickets', {
 				id: 'discountedTickets',
 				header: 'Disc Cost %',
-				cell: ({ getValue, row }) => (row.getCanExpand() ? '' : `${getValue()}%`),
+				cell: ({ getValue, row }) => (row.getCanExpand() ? '' : `${formattingDataWithoutDollr(getValue())}%`),
 				dataType: 'percent',
-				footer: ({ table }) => <div className='text-center'>{calculatePctFooter(table)}%</div>,
+				footer: ({ table }) => (
+					<div className='text-center'>{formattingDataWithoutDollr(calculatePctFooter(table))}%</div>
+				),
 			}),
 		];
 
@@ -196,18 +198,20 @@ const Discounts = () => {
 				columnHelper.accessor('price', {
 					id: 'price',
 					header: 'Price',
-					cell: ({ row }) => `$${calculateSum(row, 'price')}`,
+					cell: ({ row }) => formattingData(calculateSum(row, 'price')),
 					dataType: 'price',
-					footer: ({ table }) => <div className='text-center'>${calculateFooterSum(table, 'price')}</div>,
+					footer: ({ table }) => (
+						<div className='text-center'>{formattingData(calculateFooterSum(table, 'price'))}</div>
+					),
 					size: 80,
 				}),
 				columnHelper.accessor('amountDiscount', {
 					id: 'amountDiscount',
 					header: 'Amount Discount',
-					cell: ({ row }) => `$${calculateSum(row, 'amountDiscount')}`,
+					cell: ({ row }) => formattingData(calculateSum(row, 'amountDiscount')),
 					dataType: 'price',
 					footer: ({ table }) => (
-						<div className='text-center'>${calculateFooterSum(table, 'amountDiscount')}</div>
+						<div className='text-center'>{formattingData(calculateFooterSum(table, 'amountDiscount'))}</div>
 					),
 					size: 180,
 				}),
@@ -449,7 +453,7 @@ const Discounts = () => {
 								dataType: 'number',
 								footer: ({ table }) => (
 									<div className='text-center'>
-										${calculateFooterSum(table, 'totalDiscountAmount')}
+										{formattingData(calculateFooterSum(table, 'totalDiscountAmount'))}
 									</div>
 								),
 							}),
@@ -483,7 +487,7 @@ const Discounts = () => {
 								dataType: 'price',
 								footer: ({ table }) => (
 									<div className='text-center'>
-										${calculateFooterSum(table, 'totalSalesGenerated')}
+										{formattingData(calculateFooterSum(table, 'totalSalesGenerated'))}
 									</div>
 								),
 							}),
@@ -493,7 +497,9 @@ const Discounts = () => {
 								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
 								dataType: 'percent',
 								footer: ({ table }) => (
-									<div className='text-center'>{formattingDataWithoutDollr(calculatePctFooter(table, 'total'))}%</div>
+									<div className='text-center'>
+										{formattingDataWithoutDollr(calculatePctFooter(table, 'total'))}%
+									</div>
 								),
 							}),
 						],
@@ -514,12 +520,12 @@ const Discounts = () => {
 										header: 'Disc Amount',
 										cell: ({ getValue }) => {
 											let discAmount = formattingData(getValue());
-											return discAmount
-											},
+											return discAmount;
+										},
 										dataType: 'number',
 										footer: ({ table }) => (
 											<div className='text-center'>
-												${calculateFooterSum(table, `discountAmount_${weekId}`)}
+												{formattingData(calculateFooterSum(table, `discountAmount_${weekId}`))}
 											</div>
 										),
 									}
@@ -536,7 +542,9 @@ const Discounts = () => {
 										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
-												{formattingDataWithoutDollr(calculateFooterSum(table, `discountedChecks_${weekId}`))}
+												{formattingDataWithoutDollr(
+													calculateFooterSum(table, `discountedChecks_${weekId}`)
+												)}
 											</div>
 										),
 									}
@@ -553,7 +561,9 @@ const Discounts = () => {
 										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
-												{formattingDataWithoutDollr(calculateFooterSum(table, `discountedItems_${weekId}`))}
+												{formattingDataWithoutDollr(
+													calculateFooterSum(table, `discountedItems_${weekId}`)
+												)}
 											</div>
 										),
 									}
@@ -566,11 +576,11 @@ const Discounts = () => {
 									{
 										id: `salesGenerated_${weekId}`,
 										header: 'Sales $ Gen',
-										cell: ({ getValue }) => `$${getValue()}`,
+										cell: ({ getValue }) => formattingData(getValue()),
 										dataType: 'price',
 										footer: ({ table }) => (
 											<div className='text-center'>
-												${calculateFooterSum(table, `salesGenerated_${weekId}`)}
+												{formattingData(calculateFooterSum(table, `salesGenerated_${weekId}`))}
 											</div>
 										),
 									}
@@ -583,10 +593,12 @@ const Discounts = () => {
 									{
 										id: `discountedTickets_${weekId}`,
 										header: 'Disc Cost %',
-										cell: ({ getValue }) => `${getValue()}%`,
+										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
 										dataType: 'percent',
 										footer: ({ table }) => (
-											<div className='text-center'>{calculatePctFooter(table, weekId)}%</div>
+											<div className='text-center'>
+												{formattingDataWithoutDollr(calculatePctFooter(table, weekId))}%
+											</div>
 										),
 									}
 								),
@@ -828,9 +840,9 @@ const Discounts = () => {
 										: row[column.id] ?? 0;
 
 									if (column.dataType === 'price') {
-										value = `$${value}`;
+										value = `${formattingData(value)}`;
 									} else if (column.dataType === 'percent') {
-										value = `${value}`;
+										value = `${formattingDataWithoutDollr(value)}`;
 									}
 
 									return {
@@ -873,9 +885,9 @@ const Discounts = () => {
 										columns.map((column) => ({
 											value:
 												column.dataType === 'price'
-													? `$${Number(row[column.id]).toFixed(2)}`
+													? `${formattingData(row[column.id])}`
 													: column.dataType === 'percent'
-													? `${row[column.id]}`
+													? `${formattingDataWithoutDollr(row[column.id])}`
 													: row[column.id],
 											cellType: column.dataType,
 											columnName: column.header,
@@ -965,7 +977,7 @@ const Discounts = () => {
 					data: discountsData.map((row) =>
 						columns.map((column) =>
 							column.dataType === 'price'
-								? `$${Number(row[column.id]).toFixed(2)}`
+								? `${formattingData(row[column.id])}`
 								: column.dataType === 'percent'
 								? `${row[column.id]}%`
 								: row[column.id]
