@@ -19,7 +19,6 @@ import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import menuGrossProfit from '../../assets/introJSSteps/menuGrossProfit';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const columnHelper = createColumnHelper();
 
@@ -232,36 +231,9 @@ const MenuGrossProfit = () => {
 	];
 
 	useEffect(() => {
-		const fetchCategoryItems = async () => {
-			try {
-				setIsCategoryLoading(true);
-				const getData = {
-					url: 'getGrossProfitCategoryItems',
-					urlParams: {
-						companyId: companyID,
-						alignmentId: alignmentID,
-						memberId: selectedUnit,
-						fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
-						toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
-					},
-				};
-
-				const result = await getCall(getData);
-				const newCategories = [...new Set(result.data.map((category) => category.description))].sort();
-				setCategories(newCategories);
-				setSelectedCategories(newCategories);
-				setIsCategoryLoading(false);
-			} catch (error) {
-				console.error('Error getting categories: ', error);
-			}
-		};
-
-		if (selectedUnit && selectedFromDate && selectedToDate) fetchCategoryItems();
-	}, [selectedUnit, selectedFromDate, selectedToDate]);
-
-	useEffect(() => {
 		if (defaultUnitID) {
 			setSelectedUnit(defaultUnitID);
+			fetchMenuGrossProfitData(defaultUnitID);
 		}
 		if (defaultUnitName) {
 			setSelectedUnitName(defaultUnitName);
@@ -297,12 +269,8 @@ const MenuGrossProfit = () => {
 		getDefaultDates();
 	}, []);
 
-	const fetchMenuGrossProfitData = async () => {
+	const fetchMenuGrossProfitData = async (memberId) => {
 		try {
-			if (categories.length === 0) {
-				toast.error('Categories are not available, please try again later.');
-				return;
-			}
 			setIsLoading(true);
 			setIsError(false);
 			const getData = {
@@ -310,7 +278,7 @@ const MenuGrossProfit = () => {
 				urlParams: {
 					companyId: companyID,
 					alignmentId: alignmentID,
-					memberId: selectedUnit,
+					memberId: memberId,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 				},
@@ -337,7 +305,9 @@ const MenuGrossProfit = () => {
 				netProfit: result.data.menuGrossProfitFooterModel.netProfit.slice(1),
 			}));
 
-			let filteredData = newData.filter((item) => selectedCategories.includes(item.category));
+			var categoriesTemp = updateSelectedCategories(newData);
+
+			let filteredData = newData.filter((item) => categoriesTemp.includes(item.category));
 
 			if (!showItemsWithSales) {
 				filteredData = filteredData.filter((item) => item.itemSales !== 0);
@@ -346,6 +316,7 @@ const MenuGrossProfit = () => {
 			if (!showItemsWithNoRecipeCost) {
 				filteredData = filteredData.filter((item) => item.recipeCost !== '0.00');
 			}
+
 			setMenuGrossProfitData(filteredData);
 			setIsLoading(false);
 		} catch (error) {
@@ -353,6 +324,25 @@ const MenuGrossProfit = () => {
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
 			console.error('Error getting Menu Gross Profit Report data: ', error);
+		}
+	};
+
+	const updateSelectedCategories = (newData) => {
+		if (!selectedCategories.length) {
+			//find all distinct categories
+			const newCategories = [...new Set(newData.map((item) => item.category))].sort();
+			setCategories(newCategories);
+			setSelectedCategories(newCategories);
+			setIsCategoryLoading(false);
+			return newCategories;
+		}
+		//if there are existing selected categories, check if they are still available, if not then remove. Then and add any new ones
+		else {
+			const newCategories = [...new Set(newData.map((item) => item.category))].sort();
+			const updatedCategories = selectedCategories.filter((category) => newCategories.includes(category));
+			setSelectedCategories(updatedCategories);
+			setIsCategoryLoading(false);
+			return updatedCategories;
 		}
 	};
 
@@ -416,7 +406,7 @@ const MenuGrossProfit = () => {
 			setColumns(memoizedColumns);
 		}
 
-		if (e) fetchMenuGrossProfitData();
+		if (e) fetchMenuGrossProfitData(selectedUnit);
 	};
 
 	const handleRecipeInfoModal = async (e) => {
@@ -620,7 +610,7 @@ const MenuGrossProfit = () => {
 								{isCategoryLoading ? 'Loading...' : 'Select Categories'}
 							</div>
 						</div>
-						<div className='run-button' onClick={fetchMenuGrossProfitData}>
+						<div className='run-button' onClick={() => fetchMenuGrossProfitData(selectedUnit)}>
 							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
