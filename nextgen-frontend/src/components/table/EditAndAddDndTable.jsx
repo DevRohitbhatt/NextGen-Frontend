@@ -310,7 +310,7 @@ const EditAndAddDndTable = ({
                   <thead className="sticky top-0 bg-white">
                     <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
                       <th className="px-4 py-2 text-left lg:text-[16px] text-[12px] text-nowrap">
-                        Selected
+                        Select
                       </th>
                       {tableOneHeaders.map((header, index) => (
                         <th

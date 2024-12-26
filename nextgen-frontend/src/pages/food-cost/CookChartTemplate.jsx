@@ -184,7 +184,7 @@ const CookChartTemplate = (props) => {
                 resultData[i].cookTimeSeconds
               )}, Hold ${formatTime(resultData[i].holdTimeSeconds)}, Safety ${
                 resultData[i].safetyFactor
-              }%, UOM ${resultData.unitOfMeasure}, Mix Multiplier ${resultData.mixMultiplier}%`,
+              }%, UOM ${resultData[i].unitOfMeasure}, Mix Multiplier ${resultData[i].mixMultiplier}%`,
               items: resultData[i].listCookDropCookItemDetails.map(
                 (detail) => ({
                   id: detail.inventoryOrMenuItemID,
@@ -372,7 +372,7 @@ const CookChartTemplate = (props) => {
             draggedItem.cookTimeSeconds
           )}, Hold ${formatTime(draggedItem.holdTimeSeconds)}, Safety ${
             draggedItem.safetyFactor
-          }% UOM ${draggedItem.unitOfMeasure}, Mix Multiplier ${draggedItem.mixMultiplier}%`,
+          }%, UOM ${draggedItem.unitOfMeasure}, Mix Multiplier ${draggedItem.mixMultiplier}%`,
           items: draggedItem.listCookDropCookItemDetails.map((detail) => ({
             id: detail.inventoryOrMenuItemID,
             inventoryOrMenuItemName: detail.inventoryOrMenuItemName,

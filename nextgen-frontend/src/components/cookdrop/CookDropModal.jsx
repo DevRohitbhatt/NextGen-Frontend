@@ -42,13 +42,12 @@ export const CreateItemModal = ({addHeaderFields,
 
     const validateFields = () => {
       const invalid = {};
-      
       if (!cookItemName.trim()) invalid.cookItemName = true;
       if (!cookInterval || cookInterval == "0") invalid.cookInterval = true;
       if (!safetyFactor) invalid.safetyFactor = true;
       if (!projectAhead.trim()) invalid.projectAhead = true;
       if (!unitOfMeasure.trim()) invalid.unitOfMeasure = true;
-      if (!mixMultiplier) invalid.mixMultiplier = true;
+      if (!mixMultiplier || mixMultiplier == "0") invalid.mixMultiplier = true;
 
       setInvalidFields(invalid);
       return Object.keys(invalid).length === 0; // Return true if all fields are valid
@@ -367,7 +366,7 @@ export const CreateItemModal = ({addHeaderFields,
                     type="text"
                     value={unitOfMeasure}
                     className={`bg-gray-200 p-2 w-[90px] rounded-full  ${
-                      validateFields.unitOfMeasure
+                      invalidFields.unitOfMeasure
                         ? "border border-red-500"
                         : "border-none"
                     } `}
@@ -381,7 +380,7 @@ export const CreateItemModal = ({addHeaderFields,
                     type="text"
                     value={mixMultiplier+"%"}
                     className={`bg-gray-200 p-2 w-[115px] rounded-full  ${
-                      validateFields.mixMultiplier
+                      invalidFields.mixMultiplier
                         ? "border-red-500 border"
                         : "border-none"
                     }`}

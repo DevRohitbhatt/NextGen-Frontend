@@ -62,9 +62,9 @@ const HhmmssSelector = (props) => {
       fieldRefs[field]?.select();
     }
 
-    if (action === "keydown" && fieldValues[field]?.length === 1) {
+    if (action === "keydown" && fieldRefs[field]?.length === 1) {
       // Add padding if the field value is a single digit
-      const paddedValue = "0" + fieldValues[field];
+      const paddedValue = "0" + fieldRefs[field];
       if (field === "hh") setHh(paddedValue);
       else if (field === "mm") setMm(paddedValue);
       else if (field === "ss") setSs(paddedValue);
@@ -73,8 +73,8 @@ const HhmmssSelector = (props) => {
     if (action === "blur") {
       // Add padding on blur if the field value is a single digit
       setTimeout(() => {
-        if (fieldValues[field]?.length === 1) {
-          const paddedValue = "0" + fieldValues[field];
+        if (fieldRefs[field]?.length === 1) {
+          const paddedValue = "0" + fieldRefs[field];
           if (field === "hh") setHh(paddedValue);
           else if (field === "mm") setMm(paddedValue);
           else if (field === "ss") setSs(paddedValue);

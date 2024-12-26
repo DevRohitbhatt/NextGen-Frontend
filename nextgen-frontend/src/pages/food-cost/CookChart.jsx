@@ -255,6 +255,7 @@ const CookChart = () => {
       originalData,
       changedData
     );
+    console.log(JSON.stringify(transformedData),'<<<<<')
     const pdfData = prepareDynamicPdfData({ ...transformedData }, mode);
 
     if (pdfData) {
@@ -272,13 +273,16 @@ const CookChart = () => {
 
   const handleSaveClick = async () => {
     toast.info("Saving data...", { autoClose: 1000 });
+    try {
     const changedData = cookDropTableRef.current?.getChangedData();
     const transformedData = await applyChangesToOriginalData(
       originalData,
       changedData
     );
-    console.log("Updated CookDrop Data:", JSON.stringify(transformedData));
-
+    setIsForecastAltered(
+      transformedData.forecastedSales !==
+      forecastedSalesValue
+    );
     transformedData.forecastedSales = forecastedSalesValue;
     const postData = {
       fullUrl: "api/cookdrop/savecookdropchart",
@@ -292,6 +296,9 @@ const CookChart = () => {
     } else {
       toast.error("Failed to save", { autoClose: 1500 });
     }
+  } catch (error) {
+    toast.error("Failed to save", { autoClose: 1500 });
+  }
   };
 
   const handleUnitSelection = (unitName, unitID) => {
@@ -357,7 +364,7 @@ const CookChart = () => {
       changedData
     );
     const excelData = await prepareExcelData(cookDropChartData);
-    console.log("=>", JSON.stringify(changedData));
+
 
     exportToExcel(
       [
@@ -439,7 +446,7 @@ const CookChart = () => {
               }}
             />
             {isForecastAltered ? (
-              <p className="relative text-xs xl:text-sm py-2 overflow-hidden flex flex-row justify-start mt-6">
+              <p className="relative text-xs xl:text-sm py-2 overflow-hidden flex flex-row justify-start mt-6 !ml-[6px]">
                 *Changed
               </p>
             ) : (
