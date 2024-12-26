@@ -392,7 +392,7 @@ const InvoiceEditor = () => {
 				vendorItemReference: item.vendorItemReference || '',
 				description: item.description || '',
 				unitOfMeasure: item.unitOfMeasure || '',
-				packSize: item.size || '',
+				packSize: item.pack ? (item.size ? `${item.pack}/${item.size}` : item.pack) : item.size || '',
 				orderQty: item.quantity || '0',
 				price: item.price.toFixed(2) || '0.00',
 				tax: item.taxAmount.toFixed(2) || '0.00',

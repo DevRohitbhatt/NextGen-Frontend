@@ -765,7 +765,13 @@ const Invoices = () => {
 											<td className='p-2 text-center border border-gray-300'>
 												{item.unitOfMeasure}
 											</td>
-											<td className='p-2 text-center border border-gray-300'>{item.size}</td>
+											<td className='p-2 text-center border border-gray-300'>
+												{item.pack
+													? item.size
+														? `${item.pack}/${item.size}`
+														: item.pack
+													: item.size || ''}
+											</td>
 											<td className='p-2 text-center border border-gray-300'>{item.quantity}</td>
 											<td className='p-2 text-center border border-gray-300'>
 												{formattingData(item.price)}
