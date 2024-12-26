@@ -60,22 +60,7 @@ const VarianceFoodCost = () => {
 
 	const [isShowHideDepartmentsModalVisible, setIsShowHideDepartmentsModalVisible] = useState(false);
 	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
-	const [checkedItems, setCheckedItems] = useState([
-		{
-			name: 'DO NOT COUNT/DO NOT COUNT',
-			showOnReport: false,
-			includeInGrandTotal: false,
-		},
-		{ name: 'FOOD/BEVERAGES', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/BREAD', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/DAIRY', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/GROCERY', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/MEAT', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/PRODUCE', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'PREP/PREP', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'SUPPLY/CLEANING', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'SUPPLY/PAPER', showOnReport: true, includeInGrandTotal: true },
-	]);
+	const [checkedItems, setCheckedItems] = useState([]);
 
 	//dropdown variables
 	const [view, setView] = useState('Weekly');
@@ -202,7 +187,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('actualNumber', {
 			id: 'actualNumber',
 			header: 'Actual #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
+			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -223,7 +208,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('idealNumber', {
 			id: 'idealNumber',
 			header: 'Ideal #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
+			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -244,7 +229,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('varianceNumber', {
 			id: 'varianceNumber',
 			header: 'Variance #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
+			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 100,
 		}),
@@ -265,7 +250,7 @@ const VarianceFoodCost = () => {
 		columnHelper.accessor('wasteNumber', {
 			id: 'wasteNumber',
 			header: 'Waste #',
-			cell: ({ getValue }) => getValue()?.toFixed(2),
+			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
 			dataType: 'number',
 			size: 90,
 		}),
@@ -435,6 +420,35 @@ const VarianceFoodCost = () => {
 			}
 		}
 	}, [selectedFromDate]);
+
+	useEffect(() => {
+		const fetchShowHideDepartments = async () => {
+			try {
+				setCheckedItemsLoaded(false);
+				const getData = {
+					url: 'getShowHideDepartments',
+					urlParams: {
+						companyId: companyID,
+					},
+				};
+
+				const result = await getCall(getData);
+
+				const checkedItems = result.data.map((item) => ({
+					name: `${item.department}/${item.subdepartment}`,
+					showOnReport: item.includeInReport,
+					includeInGrandTotal: item.includeInTotal,
+				}));
+
+				setCheckedItems(checkedItems);
+				setCheckedItemsLoaded(true);
+			} catch (error) {
+				console.error('Error getting Show Hide Departments data: ', error);
+			}
+		};
+
+		fetchShowHideDepartments();
+	}, []);
 
 	useEffect(() => {
 		const fetchDates = async () => {
@@ -636,6 +650,7 @@ const VarianceFoodCost = () => {
 			)
 		);
 		setIsTableRendered(false);
+		setColumns(generatedColumns);
 		setFilteredVarianceFoodCostData(newVarianceFoodCostData);
 	};
 

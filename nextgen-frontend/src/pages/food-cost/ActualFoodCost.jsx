@@ -60,22 +60,7 @@ const ActualFoodCost = () => {
 		purchaseBetween: false,
 	});
 	const [isShowHideDepartments, setIsShowHideDepartments] = useState(false);
-	const [checkedItems, setCheckedItems] = useState([
-		{
-			name: 'DO NOT COUNT/DO NOT COUNT',
-			showOnReport: false,
-			includeInGrandTotal: false,
-		},
-		{ name: 'FOOD/BEVERAGES', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/BREAD', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/DAIRY', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/GROCERY', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/MEAT', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/PRODUCE', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'PREP/PREP', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'SUPPLY/CLEANING', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'SUPPLY/PAPER', showOnReport: true, includeInGrandTotal: true },
-	]);
+	const [checkedItems, setCheckedItems] = useState([]);
 
 	//dropdown variables
 	const [view, setView] = useState('Weekly');
@@ -359,7 +344,7 @@ const ActualFoodCost = () => {
 										subSubrow.subRows.reduce(
 											(subsubAcc, subsubsubrow) =>
 												subsubAcc +
-												(item.includeInGrandTotal && subsubsubrow.original[field]
+												(item?.includeInGrandTotal && subsubsubrow.original[field]
 													? Number(subsubsubrow.original[field])
 													: 0),
 											0
@@ -430,6 +415,8 @@ const ActualFoodCost = () => {
 	}, [defaultUnitID, defaultUnitName]);
 
 	useEffect(() => {
+		console.log('checkedItemsLoaded', checkedItemsLoaded);
+
 		setColumns(generatedColumns);
 	}, [checkedItemsLoaded]);
 
@@ -473,7 +460,34 @@ const ActualFoodCost = () => {
 		}
 	}, [selectedFromDate]);
 
-	console.log('todateoptions', toDateOptions);
+	useEffect(() => {
+		const fetchShowHideDepartments = async () => {
+			try {
+				setCheckedItemsLoaded(false);
+				const getData = {
+					url: 'getShowHideDepartments',
+					urlParams: {
+						companyId: companyID,
+					},
+				};
+
+				const result = await getCall(getData);
+
+				const checkedItems = result.data.map((item) => ({
+					name: `${item.department}/${item.subdepartment}`,
+					showOnReport: item.includeInReport,
+					includeInGrandTotal: item.includeInTotal,
+				}));
+
+				setCheckedItems(checkedItems);
+				setCheckedItemsLoaded(true);
+			} catch (error) {
+				console.error('Error getting Show Hide Departments data: ', error);
+			}
+		};
+
+		fetchShowHideDepartments();
+	}, []);
 
 	useEffect(() => {
 		const fetchDates = async () => {
@@ -639,8 +653,9 @@ const ActualFoodCost = () => {
 					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
 			)
 		);
-		setIsTableRendered(false);
 
+		setIsTableRendered(false);
+		setColumns(generatedColumns);
 		setFilteredActualFoodCostData(newActualFoodCostData);
 	};
 
