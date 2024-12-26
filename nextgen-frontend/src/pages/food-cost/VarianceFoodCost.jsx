@@ -60,22 +60,7 @@ const VarianceFoodCost = () => {
 
 	const [isShowHideDepartmentsModalVisible, setIsShowHideDepartmentsModalVisible] = useState(false);
 	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
-	const [checkedItems, setCheckedItems] = useState([
-		{
-			name: 'DO NOT COUNT/DO NOT COUNT',
-			showOnReport: false,
-			includeInGrandTotal: false,
-		},
-		{ name: 'FOOD/BEVERAGES', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/BREAD', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/DAIRY', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/GROCERY', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/MEAT', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'FOOD/PRODUCE', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'PREP/PREP', showOnReport: false, includeInGrandTotal: false },
-		{ name: 'SUPPLY/CLEANING', showOnReport: true, includeInGrandTotal: true },
-		{ name: 'SUPPLY/PAPER', showOnReport: true, includeInGrandTotal: true },
-	]);
+	const [checkedItems, setCheckedItems] = useState([]);
 
 	//dropdown variables
 	const [view, setView] = useState('Weekly');
