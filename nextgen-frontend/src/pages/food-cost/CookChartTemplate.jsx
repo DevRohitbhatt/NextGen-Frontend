@@ -184,7 +184,7 @@ const CookChartTemplate = (props) => {
                 resultData[i].cookTimeSeconds
               )}, Hold ${formatTime(resultData[i].holdTimeSeconds)}, Safety ${
                 resultData[i].safetyFactor
-              }%`,
+              }%, UOM ${resultData.unitOfMeasure}, Mix Multiplier ${resultData.mixMultiplier}%`,
               items: resultData[i].listCookDropCookItemDetails.map(
                 (detail) => ({
                   id: detail.inventoryOrMenuItemID,
@@ -372,7 +372,7 @@ const CookChartTemplate = (props) => {
             draggedItem.cookTimeSeconds
           )}, Hold ${formatTime(draggedItem.holdTimeSeconds)}, Safety ${
             draggedItem.safetyFactor
-          }%`,
+          }% UOM ${draggedItem.unitOfMeasure}, Mix Multiplier ${draggedItem.mixMultiplier}%`,
           items: draggedItem.listCookDropCookItemDetails.map((detail) => ({
             id: detail.inventoryOrMenuItemID,
             inventoryOrMenuItemName: detail.inventoryOrMenuItemName,
@@ -454,7 +454,7 @@ const CookChartTemplate = (props) => {
           resultData.cookTimeSeconds
         )}, Hold ${formatTime(resultData.holdTimeSeconds)}, Safety ${
           resultData.safetyFactor
-        }%`,
+        }%, UOM ${resultData.unitOfMeasure}, Mix Multiplier ${resultData.mixMultiplier}%`,
         items: resultData.listCookDropCookItemDetails.map((detail) => ({
           id: detail.inventoryOrMenuItemID,
           inventoryOrMenuItemName: detail.inventoryOrMenuItemName,
@@ -864,7 +864,7 @@ const CookChartTemplate = (props) => {
                                           item.cookTimeSeconds
                                         )}, Hold ${formatTime(
                                           item.holdTimeSeconds
-                                        )}, Safety ${item.safetyFactor}%`}
+                                        )}, Safety ${item.safetyFactor}%, UOM ${item.unitOfMeasure}, Mix Multiplier ${item.mixMultiplier}% `}
                                       </p>
                                     </div>
                                     <span

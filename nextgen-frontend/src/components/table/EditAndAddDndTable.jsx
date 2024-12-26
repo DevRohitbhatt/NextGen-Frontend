@@ -18,6 +18,8 @@ const DraggableRow = ({
   onQuantityChange,
   addToClick,
   isEmptyUomQty = [],
+  toggleSelection,
+  isChecked,
 }) => {
   const [timeoutId, setTimeoutId] = useState(null);
 
@@ -35,27 +37,43 @@ const DraggableRow = ({
 
   return (
     <>
-      <td className="lg:px-4 px-2 lg:py-[2px] w-[20%] lg:text-[16px] text-[12px]">{item.menuID}</td>
+      {!isTemplate && <td className="lg:px-4 px-2 lg:py-[2px] w-[20%] lg:text-[16px] text-[12px]">
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={() => toggleSelection(item.menuID)}
+        />
+      </td>}
+      <td className="lg:px-4 px-2 lg:py-[2px] w-[20%] lg:text-[16px] text-[12px]">
+        {item.menuID}
+      </td>
       <td className="lg:px-4 px-2 py-[2px] w-[50%] lg:text-[16px] text-[12px]">
         {item?.description ? item?.description : item.inventoryOrMenuItemName}
       </td>
-      {!isTemplate &&  <td className="text-center lg:px-4 px-2 py-[2px] w-[50%] lg:text-[16px] text-[12px] flex justify-center items-center lg:hidden">
-        <span
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            addToClick(item);
-          }}
-          className="text-[12px] ml-[20px] font-bold text-blue-600 hover:text-blue-800 cursor-pointer lg:hidden inline-block"
-        >
-          <FaPlusCircle />
-        </span>
-      </td>}
+      {!isTemplate && (
+        <td className="text-center lg:px-4 px-2 py-[2px] w-[50%] lg:text-[16px] text-[12px] flex justify-center items-center lg:hidden">
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              addToClick(item);
+            }}
+            className="text-[12px] ml-[20px] font-bold text-blue-600 hover:text-blue-800 cursor-pointer lg:hidden inline-block"
+          >
+            <FaPlusCircle />
+          </span>
+        </td>
+      )}
       {isTemplate && (
         <>
           <td className="lg:px-4 px-0 py-[2px] lg:w-[20%] w-full">
             <input
-              className={`border rounded-full pr-[18px] lg:pl-[10px] pl-[5px] outline-none lg:w-[60%] sm:w-[50%] w-full ${isEmptyUomQty.length && isEmptyUomQty.find((prod)=> prod.uniqueKey === item.uniqueKey) ? 'border-red-500' : ""}`}
+              className={`border rounded-full pr-[18px] lg:pl-[10px] pl-[5px] outline-none lg:w-[60%] sm:w-[50%] w-full ${
+                isEmptyUomQty.length &&
+                isEmptyUomQty.find((prod) => prod.uniqueKey === item.uniqueKey)
+                  ? "border-red-500"
+                  : ""
+              }`}
               value={item.cookItemQuantity || ""}
               onChange={(e) => onQuantityChange(item.uniqueKey, e.target.value)}
               type="text"
@@ -87,8 +105,8 @@ const EditAndAddDndTable = ({
   tableTwoHeaders,
   initialTableOneData,
   initialTemplateItems,
-  dorpabaleidOne,
-  dorpabaleidTwo,
+  dropabaleidOne,
+  dropabaleidTwo,
   onSave,
   onCancel,
   isSaveDisable = false,
@@ -97,14 +115,18 @@ const EditAndAddDndTable = ({
   isPaginationEnabled, // New prop to control pagination
 }) => {
   const [items, setItems] = useState([]);
-  const [templateItems, setTemplateItems] = useState(initialTemplateItems || [] );
+  const [templateItems, setTemplateItems] = useState(
+    initialTemplateItems || []
+  );
   const [draggingId, setDraggingId] = useState(null);
   const [uniqueIdCounter, setUniqueIdCounter] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
-  const [isEmptyUomQty, setIsEmptyUomQty] = useState([])
+  const [isEmptyUomQty, setIsEmptyUomQty] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+
   useEffect(() => {
     setItems(initialTableOneData);
     setFilteredItems(initialTableOneData); // Initialize filteredItems
@@ -132,66 +154,53 @@ const EditAndAddDndTable = ({
     setDraggingId(menuID);
   };
 
+  
   const handleDragEnd = (result) => {
-    setDraggingId(null);
     const { source, destination } = result;
+
     if (!destination) return;
-    if (
-      source.droppableId === dorpabaleidTwo &&
-      destination.droppableId === dorpabaleidTwo
-    ) {
-      const updatedTemplateItems = Array.from(templateItems);
-      const [movedItem] = updatedTemplateItems.splice(source.index, 1);
-      updatedTemplateItems.splice(destination.index, 0, movedItem);
-      setTemplateItems(updatedTemplateItems);
-      return;
-    }
 
     if (
-      source.droppableId === dorpabaleidOne &&
-      destination.droppableId === dorpabaleidTwo
+      source.droppableId === dropabaleidOne &&
+      destination.droppableId === dropabaleidTwo
     ) {
-      const itemToAdd = items.find((item) => item.menuID === draggingId);
+      const itemsToAdd = selectedRows.length
+        ? items.filter((item) => selectedRows.includes(item.menuID))
+        : [items[source.index]];
 
-      if (
-        itemToAdd &&
-        templateItems.some((item) => item.menuID === itemToAdd.menuID)
-      ) {
-        // Trigger the error toast if item already exists
+      const alreadyAdded = itemsToAdd.filter((item) =>
+        templateItems.some((tItem) => tItem.menuID === item.menuID)
+      );
 
-        toast.error("Item already exists in the right table", {
+      if (alreadyAdded.length > 0) {
+        toast.error("Some items already exist in the right table", {
           autoClose: 1500,
         });
         return;
       }
 
-      if (
-        itemToAdd &&
-        !templateItems.some((item) => item.menuID === itemToAdd.menuID)
-      ) {
-        setTemplateItems((prev) => [
-          ...prev,
-          {
-            ...itemToAdd,
-            uniqueKey: uniqueIdCounter,
-            draggableId: `${itemToAdd.menuID}-${uniqueIdCounter}`,
-          },
-        ]);
-        setUniqueIdCounter((prev) => prev + 1);
-      }
+      setTemplateItems((prev) => [
+        ...prev,
+        ...itemsToAdd.map((item) => ({
+          ...item,
+          uniqueKey: Date.now() + Math.random(),
+        })),
+      ]);
+
+      setSelectedRows([]);
     }
   };
-
-  const addToClick = (item) =>{
-    
-    if (templateItems.some((existingItem) => existingItem.menuID === item.menuID)) {
+  const addToClick = (item) => {
+    if (
+      templateItems.some((existingItem) => existingItem.menuID === item.menuID)
+    ) {
       // Trigger the error toast if item already exists
       toast.error("Item already exists in the right table", {
         autoClose: 1500,
       });
       return;
     }
-  
+
     setTemplateItems((prev) => [
       ...prev,
       {
@@ -201,7 +210,7 @@ const EditAndAddDndTable = ({
       },
     ]);
     setUniqueIdCounter((prev) => prev + 1);
-  }
+  };
 
   const handleDelete = (uniqueKey, id) => {
     console.log(uniqueKey, "uniqueKey");
@@ -253,13 +262,23 @@ const EditAndAddDndTable = ({
       let isCookItemQuantityValid = templateItems.filter(
         (item) => item?.cookItemQuantity === undefined
       );
-      if (isCookItemQuantityValid && isCookItemQuantityValid.length > 0 ) {
-        setIsEmptyUomQty(isCookItemQuantityValid)
+      if (isCookItemQuantityValid && isCookItemQuantityValid.length > 0) {
+        setIsEmptyUomQty(isCookItemQuantityValid);
         toast.error("Unit Of Measure must have a value", { autoClose: 1500 });
       } else {
         onSave(templateItems);
       }
     }
+  };
+
+  const toggleSelection = (menuID) => {
+    setSelectedRows((prevSelected) => {
+      if (prevSelected.includes(menuID)) {
+        return prevSelected.filter((id) => id !== menuID);
+      } else {
+        return [...prevSelected, menuID];
+      }
+    });
   };
 
   const goToFirstPage = () => setCurrentPage(1);
@@ -271,7 +290,7 @@ const EditAndAddDndTable = ({
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex w-full gap-4 justify-between flex-col lg:flex-row">
-        <Droppable droppableId={dorpabaleidOne}>
+        <Droppable droppableId={dropabaleidOne}>
           {(provided) => (
             <div
               ref={provided.innerRef}
@@ -279,7 +298,9 @@ const EditAndAddDndTable = ({
               className="lg:w-[40%] w-full pr-[15px] pb-[15px] lg:max-h-[580px] max-h-full"
             >
               <div className="flex items-center space-x-2 lg:mb-4 mb-2 justify-between">
-                <h2 className="lg:text-2xl text-[14px] font-bold mb-4">{tableOneName}</h2>
+                <h2 className="lg:text-2xl text-[14px] font-bold mb-4">
+                  {tableOneName}
+                </h2>
                 <div className="lg:w-[200px] w-[100px]">
                   <SearchBar onSearch={handleSearch} extraClass="w-full" />
                 </div>
@@ -288,19 +309,27 @@ const EditAndAddDndTable = ({
                 <table className="min-w-full  lg:max-h-[433px] max-h-[300px] ">
                   <thead className="sticky top-0 bg-white">
                     <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
+                      <th className="px-4 py-2 text-left lg:text-[16px] text-[12px] text-nowrap">
+                        Selected
+                      </th>
                       {tableOneHeaders.map((header, index) => (
-                        <th key={index} className="px-4 py-2 text-left lg:text-[16px] text-[12px] text-nowrap">
+                        <th
+                          key={index}
+                          className="px-4 py-2 text-left lg:text-[16px] text-[12px] text-nowrap"
+                        >
                           {header}
                         </th>
                       ))}
-                      <th className="px-4 py-2 text-left lg:text-[16px] text-[12px] text-nowrap block lg:hidden">Add to {tableTwoName}</th>
+                      <th className="px-4 py-2 text-left lg:text-[16px] text-[12px] text-nowrap block lg:hidden">
+                        Add to {tableTwoName}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {initDataLoading ? (
                       <tr>
                         <td
-                          colSpan={2}
+                          colSpan={3}
                           className="h-[482px]  max-w-full  relative"
                         >
                           {" "}
@@ -327,8 +356,16 @@ const EditAndAddDndTable = ({
                                   "shadow-[0_-1px_0_rgba(0,0,0,0.2)_inset]"
                                 }
                               >
-                                <DraggableRow addToClick={(item)=>{addToClick(item)}} item={item} isTemplate={false} />
                                 
+                                <DraggableRow
+                                  addToClick={(item) => {
+                                    addToClick(item);
+                                  }}
+                                  item={item}
+                                  isTemplate={false}
+                                  toggleSelection={toggleSelection}
+                                  isChecked={selectedRows.includes(item.menuID)}
+                                />
                               </tr>
                             )}
                           </Draggable>
@@ -388,7 +425,7 @@ const EditAndAddDndTable = ({
             </div>
           )}
         </Droppable>
-        <Droppable droppableId={dorpabaleidTwo}>
+        <Droppable droppableId={dropabaleidTwo}>
           {(provided) => (
             <div
               ref={provided.innerRef}
@@ -414,8 +451,12 @@ const EditAndAddDndTable = ({
                         {header}
                       </th>
                     ))}
-                    <th className="lg:px-4 px-2 py-2 text-left w-[20%] lg:text-[16px] text-[12px] text-nowrap">Qty of UOM</th>
-                    <th className="lg:px-4 px-2 py-2 text-left w-[10%] lg:text-[16px] text-[12px] text-nowrap">Action</th>
+                    <th className="lg:px-4 px-2 py-2 text-left w-[20%] lg:text-[16px] text-[12px] text-nowrap">
+                      Qty of UOM
+                    </th>
+                    <th className="lg:px-4 px-2 py-2 text-left w-[10%] lg:text-[16px] text-[12px] text-nowrap">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -493,5 +534,66 @@ const EditAndAddDndTable = ({
     </DragDropContext>
   );
 };
+
+import PropTypes from "prop-types";
+
+// DraggableRow PropTypes
+DraggableRow.propTypes = {
+  item: PropTypes.shape({
+    menuID: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    inventoryOrMenuItemName: PropTypes.string,
+    cookItemQuantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    uniqueKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }).isRequired,
+  isTemplate: PropTypes.bool,
+  onDelete: PropTypes.func,
+  onLongPressDragStart: PropTypes.func,
+  extraHeaders: PropTypes.arrayOf(PropTypes.string),
+  onQuantityChange: PropTypes.func,
+  addToClick: PropTypes.func,
+  isEmptyUomQty: PropTypes.arrayOf(
+    PropTypes.shape({
+      uniqueKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    })
+  ),
+  toggleSelection: PropTypes.func,
+  isChecked: PropTypes.bool,
+};
+
+// EditAndAddDndTable PropTypes
+EditAndAddDndTable.propTypes = {
+  tableOneName: PropTypes.string.isRequired,
+  tableTwoName: PropTypes.string.isRequired,
+  tableOneHeaders: PropTypes.arrayOf(PropTypes.string).isRequired,
+  tableTwoHeaders: PropTypes.arrayOf(PropTypes.string).isRequired,
+  initialTableOneData: PropTypes.arrayOf(
+    PropTypes.shape({
+      menuID: PropTypes.string.isRequired,
+      description: PropTypes.string,
+      inventoryOrMenuItemName: PropTypes.string,
+    })
+  ).isRequired,
+  initialTemplateItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      menuID: PropTypes.string.isRequired,
+      description: PropTypes.string,
+      inventoryOrMenuItemName: PropTypes.string,
+      uniqueKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      draggableId: PropTypes.string,
+      cookItemQuantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    })
+  ),
+  dropabaleidOne: PropTypes.string.isRequired,
+  dropabaleidTwo: PropTypes.string.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  isSaveDisable: PropTypes.bool,
+  initDataLoading: PropTypes.bool,
+  initialTemplateLoade: PropTypes.bool,
+  isPaginationEnabled: PropTypes.bool,
+};
+
+
 
 export default EditAndAddDndTable;

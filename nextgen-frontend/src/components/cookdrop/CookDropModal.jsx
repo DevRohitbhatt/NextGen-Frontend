@@ -239,14 +239,24 @@ export const CreateItemModal = ({addHeaderFields,
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={safetyFactor}
+                    value={safetyFactor+"%"}
                     className={`bg-gray-200 p-2 w-[105px] rounded-full   ${
                       invalidFields.safetyFactor
                         ? "border border-red-500"
                         : "border-none"
                     }`}
                     onChange={(e) => {
-                      onChangeHeaderValues(e, "safetyFactor");
+                      const inputValue = e.target.value.replace(/%/g, ""); // Remove '%' from the input
+                      if (!isNaN(inputValue)) {
+                        // Ensure the value is a valid number
+                        onChangeHeaderValues({ target: { value: inputValue } }, "safetyFactor");
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const inputValue = e.target.value.replace(/%/g, ""); // Remove '%' on blur
+                      if (!isNaN(inputValue)) {
+                        onChangeHeaderValues({ target: { value: inputValue } }, "safetyFactor");
+                      }
                     }}
                   />
                 </td>
@@ -369,14 +379,24 @@ export const CreateItemModal = ({addHeaderFields,
                 <td className="px-2 py-2">
                   <input
                     type="text"
-                    value={mixMultiplier}
+                    value={mixMultiplier+"%"}
                     className={`bg-gray-200 p-2 w-[115px] rounded-full  ${
                       validateFields.mixMultiplier
                         ? "border-red-500 border"
                         : "border-none"
                     }`}
                     onChange={(e) => {
-                      onChangeHeaderValues(e, "mixMultiplier");
+                      const inputValue = e.target.value.replace(/%/g, ""); // Remove '%' from the input
+                      if (!isNaN(inputValue)) {
+                        // Ensure the value is a valid number
+                        onChangeHeaderValues({ target: { value: inputValue } }, "mixMultiplier");
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const inputValue = e.target.value.replace(/%/g, ""); // Remove '%' on blur
+                      if (!isNaN(inputValue)) {
+                        onChangeHeaderValues({ target: { value: inputValue } }, "mixMultiplier");
+                      }
                     }}
                   />
                 </td>
@@ -392,8 +412,8 @@ export const CreateItemModal = ({addHeaderFields,
             tableOneHeaders={["Menu ID", "Description"]}
             tableTwoHeaders={["Menu ID", "Description"]}
             initialTableOneData={addMenuItems}
-            dorpabaleidOne={"items"}
-            dorpabaleidTwo={"itemstemplate"}
+            dropabaleidOne={"items"}
+            dropabaleidTwo={"itemstemplate"}
             isPaginationEnabled={addMenuItems.length > 100}
             onSave={(saved) => {
               handleSave(saved);
@@ -410,8 +430,8 @@ export const CreateItemModal = ({addHeaderFields,
             tableOneHeaders={["Inventory ID", "Description"]}
             tableTwoHeaders={["Inventory ID", "Description"]}
             initialTableOneData={addInventoryItems}
-            dorpabaleidOne={"inventory"}
-            dorpabaleidTwo={"inventorytemplate"}
+            dropabaleidOne={"inventory"}
+            dropabaleidTwo={"inventorytemplate"}
             onSave={(saved) => {
               handleSave(saved);
             }}
@@ -609,10 +629,20 @@ export const CreateItemModal = ({addHeaderFields,
                 <td className="px-2 py-2 ">
                   <input
                     type="text"
-                    value={isHeaderLoaded ? "Loading..." : safetyFactor}
+                    value={isHeaderLoaded ? "Loading..." : safetyFactor+"%"}
                     className="bg-gray-200 p-2 w-[105px]  rounded-full  border-none "
                     onChange={(e) => {
-                      onChangeHeaderValues(e, "safetyFactor");
+                      const inputValue = e.target.value.replace(/%/g, ""); // Remove '%' from the input
+                      if (!isNaN(inputValue)) {
+                        // Ensure the value is a valid number
+                        onChangeHeaderValues({ target: { value: inputValue } }, "safetyFactor");
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const inputValue = e.target.value.replace(/%/g, ""); // Remove '%' on blur
+                      if (!isNaN(inputValue)) {
+                        onChangeHeaderValues({ target: { value: inputValue } }, "safetyFactor");
+                      }
                     }}
                   />
                 </td>
@@ -711,10 +741,20 @@ export const CreateItemModal = ({addHeaderFields,
                 <td className="px-2 py-2">
                   <input
                     type="text"
-                    value={isHeaderLoaded ? "Loading..." : mixMultiplier}
+                    value={isHeaderLoaded ? "Loading..." : mixMultiplier +"%"}
                     className="bg-gray-200 p-2 w-[115px] rounded-full  border-none "
                     onChange={(e) => {
-                      onChangeHeaderValues(e, "mixMultiplier");
+                      const inputValue = e.target.value.replace(/%/g, ""); // Remove '%' from the input
+                      if (!isNaN(inputValue)) {
+                        // Ensure the value is a valid number
+                        onChangeHeaderValues({ target: { value: inputValue } }, "mixMultiplier");
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const inputValue = e.target.value.replace(/%/g, ""); // Remove '%' on blur
+                      if (!isNaN(inputValue)) {
+                        onChangeHeaderValues({ target: { value: inputValue } }, "mixMultiplier");
+                      }
                     }}
                   />
                 </td>
@@ -734,8 +774,8 @@ export const CreateItemModal = ({addHeaderFields,
             initialTemplateItems={
               sourceType == editsourceType ? editCookData : []
             }
-            dorpabaleidOne={"items"}
-            dorpabaleidTwo={"itemstemplate"}
+            dropabaleidOne={"items"}
+            dropabaleidTwo={"itemstemplate"}
             onSave={(saved) => {
               savedData(saved);
             }}
@@ -756,8 +796,8 @@ export const CreateItemModal = ({addHeaderFields,
             initialTemplateItems={
               sourceType == editsourceType ? editCookData : []
             }
-            dorpabaleidOne={"inventory"}
-            dorpabaleidTwo={"inventorytemplate"}
+            dropabaleidOne={"inventory"}
+            dropabaleidTwo={"inventorytemplate"}
             onSave={(saved) => {
               savedData(saved);
             }}
