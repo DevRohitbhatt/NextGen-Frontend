@@ -247,7 +247,7 @@ const MenuGrossProfit = () => {
 				};
 
 				const result = await getCall(getData);
-				const newCategories = [...new Set(result.data.map((category) => category.description))];
+				const newCategories = [...new Set(result.data.map((category) => category.description))].sort();
 				setCategories(newCategories);
 				setSelectedCategories(newCategories);
 				setIsCategoryLoading(false);
