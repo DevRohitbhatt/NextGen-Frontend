@@ -2,8 +2,8 @@ import { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { AiFillDownSquare } from 'react-icons/ai';
 
-const YearSelector = ({ selectedYear, onChange }) => {
-	const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
+const YearSelector = ({ selectedYear, onChange, yearIDList }) => {
+	const years = yearIDList || Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
 	const selectRef = useRef(null);
 	const handleYearChange = (e) => onChange(parseInt(e.target.value));
 	const handleIconClick = () => selectRef.current.click();
@@ -38,6 +38,7 @@ const YearSelector = ({ selectedYear, onChange }) => {
 YearSelector.propTypes = {
 	selectedYear: PropTypes.number.isRequired,
 	onChange: PropTypes.func.isRequired,
+	yearIDList: PropTypes.arrayOf(PropTypes.number),
 };
 
 export default YearSelector;
