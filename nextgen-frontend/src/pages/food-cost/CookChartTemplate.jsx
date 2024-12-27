@@ -100,6 +100,22 @@ const CookChartTemplate = (props) => {
     stepsEnabled: false,
   });
   const [companyStateId, setCompanyStateId] = useState("");
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+
+  // Function to update width
+  const updateWidth = () => {
+    setViewportWidth(window.innerWidth);
+  };
+
+  useEffect(() => {
+    // Add event listener on mount
+    window.addEventListener("resize", updateWidth);
+
+    // Cleanup event listener on unmount
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+    };
+  }, []);
   useEffect(() => {
     const handleScroll = () => {
       if (leftColumnRef.current) {
@@ -478,7 +494,8 @@ const CookChartTemplate = (props) => {
         <h2 className="my-4 text-xl xl:text-2xl leading-tight text-left pageTitle hidden lg:block">
           Cook Drop Templates
         </h2>
-        <div className="lg:hidden bg-[#EFEFEF]  justify-between align-middle flex mb-5 p-2">
+       { viewportWidth < 1023 && 
+       <div className="lg:hidden bg-[#EFEFEF]  justify-between align-middle flex mb-5 p-2">
           <h2 className="lg:hidden my-auto text-base leading-tight text-left pageTitle font-bold ml-[5px] text-nowrap ">
             Cook Drop Templates
           </h2>
@@ -492,7 +509,7 @@ const CookChartTemplate = (props) => {
               setIntroSteps({ ...introSteps, stepsEnabled: true })
             }
           />
-        </div>
+        </div>}
         <header className="flex  space-y-3 xl:space-y-0 py-3 px-4 rounded-2xl shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center">
           <div className="flex items-center space-x-3 ">
             <UnitSelector
@@ -524,7 +541,7 @@ const CookChartTemplate = (props) => {
           <div>{errorMessage}</div>
         ) : !isLoading ? (
           <>
-            <div className="container mx-auto  px-1 py-4 max-w-full cooktemplate lg:hidden block ">
+         {  viewportWidth < 1023 && <div className="container mx-auto  px-1 py-4 max-w-full cooktemplate lg:hidden block ">
               <Loader loading={isLoading} />
               <DragDropContext onDragEnd={handleDragEnd}>
                 <div className="flex w-full gap-4 justify-between flex-col">
@@ -791,7 +808,7 @@ const CookChartTemplate = (props) => {
                   </Droppable>
                 </div>
               </DragDropContext>
-            </div>
+            </div>}
             <div className="container mx-auto  px-1 py-4 max-w-full cooktemplate lg:!block !hidden">
               <Loader loading={isLoading} />
               <DragDropContext onDragEnd={handleDragEnd}>
