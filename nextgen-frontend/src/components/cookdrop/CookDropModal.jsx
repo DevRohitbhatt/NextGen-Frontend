@@ -4,7 +4,6 @@ import EditAndAddDndTable from "../table/EditAndAddDndTable";
 import { postCall } from "../../apis/network";
 import ReactDOM from "react-dom";
 import { toast } from "react-toastify";
-import Dropdown from "../common/Dropdown";
 
 export const CreateItemModal = ({addHeaderFields,
     projectAheadOptions,
@@ -146,7 +145,7 @@ export const CreateItemModal = ({addHeaderFields,
 
     return (
       <div className="lg:gap-[20px] gap-[5px] flex justify-between mx-auto lg:p-4 p-2 h-[100%] flex-col ">
-        <div className=" xl:flex space-y-3 xl:space-y-0 lg:py-3 lg:px-4 py-1 px-1  lg:rounded-[30px] rounded-[10px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center tableHOC pr-1 max-h-full  overflow-x-scroll overflow-y-hidden">
+        <div className=" xl:flex space-y-3 xl:space-y-0 lg:py-3 lg:px-4 py-1 px-1  lg:rounded-[30px] rounded-[10px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center tableHOC pr-1 max-h-full  overflow-x-auto overflow-y-visible">
           <table className="min-w-full table-auto table ">
             <thead className="">
               <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
@@ -261,13 +260,7 @@ export const CreateItemModal = ({addHeaderFields,
                   />
                 </td>
                 <td className="px-2 py-2 ">
-                  <Dropdown 
-                  title='Count Type'
-                  options={projectAheadOptions}
-                  // selectedOption={view}
-                  // onOptionChange={handleViewChange}
-                  />
-                  {/* <select
+                  <select
                     value={projectAhead}
                     onChange={(e) => {
                       onChangeHeaderValues(e, "projectAhead");
@@ -287,7 +280,7 @@ export const CreateItemModal = ({addHeaderFields,
                         </option>
                       ))}
                    
-                  </select> */}
+                  </select>
                 </td>
                 <td className="px-2 py-2 ">
                   <HhmmssSelector
