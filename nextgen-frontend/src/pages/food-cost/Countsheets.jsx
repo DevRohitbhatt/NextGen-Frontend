@@ -208,15 +208,14 @@ const Countsheets = () => {
 					...data,
 					companyId: companyID,
 					unitName: unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.unitId))?.unitName,
-					transfer: `Transfer ${
-						data.unitId === selectedUnit
+					transfer: `Transfer ${data.unitId === selectedUnit
 							? data.transferDestUnitID === 0
 								? 'to ???'
 								: 'to ' +
-								  unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.transferDestUnitID))
-										?.unitName
+								unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.transferDestUnitID))
+									?.unitName
 							: 'from ' + data.name
-					}`,
+						}`,
 				}));
 
 			setCountsheetData(newData);

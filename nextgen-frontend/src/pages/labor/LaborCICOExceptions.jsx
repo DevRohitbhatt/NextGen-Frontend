@@ -18,7 +18,16 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborCICOExceptions from "../../assets/introJSSteps/laborCICOExceptions";
-import { formattingData } from "../../functions/formatingCurrency";
+import { formattingData } from "../../functions/formatingCurrency"; 
+
+const tooltips = {
+	jobDescription: "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
+	shiftName: "The Day Part the exception occurred.",
+	reportType: "The reported exception type.",	
+	exceptionDetail: "Provides additional details about the reported exception, including CICOs and scheduled shift times for Did Not Work exceptions. \nTimes in the exception details are used to calculate the amount of money lost or saved due to the exception.",
+  totalCost: "Calculates the cost of the exception.",
+	direction: "above",
+  };
 
 const columnHelper = createColumnHelper();
 
@@ -121,18 +130,21 @@ const LaborCICOExceptions = () => {
         id: "jobDescription",
         header: "Job Description",
         dataType: "string",
+        tooltip: tooltips.jobDescription
       }),
       columnHelper.accessor("shiftName", {
         id: "shiftName",
         header: "Shift Name",
         dataType: "string",
         size: 100,
+        tooltip: tooltips.shiftName
       }),
       columnHelper.accessor("reportType", {
         id: "reportType",
         header: "Report Type",
         dataType: "string",
         size: 100,
+        tooltip: tooltips.reportType
       }),
 
       columnHelper.accessor("exceptionDetail", {
@@ -140,12 +152,14 @@ const LaborCICOExceptions = () => {
         header: "Exception Detail",
         dataType: "string",
         size: 400,
+        tooltip: tooltips.exceptionDetail
       }),
       columnHelper.accessor("totalCost", {
         id: "totalCost",
         header: "Total Cost",
         cell: ({ getValue }) => `$${getValue()}`,
         dataType: "number",
+        tooltip: tooltips.totalCost,
         footer: ({ table }) =>{ 
           let totalCost = table
           .getCoreRowModel()

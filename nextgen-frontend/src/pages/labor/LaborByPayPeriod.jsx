@@ -4,21 +4,30 @@ import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
-	Loader,
-	UnitSelector,
-	CalendarModal,
-	UnitModal,
-	ExportOptions,
-	DateSelector,
-	PdfBuilder,
-	ExcelExport as exportToExcel,
-	TableHOC,
-	Dropdown,
-} from '../../components';
-import { createColumnHelper } from '@tanstack/react-table';
-import dateFormat from 'dateformat';
-import laborByPayPeriod from '../../assets/introJSSteps/laborByPayPeriod';
-import { formattingData } from '../../functions/formatingCurrency';
+  Loader,
+  UnitSelector,
+  CalendarModal,
+  UnitModal,
+  ExportOptions,
+  DateSelector,
+  PdfBuilder,
+  ExcelExport as exportToExcel,
+  TableHOC,
+  Dropdown,
+} from "../../components";
+import { createColumnHelper } from "@tanstack/react-table";
+import dateFormat from "dateformat";
+import laborByPayPeriod from "../../assets/introJSSteps/laborByPayPeriod";
+import { formattingData } from "../../functions/formatingCurrency";
+
+const tooltips = {
+	employeeID: "Refers to the ID assigned to the employee. Originates from the POS employee information.",
+	jobCode: "The job code used when clocking into the POS.",
+	rate: "The payrate associated with the job code used when clocking into the POS.",	
+	declaredTips: "Includes credit card tips and declared cash tips entered in the POS.",
+  tipsPercent: "Declared Tips / Pre-Tax Ticket Sales = Tip %",
+	direction: "above",
+  };
 
 const columnHelper = createColumnHelper();
 
@@ -120,6 +129,7 @@ const LaborByPayPeriod = () => {
 				header: 'Employee ID',
 				dataType: 'number',
 				size: 120,
+        tooltip: tooltips.employeeID
 			}),
 			columnHelper.accessor((row) => (row.firstName && row.lastName ? `${row.firstName} ${row.lastName}` : ''), {
 				id: 'fullName',
@@ -152,6 +162,7 @@ const LaborByPayPeriod = () => {
 						return getValue();
 					}
 				},
+        tooltip: tooltips.jobCode
 			}),
 			columnHelper.accessor('regHours', {
 				id: 'regHours',
@@ -176,12 +187,14 @@ const LaborByPayPeriod = () => {
 				header: 'Rate',
 				dataType: 'number',
 				size: 60,
+        tooltip: tooltips.rate
 			}),
 			columnHelper.accessor('declaredTips', {
 				id: 'declaredTips',
 				header: 'Declared Tips',
 				dataType: 'number',
 				size: 120,
+        tooltip: tooltips.declaredTips
 			}),
 			columnHelper.accessor('preTaxTicketSales', {
 				id: 'preTaxTicketSales',
@@ -201,6 +214,7 @@ const LaborByPayPeriod = () => {
 				size: 80,
 				cell: ({ row }) => parseFloat(calculateSum(row, 'declaredTipsPct')).toFixed(2) + '%',
 				dataType: 'number',
+        tooltip: tooltips.tipsPercent
 			}),
 			columnHelper.accessor('pay', {
 				id: 'pay',

@@ -20,6 +20,18 @@ import dateFormat from 'dateformat';
 import menuGrossProfit from '../../assets/introJSSteps/menuGrossProfit';
 import { formattingData } from '../../functions/formatingCurrency';
 
+const tooltips = {
+	itemID: "ID associated with the menu item in the POS. \n\n NOTE: POSes without PLUs will have auto-generated IDs for easier tracking and troubleshooting.",
+	itemName: "Menu item name used with the associated item ID.",
+	itemPrice: "Listed price for the item in the POS. \n\n NOTE: The price shown can vary if price levels are being used. Instead, you’ll see the average price during the selected date range.",	
+	receipeCost: "Also referred to as Ideal Cost, this is the total cost of all inventory used in the recipe. \n\n NOTE: The MGP report uses the latest invoiced price seen in the system.",
+	costPercent: "Recipe Cost / Item Price = Food Cost % \n\n NOTE: The MGP report uses the latest invoiced price seen in the system.",
+	quantitySold: "Similar to PMIX, this is the quantity of menu items sold during the selected date range. \n\n NOTE: QSR may pick up items not displayed in the PMIX. I.e. modifiers, $0 items, etc.",
+	itemSales: "Item Price * Quantity Sold = Item Sales",
+	grossProfit: "Item Sales - Recipe Cost = Gross Profit",
+	grossProfitPercent: "100% - Cost % = Gross Profit %",
+  };
+
 const columnHelper = createColumnHelper();
 
 const MenuGrossProfit = () => {
@@ -81,6 +93,7 @@ const MenuGrossProfit = () => {
 			id: 'itemID',
 			header: 'Item ID',
 			dataType: 'string',
+			tooltip: tooltips.itemID,
 			footer: ({ table }) => {
 				return (
 					<div className='h-10'>
@@ -106,6 +119,7 @@ const MenuGrossProfit = () => {
 			cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 			dataType: 'string',
 			size: 150,
+			tooltip:  tooltips.itemName
 		}),
 		columnHelper.accessor('itemPrice', {
 			id: 'itemPrice',
@@ -113,6 +127,7 @@ const MenuGrossProfit = () => {
 			cell: ({ getValue }) => `${formattingData(parseFloat(getValue()))}`,
 			dataType: 'string',
 			size: 100,
+			tooltip: tooltips.itemPrice
 		}),
 		columnHelper.accessor('recipeCost', {
 			id: 'recipeCost',
@@ -120,18 +135,21 @@ const MenuGrossProfit = () => {
 			cell: ({ getValue }) => `$${getValue()}`,
 			dataType: 'string',
 			size: 100,
+			tooltip: tooltips.receipeCost
 		}),
 		columnHelper.accessor('costper', {
 			id: 'costper',
 			header: 'Cost %',
 			dataType: 'string',
 			size: 80,
+			tooltip: tooltips.costPercent
 		}),
 		columnHelper.accessor('quantitySold', {
 			id: 'quantitySold',
 			header: 'Quantity Sold',
 			dataType: 'string',
 			size: 120,
+			tooltip: tooltips.quantitySold
 		}),
 		columnHelper.accessor('itemSales', {
 			id: 'itemSales',
@@ -139,6 +157,7 @@ const MenuGrossProfit = () => {
 			cell: ({ getValue }) => `${formattingData(parseFloat(getValue()))}`,
 			dataType: 'string',
 			size: 100,
+			tooltip: tooltips.itemSales
 		}),
 		columnHelper.accessor('grossProfit', {
 			id: 'grossProfit',
@@ -146,12 +165,14 @@ const MenuGrossProfit = () => {
 			cell: ({ getValue }) => `${formattingData(parseFloat(getValue()))}`,
 			dataType: 'string',
 			size: 100,
+			tooltip: tooltips.grossProfit
 		}),
 		columnHelper.accessor('grossProfitper', {
 			id: 'grossProfitper',
 			header: 'Gross Profit %',
 			dataType: 'string',
 			size: 100,
+			tooltip: tooltips.grossProfitPercent
 		}),
 	];
 

@@ -146,9 +146,11 @@ const CalendarModal = ({
 			{modalOpen && (
 				<div className='fixed bg-[#00000073] w-full h-dvh left-0 top-0 z-10'>
 					<div
-						className={`fixed bg-white rounded-lg shadow-lg overflow-hidden left-1/3  top-[6%] ${
-							isDateRange ? '' : 'w-96'
-						}`}
+						className={`fixed bg-white rounded-lg shadow-lg overflow-hidden lg:left-1/3   top-[6%] 
+              ${
+                isDateRange ? '' : 'lg:w-96 mx-2 lg:mx-0'
+							}`
+            } 
 					>
 						<div className='flex items-center justify-between px-4 py-2 text-white bg-[var(--tw-primary)]'>
 							{isDateRange ? (

@@ -20,6 +20,21 @@ import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
 import dateFormat from 'dateformat';
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
+const tooltips = {
+	begDollar: "The inventory value from the beginning countsheet of the selected date range. \n\n Tip: Double-check the mapping if an item’s value is considerably higher or lower than expected.",
+	purDollar:"The value of invoiced purchases received during the selected date range. \n\n Tip: Missing purchases can mean invoice(s) weren’t entered or it was mapped incorrectly.",
+	transInDollar:"The inventory value of items from all transfers IN during the selected date range. \n\n $’s calculated using the latest pricing from the transferring location.",
+	transOutDollar:"The inventory value of items from all transfers OUT during the selected date range. \n\n $’s calculated using the latest pricing from your location.",
+	endDollar: "The inventory value from the ending count sheet of the selected date range. \n\n Tip: Double-check the mapping if an item’s value is considerably higher or lower than expected.",
+	actualUsageDollar: "The value of the inventory used during the selected date range, calculated by: \n\n Beg $ + Pur $ + Tr In $ – Tr Out $ – End $ / Comparison Sales",	
+	actualUsagePercent: "Actual Usage $ / Comparison Sales $ \n\n Tip: Negative Usage indicates a “growth” in inventory, possibly due to missing purchases or missing counts.",
+	wasteDollar: "The inventory value of items entered in waste countsheets during the selected date range.",
+	wasterPercent:"Waste $ / Comparison Sales $",
+	comparisonName:"Names the sales value used for comparison against inventory. \n\n (Default is Net Sales)",
+	comparisonSales:"Comparison Sales configured for this Department and/or Sub-department. i.e., Net Sales, Department Sales, etc.",
+	direction: "above",
+  };
+
 const columnHelper = createColumnHelper();
 
 const ActualFoodCost = () => {
@@ -135,235 +150,238 @@ const ActualFoodCost = () => {
 
   const [columns, setColumns] = useState([]);
 
-  const generatedColumns = [
-    columnHelper.display({
-      id: "actions",
-      cell: ({ row }) =>
-        row.getCanExpand() && row.depth === 0 ? (
-          <div
-            {...{
-              style: { cursor: "pointer", paddingLeft: `${row.depth * 2}rem` },
-              className: "flex items-center gap-2 font-bold capitalize",
-            }}
-          >
-            {row.getIsExpanded() ? (
-              <CiSquareMinus className="text-[20px]" />
-            ) : (
-              <CiSquarePlus className="text-[20px]" />
-            )}
-            {row.original.finalDepartment}
-          </div>
-        ) : null,
-      groupBy: true,
-      size: "80",
-    }),
-    columnHelper.accessor("department", {
-      id: "department",
-      header: "Department",
-      cell: ({ row }) =>
-        row.getCanExpand() ? (
-          <div
-            {...{
-              style: { cursor: "pointer", width: "100%" },
-              className: "flex items-center gap-2 font-bold capitalize",
-            }}
-          >
-            {row.getIsExpanded() ? (
-              <CiSquareMinus className="text-[20px]" />
-            ) : (
-              <CiSquarePlus className="text-[20px]" />
-            )}
-            {row.original.department}
-          </div>
-        ) : null,
-      groupBy: true,
-      dataType: "string",
-    }),
-    columnHelper.accessor("subDepartment", {
-      id: "subDepartment",
-      header: "Sub Department",
-      cell: ({ row }) =>
-        row.getCanExpand() ? (
-          <div
-            {...{
-              style: { cursor: "pointer", width: "100%" },
-              className: "flex items-center gap-2 font-bold capitalize",
-            }}
-          >
-            {row.getIsExpanded() ? (
-              <CiSquareMinus className="text-[20px]" />
-            ) : (
-              <CiSquarePlus className="text-[20px]" />
-            )}
-            {row.original.subDepartment}
-          </div>
-        ) : null,
-      groupBy: true,
-      showDepth: 2,
-      dataType: "string",
-    }),
-    columnHelper.accessor("description", {
-      id: "description",
-      header: "Description",
-      showDepth: 3,
-      dataType: "string",
-      size: 300,
-    }),
-    columnHelper.accessor("countDisplayUnitName", {
-      id: "countDisplayUnitName",
-      header: "UOM",
-      showDepth: 3,
-      dataType: "string",
-      size: 200,
-    }),
-    columnHelper.accessor("begCountDisplayUnits", {
-      id: "begCountDisplayUnits",
-      header: "Beg #",
-      showDepth: 3,
-      dataType: "number",
-      cell: ({ getValue }) => getValue()?.toFixed(2),
-      size: 90,
-    }),
-    columnHelper.accessor("begCountCost", {
-      id: "begCountCost",
-      header: "Beg $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "begCountCost", getValue),
-      size: 90,
-    }),
-    columnHelper.accessor("purchaseDisplayUnits", {
-      id: "purchaseDisplayUnits",
-      header: "Pur #",
-      showDepth: 3,
-      cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
-      size: 60,
-    }),
-    columnHelper.accessor("purchaseCost", {
-      id: "purchaseCost",
-      header: "Pur $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "purchaseCost", getValue),
-      size: 60,
-    }),
-    columnHelper.accessor("iTinCountDisplayUnits", {
-      id: "iTinCountDisplayUnits",
-      header: "Trans In #",
-      showDepth: 3,
-      cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
-      size: 60,
-    }),
-    columnHelper.accessor("iTinCountCost", {
-      id: "iTinCountCost",
-      header: "Trans In $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "iTinCountCost", getValue),
-      size: 60,
-    }),
-    columnHelper.accessor("iToutCountDisplayUnits", {
-      id: "iToutCountDisplayUnits",
-      header: "Trans Out #",
-      showDepth: 3,
-      cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
-      size: 80,
-    }),
-    columnHelper.accessor("iToutCountCost", {
-      id: "iToutCountCost",
-      header: "Trans Out $",
-      dataType: "number",
-      cell: ({ row, getValue }) =>
-        calculateSum(row, "iToutCountCost", getValue),
-      size: 80,
-    }),
-    columnHelper.accessor("endCountDisplayUnits", {
-      id: "endCountDisplayUnits",
-      header: "End #",
-      showDepth: 3,
-      cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
-      size: 60,
-    }),
-    columnHelper.accessor("endCountCost", {
-      id: "endCountCost",
-      header: "End $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "endCountCost", getValue),
-      size: 60,
-    }),
-    columnHelper.accessor("usageCountDisplayUnits", {
-      id: "usageCountDisplayUnits",
-      header: "Actual Usage #",
-      showDepth: 3,
-      cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
-      size: 80,
-    }),
-    columnHelper.accessor("usageCost", {
-      id: "usageCost",
-      header: "Actual Usage $",
-      dataType: "number",
-      cell: ({ row, getValue }) => calculateSum(row, "usageCost", getValue),
-      size: 80,
-    }),
-    columnHelper.accessor("usageCostPct", {
-      id: "usageCostPct",
-      header: "Actual Usage %",
-      dataType: "percent",
-      cell: ({ row, getValue }) =>
-        calculateSum(row, "usageCostPct", getValue, true),
-      size: 90,
-    }),
-    columnHelper.accessor("wasteCountDisplayUnits", {
-      id: "wasteCountDisplayUnits",
-      header: "Waste #",
-      showDepth: 3,
-      cell: ({ getValue }) => getValue()?.toFixed(2),
-      dataType: "number",
-      size: 80,
-    }),
-    columnHelper.accessor("wasteCountCost", {
-      id: "wasteCountCost",
-      header: "Waste $",
-      dataType: "number",
-      cell: ({ row, getValue }) =>
-        calculateSum(row, "wasteCountCost", getValue),
-      size: 80,
-    }),
-    columnHelper.accessor("wasteCostPct", {
-      id: "wasteCostPct",
-      header: "Waste %",
-      dataType: "percent",
-      cell: ({ row, getValue }) =>
-        calculateSum(row, "wasteCostPct", getValue, true),
-      size: 90,
-    }),
-    columnHelper.accessor("comparisonName", {
-      id: "comparisonName",
-      header: "Comparison Name",
-      cell: ({ row, getValue }) =>
-        row.getCanExpand()
-          ? row.original?.comparisonName
-          : getValue() !== undefined
-          ? getValue()
-          : "",
-      dataType: "string",
-      size: 100,
-    }),
-    columnHelper.accessor("comparisonSales", {
-      id: "comparisonSales",
-      header: "Comparison Net Sales",
-      dataType: "number",
-      cell: ({ row, getValue }) =>
-        row.getCanExpand()
-          ? `$${row.original?.comparisonSales?.toFixed(2)}`
-          : getValue() !== undefined
-          ? `$${parseFloat(getValue().toFixed(2)).toLocaleString("en-US")}`
-          : "",
-      size: 100,
-    }),
-  ];
+	const generatedColumns = [
+		columnHelper.display({
+			id: 'actions',
+			cell: ({ row }) =>
+				row.getCanExpand() && row.depth === 0 ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
+							className: 'flex items-center gap-2 font-bold capitalize',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.original.finalDepartment}
+					</div>
+				) : null,
+			groupBy: true,
+			size: '80',
+		}),
+		columnHelper.accessor('department', {
+			id: 'department',
+			header: 'Department',
+			cell: ({ row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', width: '100%' },
+							className: 'flex items-center gap-2 font-bold capitalize',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.original.department}
+					</div>
+				) : null,
+			groupBy: true,
+			dataType: 'string',
+		}),
+		columnHelper.accessor('subDepartment', {
+			id: 'subDepartment',
+			header: 'Sub Department',
+			cell: ({ row }) =>
+				row.getCanExpand() ? (
+					<div
+						{...{
+							style: { cursor: 'pointer', width: '100%' },
+							className: 'flex items-center gap-2 font-bold capitalize',
+						}}
+					>
+						{row.getIsExpanded() ? (
+							<CiSquareMinus className='text-[20px]' />
+						) : (
+							<CiSquarePlus className='text-[20px]' />
+						)}
+						{row.original.subDepartment}
+					</div>
+				) : null,
+			groupBy: true,
+			showDepth: 2,
+			dataType: 'string',
+		}),
+		columnHelper.accessor('description', {
+			id: 'description',
+			header: 'Description',
+			showDepth: 3,
+			dataType: 'string',
+			size: 300,
+		}),
+		columnHelper.accessor('countDisplayUnitName', {
+			id: 'countDisplayUnitName',
+			header: 'UOM',
+			showDepth: 3,
+			dataType: 'string',
+			size: 200,
+		}),
+		columnHelper.accessor('begCountDisplayUnits', {
+			id: 'begCountDisplayUnits',
+			header: 'Beg #',
+			showDepth: 3,
+			dataType: 'number',
+			cell: ({ getValue }) => getValue()?.toFixed(2),
+			size: 90,
+		}),
+		columnHelper.accessor('begCountCost', {
+			id: 'begCountCost',
+			header: 'Beg $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => calculateSum(row, 'begCountCost', getValue),
+			size: 90,
+			tooltip: tooltips.begDollar
+		}),
+		columnHelper.accessor('purchaseDisplayUnits', {
+			id: 'purchaseDisplayUnits',
+			header: 'Pur #',
+			showDepth: 3,
+			cell: ({ getValue }) => getValue()?.toFixed(2),
+			dataType: 'number',
+			size: 60,
+		}),
+		columnHelper.accessor('purchaseCost', {
+			id: 'purchaseCost',
+			header: 'Pur $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => calculateSum(row, 'purchaseCost', getValue),
+			size: 60,
+			tooltip: tooltips.purDollar
+		}),
+		columnHelper.accessor('iTinCountDisplayUnits', {
+			id: 'iTinCountDisplayUnits',
+			header: 'Trans In #',
+			showDepth: 3,
+			cell: ({ getValue }) => getValue()?.toFixed(2),
+			dataType: 'number',
+			size: 60,
+		}),
+		columnHelper.accessor('iTinCountCost', {
+			id: 'iTinCountCost',
+			header: 'Trans In $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => calculateSum(row, 'iTinCountCost', getValue),
+			size: 60,
+			tooltip: tooltips.transInDollar
+		}),
+		columnHelper.accessor('iToutCountDisplayUnits', {
+			id: 'iToutCountDisplayUnits',
+			header: 'Trans Out #',
+			showDepth: 3,
+			cell: ({ getValue }) => getValue()?.toFixed(2),
+			dataType: 'number',
+			size: 80,
+		}),
+		columnHelper.accessor('iToutCountCost', {
+			id: 'iToutCountCost',
+			header: 'Trans Out $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => calculateSum(row, 'iToutCountCost', getValue),
+			size: 80,
+			tooltip: tooltips.transOutDollar
+		}),
+		columnHelper.accessor('endCountDisplayUnits', {
+			id: 'endCountDisplayUnits',
+			header: 'End #',
+			showDepth: 3,
+			cell: ({ getValue }) => getValue()?.toFixed(2),
+			dataType: 'number',
+			size: 60,
+		}),
+		columnHelper.accessor('endCountCost', {
+			id: 'endCountCost',
+			header: 'End $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => calculateSum(row, 'endCountCost', getValue),
+			size: 60,
+			tooltip: tooltips.endDollar
+		}),
+		columnHelper.accessor('usageCountDisplayUnits', {
+			id: 'usageCountDisplayUnits',
+			header: 'Actual Usage #',
+			showDepth: 3,
+			cell: ({ getValue }) => getValue()?.toFixed(2),
+			dataType: 'number',
+			size: 80,
+		}),
+		columnHelper.accessor('usageCost', {
+			id: 'usageCost',
+			header: 'Actual Usage $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => calculateSum(row, 'usageCost', getValue),
+			size: 80,
+			tooltip: tooltips.actualUsageDollar
+		}),
+		columnHelper.accessor('usageCostPct', {
+			id: 'usageCostPct',
+			header: 'Actual Usage %',
+			dataType: 'percent',
+			cell: ({ row, getValue }) => calculateSum(row, 'usageCostPct', getValue, true),
+			size: 90,
+			tooltip: tooltips.actualUsagePercent
+		}),
+		columnHelper.accessor('wasteCountDisplayUnits', {
+			id: 'wasteCountDisplayUnits',
+			header: 'Waste #',
+			showDepth: 3,
+			cell: ({ getValue }) => getValue()?.toFixed(2),
+			dataType: 'number',
+			size: 80,
+		}),
+		columnHelper.accessor('wasteCountCost', {
+			id: 'wasteCountCost',
+			header: 'Waste $',
+			dataType: 'number',
+			cell: ({ row, getValue }) => calculateSum(row, 'wasteCountCost', getValue),
+			size: 80,
+			tooltip: tooltips.wasteDollar
+		}),
+		columnHelper.accessor('wasteCostPct', {
+			id: 'wasteCostPct',
+			header: 'Waste %',
+			dataType: 'percent',
+			cell: ({ row, getValue }) => calculateSum(row, 'wasteCostPct', getValue, true),
+			size: 90,
+			tooltip: tooltips.wasterPercent
+		}),
+		columnHelper.accessor('comparisonName', {
+			id: 'comparisonName',
+			header: 'Comparison Name',
+			cell: ({ row, getValue }) =>
+				row.getCanExpand() ? row.original?.comparisonName : getValue() !== undefined ? getValue() : '',
+			dataType: 'string',
+			size: 100,
+			tooltip: tooltips.comparisonName
+		}),
+		columnHelper.accessor('comparisonSales', {
+			id: 'comparisonSales',
+			header: 'Comparison Net Sales',
+			dataType: 'number',
+			cell: ({ row, getValue }) =>
+				row.getCanExpand()
+					? `$${row.original?.comparisonSales?.toFixed(2)}`
+					: getValue() !== undefined
+					? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}`
+					: '',
+			size: 100,
+			tooltip: tooltips.comparisonSales
+		}),
+	];
 
   // calculate the sum of the subrows
   const calculateSum = (row, field, getValue, isPercentage = false) => {

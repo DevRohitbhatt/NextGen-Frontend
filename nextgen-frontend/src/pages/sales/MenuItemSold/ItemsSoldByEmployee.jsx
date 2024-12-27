@@ -74,6 +74,16 @@ const ItemsSoldByEmployee = () => {
 	const [isGroupByUnitChecked, setIsGroupByUnitChecked] = useState(false);
 	const [inventoryFirstRender, setInventoryFirstRender] = useState(false);
 
+	const tooltips = {
+		item: "Menu Item ID",
+		description:"Menu Item Name",
+		quantity:"Number of menu items sold during the selected date range.",
+		amount:"$ Amount Sold",
+		itemSoldPercent: "The item’s percentage of total sales.",
+		avgItemQuantity: "The average quantity sold per day during the selected date range.",	
+		avgItemAmount: "The average price of the item.",	
+    };
+	
 	const inventoryHeaders = [
 		{ label: 'Qsr Inventory Item ID', key: 'inventoryItemID' },
 		{ label: 'Description', key: 'description' },
