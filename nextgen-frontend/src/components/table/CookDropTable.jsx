@@ -13,10 +13,10 @@ const CookDropTableHeader = ({ headerData }) => {
       <tr className="z-10">
         {headers.length > 0 &&
           headers.map((header, index) => (
-            <>
+            <div className="contents"  key={header + index + ""}>
               {index === 0 && (
                 <th
-                  key={header + index + ""}
+                 
                   className="main-header first-header text-nowrap lg:px-[20px] px-2 bg-gray-300 rounded-tl-[10px] sticky left-0 z-10 shadow-[0_-1px_0_var(--tw-primary)_inset]"
                   rowSpan="2"
                 >
@@ -49,7 +49,7 @@ const CookDropTableHeader = ({ headerData }) => {
               {header.itemName}
             </th> 
               
-            </>
+            </div>
           ))}
       </tr>
       <tr>
@@ -70,10 +70,10 @@ const CookDropTableHeader = ({ headerData }) => {
       </tr>
       <tr>
         {headers.map((header, index) => (
-          <>
+          <div className="contents" key={index+"wrap"}>
             {index === 0 && (
               <th
-                key={index}
+                
                 className="p-2 text-center   bg-gray-300 text-nowrap sticky left-0 shadow-[0_-1px_0_var(--tw-primary)_inset]"
               >
                 {index === 0 && (
@@ -92,7 +92,7 @@ const CookDropTableHeader = ({ headerData }) => {
                 Need / Have / Cook
               </div>
             </th>
-          </>
+          </div>
         ))}
       </tr>
     </thead>
