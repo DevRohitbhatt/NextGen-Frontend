@@ -4,6 +4,7 @@ import EditAndAddDndTable from "../table/EditAndAddDndTable";
 import { postCall } from "../../apis/network";
 import ReactDOM from "react-dom";
 import { toast } from "react-toastify";
+import Dropdown from "../common/Dropdown";
 
 export const CreateItemModal = ({addHeaderFields,
     projectAheadOptions,
@@ -143,9 +144,46 @@ export const CreateItemModal = ({addHeaderFields,
       }
     };
 
+    const addPortal = () =>{
+      return  ReactDOM.createPortal(
+        <div
+          className="absolute z-[9999]  top-[105%] left-0 rounded-xl text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] p-2"
+          style={{
+            position: "absolute",
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            minWidth: "150px",
+          }}
+          ref={moreOptionsDropdown}
+        >
+          <div className="mb-2 option ">
+            <button
+              className="w-[100%] bg-[#f9f9f9] text-sm"
+              onClick={(e) => {
+                handleSourceTypeChange("Menu");
+              }}
+            >
+              Menu Items
+            </button>
+          </div>
+          <div className="mb-2 option ">
+            <button
+              className="w-[100%] bg-[#f9f9f9] text-nowrap text-sm"
+              onClick={() =>
+                handleSourceTypeChange("Inventory")
+              }
+            >
+              Inventory item
+            </button>
+          </div>
+        </div>,
+        document.body
+      )
+    }
+
     return (
       <div className="lg:gap-[20px] gap-[5px] flex justify-between mx-auto lg:p-4 p-2 h-[100%] flex-col ">
-        <div className=" xl:flex space-y-3 xl:space-y-0 lg:py-3 lg:px-4 py-1 px-1  lg:rounded-[30px] rounded-[10px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center tableHOC pr-1 max-h-full  overflow-x-auto overflow-y-visible">
+        <div className=" xl:flex space-y-3 xl:space-y-0 lg:py-3 lg:px-4 py-1 px-1  lg:rounded-[30px] rounded-[10px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center tableHOC pr-1 max-h-full  overflow-x-scroll overflow-y-hidden">
           <table className="min-w-full table-auto table ">
             <thead className="">
               <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">

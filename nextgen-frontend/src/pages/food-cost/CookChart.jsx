@@ -57,6 +57,22 @@ const CookChart = () => {
   const cookDropTableRef = useRef(); // ref for getting CookDropTable
   const [isForecastAltered, setIsForecastAltered] = useState(false);
   const [companyStateId, setCompanyStateId] = useState("");
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+
+  // Function to update width
+  const updateWidth = () => {
+    setViewportWidth(window.innerWidth);
+  };
+
+  useEffect(() => {
+    // Add event listener on mount
+    window.addEventListener("resize", updateWidth);
+
+    // Cleanup event listener on unmount
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+    };
+  }, []);
 
   useEffect(() => {
     if (defaultUnitID) {
@@ -125,17 +141,12 @@ const CookChart = () => {
       const result = await getCall(getData, false);
       if (result?.data && result?.data.length) {
         setForecastedSalesValue(result.data[0].forecastedSales);
-        console.log(
-          result.data[0].forecastedSales !==
-            result.data[0].originalForecastedSales
-        );
         setIsForecastAltered(
           result.data[0].forecastedSales !==
             result.data[0].originalForecastedSales
         );
         setOriginalData(result.data[0]);
         const { headers, rows } = transformCookDropData(result.data);
-        console.log("rows", rows);
         setCookChartData({ headers, rows });
       } else {
         setCookChartData({});
@@ -200,7 +211,9 @@ const CookChart = () => {
 
     // Extract rows based on `cookDropTime`
     const rows = {};
-
+    let totalNeed = 0;
+    let totalHave = 0;
+    let totalCook = 0;
     data.cookItems.forEach((item) => {
       item.cookItemCounts.forEach((count) => {
         const time = count.cookDropTime.slice(0, 5); // Extract HH:MM from time
@@ -210,6 +223,9 @@ const CookChart = () => {
         rows[time].push({
           value: `${count.needCount} / ${count.haveCount} / ${count.cookCount}`,
         });
+        totalNeed += count.needCount;
+      totalHave += count.haveCount;
+      totalCook += count.cookCount;
       });
     });
 
@@ -219,6 +235,10 @@ const CookChart = () => {
       ...counts, // Add dynamic data for each column
     ]);
 
+    tableRows.push([
+      { value: "Total" },
+      { value: `${totalNeed} / ${totalHave} / ${totalCook}` },
+    ]);
     // Create PdfBuilder-compatible data
     return {
       title: "Cook Drop Chart",
@@ -255,9 +275,7 @@ const CookChart = () => {
       originalData,
       changedData
     );
-    console.log(JSON.stringify(transformedData),'<<<<<')
     const pdfData = prepareDynamicPdfData({ ...transformedData }, mode);
-
     if (pdfData) {
       PdfBuilder(pdfData);
     }
@@ -265,40 +283,36 @@ const CookChart = () => {
 
   const handlePdfExport = (mode) => {
     const pdfData = handleDynamicPdfExport(mode);
-
-    if (pdfData) {
-      PdfBuilder(pdfData);
-    }
+    
   };
 
   const handleSaveClick = async () => {
     toast.info("Saving data...", { autoClose: 1000 });
     try {
-    const changedData = cookDropTableRef.current?.getChangedData();
-    const transformedData = await applyChangesToOriginalData(
-      originalData,
-      changedData
-    );
-    setIsForecastAltered(
-      transformedData.forecastedSales !==
-      forecastedSalesValue
-    );
-    transformedData.forecastedSales = forecastedSalesValue;
-    const postData = {
-      fullUrl: "api/cookdrop/savecookdropchart",
-      urlParams: {},
-      bodyData: transformedData,
-    };
+      const changedData = cookDropTableRef.current?.getChangedData();
+      const transformedData = await applyChangesToOriginalData(
+        originalData,
+        changedData
+      );
+      setIsForecastAltered(
+        transformedData.forecastedSales !== forecastedSalesValue
+      );
+      transformedData.forecastedSales = forecastedSalesValue;
+      const postData = {
+        fullUrl: "api/cookdrop/savecookdropchart",
+        urlParams: {},
+        bodyData: transformedData,
+      };
 
-    let result = await postCall(postData);
-    if (result.errors === null) {
-      toast.success("Saved...", { autoClose: 1500 });
-    } else {
+      let result = await postCall(postData);
+      if (result.errors === null) {
+        toast.success("Saved...", { autoClose: 1500 });
+      } else {
+        toast.error("Failed to save", { autoClose: 1500 });
+      }
+    } catch (error) {
       toast.error("Failed to save", { autoClose: 1500 });
     }
-  } catch (error) {
-    toast.error("Failed to save", { autoClose: 1500 });
-  }
   };
 
   const handleUnitSelection = (unitName, unitID) => {
@@ -326,7 +340,9 @@ const CookChart = () => {
     }));
 
     const rows = {};
-
+    let totalNeed = 0;
+    let totalHave = 0;
+    let totalCook = 0;
     // Group rows by cookDropTime
     cookDropChartData.cookItems.forEach((item) => {
       item.cookItemCounts.forEach((count) => {
@@ -337,6 +353,9 @@ const CookChart = () => {
         rows[time].push(
           `${count.needCount} / ${count.haveCount} / ${count.cookCount}`
         );
+        totalNeed += count.needCount;
+        totalHave += count.haveCount;
+        totalCook += count.cookCount;
       });
     });
 
@@ -346,6 +365,10 @@ const CookChart = () => {
       ...counts,
     ]);
 
+    excelRows.push([
+      "total",
+      `${totalNeed} / ${totalHave} / ${totalCook}`,
+    ]);
     return {
       columns: [{ name: "Time" }, ...headers], // Include "Time" as the first column
       data: excelRows.map((row) =>
@@ -364,8 +387,6 @@ const CookChart = () => {
       changedData
     );
     const excelData = await prepareExcelData(cookDropChartData);
-
-
     exportToExcel(
       [
         {
@@ -396,31 +417,33 @@ const CookChart = () => {
         <h2 className="lg:my-4 lg:text-2xl lg:leading-tight lg:text-left pageTitle hidden">
           Cook Drop Chart
         </h2>
-        <div className="lg:hidden bg-[#EFEFEF] h-[28px] justify-between align-middle flex mb-5">
-          <h2 className="lg:hidden my-auto text-[12px] leading-tight text-left pageTitle font-bold ml-[5px] ">
-            Cook Drop Chart
-          </h2>
-          <div className="block lg:hidden my-auto mr-2">
-            <ExportOptions
-              includePDF={true}
-              includeSave={true}
-              includeExcel={true}
-              includePrint={true}
-              includeHelp={true}
-              handleHelpClick={() =>
-                setIntroSteps({ ...introSteps, stepsEnabled: true })
-              }
-              handleSaveClick={() => {
-                handleSaveClick();
-              }}
-              handlePDFClick={() => handlePdfExport("pdf")}
-              handlePrintClick={() => {
-                handlePdfExport("print");
-              }}
-              handleExcelClick={() => handleExcelExport()}
-            />
+        {viewportWidth < 1023 && (
+          <div className="lg:hidden bg-[#EFEFEF] h-[28px] justify-between align-middle flex mb-5">
+            <h2 className="lg:hidden my-auto text-[12px] leading-tight text-left pageTitle font-bold ml-[5px] ">
+              Cook Drop Chart
+            </h2>
+            <div className="block lg:hidden my-auto mr-2">
+              <ExportOptions
+                includePDF={true}
+                includeSave={true}
+                includeExcel={true}
+                includePrint={true}
+                includeHelp={true}
+                handleHelpClick={() =>
+                  setIntroSteps({ ...introSteps, stepsEnabled: true })
+                }
+                handleSaveClick={() => {
+                  handleSaveClick();
+                }}
+                handlePDFClick={() => handlePdfExport("pdf")}
+                handlePrintClick={() => {
+                  handlePdfExport("print");
+                }}
+                handleExcelClick={() => handleExcelExport()}
+              />
+            </div>
           </div>
-        </div>
+        )}
         <header className="xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center lg:mx-0 mx-2">
           <div className="flex items-center space-x-3 ">
             <UnitSelector
@@ -441,7 +464,6 @@ const CookChart = () => {
             <ForecastedSales
               value={forecastedSalesValue}
               onChange={(e) => {
-                console.log(e.target.value.split("$")[1]),
                   setForecastedSalesValue(e.target.value.split("$")[1]);
               }}
             />
