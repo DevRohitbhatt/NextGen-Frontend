@@ -56,15 +56,14 @@ const HhmmssSelector = (props) => {
       mm: mm,
       ss: ss,
     };
-
     if (action === "focus") {
       // Focus the selected field
       fieldRefs[field]?.select();
     }
 
-    if (action === "keydown" && fieldRefs[field]?.length === 1) {
+    if (action === "keydown" && fieldRefs[field]?.value?.length === 1) {
       // Add padding if the field value is a single digit
-      const paddedValue = "0" + fieldRefs[field];
+      const paddedValue = "0" + fieldRefs[field].value;
       if (field === "hh") setHh(paddedValue);
       else if (field === "mm") setMm(paddedValue);
       else if (field === "ss") setSs(paddedValue);
@@ -73,8 +72,8 @@ const HhmmssSelector = (props) => {
     if (action === "blur") {
       // Add padding on blur if the field value is a single digit
       setTimeout(() => {
-        if (fieldRefs[field]?.length === 1) {
-          const paddedValue = "0" + fieldRefs[field];
+        if (fieldRefs[field]?.value?.length === 1) {
+          const paddedValue = "0" + fieldRefs[field].value;
           if (field === "hh") setHh(paddedValue);
           else if (field === "mm") setMm(paddedValue);
           else if (field === "ss") setSs(paddedValue);
@@ -82,36 +81,6 @@ const HhmmssSelector = (props) => {
       }, 100);
     }
   };
-  // const changeFocusToNext = (name) => {
-  //   if (name === "hh") {
-  //     hhRef.current.select();
-  //   } else if (name === "mm") {
-  //     mmRef.current.select();
-  //   } else if (name === "ss") {
-  //     ssRef.current.select();
-  //   }
-  // };
-  // const onKeyDownCapture = (e, name) => {
-  //   if (e.code == "Tab" && name === "hh" && hh.length == 1) {
-  //     setHh("0" + hh);
-  //   } else if (e.code == "Tab" && name === "mm" && mm.length == 1) {
-  //     setMm("0" + mm);
-  //   } else if (e.code == "Tab" && name === "ss" && ss.length == 1) {
-  //     setSs("0" + ss);
-  //   }
-  // };
-
-  // const onBlureHandle = (name) => {
-  //   setTimeout(() => {
-  //     if (name === "hh" && hhRef.current.value.length == 1) {
-  //       setHh("0" + hh);
-  //     } else if (name === "mm" && mmRef.current.value.length == 1) {
-  //       setMm("0" + mm);
-  //     } else if (name === "ss" && ssRef.current.value.length == 1) {
-  //       setSs("0" + ss);
-  //     }
-  //   }, 100);
-  // };
 
   useEffect(() => {
     if (props.initialSeconds) {

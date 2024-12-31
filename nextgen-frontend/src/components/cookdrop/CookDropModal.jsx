@@ -623,21 +623,24 @@ export const CreateEditItemModal = ({
   };
 
   const openDropDowns = (e, name) => {
+
     const rect = e.target.getBoundingClientRect();
     if (name === "projectHeade") {
       setSourceTypeDropDown(false);
       setDropdownPosition({
-        top: rect.height + window.scrollY + 80, // Position 142px below the button
+        top: rect.height + 0 + 80, // Position 142px below the button
         left: rect.x - modalPosition?.x - 10, // Align with the button's left edge
       });
       setIsProjectHeadeDropDownEnable(!isProjectHeadeDropDownEnable);
+	 
     } else if (name === "sourceType") {
       setIsProjectHeadeDropDownEnable(false);
       setDropdownPosition({
-        top: rect.height + window.scrollY + 80, 
+        top: rect.height + 0 + 80, 
         left: rect.x - modalPosition?.x - 10, 
       });
       setSourceTypeDropDown(!sourceTypeDropDown);
+	
     }
   };
 
