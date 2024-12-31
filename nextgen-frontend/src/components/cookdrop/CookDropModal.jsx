@@ -352,7 +352,7 @@ export const CreateItemModal = ({
                       }}
                     >
                       <button
-                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 my-2"
                         onClick={() => {
                           setAddHeaderFields((prev) => ({
                             ...prev,
@@ -366,7 +366,7 @@ export const CreateItemModal = ({
                         Y
                       </button>
                       <button
-                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 my-2"
                         onClick={() => {
                           setAddHeaderFields((prev) => ({
                             ...prev,
@@ -428,13 +428,13 @@ export const CreateItemModal = ({
                       }}
                     >
                       <button
-                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 my-2"
                         onClick={() => handleSourceTypeChange("Menu")}
                       >
                         Menu Items
                       </button>
                       <button
-                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 my-2"
                         onClick={() => handleSourceTypeChange("Inventory")}
                       >
                         Inventory Items
@@ -789,7 +789,7 @@ export const CreateEditItemModal = ({
                       }}
                     >
                       <button
-                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 my-2"
                         onClick={() => {
                           setIsProjectHeadeDropDownEnable(false),
                             setAllDataFeilds((prev) => ({
@@ -801,7 +801,7 @@ export const CreateEditItemModal = ({
                         Y
                       </button>
                       <button
-                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 my-2"
                         onClick={() => {
                           setIsProjectHeadeDropDownEnable(false),
                             setAllDataFeilds((prev) => ({
@@ -865,13 +865,13 @@ export const CreateEditItemModal = ({
                       }}
                     >
                       <button
-                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 my-2"
                         onClick={() => handleSourceTypeChange("Menu")}
                       >
                         Menu Items
                       </button>
                       <button
-                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 my-2"
                         onClick={() => handleSourceTypeChange("Inventory")}
                       >
                         Inventory Items
