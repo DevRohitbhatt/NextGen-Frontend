@@ -181,13 +181,34 @@ export const CreateItemModal = ({
     );
   };
 
+  const openDropDowns = (e, name) => {
+    const rect = e.target.getBoundingClientRect();
+    if (name === "projectHeade") {
+      setSourceTypeDropDown(false);
+      setDropdownPosition({
+        top: rect.height + window.scrollY + 230, // Position 142px below the button
+        left: rect.x - 10, // Align with the button's left edge
+      });
+
+      setIsProjectHeadeDropDownEnable(!isProjectHeadeDropDownEnable);
+    } else if (name === "sourceType") {
+      setDropdownPosition({
+        top: rect.height + window.scrollY + 230, // Position 142px below the button
+        left: rect.x - 10, // Align with the button's left edge
+      });
+
+      setSourceTypeDropDown(!sourceTypeDropDown);
+      setIsProjectHeadeDropDownEnable(false);
+    }
+  };
+
   return (
     <div className="lg:gap-[20px] gap-[5px] flex justify-between mx-auto lg:p-4 p-2 h-[100%] flex-col ">
       <div
         className=" xl:flex space-y-3 xl:space-y-0 lg:py-3 lg:px-4 py-1 px-1  lg:rounded-[30px] rounded-[10px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center tableHOC pr-1 max-h-full  overflow-x-scroll overflow-y-hidden"
         onScroll={() => {
           setSourceTypeDropDown(false);
-		  setIsProjectHeadeDropDownEnable(false);
+          setIsProjectHeadeDropDownEnable(false);
         }}
       >
         <table className="table min-w-full table-auto ">
@@ -315,16 +336,7 @@ export const CreateItemModal = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      const rect = e.target.getBoundingClientRect();
-
-                      setDropdownPosition({
-                        top: rect.height + window.scrollY + 230, // Position 142px below the button
-                        left: rect.x - 10, // Align with the button's left edge
-                      });
-
-                      setIsProjectHeadeDropDownEnable(
-                        !isProjectHeadeDropDownEnable
-                      );
+                      openDropDowns(e, "projectHeade");
                     }}
                   >
                     {addHeaderFields.projectAhead}
@@ -356,10 +368,10 @@ export const CreateItemModal = ({
                       <button
                         className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
                         onClick={() => {
-							setAddHeaderFields((prev) => ({
-								...prev,
-								["projectAhead"]: "n",
-							  })),
+                          setAddHeaderFields((prev) => ({
+                            ...prev,
+                            ["projectAhead"]: "n",
+                          })),
                             setIsProjectHeadeDropDownEnable(
                               !isProjectHeadeDropDownEnable
                             );
@@ -370,7 +382,6 @@ export const CreateItemModal = ({
                     </div>
                   )}
                 </div>
-              
               </td>
               <td className="px-2 py-2 ">
                 <HhmmssSelector
@@ -401,14 +412,7 @@ export const CreateItemModal = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      const rect = e.target.getBoundingClientRect();
-
-                      setDropdownPosition({
-                        top: rect.height + window.scrollY + 230, // Position 142px below the button
-                        left: rect.x - 10, // Align with the button's left edge
-                      });
-
-                      setSourceTypeDropDown(!sourceTypeDropDown);
+                      openDropDowns(e, "sourceType");
                     }}
                   >
                     {sourceType} item
@@ -551,7 +555,7 @@ export const CreateEditItemModal = ({
   companyStateId,
   getCookAllItemData,
 }) => {
-	const [isProjectHeadeDropDownEnable, setIsProjectHeadeDropDownEnable] =
+  const [isProjectHeadeDropDownEnable, setIsProjectHeadeDropDownEnable] =
     useState(false);
   let {
     cookItemName,
@@ -618,9 +622,33 @@ export const CreateEditItemModal = ({
     }
   };
 
+  const openDropDowns = (e, name) => {
+    const rect = e.target.getBoundingClientRect();
+    if (name === "projectHeade") {
+      setSourceTypeDropDown(false);
+      setDropdownPosition({
+        top: rect.height + window.scrollY + 80, // Position 142px below the button
+        left: rect.x - modalPosition?.x - 10, // Align with the button's left edge
+      });
+      setIsProjectHeadeDropDownEnable(!isProjectHeadeDropDownEnable);
+    } else if (name === "sourceType") {
+      setIsProjectHeadeDropDownEnable(false);
+      setDropdownPosition({
+        top: rect.height + window.scrollY + 80, 
+        left: rect.x - modalPosition?.x - 10, 
+      });
+      setSourceTypeDropDown(!sourceTypeDropDown);
+    }
+  };
+
   return (
     <div className="gap-[20px] flex justify-between mx-auto p-4 h-[100%] relative flex-col">
-      <div className=" xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center tableHOC overflow-x-auto overflow-y-visible" onScroll={()=>{setIsProjectHeadeDropDownEnable(false);}}>
+      <div
+        className=" xl:flex space-y-3 xl:space-y-0 py-3 px-4 rounded-[30px] shadow-[0_0px_35px_-10px_rgba(0,0,0,0.3)] justify-between items-center tableHOC overflow-x-auto overflow-y-visible"
+        onScroll={() => {
+          setIsProjectHeadeDropDownEnable(false);
+        }}
+      >
         <table className="min-w-full table-auto ">
           <thead className="">
             <tr className="shadow-[0_-1px_0_var(--tw-primary)_inset]">
@@ -736,20 +764,13 @@ export const CreateEditItemModal = ({
                 />
               </td>
               <td className="px-2 py-2 ">
-			  <div className="">
+                <div className="">
                   <button
                     className="bg-gray-200 p-2 rounded-full border-none box-content whitespace-nowrap w-[130px] text-left"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-
-                      const rect = e.target.getBoundingClientRect();
-
-                      setDropdownPosition({
-                        top: rect.height + window.scrollY + 80, // Position 142px below the button
-                        left: rect.x - modalPosition?.x - 10, // Align with the button's left edge
-                      });
-                      setIsProjectHeadeDropDownEnable(!isProjectHeadeDropDownEnable);
+                      openDropDowns(e, "projectHeade");
                     }}
                   >
                     {allDataFeilds.projectAhead}
@@ -766,19 +787,25 @@ export const CreateEditItemModal = ({
                     >
                       <button
                         className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
-                        onClick={() =>{ setIsProjectHeadeDropDownEnable(false), setAllDataFeilds((prev) => ({
-							...prev,
-							["projectAhead"]: "y",
-						  }))}}
+                        onClick={() => {
+                          setIsProjectHeadeDropDownEnable(false),
+                            setAllDataFeilds((prev) => ({
+                              ...prev,
+                              ["projectAhead"]: "y",
+                            }));
+                        }}
                       >
                         Y
                       </button>
                       <button
                         className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
-                        onClick={() =>{ setIsProjectHeadeDropDownEnable(false),setAllDataFeilds((prev) => ({
-							...prev,
-							["projectAhead"]: "n",
-						  }))}}
+                        onClick={() => {
+                          setIsProjectHeadeDropDownEnable(false),
+                            setAllDataFeilds((prev) => ({
+                              ...prev,
+                              ["projectAhead"]: "n",
+                            }));
+                        }}
                       >
                         N
                       </button>
@@ -819,14 +846,7 @@ export const CreateEditItemModal = ({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-
-                      const rect = e.target.getBoundingClientRect();
-
-                      setDropdownPosition({
-                        top: rect.height + window.scrollY + 80, // Position 142px below the button
-                        left: rect.x - modalPosition?.x - 10, // Align with the button's left edge
-                      });
-                      setSourceTypeDropDown(!sourceTypeDropDown);
+                      openDropDowns(e, "sourceType");
                     }}
                   >
                     {editsourceType} item
