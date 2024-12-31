@@ -339,7 +339,7 @@ export const CreateItemModal = ({
                       openDropDowns(e, "projectHeade");
                     }}
                   >
-                    {addHeaderFields.projectAhead}
+                    {addHeaderFields?.projectAhead.toUpperCase()}
                   </button>
                   {isProjectHeadeDropDownEnable && (
                     <div
@@ -776,7 +776,7 @@ export const CreateEditItemModal = ({
                       openDropDowns(e, "projectHeade");
                     }}
                   >
-                    {allDataFeilds.projectAhead}
+                    {allDataFeilds?.projectAhead && allDataFeilds?.projectAhead.toUpperCase()}
                   </button>
                   {isProjectHeadeDropDownEnable && (
                     <div
