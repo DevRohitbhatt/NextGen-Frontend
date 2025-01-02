@@ -39,7 +39,6 @@ const LaborAnalysis = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalData, setModalData] = useState([]);
 	const [modalColumns, setModalColumns] = useState([]);
-	const [isTableRendered, setIsTableRendered] = useState(true);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
@@ -135,7 +134,7 @@ const LaborAnalysis = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setIsTableRendered(false)			setIsTableRendered(false);
+			setIsTableRendered(false);
 			const getData = {
 				url: 'laborAnalysis',
 				urlParams: {
