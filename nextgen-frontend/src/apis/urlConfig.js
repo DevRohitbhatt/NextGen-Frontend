@@ -2,7 +2,6 @@ const urlConfig = {
 	//Company apis
 	getCompanySetting: '/api/company/settings/getsetting',
 	getAllCompanySettings: '/api/company/settings/getallsettings',
-	companyUnitDates: 'api/companysetting/getCompanyUnitDates',
 	getUserRoleSettings: '/api/company/settings/getUserRoleSettings',
 	getAllWeekStartAndEndDates: 'api/company/settings/GetAllWeekStartAndEndDates',
 	getCurrentPeriodDates: '/api/company/settings/getCurrentPeriodDates',
@@ -57,8 +56,9 @@ const urlConfig = {
 	GetVarianceFoodCostBreakdownIdealReportData: '/api/foodcost/GetVarianceFoodCostBreakdownIdealReportData',
 	SaveCountSheetDesignerComment: '/api/foodcost/SaveCountSheetDesignerComment',
 	GetVarianceFoodCostPopupReportData: '/api/foodcost/GetVarianceFoodCostPopupReportData',
-	getVendorItems: '/api/foodcost/getVendorItems',
-
+	getGrossProfitCategoryItems: '/api/sales/GetGrossProfitCategoryItems',
+	getShowHideDepartments: '/api/foodcost/GetActualFoodCostShowHideDepartment',
+  getVendorItems: '/api/foodcost/getVendorItems',
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',

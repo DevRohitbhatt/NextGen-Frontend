@@ -65,6 +65,7 @@ const Discounts = () => {
 	const [discountType, setDiscountType] = useState('All-All Discounts');
 	const discountTypeOptions = discountTypesData?.map((type) => ({
 		name: `${type.type} - ${type.name}`,
+		typeName: type.name,
 		type: type.type,
 	}));
 	discountTypeOptions.unshift(
@@ -105,7 +106,7 @@ const Discounts = () => {
 				id: 'totalDiscountAmount',
 				header: 'Total Discount Amount',
 				cell: ({ getValue }) => {
-					return `${formattingData(getValue())}`
+					return `${formattingData(getValue())}`;
 				},
 				dataType: 'price',
 				footer: ({ table }) => (
@@ -126,11 +127,7 @@ const Discounts = () => {
 				cell: ({ row, getValue }) =>
 					row.getCanExpand()
 						? ''
-						: `${
-								getValue() !== null && getValue() !== undefined
-									? formattingData(getValue())
-									: '0.00'
-							}`,
+						: `${getValue() !== null && getValue() !== undefined ? formattingData(getValue()) : '0.00'}`,
 				dataType: 'price',
 				footer: ({ table }) => (
 					<div className='text-center'>${calculateFooterSum(table, 'salesGenerated')}</div>
@@ -411,11 +408,24 @@ const Discounts = () => {
 				const filterItems = discountTypesData.filter(
 					(item) => item.type === discountTypeOptions.find((option) => option.name === discountType)?.type
 				);
+
 				const filterData =
 					discountType === 'All-All Discounts'
 						? result.data
 						: result.data.filter((row) => filterItems.find((item) => item.name === row.discountType));
-				setDiscountsData(filterData);
+
+				const newData =
+					discountType === 'All-All Discounts' ||
+					discountType === 'All-All promos' ||
+					discountType === 'All-All Comps'
+						? filterData
+						: result.data.filter(
+								(row) =>
+									row.discountType ===
+									discountTypeOptions.find((option) => option.name === discountType)?.typeName
+						  );
+
+				setDiscountsData(newData);
 
 				const uniqueWeeks = Array.from(
 					new Set(result.data.flatMap((item) => item.weeks.map((week) => week.weekId)))
@@ -512,8 +522,8 @@ const Discounts = () => {
 										header: 'Disc Amount',
 										cell: ({ getValue }) => {
 											let discAmount = formattingData(getValue());
-											return discAmount
-											},
+											return discAmount;
+										},
 										dataType: 'number',
 										footer: ({ table }) => (
 											<div className='text-center'>
@@ -638,8 +648,19 @@ const Discounts = () => {
 								.filter((row) => filterItems.find((item) => item.name === row.discountType))
 								.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+				const newFilteredData =
+					discountType === 'All-All Discounts' ||
+					discountType === 'All-All promos' ||
+					discountType === 'All-All Comps'
+						? filterData
+						: newData.filter(
+								(row) =>
+									row.discountType ===
+									discountTypeOptions.find((option) => option.name === discountType)?.typeName
+						  );
+
 				handleGroupByChange(viewBy === 'Summary' || viewBy === 'Detail' ? groupBy : viewBy, columns);
-				setDiscountsData(filterData);
+				setDiscountsData(newFilteredData);
 			}
 
 			setIsLoading(false);
