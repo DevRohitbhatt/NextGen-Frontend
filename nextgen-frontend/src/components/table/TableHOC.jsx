@@ -48,6 +48,7 @@ function TableHOC({
 	isPaginated = false,
 	isFooter = false,
 	view,
+	tableHeight = '60vh',
 	isTableRendered,
 	setIsTableRendered,
 	setTableState,
@@ -143,7 +144,7 @@ function TableHOC({
 		if (table.getRowModel().rows.length > 0 && !isTableRendered && setIsTableRendered) {
 			setIsTableRendered(true);
 		}
-	}, [table.getRowModel().rows.length, isTableRendered, setIsTableRendered]);
+	}, [table, isTableRendered, setIsTableRendered]);
 
 	return (
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3'>
@@ -178,7 +179,7 @@ function TableHOC({
 			</div>
 
 			{/* table */}
-			<div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
+			<div className={`tableHOC pr-1 max-h-[${tableHeight}] overflow-auto`}>
 				<table className='w-full border-collapse table-auto select-none'>
 					{isHeader && (
 						<thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>

@@ -19,6 +19,10 @@ const urlConfig = {
 	//invoices details
 	getInvoiceDetailsData: '/api/foodcost/getInvoiceDetailsData',
 	getVendorInvoiceItems: '/api/foodcost/getVendorInvoiceItems',
+	getInvoiceSummary: '/api/foodcost/getVendorItemsSummary',
+	saveInvoice: 'api/foodcost/addUpdateInvoice',
+	deleteInvoice: 'api/foodcost/deleteVendorInvoice',
+	addVendorItem: 'api/foodcost/addVendorItem',
 	//inventory items apis
 	getInventoryItemsOrderLimits: '/api/inventoryitems/getinventoryitemsorderlimits',
 	updateInventoryItemOrderLimits: '/api/inventoryitems/updateinventoryitemsorderlimit',
@@ -54,6 +58,7 @@ const urlConfig = {
 	GetVarianceFoodCostPopupReportData: '/api/foodcost/GetVarianceFoodCostPopupReportData',
 	getGrossProfitCategoryItems: '/api/sales/GetGrossProfitCategoryItems',
 	getShowHideDepartments: '/api/foodcost/GetActualFoodCostShowHideDepartment',
+  getVendorItems: '/api/foodcost/getVendorItems',
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',

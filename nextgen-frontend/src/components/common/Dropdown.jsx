@@ -54,7 +54,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable =
 		>
 			<h3 className='mb-1 ml-2 text-xl font-semibold text-nowrap'>{title}</h3>
 			<div
-				className={`flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl ${
+				className={`flex items-center justify-between w-full px-6 py-3 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl min-h-[52px] ${
 					isEditable
 						? ' hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] cursor-pointer'
 						: 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3]'
@@ -82,7 +82,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable =
 				<ul className='absolute top-full left-0 rounded-lg text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] z-10 mt-[1px] w-full overflow-y-auto max-h-96 tableHOC overflow-hidden'>
 					{newOptions.map((option, index) => (
 						<li
-							className='cursor-pointer bg-[#f9f9f9] rounded-md px-5 py-1 mb-2 font-semibold text-gray-800 hover:border border border-transparent hover:border-[var(--tw-primary)] mx-2 my-2'
+							className='cursor-pointer text-left bg-[#f9f9f9] rounded-md px-5 py-1 mb-2 font-semibold text-gray-800 hover:border border border-transparent hover:border-[var(--tw-primary)] mx-2 my-2'
 							key={index}
 							onClick={() => handleOptionClick(option.name)}
 						>
