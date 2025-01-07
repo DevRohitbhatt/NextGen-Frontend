@@ -35,6 +35,7 @@ import {
 	PurchaseAnalysis,
 	MenuItemsSold,
 	LaborAnalysis,
+	ManagementSalesCoverage,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -152,6 +153,7 @@ const App = () => {
 								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
 								<Route path='/LaborCICO' element={<LaborCICO />} />
 								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
+								<Route path='/ManagementSalesCoverage' element={<ManagementSalesCoverage />} />
 							</Routes>
 						</Suspense>
 					</div>
