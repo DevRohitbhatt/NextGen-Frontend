@@ -37,6 +37,7 @@ import {
 	LaborAnalysis,
 } from './pages';
 import { Suspense } from 'react';
+import SalesSummary from './pages/sales/SalesSummray.jsx';
 
 const App = () => {
 	const [selectedTheme, setSelectedTheme] = useState(themes.default);
@@ -152,6 +153,7 @@ const App = () => {
 								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
 								<Route path='/LaborCICO' element={<LaborCICO />} />
 								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
+								<Route path='/SalesSummary' element={<SalesSummary />} />
 							</Routes>
 						</Suspense>
 					</div>
