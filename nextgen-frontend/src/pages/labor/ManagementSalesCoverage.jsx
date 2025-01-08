@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
-import voidsReport from '../../assets/introJSSteps/voidsReport';
+import mgmtSalesCoverage from '../../assets/introJSSteps/mgmtSalesCoverage';
 import {
 	Dropdown,
 	Loader,
@@ -18,7 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import { formattingData, formattingDataWithoutDollr } from '../../functions/formatingCurrency';
+import { formattingDataWithoutDollr } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -37,10 +37,9 @@ const ManagementSalesCoverage = () => {
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
-	const [isDateLoading, setIsDateLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
-		'There was an error trying to load the Voids Report, please try again later.'
+		'There was an error trying to load the Management Sales Coverage Report, please try again later.'
 	);
 
 	//selected unit state variables
@@ -54,11 +53,12 @@ const ManagementSalesCoverage = () => {
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [jobType, setJobType] = useState('');
+	const [isJobTypeLoading, setIsJobTypeLoading] = useState(false);
 	const [jobTypeOptions, setJobTypeOptions] = useState([]);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
-		steps: voidsReport(),
+		steps: mgmtSalesCoverage(),
 		initialStep: 0,
 		stepsEnabled: false,
 	});
@@ -127,12 +127,12 @@ const ManagementSalesCoverage = () => {
 					`${formattingDataWithoutDollr(getValue())}%`
 				),
 		}),
-		columnHelper.accessor('shifts', {
-			id: 'shifts',
+		columnHelper.accessor('scheduledShifts', {
+			id: 'scheduledShifts',
 			header: 'Scheduled shifts',
 		}),
-		columnHelper.accessor('shifts', {
-			id: 'shifts',
+		columnHelper.accessor('actualShifts', {
+			id: 'actualShifts',
 			header: 'Actual shifts',
 		}),
 	];
@@ -149,6 +149,7 @@ const ManagementSalesCoverage = () => {
 	useEffect(() => {
 		const fetchLaborJobType = async () => {
 			try {
+				setIsJobTypeLoading(true);
 				const getData = {
 					url: 'getLaborJobType',
 					urlParams: {
@@ -167,6 +168,7 @@ const ManagementSalesCoverage = () => {
 				);
 
 				setJobType(newData[0]?.description);
+				setIsJobTypeLoading(false);
 			} catch (error) {
 				console.error('Error fetching labor job types:', error);
 			}
@@ -178,7 +180,6 @@ const ManagementSalesCoverage = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsDateLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -194,8 +195,7 @@ const ManagementSalesCoverage = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsDateLoading(false);
+			console.error('Error fetching default dates:', error);
 		}
 	};
 
@@ -205,6 +205,7 @@ const ManagementSalesCoverage = () => {
 
 	const fetchMgmtSalesCoverageReport = async () => {
 		try {
+			setIsError(false);
 			setIsLoading(true);
 			const getData = {
 				url: 'getMgmtSalesCoverage',
@@ -225,16 +226,26 @@ const ManagementSalesCoverage = () => {
 						week.weekEndDate,
 						'mm/dd/yyyy'
 					)}`,
-					subRows: week.managementSalesCoverageReportUnitModels.map((unit) => ({
-						unit: unitsAndAreasList?.units?.find((item) => item.unitID === unit.unitId)?.unitName,
-						projectedSalesPerCoverage: unit.projectedSalesPerCoverage,
-						actualSalesPerCoverage: unit.actualSalesPerCoverage,
-						subRows: unit.managementSalesCoverageReportDateModels.map((date) => ({
-							date: dateFormat(date.date, 'mm/dd/yyyy'),
-							projectedSalesPerCoverage: date.projectedSalesPerCoverage,
-							actualSalesPerCoverage: date.actualSalesPerCoverage,
-						})),
-					})),
+					subRows: week.managementSalesCoverageReportUnitModels
+						.map((unit) => ({
+							unitId: unit.unitId,
+							unit: unitsAndAreasList?.units?.find((item) => item.unitID === unit.unitId)?.unitName,
+							projectedSalesPerCoverage: unit.projectedSalesPerCoverage,
+							actualSalesPerCoverage: unit.actualSalesPerCoverage,
+							subRows: unit.managementSalesCoverageReportDateModels
+								.map((date) => ({
+									date: dateFormat(date.date, 'mm/dd/yyyy'),
+									projectedSalesPerCoverage: date.projectedSalesPerCoverage,
+									actualSalesPerCoverage: date.actualSalesPerCoverage,
+									scheduledShifts:
+										date.scheduledShifts.trim() === '12:00 AM - 12:00 AM'
+											? ''
+											: date.scheduledShifts,
+									actualShifts: date.actualShifts,
+								}))
+								.sort((a, b) => new Date(a.date) - new Date(b.date)),
+						}))
+						.sort((a, b) => a.unitId - b.unitId),
 				}));
 
 				console.log('newData', newData);
@@ -291,8 +302,6 @@ const ManagementSalesCoverage = () => {
 			body: buildPDFBody(),
 		};
 
-		console.log('pdfData', pdfData);
-
 		PdfBuilder(pdfData);
 	};
 
@@ -344,12 +353,12 @@ const ManagementSalesCoverage = () => {
 						columnName: 'Actual Sales % Coverage',
 					},
 					{
-						value: subRow.shifts,
+						value: subRow.scheduledShifts,
 						cellType: 'text',
 						columnName: 'Scheduled shifts',
 					},
 					{
-						value: subRow.shifts,
+						value: subRow.actualShifts,
 						cellType: 'text',
 						columnName: 'Actual shifts',
 					},
@@ -377,8 +386,10 @@ const ManagementSalesCoverage = () => {
 							week: week.week,
 							unit: unit.unit,
 							date: date.date,
-							projectedSalesPerCoverage: date.projectedSalesPerCoverage,
-							actualSalesPerCoverage: date.actualSalesPerCoverage,
+							projectedSalesPerCoverage: formattingDataWithoutDollr(date.projectedSalesPerCoverage),
+							actualSalesPerCoverage: formattingDataWithoutDollr(date.actualSalesPerCoverage),
+							scheduledShifts: date.scheduledShifts,
+							actualShifts: date.actualShifts,
 						}))
 					)
 				),
@@ -424,11 +435,11 @@ const ManagementSalesCoverage = () => {
 						onClick={() => setShowDateModal(true)}
 						extraClass={'w-[219px]'}
 					/>
-					<div className='w-72'>
+					<div className='w-72 jobType-selector'>
 						<Dropdown
 							title={'Job Type'}
 							options={jobTypeOptions}
-							selectedOption={jobType}
+							selectedOption={isJobTypeLoading ? 'Loading...' : jobType}
 							onOptionChange={(option) => setJobType(option)}
 						/>
 					</div>
