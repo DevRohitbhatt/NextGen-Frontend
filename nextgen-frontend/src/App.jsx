@@ -29,6 +29,7 @@ import {
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
+	InvoiceEditor,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
@@ -133,6 +134,7 @@ const App = () => {
 								<Route path='/ActualFoodCost' index element={<ActualFoodCost />} />
 								<Route path='/VarianceFoodCost' index element={<VarianceFoodCost />} />
 								<Route path='/Invoices' element={<Invoices />} />
+								<Route path='/InvoiceEditor' element={<InvoiceEditor />} />
 								<Route path='/Countsheets' element={<Countsheets />} />
 								<Route path='/CountsheetDesigner' element={<CountsheetDesigner />} />
 								<Route path='/PurchaseAnalysis' element={<PurchaseAnalysis />} />

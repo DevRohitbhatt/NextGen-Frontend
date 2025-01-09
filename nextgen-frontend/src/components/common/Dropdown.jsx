@@ -82,7 +82,7 @@ const Dropdown = ({ options, selectedOption, onOptionChange, title, isEditable =
 				<ul className='absolute top-full left-0 rounded-lg text-center bg-white  shadow-[0px_5px_20px_-10px_rgba(0,_0,_0,_0.5)] z-30 mt-[1px] w-full overflow-y-auto max-h-96 tableHOC overflow-hidden'>
 					{newOptions.map((option, index) => (
 						<li
-							className='cursor-pointer bg-[#f9f9f9] rounded-md px-5 py-1 mb-2 font-semibold text-gray-800 hover:border border border-transparent hover:border-[var(--tw-primary)] mx-2 my-2 text-[14px]'
+							className='cursor-pointer text-left bg-[#f9f9f9] rounded-md px-5 py-1 mb-2 font-semibold text-gray-800 hover:border border border-transparent hover:border-[var(--tw-primary)] mx-2 my-2 text-[14px]'
 							key={index}
 							onClick={() => handleOptionClick(option.name)}
 						>

@@ -10,6 +10,7 @@ const InventoryWeeksOnHand = lazy(() => import('./food-cost/InventoryWeeksOnHand
 const ActualFoodCost = lazy(() => import('./food-cost/ActualFoodCost'));
 const VarianceFoodCost = lazy(() => import('./food-cost/VarianceFoodCost'));
 const Invoices = lazy(() => import('./food-cost/Invoices'));
+const InvoiceEditor = lazy(() => import('./food-cost/InvoiceEditor'));
 const Countsheets = lazy(() => import('./food-cost/Countsheets'));
 const CountsheetDesigner = lazy(() => import('./food-cost/CountsheetDesigner'));
 const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
@@ -53,6 +54,7 @@ export {
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
+	InvoiceEditor,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,

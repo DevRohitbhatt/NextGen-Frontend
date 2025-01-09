@@ -438,7 +438,7 @@ const LaborByPayPeriod = () => {
 						columnName: 'Regular Hours',
 					},
 					{
-						value: subRow.overHours || '0 ',
+						value: subRow.overHours.toFixed(2) || '0 ',
 						cellType: 'number',
 						columnName: 'Overtime Hours',
 					},
@@ -497,8 +497,8 @@ const LaborByPayPeriod = () => {
 						period.date, // Second level subrow data (period)
 						period.jobCode,
 						period.jobDesc,
-						period.regHours,
-						period.overHours,
+						period.regHours.toFixed(2),
+						period.overHours.toFixed(2),
 						period.rate,
 						period.declaredTips,
 						period.preTaxTicketSales,
@@ -550,7 +550,7 @@ const LaborByPayPeriod = () => {
 							jobCode: period.jobCode,
 							jobDesc: period.jobDesc,
 							regHoursPeriod: period?.regHours.toFixed(2),
-							overHours: period.overHours,
+							overHours: period.overHours.toFixed(2),
 							rate: period.rate,
 							declaredTips: period.declaredTips,
 							preTaxTicketSales: period.preTaxTicketSales,

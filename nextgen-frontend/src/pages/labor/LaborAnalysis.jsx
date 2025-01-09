@@ -59,15 +59,16 @@ const LaborAnalysis = () => {
 	//dropdown state variables
 	const [jobDetails, setJobDetails] = useState([]);
 	const [jobDescription, setJobDescription] = useState('All');
-	const jobDescriptionOptions = [
-		{ name: 'All' },
-		{ name: 'Hourly Manager' },
-		{ name: 'Salary Manager' },
-		{ name: 'Shift Supervisor' },
-		{ name: 'Test User' },
-		{ name: 'Request Off' },
-		{ name: 'None' },
-	];
+	const [jobDescriptionOptions, setJobDescriptionOptions] = useState([]);
+	// const jobDescriptionOptions = [
+	// 	{ name: 'All' },
+	// 	{ name: 'Hourly Manager' },
+	// 	{ name: 'Salary Manager' },
+	// 	{ name: 'Shift Supervisor' },
+	// 	{ name: 'Test User' },
+	// 	{ name: 'Request Off' },
+	// 	{ name: 'None' },
+	// ];
 
 	const modalNames = {
 		'Projected Sales': 'avg',
@@ -122,6 +123,15 @@ const LaborAnalysis = () => {
 				},
 			};
 			const result = await getCall(getData);
+			const newData = result.data?.sort((a, b) => a.jobSortOrder - b.jobSortOrder);
+			const Y = 'Y'; // Define 'Y'
+			setJobDescriptionOptions([
+				...(newData
+					? newData.filter((item) => item.jobIsVisible === Y).map((item) => ({ name: item.description }))
+					: []),
+				{ name: 'None' },
+				{ name: 'All' },
+			]);
 			setJobDetails(result.data);
 		} catch (error) {
 			console.error('Error getting job details: ', error);
@@ -134,7 +144,7 @@ const LaborAnalysis = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setIsTableRendered(false)
+			setIsTableRendered(false);
 			const getData = {
 				url: 'laborAnalysis',
 				urlParams: {
@@ -447,7 +457,16 @@ const LaborAnalysis = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={laborAnalysisReportData} expandCollapseButtons={true}  view={1} isTableRendered={isTableRendered} setIsTableRendered={setIsTableRendered} />;
+	const Table = (
+		<TableHOC
+			columns={columns}
+			data={laborAnalysisReportData}
+			expandCollapseButtons={true}
+			view={1}
+			isTableRendered={isTableRendered}
+			setIsTableRendered={setIsTableRendered}
+		/>
+	);
 	const modalTable = <TableHOC columns={modalColumns} data={laborAnalysisModalData} />;
 
 	return (

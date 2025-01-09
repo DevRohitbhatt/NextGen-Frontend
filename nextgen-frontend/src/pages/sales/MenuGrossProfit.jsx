@@ -48,6 +48,7 @@ const MenuGrossProfit = () => {
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isCategoryLoading, setIsCategoryLoading] = useState(false);
 	const [isRecipeInfoLoading, setIsRecipeInfoLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
@@ -64,8 +65,8 @@ const MenuGrossProfit = () => {
 	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
-	const Categories = ['Beverage', 'Food', 'Non Revenue', 'Wings'];
-	const [selectedCategories, setSelectedCategories] = useState(Categories);
+	const [categories, setCategories] = useState([]);
+	const [selectedCategories, setSelectedCategories] = useState([]);
 	const [isGroupByCategory, setIsGroupByCategory] = useState(true);
 	const [showItemsWithSales, setShowItemsWithSales] = useState(false);
 	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -253,6 +254,7 @@ const MenuGrossProfit = () => {
 	useEffect(() => {
 		if (defaultUnitID) {
 			setSelectedUnit(defaultUnitID);
+			fetchMenuGrossProfitData(defaultUnitID);
 		}
 		if (defaultUnitName) {
 			setSelectedUnitName(defaultUnitName);
@@ -263,7 +265,6 @@ const MenuGrossProfit = () => {
 		handleGroupByCategory();
 	}, []);
 
-	//Default date get
 	const getDefaultDates = async () => {
 		try {
 			const getData = {
@@ -289,7 +290,7 @@ const MenuGrossProfit = () => {
 		getDefaultDates();
 	}, []);
 
-	const fetchMenuGrossProfitData = async () => {
+	const fetchMenuGrossProfitData = async (memberId) => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
@@ -298,7 +299,7 @@ const MenuGrossProfit = () => {
 				urlParams: {
 					companyId: companyID,
 					alignmentId: alignmentID,
-					memberId: selectedUnit,
+					memberId: memberId,
 					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
 					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
 				},
@@ -325,7 +326,9 @@ const MenuGrossProfit = () => {
 				netProfit: result.data.menuGrossProfitFooterModel.netProfit.slice(1),
 			}));
 
-			let filteredData = newData.filter((item) => selectedCategories.includes(item.category));
+			var categoriesTemp = updateSelectedCategories(newData);
+
+			let filteredData = newData.filter((item) => categoriesTemp.includes(item.category));
 
 			if (!showItemsWithSales) {
 				filteredData = filteredData.filter((item) => item.itemSales !== 0);
@@ -334,6 +337,7 @@ const MenuGrossProfit = () => {
 			if (!showItemsWithNoRecipeCost) {
 				filteredData = filteredData.filter((item) => item.recipeCost !== '0.00');
 			}
+
 			setMenuGrossProfitData(filteredData);
 			setIsLoading(false);
 		} catch (error) {
@@ -341,6 +345,25 @@ const MenuGrossProfit = () => {
 			setIsLoading(false);
 			setErrorMessage('There was an issue loading your data, please try again later.');
 			console.error('Error getting Menu Gross Profit Report data: ', error);
+		}
+	};
+
+	const updateSelectedCategories = (newData) => {
+		if (!selectedCategories.length) {
+			//find all distinct categories
+			const newCategories = [...new Set(newData.map((item) => item.category))].sort();
+			setCategories(newCategories);
+			setSelectedCategories(newCategories);
+			setIsCategoryLoading(false);
+			return newCategories;
+		}
+		//if there are existing selected categories, check if they are still available, if not then remove. Then and add any new ones
+		else {
+			const newCategories = [...new Set(newData.map((item) => item.category))].sort();
+			const updatedCategories = selectedCategories.filter((category) => newCategories.includes(category));
+			setSelectedCategories(updatedCategories);
+			setIsCategoryLoading(false);
+			return updatedCategories;
 		}
 	};
 
@@ -404,7 +427,7 @@ const MenuGrossProfit = () => {
 			setColumns(memoizedColumns);
 		}
 
-		if (e) fetchMenuGrossProfitData();
+		if (e) fetchMenuGrossProfitData(selectedUnit);
 	};
 
 	const handleRecipeInfoModal = async (e) => {
@@ -605,10 +628,10 @@ const MenuGrossProfit = () => {
 						/>
 						<div className='categories-button' onClick={() => setIsCategoryModalOpen(true)}>
 							<div className='py-2 ml-2 text-[14px] text-center capitalize border-2 border-solid cursor-pointer px-8 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
-								Select Categories
+								{isCategoryLoading ? 'Loading...' : 'Select Categories'}
 							</div>
 						</div>
-						<div className='run-button' onClick={fetchMenuGrossProfitData}>
+						<div className='run-button' onClick={() => fetchMenuGrossProfitData(selectedUnit)}>
 							<div className='py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
@@ -705,7 +728,7 @@ const MenuGrossProfit = () => {
 							<div className='flex justify-between'>
 								<button
 									className='relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_2px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[14px]'
-									onClick={() => setSelectedCategories(Categories)}
+									onClick={() => setSelectedCategories(categories)}
 								>
 									Select All
 								</button>
@@ -716,8 +739,8 @@ const MenuGrossProfit = () => {
 									Select None
 								</button>
 							</div>
-							<div className='flex flex-col space-y-2'>
-								{Categories.map((category) => (
+							<div className='flex flex-col space-y-2 overflow-auto max-h-96 tableHOC'>
+								{categories.map((category) => (
 									<div key={category} className='flex items-center rounded text-[14px]'>
 										<input
 											type='checkbox'
