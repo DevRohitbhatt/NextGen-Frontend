@@ -361,11 +361,20 @@ const Voids = () => {
 	};
 
 	const formatPDFData = (data) => {
+		const getValue = (valueCol,row) =>{
+			if(typeof valueCol?.header === 'object'){
+				return row[valueCol.id]
+			}else if(valueCol?.header?.includes('Price')){
+				return formattingData(row[valueCol.id])
+			}else{
+				return row[valueCol.id]
+			}
+		}
 		return {
 			columnHeaders: columns.map((column) => column.header),
 			rows: data.map((row) =>
 				columns.map((column) => ({
-					value: column.header.includes('Price') ? formattingData(row[column.id]) : row[column.id],
+					value: getValue(column,row),
 					cellType: '',
 					columnName: column.id,
 				}))
