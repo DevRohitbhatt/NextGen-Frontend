@@ -9,15 +9,16 @@ const ExportButton = ({ isInclude, handleClick, iconName, title, className }) =>
 		<div
 			className={`
 				${className}
-				p-2 border-2 flex justify-center items-center border-solid w-[60px] h-[60px] border-[var(--tw-primary)] text-4xl rounded-full hover:bg-[var(--tw-primary)] text-[var(--tw-primary)] hover:text-white cursor-pointer ${
-					isInclude ? 'block' : 'hidden'
-				}`}
-			title={title}
-			onClick={handleClick}
-		>
-			{iconName}
-		</div>
-	);
+				p-2 border-2 flex justify-center items-center border-solid w-[40px] h-[40px] border-[var(--tw-primary)] text-4xl rounded-full hover:bg-[var(--tw-primary)] text-[var(--tw-primary)] hover:text-white cursor-pointer ${
+					isInclude ? "block" : "hidden"
+				}`
+			}
+      title={title}
+      onClick={handleClick}
+    >
+      {iconName}
+    </div>
+  );
 };
 
 ExportButton.propTypes = {

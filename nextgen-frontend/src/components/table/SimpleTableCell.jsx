@@ -7,6 +7,7 @@ const TableCell = styled.td`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 12px
 `;
 
 const Select = styled.select`

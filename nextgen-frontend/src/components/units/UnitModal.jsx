@@ -170,7 +170,7 @@ const UnitModal = ({
 	};
 
 	return show ? (
-		<Styled.ModalDialog>
+		<Styled.ModalDialog className='z-50' style={{zIndex:999}}>
 			<Styled.ModalOverlay>
 				<Styled.ModalContent>
 					<ModalHeader>

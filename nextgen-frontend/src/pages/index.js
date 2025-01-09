@@ -14,6 +14,8 @@ const InvoiceEditor = lazy(() => import('./food-cost/InvoiceEditor'));
 const Countsheets = lazy(() => import('./food-cost/Countsheets'));
 const CountsheetDesigner = lazy(() => import('./food-cost/CountsheetDesigner'));
 const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
+const CookChart = lazy(() => import('./food-cost/CookChart'));
+const CookChartTemplate = lazy(() => import('./food-cost/CookChartTemplate'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
@@ -57,4 +59,6 @@ export {
 	CountsheetDesigner,
 	PurchaseAnalysis,
 	LaborAnalysis,
+	CookChart,
+	CookChartTemplate
 };

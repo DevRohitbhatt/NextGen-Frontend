@@ -22,6 +22,12 @@ import PurchaseAnalysi from "../../assets/introJSSteps/PurchaseAnalysis";
 import { useLocation } from "react-router-dom";
 import dateFormat from "dateformat";
 import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
+import { formattingData } from "../../functions/formatingCurrency";
+
+const tooltips = {
+	glCode: "Accounting code assigned to the vendor item. \n\nNOTE: GL Codes only populate for Accounting Automation customers.",	
+	direction: "above",
+  };
 
 const columnHelper = createColumnHelper();
 
@@ -128,7 +134,7 @@ const PurchaseAnalysis = () => {
       columnHelper.accessor("totalAmountIncludingTax", {
         id: "totalAmountIncludingTax",
         header: "Invoice Total",
-        cell: ({ getValue }) => (getValue() ? `${getValue().toFixed(2)}` : ""),
+        cell: ({ getValue }) => (getValue() ? `${formattingData(getValue())}` : ""),
         filterFn: "weakEquals",
         dataType: "number",
         size: 120,
@@ -139,6 +145,7 @@ const PurchaseAnalysis = () => {
         dataType: "string",
         filterFn: "arrIncludesSome",
         size: 200,
+        tooltip: tooltips.glCode
       }),
       columnHelper.accessor("vendorItemDescription", {
         id: "vendorItemDescription",
@@ -189,15 +196,15 @@ const PurchaseAnalysis = () => {
         header: "Item Total",
         cell: ({ getValue }) =>
           getValue() ? `$${getValue().toFixed(2)}` : "$0.00",
-        footer: ({ table }) => (
+        footer: ({ table }) =>{
+          let totalAmount = table.getFilteredRowModel().rows.reduce((acc, row) => acc + row.original.extPrice, 0)
+          totalAmount = formattingData(totalAmount);
+          
+           return(
           <div className="font-bold text-start">
-            $
-            {table
-              .getFilteredRowModel()
-              .rows.reduce((acc, row) => acc + row.original.extPrice, 0)
-              .toFixed(2)}
+            {totalAmount}
           </div>
-        ),
+        )},
         dataType: "number",
         filterFn: "weakEquals",
         size: 100,
@@ -601,14 +608,14 @@ const PurchaseAnalysis = () => {
 
   return (
     <>
-      <div className="w-10/12 mx-auto pageContainer">
+      <div className="w-[98%] mx-auto pageContainer">
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-4 text-2xl leading-tight text-left pageTitle">
+        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
           Purchase Analysis
         </h2>
         <header className="optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
@@ -647,7 +654,7 @@ const PurchaseAnalysis = () => {
               className="run-button"
               onClick={() => fetchPurchaseAnalysisReport()}
             >
-              <div className="py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
+              <div className="py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
                 Run
               </div>
             </div>
