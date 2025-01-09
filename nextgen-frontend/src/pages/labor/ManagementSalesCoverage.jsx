@@ -14,7 +14,9 @@ import {
 	PdfBuilder,
 	ExcelExport as exportToExcel,
 	TableHOC,
+	Modal,
 } from '../../components';
+import Chart from 'react-apexcharts';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
@@ -34,9 +36,12 @@ const ManagementSalesCoverage = () => {
 	} = useSelector((state) => state.globalState);
 
 	const [mgmtSalesCoverageData, setMgmtSalesCoverageData] = useState([]);
+	const [isChartModalOpen, setIsChartModalOpen] = useState(false);
+	const [chartData, setChartData] = useState([]);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isChartLoading, setIsChartLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Management Sales Coverage Report, please try again later.'
@@ -238,10 +243,15 @@ const ManagementSalesCoverage = () => {
 									projectedSalesPerCoverage: date.projectedSalesPerCoverage,
 									actualSalesPerCoverage: date.actualSalesPerCoverage,
 									scheduledShifts:
-										date.scheduledShifts.trim() === '12:00 AM - 12:00 AM'
+										date.scheduledShifts?.trim() === '12:00 AM - 12:00 AM'
 											? ''
 											: date.scheduledShifts,
 									actualShifts: date.actualShifts,
+									projectedDailySales: date.projectedDailySales,
+									actualDailySales: date.actualDailySales === null ? 0 : date.actualDailySales,
+									projectedManagementWork: date.projectedManagementWork,
+									actualManagementWork:
+										date.actualManagementWork === null ? 0 : date.actualManagementWork,
 								}))
 								.sort((a, b) => new Date(a.date) - new Date(b.date)),
 						}))
@@ -276,6 +286,105 @@ const ManagementSalesCoverage = () => {
 		setSelectedFromDate(from);
 		setSelectedToDate(to);
 		setShowDateModal(false);
+	};
+
+	const handleChart = (row) => {
+		setIsChartLoading(true);
+		const chartData = {
+			series: [
+				{
+					name: '',
+					data: [row.projectedDailySales, row.actualDailySales, null, null],
+				},
+				{
+					name: '',
+					data: [null, null, row.projectedManagementWork, row.actualManagementWork],
+				},
+			],
+			options: {
+				xaxis: {
+					categories: [
+						'Projected Daily Sales',
+						'Actual Daily Sales',
+						'Projected Management Work',
+						'Actual Management Work',
+					],
+					tickAmount: 4,
+				},
+				yaxis: {
+					categories: Array.from(
+						{
+							length:
+								Math.ceil(
+									Math.max(
+										row.projectedDailySales,
+										row.actualDailySales,
+										row.projectedManagementWork,
+										row.actualManagementWork
+									) / 2000
+								) + 1,
+						},
+						(_, i) => i * 2000
+					),
+
+					labels: {
+						showAlways: true,
+						formatter: function (value) {
+							return `$${Math.round(value)}`;
+						},
+					},
+					axisBorder: {
+						show: true,
+					},
+					axisTicks: {
+						show: true,
+					},
+					stepSize: 2000,
+					tickAmount: 4,
+					title: {
+						text: 'Sales in $',
+						style: {
+							fontSize: '18px',
+							fontWeight: '600',
+						},
+					},
+				},
+				fill: {
+					colors: ['#4F81BD'],
+					type: 'solid',
+					opacity: 0.8,
+				},
+				stroke: {
+					curve: 'straight',
+					width: 2,
+				},
+				colors: ['#4F81BD', '#FF0000'],
+				legend: {
+					show: true,
+					position: 'top',
+					horizontalAlign: 'right',
+					floating: true,
+					fontWeight: '600',
+				},
+				chart: {
+					toolbar: {
+						show: false,
+					},
+					animation: {
+						enabled: false,
+					},
+				},
+				markers: {
+					size: 0,
+				},
+			},
+		};
+
+		console.log('chartData', chartData);
+
+		setChartData(chartData);
+		setIsChartModalOpen(true);
+		setIsChartLoading(false);
 	};
 
 	const handlePDFClick = () => {
@@ -406,7 +515,14 @@ const ManagementSalesCoverage = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={mgmtSalesCoverageData} expandCollapseButtons={true} />;
+	const Table = (
+		<TableHOC
+			columns={columns}
+			data={mgmtSalesCoverageData}
+			expandCollapseButtons={true}
+			onCallBack={(row) => handleChart(row)}
+		/>
+	);
 
 	return (
 		<div className='w-[85%] mx-auto'>
@@ -499,6 +615,19 @@ const ManagementSalesCoverage = () => {
 					selectedFromDate={selectedFromDate}
 					selectedToDate={selectedToDate}
 				/>
+				<Modal
+					title={'Management Sales Details Chart'}
+					isOpen={isChartModalOpen}
+					onClose={() => setIsChartModalOpen(!isChartModalOpen)}
+				>
+					<div className='m-4 w-[60rem] border border-solid border-black '>
+						{isChartLoading ? (
+							<Loader loading={isChartLoading} />
+						) : (
+							<Chart options={chartData.options} series={chartData.series} type='area' height={550} />
+						)}
+					</div>
+				</Modal>
 			</div>
 		</div>
 	);
