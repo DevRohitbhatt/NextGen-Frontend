@@ -104,8 +104,8 @@ const Voids = () => {
 				header: <div className='w-full text-left'>Void Reason</div>,
 				dataType: 'string',
 				cell: ({ getValue }) => {
-					return <div className='text-left pr-3'>{getValue()}</div>;
-				}
+					return <div className='pr-3 text-left'>{getValue()}</div>;
+				},
 			}),
 			columnHelper.accessor('employeeName', {
 				id: 'employeeName',
@@ -113,7 +113,7 @@ const Voids = () => {
 				dataType: 'string',
 				cell: ({ getValue }) => {
 					return <div className='text-left'>{getValue()}</div>;
-				}
+				},
 			}),
 			columnHelper.accessor('managerName', {
 				id: 'managerName',
@@ -121,7 +121,7 @@ const Voids = () => {
 				dataType: 'string',
 				cell: ({ getValue }) => {
 					return <div className='text-left'>{getValue()}</div>;
-				}
+				},
 			}),
 			columnHelper.accessor('fullDescription', {
 				id: 'fullDescription',
@@ -143,7 +143,7 @@ const Voids = () => {
 				dataType: 'string',
 				cell: ({ getValue }) => {
 					return <div className='text-left'>{getValue()}</div>;
-				}
+				},
 			}),
 			columnHelper.accessor('revenueID', {
 				id: 'revenueID',
@@ -158,8 +158,8 @@ const Voids = () => {
 				header: 'Price',
 				size: 100,
 				cell: ({ getValue }) => {
-					let price = getValue() !== undefined ? formattingData(getValue()) : ""
-					return price
+					let price = getValue() !== undefined ? formattingData(getValue()) : '';
+					return price;
 				},
 				footer: ({ table }) =>
 					`$${table
@@ -362,10 +362,23 @@ const Voids = () => {
 
 	const formatPDFData = (data) => {
 		return {
-			columnHeaders: columns.map((column) => column.header),
+			columnHeaders: [
+				'Date',
+				'Hour',
+				'Minute',
+				'Void Reason',
+				'Employee',
+				'Manager',
+				'Description',
+				'POS Check ID',
+				'Table Name',
+				'Revenue ID',
+				'Price',
+				'Tenders',
+			],
 			rows: data.map((row) =>
 				columns.map((column) => ({
-					value: column.header.includes('Price') ? formattingData(row[column.id]) : row[column.id],
+					value: column.id === 'price' ? formattingData(row[column.id]) : row[column.id] || '0 ',
 					cellType: '',
 					columnName: column.id,
 				}))

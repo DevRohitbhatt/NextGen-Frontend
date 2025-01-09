@@ -337,7 +337,7 @@ const ActualFoodCost = () => {
 							subrow.subRows.reduce((subAcc, subSubrow) => {
 								if (subSubrow.getCanExpand()) {
 									const item = checkedItems.find(
-										(item) => item.name.split('/')[1] === subSubrow.original.subDepartment
+										(item) => item.name.split(/\/(.+)/)[1] === subSubrow.original.subDepartment
 									);
 									return (
 										subAcc +
@@ -351,16 +351,7 @@ const ActualFoodCost = () => {
 										)
 									);
 								} else {
-									let item = checkedItems.find(
-										(item) => item?.name.split('/')[1] === subrow.original.subDepartment
-									);
-
-									return (
-										subAcc +
-										(item?.includeInGrandTotal && subSubrow.original[field]
-											? Number(subSubrow.original[field])
-											: 0)
-									);
+									return subAcc + (subSubrow.original[field] ? Number(subSubrow.original[field]) : 0);
 								}
 							}, 0)
 						);
