@@ -16,8 +16,9 @@ import {
 	SimpleTable as Table,
 	PdfBuilder,
 } from '../../components';
+import { formattingData } from '../../functions/formatingCurrency';
 
-const InventoryTransfer = () => {
+const InventoryTransferReport = () => {
 	const {
 		companyID,
 		alignmentID,
@@ -86,7 +87,7 @@ const InventoryTransfer = () => {
 			cellType: 'string',
 			toolTip: '',
 			toolTipDirection: '',
-			width: '150px',
+			width: '170px',
 		},
 		{
 			key: 'inventoryItem',
@@ -140,6 +141,7 @@ const InventoryTransfer = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
+			console.error('Error getting default dates: ', error);
 		} finally {
 			setIsLoading(false);
 		}
@@ -167,6 +169,8 @@ const InventoryTransfer = () => {
 			};
 
 			const result = await getCall(getData);
+			
+			await result?.data?.length && result?.data.forEach((item)=> item.transferValue = formattingData(item.transferValue))
 			setInventoryTransferReportData(result);
 			changeHeadersBasedOnReportType();
 			setIsLoading(false);
@@ -210,7 +214,7 @@ const InventoryTransfer = () => {
 					cellType: 'string',
 					toolTip: '',
 					toolTipDirection: '',
-					width: '150px',
+					width: '170px',
 				},
 				{
 					key: 'inventoryItem',
@@ -233,6 +237,7 @@ const InventoryTransfer = () => {
 					toolTip: '',
 					toolTipDirection: '',
 					width: '125px',
+				
 				},
 			]);
 		} else {
@@ -387,14 +392,14 @@ const InventoryTransfer = () => {
 
 	return (
 		<>
-			<div className='w-[85%] mx-auto'>
+			<div className='w-[98%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Transfer</h2>
+				<h2 className='my-2 text-2xl leading-tight text-left pageTitle text-[18px]'>Inventory Transfer Report</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
@@ -423,7 +428,7 @@ const InventoryTransfer = () => {
 							/>
 						</div>
 						<div className='run-button' onClick={fetchInventoryTransferReport}>
-							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
@@ -496,4 +501,4 @@ const InventoryTransfer = () => {
 	);
 };
 
-export default InventoryTransfer;
+export default InventoryTransferReport;

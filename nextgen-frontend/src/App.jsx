@@ -14,7 +14,7 @@ import {
 	PrepChartTemplate,
 	SuggestedOrderList,
 	SuggestedOrder,
-	InventoryTransfer,
+	InventoryTransferReport,
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
@@ -30,11 +30,14 @@ import {
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
+	InvoiceEditor,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
 	MenuItemsSold,
 	LaborAnalysis,
+	CookChart,
+	CookChartTemplate
 } from './pages';
 import { Suspense } from 'react';
 
@@ -127,14 +130,17 @@ const App = () => {
 								<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
 
 								{/* Food Cost */}
-								<Route path='/InventoryTransfer' index element={<InventoryTransfer />} />
+								<Route path='/InventoryTransferReport' index element={<InventoryTransferReport />} />
 								<Route path='/InventoryWeeksOnHand' index element={<InventoryWeeksOnHand />} />
 								<Route path='/ActualFoodCost' index element={<ActualFoodCost />} />
 								<Route path='/VarianceFoodCost' index element={<VarianceFoodCost />} />
 								<Route path='/Invoices' element={<Invoices />} />
+								<Route path='/InvoiceEditor' element={<InvoiceEditor />} />
 								<Route path='/Countsheets' element={<Countsheets />} />
 								<Route path='/CountsheetDesigner' element={<CountsheetDesigner />} />
 								<Route path='/PurchaseAnalysis' element={<PurchaseAnalysis />} />
+								<Route path='/CookChart' element={<CookChart />} />
+								<Route path='/CookChartTemplate' element={<CookChartTemplate />} />
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
@@ -152,6 +158,7 @@ const App = () => {
 								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
 								<Route path='/LaborCICO' element={<LaborCICO />} />
 								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
+								
 							</Routes>
 						</Suspense>
 					</div>

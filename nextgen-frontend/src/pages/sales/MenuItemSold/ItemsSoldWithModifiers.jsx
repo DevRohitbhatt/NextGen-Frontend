@@ -18,6 +18,16 @@ import dateFormat from 'dateformat';
 import { createColumnHelper } from '@tanstack/react-table';
 import itemSoldWithModifiers from '../../../assets/introJSSteps/menuItemSold/itemSoldWithModifiers';
 
+const tooltips = {
+	item: "Menu Item ID",
+	description:"Menu Item Name",
+	quantity:"Number of menu items sold during the selected date range.",
+	amount:"$ Amount Sold",
+	itemSoldPercent: "The item’s percentage of total sales.",
+	avgItemQuantity: "The average quantity sold per day during the selected date range.",	
+	avgItemAmount: "The average price of the item."
+};
+
 const columnHelper = createColumnHelper();
 
 const ItemsSoldWithModifiers = () => {
@@ -69,7 +79,6 @@ const ItemsSoldWithModifiers = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -85,8 +94,7 @@ const ItemsSoldWithModifiers = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -138,36 +146,44 @@ const ItemsSoldWithModifiers = () => {
 
 			// Conditional mapping based on salesType
 			if (viewValue === 0) {
-				newData = result.data.menuItemSoldModifierReportModels.map((category) => ({
-					category: category.itemFullDescription,
-					total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
-					totalItemQuantity: category.menuItemSoldModifierModels[0].totalItemQuantity,
-					subRows: category.menuItemSoldModifierModels?.map((item) => ({
-						itemId: item.itemId,
-						modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
-						modifierDisplayName: item.modifierDisplayName,
-						quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
-						modItemFrequency: item.modItemFrequency,
-					})),
-				}));
-			} else if (viewValue === 1) {
-				newData = result.data.menuItemSoldModifierReportModels.map((category) => ({
-					category: category.itemFullDescription,
-					total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
-					subRows: category.menuItemSoldModifierUnitReportModels.map((unit) => ({
-						totalItemQuantity: unit.menuItemSoldModifierModels[0].totalItemQuantity,
-						unitName: unit.unitName,
-						subRows: unit.menuItemSoldModifierModels.map((item) => ({
-							unitName: item.unitName,
+				newData = result.data.menuItemSoldModifierReportModels
+					.map((category) => ({
+						category: category.itemFullDescription,
+						total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
+						totalItemQuantity: category.menuItemSoldModifierModels[0].totalItemQuantity,
+						subRows: category.menuItemSoldModifierModels?.map((item) => ({
 							itemId: item.itemId,
-							quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
 							modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
 							modifierDisplayName: item.modifierDisplayName,
-							modQuantity: item.modQuantity,
+							quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
 							modItemFrequency: item.modItemFrequency,
 						})),
-					})),
-				}));
+					}))
+					.sort((a, b) =>
+						a.category.slice(0, 1).localeCompare(b.category.slice(0, 1), undefined, { numeric: true })
+					);
+			} else if (viewValue === 1) {
+				newData = result.data.menuItemSoldModifierReportModels
+					.map((category) => ({
+						category: category.itemFullDescription,
+						total: salesType === 'SalesNet' ? result.data.salesTotal : result.data.grossTotal,
+						subRows: category.menuItemSoldModifierUnitReportModels.map((unit) => ({
+							totalItemQuantity: unit.menuItemSoldModifierModels[0].totalItemQuantity,
+							unitName: unit.unitName,
+							subRows: unit.menuItemSoldModifierModels.map((item) => ({
+								unitName: item.unitName,
+								itemId: item.itemId,
+								quant: item.modQuantity === 0 ? item.totalItemQuantity : item.modQuantity,
+								modItemID: item.modItemID === 0 ? item.itemId : item.modItemID,
+								modifierDisplayName: item.modifierDisplayName,
+								modQuantity: item.modQuantity,
+								modItemFrequency: item.modItemFrequency,
+							})),
+						})),
+					}))
+					.sort((a, b) =>
+						a.category.slice(0, 1).localeCompare(b.category.slice(0, 1), undefined, { numeric: true })
+					);
 			}
 
 			setColumns([
@@ -464,8 +480,9 @@ const ItemsSoldWithModifiers = () => {
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
 			expandCollapseButtons={true}
+			largeHeader= {true}
 			detailOnTop={`${salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
-				menuItemSoldData[0]?.total?.toFixed(2) || 0
+				Number(menuItemSoldData[0]?.total?.toFixed(2)).toLocaleString('en-US') || 0
 			}`}
 		/>
 	);
@@ -500,7 +517,7 @@ const ItemsSoldWithModifiers = () => {
 						/>
 
 						<div className='run-button' onClick={fetchItemsSoldWithModifiersData}>
-							<div className='py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-2 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

@@ -17,6 +17,7 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -48,10 +49,8 @@ const HourlySales = () => {
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
@@ -101,7 +100,6 @@ const HourlySales = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -117,8 +115,7 @@ const HourlySales = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -283,17 +280,17 @@ const HourlySales = () => {
 					id: 'Total',
 					header: 'Total',
 					pinDirection: 'left',
-					cell: ({ getValue }) => Number(getValue()).toLocaleString('en-US'),
+					cell: ({ getValue }) => formattingData(parseFloat(getValue())),
 					size: 100,
 					footer: ({ table }) =>
 						reportType === 'Unit, Hour and Day' ? null : (
 							<div className='text-center'>
-								{`$ ${Number(
+								{`${formattingData(parseFloat(
 									table
 										.getRowModel()
 										.rows.reduce((acc, row) => acc + row.original.Total, 0)
 										.toFixed(2)
-								).toLocaleString('en-US')}`}
+								))}`}
 							</div>
 						),
 				}),
@@ -303,14 +300,13 @@ const HourlySales = () => {
 								id: 'Avg',
 								header: 'Avg',
 								pinDirection: 'left',
-								cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+								cell: ({ getValue }) => (getValue() !== 0 ? formattingData(parseFloat(getValue())) : "$0.00"),
 								size: 100,
 								footer: ({ table }) => (
 									<div className='text-center'>
-										{`$ ${table
+										{`${formattingData(parseFloat(table
 											.getRowModel()
-											.rows.reduce((acc, row) => acc + row.original.Avg, 0)
-											.toFixed(2)}`}
+											.rows.reduce((acc, row) => acc + row.original.Avg, 0)))}`}
 									</div>
 								),
 							}),
@@ -341,16 +337,15 @@ const HourlySales = () => {
 									? 0
 									: getValue() === '00'
 									? 0
-									: Number(getValue()).toLocaleString('en-US'),
+									: formattingData(parseFloat((getValue()))),
 							footer: ({ table }) =>
 								reportType !== 'Hour and Day' ? null : item === '' ? (
 									''
 								) : (
 									<div className='text-center'>
-										{`${salesType !== 'Transaction' ? '$' : ''} ${table
+										{`${salesType !== 'Transaction' ? '' : ''} ${formattingData(parseFloat((table
 											.getRowModel()
-											.rows.reduce((acc, row) => acc + row.original[item], 0)
-											.toFixed(2)}`}
+											.rows.reduce((acc, row) => acc + row.original[item], 0))))}`}
 									</div>
 								),
 						})
@@ -491,15 +486,15 @@ const HourlySales = () => {
 
 	const Table = <TableHOC columns={columns} data={hourlySalesData} isFooter={true} />;
 	return (
-		<div className='w-[85%] mx-auto'>
+		<div className='w-[98%] mx-auto'>
 			<Steps
 				enabled={introSteps.stepsEnabled}
 				steps={introSteps.steps}
 				initialStep={introSteps.initialStep}
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Hourly Sales</h2>
-			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+			<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Hourly Sales</h2>
+			<header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex flex-col '>
 					<div className='flex items-center space-x-1'>
 						<UnitSelector
@@ -516,6 +511,7 @@ const HourlySales = () => {
 							fromDate={selectedFromDate}
 							isDateRange={true}
 							onClick={() => setShowDateModal(true)}
+							extraClass={'w-[219px]'}
 						/>
 						<div className='w-56 reportType-selector'>
 							<Dropdown
@@ -526,7 +522,7 @@ const HourlySales = () => {
 							/>
 						</div>
 						<div className='ml-3 run-button' onClick={fetchHourlySalesReport}>
-							<div className='py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-2 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

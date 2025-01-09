@@ -25,7 +25,7 @@ export default function itemSoldTotals() {
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Item Sold Totals Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
+			intro: 'You can export the Item Sold Totals Report to either .XLSX, .CSV or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.view-selector',

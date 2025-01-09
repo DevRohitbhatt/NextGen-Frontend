@@ -32,10 +32,12 @@ const BusinessSummary = () => {
 	} = useSelector((state) => state.globalState);
 
 	const [businessSummaryData, setBusinessSummaryData] = useState([]);
+	const [useGrossSalesInBusinessSummary, setUseGrossSalesInBusinessSummary] = useState(false);
 	const [columns, setColumns] = useState([]);
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isDateLoading, setIsDateLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Business Summary Report, please try again later.'
@@ -87,7 +89,7 @@ const BusinessSummary = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
+			setIsDateLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -103,14 +105,51 @@ const BusinessSummary = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
+			console.error('Error getting default dates: ', error);
 		} finally {
-			setIsLoading(false);
+			setIsDateLoading(false);
 		}
 	};
 
 	useEffect(() => {
 		getDefaultDates();
 	}, []);
+
+	useEffect(() => {
+		if (companyID) {
+			const fetchCompanySettings = async () => {
+				try {
+					const getData = {
+						url: 'getAllCompanySettings',
+						urlParams: {
+							companyID: companyID,
+						},
+					};
+
+					const result = await getCall(getData);
+					const status = result.data.find((setting) => setting.name === 'UseGrossSalesInBusinessSummary')
+						? true
+						: false;
+					setUseGrossSalesInBusinessSummary(status);
+				} catch (error) {
+					console.error('Error getting company settings: ', error);
+				}
+			};
+			fetchCompanySettings();
+		}
+	}, [companyID]);
+
+	const formattingData = (value) => {
+		return value < 0
+			? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`
+			: `$${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })}`;
+	};
 
 	const fetchBusinessSummaryReport = async () => {
 		try {
@@ -127,6 +166,7 @@ const BusinessSummary = () => {
 					DOW: DOWTypeOptions.findIndex((option) => option.name === DOWType),
 					summaryBy,
 					salesType: salesType === 'Net Sales' ? 'SalesNet' : 'SalesGross',
+					UseGrossSales: useGrossSalesInBusinessSummary,
 				},
 			};
 
@@ -143,7 +183,7 @@ const BusinessSummary = () => {
 						...Object.fromEntries(
 							Object.entries(data.dateValues).map(([key, value]) => [
 								key,
-								Number.isInteger(value) ? value : value.toFixed(2),
+								Number.isInteger(value) ? value : value,
 							])
 						),
 						total: Number(
@@ -157,7 +197,6 @@ const BusinessSummary = () => {
 					return updatedData;
 				});
 
-				// Calculate the total for Variable Labor %, Check Average and Food Cost %
 				newData.forEach((data) => {
 					if (
 						data.description === 'Variable Lbr %' ||
@@ -168,27 +207,58 @@ const BusinessSummary = () => {
 						const foodCostPct = newData.find((item) => item.description === 'Food Cost %');
 						const netSales = newData.find((item) => item.description === salesType);
 						const transactions = newData.find((item) => item.description === 'Transactions');
+						const netSalesTotal = parseFloat(netSales.total.replace(/[$,]/g, ''));
+						const transactionTotal = parseFloat(transactions.total.replace(/[$,]/g, ''));
+						const variableLaborTotal = parseFloat(String(variableLabor.total).replace(/[$,]/g, ''));
+
 						if (variableLabor && netSales && data.description === 'Variable Lbr %') {
-							data.total = ((variableLabor.total / netSales.total) * 100).toFixed(2) + ' %';
+							data.total =
+								((variableLaborTotal / netSalesTotal) * 100).toLocaleString('en-US', {
+									maximumFractionDigits: 2,
+									minimumFractionDigits: 2,
+								}) + ' %';
 							Object.keys(data)
 								.filter((key) => !['description', 'total'].includes(key))
 								.forEach((key) => {
-									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
+									data[key] =
+										Number(data[key]).toLocaleString('en-US', {
+											maximumFractionDigits: 2,
+											minimumFractionDigits: 2,
+										}) + ' %';
 								});
 						} else if (data.description === 'Check Average') {
-							data.total = (netSales.total / transactions.total).toFixed(2);
+							const value = netSalesTotal / transactionTotal;
+							data.total = value;
+							Object.keys(data)
+								.filter((key) => !['description'].includes(key))
+								.forEach((key) => {
+									data[key] = formattingData(data[key]);
+								});
 						} else if (foodCostPct && data.description === 'Food Cost %') {
 							data.total =
 								(
 									foodCostPct.total /
 									Object.keys(data).filter((key) => !['description', 'total'].includes(key)).length
-								).toFixed(2) + ' %';
+								).toLocaleString('en-US', {
+									maximumFractionDigits: 2,
+									minimumFractionDigits: 2,
+								}) + ' %';
 							Object.keys(data)
 								.filter((key) => !['description', 'total'].includes(key))
 								.forEach((key) => {
-									data[key] = Number(data[key]).toFixed(2).toLocaleString('en-US') + ' %';
+									data[key] =
+										parseFloat(data[key]).toLocaleString('en-US', {
+											maximumFractionDigits: 2,
+											minimumFractionDigits: 2,
+										}) + ' %';
 								});
 						}
+					} else {
+						Object.keys(data)
+							.filter((key) => !['description'].includes(key))
+							.forEach((key) => {
+								data[key] = formattingData(data[key]);
+							});
 					}
 					return data;
 				});
@@ -209,15 +279,15 @@ const BusinessSummary = () => {
 					...Object.keys(newData[0])
 						.filter((key) => !['description', 'total'].includes(key))
 						.map((item) =>
-							columnHelper.accessor(item, {
+							columnHelper.accessor((row) => row[item], {
 								id: item,
 								header: summaryBy === 'Day' ? dateFormat(item, 'dddd mm/dd/yy') : item,
 								dataType: 'number',
 								cell: ({ getValue }) =>
 									typeof getValue() === 'string' && getValue().includes('%')
 										? getValue()
-										: Number(getValue()),
-								size: summaryBy === 'Day' ? 90 : 120,
+										: getValue(),
+								size: summaryBy === 'Day' ? 120 : 120,
 							})
 						),
 				];
@@ -276,7 +346,7 @@ const BusinessSummary = () => {
 			pageOrientation: 'landscape',
 			body: generateBody(),
 		};
-
+		
 		PdfBuilder(pdfData);
 	};
 
@@ -304,7 +374,7 @@ const BusinessSummary = () => {
 									typeof row[column.id] === 'string' &&
 									(row[column.id].includes('%') || column.id === 'description')
 										? row[column.id]
-										: Number(row[column.id]).toLocaleString('en-US'),
+										: row[column.id],
 								cellType: '',
 								columnName: column.header,
 							}))
@@ -325,7 +395,7 @@ const BusinessSummary = () => {
 				.map((column) =>
 					typeof row[column.id] === 'string' && (row[column.id].includes('%') || column.id === 'description')
 						? `"${row[column.id]}"`
-						: `"${Number(row[column.id]).toLocaleString('en-US')}"`
+						: `"${row[column.id]}"`
 				)
 				.join(',')
 		);
@@ -353,7 +423,7 @@ const BusinessSummary = () => {
 						typeof row[column.id] === 'string' &&
 						(row[column.id].includes('%') || column.id === 'description')
 							? row[column.id]
-							: Number(row[column.id]).toLocaleString('en-US')
+							: row[column.id]
 					)
 				),
 			},
@@ -369,19 +439,21 @@ const BusinessSummary = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={businessSummaryData} />;
+	const Table = (
+		<TableHOC columns={columns} data={businessSummaryData} headerPosition='left' dataPosition='text-left' />
+	);
 
 	return (
 		<>
-			<div className='w-[85%] mx-auto'>
+			<div className='w-[98%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Business Summary</h2>
-				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+				<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Business Summary</h2>
+				<header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
 							companyId={companyID}
@@ -424,7 +496,7 @@ const BusinessSummary = () => {
 							/>
 						</div>
 						<div className='run-button' onClick={fetchBusinessSummaryReport}>
-							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

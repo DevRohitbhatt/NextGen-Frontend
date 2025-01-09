@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import discounts from '../../assets/introJSSteps/discounts';
+import { formattingData, formattingDataWithoutDollr } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -26,14 +27,12 @@ const Discounts = () => {
 		companyID,
 		alignmentID,
 		unitsAndAreas: unitsAndAreasList,
-		groupOrUnitAccess,
 		defaultUnitID,
-		groupOrUnitAccessName,
 		defaultUnitName,
 	} = useSelector((state) => state.globalState);
 
 	const [discountsData, setDiscountsData] = useState([]);
-	const [discountTypes, setDiscountTypes] = useState([]);
+	const [discountTypesData, setDiscountTypesData] = useState([]);
 	const [columns, setColumns] = useState([]);
 	const [summaryColumns, setSummaryColumns] = useState([]);
 	const [isDiscountTypesLoading, setIsDiscountTypesLoading] = useState(false);
@@ -64,8 +63,10 @@ const Discounts = () => {
 		{ name: 'Detail' },
 	];
 	const [discountType, setDiscountType] = useState('All-All Discounts');
-	const discountTypeOptions = discountTypes?.map((type) => ({
+	const discountTypeOptions = discountTypesData?.map((type) => ({
 		name: `${type.type} - ${type.name}`,
+		typeName: type.name,
+		type: type.type,
 	}));
 	discountTypeOptions.unshift(
 		{ name: 'All-All Discounts' },
@@ -89,6 +90,7 @@ const Discounts = () => {
 			columnHelper.accessor('discountType', {
 				id: 'discountType',
 				header: 'Discount Type',
+				cell: ({ getValue }) => getValue(),
 				dataType: 'string',
 				size: 250,
 			}),
@@ -97,16 +99,22 @@ const Discounts = () => {
 				header: 'Discounted Checks',
 				dataType: 'number',
 				footer: ({ table }) => (
-					<div className='text-center'>{calculateFooterSum(table, 'discountedChecks')}</div>
+					<div className='text-center'>
+						{calculateFooterSum(table, 'discountedChecks').toLocaleString('en-US')}
+					</div>
 				),
 			}),
 			columnHelper.accessor('totalDiscountAmount', {
 				id: 'totalDiscountAmount',
 				header: 'Total Discount Amount',
-				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
-				dataType: 'number',
+				cell: ({ getValue }) => {
+					return `${formattingData(getValue())}`;
+				},
+				dataType: 'price',
 				footer: ({ table }) => (
-					<div className='text-center'>${calculateFooterSum(table, 'totalDiscountAmount')}</div>
+					<div className='text-center'>
+						{formattingData(calculateFooterSum(table, 'totalDiscountAmount'))}
+					</div>
 				),
 			}),
 			columnHelper.accessor('discountedItems', {
@@ -120,18 +128,23 @@ const Discounts = () => {
 			columnHelper.accessor('salesGenerated', {
 				id: 'salesGenerated',
 				header: 'Sales $ Generated',
-				cell: ({ getValue }) => `$${getValue()?.toFixed(2)}`,
-				dataType: 'number',
+				cell: ({ row, getValue }) =>
+					row.getCanExpand()
+						? ''
+						: `${getValue() !== null && getValue() !== undefined ? formattingData(getValue()) : '0.00'}`,
+				dataType: 'price',
 				footer: ({ table }) => (
-					<div className='text-center'>${calculateFooterSum(table, 'salesGenerated')}</div>
+					<div className='text-center'>{formattingData(calculateFooterSum(table, 'salesGenerated'))}</div>
 				),
 			}),
 			columnHelper.accessor('discountedTickets', {
 				id: 'discountedTickets',
 				header: 'Disc Cost %',
-				cell: ({ getValue, row }) => (row.getCanExpand() ? '' : `${getValue()}%`),
-				dataType: 'number',
-				footer: ({ table }) => <div className='text-center'>{calculatePctFooter(table)}%</div>,
+				cell: ({ getValue, row }) => (row.getCanExpand() ? '' : `${formattingDataWithoutDollr(getValue())}%`),
+				dataType: 'percent',
+				footer: ({ table }) => (
+					<div className='text-center'>{formattingDataWithoutDollr(calculatePctFooter(table))}%</div>
+				),
 			}),
 		];
 
@@ -173,7 +186,7 @@ const Discounts = () => {
 				}),
 				columnHelper.accessor('date', {
 					id: 'date',
-					header: 'DATE',
+					header: 'Date',
 					dataType: 'string',
 					size: 80,
 				}),
@@ -186,18 +199,20 @@ const Discounts = () => {
 				columnHelper.accessor('price', {
 					id: 'price',
 					header: 'Price',
-					cell: ({ row }) => `$${calculateSum(row, 'price')}`,
-					dataType: 'number',
-					footer: ({ table }) => <div className='text-center'>${calculateFooterSum(table, 'price')}</div>,
+					cell: ({ row }) => formattingData(calculateSum(row, 'price')),
+					dataType: 'price',
+					footer: ({ table }) => (
+						<div className='text-center'>{formattingData(calculateFooterSum(table, 'price'))}</div>
+					),
 					size: 80,
 				}),
 				columnHelper.accessor('amountDiscount', {
 					id: 'amountDiscount',
 					header: 'Amount Discount',
-					cell: ({ row }) => `$${calculateSum(row, 'amountDiscount')}`,
-					dataType: 'number',
+					cell: ({ row }) => formattingData(calculateSum(row, 'amountDiscount')),
+					dataType: 'price',
 					footer: ({ table }) => (
-						<div className='text-center'>${calculateFooterSum(table, 'amountDiscount')}</div>
+						<div className='text-center'>{formattingData(calculateFooterSum(table, 'amountDiscount'))}</div>
 					),
 					size: 180,
 				}),
@@ -215,19 +230,22 @@ const Discounts = () => {
 				}),
 				columnHelper.accessor('menuItem', {
 					id: 'menuItem',
-					header: 'Menu Item',
+					header: <div className='w-full text-left'>Menu Item</div>,
+					cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 					dataType: 'string',
 					size: 180,
 				}),
 				columnHelper.accessor('discountType', {
 					id: 'discountType',
-					header: 'Discount Type',
+					header: <div className='w-full text-left'>Discount Type</div>,
+					cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 					dataType: 'string',
 					size: 120,
 				}),
 				columnHelper.accessor('employee', {
 					id: 'employee',
-					header: 'Employee',
+					header: <div className='w-full text-left'>Employee</div>,
+					cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 					dataType: 'string',
 					size: 80,
 				})
@@ -242,7 +260,6 @@ const Discounts = () => {
 	//getDefaultDates
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -259,8 +276,6 @@ const Discounts = () => {
 			}
 		} catch (error) {
 			console.error('Error getting default dates: ', error);
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
@@ -283,7 +298,7 @@ const Discounts = () => {
 					return acc + parseFloat(subrow.original[accessor]);
 				}
 			}, 0);
-			return accessor === 'variableLaborMinutes' ? sum : sum.toFixed(2);
+			return accessor === 'variableLaborMinutes' ? sum : formattingData(sum);
 		} else {
 			return row.original[accessor];
 		}
@@ -343,19 +358,17 @@ const Discounts = () => {
 	};
 
 	useEffect(() => {
-		if (groupOrUnitAccess || defaultUnitID) {
-			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
+		if (defaultUnitID) {
+			setSelectedUnit(defaultUnitID);
 		}
-		if (groupOrUnitAccessName || defaultUnitName) {
-			setSelectedUnitName(groupOrUnitAccessName || defaultUnitName);
+		if (defaultUnitName) {
+			setSelectedUnitName(defaultUnitName);
 		}
-	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
+	}, [defaultUnitID, defaultUnitName]);
 
 	useEffect(() => {
-		if (selectedUnit) {
-			fetchDiscountTypes();
-		}
-	}, [selectedUnit]);
+		fetchDiscountTypes();
+	}, []);
 
 	const fetchDiscountTypes = async () => {
 		try {
@@ -369,11 +382,11 @@ const Discounts = () => {
 			};
 
 			const result = await getCall(getData);
-			const discountTypes = result.data.map((type) => ({
+			const discountTypesData = result.data.map((type) => ({
 				name: type.TypeItemName,
 				type: type.TypeName,
 			}));
-			setDiscountTypes(discountTypes);
+			setDiscountTypesData(discountTypesData);
 			setIsDiscountTypesLoading(false);
 		} catch (error) {
 			console.error('Error getting Discount Types: ', error);
@@ -400,15 +413,27 @@ const Discounts = () => {
 			const result = await getCall(getData);
 
 			if (viewBy === 'Summary') {
+				const filterItems = discountTypesData.filter(
+					(item) => item.type === discountTypeOptions.find((option) => option.name === discountType)?.type
+				);
+
 				const filterData =
 					discountType === 'All-All Discounts'
 						? result.data
+						: result.data.filter((row) => filterItems.find((item) => item.name === row.discountType));
+
+				const newData =
+					discountType === 'All-All Discounts' ||
+					discountType === 'All-All promos' ||
+					discountType === 'All-All Comps'
+						? filterData
 						: result.data.filter(
 								(row) =>
-									row.typeName ===
-									discountTypeOptions.find((option) => option.name === discountType)?.type
+									row.discountType ===
+									discountTypeOptions.find((option) => option.name === discountType)?.typeName
 						  );
-				setDiscountsData(filterData);
+
+				setDiscountsData(newData);
 
 				const uniqueWeeks = Array.from(
 					new Set(result.data.flatMap((item) => item.weeks.map((week) => week.weekId)))
@@ -428,7 +453,8 @@ const Discounts = () => {
 				const generatedColumns = [
 					columnHelper.accessor('discountType', {
 						id: 'discountType',
-						header: 'Discount Name',
+						header: <div className='w-full text-left'>Discount Name</div>,
+						cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 						dataType: 'string',
 					}),
 					columnHelper.group({
@@ -437,11 +463,11 @@ const Discounts = () => {
 							columnHelper.accessor('totalDiscountAmount', {
 								id: 'totalDiscountAmount',
 								header: 'Disc Amount',
-								cell: ({ getValue }) => `$${getValue()}`,
+								cell: ({ getValue }) => `${formattingData(getValue())}`,
 								dataType: 'number',
 								footer: ({ table }) => (
 									<div className='text-center'>
-										${calculateFooterSum(table, 'totalDiscountAmount')}
+										{formattingData(calculateFooterSum(table, 'totalDiscountAmount'))}
 									</div>
 								),
 							}),
@@ -449,9 +475,10 @@ const Discounts = () => {
 								id: 'totalDiscountedChecks',
 								header: 'Disc Checks',
 								dataType: 'number',
+								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 								footer: ({ table }) => (
 									<div className='text-center'>
-										{calculateFooterSum(table, 'totalDiscountedChecks')}
+										{formattingDataWithoutDollr(calculateFooterSum(table, 'totalDiscountedChecks'))}
 									</div>
 								),
 							}),
@@ -459,9 +486,10 @@ const Discounts = () => {
 								id: 'totalDiscountedItems',
 								header: 'Disc Items',
 								dataType: 'number',
+								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 								footer: ({ table }) => (
 									<div className='text-center'>
-										{calculateFooterSum(table, 'totalDiscountedItems')}
+										{formattingDataWithoutDollr(calculateFooterSum(table, 'totalDiscountedItems'))}
 									</div>
 								),
 							}),
@@ -469,21 +497,23 @@ const Discounts = () => {
 							columnHelper.accessor('totalSalesGenerated', {
 								id: 'totalSalesGenerated',
 								header: 'Sales $ Gen',
-								cell: ({ getValue }) => `$${getValue()}`,
-								dataType: 'number',
+								cell: ({ getValue }) => `${formattingData(getValue())}`,
+								dataType: 'price',
 								footer: ({ table }) => (
 									<div className='text-center'>
-										${calculateFooterSum(table, 'totalSalesGenerated')}
+										{formattingData(calculateFooterSum(table, 'totalSalesGenerated'))}
 									</div>
 								),
 							}),
 							columnHelper.accessor('totaldiscountedTickets', {
 								id: 'totaldiscountedTickets',
 								header: 'Disc Cost %',
-								cell: ({ getValue }) => `${getValue()}%`,
-								dataType: 'number',
+								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
+								dataType: 'percent',
 								footer: ({ table }) => (
-									<div className='text-center'>{calculatePctFooter(table, 'total')}%</div>
+									<div className='text-center'>
+										{formattingDataWithoutDollr(calculatePctFooter(table, 'total'))}%
+									</div>
 								),
 							}),
 						],
@@ -502,11 +532,14 @@ const Discounts = () => {
 									{
 										id: `discountAmount_${weekId}`,
 										header: 'Disc Amount',
-										cell: ({ getValue }) => `$${getValue()}`,
+										cell: ({ getValue }) => {
+											let discAmount = formattingData(getValue());
+											return discAmount;
+										},
 										dataType: 'number',
 										footer: ({ table }) => (
 											<div className='text-center'>
-												${calculateFooterSum(table, `discountAmount_${weekId}`)}
+												{formattingData(calculateFooterSum(table, `discountAmount_${weekId}`))}
 											</div>
 										),
 									}
@@ -520,9 +553,12 @@ const Discounts = () => {
 										id: `discountedChecks_${weekId}`,
 										header: 'Disc Checks',
 										dataType: 'number',
+										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
-												{calculateFooterSum(table, `discountedChecks_${weekId}`)}
+												{formattingDataWithoutDollr(
+													calculateFooterSum(table, `discountedChecks_${weekId}`)
+												)}
 											</div>
 										),
 									}
@@ -536,9 +572,12 @@ const Discounts = () => {
 										id: `discountedItems_${weekId}`,
 										header: 'Disc Items',
 										dataType: 'number',
+										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
-												{calculateFooterSum(table, `discountedItems_${weekId}`)}
+												{formattingDataWithoutDollr(
+													calculateFooterSum(table, `discountedItems_${weekId}`)
+												)}
 											</div>
 										),
 									}
@@ -551,11 +590,11 @@ const Discounts = () => {
 									{
 										id: `salesGenerated_${weekId}`,
 										header: 'Sales $ Gen',
-										cell: ({ getValue }) => `$${getValue()}`,
-										dataType: 'number',
+										cell: ({ getValue }) => formattingData(getValue()),
+										dataType: 'price',
 										footer: ({ table }) => (
 											<div className='text-center'>
-												${calculateFooterSum(table, `salesGenerated_${weekId}`)}
+												{formattingData(calculateFooterSum(table, `salesGenerated_${weekId}`))}
 											</div>
 										),
 									}
@@ -568,10 +607,12 @@ const Discounts = () => {
 									{
 										id: `discountedTickets_${weekId}`,
 										header: 'Disc Cost %',
-										cell: ({ getValue }) => `${getValue()}%`,
-										dataType: 'number',
+										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
+										dataType: 'percent',
 										footer: ({ table }) => (
-											<div className='text-center'>{calculatePctFooter(table, weekId)}%</div>
+											<div className='text-center'>
+												{formattingDataWithoutDollr(calculatePctFooter(table, weekId))}%
+											</div>
 										),
 									}
 								),
@@ -616,19 +657,30 @@ const Discounts = () => {
 					}
 				});
 
+				const filterItems = discountTypesData.filter(
+					(item) => item.type === discountTypeOptions.find((option) => option.name === discountType)?.type
+				);
+
 				const filterData =
 					discountType === 'All-All Discounts'
 						? newData.sort((a, b) => new Date(a.date) - new Date(b.date))
 						: newData
-								.filter(
-									(row) =>
-										row.typeName ===
-										discountTypeOptions.find((option) => option.name === discountType)?.type
-								)
+								.filter((row) => filterItems.find((item) => item.name === row.discountType))
 								.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+				const newFilteredData =
+					discountType === 'All-All Discounts' ||
+					discountType === 'All-All promos' ||
+					discountType === 'All-All Comps'
+						? filterData
+						: newData.filter(
+								(row) =>
+									row.discountType ===
+									discountTypeOptions.find((option) => option.name === discountType)?.typeName
+						  );
+
 				handleGroupByChange(viewBy === 'Summary' || viewBy === 'Detail' ? groupBy : viewBy, columns);
-				setDiscountsData(filterData);
+				setDiscountsData(newFilteredData);
 			}
 
 			setIsLoading(false);
@@ -705,7 +757,9 @@ const Discounts = () => {
 						) : column.header === 'Disc Amount' ? (
 							`$${getValue()}`
 						) : (
-							getValue()
+							<div className={`${column.header === 'Discount Type' ? 'text-left px-6' : ''}`}>
+								{getValue()}
+							</div>
 						);
 					},
 				});
@@ -799,19 +853,31 @@ const Discounts = () => {
 								column.parentHeader ? `${column.parentHeader} - ${column.header}` : column.header
 							),
 							rows: data.slice(i, i + rowsPerTable).map((row) =>
-								columnChunk.map((column) => ({
-									value:
+								columnChunk.map((column) => {
+									const isMetricColumn =
 										column.id.startsWith('discounted') ||
 										column.id.startsWith('salesGenerated') ||
 										column.id.startsWith('discountAmount') ||
-										column.id.startsWith('discountedTickets')
-											? row.weeks.find((week) => week[column.id])?.[column.id] || '0 '
-											: row[column.id] || '0 ',
-									cellType: column.dataType,
-									columnName: column.parentHeader
-										? `${column.parentHeader} - ${column.header}`
-										: column.header,
-								}))
+										column.id.startsWith('discountedTickets');
+
+									let value = isMetricColumn
+										? row.weeks?.find((week) => week[column.id])?.[column.id] ?? 0
+										: row[column.id] ?? 0;
+
+									if (column.dataType === 'price') {
+										value = `${formattingData(value)}`;
+									} else if (column.dataType === 'percent') {
+										value = `${formattingDataWithoutDollr(value)}`;
+									}
+
+									return {
+										value: value.toString(),
+										cellType: column.dataType,
+										columnName: column.parentHeader
+											? `${column.parentHeader} - ${column.header}`
+											: column.header,
+									};
+								})
 							),
 						},
 					});
@@ -842,7 +908,12 @@ const Discounts = () => {
 									columnHeaders: columns.map((column) => column.header),
 									rows: discountsData.map((row) =>
 										columns.map((column) => ({
-											value: row[column.id],
+											value:
+												column.dataType === 'price'
+													? `${formattingData(row[column.id])}`
+													: column.dataType === 'percent'
+													? `${formattingDataWithoutDollr(row[column.id])}`
+													: row[column.id],
 											cellType: column.dataType,
 											columnName: column.header,
 										}))
@@ -928,11 +999,22 @@ const Discounts = () => {
 						name: column.header,
 						filterButton: true,
 					})),
-					data: discountsData.map((row) => columns.map((column) => row[column.id])),
+					data: discountsData.map((row) =>
+						columns.map((column) =>
+							column.dataType === 'price'
+								? `${formattingData(row[column.id])}`
+								: column.dataType === 'percent'
+								? `${row[column.id]}%`
+								: row[column.id]
+						)
+					),
 				},
 			];
 
-			const filename = 'discounts';
+			const filename = `discounts_${selectedUnitName}_${dateFormat(
+				selectedFromDate,
+				'mm-dd-yyyy'
+			)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 			const spreadSheetTitle = 'Discounts';
 			const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
@@ -966,14 +1048,23 @@ const Discounts = () => {
 					})),
 					data: discountsData.map((row) =>
 						flattenedColumns.map((column) => {
-							const value =
+							const isMetricColumn =
 								column.id.startsWith('discounted') ||
 								column.id.startsWith('salesGenerated') ||
 								column.id.startsWith('discountAmount') ||
-								column.id.startsWith('discountedTickets')
-									? row.weeks.find((week) => week[column.id])?.[column.id] || '0'
-									: row[column.id] || '0';
-							return value;
+								column.id.startsWith('discountedTickets');
+
+							let value = isMetricColumn
+								? row.weeks?.find((week) => week[column.id])?.[column.id] ?? 0
+								: row[column.id] ?? 0;
+
+							if (column.dataType === 'price') {
+								value = `$${value}`;
+							} else if (column.dataType === 'percent') {
+								value = `${value}%`;
+							}
+
+							return value.toString();
 						})
 					),
 				},
@@ -996,15 +1087,15 @@ const Discounts = () => {
 
 	return (
 		<>
-			<div className='w-[85%] mx-auto'>
+			<div className='w-[98%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Discounts</h2>
-				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+				<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Discounts</h2>
+				<header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
 							companyId={companyID}
@@ -1036,6 +1127,7 @@ const Discounts = () => {
 								options={isDiscountTypesLoading ? [{ name: 'Loading...' }] : discountTypeOptions}
 								selectedOption={isDiscountTypesLoading ? 'Loading...' : discountType}
 								onOptionChange={handleReportTypeChange}
+								isSearch={true}
 							/>
 						</div>
 						<div className='w-44 group-by'>
@@ -1048,7 +1140,7 @@ const Discounts = () => {
 							/>
 						</div>
 						<div className='run-button' onClick={fetchDiscountsReportData}>
-							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>

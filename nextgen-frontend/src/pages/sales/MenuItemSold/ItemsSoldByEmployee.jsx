@@ -74,6 +74,16 @@ const ItemsSoldByEmployee = () => {
 	const [isGroupByUnitChecked, setIsGroupByUnitChecked] = useState(false);
 	const [inventoryFirstRender, setInventoryFirstRender] = useState(false);
 
+	const tooltips = {
+		item: "Menu Item ID",
+		description:"Menu Item Name",
+		quantity:"Number of menu items sold during the selected date range.",
+		amount:"$ Amount Sold",
+		itemSoldPercent: "The item’s percentage of total sales.",
+		avgItemQuantity: "The average quantity sold per day during the selected date range.",	
+		avgItemAmount: "The average price of the item.",	
+    };
+	
 	const inventoryHeaders = [
 		{ label: 'Qsr Inventory Item ID', key: 'inventoryItemID' },
 		{ label: 'Description', key: 'description' },
@@ -101,7 +111,6 @@ const ItemsSoldByEmployee = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -117,8 +126,7 @@ const ItemsSoldByEmployee = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -147,6 +155,7 @@ const ItemsSoldByEmployee = () => {
 			id: 'unitName',
 			header: 'Unit',
 			dataType: 'number',
+			cell: (info) => info.getValue() || '',
 		}),
 
 		columnHelper.accessor('employeeId', {
@@ -157,21 +166,21 @@ const ItemsSoldByEmployee = () => {
 		}),
 		columnHelper.accessor('firstName', {
 			id: 'firstName',
-			header: 'First Name',
+			header: <div className='w-full text-left'>First Name</div>,
 			dataType: 'string',
-			cell: (info) => info.getValue() || '',
+			cell: (info) => <div className='text-left'>{info.getValue()}</div> || '',
 		}),
 		columnHelper.accessor('lastName', {
 			id: 'lastName',
-			header: 'Last Name',
+			header: <div className='w-full text-left'>Last Name</div>,
 			dataType: 'string',
-			cell: (info) => info.getValue() || '',
+			cell: (info) => <div className='text-left'>{info.getValue()}</div> || '',
 		}),
 		columnHelper.accessor('description', {
 			id: 'description',
-			header: 'Menu Item',
+			header: <div className='w-full text-left'>Menu Item</div>,
 			dataType: 'string',
-			cell: (info) => info.getValue() || '',
+			cell: (info) => <div className='text-left'>{info.getValue()}</div> || '',
 		}),
 		columnHelper.accessor('quant', {
 			id: 'quant',
@@ -291,7 +300,9 @@ const ItemsSoldByEmployee = () => {
 			) {
 				setIsLoading(false);
 				setIsError(true);
-				setErrorMessage('Please select according to the Item Type you have chosen !');
+				itemValue === 0
+					? setErrorMessage('Please select a Menu Item!')
+					: setErrorMessage('Please select an Inventory Item!');
 				return false; // Prevent API call
 			}
 
@@ -429,10 +440,16 @@ const ItemsSoldByEmployee = () => {
 											: calculateTotalCost(row.subRows, 'quant')
 								  } Total Amount: $${
 										selectedGroupByColumns.length === 1
-											? calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											? Number(
+													calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											  ).toLocaleString('en-US')
 											: row.depth === 0
-											? calculateNestedTotalCost(row.subRows, 'discPrice').toFixed(2)
-											: calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											? Number(
+													calculateNestedTotalCost(row.subRows, 'discPrice').toFixed(2)
+											  ).toLocaleString('en-US')
+											: Number(
+													calculateTotalCost(row.subRows, 'discPrice').toFixed(2)
+											  ).toLocaleString('en-US')
 								  }) `
 								: '';
 
@@ -494,8 +511,6 @@ const ItemsSoldByEmployee = () => {
 			pageOrientation: 'landscape',
 			body: buildPDFBody(),
 		};
-
-		console.log('PDF Data: ', pdfData);
 
 		PdfBuilder(pdfData);
 	};
@@ -634,8 +649,9 @@ const ItemsSoldByEmployee = () => {
 			data={menuItemSoldData}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
+			largeHeader= {true}
 			detailOnTop={`${salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
-				menuItemSoldData[0]?.total?.toFixed(2) || 0
+				Number(menuItemSoldData[0]?.total?.toFixed(2)).toLocaleString('en-US') || 0
 			}`}
 		/>
 	);
@@ -706,7 +722,7 @@ const ItemsSoldByEmployee = () => {
 							Group By Unit
 						</div>
 						<div className='run-button' onClick={fetchSoldByEmpData}>
-							<div className='py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7 text-[14px]'>
 								Run
 							</div>
 						</div>

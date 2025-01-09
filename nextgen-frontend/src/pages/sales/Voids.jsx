@@ -18,6 +18,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -35,6 +36,7 @@ const Voids = () => {
 
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isDateLoading, setIsDateLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load the Voids Report, please try again later.'
@@ -46,10 +48,8 @@ const Voids = () => {
 	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState(
-		new Date(new Date().getFullYear(), new Date().getMonth(), 0)
-	);
-	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [selectedFromDate, setSelectedFromDate] = useState();
+	const [selectedToDate, setSelectedToDate] = useState();
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
@@ -101,23 +101,35 @@ const Voids = () => {
 			}),
 			columnHelper.accessor('voidReason', {
 				id: 'voidReason',
-				header: 'Void Reason',
+				header: <div className='w-full text-left'>Void Reason</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='pr-3 text-left'>{getValue()}</div>;
+				},
 			}),
 			columnHelper.accessor('employeeName', {
 				id: 'employeeName',
-				header: 'Employee',
+				header: <div className='w-full text-left'>Employee</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				},
 			}),
 			columnHelper.accessor('managerName', {
 				id: 'managerName',
-				header: 'Manager',
+				header: <div className='w-full text-left'>Manager</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				},
 			}),
 			columnHelper.accessor('fullDescription', {
 				id: 'fullDescription',
-				header: 'Description',
+				header: <div className='w-full text-left'>Description</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				},
 				size: 200,
 			}),
 			columnHelper.accessor('posCheckId', {
@@ -127,8 +139,11 @@ const Voids = () => {
 			}),
 			columnHelper.accessor('tableName', {
 				id: 'tableName',
-				header: 'Table Name',
+				header: <div className='w-full text-left'>Table Name</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				},
 			}),
 			columnHelper.accessor('revenueID', {
 				id: 'revenueID',
@@ -142,6 +157,10 @@ const Voids = () => {
 				id: 'price',
 				header: 'Price',
 				size: 100,
+				cell: ({ getValue }) => {
+					let price = getValue() !== undefined ? formattingData(getValue()) : '';
+					return price;
+				},
 				footer: ({ table }) =>
 					`$${table
 						.getCoreRowModel()
@@ -154,8 +173,11 @@ const Voids = () => {
 			}),
 			columnHelper.accessor('tendersUsed', {
 				id: 'tendersUsed',
-				header: 'Tenders',
+				header: <div className='w-full text-left'>Tenders</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => {
+					return <div className='text-left'>{getValue()}</div>;
+				},
 			}),
 		],
 		[]
@@ -173,7 +195,7 @@ const Voids = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
+			setIsDateLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -190,7 +212,7 @@ const Voids = () => {
 			}
 		} catch (error) {
 		} finally {
-			setIsLoading(false);
+			setIsDateLoading(false);
 		}
 	};
 
@@ -339,11 +361,33 @@ const Voids = () => {
 	};
 
 	const formatPDFData = (data) => {
+		const getValue = (valueCol,row) =>{
+			if(typeof valueCol?.header === 'object'){
+				return row[valueCol.id]
+			}else if(valueCol?.header?.includes('Price')){
+				return formattingData(row[valueCol.id])
+			}else{
+				return row[valueCol.id]
+			}
+		}
 		return {
-			columnHeaders: columns.map((column) => column.header),
+			columnHeaders: [
+				'Date',
+				'Hour',
+				'Minute',
+				'Void Reason',
+				'Employee',
+				'Manager',
+				'Description',
+				'POS Check ID',
+				'Table Name',
+				'Revenue ID',
+				'Price',
+				'Tenders',
+			],
 			rows: data.map((row) =>
 				columns.map((column) => ({
-					value: row[column.id],
+					value: column.id === 'price' ? formattingData(row[column.id]) : row[column.id] || '0 ',
 					cellType: '',
 					columnName: column.id,
 				}))
@@ -412,8 +456,6 @@ const Voids = () => {
 			},
 		];
 
-		console.log('data', data);
-
 		const filename = 'voids';
 		const spreadSheetTitle = 'Voids';
 		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
@@ -424,14 +466,14 @@ const Voids = () => {
 	const Table = <TableHOC columns={columns} data={filteredVoidsReportData} expandCollapseButtons={true} />;
 
 	return (
-		<div className='w-[85%] mx-auto'>
+		<div className='w-[98%] mx-auto'>
 			<Steps
 				enabled={introSteps.stepsEnabled}
 				steps={introSteps.steps}
 				initialStep={introSteps.initialStep}
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Voids</h2>
+			<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Voids</h2>
 			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center'>
 					<UnitSelector
@@ -451,7 +493,7 @@ const Voids = () => {
 						extraClass={'w-[219px]'}
 					/>
 					<div className='ml-1 filterByHour-selector'>
-						<span className='text-xl font-medium'>Filter By Hour</span>
+						<span className='text-[16px] font-medium'>Filter By Hour</span>
 						<div className='flex'>
 							<div className='flex items-center'>
 								<span className='font-medium'>From: </span>
@@ -474,7 +516,7 @@ const Voids = () => {
 						</div>
 					</div>
 					<div className='run-button' onClick={fetchVoidsReport}>
-						<div className='py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+						<div className='py-2 ml-1 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 							Run
 						</div>
 					</div>

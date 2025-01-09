@@ -4,20 +4,30 @@ import { Steps } from 'intro.js-react';
 import { useSelector } from 'react-redux';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
-	Loader,
-	UnitSelector,
-	CalendarModal,
-	UnitModal,
-	ExportOptions,
-	DateSelector,
-	PdfBuilder,
-	ExcelExport as exportToExcel,
-	TableHOC,
-	Dropdown,
-} from '../../components';
-import { createColumnHelper } from '@tanstack/react-table';
-import dateFormat from 'dateformat';
-import laborByPayPeriod from '../../assets/introJSSteps/laborByPayPeriod';
+  Loader,
+  UnitSelector,
+  CalendarModal,
+  UnitModal,
+  ExportOptions,
+  DateSelector,
+  PdfBuilder,
+  ExcelExport as exportToExcel,
+  TableHOC,
+  Dropdown,
+} from "../../components";
+import { createColumnHelper } from "@tanstack/react-table";
+import dateFormat from "dateformat";
+import laborByPayPeriod from "../../assets/introJSSteps/laborByPayPeriod";
+import { formattingData } from "../../functions/formatingCurrency";
+
+const tooltips = {
+	employeeID: "Refers to the ID assigned to the employee. Originates from the POS employee information.",
+	jobCode: "The job code used when clocking into the POS.",
+	rate: "The payrate associated with the job code used when clocking into the POS.",	
+	declaredTips: "Includes credit card tips and declared cash tips entered in the POS.",
+  tipsPercent: "Declared Tips / Pre-Tax Ticket Sales = Tip %",
+	direction: "above",
+  };
 
 const columnHelper = createColumnHelper();
 
@@ -44,8 +54,8 @@ const LaborByPayPeriod = () => {
 	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState();
-	const [selectedToDate, setSelectedToDate] = useState();
+	const [selectedFromDate, setSelectedFromDate] = useState(new Date());
+	const [selectedToDate, setSelectedToDate] = useState(new Date());
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	//dropdown variables
@@ -109,8 +119,9 @@ const LaborByPayPeriod = () => {
 			}),
 			columnHelper.accessor('unitName', {
 				id: 'unitName',
-				header: 'Unit Name',
+				header: <div className='w-full text-left'>Unit Name</div>,
 				dataType: 'string',
+				cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 				size: 300,
 			}),
 			columnHelper.accessor('employeeId', {
@@ -118,10 +129,12 @@ const LaborByPayPeriod = () => {
 				header: 'Employee ID',
 				dataType: 'number',
 				size: 120,
+        tooltip: tooltips.employeeID
 			}),
 			columnHelper.accessor((row) => (row.firstName && row.lastName ? `${row.firstName} ${row.lastName}` : ''), {
 				id: 'fullName',
-				header: 'Full Name',
+				header: <div className='w-full text-left bg-transparent'>Full Name</div>,
+				cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 				dataType: 'string',
 			}),
 			columnHelper.accessor('date', {
@@ -149,13 +162,18 @@ const LaborByPayPeriod = () => {
 						return getValue();
 					}
 				},
+        tooltip: tooltips.jobCode
 			}),
 			columnHelper.accessor('regHours', {
 				id: 'regHours',
 				header: 'Regular Hours',
 				dataType: 'number',
 				size: 140,
-				cell: ({ row }) => calculateSum(row, 'regHours'),
+				cell: ({ row }) => {
+					let regHours = calculateSum(row, 'regHours');
+					regHours = parseFloat(regHours).toFixed(2);
+					return regHours;
+				},
 			}),
 			columnHelper.accessor('overHours', {
 				id: 'overHours',
@@ -169,17 +187,24 @@ const LaborByPayPeriod = () => {
 				header: 'Rate',
 				dataType: 'number',
 				size: 60,
+        tooltip: tooltips.rate
 			}),
 			columnHelper.accessor('declaredTips', {
 				id: 'declaredTips',
 				header: 'Declared Tips',
 				dataType: 'number',
 				size: 120,
+        tooltip: tooltips.declaredTips
 			}),
 			columnHelper.accessor('preTaxTicketSales', {
 				id: 'preTaxTicketSales',
 				header: 'Pre-Tax Ticket Sales',
-				cell: ({ row }) => `$${Number(calculateSum(row, 'preTaxTicketSales')).toLocaleString('en-US')}`,
+				cell: ({ row }) => {
+					let preTaxTicketSalesCalculate = calculateSum(row, 'preTaxTicketSales');
+					preTaxTicketSalesCalculate = formattingData(parseFloat(preTaxTicketSalesCalculate));
+
+					return `${preTaxTicketSalesCalculate.toLocaleString('en-US')}`;
+				},
 				dataType: 'number',
 				size: 160,
 			}),
@@ -187,14 +212,15 @@ const LaborByPayPeriod = () => {
 				id: 'declaredTipsPct',
 				header: 'Tips %',
 				size: 80,
-				cell: ({ row }) => calculateSum(row, 'declaredTipsPct'),
+				cell: ({ row }) => parseFloat(calculateSum(row, 'declaredTipsPct')).toFixed(2) + '%',
 				dataType: 'number',
+        tooltip: tooltips.tipsPercent
 			}),
-			columnHelper.accessor('regPay', {
-				id: 'regPay',
+			columnHelper.accessor('pay', {
+				id: 'pay',
 				header: 'Total Pay',
 				size: 120,
-				cell: ({ row }) => `$${Number(calculateSum(row, 'regPay')).toLocaleString('en-US')}`,
+				cell: ({ row }) => `${formattingData(parseFloat(calculateSum(row, 'pay')))}`,
 				dataType: 'number',
 			}),
 		],
@@ -213,7 +239,6 @@ const LaborByPayPeriod = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -223,14 +248,13 @@ const LaborByPayPeriod = () => {
 
 			const result = await getCall(getData, false);
 			if (result?.data?.weekMaxDate) {
-				const maxDate = new Date(result?.data?.weekMaxDate);
-				const minDate = new Date(result?.data?.weekMinDate);
+				const maxDate = new Date(result?.data?.payPeriodMaxDate);
+				const minDate = new Date(result?.data?.payPeriodMinDate);
 				setSelectedFromDate(minDate);
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -272,6 +296,7 @@ const LaborByPayPeriod = () => {
 						preTaxTicketSales: period.preTaxTicketSales,
 						declaredTipsPct: period.declaredTipsPct,
 						regPay: period.regPay,
+						pay: period.pay,
 					})),
 				})),
 			}));
@@ -408,12 +433,12 @@ const LaborByPayPeriod = () => {
 						columnName: 'Job Description',
 					},
 					{
-						value: subRow.regHours || '0 ',
+						value: subRow?.regHours.toFixed(2) || '0 ',
 						cellType: 'number',
 						columnName: 'Regular Hours',
 					},
 					{
-						value: subRow.overHours || '0 ',
+						value: subRow.overHours.toFixed(2) || '0 ',
 						cellType: 'number',
 						columnName: 'Overtime Hours',
 					},
@@ -434,7 +459,7 @@ const LaborByPayPeriod = () => {
 						columnName: 'Declared Tips %',
 					},
 					{
-						value: subRow.regPay || '0 ',
+						value: subRow.pay || '0 ',
 						cellType: 'number',
 						columnName: 'Regular Pay',
 					},
@@ -472,13 +497,13 @@ const LaborByPayPeriod = () => {
 						period.date, // Second level subrow data (period)
 						period.jobCode,
 						period.jobDesc,
-						period.regHours,
-						period.overHours,
+						period.regHours.toFixed(2),
+						period.overHours.toFixed(2),
 						period.rate,
 						period.declaredTips,
 						period.preTaxTicketSales,
 						period.declaredTipsPct,
-						period.regPay,
+						period.pay,
 					].join(',')
 				)
 			)
@@ -525,12 +550,12 @@ const LaborByPayPeriod = () => {
 							jobCode: period.jobCode,
 							jobDesc: period.jobDesc,
 							regHoursPeriod: period?.regHours.toFixed(2),
-							overHours: period.overHours,
+							overHours: period.overHours.toFixed(2),
 							rate: period.rate,
 							declaredTips: period.declaredTips,
 							preTaxTicketSales: period.preTaxTicketSales,
 							declaredTipsPct: period.declaredTipsPct,
-							regPay: period.regPay,
+							regPay: period.pay,
 						}))
 					)
 				),
@@ -559,14 +584,14 @@ const LaborByPayPeriod = () => {
 	);
 
 	return (
-		<div className='w-[85%] mx-auto'>
+		<div className='w-[98%] mx-auto'>
 			<Steps
 				enabled={introSteps.stepsEnabled}
 				steps={introSteps.steps}
 				initialStep={introSteps.initialStep}
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Labor By Pay Period</h2>
+			<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Labor By Pay Period</h2>
 			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center'>
 					<UnitSelector
@@ -594,7 +619,7 @@ const LaborByPayPeriod = () => {
 						/>
 					</div>
 					<div className='run-button' onClick={fetchLaborByPayPeriod}>
-						<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
+						<div className='py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-primary hover:text-white hover:bg-primary text-nowrap rounded-3xl mt-7'>
 							Run
 						</div>
 					</div>
@@ -629,7 +654,6 @@ const LaborByPayPeriod = () => {
 						))}
 				</div>
 			)}
-
 			<div>
 				<UnitModal
 					unitData={unitsAndAreasList}
@@ -651,6 +675,7 @@ const LaborByPayPeriod = () => {
 					handleToDateChange={(toDate) => setSelectedToDate(toDate)}
 					selectedFromDate={selectedFromDate}
 					selectedToDate={selectedToDate}
+					periodDatesEndpoint='getAllPayPeriodDates'
 				/>
 			</div>
 		</div>

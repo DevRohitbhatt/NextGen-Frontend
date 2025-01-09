@@ -66,7 +66,7 @@ export const postCall = async (postData = {}) => {
 };
 
 // function to make get call
-export const getCall = async (getData = {}) => {
+export const getCall = async (getData = {},isCache=true) => {
 	let url = '';
 
 	if (getData.fullUrl) {
@@ -90,9 +90,9 @@ export const getCall = async (getData = {}) => {
 	}
 
 	//Check if the response is already cached
-	const cacheKey = getCacheKey(url, getData.urlParams);
-	const cachedResponse = getCache(cacheKey);
-	if (cachedResponse) return cachedResponse;
+	const cacheKey = isCache && getCacheKey(url, getData.urlParams);
+	const cachedResponse = isCache && getCache(cacheKey);
+	if (cachedResponse && isCache) return cachedResponse;
 
 	const response = await api.request({
 		method: 'GET',

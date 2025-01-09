@@ -5,14 +5,17 @@ const PrepChart = lazy(() => import('./food-cost/PrepChart/PrepChart'));
 const PrepChartTemplate = lazy(() => import('./food-cost/PrepChart/PrepChartTemplate'));
 const SuggestedOrder = lazy(() => import('./food-cost/SuggestedOrder/SuggestedOrder'));
 const SuggestedOrderList = lazy(() => import('./food-cost/SuggestedOrder/SuggestedOrderList'));
-const InventoryTransfer = lazy(() => import('./food-cost/InventoryTransfer'));
+const InventoryTransferReport = lazy(() => import('./food-cost/InventoryTransferReport'));
 const InventoryWeeksOnHand = lazy(() => import('./food-cost/InventoryWeeksOnHand'));
 const ActualFoodCost = lazy(() => import('./food-cost/ActualFoodCost'));
 const VarianceFoodCost = lazy(() => import('./food-cost/VarianceFoodCost'));
 const Invoices = lazy(() => import('./food-cost/Invoices'));
+const InvoiceEditor = lazy(() => import('./food-cost/InvoiceEditor'));
 const Countsheets = lazy(() => import('./food-cost/Countsheets'));
 const CountsheetDesigner = lazy(() => import('./food-cost/CountsheetDesigner'));
 const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
+const CookChart = lazy(() => import('./food-cost/CookChart'));
+const CookChartTemplate = lazy(() => import('./food-cost/CookChartTemplate'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
@@ -36,7 +39,7 @@ export {
 	PrepChartTemplate,
 	SuggestedOrder,
 	SuggestedOrderList,
-	InventoryTransfer,
+	InventoryTransferReport,
 	InventoryWeeksOnHand,
 	EmployeeInformation,
 	LaborByPayPeriod,
@@ -53,8 +56,11 @@ export {
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
+	InvoiceEditor,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
 	LaborAnalysis,
+	CookChart,
+	CookChartTemplate
 };

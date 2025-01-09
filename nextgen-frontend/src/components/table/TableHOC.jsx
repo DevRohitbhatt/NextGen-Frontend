@@ -34,7 +34,7 @@ const getCommonPinningStyles = (column, row) => {
 				: undefined,
 		left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
 		right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
-		position: isPinned ? 'sticky' : 'relative',
+		position: isPinned ? 'sticky' : '',
 		width: column.getSize(),
 		zIndex: isPinned ? 1 : 0,
 		backgroundColor: 'white',
@@ -48,6 +48,7 @@ function TableHOC({
 	isPaginated = false,
 	isFooter = false,
 	view,
+	tableHeight = '60vh',
 	isTableRendered,
 	setIsTableRendered,
 	setTableState,
@@ -57,6 +58,7 @@ function TableHOC({
 	dataPosition = 'text-center',
 	detailOnTop,
 	onCallBack,
+	largeHeader = false,
 }) {
 	const [expanded, setExpanded] = useState({});
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -93,23 +95,25 @@ function TableHOC({
 		getExpandedRowModel: getExpandedRowModel(),
 		getFacetedRowModel: getFacetedRowModel(), // client-side faceting
 		getFacetedUniqueValues: getFacetedUniqueValues(),
-		//filterFromLeafRows: true,
-		//maxLeafRowFilterDepth: 1,
+		// filterFromLeafRows: true,
+		// maxLeafRowFilterDepth: 1,
 		columnResizeMode: 'onChange',
 		debugTable: false,
 	});
 
+	console.log(view);
 	useTableView(table, view, isTableRendered);
 
 	useEffect(() => {
 		if (setTableState) {
 			setTableState(table.getState());
 		}
+
 		table.getAllColumns().map((column) => {
 			if (column.columnDef.show === false) {
 				column.toggleVisibility(false);
 			} else {
-				if (table.getExpandedDepth() < column.columnDef.showDepth) {
+				if (Object.keys(table.getState().expanded)?.length < column.columnDef.showDepth) {
 					column.toggleVisibility(false);
 				} else {
 					column.toggleVisibility(true);
@@ -141,16 +145,16 @@ function TableHOC({
 		if (table.getRowModel().rows.length > 0 && !isTableRendered && setIsTableRendered) {
 			setIsTableRendered(true);
 		}
-	}, [table.getRowModel().rows.length, isTableRendered, setIsTableRendered]);
+	}, [table, isTableRendered, setIsTableRendered]);
 
 	return (
 		<div className='rounded-2xl border-[1px] shadow-[0_5px_35px_-5px_rgba(0,0,0,0.3)] mt-3 p-3'>
 			<div className='flex items-center gap-2'>
 				{expandCollapseButtons && (
-					<div className='flex items-center my-4 space-x-4'>
+					<div className='flex items-center my-2 space-x-4'>
 						<button
 							onClick={() => table.toggleAllRowsExpanded(true)}
-							className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+							className={`flex items-center w-[150px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[14px] ${
 								table.getIsAllRowsExpanded()
 									? 'bg-[var(--tw-primary)] text-white'
 									: 'text-[var(--tw-primary)]'
@@ -161,7 +165,7 @@ function TableHOC({
 						</button>
 						<button
 							onClick={() => table.toggleAllRowsExpanded(false)}
-							className={`flex items-center w-[164px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button ${
+							className={`flex items-center w-[150px] justify-center gap-[10px] px-5 py-[10px] font-medium border-solid focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button text-[14px] ${
 								table.getIsAllRowsExpanded()
 									? 'text-[var(--tw-primary)]'
 									: 'bg-[var(--tw-primary)] text-white'
@@ -172,11 +176,15 @@ function TableHOC({
 						</button>
 					</div>
 				)}
-				<div className='text-xl font-bold'>{detailOnTop}</div>
+				<div className='text-[16px] font-bold'>{detailOnTop}</div>
 			</div>
 
 			{/* table */}
-			<div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
+			<div
+				className={`tableHOC pr-1 ${
+					isPaginated ? 'max-h-[58vh]' : largeHeader ? 'max-h-[48vh]' : 'max-h-[60vh]'
+				}  overflow-auto`}
+			>
 				<table className='w-full border-collapse table-auto select-none'>
 					{isHeader && (
 						<thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
@@ -188,11 +196,13 @@ function TableHOC({
 												<th
 													key={header.id}
 													colSpan={header.colSpan}
-													className='py-2'
+													className='py-2 text-[14px] px-[5px] shadow-[0_-1px_0_var(--tw-primary)_inset]'
 													style={{
 														minWidth: header.getSize(),
 														width: 'auto',
-														...getCommonPinningStyles(header.column, 'header'),
+														...(header.column.columnDef.pinDirection
+															? getCommonPinningStyles(header.column, 'header')
+															: {}),
 													}}
 												>
 													{header.column.columnDef.tooltip ? (
@@ -204,7 +214,7 @@ function TableHOC({
 																<div
 																	{...{
 																		className: header.column.getCanSort()
-																			? `cursor-pointer flex gap-1 items-center text-${headerPosition}`
+																			? `cursor-pointer flex gap-1 items-center text-[14px] text-${headerPosition}`
 																			: '',
 																		onClick:
 																			header.column.getToggleSortingHandler(),
@@ -228,7 +238,7 @@ function TableHOC({
 															<div
 																{...{
 																	className: header.column.getCanSort()
-																		? `cursor-pointer flex gap-1 items-center text-${headerPosition}`
+																		? `cursor-pointer text-[14px] flex gap-1 items-center text-${headerPosition}`
 																		: '',
 																	onClick: header.column.getToggleSortingHandler(),
 																}}
@@ -266,7 +276,7 @@ function TableHOC({
 													<th
 														key={header.id}
 														colSpan={header.colSpan}
-														className='p-1 py-2 text-right border-b border-gray-300 cursor-pointer'
+														className='p-1 py-2 text-right border-b border-gray-300 cursor-pointer text-[12px] px-[5px]'
 														style={{ width: header.getSize() }}
 													>
 														{header.isPlaceholder ? null : (
@@ -294,7 +304,7 @@ function TableHOC({
 							return (
 								<tr
 									key={row.id}
-									className={`h-[35px] font-normal border-y relative hover:bg-gray-100 ${
+									className={`h-[28px] font-normal border-y relative hover:bg-gray-100 ${
 										row.getCanExpand() ? 'cursor-pointer' : 'cursor-default'
 									}`}
 									onClick={(e) => {
@@ -310,7 +320,7 @@ function TableHOC({
 										return (
 											<td
 												key={cell.id}
-												className={`${dataPosition} text-nowrap`}
+												className={`${dataPosition} text-nowrap text-[12px] px-[5px]`}
 												style={
 													cell.column.columnDef.pinDirection
 														? getCommonPinningStyles(cell.column)
@@ -320,8 +330,7 @@ function TableHOC({
 												{cell.getIsGrouped() ? (
 													// If it's a grouped cell, add an expander and row count
 													<div className='flex items-center gap-2'>
-														{flexRender(cell.column.columnDef.cell, cell.getContext())} (
-														{row.subRows.length})
+														{flexRender(cell.column.columnDef.cell, cell.getContext())}
 													</div>
 												) : cell.getIsPlaceholder() ? null : (
 													flexRender(cell.column.columnDef.cell, cell.getContext())
@@ -336,14 +345,14 @@ function TableHOC({
 
 					{/* footer */}
 					{isFooter && (
-						<tfoot className='sticky z-[2] bg-white -bottom-1 shadow-[0_1px_0_var(--tw-primary)_inset]'>
+						<tfoot className='sticky z-[2] bg-white h-fit -bottom-1 shadow-[0_1px_0_var(--tw-primary)_inset]'>
 							{table.getFooterGroups().map((footerGroup) => (
 								<>
 									<tr className='' key={footerGroup.id}>
 										{footerGroup.headers.map((footer) => (
 											<td
 												key={footer.id}
-												className='p-2 text-left cursor-pointer shadow-[0_1px_0_var(--tw-primary)_inset] '
+												className='p-2 text-left cursor-pointer shadow-[0_1px_0_var(--tw-primary)_inset] text-[14px] px-[5px]'
 												style={{
 													width: footer.getSize(),
 													...getCommonPinningStyles(footer.column, 'footer'),
@@ -413,7 +422,7 @@ function TableHOC({
 							table.setPageSize(Number(e.target.value));
 						}}
 					>
-						{[10, 20, 25].map((pageSize) => (
+						{[20, 30, 50].map((pageSize) => (
 							<option key={pageSize} value={pageSize}>
 								{`${pageSize} per page`}
 							</option>

@@ -21,6 +21,16 @@ import dateFormat from 'dateformat';
 import { createColumnHelper } from '@tanstack/react-table';
 import itemSoldByHour from '../../../assets/introJSSteps/menuItemSold/itemSoldByHour';
 
+const tooltips = {
+	item: "Menu Item ID",
+	description:"Menu Item Name",
+	quantity:"Number of menu items sold during the selected date range.",
+	amount:"$ Amount Sold",
+	itemSoldPercent: "The item’s percentage of total sales.",
+	avgItemQuantity: "The average quantity sold per day during the selected date range.",	
+	avgItemAmount: "The average price of the item.",	
+};
+
 const columnHelper = createColumnHelper();
 
 const ItemsSoldByHour = () => {
@@ -103,7 +113,6 @@ const ItemsSoldByHour = () => {
 	//Default date get
 	const getDefaultDates = async () => {
 		try {
-			setIsLoading(true);
 			const getData = {
 				url: 'getCurrentPeriodDates',
 				urlParams: {
@@ -119,8 +128,7 @@ const ItemsSoldByHour = () => {
 				setSelectedToDate(maxDate);
 			}
 		} catch (error) {
-		} finally {
-			setIsLoading(false);
+			console.error('Error getting default dates: ', error);
 		}
 	};
 
@@ -290,7 +298,9 @@ const ItemsSoldByHour = () => {
 			) {
 				setIsLoading(false);
 				setIsError(true);
-				setErrorMessage('Please select according to the Item Type you have chosen !');
+				itemValue === 0
+					? setErrorMessage('Please select a Menu Item!')
+					: setErrorMessage('Please select an Inventory Item!');
 				return false;
 			}
 			const getData = {
@@ -466,8 +476,6 @@ const ItemsSoldByHour = () => {
 			body: buildPDFBody(),
 		};
 
-		console.log('PDF Data: ', pdfData);
-
 		PdfBuilder(pdfData);
 	};
 
@@ -607,8 +615,9 @@ const ItemsSoldByHour = () => {
 			data={menuItemSoldData}
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
+			largeHeader= {true}
 			detailOnTop={`${salesType === 'SalesNet' ? 'Net Sales:' : 'Gross Sales:'} $${
-				menuItemSoldData[0]?.total?.toFixed(2) || 0
+				Number(menuItemSoldData[0]?.total?.toFixed(2)).toLocaleString('en-US') || 0
 			}`}
 		/>
 	);
@@ -678,7 +687,7 @@ const ItemsSoldByHour = () => {
 							Group By Unit
 						</div>
 						<div className='run-button' onClick={fetchSoldByHourData}>
-							<div className='py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-2 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
