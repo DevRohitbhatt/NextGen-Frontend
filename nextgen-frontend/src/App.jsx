@@ -23,6 +23,7 @@ import {
 	Voids,
 	Discounts,
 	HourlySales,
+	BrumitDWP,
 	SalesVsLabor,
 	BusinessSummary,
 	MenuGrossProfit,
@@ -145,6 +146,7 @@ const App = () => {
 								<Route path='/Voids' element={<Voids />} />
 								<Route path='/Discounts' element={<Discounts />} />
 								<Route path='/HourlySales' element={<HourlySales />} />
+								<Route path='/BrumitDWP' element={<BrumitDWP />} />
 								<Route path='/MenuItemsSold' element={<MenuItemsSold />} />
 								<Route path='/SalesVsLabor' element={<SalesVsLabor />} />
 								<Route path='/BusinessSummary' element={<BusinessSummary />} />

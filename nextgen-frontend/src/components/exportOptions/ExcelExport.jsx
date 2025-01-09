@@ -55,12 +55,17 @@ const addTable = (worksheet, table, index, lastColumn, lastRow) => {
 					return `${alpha}${red}${green}${blue}`;
 				};
 
-				const fillColor = cellData.color ? rgbaToArgb(cellData.color) : '';
 				if (cellData.color) {
+					const fillColor = cellData.color ? rgbaToArgb(cellData.color) : '';
 					cell.fill = {
 						type: 'pattern',
 						pattern: 'solid',
 						fgColor: { argb: fillColor },
+					};
+				} else {
+					const fillColor = cellData.fontColor ? rgbaToArgb(cellData.fontColor) : '';
+					cell.font = {
+						color: { argb: fillColor },
 					};
 				}
 			});

@@ -21,6 +21,7 @@ const CookChartTemplate = lazy(() => import('./food-cost/CookChartTemplate'));
 const Voids = lazy(() => import('./sales/Voids'));
 const Discounts = lazy(() => import('./sales/Discounts'));
 const HourlySales = lazy(() => import('./sales/HourlySales'));
+const BrumitDWP = lazy(() => import('./sales/BrumitDWP'));
 const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
 const SalesVsLabor = lazy(() => import('./sales/SalesVsLabor'));
 const BusinessSummary = lazy(() => import('./sales/BusinessSummary'));
@@ -47,6 +48,7 @@ export {
 	Voids,
 	Discounts,
 	HourlySales,
+	BrumitDWP,
 	MenuItemsSold,
 	SalesVsLabor,
 	BusinessSummary,

@@ -101,7 +101,7 @@ export const getCall = async (getData = {},isCache=true) => {
 	});
 
 	// Cache the response
-	//setCache(cacheKey, response.data, 3600000);
+	setCache(cacheKey, response.data, 3600000);
 
 	return response.data;
 };
