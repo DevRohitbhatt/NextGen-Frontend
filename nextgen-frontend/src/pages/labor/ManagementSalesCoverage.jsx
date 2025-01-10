@@ -239,6 +239,8 @@ const ManagementSalesCoverage = () => {
 							actualSalesPerCoverage: unit.actualSalesPerCoverage,
 							subRows: unit.managementSalesCoverageReportDateModels
 								.map((date) => ({
+									unit: unitsAndAreasList?.units?.find((item) => item.unitID === unit.unitId)
+										?.unitName,
 									date: dateFormat(date.date, 'mm/dd/yyyy'),
 									projectedSalesPerCoverage: date.projectedSalesPerCoverage,
 									actualSalesPerCoverage: date.actualSalesPerCoverage,
@@ -247,9 +249,11 @@ const ManagementSalesCoverage = () => {
 											? ''
 											: date.scheduledShifts,
 									actualShifts: date.actualShifts,
-									projectedDailySales: date.projectedDailySales,
+									projectedDailySales:
+										date.projectedDailySales === null ? 0 : date.projectedDailySales,
 									actualDailySales: date.actualDailySales === null ? 0 : date.actualDailySales,
-									projectedManagementWork: date.projectedManagementWork,
+									projectedManagementWork:
+										date.projectedManagementWork === null ? 0 : date.projectedManagementWork,
 									actualManagementWork:
 										date.actualManagementWork === null ? 0 : date.actualManagementWork,
 								}))
@@ -257,8 +261,6 @@ const ManagementSalesCoverage = () => {
 						}))
 						.sort((a, b) => a.unitId - b.unitId),
 				}));
-
-				console.log('newData', newData);
 
 				setMgmtSalesCoverageData(newData);
 			} else {
@@ -289,15 +291,16 @@ const ManagementSalesCoverage = () => {
 	};
 
 	const handleChart = (row) => {
+		if (!row) return;
 		setIsChartLoading(true);
 		const chartData = {
 			series: [
 				{
-					name: '',
+					name: 'Sales',
 					data: [row.projectedDailySales, row.actualDailySales, null, null],
 				},
 				{
-					name: '',
+					name: 'Management Sales',
 					data: [null, null, row.projectedManagementWork, row.actualManagementWork],
 				},
 			],
@@ -309,24 +312,8 @@ const ManagementSalesCoverage = () => {
 						'Projected Management Work',
 						'Actual Management Work',
 					],
-					tickAmount: 4,
 				},
 				yaxis: {
-					categories: Array.from(
-						{
-							length:
-								Math.ceil(
-									Math.max(
-										row.projectedDailySales,
-										row.actualDailySales,
-										row.projectedManagementWork,
-										row.actualManagementWork
-									) / 2000
-								) + 1,
-						},
-						(_, i) => i * 2000
-					),
-
 					labels: {
 						showAlways: true,
 						formatter: function (value) {
@@ -339,8 +326,7 @@ const ManagementSalesCoverage = () => {
 					axisTicks: {
 						show: true,
 					},
-					stepSize: 2000,
-					tickAmount: 4,
+					tickAmount: 20,
 					title: {
 						text: 'Sales in $',
 						style: {
@@ -350,9 +336,9 @@ const ManagementSalesCoverage = () => {
 					},
 				},
 				fill: {
-					colors: ['#4F81BD'],
+					colors: ['#4F81BD', '#FF0000'],
 					type: 'solid',
-					opacity: 0.8,
+					opacity: 0.5,
 				},
 				stroke: {
 					curve: 'straight',
@@ -362,9 +348,10 @@ const ManagementSalesCoverage = () => {
 				legend: {
 					show: true,
 					position: 'top',
-					horizontalAlign: 'right',
+					horizontalAlign: 'left',
 					floating: true,
 					fontWeight: '600',
+					customLegendItems: ['Sales', 'Management Sales'],
 				},
 				chart: {
 					toolbar: {
@@ -374,13 +361,34 @@ const ManagementSalesCoverage = () => {
 						enabled: false,
 					},
 				},
-				markers: {
-					size: 0,
+				grid: {
+					padding: {
+						top: 40,
+					},
+				},
+				tooltip: {
+					custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+						return (
+							'<div class="arrow_box" style="padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 5px;">' +
+							'<span style="font-size: 14px; font-weight: bold;">' +
+							w.globals.categoryLabels[dataPointIndex] +
+							': $' +
+							(series[seriesIndex][dataPointIndex] !== null ? series[seriesIndex][dataPointIndex] : 0) +
+							'</span>' +
+							'</div>'
+						);
+					},
+				},
+				title: {
+					text: `${row.unit} Sales Details for ${row.date}`,
+					align: 'center',
+					margin: 6,
+					style: {
+						fontSize: '18px',
+					},
 				},
 			},
 		};
-
-		console.log('chartData', chartData);
 
 		setChartData(chartData);
 		setIsChartModalOpen(true);
