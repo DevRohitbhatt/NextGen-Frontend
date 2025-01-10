@@ -61,8 +61,8 @@ const SalesSummary = () => {
           companyId: companyID,
           alignmentId: alignmentID,
           //   memberId: selectedUnit,
-          fromDate: "2024-11-11", //dateFormat(selectedFromDate, 'yyyy-mm-dd'),
-          toDate: "2024-11-11", //dateFormat(selectedToDate, 'yyyy-mm-dd'),
+          fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+          toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
           UnitID: selectedUnit,
         },
       };
@@ -848,6 +848,7 @@ const SalesSummary = () => {
         handleToDateChange={(toDate) => setSelectedToDate(toDate)}
         selectedFromDate={selectedFromDate}
         selectedToDate={selectedToDate}
+        
       />
     </div>
   );
