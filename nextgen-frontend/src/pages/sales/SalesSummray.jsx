@@ -4,6 +4,7 @@ import {
   DateSelector,
   Dropdown,
   ExportOptions,
+  Loader,
   PdfBuilder,
   UnitModal,
   UnitSelector,
@@ -11,7 +12,7 @@ import {
 import { getCall } from "../../apis/network";
 import { useSelector } from "react-redux";
 import dateFormat from "dateformat";
-import { formattingData } from "../../functions/formatingCurrency";
+import { addDecimals, formattingData } from "../../functions/formatingCurrency";
 import generateSalesSummaryPDF from "../../components/exportOptions/SalesSumarayexportPdf";
 import exportToExcel from "../../components/exportOptions/ExcelExport";
 
@@ -33,7 +34,7 @@ const SalesSummary = () => {
   const [selectedToDate, setSelectedToDate] = useState(new Date());
   const [showDateModal, setShowDateModal] = useState(false);
   const [salesSummrayData, setSelesSummrayDaata] = useState({});
-
+  const [isLoading, setIsLoading] = useState(false);
   const aggregateData = async (viewActivityDaily) => {
     const result = {};
 
@@ -52,6 +53,7 @@ const SalesSummary = () => {
     return [result];
 };
   const getSalesData = async () => {
+    setIsLoading(true)
     try {
       const getData = {
         url: "GetSaleSummeryReport",
@@ -101,6 +103,8 @@ const SalesSummary = () => {
       }
     } catch (error) {
       console.log("errrrr=>", error);
+    } finally{
+        setIsLoading(false)
     }
   };
 
@@ -364,6 +368,7 @@ const SalesSummary = () => {
         </div>
       </header>
       {/* Gross Sales Section */}
+      {isLoading && <Loader loading={isLoading} />}
       {Object.keys(salesSummrayData).length > 0 ? (
         <>
           <div className="bg-white shadow-md rounded-lg mb-6 p-4 mt-[10px]">
@@ -548,6 +553,9 @@ const SalesSummary = () => {
                         Qty Items
                       </th>
                       <th className="border border-gray-300 p-2 text-right">
+                        Qty Mode
+                      </th>
+                      <th className="border border-gray-300 p-2 text-right">
                         Total
                       </th>
                       <th className="border border-gray-300 p-2 text-right">
@@ -563,6 +571,9 @@ const SalesSummary = () => {
                         </td>
                         <td className="border border-gray-300 p-2 text-right">
                           {item.quantityItems}
+                        </td>
+                        <td className="border border-gray-300 p-2 text-right">
+                          {item.quantityModifiers}
                         </td>
                         <td className="border border-gray-300 p-2 text-right">
                           ${item.salesNet}
@@ -582,24 +593,24 @@ const SalesSummary = () => {
             <h3 className="text-lg font-semibold mb-4">Payments</h3>
             <div className="max-h-[500px] overflow-auto tableHOC">
               <table className="table-auto w-full border-collapse border border-gray-300">
-                <thead className="bg-gray-200 sticky top-0">
+                <thead className="bg-gray-200 sticky top-0 border border-gray-300">
                   <tr>
-                    <th className="border border-gray-300 p-2 text-left">
+                    <th className=" p-2 text-left border border-gray-300">
                       Name
                     </th>
-                    <th className="border border-gray-300 p-2 text-right">
+                    <th className=" p-2 text-right border border-gray-300">
                       Quantity
                     </th>
-                    <th className="border border-gray-300 p-2 text-right">
+                    <th className=" p-2 text-right border border-gray-300">
                       Payments
                     </th>
-                    <th className="border border-gray-300 p-2 text-right">
+                    <th className=" p-2 text-rightborder border-gray-300">
                       Tips
                     </th>
-                    <th className="border border-gray-300 p-2 text-right">
+                    <th className=" p-2 text-right border border-gray-300">
                       Total
                     </th>
-                    <th className="border border-gray-300 p-2 text-right">
+                    <th className=" p-2 text-right border border-gray-300">
                       Percent
                     </th>
                   </tr>
@@ -611,19 +622,19 @@ const SalesSummary = () => {
                         {item.name}
                       </td>
                       <td className="border border-gray-300 p-2 text-right">
-                        {item.quantity}
+                        {addDecimals(item.quantity)}
                       </td>
                       <td className="border border-gray-300 p-2 text-right">
-                        ${item.amount}
+                        {formattingData(item.amount)}
                       </td>
                       <td className="border border-gray-300 p-2 text-right">
-                        ${item.tip}
+                        {formattingData(item.tip)}
                       </td>
                       <td className="border border-gray-300 p-2 text-right">
-                        ${item.amount + item.tip}
+                        {formattingData(item.amount + item.tip)}
                       </td>
                       <td className="border border-gray-300 p-2 text-right">
-                        {item.percentOfTotal.toFixed(2)}%
+                        {addDecimals(item.percentOfTotal*100)}%
                       </td>
                     </tr>
                   ))}
@@ -661,10 +672,10 @@ const SalesSummary = () => {
                         {item.quantityTickets}
                       </td>
                       <td className="border border-gray-300 p-2 text-right">
-                        ${item.amountDiscount}
+                        {formattingData(item.amountDiscount)}
                       </td>
                       <td className="border border-gray-300 p-2 text-right">
-                        ${item.quantityTicketItems}
+                        {addDecimals(item.amountDiscountPercentOfTotal * 100)}%
                       </td>
                     </tr>
                   ))}
