@@ -126,7 +126,7 @@ const generateSalesSummaryPDF = (data) => {
       widths: ["40%", "20%", "20%", "20%"],
       body: [
         [
-          { text: "Category", style: "tableHeader" },
+          { text: "Name", style: "tableHeader" },
           { text: "Qty Items", style: "tableHeader" },
           { text: "Sales Net", style: "tableHeader" },
           { text: "Percent", style: "tableHeader" },
@@ -147,7 +147,7 @@ const generateSalesSummaryPDF = (data) => {
       widths: ["25%", "15%", "20%", "15%", "15%", "10%"],
       body: [
         [
-          { text: "Payment Method", style: "tableHeader" },
+          { text: "Name", style: "tableHeader" },
           { text: "Quantity", style: "tableHeader" },
           { text: "Amount", style: "tableHeader" },
           { text: "Tips", style: "tableHeader" },
@@ -172,7 +172,7 @@ const generateSalesSummaryPDF = (data) => {
       widths: ["40%", "20%", "20%", "20%"],
       body: [
         [
-          { text: "Discount Type", style: "tableHeader" },
+          { text: "Name", style: "tableHeader" },
           { text: "Tickets", style: "tableHeader" },
           { text: "Amount", style: "tableHeader" },
           { text: "Items", style: "tableHeader" },

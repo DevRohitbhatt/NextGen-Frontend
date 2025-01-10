@@ -246,7 +246,7 @@ const SalesSummary = () => {
     const categorySalesSection = {
       name: "Category Sales",
       columns: [
-        { name: "Category" },
+        { name: "Name" },
         { name: "Qty Items" },
         { name: "Sales Net" },
         { name: "Percent" },
@@ -265,7 +265,7 @@ const SalesSummary = () => {
     const paymentsSection = {
       name: "Payments",
       columns: [
-        { name: "Payment Method" },
+        { name: "Name" },
         { name: "Quantity" },
         { name: "Amount" },
         { name: "Tips" },
@@ -429,9 +429,15 @@ const SalesSummary = () => {
       {Object.keys(salesSummrayData).length > 0 ? (
         <>
           <div className="bg-white shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)] rounded-lg mb-6 p-4 mt-[15px]">
-            <h2 className="text-lg font-semibold mb-4">
-              {groupOrUnitAccessName} - {selectedUnitName}
-            </h2>
+            <div className="flex justify-between">
+              {" "}
+              <h2 className="text-lg font-semibold mb-4">
+                {groupOrUnitAccessName} - {selectedUnitName}
+              </h2>
+              <h2 className="text-lg font-semibold mb-4">
+                {dateFormat(selectedFromDate, 'mm-dd-yyyy')} to {dateFormat(selectedToDate, 'mm-dd-yyyy')}
+              </h2>
+            </div>
             <div className="max-h-[500px] overflow-auto tableHOC">
               <table className="table-auto w-full border-collapse border border-gray-300">
                 <tbody>
