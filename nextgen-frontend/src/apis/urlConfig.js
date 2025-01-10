@@ -75,6 +75,8 @@ const urlConfig = {
 	menuGrossProfit: 'api/sales/getMenuGrossProfitReport',
 	menuGrossProfitRecipeInfo: 'api/sales/GetMenuGrossProfitRecipePopupReport',
 	GetSaleSummeryReport : 'api/sales/GetSaleSummeryReport',
+	brumitDWP: 'api/sales/GetBrumitDWP2ReportData',
+
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',
 	laborByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',

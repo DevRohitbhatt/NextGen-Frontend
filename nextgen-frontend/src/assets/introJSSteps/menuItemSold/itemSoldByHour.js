@@ -21,7 +21,7 @@ export default function itemSoldByHour() {
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Item Sold By Hour Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
+			intro: 'You can export the Item Sold By Hour Report to either .XLSX, .CSV or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.itemType-selector',

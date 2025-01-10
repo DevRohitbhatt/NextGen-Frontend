@@ -117,11 +117,17 @@ const Countsheets = () => {
 			columnHelper.accessor('dateTime', {
 				id: 'dateTime',
 				header: 'Date',
+				cell: ({getValue})=>{
+				let isDate  = dateFormat(getValue(), 'mm/dd/yyyy ddd HH:MM TT')
+			
+				return isDate
+				},
 				size: 180,
 			}),
 			columnHelper.accessor(
 				(row) => {
-					const formattedDate = `${row.userName} - ${dateFormat(row.saveDateTime, 'mm/dd/yyyy h:MM TT')}`;
+					let dateis = dateFormat(row.saveDateTime, 'mm/dd/yyyy h:MM TT');
+					const formattedDate = `${row.userName} - ${dateis}`;
 					// Combine formatted date and time
 					return formattedDate;
 				},
@@ -202,15 +208,14 @@ const Countsheets = () => {
 					...data,
 					companyId: companyID,
 					unitName: unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.unitId))?.unitName,
-					transfer: `Transfer ${
-						data.unitId === selectedUnit
+					transfer: `Transfer ${data.unitId === selectedUnit
 							? data.transferDestUnitID === 0
 								? 'to ???'
 								: 'to ' +
-								  unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.transferDestUnitID))
-										?.unitName
+								unitsAndAreas.units.find((unit) => unit.unitID === parseInt(data.transferDestUnitID))
+									?.unitName
 							: 'from ' + data.name
-					}`,
+						}`,
 				}));
 
 			setCountsheetData(newData);
@@ -260,14 +265,14 @@ const Countsheets = () => {
 
 	return (
 		<>
-			<div className='w-[85%] mx-auto'>
+			<div className='w-[98%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Browse Countsheets</h2>
+				<h2 className='my-2 text-2xl leading-tight text-left pageTitle'>Browse Countsheets</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
