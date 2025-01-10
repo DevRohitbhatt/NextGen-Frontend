@@ -76,9 +76,9 @@ const SalesSummary = () => {
             ...item,
             orderAverage: formattingData(item?.salesNet / item?.transactions),
             laborCost: formattingData(item?.laborVariable + item?.laborSalary),
-            laborHours: formattingData(
-              item?.laborVariableHours + item?.laborSalary
-            ),
+            laborHours: 
+              addDecimals(item?.laborVariableHours + item?.laborSalary)
+            ,
             laborPercent:
               item?.laborVariable == 0
                 ? 0.0
@@ -435,7 +435,8 @@ const SalesSummary = () => {
                 {groupOrUnitAccessName} - {selectedUnitName}
               </h2>
               <h2 className="text-lg font-semibold mb-4">
-                {dateFormat(selectedFromDate, 'mm-dd-yyyy')} to {dateFormat(selectedToDate, 'mm-dd-yyyy')}
+                {dateFormat(selectedFromDate, "mm-dd-yyyy")} to{" "}
+                {dateFormat(selectedToDate, "mm-dd-yyyy")}
               </h2>
             </div>
             <div className="max-h-[500px] overflow-auto tableHOC">
@@ -531,17 +532,13 @@ const SalesSummary = () => {
                   <tr>
                     <td className="border border-gray-300 p-2">Order Count</td>
                     <td className="border border-gray-300 p-2 text-right">
-                      {formattingData(
-                        salesSummrayData?.viewActivityDaily[0]?.transactions
-                      )}
+                      {salesSummrayData?.viewActivityDaily[0]?.transactions}
                     </td>
                   </tr>
                   <tr>
                     <td className="border border-gray-300 p-2">Covers</td>
                     <td className="border border-gray-300 p-2 text-right">
-                      {formattingData(
-                        salesSummrayData?.viewActivityDaily[0]?.nrsTotalOpen
-                      )}
+                      {salesSummrayData?.viewActivityDaily[0]?.nrsTotalOpen}
                     </td>
                   </tr>
                   <tr>
@@ -652,19 +649,15 @@ const SalesSummary = () => {
                         Total
                       </td>
                       <td className="border border-gray-300 p-2 text-right font-bold">
-                        {
-                          salesSummrayData.categorySummary.reduce(
-                            (sum, item) => sum + item.quantityItems,
-                            0
-                       
+                        {salesSummrayData.categorySummary.reduce(
+                          (sum, item) => sum + item.quantityItems,
+                          0
                         )}
                       </td>
                       <td className="border border-gray-300 p-2 text-right font-bold">
-                        {
-                          salesSummrayData.categorySummary.reduce(
-                            (sum, item) => sum + item.quantityModifiers,
-                            0
-                          
+                        {salesSummrayData.categorySummary.reduce(
+                          (sum, item) => sum + item.quantityModifiers,
+                          0
                         )}
                       </td>
                       <td className="border border-gray-300 p-2 text-right font-bold">
