@@ -371,7 +371,7 @@ const SalesSummary = () => {
       {isLoading && <Loader loading={isLoading} />}
       {Object.keys(salesSummrayData).length > 0 ? (
         <>
-          <div className="bg-white shadow-md rounded-lg mb-6 p-4 mt-[10px]">
+          <div className="bg-white shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)] rounded-lg mb-6 p-4 mt-[10px]">
             <h2 className="text-lg font-semibold mb-4">
               {groupOrUnitAccessName} - {selectedUnitName}
             </h2>
@@ -540,11 +540,11 @@ const SalesSummary = () => {
 
           {/* Category Sales Section */}
           {Object.keys(salesSummrayData).length > 0 && (
-            <div className="bg-white shadow-md rounded-lg mb-6 p-4 mt-[10px]">
+            <div className="bg-white shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)] rounded-lg mb-6 p-4 mt-[10px]">
               <h3 className="text-lg font-semibold mb-4">Category Sales</h3>
               <div className="max-h-[500px] overflow-auto tableHOC">
                 <table className="table-auto w-full border-collapse border border-gray-300">
-                  <thead className="bg-gray-200 sticky top-0">
+                  <thead className="bg-gray-200 sticky top-[-1px]">
                     <tr>
                       <th className="border border-gray-300 p-2 text-left">
                         Name
@@ -589,28 +589,28 @@ const SalesSummary = () => {
             </div>
           )}
           {/* Payments Section */}
-          <div className="bg-white shadow-md rounded-lg p-4 mt-[10px]">
+          <div className="bg-white shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)] rounded-lg p-4 mt-[10px]">
             <h3 className="text-lg font-semibold mb-4">Payments</h3>
             <div className="max-h-[500px] overflow-auto tableHOC">
-              <table className="table-auto w-full border-collapse border border-gray-300">
-                <thead className="bg-gray-200 sticky top-0 border border-gray-300">
-                  <tr>
-                    <th className=" p-2 text-left border border-gray-300">
+              <table className="table-auto w-full  border border-gray-300">
+                <thead className="">
+                  <tr className="bg-gray-200 sticky top-[-1px] m-o">
+                    <th className="  text-left ">
                       Name
                     </th>
-                    <th className=" p-2 text-right border border-gray-300">
+                    <th className=" p-2 text-right ">
                       Quantity
                     </th>
-                    <th className=" p-2 text-right border border-gray-300">
+                    <th className=" p-2 text-right ">
                       Payments
                     </th>
-                    <th className=" p-2 text-rightborder border-gray-300">
+                    <th className=" p-2 text-right ">
                       Tips
                     </th>
-                    <th className=" p-2 text-right border border-gray-300">
+                    <th className=" p-2 text-right ">
                       Total
                     </th>
-                    <th className=" p-2 text-right border border-gray-300">
+                    <th className=" p-2 text-right ">
                       Percent
                     </th>
                   </tr>
@@ -642,11 +642,11 @@ const SalesSummary = () => {
               </table>
             </div>
           </div>
-          <div className="bg-white shadow-md rounded-lg p-4 mt-[10px]">
+          <div className="bg-white shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)] rounded-lg p-4 mt-[10px]">
             <h3 className="text-lg font-semibold mb-4">Discounts</h3>
             <div className="max-h-[500px] overflow-auto tableHOC">
               <table className="table-auto w-full border-collapse border border-gray-300">
-                <thead className="bg-gray-200 sticky top-0">
+                <thead className="bg-gray-200 sticky top-[-1px]">
                   <tr>
                     <th className="border border-gray-300 p-2 text-left">
                       Name
