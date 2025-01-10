@@ -632,13 +632,13 @@ const SalesSummary = () => {
                           {item.categoryName}
                         </td>
                         <td className="border border-gray-300 p-2 text-right">
-                          {addDecimals(item.quantityItems)}
+                          {item.quantityItems}
                         </td>
                         <td className="border border-gray-300 p-2 text-right">
-                          {addDecimals(item.quantityModifiers)}
+                          {item.quantityModifiers}
                         </td>
                         <td className="border border-gray-300 p-2 text-right">
-                          ${formattingData(item.salesNet)}
+                          {formattingData(item.salesNet)}
                         </td>
                         <td className="border border-gray-300 p-2 text-right">
                           {multiplieForPercent(item.percentOfTotal)}%
@@ -652,19 +652,19 @@ const SalesSummary = () => {
                         Total
                       </td>
                       <td className="border border-gray-300 p-2 text-right font-bold">
-                        {addDecimals(
+                        {
                           salesSummrayData.categorySummary.reduce(
                             (sum, item) => sum + item.quantityItems,
                             0
-                          )
+                       
                         )}
                       </td>
                       <td className="border border-gray-300 p-2 text-right font-bold">
-                        {formattingData(
+                        {
                           salesSummrayData.categorySummary.reduce(
                             (sum, item) => sum + item.quantityModifiers,
                             0
-                          )
+                          
                         )}
                       </td>
                       <td className="border border-gray-300 p-2 text-right font-bold">
@@ -706,7 +706,7 @@ const SalesSummary = () => {
                         {item.name}
                       </td>
                       <td className="border border-gray-300 p-2 text-right">
-                        {addDecimals(item.quantity)}
+                        {item.quantity}
                       </td>
                       <td className="border border-gray-300 p-2 text-right">
                         {formattingData(item.amount)}
@@ -824,7 +824,7 @@ const SalesSummary = () => {
                       )}
                     </td>
                     <td className="border border-gray-300 p-2 text-right font-bold">
-                      100%
+                      {/* 100% */}
                     </td>
                   </tr>
                 </tfoot>
