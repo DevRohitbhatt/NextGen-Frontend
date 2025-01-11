@@ -53,8 +53,16 @@ const ManagementSalesCoverage = () => {
 	const [showUnitModal, setShowUnitModal] = useState(false); // State to manage modal visibility
 
 	//calendar state variables
-	const [selectedFromDate, setSelectedFromDate] = useState();
-	const [selectedToDate, setSelectedToDate] = useState();
+	const [selectedFromDate, setSelectedFromDate] = useState(() => {
+		const today = new Date();
+		const prevMonday = new Date(today.setDate(today.getDate() - today.getDay() - 6));
+		return prevMonday;
+	});
+	const [selectedToDate, setSelectedToDate] = useState(() => {
+		const today = new Date();
+		const nextMonday = new Date(today.setDate(today.getDate() + ((7 - today.getDay()) % 7)));
+		return nextMonday;
+	});
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [jobType, setJobType] = useState('');
@@ -182,32 +190,6 @@ const ManagementSalesCoverage = () => {
 		fetchLaborJobType();
 	}, []);
 
-	//Default date get
-	const getDefaultDates = async () => {
-		try {
-			const getData = {
-				url: 'getCurrentPeriodDates',
-				urlParams: {
-					companyId: companyID,
-				},
-			};
-
-			const result = await getCall(getData, false);
-			if (result?.data?.weekMaxDate) {
-				const maxDate = new Date(result?.data?.weekMaxDate);
-				const minDate = new Date(result?.data?.weekMinDate);
-				setSelectedFromDate(minDate);
-				setSelectedToDate(maxDate);
-			}
-		} catch (error) {
-			console.error('Error fetching default dates:', error);
-		}
-	};
-
-	useEffect(() => {
-		getDefaultDates();
-	}, []);
-
 	const fetchMgmtSalesCoverageReport = async () => {
 		try {
 			setIsError(false);
@@ -226,41 +208,44 @@ const ManagementSalesCoverage = () => {
 
 			const result = await getCall(getData);
 			if (result?.data.length > 0) {
-				const newData = result?.data?.map((week) => ({
-					week: `${week.weekNumber}: ${dateFormat(week.weekStartDate, 'mm/dd/yyyy')} - ${dateFormat(
-						week.weekEndDate,
-						'mm/dd/yyyy'
-					)}`,
-					subRows: week.managementSalesCoverageReportUnitModels
-						.map((unit) => ({
-							unitId: unit.unitId,
-							unit: unitsAndAreasList?.units?.find((item) => item.unitID === unit.unitId)?.unitName,
-							projectedSalesPerCoverage: unit.projectedSalesPerCoverage,
-							actualSalesPerCoverage: unit.actualSalesPerCoverage,
-							subRows: unit.managementSalesCoverageReportDateModels
-								.map((date) => ({
-									unit: unitsAndAreasList?.units?.find((item) => item.unitID === unit.unitId)
-										?.unitName,
-									date: dateFormat(date.date, 'mm/dd/yyyy'),
-									projectedSalesPerCoverage: date.projectedSalesPerCoverage,
-									actualSalesPerCoverage: date.actualSalesPerCoverage,
-									scheduledShifts:
-										date.scheduledShifts?.trim() === '12:00 AM - 12:00 AM'
-											? ''
-											: date.scheduledShifts,
-									actualShifts: date.actualShifts,
-									projectedDailySales:
-										date.projectedDailySales === null ? 0 : date.projectedDailySales,
-									actualDailySales: date.actualDailySales === null ? 0 : date.actualDailySales,
-									projectedManagementWork:
-										date.projectedManagementWork === null ? 0 : date.projectedManagementWork,
-									actualManagementWork:
-										date.actualManagementWork === null ? 0 : date.actualManagementWork,
-								}))
-								.sort((a, b) => new Date(a.date) - new Date(b.date)),
-						}))
-						.sort((a, b) => a.unitId - b.unitId),
-				}));
+				const newData = result?.data
+					?.map((week) => ({
+						weekNumber: week.weekNumber.replace(/\D/g, ''),
+						week: `${week.weekNumber}: ${dateFormat(week.weekStartDate, 'mm/dd/yyyy')} - ${dateFormat(
+							week.weekEndDate,
+							'mm/dd/yyyy'
+						)}`,
+						subRows: week.managementSalesCoverageReportUnitModels
+							.map((unit) => ({
+								unitId: unit.unitId,
+								unit: unitsAndAreasList?.units?.find((item) => item.unitID === unit.unitId)?.unitName,
+								projectedSalesPerCoverage: unit.projectedSalesPerCoverage,
+								actualSalesPerCoverage: unit.actualSalesPerCoverage,
+								subRows: unit.managementSalesCoverageReportDateModels
+									.map((date) => ({
+										unit: unitsAndAreasList?.units?.find((item) => item.unitID === unit.unitId)
+											?.unitName,
+										date: dateFormat(date.date, 'mm/dd/yyyy'),
+										projectedSalesPerCoverage: date.projectedSalesPerCoverage,
+										actualSalesPerCoverage: date.actualSalesPerCoverage,
+										scheduledShifts:
+											date.scheduledShifts?.trim() === '12:00 AM - 12:00 AM'
+												? ''
+												: date.scheduledShifts,
+										actualShifts: date.actualShifts,
+										projectedDailySales:
+											date.projectedDailySales === null ? 0 : date.projectedDailySales,
+										actualDailySales: date.actualDailySales === null ? 0 : date.actualDailySales,
+										projectedManagementWork:
+											date.projectedManagementWork === null ? 0 : date.projectedManagementWork,
+										actualManagementWork:
+											date.actualManagementWork === null ? 0 : date.actualManagementWork,
+									}))
+									.sort((a, b) => new Date(a.date) - new Date(b.date)),
+							}))
+							.sort((a, b) => a.unitId - b.unitId),
+					}))
+					.sort((a, b) => a.weekNumber - b.weekNumber);
 
 				setMgmtSalesCoverageData(newData);
 			} else {
