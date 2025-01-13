@@ -216,6 +216,7 @@ const ManagementSalesCoverage = () => {
 							'mm/dd/yyyy'
 						)}`,
 						subRows: week.managementSalesCoverageReportUnitModels
+							.filter((unit) => unit.managementSalesCoverageReportDateModels.length > 0)
 							.map((unit) => ({
 								unitId: unit.unitId,
 								unit: unitsAndAreasList?.units?.find((item) => item.unitID === unit.unitId)?.unitName,
