@@ -153,7 +153,9 @@ const SalesSummary = () => {
             .getCoreRowModel()
             .rows.reduce((sum, item) => sum + parseFloat(item.original.tip), 0);
           return (
-            <div className="w-full text-center" aria-hidden>{formattingData(tip)}</div>
+            <div className="w-full text-center" aria-hidden>
+              {formattingData(tip)}
+            </div>
           );
         },
       },
@@ -166,7 +168,10 @@ const SalesSummary = () => {
           let total = table
             .getCoreRowModel()
             .rows.reduce(
-              (sum, item) => sum + parseFloat(item.original.amount) + parseFloat(item.original.tip),
+              (sum, item) =>
+                sum +
+                parseFloat(item.original.amount) +
+                parseFloat(item.original.tip),
               0
             );
           return (
@@ -189,7 +194,9 @@ const SalesSummary = () => {
       {
         accessorKey: "typeItemName",
         header: <div className="w-full text-left">Name</div>,
-        cell: (info) => <div className="w-full text-left">{info.getValue()}</div>,
+        cell: (info) => (
+          <div className="w-full text-left">{info.getValue()}</div>
+        ),
         footer: ({ table }) => <div className="w-full text-left">Total</div>,
       },
       {
@@ -199,9 +206,14 @@ const SalesSummary = () => {
         footer: ({ table }) => {
           let quantityTickets = table
             .getCoreRowModel()
-            .rows.reduce((sum, item) => sum + parseFloat(item.original.quantityTickets), 0);
+            .rows.reduce(
+              (sum, item) => sum + parseFloat(item.original.quantityTickets),
+              0
+            );
           return (
-            <div className="w-full text-center" aria-hidden>{quantityTickets}</div>
+            <div className="w-full text-center" aria-hidden>
+              {quantityTickets}
+            </div>
           );
         },
       },
@@ -212,9 +224,14 @@ const SalesSummary = () => {
         footer: ({ table }) => {
           let amountDiscount = table
             .getCoreRowModel()
-            .rows.reduce((sum, item) => sum + parseFloat(item.original.amountDiscount), 0);
+            .rows.reduce(
+              (sum, item) => sum + parseFloat(item.original.amountDiscount),
+              0
+            );
           return (
-            <div className="w-full text-center" aria-hidden>{formattingData(amountDiscount)}</div>
+            <div className="w-full text-center" aria-hidden>
+              {formattingData(amountDiscount)}
+            </div>
           );
         },
       },
@@ -297,7 +314,6 @@ const SalesSummary = () => {
         urlParams: {
           companyId: companyID,
           alignmentId: alignmentID,
-          //   memberId: selectedUnit,
           fromDate: dateFormat(selectedFromDate, "yyyy-mm-dd"),
           toDate: dateFormat(selectedToDate, "yyyy-mm-dd"),
           UnitID: selectedUnit,
@@ -306,7 +322,9 @@ const SalesSummary = () => {
 
       const result = await getCall(getData);
       if (result?.data) {
-        let totalOfViewActivity = await aggregateData(result.data.viewActivityDaily);
+        let totalOfViewActivity = await aggregateData(
+          result.data.viewActivityDaily
+        );
         let viewActivityDaily = totalOfViewActivity.map((item) => {
           let activity = {
             ...item,
@@ -357,7 +375,6 @@ const SalesSummary = () => {
       setSelectedUnitName(defaultUnitName);
     }
   }, [defaultUnitID, defaultUnitName]);
- 
 
   const handlePDFClick = () => {
     const metaInfo = {
@@ -472,6 +489,19 @@ const SalesSummary = () => {
     data.push(grossSalesSection);
 
     // Category Sales Section
+    let categoryData = salesSummaryData.categorySummary;
+    categoryData[categoryData.length] = {
+      categoryName: "Total",
+      quantityItems: categoryData.reduce(
+        (sum, item) => sum + parseFloat(item.quantityItems),
+        0
+      ),
+      salesNet: categoryData.reduce(
+        (sum, item) => sum + parseFloat(item.salesNet),
+        0
+      ),
+      percentOfTotal: 1,
+    };
     const categorySalesSection = {
       name: "Category Sales",
       columns: [
@@ -480,17 +510,36 @@ const SalesSummary = () => {
         { name: "Sales Net" },
         { name: "Percent" },
       ],
-      data: salesSummaryData.categorySummary.map((item) => [
+      data: categoryData.map((item, index) => [
         item.categoryName,
         item.quantityItems,
         `$${item.salesNet?.toFixed(2)}`,
         `${(item.percentOfTotal * 100).toFixed(2)}%`,
       ]),
     };
-
     data.push(categorySalesSection);
+    categoryData = [];
 
     // Payments Section
+    let paymentData = salesSummaryData.paymentsSummary;
+
+    // Add Total Row
+    paymentData[paymentData.length] = {
+      name: "Total",
+      quantity: paymentData.reduce(
+        (sum, item) => sum + parseFloat(item.quantity || 0),
+        0
+      ),
+      amount: paymentData.reduce(
+        (sum, item) => sum + parseFloat(item.amount || 0),
+        0
+      ),
+      tip: paymentData.reduce(
+        (sum, item) => sum + parseFloat(item.tip || 0),
+        0
+      ),
+      percentOfTotal: 1, // Total percent should always be 1 (or 100%)
+    };
     const paymentsSection = {
       name: "Payments",
       columns: [
@@ -501,7 +550,7 @@ const SalesSummary = () => {
         { name: "Total" },
         { name: "Percent" },
       ],
-      data: salesSummaryData.paymentsSummary.map((item) => [
+      data: paymentData.map((item) => [
         item.name,
         item.quantity,
         `$${item.amount?.toFixed(2)}`,
@@ -512,8 +561,27 @@ const SalesSummary = () => {
     };
 
     data.push(paymentsSection);
-
+    paymentData = [];
     // Discounts Section
+    let discountData = salesSummaryData.discountSummary;
+
+    // Add Total Row
+    discountData[discountData.length] = {
+      typeItemName: "Total",
+      quantityTickets: discountData.reduce(
+        (sum, item) => sum + parseFloat(item.quantityTickets || 0),
+        0
+      ),
+      amountDiscount: discountData.reduce(
+        (sum, item) => sum + parseFloat(item.amountDiscount || 0),
+        0
+      ),
+      quantityTicketItems: discountData.reduce(
+        (sum, item) => sum + parseFloat(item.quantityTicketItems || 0),
+        0
+      ),
+    };
+
     const discountsSection = {
       name: "Discounts",
       columns: [
@@ -522,7 +590,7 @@ const SalesSummary = () => {
         { name: "Total" },
         { name: "Items" },
       ],
-      data: salesSummaryData.discountSummary.map((item) => [
+      data: discountData.map((item) => [
         item.typeItemName,
         item.quantityTickets,
         `$${item.amountDiscount?.toFixed(2)}`,
@@ -531,7 +599,7 @@ const SalesSummary = () => {
     };
 
     data.push(discountsSection);
-
+    discountData= []
     return data;
   };
 
@@ -645,7 +713,10 @@ const SalesSummary = () => {
                 salesSummrayData,
                 "Sales_Summary_Report",
                 "Sales Summary Report",
-                `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} - ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`,
+                `${dateFormat(selectedFromDate, "mm-dd-yyyy")} - ${dateFormat(
+                  selectedToDate,
+                  "mm-dd-yyyy"
+                )}`,
                 `${groupOrUnitAccessName} - ${selectedUnitName}`
               );
             }}
