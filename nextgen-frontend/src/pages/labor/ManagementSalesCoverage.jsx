@@ -98,7 +98,9 @@ const ManagementSalesCoverage = () => {
 							<CiSquarePlus className='text-[20px]' />
 						)}
 						{row.depth === 0 ? (
-							<div>{row.original.week}</div>
+							<div>
+								<span className='font-bold'>Week {row.original.weekNumber}:</span> {row.original.week}
+							</div>
 						) : (
 							<div>
 								<span className='mr-1 font-bold'>Unit:</span>
@@ -211,7 +213,7 @@ const ManagementSalesCoverage = () => {
 				const newData = result?.data
 					?.map((week) => ({
 						weekNumber: week.weekNumber.replace(/\D/g, ''),
-						week: `${week.weekNumber}: ${dateFormat(week.weekStartDate, 'mm/dd/yyyy')} - ${dateFormat(
+						week: `${dateFormat(week.weekStartDate, 'mm/dd/yyyy')} - ${dateFormat(
 							week.weekEndDate,
 							'mm/dd/yyyy'
 						)}`,
@@ -242,6 +244,9 @@ const ManagementSalesCoverage = () => {
 										actualManagementWork:
 											date.actualManagementWork === null ? 0 : date.actualManagementWork,
 									}))
+									.filter(
+										(date, index, self) => self.findIndex((d) => d.date === date.date) === index
+									)
 									.sort((a, b) => new Date(a.date) - new Date(b.date)),
 							}))
 							.sort((a, b) => a.unitId - b.unitId),
@@ -410,7 +415,7 @@ const ManagementSalesCoverage = () => {
 
 	const buildPDFBody = () => {
 		const body = mgmtSalesCoverageData.map((row) => {
-			const title = row.week;
+			const title = `Week ${row.weekNumber}: ${row.week}`;
 			return {
 				type: 'table',
 				title: title,
@@ -486,7 +491,7 @@ const ManagementSalesCoverage = () => {
 				data: mgmtSalesCoverageData.flatMap((week) =>
 					week.subRows.flatMap((unit) =>
 						unit.subRows.map((date) => ({
-							week: week.week,
+							week: `Week ${week.weekNumber}: ${week.week}`,
 							unit: unit.unit,
 							date: date.date,
 							projectedSalesPerCoverage: formattingDataWithoutDollr(date.projectedSalesPerCoverage),
