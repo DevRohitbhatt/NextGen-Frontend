@@ -20,6 +20,8 @@ import {
 } from "../../functions/formatingCurrency";
 import generateSalesSummaryPDF from "../../components/exportOptions/SalesSumarayexportPdf";
 import exportToExcel from "../../components/exportOptions/ExcelExport";
+import { Steps } from "intro.js-react";
+import salesSummary from "../../assets/introJSSteps/salesSummary";
 
 const SalesSummary = () => {
   const {
@@ -40,6 +42,11 @@ const SalesSummary = () => {
   const [showDateModal, setShowDateModal] = useState(false);
   const [salesSummrayData, setSelesSummrayData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [introSteps, setIntroSteps] = useState({
+      steps: salesSummary(),
+      initialStep: 0,
+      stepsEnabled: false,
+    });
 
   const categorySalesColumns = React.useMemo(
     () => [
@@ -62,7 +69,11 @@ const SalesSummary = () => {
               (sum, item) => sum + parseFloat(item.original.quantityItems),
               0
             );
-          return <div className="w-full text-center">{valueFormatewithoutDecimal(qtyItem)}</div>;
+          return (
+            <div className="w-full text-center">
+              {valueFormatewithoutDecimal(qtyItem)}
+            </div>
+          );
         },
       },
       {
@@ -76,7 +87,11 @@ const SalesSummary = () => {
               (sum, item) => sum + parseFloat(item.original.quantityModifiers),
               0
             );
-          return <div className="w-full text-center">{valueFormatewithoutDecimal(quantityModifiers)}</div>;
+          return (
+            <div className="w-full text-center">
+              {valueFormatewithoutDecimal(quantityModifiers)}
+            </div>
+          );
         },
       },
       {
@@ -113,7 +128,7 @@ const SalesSummary = () => {
         cell: (info) => (
           <div className="w-full text-left"> {info.getValue()}</div>
         ),
-        footer:()=><div className="w-full text-left">Total</div>,
+        footer: () => <div className="w-full text-left">Total</div>,
       },
       {
         accessorKey: "quantity",
@@ -126,7 +141,11 @@ const SalesSummary = () => {
               (sum, item) => sum + parseFloat(item.original.quantity),
               0
             );
-          return <div className="w-full text-center">{valueFormatewithoutDecimal(quantity)}</div>;
+          return (
+            <div className="w-full text-center">
+              {valueFormatewithoutDecimal(quantity)}
+            </div>
+          );
         },
       },
       {
@@ -334,6 +353,7 @@ const SalesSummary = () => {
             laborHours: addDecimals(
               item?.laborVariableHours + item?.laborSalary
             ),
+            transactions: item.transactions + "",
             laborPercent:
               item?.laborVariable == 0
                 ? 0.0
@@ -493,14 +513,18 @@ const SalesSummary = () => {
     let categoryData = [...salesSummaryData.categorySummary];
     categoryData[categoryData.length] = {
       categoryName: "Total",
-      quantityItems: valueFormatewithoutDecimal(categoryData.reduce(
-        (sum, item) => sum + parseFloat(item.quantityItems),
-        0
-      )),
-      quantityModifiers: valueFormatewithoutDecimal(categoryData.reduce(
-        (sum, item) => sum + parseFloat(item.quantityModifiers),
-        0
-      )),
+      quantityItems: valueFormatewithoutDecimal(
+        categoryData.reduce(
+          (sum, item) => sum + parseFloat(item.quantityItems),
+          0
+        )
+      ),
+      quantityModifiers: valueFormatewithoutDecimal(
+        categoryData.reduce(
+          (sum, item) => sum + parseFloat(item.quantityModifiers),
+          0
+        )
+      ),
       salesNet: categoryData.reduce(
         (sum, item) => sum + parseFloat(item.salesNet),
         0
@@ -595,7 +619,7 @@ const SalesSummary = () => {
         { name: "Name" },
         { name: "Quantity" },
         { name: "Total" },
-        { name: "Items" },
+        { name: "Percent" },
       ],
       data: discountData.map((item) => [
         item.typeItemName,
@@ -606,7 +630,7 @@ const SalesSummary = () => {
     };
 
     data.push(discountsSection);
-    discountData= []
+    discountData = [];
     return data;
   };
 
@@ -673,6 +697,12 @@ const SalesSummary = () => {
   };
   return (
     <div className="w-[98%] mx-auto pageContainer">
+      <Steps
+        enabled={introSteps.stepsEnabled}
+        steps={introSteps.steps}
+        initialStep={introSteps.initialStep}
+        onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+      />
       <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
         Sales Summary
       </h2>
@@ -728,6 +758,7 @@ const SalesSummary = () => {
               );
             }}
             includeHelp={true}
+            handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 
             // handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
           />
@@ -737,7 +768,7 @@ const SalesSummary = () => {
       {isLoading && <Loader loading={isLoading} />}
       {Object.keys(salesSummrayData).length > 0 ? (
         <>
-          <div className="  rounded-lg mb-0 p-4  ">
+          <div className="  rounded-lg mb-0 p-4  all">
             <div className="flex justify-between">
               {" "}
               <h2 className="text-lg font-semibold mb-4">
@@ -760,7 +791,7 @@ const SalesSummary = () => {
 
           {/* Category Sales Section */}
           {Object.keys(salesSummrayData).length > 0 && (
-            <div className=" paged-table rounded-lg p-4 mt-[-20px] ">
+            <div className=" paged-table rounded-lg p-4 mt-[-20px] categorySales">
               <h3 className="text-lg font-semibold mb-4">Category Sales</h3>
               <TableHOC
                 columns={categorySalesColumns}
@@ -771,7 +802,7 @@ const SalesSummary = () => {
             </div>
           )}
           {/* Payments Section */}
-          <div className=" paged-table rounded-lg p-4 mt-[-20px] ">
+          <div className=" paged-table rounded-lg p-4 mt-[-20px] Payments">
             <h3 className="text-lg font-semibold mb-4">Payments</h3>
             <TableHOC
               columns={paymentsColumns}
@@ -780,7 +811,7 @@ const SalesSummary = () => {
               isFooter={true}
             />
           </div>
-          <div className=" paged-table rounded-lg p-4 mt-[-20px]">
+          <div className=" paged-table rounded-lg p-4 mt-[-20px] Discounts">
             <h3 className="text-lg font-semibold mb-4">Discounts</h3>
             <TableHOC
               columns={discountsColumns}

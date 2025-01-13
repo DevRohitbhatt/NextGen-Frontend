@@ -220,10 +220,7 @@ const generateSalesSummaryPDF = (data) => {
               0
             )
           ),
-          data.discountSummary.reduce(
-            (sum, item) => sum + item.quantityTicketItems,
-            0
-          ),
+          "",
         ],
       ],
     },
