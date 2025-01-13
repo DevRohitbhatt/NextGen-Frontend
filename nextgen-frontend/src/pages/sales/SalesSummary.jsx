@@ -62,7 +62,7 @@ const SalesSummary = () => {
               (sum, item) => sum + parseFloat(item.original.quantityItems),
               0
             );
-          return <div className="w-full text-center">{qtyItem}</div>;
+          return <div className="w-full text-center">{valueFormatewithoutDecimal(qtyItem)}</div>;
         },
       },
       {
@@ -76,7 +76,7 @@ const SalesSummary = () => {
               (sum, item) => sum + parseFloat(item.original.quantityModifiers),
               0
             );
-          return <div className="w-full text-center">{quantityModifiers}</div>;
+          return <div className="w-full text-center">{valueFormatewithoutDecimal(quantityModifiers)}</div>;
         },
       },
       {
@@ -113,6 +113,7 @@ const SalesSummary = () => {
         cell: (info) => (
           <div className="w-full text-left"> {info.getValue()}</div>
         ),
+        footer:()=><div className="w-full text-left">Total</div>,
       },
       {
         accessorKey: "quantity",
@@ -125,7 +126,7 @@ const SalesSummary = () => {
               (sum, item) => sum + parseFloat(item.original.quantity),
               0
             );
-          return <div className="w-full text-center">{quantity}</div>;
+          return <div className="w-full text-center">{valueFormatewithoutDecimal(quantity)}</div>;
         },
       },
       {
@@ -212,7 +213,7 @@ const SalesSummary = () => {
             );
           return (
             <div className="w-full text-center" aria-hidden>
-              {quantityTickets}
+              {valueFormatewithoutDecimal(quantityTickets)}
             </div>
           );
         },
@@ -275,7 +276,7 @@ const SalesSummary = () => {
       { label: "Promotions", value: data?.promo },
       { label: "Refunds", value: data?.refunds },
       { label: "Voids", value: data?.voids },
-      { label: "Sales Non Cash", value: data?.salesFood },
+      { label: "Sales Non Cash", value: data?.planSalesNet },
       { label: "Deposits", value: data?.deposits },
       { label: "Cash OverShort", value: data?.cashOverShort },
       { label: "Order Count", value: data?.transactions },
@@ -424,7 +425,7 @@ const SalesSummary = () => {
         ],
         [
           "Sales Non Cash",
-          `$${salesSummaryData.viewActivityDaily[0]?.salesFood?.toFixed(2)}`,
+          `$${salesSummaryData.viewActivityDaily[0]?.planSalesNet?.toFixed(2)}`,
         ],
         [
           "Deposits",
@@ -492,10 +493,10 @@ const SalesSummary = () => {
     let categoryData = salesSummaryData.categorySummary;
     categoryData[categoryData.length] = {
       categoryName: "Total",
-      quantityItems: categoryData.reduce(
+      quantityItems: valueFormatewithoutDecimal(categoryData.reduce(
         (sum, item) => sum + parseFloat(item.quantityItems),
         0
-      ),
+      )),
       salesNet: categoryData.reduce(
         (sum, item) => sum + parseFloat(item.salesNet),
         0
@@ -730,7 +731,7 @@ const SalesSummary = () => {
       {isLoading && <Loader loading={isLoading} />}
       {Object.keys(salesSummrayData).length > 0 ? (
         <>
-          <div className="bg-white  rounded-lg mb-6 p-4 ">
+          <div className="  rounded-lg mb-0 p-4  ">
             <div className="flex justify-between">
               {" "}
               <h2 className="text-lg font-semibold mb-4">
@@ -753,7 +754,7 @@ const SalesSummary = () => {
 
           {/* Category Sales Section */}
           {Object.keys(salesSummrayData).length > 0 && (
-            <div className="bg-white paged-table rounded-lg p-4 ">
+            <div className=" paged-table rounded-lg p-4 mt-[-20px] ">
               <h3 className="text-lg font-semibold mb-4">Category Sales</h3>
               <TableHOC
                 columns={categorySalesColumns}
@@ -764,7 +765,7 @@ const SalesSummary = () => {
             </div>
           )}
           {/* Payments Section */}
-          <div className="bg-white paged-table rounded-lg p-4 ">
+          <div className=" paged-table rounded-lg p-4 mt-[-20px] ">
             <h3 className="text-lg font-semibold mb-4">Payments</h3>
             <TableHOC
               columns={paymentsColumns}
@@ -773,7 +774,7 @@ const SalesSummary = () => {
               isFooter={true}
             />
           </div>
-          <div className="bg-white paged-table rounded-lg p-4 ">
+          <div className=" paged-table rounded-lg p-4 mt-[-20px]">
             <h3 className="text-lg font-semibold mb-4">Discounts</h3>
             <TableHOC
               columns={discountsColumns}

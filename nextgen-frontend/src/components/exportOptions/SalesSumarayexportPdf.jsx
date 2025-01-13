@@ -1,4 +1,5 @@
 import pdfMake from "pdfmake/build/pdfmake";
+import { addDecimals, formattingData, valueFormatewithoutDecimal } from "../../functions/formatingCurrency";
 
 pdfMake.fonts = {
   Roboto: {
@@ -14,10 +15,6 @@ pdfMake.fonts = {
 
 const generateSalesSummaryPDF = (data) => {
   // Format helpers
-  const formatCurrency = (value) =>
-    value !== undefined && value !== null
-      ? `$${parseFloat(value).toFixed(2)}`
-      : "$0.00";
 
   const formatPercent = (value) =>
     value !== undefined && value !== null
@@ -31,47 +28,47 @@ const generateSalesSummaryPDF = (data) => {
       body: [
         [
           { text: "Gross Sales", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.salesGross),
+          formattingData(data.viewActivityDaily[0]?.salesGross),
         ],
         [
           { text: "Net Sales", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.salesNet),
+          formattingData(data.viewActivityDaily[0]?.salesNet),
         ],
         [
           { text: "Tax", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.salesTax),
+          formattingData(data.viewActivityDaily[0]?.salesTax),
         ],
         [
           { text: "Comps", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.comps),
+          formattingData(data.viewActivityDaily[0]?.comps),
         ],
         [
           { text: "Promotions", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.promo),
+          formattingData(data.viewActivityDaily[0]?.promo),
         ],
         [
           { text: "Refunds", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.refunds),
+          formattingData(data.viewActivityDaily[0]?.refunds),
         ],
         [
           { text: "Voids", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.voids),
+          formattingData(data.viewActivityDaily[0]?.voids),
         ],
         [
           { text: "Sales Non Cash", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.salesFood),
+          formattingData(data.viewActivityDaily[0]?.planSalesNet),
         ],
         [
           { text: "Deposits", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.deposits),
+          formattingData(data.viewActivityDaily[0]?.deposits),
         ],
         [
           { text: "Cash OverShort", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.cashOverShort),
+          formattingData(data.viewActivityDaily[0]?.cashOverShort),
         ],
         [
           { text: "Order Count", style: "tableHeader" },
-          data.viewActivityDaily[0]?.transactions || "0",
+          valueFormatewithoutDecimal(data.viewActivityDaily[0]?.transactions) || "0",
         ],
         [
           { text: "Covers", style: "tableHeader" },
@@ -79,14 +76,14 @@ const generateSalesSummaryPDF = (data) => {
         ],
         [
           { text: "Order Average", style: "tableHeader" },
-          formatCurrency(
+          formattingData(
             data.viewActivityDaily[0]?.salesNet /
               data.viewActivityDaily[0]?.transactions
           ),
         ],
         [
           { text: "Labor Cost", style: "tableHeader" },
-          formatCurrency(
+          formattingData(
             data.viewActivityDaily[0]?.laborVariable +
               data.viewActivityDaily[0]?.laborSalary
           ),
@@ -109,11 +106,11 @@ const generateSalesSummaryPDF = (data) => {
         ],
         [
           { text: "Gift Cards Redeemed", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.giftCertificate),
+          formattingData(data.viewActivityDaily[0]?.giftCertificate),
         ],
         [
           { text: "Gift Cards Sold", style: "tableHeader" },
-          formatCurrency(data.viewActivityDaily[0]?.giftCertificatesSold),
+          formattingData(data.viewActivityDaily[0]?.giftCertificatesSold),
         ],
       ],
     },
@@ -123,24 +120,27 @@ const generateSalesSummaryPDF = (data) => {
   const categorySalesSection = {
     table: {
       headerRows: 1,
-      widths: ["40%", "20%", "20%", "20%"],
+      widths: ["20%","20%", "20%", "20%", "20%"],
       body: [
         [
           { text: "Name", style: "tableHeader" },
           { text: "Qty Items", style: "tableHeader" },
+          { text: "Qty Mode", style: "tableHeader" },
           { text: "Sales Net", style: "tableHeader" },
           { text: "Percent", style: "tableHeader" },
         ],
         ...data.categorySummary.map((item) => [
           item.categoryName,
-          item.quantityItems,
-          formatCurrency(item.salesNet),
+          valueFormatewithoutDecimal(item.quantityItems),
+          valueFormatewithoutDecimal(item.quantityModifiers),
+          formattingData(item.salesNet),
           formatPercent(item.percentOfTotal),
         ]),
         [
           { text: "Total", style: "tableHeader" },
-          data.categorySummary.reduce((sum, item) => sum + item.quantityItems, 0),
-          formatCurrency(
+          valueFormatewithoutDecimal(data.categorySummary.reduce((sum, item) => sum + item.quantityItems, 0)),
+          data.categorySummary.reduce((sum, item) => sum + item.quantityModifiers, 0),
+          formattingData(
             data.categorySummary.reduce((sum, item) => sum + item.salesNet, 0)
           ),
           "100%",
@@ -165,21 +165,21 @@ const generateSalesSummaryPDF = (data) => {
         ...data.paymentsSummary.map((item) => [
           item.name,
           item.quantity,
-          formatCurrency(item.amount),
-          formatCurrency(item.tip),
-          formatCurrency(item.amount + item.tip),
+          formattingData(item.amount),
+          formattingData(item.tip),
+          formattingData(item.amount + item.tip),
           formatPercent(item.percentOfTotal),
         ]),
         [
           { text: "Total", style: "tableHeader" },
           data.paymentsSummary.reduce((sum, item) => sum + item.quantity, 0),
-          formatCurrency(
+          formattingData(
             data.paymentsSummary.reduce((sum, item) => sum + item.amount, 0)
           ),
-          formatCurrency(
+          formattingData(
             data.paymentsSummary.reduce((sum, item) => sum + item.tip, 0)
           ),
-          formatCurrency(
+          formattingData(
             data.paymentsSummary.reduce(
               (sum, item) => sum + item.amount + item.tip,
               0
@@ -200,13 +200,13 @@ const generateSalesSummaryPDF = (data) => {
           { text: "Name", style: "tableHeader" },
           { text: "Tickets", style: "tableHeader" },
           { text: "Amount", style: "tableHeader" },
-          { text: "Items", style: "tableHeader" },
+          { text: "Percent", style: "tableHeader" },
         ],
         ...data.discountSummary.map((item) => [
           item.typeItemName,
           item.quantityTickets,
-          formatCurrency(item.amountDiscount),
-          item.quantityTicketItems,
+          formattingData(item.amountDiscount),
+          formatPercent(item.amountDiscountPercentOfTotal),
         ]),
         [
           { text: "Total", style: "tableHeader" },
@@ -214,7 +214,7 @@ const generateSalesSummaryPDF = (data) => {
             (sum, item) => sum + item.quantityTickets,
             0
           ),
-          formatCurrency(
+          formattingData(
             data.discountSummary.reduce(
               (sum, item) => sum + item.amountDiscount,
               0
@@ -263,7 +263,7 @@ const generateSalesSummaryPDF = (data) => {
       },
       tableHeader: {
         bold: true,
-        fontSize: 10,
+        fontSize: 12,
         fillColor: "#CCCCCC",
       },
     },
