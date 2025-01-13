@@ -116,7 +116,7 @@ const ManagementSalesCoverage = () => {
 			cell: ({ row, getValue }) =>
 				row.getCanExpand() ? (
 					row.depth === 1 ? (
-						<div>
+						<div className='mx-4'>
 							<span className='mr-1 font-bold'>Projected Sales % Coverage:</span>
 							{formattingDataWithoutDollr(row.original?.projectedSalesPerCoverage)}%
 						</div>
@@ -131,7 +131,7 @@ const ManagementSalesCoverage = () => {
 			cell: ({ row, getValue }) =>
 				row.getCanExpand() ? (
 					row.depth === 1 ? (
-						<div>
+						<div className='mx-4'>
 							<span className='mr-1 font-bold'>Actual Sales % Coverage:</span>
 							{formattingDataWithoutDollr(row.original?.actualSalesPerCoverage)}%
 						</div>
@@ -614,7 +614,7 @@ const ManagementSalesCoverage = () => {
 					isOpen={isChartModalOpen}
 					onClose={() => setIsChartModalOpen(!isChartModalOpen)}
 				>
-					<div className='m-4 w-[60rem] border border-solid border-black '>
+					<div className='m-4 xl:w-[60rem] md:w-[40rem] w-fit border border-black border-solid '>
 						{isChartLoading ? (
 							<Loader loading={isChartLoading} />
 						) : (
