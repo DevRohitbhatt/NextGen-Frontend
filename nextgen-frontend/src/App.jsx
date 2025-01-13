@@ -37,10 +37,11 @@ import {
 	MenuItemsSold,
 	LaborAnalysis,
 	CookChart,
-	CookChartTemplate
+	CookChartTemplate,
+	SalesSummary
 } from './pages';
 import { Suspense } from 'react';
-import SalesSummary from './pages/sales/SalesSummray.jsx';
+// import SalesSummary from './pages/sales/SalesSummray.jsx';
 
 const App = () => {
 	const [selectedTheme, setSelectedTheme] = useState(themes.default);
