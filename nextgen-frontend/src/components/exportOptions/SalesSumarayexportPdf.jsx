@@ -137,6 +137,14 @@ const generateSalesSummaryPDF = (data) => {
           formatCurrency(item.salesNet),
           formatPercent(item.percentOfTotal),
         ]),
+        [
+          { text: "Total", style: "tableHeader" },
+          data.categorySummary.reduce((sum, item) => sum + item.quantityItems, 0),
+          formatCurrency(
+            data.categorySummary.reduce((sum, item) => sum + item.salesNet, 0)
+          ),
+          "100%",
+        ],
       ],
     },
   };
@@ -162,6 +170,23 @@ const generateSalesSummaryPDF = (data) => {
           formatCurrency(item.amount + item.tip),
           formatPercent(item.percentOfTotal),
         ]),
+        [
+          { text: "Total", style: "tableHeader" },
+          data.paymentsSummary.reduce((sum, item) => sum + item.quantity, 0),
+          formatCurrency(
+            data.paymentsSummary.reduce((sum, item) => sum + item.amount, 0)
+          ),
+          formatCurrency(
+            data.paymentsSummary.reduce((sum, item) => sum + item.tip, 0)
+          ),
+          formatCurrency(
+            data.paymentsSummary.reduce(
+              (sum, item) => sum + item.amount + item.tip,
+              0
+            )
+          ),
+          "100%",
+        ],
       ],
     },
   };
@@ -183,6 +208,23 @@ const generateSalesSummaryPDF = (data) => {
           formatCurrency(item.amountDiscount),
           item.quantityTicketItems,
         ]),
+        [
+          { text: "Total", style: "tableHeader" },
+          data.discountSummary.reduce(
+            (sum, item) => sum + item.quantityTickets,
+            0
+          ),
+          formatCurrency(
+            data.discountSummary.reduce(
+              (sum, item) => sum + item.amountDiscount,
+              0
+            )
+          ),
+          data.discountSummary.reduce(
+            (sum, item) => sum + item.quantityTicketItems,
+            0
+          ),
+        ],
       ],
     },
   };
