@@ -490,11 +490,15 @@ const SalesSummary = () => {
     data.push(grossSalesSection);
 
     // Category Sales Section
-    let categoryData = salesSummaryData.categorySummary;
+    let categoryData = [...salesSummaryData.categorySummary];
     categoryData[categoryData.length] = {
       categoryName: "Total",
       quantityItems: valueFormatewithoutDecimal(categoryData.reduce(
         (sum, item) => sum + parseFloat(item.quantityItems),
+        0
+      )),
+      quantityModifiers: valueFormatewithoutDecimal(categoryData.reduce(
+        (sum, item) => sum + parseFloat(item.quantityModifiers),
         0
       )),
       salesNet: categoryData.reduce(
@@ -508,12 +512,14 @@ const SalesSummary = () => {
       columns: [
         { name: "Name" },
         { name: "Qty Items" },
+        { name: "Qty Mode" },
         { name: "Sales Net" },
         { name: "Percent" },
       ],
       data: categoryData.map((item, index) => [
         item.categoryName,
         item.quantityItems,
+        item.quantityModifiers,
         `$${item.salesNet?.toFixed(2)}`,
         `${(item.percentOfTotal * 100).toFixed(2)}%`,
       ]),
@@ -522,7 +528,7 @@ const SalesSummary = () => {
     categoryData = [];
 
     // Payments Section
-    let paymentData = salesSummaryData.paymentsSummary;
+    let paymentData = [...salesSummaryData.paymentsSummary];
 
     // Add Total Row
     paymentData[paymentData.length] = {
@@ -564,7 +570,7 @@ const SalesSummary = () => {
     data.push(paymentsSection);
     paymentData = [];
     // Discounts Section
-    let discountData = salesSummaryData.discountSummary;
+    let discountData = [...salesSummaryData.discountSummary];
 
     // Add Total Row
     discountData[discountData.length] = {
