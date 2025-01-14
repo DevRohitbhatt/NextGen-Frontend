@@ -26,6 +26,7 @@ const CalendarModal = ({
 	const [localFromDate, setLocalFromDate] = useState(selectedFromDate);
 	const [localToDate, setLocalToDate] = useState(selectedToDate);
 	const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+	const [yearIDList, setYearIDList] = useState([]);
 	const [showCalendar, setShowCalendar] = useState(false);
 	const [dynamicData, setDynamicData] = useState([]);
 	const [allDatesData, setAllDatesData] = useState([]);
@@ -91,6 +92,9 @@ const CalendarModal = ({
 					periodMinDate: dateFormat(new Date(entry.periodMinDate), 'mm/dd/yyyy'),
 					periodMaxDate: dateFormat(new Date(entry.periodMaxDate), 'mm/dd/yyyy'),
 				}));
+
+				const yearList = result?.data.map((entry) => entry.yearID).filter((value, index, self) => self.indexOf(value) === index);
+				setYearIDList(yearList);
 
 				setAllDatesData(result.data);
 				setDynamicData(newData);
@@ -197,7 +201,7 @@ const CalendarModal = ({
 										</div>
 										<div className='yeardiv'>
 											<span className='text-xs font-bold'>Show Periods For Year:</span>
-											<YearSelector selectedYear={selectedYear} onChange={handleYearChange} />
+											<YearSelector selectedYear={selectedYear} onChange={handleYearChange} yearIDList={yearIDList}/>
 										</div>
 									</div>
 

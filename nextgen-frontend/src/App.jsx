@@ -23,12 +23,14 @@ import {
 	Voids,
 	Discounts,
 	HourlySales,
+	BrumitDWP,
 	SalesVsLabor,
 	BusinessSummary,
 	MenuGrossProfit,
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
+	InvoiceEditor,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
@@ -133,6 +135,7 @@ const App = () => {
 								<Route path='/ActualFoodCost' index element={<ActualFoodCost />} />
 								<Route path='/VarianceFoodCost' index element={<VarianceFoodCost />} />
 								<Route path='/Invoices' element={<Invoices />} />
+								<Route path='/InvoiceEditor' element={<InvoiceEditor />} />
 								<Route path='/Countsheets' element={<Countsheets />} />
 								<Route path='/CountsheetDesigner' element={<CountsheetDesigner />} />
 								<Route path='/PurchaseAnalysis' element={<PurchaseAnalysis />} />
@@ -143,6 +146,7 @@ const App = () => {
 								<Route path='/Voids' element={<Voids />} />
 								<Route path='/Discounts' element={<Discounts />} />
 								<Route path='/HourlySales' element={<HourlySales />} />
+								<Route path='/BrumitDWP' element={<BrumitDWP />} />
 								<Route path='/MenuItemsSold' element={<MenuItemsSold />} />
 								<Route path='/SalesVsLabor' element={<SalesVsLabor />} />
 								<Route path='/BusinessSummary' element={<BusinessSummary />} />

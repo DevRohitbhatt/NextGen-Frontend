@@ -3,6 +3,7 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { useSelector, useDispatch } from 'react-redux';
 import invoices from '../../assets/introJSSteps/invoices';
+import { Link } from 'react-router-dom';
 import { setVendorsList } from '../../reducer/slices/globalState';
 import {
 	UnitSelector,
@@ -17,10 +18,12 @@ import {
 	ExcelExport as exportToExcel,
 	TableHOC,
 	Modal,
+	Dropdown,
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import { SlEye } from 'react-icons/sl';
+import { formattingData } from './../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -42,8 +45,15 @@ const Invoices = () => {
 	const [searchKey, setSearchKey] = useState('');
 	const [searchInvoiceData, setSearchInvoiceData] = useState([]);
 	const [invoiceDetailLoading, setInvoiceDetailsLoading] = useState(false);
+	const [showAddInvoicesModal, setShowAddInvoicesModal] = useState();
+	const [unitDropdownData, setUnitDropdownData] = useState([]);
+	const [vendorDropdownData, setVendorDropdownData] = useState([]);
+	const [selectedDropdownUnit, setSelectedDropdownUnit] = useState();
+	const [selectedDropdownVendor, setSelectedDropdownVendor] = useState();
+
 	//loading and error state variables
 	const [isLoading, setIsLoading] = useState(false);
+	const [isNewInvoiceLoading, setIsNewInvoiceLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState(
 		'There was an error trying to load your Invoices, please try again later.'
@@ -62,6 +72,7 @@ const Invoices = () => {
 	//calendar state variables
 	const [selectedFromDate, setSelectedFromDate] = useState();
 	const [selectedToDate, setSelectedToDate] = useState();
+	const [showWarnings, setShowWarnings] = useState(false);
 	const [showDateModal, setShowDateModal] = useState(false);
 	const [showPreviewModal, setShowPreviewModal] = useState(false);
 	const [invoiceHeaderDetails, setInvoiceHeaderDetails] = useState([]);
@@ -72,6 +83,27 @@ const Invoices = () => {
 		initialStep: 0,
 		stepsEnabled: false,
 	});
+
+	useEffect(() => {
+		if (unitsAndAreas && vendorsList) {
+			const unitsList =
+				unitsAndAreas?.units?.map((unit) => {
+					return {
+						id: unit.unitID,
+						name: unit.unitName,
+					};
+				}) || [];
+			const vendorsListData =
+				vendorsList?.data?.map((vendor) => {
+					return {
+						id: vendor.vendorID,
+						name: vendor.vendorName,
+					};
+				}) || [];
+			setUnitDropdownData(unitsList);
+			setVendorDropdownData(vendorsListData);
+		}
+	}, [unitsAndAreas, vendorsList]);
 
 	//Open invoicesDetails
 	const handleInvoicesDetailsModal = async (id) => {
@@ -99,6 +131,7 @@ const Invoices = () => {
 			setInvoiceItemDetails(invoiceItemrResult.data);
 			setInvoiceHeaderDetails(result.data);
 		} catch (error) {
+			console.error('Error getting default dates: ', error);
 		} finally {
 			setInvoiceDetailsLoading(false);
 		}
@@ -109,7 +142,7 @@ const Invoices = () => {
 		() => [
 			columnHelper.display({
 				id: 'actions',
-				cell: ({ getValue, row }) => (
+				cell: ({ row }) => (
 					<div
 						className='flex space-x-2 text-lg'
 						onClick={(e) => {
@@ -201,6 +234,12 @@ const Invoices = () => {
 			setErrorMessage('An issue occurred while loading the vendors. Please try again later.');
 		}
 	}, [companyID, alignmentID, groupOrUnitAccess, selectedUnit]);
+
+	useEffect(() => {
+		if (selectedUnit) {
+			setSelectedDropdownUnit(unitDropdownData?.find((unit) => unit.id === selectedUnit)?.name);
+		}
+	}, [selectedUnit]);
 
 	//Default date get
 	const getDefaultDates = async () => {
@@ -343,6 +382,50 @@ const Invoices = () => {
 		}, 500);
 	};
 
+	const openInvoiceEditor = (row) => {
+		window.open(
+			`/InvoiceEditor?unitID=${row.unitID}&unitName=${row.unitName}&vendorID=${row.vendorID}&vendorName=${row.name}&date=${row.date}&invoiceID=${row.qsrInvoiceID}&lastEditedBy=${row.lastEditedBy}&invoiceReference=${row.vendorInvoiceReference}&totalAmount=${row.totalAmountIncludingTax}&newInvoice=false`,
+			'_blank'
+		);
+	};
+
+	const handleAddNewInvoice = async () => {
+		try {
+			setIsNewInvoiceLoading(true);
+			setShowAddInvoicesModal(false);
+			const getData = {
+				url: 'getVendorItems',
+				urlParams: {
+					companyID: companyID,
+					unitID: unitDropdownData?.find((unit) => unit.name === selectedDropdownUnit)?.id,
+					vendorID: vendorDropdownData?.find((vendor) => vendor.name === selectedDropdownVendor)?.id,
+					mode: 'EDITORVIEW',
+					includePriceInfo: 'Y',
+					otherOptions: '',
+				},
+			};
+
+			const result = await getCall(getData);
+
+			if (result.data.length > 0) {
+				window.open(
+					`/InvoiceEditor?unitID=${
+						unitDropdownData?.find((unit) => unit.name === selectedDropdownUnit)?.id
+					}&unitName=${selectedDropdownUnit}&vendorID=${
+						vendorDropdownData?.find((vendor) => vendor.name === selectedDropdownVendor)?.id
+					}&vendorName=${selectedDropdownVendor}&date=${new Date()}&newInvoice=true`,
+					'_blank'
+				);
+			} else {
+				setShowAddInvoicesModal(false);
+				setShowWarnings(true);
+			}
+			setIsNewInvoiceLoading(false);
+		} catch (error) {
+			console.error('Error getting Invoice data: ', error);
+		}
+	};
+
 	// Function to handle the PDF export
 	const handlePDFClick = () => {
 		if (isBrowseInvoicesClicked) {
@@ -461,7 +544,7 @@ const Invoices = () => {
 					isPaginated={true}
 					dataPosition='left'
 					headerPosition='left'
-					onCallBack={(e) => {}}
+					onCallBack={(row) => openInvoiceEditor(row)}
 				/>
 			)
 		) : searchKey.length === 0 ? (
@@ -478,14 +561,14 @@ const Invoices = () => {
 
 	return (
 		<>
-			<div className='w-[85%] mx-auto'>
+			<div className='w-[98%] mx-auto'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Invoices</h2>
+				<h2 className='my-2 mb-2 text-[20px] leading-tight text-left pageTitle'>Invoices</h2>
 
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div>
@@ -499,18 +582,18 @@ const Invoices = () => {
 								setMemberName={setSelectedUnitName}
 								onClick={() => setShowUnitModal(true)}
 							/>
-							<VendorSelector
-								vendorID={selectedVendor}
-								vendorName={selectedVendorName}
-								setVendorName={setSelectedVendorName}
-								onClick={() => setVendorShowModal(true)}
-							/>
 							<DateSelector
 								toDate={selectedToDate}
 								fromDate={selectedFromDate}
 								isDateRange={true}
 								onClick={() => setShowDateModal(true)}
 								extraClass={'w-[219px]'}
+							/>
+							<VendorSelector
+								vendorID={selectedVendor}
+								vendorName={selectedVendorName}
+								setVendorName={setSelectedVendorName}
+								onClick={() => setVendorShowModal(true)}
 							/>
 						</div>
 					</div>
@@ -522,6 +605,9 @@ const Invoices = () => {
 							includeExcel={true}
 							handleExcelClick={handleExcelClick}
 							includeHelp={true}
+							includeAdd={true}
+							addTitle={'Add New Invoice'}
+							handleAddClick={() => setShowAddInvoicesModal(true)}
 							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 						/>
 					</div>
@@ -549,6 +635,8 @@ const Invoices = () => {
 						<div className='paged-table'>{Table}</div>
 					</div>
 				)}
+
+				{isNewInvoiceLoading && <Loader loading={isNewInvoiceLoading} />}
 
 				<div>
 					<UnitModal
@@ -594,35 +682,62 @@ const Invoices = () => {
 					}}
 				>
 					<div className='w-full max-w-5xl p-6 overflow-auto bg-white rounded-lg shadow-lg min-w-[940px] min-h-[400px]'>
-						<div className='my-4'>
-							<div className='text-sm'>
-								<span className='font-semibold'>Unit:</span>{' '}
-								{invoiceHeaderDetails[0]?.unitName && invoiceHeaderDetails[0]?.unitName}
-								<span className='mx-2 font-semibold'>Vendor:</span>{' '}
-								{invoiceHeaderDetails[0]?.vendorName && invoiceHeaderDetails[0]?.vendorName}
-								<span className='mx-2 font-semibold'>Date:</span> Mon 09/30/2024
-								<span className='mx-2 font-semibold'>Invoice Reference:</span>{' '}
-								{invoiceHeaderDetails[0]?.vendorInvoiceReference &&
-									invoiceHeaderDetails[0]?.vendorInvoiceReference}
-								<span className='mx-2 font-semibold'>Total:</span> $
-								{invoiceHeaderDetails[0]?.totalAmountIncludingTax &&
-									invoiceHeaderDetails[0]?.totalAmountIncludingTax}
+						<div className='flex justify-between my-4'>
+							<div className='flex gap-4 text-sm'>
+								<span className='flex flex-col'>
+									Unit:
+									<span className='font-semibold'>
+										{invoiceHeaderDetails[0]?.unitName && invoiceHeaderDetails[0]?.unitName}
+									</span>
+								</span>
+								<span className='flex flex-col'>
+									Vendor:
+									<span className='font-semibold'>
+										{invoiceHeaderDetails[0]?.vendorName && invoiceHeaderDetails[0]?.vendorName}
+									</span>
+								</span>
+								<span className='flex flex-col'>
+									Date:{' '}
+									<span className='font-semibold'>
+										{dateFormat(invoiceHeaderDetails[0]?.date, 'ddd yyyy-mm-dd')}
+									</span>
+								</span>
+								<span className='flex flex-col'>
+									Invoice Reference:
+									<span className='font-semibold'>
+										{invoiceHeaderDetails[0]?.vendorInvoiceReference}
+									</span>
+								</span>
+								<span className='flex flex-col'>
+									Total:
+									<span className='font-semibold'>
+										{formattingData(invoiceHeaderDetails[0]?.totalAmountIncludingTax)}
+									</span>
+								</span>
 							</div>
 							<div className='mt-1 text-sm'>
-								<span className='font-semibold'>Created By:</span>{' '}
-								{invoiceHeaderDetails[0]?.originalFirstName &&
-								invoiceHeaderDetails[0]?.originalFirstName !== 'Unknown'
-									? invoiceHeaderDetails[0]?.originalFirstName +
-									  ' ' +
-									  invoiceHeaderDetails[0]?.originalLastName
-									: invoiceHeaderDetails[0]?.userFirstName +
-									  ' ' +
-									  invoiceHeaderDetails[0]?.userLastName}
-								<span className='mx-2 font-semibold'>Last Edited By:</span>{' '}
-								{invoiceHeaderDetails[0]?.userFirstName &&
-									invoiceHeaderDetails[0]?.userFirstName +
-										' ' +
-										invoiceHeaderDetails[0]?.userLastName}
+								<span className='flex gap-1'>
+									Created By:{' '}
+									<span>
+										{invoiceHeaderDetails[0]?.originalFirstName &&
+										invoiceHeaderDetails[0]?.originalFirstName !== 'Unknown'
+											? invoiceHeaderDetails[0]?.originalFirstName +
+											  ' ' +
+											  invoiceHeaderDetails[0]?.originalLastName
+											: invoiceHeaderDetails[0]?.userFirstName +
+											  ' ' +
+											  invoiceHeaderDetails[0]?.userLastName}
+									</span>
+								</span>{' '}
+								<span className=''>
+									Last Edited By:{' '}
+									<span>
+										{invoiceHeaderDetails[0]?.userFirstName &&
+											invoiceHeaderDetails[0]?.userFirstName +
+												' ' +
+												invoiceHeaderDetails[0]?.userLastName}
+									</span>
+								</span>{' '}
 							</div>
 						</div>
 						<div className='tableHOC pr-1 max-h-[60vh] overflow-auto'>
@@ -641,7 +756,6 @@ const Invoices = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{/* Repeat this row for each item */}
 									{invoiceItemDetails.map((item) => (
 										<tr className='even:bg-gray-50' key={item.vendorItemReference}>
 											<td className='p-2 text-center border border-gray-300'>
@@ -651,22 +765,69 @@ const Invoices = () => {
 											<td className='p-2 text-center border border-gray-300'>
 												{item.unitOfMeasure}
 											</td>
-											<td className='p-2 text-center border border-gray-300'>{item.size}</td>
+											<td className='p-2 text-center border border-gray-300'>
+												{item.pack
+													? item.size
+														? `${item.pack}/${item.size}`
+														: item.pack
+													: item.size || ''}
+											</td>
 											<td className='p-2 text-center border border-gray-300'>{item.quantity}</td>
 											<td className='p-2 text-center border border-gray-300'>
-												${item.price.toFixed(2)}
+												{formattingData(item.price)}
 											</td>
 											<td className='p-2 text-center border border-gray-300'>
-												${item.taxAmount.toFixed(2)}
+												{formattingData(item.taxAmount)}
 											</td>
 											<td className='p-2 text-center border border-gray-300'>
-												${((item.price * item.quantity) + item.taxAmount).toFixed(2)}
+												{formattingData(item.price * item.quantity + item.taxAmount)}
 											</td>
 										</tr>
 									))}
 								</tbody>
 							</table>
 						</div>
+					</div>
+				</Modal>
+				<Modal
+					isOpen={showAddInvoicesModal}
+					title={'Add New Invoice'}
+					onClose={() => {
+						setShowAddInvoicesModal(!showAddInvoicesModal);
+					}}
+				>
+					<div className='flex flex-col items-center gap-3 p-4 min-w-96'>
+						<Dropdown
+							title='Unit'
+							options={unitDropdownData}
+							selectedOption={selectedDropdownUnit}
+							onOptionChange={(unit) => setSelectedDropdownUnit(unit)}
+							isSearch={true}
+						/>
+						<Dropdown
+							title='Vendor'
+							options={vendorDropdownData}
+							selectedOption={selectedDropdownVendor}
+							onOptionChange={(unit) => setSelectedDropdownVendor(unit)}
+							isSearch={true}
+						/>
+						<button
+							className={`flex items-center gap-2 px-4 py-3 border-solid focus:outline-none relative rounded-none border transition-colors duration-[0.25s] delay-[0.0833s] mt-2 ${
+								!selectedDropdownUnit || !selectedDropdownVendor
+									? 'border-[#D3D3D3] bg-gray-200 hover:border-[#d3d3d3] text-[#D3D3D3] hover:text-[#D3D3D3] cursor-not-allowed'
+									: 'border-[var(--tw-primary)] hover:bg-[var(--tw-primary)] text-[var(--tw-primary)] hover:text-white shadow-[inset_0_0_0_1px_var(--tw-primary)] tailwind-button'
+							}`}
+							onClick={!selectedDropdownUnit || !selectedDropdownVendor ? null : handleAddNewInvoice}
+						>
+							New Invoice
+						</button>
+					</div>
+				</Modal>
+				<Modal title={'No Vendor Item'} isOpen={showWarnings} onClose={() => setShowWarnings(false)}>
+					<div className='p-4 w-[440px]'>
+						<p className='text-center text-[var(--tw-primary)]'>
+							{`There should be at least one vendor item in the vendor '${selectedDropdownVendor}' prior to creating a new Invoice.`}
+						</p>
 					</div>
 				</Modal>
 			</div>

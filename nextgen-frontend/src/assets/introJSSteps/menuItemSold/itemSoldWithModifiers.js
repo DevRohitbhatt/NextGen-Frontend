@@ -21,7 +21,7 @@ export default function itemSoldWithModifiers() {
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Item Sold With Modifiers Report to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
+			intro: 'You can export the Item Sold With Modifiers Report to either .XLSX, .CSV or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.view-selector',

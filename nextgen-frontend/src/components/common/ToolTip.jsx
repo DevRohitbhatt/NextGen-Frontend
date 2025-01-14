@@ -19,11 +19,10 @@ const TooltipTip = styled.div`
   line-height: 1.2;
   z-index: 1000;
   max-width: 300px;
-  word-wrap: break-word;
-  white-space: normal;
+  word-wrap: break-word;  
   left: 50%;
-  transform: translateX(-50%);
-  white-space: normal;
+  transform: translateX(-50%);  
+   white-space: pre-line;
 `;
 
 const Tooltip = ({ content, direction, delay, children, styles = '' }) => {

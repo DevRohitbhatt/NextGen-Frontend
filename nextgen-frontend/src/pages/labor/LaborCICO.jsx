@@ -19,6 +19,13 @@ import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborCICO from "../../assets/introJSSteps/laborCICO";
 
+const tooltips = {
+	employeeID: "The ID assigned to the employee. Originates from the POS employee information.",
+	jobDescription: "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
+	invalid: "Y = Edited CICO \n\nN = Original CICO \n\nNOTE: This info is only available for Focus POS.",	
+	direction: "above",
+  };
+
 const columnHelper = createColumnHelper();
 
 const LaborCICO = () => {
@@ -140,6 +147,7 @@ const LaborCICO = () => {
         id: "employeeID",
         header: "Employee ID",
         dataType: "number",
+        tooltip: tooltips.employeeID
       }),
       columnHelper.accessor("name", {
         id: "name",
@@ -150,6 +158,7 @@ const LaborCICO = () => {
         id: "jobDescription",
         header: "Job Description",
         dataType: "string",
+        tooltip: tooltips.jobDescription
       }),
     ];
 
@@ -158,11 +167,13 @@ const LaborCICO = () => {
         id: "jobDescription",
         header: "Job Description",
         dataType: "string",
+        tooltip: tooltips.jobDescription
       }),
       columnHelper.accessor("employeeID", {
         id: "employeeID",
         header: "Employee ID",
         dataType: "number",
+        tooltip: tooltips.employeeID
       }),
       columnHelper.accessor("name", {
         id: "name",
@@ -205,6 +216,7 @@ const LaborCICO = () => {
         id: "invalid",
         header: "Invalid",
         dataType: "boolean",
+        tooltip: tooltips.invalid
       }),
     ];
 
@@ -605,7 +617,7 @@ const LaborCICO = () => {
   const detailOnTop = (
     <div className="flex items-center space-x-2 text-base font-normal">
       {/* Add any additional details or components you want to display on top */}
-      <div className="text-xl font-bold">Expand To:</div>
+      <div className="text-[14px] font-bold">Expand To:</div>
       <div className="w-52">
         <Dropdown
           options={viewOptions}
@@ -613,7 +625,7 @@ const LaborCICO = () => {
           onOptionChange={(option) => setViewBy(option)}
         />
       </div>
-      <div className="text-xl font-bold">Group By:</div>
+      <div className="text-[14px] font-bold">Group By:</div>
       <div className="w-48 group-by">
         <Dropdown
           options={groupOptions}
@@ -640,17 +652,17 @@ const LaborCICO = () => {
 
   return (
     <>
-      <div className="w-[85%] mx-auto">
+      <div className="w-[98%] mx-auto">
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-4 text-2xl leading-tight text-left pageTitle">
+        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
           Clock In - Clock Out
         </h2>
-        <header className="optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
+        <header className="optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
           <div className="flex items-center space-x-1">
             <UnitSelector
               companyId={companyID}
@@ -669,7 +681,7 @@ const LaborCICO = () => {
               extraClass={"w-[219px]"}
             />
             <div className="run-button" onClick={handleRunClick}>
-              <div className="py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
+              <div className="py-2 ml-1  font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7 text-[14px]">
                 Run
               </div>
             </div>

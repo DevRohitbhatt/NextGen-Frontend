@@ -14,6 +14,15 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
+import { formattingData } from '../../functions/formatingCurrency.js'; 
+
+const tooltips = {
+	uom: "References each inventory item’s main UOM.",
+	usedEstimate: "Calculated average use per week. Amounts may vary depending on the selected Usage Estimation Model.",
+	salesYieldWeeklyAverage: "Average Usage % * Estimated Weekly Sales Average",	
+	inventoryWeeksOnHandNow: "An estimation of how many weeks the current inventory amount might last.",
+	direction: "above",
+  };
 
 const columnHelper = createColumnHelper();
 
@@ -79,6 +88,7 @@ const InventoryWeeksOnHand = () => {
 				size: 120,
 				filterFn: 'arrIncludesSome',
 				isFilterMenu: true,
+				cell: ({ getValue }) => <div className='w-full text-left'>{getValue()}</div>
 			}),
 			columnHelper.accessor('subDepartment', {
 				id: 'subDepartment',
@@ -87,6 +97,7 @@ const InventoryWeeksOnHand = () => {
 				size: 120,
 				filterFn: 'arrIncludesSome',
 				isFilterMenu: true,
+				cell: ({ getValue }) => <div className='w-full text-left'>{getValue()}</div>
 			}),
 			columnHelper.accessor('latestCountDate', {
 				id: 'latestCountDate',
@@ -95,6 +106,7 @@ const InventoryWeeksOnHand = () => {
 				size: 120,
 				filterFn: 'arrIncludesSome',
 				isFilterMenu: true,
+				cell: ({ getValue }) => <div className='w-full text-left'>{getValue()}</div>
 			}),
 			columnHelper.accessor('caseUnitOfMeasureName', {
 				id: 'caseUnitOfMeasureName',
@@ -103,6 +115,8 @@ const InventoryWeeksOnHand = () => {
 				size: 150,
 				filterFn: 'arrIncludesSome',
 				isFilterMenu: true,
+				tooltip: tooltips.uom,
+				cell: ({ getValue }) => <div className='w-full text-left'>{getValue()}</div>
 			}),
 			columnHelper.accessor('casesOnHandAtLastCount', {
 				id: 'casesOnHandAtLastCount',
@@ -167,6 +181,7 @@ const InventoryWeeksOnHand = () => {
 				dataType: 'number',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
+				tooltip: tooltips.usedEstimate
 			}),
 			columnHelper.accessor('estimatedCasesOnHandNow', {
 				id: 'estimatedCasesOnHandNow',
@@ -208,6 +223,7 @@ const InventoryWeeksOnHand = () => {
 				dataType: 'string',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
+				tooltip: tooltips.salesYieldWeeklyAverage
 			}),
 			columnHelper.accessor('inventoryWeeksOnHandNow', {
 				id: 'inventoryWeeksOnHandNow',
@@ -216,6 +232,7 @@ const InventoryWeeksOnHand = () => {
 				dataType: 'number',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
+				tooltip: tooltips.inventoryWeeksOnHandNow
 			}),
 		],
 		[]
@@ -354,14 +371,14 @@ const InventoryWeeksOnHand = () => {
 
 	return (
 		<>
-			<div className='w-10/12 mx-auto pageContainer'>
+			<div className='w-[98%] mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Inventory Weeks On Hand</h2>
+				<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Inventory Weeks On Hand</h2>
 				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
@@ -381,7 +398,7 @@ const InventoryWeeksOnHand = () => {
 							onOptionChange={handleUsageChange}
 						/>
 						<div className='run-button' onClick={fetchInventoryWeeksOnHandReport}>
-							<div className='py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-1 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
@@ -410,7 +427,7 @@ const InventoryWeeksOnHand = () => {
 							(inventoryWeeksOnHandReportData.length > 0 ? (
 								<div className='mt-4'>
 									{total > 0 && (
-										<div className='text-2xl font-medium min-w-fit'>{`Total $: ${total}`}</div>
+										<div className='text-[16px] font-medium min-w-fit'>{`Total : ${formattingData(parseFloat(total))}`}</div>
 									)}
 									{Table}
 								</div>
