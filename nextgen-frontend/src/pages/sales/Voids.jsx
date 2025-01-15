@@ -104,8 +104,8 @@ const Voids = () => {
 				header: <div className='w-full text-left'>Void Reason</div>,
 				dataType: 'string',
 				cell: ({ getValue }) => {
-					return <div className='text-left pr-3'>{getValue()}</div>;
-				}
+					return <div className='pr-3 text-left'>{getValue()}</div>;
+				},
 			}),
 			columnHelper.accessor('employeeName', {
 				id: 'employeeName',
@@ -113,7 +113,7 @@ const Voids = () => {
 				dataType: 'string',
 				cell: ({ getValue }) => {
 					return <div className='text-left'>{getValue()}</div>;
-				}
+				},
 			}),
 			columnHelper.accessor('managerName', {
 				id: 'managerName',
@@ -121,7 +121,7 @@ const Voids = () => {
 				dataType: 'string',
 				cell: ({ getValue }) => {
 					return <div className='text-left'>{getValue()}</div>;
-				}
+				},
 			}),
 			columnHelper.accessor('fullDescription', {
 				id: 'fullDescription',
@@ -143,7 +143,7 @@ const Voids = () => {
 				dataType: 'string',
 				cell: ({ getValue }) => {
 					return <div className='text-left'>{getValue()}</div>;
-				}
+				},
 			}),
 			columnHelper.accessor('revenueID', {
 				id: 'revenueID',
@@ -158,8 +158,8 @@ const Voids = () => {
 				header: 'Price',
 				size: 100,
 				cell: ({ getValue }) => {
-					let price = getValue() !== undefined ? formattingData(getValue()) : ""
-					return price
+					let price = getValue() !== undefined ? formattingData(getValue()) : '';
+					return price;
 				},
 				footer: ({ table }) =>
 					`$${table
@@ -361,11 +361,33 @@ const Voids = () => {
 	};
 
 	const formatPDFData = (data) => {
+		const getValue = (valueCol,row) =>{
+			if(typeof valueCol?.header === 'object'){
+				return row[valueCol.id]
+			}else if(valueCol?.header?.includes('Price')){
+				return formattingData(row[valueCol.id])
+			}else{
+				return row[valueCol.id]
+			}
+		}
 		return {
-			columnHeaders: columns.map((column) => column.header),
+			columnHeaders: [
+				'Date',
+				'Hour',
+				'Minute',
+				'Void Reason',
+				'Employee',
+				'Manager',
+				'Description',
+				'POS Check ID',
+				'Table Name',
+				'Revenue ID',
+				'Price',
+				'Tenders',
+			],
 			rows: data.map((row) =>
 				columns.map((column) => ({
-					value: column.header.includes('Price') ? formattingData(row[column.id]) : row[column.id],
+					value: column.id === 'price' ? formattingData(row[column.id]) : row[column.id] || '0 ',
 					cellType: '',
 					columnName: column.id,
 				}))
@@ -444,14 +466,14 @@ const Voids = () => {
 	const Table = <TableHOC columns={columns} data={filteredVoidsReportData} expandCollapseButtons={true} />;
 
 	return (
-		<div className='w-[85%] mx-auto'>
+		<div className='w-[98%] mx-auto'>
 			<Steps
 				enabled={introSteps.stepsEnabled}
 				steps={introSteps.steps}
 				initialStep={introSteps.initialStep}
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Voids</h2>
+			<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Voids</h2>
 			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center'>
 					<UnitSelector
@@ -471,7 +493,7 @@ const Voids = () => {
 						extraClass={'w-[219px]'}
 					/>
 					<div className='ml-1 filterByHour-selector'>
-						<span className='text-xl font-medium'>Filter By Hour</span>
+						<span className='text-[16px] font-medium'>Filter By Hour</span>
 						<div className='flex'>
 							<div className='flex items-center'>
 								<span className='font-medium'>From: </span>
@@ -494,7 +516,7 @@ const Voids = () => {
 						</div>
 					</div>
 					<div className='run-button' onClick={fetchVoidsReport}>
-						<div className='py-3 ml-1 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+						<div className='py-2 ml-1 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 							Run
 						</div>
 					</div>

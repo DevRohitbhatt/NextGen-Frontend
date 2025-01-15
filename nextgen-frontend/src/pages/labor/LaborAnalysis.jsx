@@ -59,15 +59,16 @@ const LaborAnalysis = () => {
 	//dropdown state variables
 	const [jobDetails, setJobDetails] = useState([]);
 	const [jobDescription, setJobDescription] = useState('All');
-	const jobDescriptionOptions = [
-		{ name: 'All' },
-		{ name: 'Hourly Manager' },
-		{ name: 'Salary Manager' },
-		{ name: 'Shift Supervisor' },
-		{ name: 'Test User' },
-		{ name: 'Request Off' },
-		{ name: 'None' },
-	];
+	const [jobDescriptionOptions, setJobDescriptionOptions] = useState([]);
+	// const jobDescriptionOptions = [
+	// 	{ name: 'All' },
+	// 	{ name: 'Hourly Manager' },
+	// 	{ name: 'Salary Manager' },
+	// 	{ name: 'Shift Supervisor' },
+	// 	{ name: 'Test User' },
+	// 	{ name: 'Request Off' },
+	// 	{ name: 'None' },
+	// ];
 
 	const modalNames = {
 		'Projected Sales': 'avg',
@@ -122,6 +123,15 @@ const LaborAnalysis = () => {
 				},
 			};
 			const result = await getCall(getData);
+			const newData = result.data?.sort((a, b) => a.jobSortOrder - b.jobSortOrder);
+			const Y = 'Y'; // Define 'Y'
+			setJobDescriptionOptions([
+				...(newData
+					? newData.filter((item) => item.jobIsVisible === Y).map((item) => ({ name: item.description }))
+					: []),
+				{ name: 'None' },
+				{ name: 'All' },
+			]);
 			setJobDetails(result.data);
 		} catch (error) {
 			console.error('Error getting job details: ', error);
@@ -134,7 +144,7 @@ const LaborAnalysis = () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
-			setIsTableRendered(false)
+			setIsTableRendered(false);
 			const getData = {
 				url: 'laborAnalysis',
 				urlParams: {
@@ -447,18 +457,27 @@ const LaborAnalysis = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	const Table = <TableHOC columns={columns} data={laborAnalysisReportData} expandCollapseButtons={true}  view={1} isTableRendered={isTableRendered} setIsTableRendered={setIsTableRendered} />;
+	const Table = (
+		<TableHOC
+			columns={columns}
+			data={laborAnalysisReportData}
+			expandCollapseButtons={true}
+			view={1}
+			isTableRendered={isTableRendered}
+			setIsTableRendered={setIsTableRendered}
+		/>
+	);
 	const modalTable = <TableHOC columns={modalColumns} data={laborAnalysisModalData} />;
 
 	return (
-		<div className='w-[85%] mx-auto'>
+		<div className='w-[98%] mx-auto'>
 			<Steps
 				enabled={introSteps.stepsEnabled}
 				steps={introSteps.steps}
 				initialStep={introSteps.initialStep}
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Labor Analysis</h2>
+			<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Labor Analysis</h2>
 			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center'>
 					<UnitSelector
@@ -474,7 +493,7 @@ const LaborAnalysis = () => {
 						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
 						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
 					/>
-					<div className='w-56 ml-2 job-selector'>
+					<div className='w-40 ml-2 job-selector'>
 						<Dropdown
 							title='Job Description'
 							options={jobDescriptionOptions}

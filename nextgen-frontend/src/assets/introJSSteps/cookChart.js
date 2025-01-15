@@ -1,8 +1,8 @@
-export default function itemSoldWithModifiers() {
+export default function cookChart() {
 	return [
 		{
 			intro:
-				'<center>Welcome to QSROnline’s Menu Item Sold - Item Sold With Modifiers Report tool! Let us show you around.' +
+				'<center>Welcome to QSROnline’s Cook Drop Chart tool! Let us show you around.' +
 				'<br><br>Press the enter or arrow keys to advance through the tutorial.</center>',
 		},
 		{
@@ -13,19 +13,15 @@ export default function itemSoldWithModifiers() {
 		},
 		{
 			element: '.date-selector',
-			intro: '-Select the date, or date range, you wish to display Item Sold With Modifiers Report',
+			intro: '-Select the date, you wish to display  Cook Drop Chart Report',
 		},
 		{
-			element: '.run-button',
-			intro: 'Click the Run button to generate the report based on the selected criteria.',
+			element: '.dropdown-selector',
+			intro: 'You can select the Cook Drop Chart based on the Unit and Date ',
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Item Sold With Modifiers Report to either .XLSX, .CSV or .PDF format. The ? icon will launch this guided tour.',
-		},
-		{
-			element: '.view-selector',
-			intro: '-Select the view you like to display for the Item Sold With Modifiers Report',
+			intro: 'You can export the Actual Cook Drop Chart to either .XLSX or .PDF format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.paged-table',

@@ -10,14 +10,18 @@ const InventoryWeeksOnHand = lazy(() => import('./food-cost/InventoryWeeksOnHand
 const ActualFoodCost = lazy(() => import('./food-cost/ActualFoodCost'));
 const VarianceFoodCost = lazy(() => import('./food-cost/VarianceFoodCost'));
 const Invoices = lazy(() => import('./food-cost/Invoices'));
+const InvoiceEditor = lazy(() => import('./food-cost/InvoiceEditor'));
 const Countsheets = lazy(() => import('./food-cost/Countsheets'));
 const CountsheetDesigner = lazy(() => import('./food-cost/CountsheetDesigner'));
 const PurchaseAnalysis = lazy(() => import('./food-cost/PurchaseAnalysis'));
+const CookChart = lazy(() => import('./food-cost/CookChart'));
+const CookChartTemplate = lazy(() => import('./food-cost/CookChartTemplate'));
 
 // Sales Pages
 const Voids = lazy(() => import('./sales/Voids'));
 const Discounts = lazy(() => import('./sales/Discounts'));
 const HourlySales = lazy(() => import('./sales/HourlySales'));
+const BrumitDWP = lazy(() => import('./sales/BrumitDWP'));
 const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
 const SalesVsLabor = lazy(() => import('./sales/SalesVsLabor'));
 const BusinessSummary = lazy(() => import('./sales/BusinessSummary'));
@@ -45,6 +49,7 @@ export {
 	Voids,
 	Discounts,
 	HourlySales,
+	BrumitDWP,
 	MenuItemsSold,
 	SalesVsLabor,
 	BusinessSummary,
@@ -52,9 +57,12 @@ export {
 	ActualFoodCost,
 	VarianceFoodCost,
 	Invoices,
+	InvoiceEditor,
 	Countsheets,
 	CountsheetDesigner,
 	PurchaseAnalysis,
 	LaborAnalysis,
+	CookChart,
+	CookChartTemplate,
 	LaborAudit
 };
