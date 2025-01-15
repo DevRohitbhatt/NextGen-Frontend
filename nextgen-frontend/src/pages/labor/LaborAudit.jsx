@@ -477,6 +477,23 @@ const LaborAudit = () => {
             ],
           });
         }
+        else if (isVersion?.length > 0) {
+          finalData2.forEach((obj) => {
+            if (obj.version == extractedValues.Version) {
+              obj.subRows.push({
+                editVersion: extractedValues.Version,
+                employeeFirstName: isVersion[0].Name.split(" ")[0],
+                employeeLastName: isVersion[0].Name.split(" ")[1],
+                jobName: "",
+                businessDate: dateFormat(isVersion[0].Date, "mm/dd/yyyy"),
+                startTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
+                endTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
+                detailsComments: "",
+                editAction: "Schedule Posted",
+              });
+            }
+          });
+        }
       } else if (isVersion?.length > 0) {
         finalData2.forEach((obj) => {
           if (obj.version == extractedValues.Version) {
@@ -660,14 +677,14 @@ const LaborAudit = () => {
     />
   );
   return (
-    <div className='w-[88%] mx-auto'>
+    <div className='w-[98%] mx-auto'>
       <Steps
         enabled={introSteps.stepsEnabled}
         steps={introSteps.steps}
         initialStep={introSteps.initialStep}
         onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
       />
-      <h2 className='my-4 text-2xl leading-tight pageTitle'>
+      <h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>
         Labor Audit Report
       </h2>
       <header className='optionBar flex justify-between items-center mb-2 rounded-2xl shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)] p-4'>
@@ -691,7 +708,7 @@ const LaborAudit = () => {
               />
             </div>
             <div className='ml-3 run-button' onClick={fetchVersionCheck}>
-              <div className='py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+              <div className='py-2 ml-1 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
                 Run
               </div>
             </div>

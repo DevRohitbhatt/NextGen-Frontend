@@ -13,7 +13,7 @@ export default function laborAudit() {
 		},
 		{
 			element: '.schedule-selector',
-			intro: '-Select the date, or date range, you wish to display Labor Audit Report',
+			intro: '-Select the date, or date range, you wish to display Labor Audit Report.',
 		},
 		{
 			element: '.run-button',
@@ -27,8 +27,7 @@ export default function laborAudit() {
 			element: '.paged-table',
 			intro:
 				'-All information is displayed for your selected criteria.' +
-				'<br><br> -Tooltips will explain the column element in more detail,  ' 
-				
+				'<br><br> -Tooltips will explain the column element in more detail.' 		
 		}
 	];
 }
