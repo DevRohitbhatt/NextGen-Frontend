@@ -77,6 +77,9 @@ const urlConfig = {
 	laborCICO: 'api/labor/getLaborCICOReportData',
 	laborAnalysis: 'api/labor/getLaborAnalysisData',
 	getJobDetails: 'api/labor/getJobDetails',
+	getLaborAuditDateRange: 'api/labor/GetEMPLOYEESSCHEDULESCHEDULEIDS',
+	laborAudit: 'api/labor/GetLaborAuditReportData',
+	versionOneCheck: 'api/labor/GetUserActivityGetByUserID',
 
 	//Menu item
 	MenuItemsByCompanyID: 'api/menus/getMenuItemsByCompanyID',

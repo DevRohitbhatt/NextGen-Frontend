@@ -23,7 +23,7 @@ import {
 	Voids,
 	Discounts,
 	HourlySales,
-	SalesVsLabor,
+		SalesVsLabor,
 	BusinessSummary,
 	MenuGrossProfit,
 	ActualFoodCost,
@@ -34,6 +34,7 @@ import {
 	PurchaseAnalysis,
 	MenuItemsSold,
 	LaborAnalysis,
+	LaborAudit
 } from './pages';
 import { Suspense } from 'react';
 
@@ -150,6 +151,7 @@ const App = () => {
 								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
 								<Route path='/LaborCICO' element={<LaborCICO />} />
 								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
+								<Route path='/LaborAudit' element={<LaborAudit/>}/>
 							</Routes>
 						</Suspense>
 					</div>

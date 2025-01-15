@@ -93,8 +93,8 @@ function TableHOC({
 		getExpandedRowModel: getExpandedRowModel(),
 		getFacetedRowModel: getFacetedRowModel(), // client-side faceting
 		getFacetedUniqueValues: getFacetedUniqueValues(),
-		// filterFromLeafRows: true,
-		// maxLeafRowFilterDepth: 1,
+		filterFromLeafRows: true,
+		maxLeafRowFilterDepth: 1,
 		columnResizeMode: 'onChange',
 		debugTable: false,
 	});
