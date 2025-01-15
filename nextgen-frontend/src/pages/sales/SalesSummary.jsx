@@ -43,10 +43,10 @@ const SalesSummary = () => {
   const [salesSummaryData, setSalesSummaryData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [introSteps, setIntroSteps] = useState({
-      steps: salesSummary(),
-      initialStep: 0,
-      stepsEnabled: false,
-    });
+    steps: salesSummary(),
+    initialStep: 0,
+    stepsEnabled: false,
+  });
 
   const categorySalesColumns = React.useMemo(
     () => [
@@ -119,7 +119,6 @@ const SalesSummary = () => {
     []
   );
 
-  
   const paymentsColumns = React.useMemo(
     () => [
       {
@@ -208,7 +207,6 @@ const SalesSummary = () => {
     []
   );
 
-  
   const discountsColumns = React.useMemo(
     () => [
       {
@@ -264,10 +262,15 @@ const SalesSummary = () => {
     []
   );
 
-
   const activityColumns = React.useMemo(
     () => [
-      { accessorKey: "label", header: "Name", cell: (info) => info.getValue() },
+      {
+        accessorKey: "label",
+        header: () => <div className="w-full text-left">Name</div>,
+        cell: (info) => (
+          <div className="w-full text-left">{info.getValue()}</div>
+        ),
+      },
       {
         accessorKey: "value",
         header: "Value",
@@ -285,8 +288,10 @@ const SalesSummary = () => {
       salesSummaryData?.viewActivityDaily &&
       salesSummaryData?.viewActivityDaily.length > 0
         ? salesSummaryData?.viewActivityDaily[0]
-        : {};
-    return [
+        : [];
+
+    // Transform data into key-value pairs
+    const transformedData = [
       { label: "Gross Sales", value: data?.salesGross },
       { label: "Net Sales", value: data?.salesNet },
       { label: "Tax", value: data?.salesTax },
@@ -306,6 +311,17 @@ const SalesSummary = () => {
       { label: "Gift Cards Redeemed", value: data?.giftCertificate },
       { label: "Gift Cards Sold", value: data?.giftCertificatesSold },
     ];
+
+    // Find the split point index
+    const splitIndex = transformedData.findIndex(
+      (item) => item.label === "Cash OverShort"
+    );
+
+    // Split data into two parts
+    const firstPart = transformedData.slice(0, splitIndex + 1);
+    const secondPart = transformedData.slice(splitIndex + 1);
+
+    return { firstPart, secondPart };
   }, [salesSummaryData]);
 
   const aggregateData = async (viewActivityDaily) => {
@@ -314,7 +330,7 @@ const SalesSummary = () => {
     viewActivityDaily.forEach((item) => {
       for (const [key, value] of Object.entries(item)) {
         if (typeof value === "number") {
-          result[key] = (result[key] || 0) + value; 
+          result[key] = (result[key] || 0) + value;
         } else if (Array.isArray(value)) {
           result[key] = (result[key] || []).concat(value);
         } else {
@@ -400,6 +416,10 @@ const SalesSummary = () => {
     const metaInfo = {
       groupOrUnitAccessName,
       selectedUnitName,
+      selectedDate: `${dateFormat(
+        selectedFromDate,
+        "mm-dd-yyyy"
+      )} - ${dateFormat(selectedToDate, "mm-dd-yyyy")}`,
     };
     let data = salesSummaryData;
     data.metaInfo = metaInfo;
@@ -757,8 +777,9 @@ const SalesSummary = () => {
               );
             }}
             includeHelp={true}
-            handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
-
+            handleHelpClick={() =>
+              setIntroSteps({ ...introSteps, stepsEnabled: true })
+            }
           />
         </div>
       </header>
@@ -766,30 +787,32 @@ const SalesSummary = () => {
       {isLoading && <Loader loading={isLoading} />}
       {Object.keys(salesSummaryData).length > 0 ? (
         <>
-          <div className="  rounded-lg mb-0 p-4  all">
-            <div className="flex justify-between">
-              {" "}
-              <h2 className="text-lg font-semibold mb-4">
-                {groupOrUnitAccessName} - {selectedUnitName}
-              </h2>
-              <h2 className="text-lg font-semibold mb-4">
-                {dateFormat(selectedFromDate, "mm-dd-yyyy")} to{" "}
-                {dateFormat(selectedToDate, "mm-dd-yyyy")}
-              </h2>
-            </div>
-            <div className="paged-table">
-              <TableHOC
-                columns={activityColumns}
-                data={viewActivityData}
-                isHeader={false}
-                dataPosition={"left"}
-              />
+          <div className="  rounded-lg mb-0 py-4  all">
+            <div className="paged-table ">
+              <div className="main-container flex flex-row gap-4">
+                <div className="w-1/2">
+                  <TableHOC
+                    columns={activityColumns}
+                    data={viewActivityData.firstPart}
+                    isHeader={true}
+                    // dataPosition={"center"}
+                  />
+                </div>
+                <div className="w-1/2">
+                  <TableHOC
+                    columns={activityColumns}
+                    data={viewActivityData.secondPart}
+                    isHeader={true}
+                    // dataPosition={"center"}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Category Sales Section */}
           {Object.keys(salesSummaryData).length > 0 && (
-            <div className=" paged-table rounded-lg p-4 mt-[-20px] categorySales">
+            <div className=" paged-table rounded-lg py-4 mt-[-20px] categorySales">
               <h3 className="text-lg font-semibold mb-4">Category Sales</h3>
               <TableHOC
                 columns={categorySalesColumns}
@@ -800,7 +823,7 @@ const SalesSummary = () => {
             </div>
           )}
           {/* Payments Section */}
-          <div className=" paged-table rounded-lg p-4 mt-[-20px] Payments">
+          <div className=" paged-table rounded-lg py-4 mt-[-20px] Payments">
             <h3 className="text-lg font-semibold mb-4">Payments</h3>
             <TableHOC
               columns={paymentsColumns}
@@ -809,7 +832,7 @@ const SalesSummary = () => {
               isFooter={true}
             />
           </div>
-          <div className=" paged-table rounded-lg p-4 mt-[-20px] Discounts">
+          <div className=" paged-table rounded-lg py-4 mt-[-20px] Discounts">
             <h3 className="text-lg font-semibold mb-4">Discounts</h3>
             <TableHOC
               columns={discountsColumns}

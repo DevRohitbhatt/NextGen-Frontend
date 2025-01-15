@@ -231,9 +231,27 @@ const generateSalesSummaryPDF = (data) => {
     content: [
       { text: "Sales Summary", style: "header" },
       {
-        text: `${data.metaInfo.groupOrUnitAccessName} - ${data.metaInfo.selectedUnitName}`,
-        style: "subheader",
+        table: {
+          widths: ["60%", "40%"], // Adjust the widths for left and right sections
+          body: [
+            [
+              {
+                text: `${data.metaInfo.groupOrUnitAccessName} - ${data.metaInfo.selectedUnitName}`,
+                style: "subheader",
+                alignment: "left",
+              },
+              {
+                text: `Date: ${data.metaInfo.selectedDate || "N/A"}`,
+                style: "subheader",
+                alignment: "right",
+              },
+            ],
+          ],
+        },
+        layout: "noBorders", // No borders for the table
+        margin: [0, 0, 0, 10], // Add some margin below the table
       },
+      { text: "Gross Sales", style: "sectionHeader" },
       grossSalesSection,
       { text: "Category Sales", style: "sectionHeader" },
       categorySalesSection,
