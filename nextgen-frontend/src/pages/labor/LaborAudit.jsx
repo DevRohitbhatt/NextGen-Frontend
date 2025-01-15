@@ -8,6 +8,7 @@ import {
   TableHOC,
   Loader,
   PdfBuilder,
+  Modal,
   ExcelExport as exportToExcel,
 } from "../../components";
 import { useSelector } from "react-redux";
@@ -49,6 +50,10 @@ const LaborAudit = () => {
   const [errorMessage, setErrorMessage] = useState(
     "There was an error trying to load the Labor Audit Report, please try again later."
   );
+
+  // For comment Modal
+  const [showCommentModal, setShowCommentModal] = useState(false);
+	const [commentValue, setCommentValue] = useState('');
 
   // Schedule DropDown Variable
   const [defaultSchedule, setDefaultSchedule] = useState();
@@ -143,6 +148,28 @@ const LaborAudit = () => {
     columnHelper.accessor("detailComments", {
       id: "detailsComments",
       header: "Shift Comments",
+      cell: ({getValue,row}) => {
+       if(row.getCanExpand()){
+        return
+       }
+       else
+       {
+        if(getValue() ==''){
+          return '';
+        }
+        else
+        {
+          return(
+            <div  className='underline cursor-pointer' onClick={() =>{
+              setShowCommentModal(!showCommentModal);
+              setCommentValue(getValue());
+            }} >
+                  View comment
+            </div>
+          )
+        }
+       }
+      }, 
       dataType: "string",
       filterFn: "arrIncludesSome",
     }),
@@ -760,6 +787,17 @@ const LaborAudit = () => {
           }}
           handleUnitSelection={handleUnitSelection}
         />
+        <Modal
+						isOpen={showCommentModal}
+						title={'Comment'}
+						onClose={() => {
+							setShowCommentModal(!showCommentModal);
+						}}
+					>
+						<div
+							className='w-[300px] h-auto m-[15px]'
+						>{commentValue}</div>
+					</Modal>
       </div>
     </div>
   );
