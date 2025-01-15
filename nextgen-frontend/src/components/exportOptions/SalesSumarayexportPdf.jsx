@@ -68,7 +68,7 @@ const generateSalesSummaryPDF = (data) => {
         ],
         [
           { text: "Order Count", style: "tableHeader" },
-          valueFormatewithoutDecimal(data.viewActivityDaily[0]?.transactions) || "0",
+          data.viewActivityDaily[0]?.transactions || "0",
         ],
         [
           { text: "Covers", style: "tableHeader" },
@@ -76,10 +76,9 @@ const generateSalesSummaryPDF = (data) => {
         ],
         [
           { text: "Order Average", style: "tableHeader" },
-          formattingData(
-            data.viewActivityDaily[0]?.salesNet /
-              data.viewActivityDaily[0]?.transactions
-          ),
+          
+            data.viewActivityDaily[0]?.orderAverage
+          ,
         ],
         [
           { text: "Labor Cost", style: "tableHeader" },
@@ -91,8 +90,7 @@ const generateSalesSummaryPDF = (data) => {
         [
           { text: "Labor Hours", style: "tableHeader" },
           `${
-            data.viewActivityDaily[0]?.laborVariableHours +
-            data.viewActivityDaily[0]?.laborSalaryHours
+            data.viewActivityDaily[0]?.laborHours
           }`,
         ],
         [
@@ -164,7 +162,7 @@ const generateSalesSummaryPDF = (data) => {
         ],
         ...data.paymentsSummary.map((item) => [
           item.name,
-          item.quantity,
+          valueFormatewithoutDecimal(item.quantity),
           formattingData(item.amount),
           formattingData(item.tip),
           formattingData(item.amount + item.tip),
@@ -172,7 +170,7 @@ const generateSalesSummaryPDF = (data) => {
         ]),
         [
           { text: "Total", style: "tableHeader" },
-          data.paymentsSummary.reduce((sum, item) => sum + item.quantity, 0),
+          valueFormatewithoutDecimal(data.paymentsSummary.reduce((sum, item) => sum + item.quantity, 0)),
           formattingData(
             data.paymentsSummary.reduce((sum, item) => sum + item.amount, 0)
           ),
@@ -198,22 +196,22 @@ const generateSalesSummaryPDF = (data) => {
       body: [
         [
           { text: "Name", style: "tableHeader" },
-          { text: "Tickets", style: "tableHeader" },
+          { text: "Quantity", style: "tableHeader" },
           { text: "Amount", style: "tableHeader" },
           { text: "Percent", style: "tableHeader" },
         ],
         ...data.discountSummary.map((item) => [
           item.typeItemName,
-          item.quantityTickets,
+          valueFormatewithoutDecimal(item.quantityTickets),
           formattingData(item.amountDiscount),
           formatPercent(item.amountDiscountPercentOfTotal),
         ]),
         [
           { text: "Total", style: "tableHeader" },
-          data.discountSummary.reduce(
+          valueFormatewithoutDecimal( data.discountSummary.reduce(
             (sum, item) => sum + item.quantityTickets,
             0
-          ),
+          )),
           formattingData(
             data.discountSummary.reduce(
               (sum, item) => sum + item.amountDiscount,
