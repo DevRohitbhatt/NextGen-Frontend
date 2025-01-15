@@ -273,7 +273,7 @@ const SalesSummary = () => {
       },
       {
         accessorKey: "value",
-        header: "Value",
+        header: "Total",
         cell: (info) => {
           let valueType = typeof info.getValue() === "string";
           return valueType ? info.getValue() : formattingData(info.getValue());
@@ -356,19 +356,21 @@ const SalesSummary = () => {
       };
 
       const result = await getCall(getData);
-      if (result?.data) {
+      if (result?.data && result.data.categorySummary.length >0) {
+        
         let totalOfViewActivity = await aggregateData(
           result.data.viewActivityDaily
         );
         let viewActivityDaily = totalOfViewActivity.map((item) => {
           let activity = {
             ...item,
-            orderAverage: formattingData(item?.salesNet / item?.transactions),
+            orderAverage: formattingData(item?.salesNet / parseFloat(item?.transactions)),
             laborCost: formattingData(item?.laborVariable + item?.laborSalary),
             laborHours: addDecimals(
               item?.laborVariableHours + item?.laborSalary
             ),
-            transactions: item.transactions + "",
+            transactions: addDecimals(item.transactions.toFixed(0)) + "",
+            nrsTotalOpen : item.nrsTotalOpen + "",
             laborPercent:
               item?.laborVariable == 0
                 ? 0.0
@@ -431,76 +433,66 @@ const SalesSummary = () => {
 
     // Gross Sales Section
     const grossSalesSection = {
-      name: "Gross Sales Data",
-      columns: [{ name: "Metric" }, { name: "Value" }],
+      name: "Sales",
+      columns: [{ name: "Name" }, { name: "Total" }],
       data: [
         [
           "Gross Sales",
-          `$${salesSummaryData.viewActivityDaily[0]?.salesGross?.toFixed(2)}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.salesGross)}`,
         ],
         [
           "Net Sales",
-          `$${salesSummaryData.viewActivityDaily[0]?.salesNet?.toFixed(2)}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.salesNet)}`,
         ],
         [
           "Tax",
-          `$${salesSummaryData.viewActivityDaily[0]?.salesTax?.toFixed(2)}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.salesTax)}`,
         ],
         [
           "Comps",
-          `$${salesSummaryData.viewActivityDaily[0]?.comps?.toFixed(2)}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.comps)}`,
         ],
         [
           "Promotions",
-          `$${salesSummaryData.viewActivityDaily[0]?.promo?.toFixed(2)}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.promo)}`,
         ],
         [
           "Refunds",
-          `$${salesSummaryData.viewActivityDaily[0]?.refunds?.toFixed(2)}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.refunds)}`,
         ],
         [
           "Voids",
-          `$${salesSummaryData.viewActivityDaily[0]?.voids?.toFixed(2)}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.voids)}`,
         ],
         [
           "Sales Non Cash",
-          `$${salesSummaryData.viewActivityDaily[0]?.planSalesNet?.toFixed(2)}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.planSalesNet)}`,
         ],
         [
           "Deposits",
-          `$${salesSummaryData.viewActivityDaily[0]?.deposits?.toFixed(2)}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.deposits)}`,
         ],
         [
           "Cash OverShort",
-          `$${salesSummaryData.viewActivityDaily[0]?.cashOverShort?.toFixed(
-            2
-          )}`,
+          `${formattingData(salesSummaryData.viewActivityDaily[0]?.cashOverShort)}`,
         ],
         [
           "Order Count",
           salesSummaryData.viewActivityDaily[0]?.transactions || "0",
         ],
-        ["Covers", salesSummaryData.viewActivityDaily[0]?.nrsTotalOpen || "0"],
+        ["Covers", addDecimals(salesSummaryData.viewActivityDaily[0]?.nrsTotalOpen) || "0"],
         [
           "Order Average",
-          `$${(
-            salesSummaryData.viewActivityDaily[0]?.salesNet /
-            salesSummaryData.viewActivityDaily[0]?.transactions
-          ).toFixed(2)}`,
+          `${
+            salesSummaryData.viewActivityDaily[0]?.orderAverage}`,
         ],
         [
           "Labor Cost",
-          `$${(
-            salesSummaryData.viewActivityDaily[0]?.laborVariable +
-            salesSummaryData.viewActivityDaily[0]?.laborSalary
-          ).toFixed(2)}`,
+          `${salesSummaryData.viewActivityDaily[0]?.laborCost}`,
         ],
         [
           "Labor Hours",
-          `$${(
-            salesSummaryData.viewActivityDaily[0]?.laborVariableHours +
-            salesSummaryData.viewActivityDaily[0]?.laborSalaryHours
-          ).toFixed(2)}`,
+          `${addDecimals(salesSummaryData.viewActivityDaily[0]?.laborHours)}`,
         ],
         [
           "Labor Percent",
@@ -561,10 +553,10 @@ const SalesSummary = () => {
       ],
       data: categoryData.map((item, index) => [
         item.categoryName,
-        item.quantityItems,
-        item.quantityModifiers,
-        `$${item.salesNet?.toFixed(2)}`,
-        `${(item.percentOfTotal * 100).toFixed(2)}%`,
+        valueFormatewithoutDecimal(item.quantityItems),
+        valueFormatewithoutDecimal(item.quantityModifiers),
+        `${formattingData(item.salesNet)}`,
+        `${index !== categoryData.length-1 ? (item.percentOfTotal * 100).toFixed(2)+"%" : ""}`,
       ]),
     };
     data.push(categorySalesSection);
@@ -600,13 +592,13 @@ const SalesSummary = () => {
         { name: "Total" },
         { name: "Percent" },
       ],
-      data: paymentData.map((item) => [
+      data: paymentData.map((item,index) => [
         item.name,
-        item.quantity,
-        `$${item.amount?.toFixed(2)}`,
-        `$${item.tip?.toFixed(2)}`,
-        `$${(item.amount + item.tip)?.toFixed(2)}`,
-        `${(item.percentOfTotal * 100).toFixed(2)}%`,
+        valueFormatewithoutDecimal(item.quantity),
+        `${formattingData(item.amount)}`,
+        `${formattingData(item.tip)}`,
+        `${formattingData((item.amount + item.tip))}`,
+        `${index !== paymentData.length-1 ? (item.percentOfTotal * 100).toFixed(2)+"%" : ""}`,
       ]),
     };
 
@@ -627,7 +619,7 @@ const SalesSummary = () => {
         0
       ),
       quantityTicketItems: discountData.reduce(
-        (sum, item) => sum + parseFloat(item.quantityTicketItems || 0),
+        (sum, item) => sum + parseFloat(item.amountDiscountPercentOfTotal || 0),
         0
       ),
     };
@@ -640,11 +632,11 @@ const SalesSummary = () => {
         { name: "Total" },
         { name: "Percent" },
       ],
-      data: discountData.map((item) => [
+      data: discountData.map((item,index) => [
         item.typeItemName,
-        item.quantityTickets,
-        `$${item.amountDiscount?.toFixed(2)}`,
-        item.quantityTicketItems,
+        valueFormatewithoutDecimal(item.quantityTickets),
+        `${formattingData(item.amountDiscount)}`,
+        `${ index !== discountData.length-1 ? addDecimals(item.amountDiscountPercentOfTotal*100) + "%": ""}`,
       ]),
     };
 

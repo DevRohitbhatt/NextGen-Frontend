@@ -143,7 +143,7 @@ const generateSalesSummaryPDF = (data) => {
           formattingData(
             data.categorySummary.reduce((sum, item) => sum + item.salesNet, 0)
           ),
-          "100%",
+          "",
         ],
       ],
     },
@@ -185,7 +185,7 @@ const generateSalesSummaryPDF = (data) => {
               0
             )
           ),
-          "100%",
+          "",
         ],
       ],
     },
@@ -251,7 +251,7 @@ const generateSalesSummaryPDF = (data) => {
         layout: "noBorders", // No borders for the table
         margin: [0, 0, 0, 10], // Add some margin below the table
       },
-      { text: "Gross Sales", style: "sectionHeader" },
+      { text: "Sales", style: "sectionHeader" },
       grossSalesSection,
       { text: "Category Sales", style: "sectionHeader" },
       categorySalesSection,
