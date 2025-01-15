@@ -40,7 +40,7 @@ const SalesSummary = () => {
   const [selectedFromDate, setSelectedFromDate] = useState(new Date());
   const [selectedToDate, setSelectedToDate] = useState(new Date());
   const [showDateModal, setShowDateModal] = useState(false);
-  const [salesSummrayData, setSelesSummrayData] = useState({});
+  const [salesSummaryData, setSalesSummaryData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [introSteps, setIntroSteps] = useState({
       steps: salesSummary(),
@@ -119,7 +119,7 @@ const SalesSummary = () => {
     []
   );
 
-  // Column definitions for Payments
+  
   const paymentsColumns = React.useMemo(
     () => [
       {
@@ -208,7 +208,7 @@ const SalesSummary = () => {
     []
   );
 
-  // Column definitions for Discounts
+  
   const discountsColumns = React.useMemo(
     () => [
       {
@@ -264,7 +264,7 @@ const SalesSummary = () => {
     []
   );
 
-  // Column definitions for View Activity Summary
+
   const activityColumns = React.useMemo(
     () => [
       { accessorKey: "label", header: "Name", cell: (info) => info.getValue() },
@@ -280,12 +280,11 @@ const SalesSummary = () => {
     []
   );
 
-  // Transform View Activity Summary data
   const viewActivityData = React.useMemo(() => {
     const data =
-      salesSummrayData?.viewActivityDaily &&
-      salesSummrayData?.viewActivityDaily.length > 0
-        ? salesSummrayData?.viewActivityDaily[0]
+      salesSummaryData?.viewActivityDaily &&
+      salesSummaryData?.viewActivityDaily.length > 0
+        ? salesSummaryData?.viewActivityDaily[0]
         : {};
     return [
       { label: "Gross Sales", value: data?.salesGross },
@@ -307,7 +306,7 @@ const SalesSummary = () => {
       { label: "Gift Cards Redeemed", value: data?.giftCertificate },
       { label: "Gift Cards Sold", value: data?.giftCertificatesSold },
     ];
-  }, [salesSummrayData]);
+  }, [salesSummaryData]);
 
   const aggregateData = async (viewActivityDaily) => {
     const result = {};
@@ -315,9 +314,9 @@ const SalesSummary = () => {
     viewActivityDaily.forEach((item) => {
       for (const [key, value] of Object.entries(item)) {
         if (typeof value === "number") {
-          result[key] = (result[key] || 0) + value; // Sum numeric values
+          result[key] = (result[key] || 0) + value; 
         } else if (Array.isArray(value)) {
-          result[key] = (result[key] || []).concat(value); // Merge arrays
+          result[key] = (result[key] || []).concat(value);
         } else {
           result[key] = result[key] || value; // Store first occurrence of non-numeric
         }
@@ -367,7 +366,7 @@ const SalesSummary = () => {
         });
 
         result.data.viewActivityDaily = viewActivityDaily;
-        setSelesSummrayData(result?.data);
+        setSalesSummaryData(result?.data);
       }
     } catch (error) {
       console.log("errrrr=>", error);
@@ -402,7 +401,7 @@ const SalesSummary = () => {
       groupOrUnitAccessName,
       selectedUnitName,
     };
-    let data = salesSummrayData;
+    let data = salesSummaryData;
     data.metaInfo = metaInfo;
     generateSalesSummaryPDF(data);
   };
@@ -742,12 +741,12 @@ const SalesSummary = () => {
             handlePDFClick={handlePDFClick}
             includeCSV={true}
             handleCSVClick={() =>
-              handleExportToCSV(salesSummrayData, "Sales_Summary_Report")
+              handleExportToCSV(salesSummaryData, "Sales_Summary_Report")
             }
             includeExcel={true}
             handleExcelClick={() => {
               handleExportToExcel(
-                salesSummrayData,
+                salesSummaryData,
                 "Sales_Summary_Report",
                 "Sales Summary Report",
                 `${dateFormat(selectedFromDate, "mm-dd-yyyy")} - ${dateFormat(
@@ -760,13 +759,12 @@ const SalesSummary = () => {
             includeHelp={true}
             handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
 
-            // handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
           />
         </div>
       </header>
       {/* Gross Sales Section */}
       {isLoading && <Loader loading={isLoading} />}
-      {Object.keys(salesSummrayData).length > 0 ? (
+      {Object.keys(salesSummaryData).length > 0 ? (
         <>
           <div className="  rounded-lg mb-0 p-4  all">
             <div className="flex justify-between">
@@ -790,12 +788,12 @@ const SalesSummary = () => {
           </div>
 
           {/* Category Sales Section */}
-          {Object.keys(salesSummrayData).length > 0 && (
+          {Object.keys(salesSummaryData).length > 0 && (
             <div className=" paged-table rounded-lg p-4 mt-[-20px] categorySales">
               <h3 className="text-lg font-semibold mb-4">Category Sales</h3>
               <TableHOC
                 columns={categorySalesColumns}
-                data={salesSummrayData.categorySummary}
+                data={salesSummaryData.categorySummary}
                 isHeader={true}
                 isFooter={true}
               />
@@ -806,7 +804,7 @@ const SalesSummary = () => {
             <h3 className="text-lg font-semibold mb-4">Payments</h3>
             <TableHOC
               columns={paymentsColumns}
-              data={salesSummrayData.paymentsSummary}
+              data={salesSummaryData.paymentsSummary}
               isHeader={true}
               isFooter={true}
             />
@@ -815,7 +813,7 @@ const SalesSummary = () => {
             <h3 className="text-lg font-semibold mb-4">Discounts</h3>
             <TableHOC
               columns={discountsColumns}
-              data={salesSummrayData.discountSummary}
+              data={salesSummaryData.discountSummary}
               isHeader={true}
               isFooter={true}
             />
