@@ -171,9 +171,9 @@ const EditAndAddDndTable = ({
       const alreadyAdded = itemsToAdd.filter((item) =>
         templateItems.some((tItem) => tItem.menuID === item.menuID)
       );
-
+      
       if (alreadyAdded.length > 0) {
-        toast.error("Some items already exist in the right table", {
+        toast.error(`The Item ${alreadyAdded[0].description} has already been added.`, {
           autoClose: 1500,
         });
         return;
