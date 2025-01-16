@@ -157,7 +157,7 @@ const LaborCICOExceptions = () => {
       columnHelper.accessor("totalCost", {
         id: "totalCost",
         header: "Total Cost",
-        cell: ({ getValue }) => `$${getValue()}`,
+        cell: ({ getValue }) => `${formattingData(getValue())}`,
         dataType: "number",
         tooltip: tooltips.totalCost,
         footer: ({ table }) =>{ 
@@ -221,7 +221,7 @@ const LaborCICOExceptions = () => {
             shiftName: data.shiftName,
             reportType: data.exceptionType,
             exceptionDetail: data.exceptionDetail,
-            totalCost: Math.abs(data.totalAmount)?.toFixed(2),
+            totalCost: data.totalAmount?.toFixed(2),
           }))
         )
       );
@@ -327,7 +327,6 @@ const LaborCICOExceptions = () => {
         })
       );
     }
-
     setColumns(newColumns);
 
     if (isTableRendered) {
