@@ -19,7 +19,6 @@ import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborCICOExceptions from "../../assets/introJSSteps/laborCICOExceptions";
 import { formattingData } from "../../functions/formatingCurrency"; 
-import { Prev } from "react-bootstrap/esm/PageItem";
 
 const tooltips = {
 	jobDescription: "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
@@ -267,7 +266,7 @@ const LaborCICOExceptions = () => {
     const selectedGroupByColumns = groupByColumns[option] || [];
     const newColumns = memoizedColumns.map((column) =>
       selectedGroupByColumns.includes(column.id)
-        ? { ...column, groupBy: true, sortDescFirst: false, show: false }
+        ? { ...column, groupBy: true, show: false }
         : column
     );
 
