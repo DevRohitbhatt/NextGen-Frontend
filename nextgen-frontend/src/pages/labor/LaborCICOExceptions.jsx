@@ -19,6 +19,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborCICOExceptions from "../../assets/introJSSteps/laborCICOExceptions";
 import { formattingData } from "../../functions/formatingCurrency"; 
+import { Prev } from "react-bootstrap/esm/PageItem";
 
 const tooltips = {
 	jobDescription: "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
@@ -157,7 +158,7 @@ const LaborCICOExceptions = () => {
       columnHelper.accessor("totalCost", {
         id: "totalCost",
         header: "Total Cost",
-        cell: ({ getValue }) => `$${getValue()}`,
+        cell: ({ getValue }) => `${formattingData(getValue())}`,
         dataType: "number",
         tooltip: tooltips.totalCost,
         footer: ({ table }) =>{ 
@@ -221,7 +222,7 @@ const LaborCICOExceptions = () => {
             shiftName: data.shiftName,
             reportType: data.exceptionType,
             exceptionDetail: data.exceptionDetail,
-            totalCost: Math.abs(data.totalAmount)?.toFixed(2),
+            totalCost: data.totalAmount?.toFixed(2),
           }))
         )
       );
@@ -266,7 +267,7 @@ const LaborCICOExceptions = () => {
     const selectedGroupByColumns = groupByColumns[option] || [];
     const newColumns = memoizedColumns.map((column) =>
       selectedGroupByColumns.includes(column.id)
-        ? { ...column, groupBy: true, show: false }
+        ? { ...column, groupBy: true, sortDescFirst: false, show: false }
         : column
     );
 
@@ -327,7 +328,6 @@ const LaborCICOExceptions = () => {
         })
       );
     }
-
     setColumns(newColumns);
 
     if (isTableRendered) {
