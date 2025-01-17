@@ -351,9 +351,9 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) =>
 				row.getCanExpand()
-					? `$${row.original?.comparisonSales?.toFixed(2)}`
+					? formattingData(row.original?.comparisonSales)
 					: getValue() !== undefined
-					? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}`
+					? formattingData(getValue())
 					: '',
 			size: 100,
 			tooltip: tooltips.comparisonSales,

@@ -19,6 +19,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
+import { formattingData } from './../../functions/formatingCurrency';
 
 const tooltips = {
 	actualUsageDollar:
@@ -309,9 +310,9 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) =>
 				row.getCanExpand()
-					? `$${row.original?.comparisonSales?.toFixed(2)}`
+					? formattingData(row.original?.comparisonSales)
 					: getValue() !== undefined
-					? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}`
+					? formattingData(getValue())
 					: '',
 			size: 150,
 			tooltip: tooltips.comparisonSales,
