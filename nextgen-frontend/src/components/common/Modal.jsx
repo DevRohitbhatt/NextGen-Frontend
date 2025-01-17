@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { FaRegWindowClose } from 'react-icons/fa';
 
@@ -45,18 +45,33 @@ const CloseButton = styled(FaRegWindowClose)`
 	}
 `;
 
+export default function Modal({ children, isOpen, setIsOpen, onClose, setModalPosition, title }) {
+	const modalRef = React.useRef(null);
 
-export default function Modal ({ children, isOpen, setIsOpen, onClose, title }) {
-  return (
-    isOpen ? (
-        <ModalContainer className='lg:!pt-[100px] !p-[10px] sm:!pt-[80px]'  isOpen={isOpen}>
-					<ModalContent className='lg:!max-w-[80%] !max-w-full'>
-							<ModalHeader>{title}
-									<CloseButton onClick={onClose}/>
-							</ModalHeader>
-							{children}
-					</ModalContent>
-        </ModalContainer>
-    ) : null
-  );
+	useEffect(() => {
+		const updateModalPosition = () => {
+			if (isOpen && modalRef.current && setModalPosition) {
+				const modalPosition = modalRef.current.getBoundingClientRect();
+				setModalPosition(modalPosition);
+			}
+		};
+
+		updateModalPosition();
+		window.addEventListener('resize', updateModalPosition);
+
+		return () => {
+			window.removeEventListener('resize', updateModalPosition);
+		};
+	}, [isOpen]);
+	return isOpen ? (
+		<ModalContainer className='lg:!pt-[100px] !p-[10px] sm:!pt-[80px]' isOpen={isOpen}>
+			<ModalContent ref={modalRef} className='lg:!max-w-[80%] !max-w-full'>
+				<ModalHeader>
+					{title}
+					<CloseButton onClick={onClose} />
+				</ModalHeader>
+				{children}
+			</ModalContent>
+		</ModalContainer>
+	) : null;
 }
