@@ -57,8 +57,11 @@ const CalendarModal = ({
 	}, [modalOpen, selectedFromDate, selectedToDate, companyID]);
 
 	useEffect(() => {
-		getDynamicDates();
-	}, []);
+		if(companyID){
+
+			getDynamicDates();
+		}
+	}, [companyID]);
 
 	useEffect(() => {
 		if (dynamicData) {

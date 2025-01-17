@@ -37,7 +37,8 @@ import {
 	MenuItemsSold,
 	LaborAnalysis,
 	CookChart,
-	CookChartTemplate
+	CookChartTemplate,
+	SalesSummary
 } from './pages';
 import { Suspense } from 'react';
 
@@ -158,6 +159,7 @@ const App = () => {
 								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
 								<Route path='/LaborCICO' element={<LaborCICO />} />
 								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
+								<Route path='/SalesSummary' element={<SalesSummary />} />
 								
 							</Routes>
 						</Suspense>
