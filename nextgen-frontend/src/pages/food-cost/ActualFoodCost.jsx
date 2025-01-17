@@ -649,6 +649,7 @@ const ActualFoodCost = () => {
 	};
 
 	const handleShowColumns = (status, type) => {
+		setIsLoading(true);
 		if (type === '#') {
 			setShowQuantities(!showQuantities);
 		} else {
@@ -672,6 +673,9 @@ const ActualFoodCost = () => {
 		setFilteredActualFoodCostData((prev) => [...actualFoodCostData]);
 		setViewBy('Inventory Item');
 		setIsTableRendered(false);
+		setTimeout(() => {
+			setIsLoading(false);
+		}, 1000);
 	};
 
 	const handleShowHideDepartments = () => {
@@ -1548,7 +1552,9 @@ const ActualFoodCost = () => {
 													className='mr-1 accent-[var(--tw-primary)]'
 													type='checkbox'
 													checked={showQuantities}
-													onChange={(e) => handleShowColumns(e.target.checked, '#')}
+													onChange={(e) => {
+														if (!isLoading) handleShowColumns(e.target.checked, '#');
+													}}
 												/>
 												Show Quantities
 											</div>
@@ -1557,7 +1563,9 @@ const ActualFoodCost = () => {
 													className='mr-1 accent-[var(--tw-primary)]'
 													type='checkbox'
 													checked={showDollarAmounts}
-													onChange={(e) => handleShowColumns(e.target.checked, '$')}
+													onChange={(e) => {
+														if (!isLoading) handleShowColumns(e.target.checked, '$');
+													}}
 												/>
 												Show Dollar Amounts
 											</div>

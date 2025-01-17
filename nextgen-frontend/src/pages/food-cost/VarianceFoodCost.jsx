@@ -675,6 +675,7 @@ const VarianceFoodCost = () => {
 	};
 
 	const handleShowColumns = (status, type) => {
+		setIsLoading(true);
 		if (type === '#') {
 			setShowQuantities(!showQuantities);
 		} else {
@@ -698,6 +699,9 @@ const VarianceFoodCost = () => {
 		setFilteredVarianceFoodCostData((prev) => [...varianceFoodCostData]);
 		setViewBy('Inventory Item');
 		setIsTableRendered(false);
+		setTimeout(() => {
+			setIsLoading(false);
+		}, 1000);
 	};
 
 	// Function to handle the PDF export
@@ -1521,7 +1525,9 @@ const VarianceFoodCost = () => {
 												className='mr-1 accent-[var(--tw-primary)] text-[14px]'
 												type='checkbox'
 												checked={showQuantities}
-												onChange={(e) => handleShowColumns(e.target.checked, '#')}
+												onChange={(e) => {
+													if (!isLoading) handleShowColumns(e.target.checked, '#');
+												}}
 											/>
 											Show Quantities
 										</div>
@@ -1530,7 +1536,9 @@ const VarianceFoodCost = () => {
 												className='mr-1 accent-[var(--tw-primary)] text-[14px] '
 												type='checkbox'
 												checked={showDollarAmounts}
-												onChange={(e) => handleShowColumns(e.target.checked, '$')}
+												onChange={(e) => {
+													if (!isLoading) handleShowColumns(e.target.checked, '$');
+												}}
 											/>
 											Show Dollar Amounts
 										</div>
