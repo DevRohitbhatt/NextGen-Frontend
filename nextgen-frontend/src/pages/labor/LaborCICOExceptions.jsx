@@ -227,7 +227,8 @@ const LaborCICOExceptions = () => {
         ).sort((a, b) => a.employeeName.localeCompare(b.employeeName));
         setLaborCICOExceptionsData(newData);
       }else if( optionName === "Date"){
-        const newData = result.data.flatMap((unit) =>
+        const newData = result.data
+        .flatMap((unit) =>
           unit.employees.flatMap((employee) =>
             employee.cicoExceptions.map((data) => ({
               unitName: unit.unitName,
@@ -240,7 +241,8 @@ const LaborCICOExceptions = () => {
               totalCost: data.totalAmount?.toFixed(2),
             }))
           )
-        ).sort((a, b) => a.businessDate.localeCompare(b.businessDate));
+        )
+        .sort((a, b) => new Date(a.businessDate) - new Date(b.businessDate));
         setLaborCICOExceptionsData(newData);
       } else {
         const newData = result.data.flatMap((unit) =>
@@ -259,22 +261,7 @@ const LaborCICOExceptions = () => {
         );
         setLaborCICOExceptionsData(newData);
       }
-      // const newData = result.data.flatMap((unit) =>
-      //   unit.employees.flatMap((employee) =>
-      //     employee.cicoExceptions.map((data) => ({
-      //       unitName: unit.unitName,
-      //       businessDate: dateFormat(data.businessDate, "mm-dd-yyyy"),
-      //       employeeName: data.employeeFullName,
-      //       jobDescription: data.jobDescription,
-      //       shiftName: data.shiftName,
-      //       reportType: data.exceptionType,
-      //       exceptionDetail: data.exceptionDetail,
-      //       totalCost: data.totalAmount?.toFixed(2),
-      //     }))
-      //   )
-      // );
-
-      // setLaborCICOExceptionsData(newData);
+    
       setIsLoading(false);
       setIsTableRendered(true);
     } catch (error) {
