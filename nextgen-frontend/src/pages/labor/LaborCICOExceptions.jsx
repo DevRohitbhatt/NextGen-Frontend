@@ -18,6 +18,18 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborCICOExceptions from "../../assets/introJSSteps/laborCICOExceptions";
+import { formattingData } from "../../functions/formatingCurrency";
+
+const tooltips = {
+  jobDescription:
+    "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
+  shiftName: "The Day Part the exception occurred.",
+  reportType: "The reported exception type.",
+  exceptionDetail:
+    "Provides additional details about the reported exception, including CICOs and scheduled shift times for Did Not Work exceptions. \nTimes in the exception details are used to calculate the amount of money lost or saved due to the exception.",
+  totalCost: "Calculates the cost of the exception.",
+  direction: "above",
+};
 
 const columnHelper = createColumnHelper();
 
@@ -120,18 +132,21 @@ const LaborCICOExceptions = () => {
         id: "jobDescription",
         header: "Job Description",
         dataType: "string",
+        tooltip: tooltips.jobDescription,
       }),
       columnHelper.accessor("shiftName", {
         id: "shiftName",
         header: "Shift Name",
         dataType: "string",
         size: 100,
+        tooltip: tooltips.shiftName,
       }),
       columnHelper.accessor("reportType", {
         id: "reportType",
         header: "Report Type",
         dataType: "string",
         size: 100,
+        tooltip: tooltips.reportType,
       }),
 
       columnHelper.accessor("exceptionDetail", {
@@ -139,24 +154,24 @@ const LaborCICOExceptions = () => {
         header: "Exception Detail",
         dataType: "string",
         size: 400,
+        tooltip: tooltips.exceptionDetail,
       }),
       columnHelper.accessor("totalCost", {
         id: "totalCost",
         header: "Total Cost",
-        cell: ({ getValue }) => `$${getValue()}`,
+        cell: ({ getValue }) => `${formattingData(getValue())}`,
         dataType: "number",
-        footer: ({ table }) => (
-          <div className="font-bold text-start">
-            $
-            {table
-              .getCoreRowModel()
-              .rows.reduce(
-                (acc, row) => acc + parseFloat(row.original.totalCost),
-                0
-              )
-              .toFixed(2)}
-          </div>
-        ),
+        tooltip: tooltips.totalCost,
+        footer: ({ table }) => {
+          let totalCost = table
+            .getCoreRowModel()
+            .rows.reduce(
+              (acc, row) => acc + parseFloat(row.original.totalCost),
+              0
+            );
+          totalCost = formattingData(totalCost);
+          return <div className="font-bold text-start">{totalCost}</div>;
+        },
       }),
     ],
     []
@@ -177,7 +192,7 @@ const LaborCICOExceptions = () => {
     groupOrUnitAccessName,
   ]);
 
-  const fetchLaborCICOExceptionsData = async () => {
+  const fetchLaborCICOExceptionsData = async (optionName) => {
     try {
       setIsLoading(true);
       setIsError(false);
@@ -192,25 +207,61 @@ const LaborCICOExceptions = () => {
           toDate: dateFormat(selectedToDate, "yyyy-mm-dd"),
         },
       };
-
+    
       const result = await getCall(getData);
-
-      const newData = result.data.flatMap((unit) =>
-        unit.employees.flatMap((employee) =>
-          employee.cicoExceptions.map((data) => ({
-            unitName: unit.unitName,
-            businessDate: dateFormat(data.businessDate, "mm-dd-yyyy"),
-            employeeName: data.employeeFullName,
-            jobDescription: data.jobDescription,
-            shiftName: data.shiftName,
-            reportType: data.exceptionType,
-            exceptionDetail: data.exceptionDetail,
-            totalCost: Math.abs(data.totalAmount)?.toFixed(2),
-          }))
+      let optionType = optionName === "Employee" || optionName === "Date" ? optionName : groupBy
+      if (optionType === "Employee" ) {
+        const newData = result.data.flatMap((unit) =>
+          unit.employees.flatMap((employee) =>
+            employee.cicoExceptions.map((data) => ({
+              unitName: unit.unitName,
+              businessDate: dateFormat(data.businessDate, "mm-dd-yyyy"),
+              employeeName: data.employeeFullName,
+              jobDescription: data.jobDescription,
+              shiftName: data.shiftName,
+              reportType: data.exceptionType,
+              exceptionDetail: data.exceptionDetail,
+              totalCost: data.totalAmount?.toFixed(2),
+            }))
+          )
+        ).sort((a, b) => a.employeeName.localeCompare(b.employeeName));
+        setLaborCICOExceptionsData(newData);
+      }else if( optionType === "Date"){
+        const newData = result.data
+        .flatMap((unit) =>
+          unit.employees.flatMap((employee) =>
+            employee.cicoExceptions.map((data) => ({
+              unitName: unit.unitName,
+              businessDate: dateFormat(data.businessDate, "mm-dd-yyyy"),
+              employeeName: data.employeeFullName,
+              jobDescription: data.jobDescription,
+              shiftName: data.shiftName,
+              reportType: data.exceptionType,
+              exceptionDetail: data.exceptionDetail,
+              totalCost: data.totalAmount?.toFixed(2),
+            }))
+          )
         )
-      );
-
-      setLaborCICOExceptionsData(newData);
+        .sort((a, b) => new Date(a.businessDate) - new Date(b.businessDate));
+        setLaborCICOExceptionsData(newData);
+      } else {
+        const newData = result.data.flatMap((unit) =>
+          unit.employees.flatMap((employee) =>
+            employee.cicoExceptions.map((data) => ({
+              unitName: unit.unitName,
+              businessDate: dateFormat(data.businessDate, "mm-dd-yyyy"),
+              employeeName: data.employeeFullName,
+              jobDescription: data.jobDescription,
+              shiftName: data.shiftName,
+              reportType: data.exceptionType,
+              exceptionDetail: data.exceptionDetail,
+              totalCost: data.totalAmount?.toFixed(2),
+            }))
+          )
+        );
+        setLaborCICOExceptionsData(newData);
+      }
+    
       setIsLoading(false);
       setIsTableRendered(true);
     } catch (error) {
@@ -246,7 +297,7 @@ const LaborCICOExceptions = () => {
       Employee: ["unitName", "employeeName"],
       Unit: ["unitName"],
     };
-
+    
     const selectedGroupByColumns = groupByColumns[option] || [];
     const newColumns = memoizedColumns.map((column) =>
       selectedGroupByColumns.includes(column.id)
@@ -277,13 +328,13 @@ const LaborCICOExceptions = () => {
                     columns.find(
                       (col) => col.id === selectedGroupByColumns[row.depth]
                     )?.header
-                  }: ${row.original[selectedGroupByColumns[row.depth]]} ($${
+                  }: ${row.original[selectedGroupByColumns[row.depth]]} (${formattingData(
                     selectedGroupByColumns.length === 1
                       ? calculateTotalCost(row.subRows).toFixed(2)
                       : row.depth === 0
                       ? calculateNestedTotalCost(row.subRows).toFixed(2) // For depth-0 rows, process nested subrows
                       : calculateTotalCost(row.subRows).toFixed(2)
-                  })`
+                  )})`
                 : "";
 
             return (
@@ -311,11 +362,10 @@ const LaborCICOExceptions = () => {
         })
       );
     }
-
     setColumns(newColumns);
 
     if (isTableRendered) {
-      fetchLaborCICOExceptionsData();
+      fetchLaborCICOExceptionsData(option);
     }
   };
 
@@ -412,17 +462,17 @@ const LaborCICOExceptions = () => {
 
   return (
     <>
-      <div className="w-[85%] mx-auto">
+      <div className="w-[98%] mx-auto">
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-4 text-2xl leading-tight text-left pageTitle">
+        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
           Clock In - Clock Out Exceptions
         </h2>
-        <header className="optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
+        <header className="optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
           <div className="flex items-center space-x-1">
             <UnitSelector
               companyId={companyID}
@@ -449,7 +499,7 @@ const LaborCICOExceptions = () => {
               />
             </div>
             <div className="run-button" onClick={fetchLaborCICOExceptionsData}>
-              <div className="py-3 ml-2 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
+              <div className="py-2 ml-2 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
                 Run
               </div>
             </div>

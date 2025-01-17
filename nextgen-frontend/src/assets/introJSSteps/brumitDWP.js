@@ -1,8 +1,8 @@
-export default function itemSoldTotals() {
+export default function brumitDWP() {
 	return [
 		{
 			intro:
-				'<center>Welcome to QSROnline’s Menu Item Sold - Item Sold Totals Report tool! Let us show you around.' +
+				'<center>Welcome to QSROnline’s Brumit DWP Report tool! Let us show you around.' +
 				'<br><br>Press the enter or arrow keys to advance through the tutorial.</center>',
 		},
 		{
@@ -13,11 +13,11 @@ export default function itemSoldTotals() {
 		},
 		{
 			element: '.date-selector',
-			intro: '-Select the date, or date range, you wish to display Item Sold Totals Report',
+			intro: '-Select the date, or date range, you wish to display Brumit DWP Report',
 		},
 		{
-			element: '.dropdown-selector',
-			intro: 'You can select the Item Sold Totals Report based on specific days of the week or all days.',
+			element: '.reportType-selector',
+			intro: '-Select the report type for which you want to view the report.',
 		},
 		{
 			element: '.run-button',
@@ -25,15 +25,7 @@ export default function itemSoldTotals() {
 		},
 		{
 			element: '.export-options',
-			intro: 'You can export the Item Sold Totals Report to either .XLSX, .CSV or .PDF format. The ? icon will launch this guided tour.',
-		},
-		{
-			element: '.view-selector',
-			intro: '-Select the view you like to display for the Item Sold Totals Report',
-		},
-		{
-			element: '.sale-selector',
-			intro: '-Select the sale type - Net or Gross, you wish to display fot the Item Sold Totals Report Report',
+			intro: 'You can export the Brumit DWP Report to either .XLSX format. The ? icon will launch this guided tour.',
 		},
 		{
 			element: '.paged-table',

@@ -57,8 +57,11 @@ const CalendarModal = ({
 	}, [modalOpen, selectedFromDate, selectedToDate, companyID]);
 
 	useEffect(() => {
-		getDynamicDates();
-	}, []);
+		if(companyID){
+
+			getDynamicDates();
+		}
+	}, [companyID]);
 
 	useEffect(() => {
 		if (dynamicData) {
@@ -150,9 +153,11 @@ const CalendarModal = ({
 			{modalOpen && (
 				<div className='fixed bg-[#00000073] w-full h-dvh left-0 top-0 z-10'>
 					<div
-						className={`fixed bg-white rounded-lg shadow-lg overflow-hidden left-1/3  top-[6%] ${
-							isDateRange ? '' : 'w-96'
-						}`}
+						className={`fixed bg-white rounded-lg shadow-lg overflow-auto lg:left-1/3   top-[6%] 
+              ${
+                isDateRange ? '' : 'lg:w-96 mx-2 lg:mx-0'
+							}`
+            } 
 					>
 						<div className='flex items-center justify-between px-4 py-2 text-white bg-[var(--tw-primary)]'>
 							{isDateRange ? (
@@ -209,7 +214,7 @@ const CalendarModal = ({
 										</div>
 									) : (
 										<div className='px-4 py-4 bg-white '>
-											<div className='m-auto overflow-y-auto text-sm border tableHOC h-96 rounded-2xl'>
+											<div className='m-auto overflow-y-auto text-sm border tableHOC max-h-96 rounded-2xl'>
 												<table className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
 													<thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
 														<tr>

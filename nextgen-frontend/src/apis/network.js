@@ -2,29 +2,29 @@ import api from './configs/axiosConfig';
 import urlConfig from './urlConfig';
 
 //Cache object to store API responses
-// const cache = {};
+const cache = {};
 
-// const getCacheKey = (url, params) => {
-// 	if (!params) return url;
-// 	return `${url}:${JSON.stringify(params)}`;
-// };
+const getCacheKey = (url, params) => {
+	if (!params) return url;
+	return `${url}:${JSON.stringify(params)}`;
+};
 
-// const setCache = (key, data, ttl = 300000) => {
-// 	cache[key] = {
-// 		data,
-// 		expiry: Date.now() + ttl,
-// 	};
-// };
+const setCache = (key, data, ttl = 300000) => {
+	cache[key] = {
+		data,
+		expiry: Date.now() + ttl,
+	};
+};
 
-// const getCache = (key) => {
-// 	const cacheData = cache[key];
-// 	if (!cacheData) return null;
-// 	if (cacheData.expiry < Date.now()) {
-// 		delete cache[key];
-// 		return null;
-// 	}
-// 	return cacheData.data;
-// };
+const getCache = (key) => {
+	const cacheData = cache[key];
+	if (!cacheData) return null;
+	if (cacheData.expiry < Date.now()) {
+		delete cache[key];
+		return null;
+	}
+	return cacheData.data;
+};
 
 // function to make post call
 export const postCall = async (postData = {}) => {
@@ -66,7 +66,7 @@ export const postCall = async (postData = {}) => {
 };
 
 // function to make get call
-export const getCall = async (getData = {}) => {
+export const getCall = async (getData = {},isCache=true) => {
 	let url = '';
 
 	if (getData.fullUrl) {
@@ -90,9 +90,9 @@ export const getCall = async (getData = {}) => {
 	}
 
 	//Check if the response is already cached
-	// const cacheKey = getCacheKey(url, getData.urlParams);
-	// const cachedResponse = getCache(cacheKey);
-	// if (cachedResponse) return cachedResponse;
+	const cacheKey = isCache && getCacheKey(url, getData.urlParams);
+	const cachedResponse = isCache && getCache(cacheKey);
+	if (cachedResponse && isCache) return cachedResponse;
 
 	const response = await api.request({
 		method: 'GET',
@@ -101,7 +101,7 @@ export const getCall = async (getData = {}) => {
 	});
 
 	// Cache the response
-	//setCache(cacheKey, response.data, 3600000);
+	setCache(cacheKey, response.data, 3600000);
 
 	return response.data;
 };

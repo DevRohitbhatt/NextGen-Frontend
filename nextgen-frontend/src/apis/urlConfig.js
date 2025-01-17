@@ -76,6 +76,8 @@ const urlConfig = {
 	discountTypes: 'api/sales/GetDiscountTypesReportData',
 	menuGrossProfit: 'api/sales/getMenuGrossProfitReport',
 	menuGrossProfitRecipeInfo: 'api/sales/GetMenuGrossProfitRecipePopupReport',
+	GetSalesSummaryReport : 'api/sales/GetSalesSummaryReport',
+	brumitDWP: 'api/sales/GetBrumitDWP2ReportData',
 
 	//labor apis
 	employeeInformation: 'api/labor/getEmployeeInformation',

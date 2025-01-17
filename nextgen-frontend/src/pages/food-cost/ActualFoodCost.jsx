@@ -20,6 +20,29 @@ import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
 import dateFormat from 'dateformat';
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
+const tooltips = {
+	begDollar:
+		'The inventory value from the beginning countsheet of the selected date range. \n\n Tip: Double-check the mapping if an item’s value is considerably higher or lower than expected.',
+	purDollar:
+		'The value of invoiced purchases received during the selected date range. \n\n Tip: Missing purchases can mean invoice(s) weren’t entered or it was mapped incorrectly.',
+	transInDollar:
+		'The inventory value of items from all transfers IN during the selected date range. \n\n $’s calculated using the latest pricing from the transferring location.',
+	transOutDollar:
+		'The inventory value of items from all transfers OUT during the selected date range. \n\n $’s calculated using the latest pricing from your location.',
+	endDollar:
+		'The inventory value from the ending count sheet of the selected date range. \n\n Tip: Double-check the mapping if an item’s value is considerably higher or lower than expected.',
+	actualUsageDollar:
+		'The value of the inventory used during the selected date range, calculated by: \n\n Beg $ + Pur $ + Tr In $ – Tr Out $ – End $ / Comparison Sales',
+	actualUsagePercent:
+		'Actual Usage $ / Comparison Sales $ \n\n Tip: Negative Usage indicates a “growth” in inventory, possibly due to missing purchases or missing counts.',
+	wasteDollar: 'The inventory value of items entered in waste countsheets during the selected date range.',
+	wasterPercent: 'Waste $ / Comparison Sales $',
+	comparisonName: 'Names the sales value used for comparison against inventory. \n\n (Default is Net Sales)',
+	comparisonSales:
+		'Comparison Sales configured for this Department and/or Sub-department. i.e., Net Sales, Department Sales, etc.',
+	direction: 'above',
+};
+
 const columnHelper = createColumnHelper();
 
 const ActualFoodCost = () => {
@@ -199,6 +222,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'begCountCost', getValue),
 			size: 90,
+			tooltip: tooltips.begDollar,
 		}),
 		columnHelper.accessor('purchaseDisplayUnits', {
 			id: 'purchaseDisplayUnits',
@@ -214,6 +238,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'purchaseCost', getValue),
 			size: 60,
+			tooltip: tooltips.purDollar,
 		}),
 		columnHelper.accessor('iTinCountDisplayUnits', {
 			id: 'iTinCountDisplayUnits',
@@ -229,6 +254,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'iTinCountCost', getValue),
 			size: 60,
+			tooltip: tooltips.transInDollar,
 		}),
 		columnHelper.accessor('iToutCountDisplayUnits', {
 			id: 'iToutCountDisplayUnits',
@@ -244,6 +270,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'iToutCountCost', getValue),
 			size: 80,
+			tooltip: tooltips.transOutDollar,
 		}),
 		columnHelper.accessor('endCountDisplayUnits', {
 			id: 'endCountDisplayUnits',
@@ -259,6 +286,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'endCountCost', getValue),
 			size: 60,
+			tooltip: tooltips.endDollar,
 		}),
 		columnHelper.accessor('usageCountDisplayUnits', {
 			id: 'usageCountDisplayUnits',
@@ -274,6 +302,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'usageCost', getValue),
 			size: 80,
+			tooltip: tooltips.actualUsageDollar,
 		}),
 		columnHelper.accessor('usageCostPct', {
 			id: 'usageCostPct',
@@ -281,6 +310,7 @@ const ActualFoodCost = () => {
 			dataType: 'percent',
 			cell: ({ row, getValue }) => calculateSum(row, 'usageCostPct', getValue, true),
 			size: 90,
+			tooltip: tooltips.actualUsagePercent,
 		}),
 		columnHelper.accessor('wasteCountDisplayUnits', {
 			id: 'wasteCountDisplayUnits',
@@ -296,6 +326,7 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) => calculateSum(row, 'wasteCountCost', getValue),
 			size: 80,
+			tooltip: tooltips.wasteDollar,
 		}),
 		columnHelper.accessor('wasteCostPct', {
 			id: 'wasteCostPct',
@@ -303,6 +334,7 @@ const ActualFoodCost = () => {
 			dataType: 'percent',
 			cell: ({ row, getValue }) => calculateSum(row, 'wasteCostPct', getValue, true),
 			size: 90,
+			tooltip: tooltips.wasterPercent,
 		}),
 		columnHelper.accessor('comparisonName', {
 			id: 'comparisonName',
@@ -311,6 +343,7 @@ const ActualFoodCost = () => {
 				row.getCanExpand() ? row.original?.comparisonName : getValue() !== undefined ? getValue() : '',
 			dataType: 'string',
 			size: 100,
+			tooltip: tooltips.comparisonName,
 		}),
 		columnHelper.accessor('comparisonSales', {
 			id: 'comparisonSales',
@@ -318,11 +351,12 @@ const ActualFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) =>
 				row.getCanExpand()
-					? `$${row.original?.comparisonSales?.toFixed(2)}`
+					? formattingData(row.original?.comparisonSales)
 					: getValue() !== undefined
-					? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}`
+					? formattingData(getValue())
 					: '',
 			size: 100,
+			tooltip: tooltips.comparisonSales,
 		}),
 	];
 
@@ -337,7 +371,7 @@ const ActualFoodCost = () => {
 							subrow.subRows.reduce((subAcc, subSubrow) => {
 								if (subSubrow.getCanExpand()) {
 									const item = checkedItems.find(
-										(item) => item.name.split('/')[1] === subSubrow.original.subDepartment
+										(item) => item.name.split(/\/(.+)/)[1] === subSubrow.original.subDepartment
 									);
 									return (
 										subAcc +
@@ -351,16 +385,7 @@ const ActualFoodCost = () => {
 										)
 									);
 								} else {
-									let item = checkedItems.find(
-										(item) => item?.name.split('/')[1] === subrow.original.subDepartment
-									);
-
-									return (
-										subAcc +
-										(item?.includeInGrandTotal && subSubrow.original[field]
-											? Number(subSubrow.original[field])
-											: 0)
-									);
+									return subAcc + (subSubrow.original[field] ? Number(subSubrow.original[field]) : 0);
 								}
 							}, 0)
 						);
@@ -414,6 +439,9 @@ const ActualFoodCost = () => {
 		}
 	}, [defaultUnitID, defaultUnitName]);
 
+	useEffect(() => {
+		setColumns(generatedColumns);
+	}, [checkedItemsLoaded]);
 	useEffect(() => {
 		console.log('checkedItemsLoaded', checkedItemsLoaded);
 
@@ -621,6 +649,7 @@ const ActualFoodCost = () => {
 	};
 
 	const handleShowColumns = (status, type) => {
+		setIsLoading(true);
 		if (type === '#') {
 			setShowQuantities(!showQuantities);
 		} else {
@@ -641,7 +670,12 @@ const ActualFoodCost = () => {
 		});
 
 		setColumns((prev) => [...updatedColumns]);
-		fetchActualFoodCostReport();
+		setFilteredActualFoodCostData((prev) => [...actualFoodCostData]);
+		setViewBy('Inventory Item');
+		setIsTableRendered(false);
+		setTimeout(() => {
+			setIsLoading(false);
+		}, 1000);
 	};
 
 	const handleShowHideDepartments = () => {
@@ -1376,15 +1410,15 @@ const ActualFoodCost = () => {
 
 	return (
 		<>
-			<div className='w-10/12 mx-auto pageContainer'>
+			<div className='w-[98%] mx-auto pageContainer'>
 				<Steps
 					enabled={introSteps.stepsEnabled}
 					steps={introSteps.steps}
 					initialStep={introSteps.initialStep}
 					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 				/>
-				<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Actual Food Cost</h2>
-				<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+				<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Actual Food Cost</h2>
+				<header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 					<div className='flex items-center'>
 						<UnitSelector
 							companyId={companyID}
@@ -1424,7 +1458,7 @@ const ActualFoodCost = () => {
 						</div>
 
 						<div className='run-button' onClick={fetchActualFoodCostReport}>
-							<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
+							<div className='py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
 								Run
 							</div>
 						</div>
@@ -1456,26 +1490,26 @@ const ActualFoodCost = () => {
 											onOptionChange={handleTotalViewChange}
 										/>
 									</div>
-									<div className='flex items-center justify-center w-28  py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[31px] '>
+									<div className='flex items-center justify-center w-28  py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl  mt-[28px] '>
 										<div
 											onClick={togglePopup}
-											className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
+											className='items-center justify-center w-full px-6 py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid text-[16px]'
 										>
 											<span className='cursor-pointer '> More....</span>
 										</div>
 										{isDropdownVisible && (
 											<div className='more-container !mt-[32px]' ref={moreOptionsDropdown}>
 												<div
-													className='option mb-2 w-[258px]'
+													className='option mb-2 w-[200px] text-[14px]'
 													onClick={() => setIsShowHideDepartments(true)}
 												>
-													<button className='w-[100%] bg-[#f9f9f9]'>
+													<button className='w-[100%] bg-[#f9f9f9] text-[14px]'>
 														Show/Hide Departments
 													</button>
 												</div>
-												<div className='option mb-2 w-[258px]'>
+												<div className='option mb-2 w-[200px] text-[14px]'>
 													<button
-														className='w-[100%] bg-[#f9f9f9]'
+														className='w-[100%] bg-[#f9f9f9] text-[14px]'
 														onClick={() => {
 															handleCountsheet(selectedFromDate, selectedToDate); // For Beginning Countsheet
 															setIsDropdownVisible(false);
@@ -1484,9 +1518,9 @@ const ActualFoodCost = () => {
 														View Beginning Countsheet
 													</button>
 												</div>
-												<div className='option mb-2 w-[258px] bg-[#f9f9f9]'>
+												<div className='option mb-2 w-[200px] bg-[#f9f9f9] text-[14px]'>
 													<button
-														className='w-[100%]'
+														className='w-[100%] text-[14px]'
 														onClick={() => {
 															handleCountsheet(selectedFromDate, selectedToDate, true); // For Ending Countsheet
 															setIsDropdownVisible(false);
@@ -1495,9 +1529,9 @@ const ActualFoodCost = () => {
 														View Ending Countsheet
 													</button>
 												</div>
-												<div className='option'>
+												<div className='option text-[14px]'>
 													<button
-														className='w-[100%] bg-[#f9f9f9]'
+														className='w-[100%] bg-[#f9f9f9] text-[14px]'
 														onClick={() => {
 															handleViewPurchase(selectedFromDate, selectedToDate, true); // For View Purchase
 															setIsDropdownVisible(false);
@@ -1509,7 +1543,8 @@ const ActualFoodCost = () => {
 											</div>
 										)}
 									</div>
-									{((tableState?.expanded && Object.keys(tableState.expanded).length > 2) ||
+									{((tableState?.expanded &&
+										Object.keys(tableState.expanded).some((key) => /^\d+\.\d+\.\d+$/.test(key))) ||
 										viewby === 'Inventory Item') && (
 										<div className='flex items-center mt-[31px] gap-3'>
 											<div>
@@ -1517,7 +1552,9 @@ const ActualFoodCost = () => {
 													className='mr-1 accent-[var(--tw-primary)]'
 													type='checkbox'
 													checked={showQuantities}
-													onChange={(e) => handleShowColumns(e.target.checked, '#')}
+													onChange={(e) => {
+														if (!isLoading) handleShowColumns(e.target.checked, '#');
+													}}
 												/>
 												Show Quantities
 											</div>
@@ -1526,7 +1563,9 @@ const ActualFoodCost = () => {
 													className='mr-1 accent-[var(--tw-primary)]'
 													type='checkbox'
 													checked={showDollarAmounts}
-													onChange={(e) => handleShowColumns(e.target.checked, '$')}
+													onChange={(e) => {
+														if (!isLoading) handleShowColumns(e.target.checked, '$');
+													}}
 												/>
 												Show Dollar Amounts
 											</div>
@@ -1538,9 +1577,9 @@ const ActualFoodCost = () => {
 										onClick={() =>
 											setIsExportFilteredViewDropDownVisible(!isExportFilteredViewDropDownVisible)
 										}
-										className='items-center justify-center w-full px-6 py-3 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
+										className='items-center justify-center w-full px-6 py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
 									>
-										<span className='cursor-pointer'> Export Filtered View</span>
+										<span className='cursor-pointer text-[14px]'> Export Filtered View</span>
 									</div>
 									{isExportFilteredViewDropDownVisible && (
 										<div className='more-container !mr-[80px] !mt-[32px]' ref={moreOptionsDropdown}>

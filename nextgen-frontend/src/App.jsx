@@ -23,6 +23,7 @@ import {
 	Voids,
 	Discounts,
 	HourlySales,
+	BrumitDWP,
 	SalesVsLabor,
 	BusinessSummary,
 	MenuGrossProfit,
@@ -36,6 +37,9 @@ import {
 	MenuItemsSold,
 	LaborAnalysis,
 	ManagementSalesCoverage,
+	CookChart,
+	CookChartTemplate,
+	SalesSummary
 } from './pages';
 import { Suspense } from 'react';
 
@@ -137,11 +141,14 @@ const App = () => {
 								<Route path='/Countsheets' element={<Countsheets />} />
 								<Route path='/CountsheetDesigner' element={<CountsheetDesigner />} />
 								<Route path='/PurchaseAnalysis' element={<PurchaseAnalysis />} />
+								<Route path='/CookChart' element={<CookChart />} />
+								<Route path='/CookChartTemplate' element={<CookChartTemplate />} />
 
 								{/* Sales */}
 								<Route path='/Voids' element={<Voids />} />
 								<Route path='/Discounts' element={<Discounts />} />
 								<Route path='/HourlySales' element={<HourlySales />} />
+								<Route path='/BrumitDWP' element={<BrumitDWP />} />
 								<Route path='/MenuItemsSold' element={<MenuItemsSold />} />
 								<Route path='/SalesVsLabor' element={<SalesVsLabor />} />
 								<Route path='/BusinessSummary' element={<BusinessSummary />} />
@@ -154,6 +161,8 @@ const App = () => {
 								<Route path='/LaborCICO' element={<LaborCICO />} />
 								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
 								<Route path='/ManagementSalesCoverage' element={<ManagementSalesCoverage />} />
+								<Route path='/SalesSummary' element={<SalesSummary />} />
+								
 							</Routes>
 						</Suspense>
 					</div>

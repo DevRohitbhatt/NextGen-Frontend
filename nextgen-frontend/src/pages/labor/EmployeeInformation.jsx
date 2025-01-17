@@ -15,6 +15,16 @@ import {
 	PdfBuilder,
 } from '../../components';
 
+const tooltips = {
+	employeeID: "The ID associated with the employee in the POS. Typically used to clock in/out and track sales.",
+	uniqueID: "An ID that is unique to the employee within an entire company. The unique ID may be re-used as the employee ID depending on employee onboarding procedures. \n\nTypically used for payroll and benefits.",
+	payRate: "The hourly rate an employee is paid. If the employee has more than one job code and payrate assigned their default job payrate will be displayed.",	
+	payrollID: "An ID assigned to an employee for payroll purposes. The Unique ID may be re-used or the SSN may be used.",
+	termDate: "The date an employee separated from the company. \n\nNOTE: An employee with a termination date will not appear on the schedule. If an employee is seasonal, remove the termination date in the POS to re-appear in our Web Scheduler.",
+	phantomEmployee: "This refers to non-employees with employee IDs. Examples include TOGO, DRIVETHRU, BAR, etc. \nN = Employee \nY = Phantom Employee \n\nNOTE: Not all POSes will contain identifiers for phantom employees. Please contact Help Desk for assistance with hiding phantom employees from Labor reports and schedules.",
+	direction: "above",
+  };
+
 const EmployeeInformation = () => {
 	const {
 		companyID,
@@ -70,7 +80,7 @@ const EmployeeInformation = () => {
 			key: 'employeeId',
 			label: 'Employee ID',
 			cellType: 'string',
-			toolTip: '',
+			toolTip: tooltips.employeeID,
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
@@ -80,7 +90,7 @@ const EmployeeInformation = () => {
 			key: 'ssn',
 			label: 'Unique ID',
 			cellType: 'string',
-			toolTip: '',
+			toolTip: tooltips.uniqueID,
 			toolTipDirection: '',
 			minWidth: '130px',
 			maxWidth: '200px',
@@ -120,7 +130,7 @@ const EmployeeInformation = () => {
 			key: 'payRate',
 			label: 'Pay Rate',
 			cellType: 'string',
-			toolTip: '',
+			toolTip: tooltips.payRate,
 			toolTipDirection: '',
 			minWidth: '100px',
 			maxWidth: '150px',
@@ -210,7 +220,7 @@ const EmployeeInformation = () => {
 			key: 'phantomEmployee',
 			label: 'Phantom Employee',
 			cellType: 'string',
-			toolTip: '',
+			toolTip: tooltips.phantomEmployee,
 			toolTipDirection: '',
 			minWidth: '150px',
 			maxWidth: '200px',
@@ -240,7 +250,7 @@ const EmployeeInformation = () => {
 			key: 'payrollID',
 			label: 'Payroll ID',
 			cellType: 'string',
-			toolTip: '',
+			toolTip: tooltips.payrollID,
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
@@ -270,7 +280,7 @@ const EmployeeInformation = () => {
 			key: 'termDate',
 			label: 'Term Date',
 			cellType: 'string',
-			toolTip: '',
+			toolTip: tooltips.termDate,
 			toolTipDirection: '',
 			minWidth: '120px',
 			maxWidth: '180px',
@@ -472,15 +482,15 @@ const EmployeeInformation = () => {
 	};
 
 	return (
-		<div className='w-[85%] mx-auto'>
+		<div className='w-[98%] mx-auto'>
 			<Steps
 				enabled={introSteps.stepsEnabled}
 				steps={introSteps.steps}
 				initialStep={introSteps.initialStep}
 				onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
 			/>
-			<h2 className='my-4 text-2xl leading-tight text-left pageTitle'>Employee Information</h2>
-			<header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+			<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Employee Information</h2>
+			<header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
 				<div className='flex items-center'>
 					<UnitSelector
 						companyId={companyID}
@@ -526,7 +536,7 @@ const EmployeeInformation = () => {
 										data={filteredEmployeeInformationData.data}
 										headers={headers}
 										onRowClick={() => {}}
-										itemsPerPageOptions={[10, 25, 50, 100]}
+										itemsPerPageOptions={[20, 30, 50, 100]}
 									/>
 								</div>
 							) : !selectedUnit ? (
