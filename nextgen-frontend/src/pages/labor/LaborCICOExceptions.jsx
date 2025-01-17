@@ -207,10 +207,10 @@ const LaborCICOExceptions = () => {
           toDate: dateFormat(selectedToDate, "yyyy-mm-dd"),
         },
       };
-
+    
       const result = await getCall(getData);
-  
-      if (optionName === "Employee" ) {
+      let optionType = optionName === "Employee" || optionName === "Date" ? optionName : groupBy
+      if (optionType === "Employee" ) {
         const newData = result.data.flatMap((unit) =>
           unit.employees.flatMap((employee) =>
             employee.cicoExceptions.map((data) => ({
@@ -226,7 +226,7 @@ const LaborCICOExceptions = () => {
           )
         ).sort((a, b) => a.employeeName.localeCompare(b.employeeName));
         setLaborCICOExceptionsData(newData);
-      }else if( optionName === "Date"){
+      }else if( optionType === "Date"){
         const newData = result.data
         .flatMap((unit) =>
           unit.employees.flatMap((employee) =>
