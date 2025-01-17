@@ -210,7 +210,7 @@ const LaborCICOExceptions = () => {
 
       const result = await getCall(getData);
   
-      if (optionName === "Employee") {
+      if (optionName === "Employee" ) {
         const newData = result.data.flatMap((unit) =>
           unit.employees.flatMap((employee) =>
             employee.cicoExceptions.map((data) => ({
@@ -225,6 +225,22 @@ const LaborCICOExceptions = () => {
             }))
           )
         ).sort((a, b) => a.employeeName.localeCompare(b.employeeName));
+        setLaborCICOExceptionsData(newData);
+      }else if( optionName === "Date"){
+        const newData = result.data.flatMap((unit) =>
+          unit.employees.flatMap((employee) =>
+            employee.cicoExceptions.map((data) => ({
+              unitName: unit.unitName,
+              businessDate: dateFormat(data.businessDate, "mm-dd-yyyy"),
+              employeeName: data.employeeFullName,
+              jobDescription: data.jobDescription,
+              shiftName: data.shiftName,
+              reportType: data.exceptionType,
+              exceptionDetail: data.exceptionDetail,
+              totalCost: data.totalAmount?.toFixed(2),
+            }))
+          )
+        ).sort((a, b) => a.businessDate.localeCompare(b.businessDate));
         setLaborCICOExceptionsData(newData);
       } else {
         const newData = result.data.flatMap((unit) =>
@@ -325,13 +341,13 @@ const LaborCICOExceptions = () => {
                     columns.find(
                       (col) => col.id === selectedGroupByColumns[row.depth]
                     )?.header
-                  }: ${row.original[selectedGroupByColumns[row.depth]]} ($${
+                  }: ${row.original[selectedGroupByColumns[row.depth]]} (${formattingData(
                     selectedGroupByColumns.length === 1
                       ? calculateTotalCost(row.subRows).toFixed(2)
                       : row.depth === 0
                       ? calculateNestedTotalCost(row.subRows).toFixed(2) // For depth-0 rows, process nested subrows
                       : calculateTotalCost(row.subRows).toFixed(2)
-                  })`
+                  )})`
                 : "";
 
             return (
