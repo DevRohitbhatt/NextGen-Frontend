@@ -696,7 +696,7 @@ const VarianceFoodCost = () => {
 
 		setColumns((prev) => [...updatedColumns]);
 		setFilteredVarianceFoodCostData((prev) => [...varianceFoodCostData]);
-		setViewBy('Department');
+		setViewBy('Inventory Item');
 		setIsTableRendered(false);
 	};
 

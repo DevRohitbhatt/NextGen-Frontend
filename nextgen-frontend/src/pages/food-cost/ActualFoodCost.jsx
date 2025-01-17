@@ -670,7 +670,7 @@ const ActualFoodCost = () => {
 
 		setColumns((prev) => [...updatedColumns]);
 		setFilteredActualFoodCostData((prev) => [...actualFoodCostData]);
-		setViewBy('Department');
+		setViewBy('Inventory Item');
 		setIsTableRendered(false);
 	};
 
