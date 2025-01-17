@@ -280,17 +280,23 @@ const HourlySales = () => {
 					id: 'Total',
 					header: 'Total',
 					pinDirection: 'left',
-					cell: ({ getValue }) => formattingData(parseFloat(getValue())),
+					cell: ({ getValue }) => (
+						salesType === 'Transaction' ? formattingDataWithoutDollr(parseFloat(getValue())) : formattingData(parseFloat(getValue()))
+					),
 					size: 100,
 					footer: ({ table }) =>
 						reportType === 'Unit, Hour and Day' ? null : (
 							<div className='text-center'>
-								{`${formattingData(parseFloat(
-									table
-										.getRowModel()
-										.rows.reduce((acc, row) => acc + row.original.Total, 0)
-										.toFixed(2)
-								))}`}
+								{`${
+									salesType === 'Transaction' ?
+										formattingDataWithoutDollr(parseFloat((table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original.Total, 0))))
+										:
+										formattingData(parseFloat((table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original.Total, 0))))
+								}`}
 							</div>
 						),
 				}),
@@ -300,13 +306,22 @@ const HourlySales = () => {
 								id: 'Avg',
 								header: 'Avg',
 								pinDirection: 'left',
-								cell: ({ getValue }) => (getValue() !== 0 ? formattingData(parseFloat(getValue())) : "$0.00"),
+								cell: ({ getValue }) => (
+									salesType === 'Transaction' ? formattingDataWithoutDollr(parseFloat(getValue())) : formattingData(parseFloat(getValue()))
+								),
 								size: 100,
 								footer: ({ table }) => (
 									<div className='text-center'>
-										{`${formattingData(parseFloat(table
-											.getRowModel()
-											.rows.reduce((acc, row) => acc + row.original.Avg, 0)))}`}
+										{`${
+											salesType === 'Transaction' ?
+												formattingDataWithoutDollr(parseFloat((table
+													.getRowModel()
+													.rows.reduce((acc, row) => acc + row.original.Avg, 0))))
+												:
+												formattingData(parseFloat((table
+													.getRowModel()
+													.rows.reduce((acc, row) => acc + row.original.Avg, 0))))
+										}`}
 									</div>
 								),
 							}),
