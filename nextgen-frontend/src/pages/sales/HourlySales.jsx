@@ -17,7 +17,7 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
-import { formattingData } from '../../functions/formatingCurrency';
+import { formattingData, formattingDataWithoutDollr } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -337,13 +337,15 @@ const HourlySales = () => {
 									? 0
 									: getValue() === '00'
 									? 0
-									: formattingData(parseFloat((getValue()))),
+									: salesType === 'Transaction' ? formattingDataWithoutDollr(parseFloat((getValue()))) : formattingData(parseFloat((getValue()))),
 							footer: ({ table }) =>
 								reportType !== 'Hour and Day' ? null : item === '' ? (
 									''
 								) : (
 									<div className='text-center'>
-										{`${salesType !== 'Transaction' ? '' : ''} ${formattingData(parseFloat((table
+										{`${salesType === 'Transaction' ? '' : ''} ${ salesType === 'Transaction'  ? formattingDataWithoutDollr(parseFloat((table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original[item], 0)))) :formattingData(parseFloat((table
 											.getRowModel()
 											.rows.reduce((acc, row) => acc + row.original[item], 0))))}`}
 									</div>
