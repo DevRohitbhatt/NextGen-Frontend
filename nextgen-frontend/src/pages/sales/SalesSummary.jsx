@@ -14,7 +14,7 @@ import { getCall } from "../../apis/network";
 import { useSelector } from "react-redux";
 import dateFormat from "dateformat";
 import {
-  addDecimals,
+  formattingDataWithoutDollr,
   formattingData,
   valueFormatewithoutDecimal,
 } from "../../functions/formatingCurrency";
@@ -201,7 +201,7 @@ const SalesSummary = () => {
       {
         accessorKey: "percentOfTotal",
         header: "Percent",
-        cell: (info) => `${addDecimals(info.getValue() * 100)}%`,
+        cell: (info) => `${formattingDataWithoutDollr(info.getValue() * 100)}%`,
       },
     ],
     []
@@ -256,7 +256,7 @@ const SalesSummary = () => {
       {
         accessorKey: "amountDiscountPercentOfTotal",
         header: "Percent",
-        cell: (info) => `${addDecimals(info.getValue() * 100)}%`,
+        cell: (info) => `${formattingDataWithoutDollr(info.getValue() * 100)}%`,
       },
     ],
     []
@@ -366,10 +366,10 @@ const SalesSummary = () => {
             ...item,
             orderAverage: formattingData(item?.salesNet / parseFloat(item?.transactions)),
             laborCost: formattingData(item?.laborVariable + item?.laborSalary),
-            laborHours: addDecimals(
+            laborHours: formattingDataWithoutDollr(
               item?.laborVariableHours + item?.laborSalary
             ),
-            transactions: addDecimals(item.transactions.toFixed(0)) + "",
+            transactions: formattingDataWithoutDollr(item.transactions.toFixed(0)) + "",
             nrsTotalOpen : item.nrsTotalOpen + "",
             laborPercent:
               item?.laborVariable == 0
@@ -480,7 +480,7 @@ const SalesSummary = () => {
           "Order Count",
           salesSummaryData.viewActivityDaily[0]?.transactions || "0",
         ],
-        ["Covers", addDecimals(salesSummaryData.viewActivityDaily[0]?.nrsTotalOpen) || "0"],
+        ["Covers", formattingDataWithoutDollr(salesSummaryData.viewActivityDaily[0]?.nrsTotalOpen) || "0"],
         [
           "Order Average",
           `${
@@ -492,7 +492,7 @@ const SalesSummary = () => {
         ],
         [
           "Labor Hours",
-          `${addDecimals(salesSummaryData.viewActivityDaily[0]?.laborHours)}`,
+          `${formattingDataWithoutDollr(salesSummaryData.viewActivityDaily[0]?.laborHours)}`,
         ],
         [
           "Labor Percent",
@@ -636,7 +636,7 @@ const SalesSummary = () => {
         item.typeItemName,
         valueFormatewithoutDecimal(item.quantityTickets),
         `${formattingData(item.amountDiscount)}`,
-        `${ index !== discountData.length-1 ? addDecimals(item.amountDiscountPercentOfTotal*100) + "%": ""}`,
+        `${ index !== discountData.length-1 ? formattingDataWithoutDollr(item.amountDiscountPercentOfTotal*100) + "%": ""}`,
       ]),
     };
 

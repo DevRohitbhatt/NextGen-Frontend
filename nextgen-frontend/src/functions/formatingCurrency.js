@@ -10,7 +10,7 @@ export const formattingData = (value) => {
       })}`;
 };
 
-export const addDecimals = (value) => {
+export const formattingDataWithoutDollr = (value) => {
   return value < 0
       ? `-${Math.abs(parseFloat(value)).toLocaleString('en-US', {
               maximumFractionDigits: 2,
