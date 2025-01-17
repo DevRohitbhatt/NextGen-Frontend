@@ -16,7 +16,7 @@ const DraggableRow = ({
   onLongPressDragStart,
   extraHeaders,
   onQuantityChange,
-  addToClick,
+  addItemToTemplate,
   isEmptyUomQty = [],
   toggleSelection,
   isChecked,
@@ -37,13 +37,15 @@ const DraggableRow = ({
 
   return (
     <>
-      {!isTemplate && <td className="lg:px-4 px-2 lg:py-[2px] w-[20%] lg:text-[16px] text-[12px]">
-        <input
-          type="checkbox"
-          checked={isChecked}
-          onChange={() => toggleSelection(item.menuID)}
-        />
-      </td>}
+      {!isTemplate && (
+        <td className="lg:px-4 px-2 lg:py-[2px] w-[20%] lg:text-[16px] text-[12px]">
+          <input
+            type="checkbox"
+            checked={isChecked}
+            onChange={() => toggleSelection(item.menuID)}
+          />
+        </td>
+      )}
       <td className="lg:px-4 px-2 lg:py-[2px] w-[20%] lg:text-[16px] text-[12px]">
         {item.menuID}
       </td>
@@ -56,7 +58,7 @@ const DraggableRow = ({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              addToClick(item);
+              addItemToTemplate(item);
             }}
             className="text-[12px] ml-[20px] font-bold text-blue-600 hover:text-blue-800 cursor-pointer lg:hidden inline-block"
           >
@@ -105,8 +107,8 @@ const EditAndAddDndTable = ({
   tableTwoHeaders,
   initialTableOneData,
   initialTemplateItems,
-  dropabaleidOne,
-  dropabaleidTwo,
+  droppableIdOne,
+  droppableIdTwo,
   onSave,
   onCancel,
   isSaveDisable = false,
@@ -154,15 +156,14 @@ const EditAndAddDndTable = ({
     setDraggingId(menuID);
   };
 
-  
   const handleDragEnd = (result) => {
     const { source, destination } = result;
 
     if (!destination) return;
 
     if (
-      source.droppableId === dropabaleidOne &&
-      destination.droppableId === dropabaleidTwo
+      source.droppableId === droppableIdOne &&
+      destination.droppableId === droppableIdTwo
     ) {
       const itemsToAdd = selectedRows.length
         ? items.filter((item) => selectedRows.includes(item.menuID))
@@ -171,11 +172,14 @@ const EditAndAddDndTable = ({
       const alreadyAdded = itemsToAdd.filter((item) =>
         templateItems.some((tItem) => tItem.menuID === item.menuID)
       );
-      
+
       if (alreadyAdded.length > 0) {
-        toast.error(`The Item ${alreadyAdded[0].description} has already been added.`, {
-          autoClose: 1500,
-        });
+        toast.error(
+          `The Item ${alreadyAdded[0].description} has already been added.`,
+          {
+            autoClose: 1500,
+          }
+        );
         return;
       }
 
@@ -190,12 +194,12 @@ const EditAndAddDndTable = ({
       setSelectedRows([]);
     }
   };
-  const addToClick = (item) => {
+  const addItemToTemplate = (item) => {
     if (
       templateItems.some((existingItem) => existingItem.menuID === item.menuID)
     ) {
       // Trigger the error toast if item already exists
-      toast.error("Item already exists in the right table", {
+      toast.error(`The Item ${item.description} has already been added.`, {
         autoClose: 1500,
       });
       return;
@@ -213,7 +217,6 @@ const EditAndAddDndTable = ({
   };
 
   const handleDelete = (uniqueKey, id) => {
-    console.log(uniqueKey, "uniqueKey");
     if (uniqueKey) {
       setTemplateItems((prev) =>
         prev.filter((item) => item.uniqueKey !== uniqueKey)
@@ -235,8 +238,10 @@ const EditAndAddDndTable = ({
 
   const handleSearch = (term) => {
     setSearchTerm(term);
-    const filtered = items.filter((item) =>
-      item.description.toLowerCase().includes(term.toLowerCase())
+    const filtered = items.filter(
+      (item) =>
+        item.description.toLowerCase().includes(term.toLowerCase()) ||
+        item.menuID.toString().toLowerCase().includes(term.toLowerCase())
     );
     setFilteredItems(filtered);
     setCurrentPage(1);
@@ -290,7 +295,7 @@ const EditAndAddDndTable = ({
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex w-full gap-4 justify-between flex-col lg:flex-row">
-        <Droppable droppableId={dropabaleidOne}>
+        <Droppable droppableId={droppableIdOne}>
           {(provided) => (
             <div
               ref={provided.innerRef}
@@ -356,10 +361,9 @@ const EditAndAddDndTable = ({
                                   "shadow-[0_-1px_0_rgba(0,0,0,0.2)_inset]"
                                 }
                               >
-                                
                                 <DraggableRow
-                                  addToClick={(item) => {
-                                    addToClick(item);
+                                  addItemToTemplate={(item) => {
+                                    addItemToTemplate(item);
                                   }}
                                   item={item}
                                   isTemplate={false}
@@ -425,7 +429,7 @@ const EditAndAddDndTable = ({
             </div>
           )}
         </Droppable>
-        <Droppable droppableId={dropabaleidTwo}>
+        <Droppable droppableId={droppableIdTwo}>
           {(provided) => (
             <div
               ref={provided.innerRef}
@@ -551,7 +555,7 @@ DraggableRow.propTypes = {
   onLongPressDragStart: PropTypes.func,
   extraHeaders: PropTypes.arrayOf(PropTypes.string),
   onQuantityChange: PropTypes.func,
-  addToClick: PropTypes.func,
+  addItemToTemplate: PropTypes.func,
   isEmptyUomQty: PropTypes.arrayOf(
     PropTypes.shape({
       uniqueKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -581,11 +585,14 @@ EditAndAddDndTable.propTypes = {
       inventoryOrMenuItemName: PropTypes.string,
       uniqueKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       draggableId: PropTypes.string,
-      cookItemQuantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      cookItemQuantity: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+      ]),
     })
   ),
-  dropabaleidOne: PropTypes.string.isRequired,
-  dropabaleidTwo: PropTypes.string.isRequired,
+  droppableIdOne: PropTypes.string.isRequired,
+  droppableIdTwo: PropTypes.string.isRequired,
   onSave: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   isSaveDisable: PropTypes.bool,
@@ -593,7 +600,5 @@ EditAndAddDndTable.propTypes = {
   initialTemplateLoade: PropTypes.bool,
   isPaginationEnabled: PropTypes.bool,
 };
-
-
 
 export default EditAndAddDndTable;

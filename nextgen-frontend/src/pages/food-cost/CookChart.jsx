@@ -20,7 +20,7 @@ import dateFormat from "dateformat";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import cookChart from "../../assets/introJSSteps/cookChart";
-import ForecastedSales from "../../components/forcastedSales/ForecastedSales";
+import ForecastedSales from "../../components/forecastedSales/ForecastedSales";
 const columnHelper = createColumnHelper();
 
 const CookChart = () => {

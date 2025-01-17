@@ -499,8 +499,8 @@ export const CreateItemModal = ({
           tableOneHeaders={["Menu ID", "Description"]}
           tableTwoHeaders={["Menu ID", "Description"]}
           initialTableOneData={addMenuItems}
-          dropabaleidOne={"items"}
-          dropabaleidTwo={"itemstemplate"}
+          droppableIdOne={"items"}
+          droppableIdTwo={"itemstemplate"}
           isPaginationEnabled={addMenuItems.length > 100}
           onSave={(saved) => {
             handleSave(saved);
@@ -517,8 +517,8 @@ export const CreateItemModal = ({
           tableOneHeaders={["Inventory ID", "Description"]}
           tableTwoHeaders={["Inventory ID", "Description"]}
           initialTableOneData={addInventoryItems}
-          dropabaleidOne={"inventory"}
-          dropabaleidTwo={"inventorytemplate"}
+          droppableIdOne={"inventory"}
+          droppableIdTwo={"inventorytemplate"}
           onSave={(saved) => {
             handleSave(saved);
           }}
@@ -932,8 +932,8 @@ export const CreateEditItemModal = ({
           initialTemplateItems={
             sourceType == editsourceType ? editCookData : []
           }
-          dropabaleidOne={"items"}
-          dropabaleidTwo={"itemstemplate"}
+          droppableIdOne={"items"}
+          droppableIdTwo={"itemstemplate"}
           onSave={(saved) => {
             savedData(saved);
           }}
@@ -954,8 +954,8 @@ export const CreateEditItemModal = ({
           initialTemplateItems={
             sourceType == editsourceType ? editCookData : []
           }
-          dropabaleidOne={"inventory"}
-          dropabaleidTwo={"inventorytemplate"}
+          droppableIdOne={"inventory"}
+          droppableIdTwo={"inventorytemplate"}
           onSave={(saved) => {
             savedData(saved);
           }}
