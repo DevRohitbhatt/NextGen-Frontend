@@ -10,6 +10,7 @@ import {
   PdfBuilder,
   Modal,
   ExcelExport as exportToExcel,
+  Run,
 } from "../../components";
 import { useSelector } from "react-redux";
 import { Steps } from "intro.js-react";
@@ -36,9 +37,6 @@ const LaborAudit = () => {
     stepsEnabled: false,
   });
 
-  
-  
-
   // State variables for selected unit
   const [selectedUnit, setSelectedUnit] = useState();
   const [selectedUnitName, setSelectedUnitName] = useState("Loading");
@@ -53,7 +51,7 @@ const LaborAudit = () => {
 
   // For comment Modal
   const [showCommentModal, setShowCommentModal] = useState(false);
-	const [commentValue, setCommentValue] = useState('');
+  const [commentValue, setCommentValue] = useState("");
 
   // Schedule DropDown Variable
   const [defaultSchedule, setDefaultSchedule] = useState();
@@ -68,7 +66,7 @@ const LaborAudit = () => {
   const [laborAuditData, setLaborAuditData] = useState([]);
 
   // Version fetching from diff API state variable
-  const [isVersionFetched, setIsVersionFetched] = useState(false); 
+  const [isVersionFetched, setIsVersionFetched] = useState(false);
 
   // useEffect is for default Unit Id
   useEffect(() => {
@@ -91,20 +89,17 @@ const LaborAudit = () => {
           <div
             className={`flex items-center gap-2 font-bold absolute inset-0 w-96] `}
           >
-            {row.getIsExpanded() ? <CiSquareMinus/> : <CiSquarePlus/>}
+            {row.getIsExpanded() ? <CiSquareMinus /> : <CiSquarePlus />}
 
             <div className='mr-20 w-20'>Version: {row.original.version}</div>
             <div className='mr-20'>
               Edit Date:{" "}
               {dateFormat(row.original.editDate, "mm/dd/yyyy hh:MM TT")}
             </div>
-            <div className='mr-20'>
-              Edit Type: {row.original.user}
-              {row.original.editDescription}
-            </div>
+            <div className='mr-20'>{row.original.editDescription}</div>
           </div>
         ) : (
-          <div className="text-left">{getValue()}</div>
+          <div className='text-left'>{getValue()}</div>
         ),
       dataType: "string",
       filterFn: "arrIncludesSome",
@@ -112,18 +107,14 @@ const LaborAudit = () => {
     columnHelper.accessor("employeeLastName", {
       id: "employeeLastName",
       header: "Employee Last Name",
-      cell: ({getValue}) =>
-        <div className="text-left">{getValue()}</div>
-      ,
+      cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
       dataType: "string",
       filterFn: "arrIncludesSome",
     }),
     columnHelper.accessor("jobName", {
       id: "jobName",
       header: "Job Name",
-      cell: ({getValue}) =>
-        <div className="text-left">{getValue()}</div>
-      ,
+      cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
       dataType: "string",
       filterFn: "arrIncludesSome",
     }),
@@ -148,28 +139,27 @@ const LaborAudit = () => {
     columnHelper.accessor("detailComments", {
       id: "detailsComments",
       header: "Shift Comments",
-      cell: ({getValue,row}) => {
-       if(row.getCanExpand()){
-        return
-       }
-       else
-       {
-        if(getValue() ==''){
-          return '';
+      cell: ({ getValue, row }) => {
+        if (row.getCanExpand()) {
+          return;
+        } else {
+          if (!getValue()) {
+            return "";
+          } else {
+            return (
+              <div
+                className='underline cursor-pointer'
+                onClick={() => {
+                  setShowCommentModal(!showCommentModal);
+                  setCommentValue(getValue());
+                }}
+              >
+                View comment
+              </div>
+            );
+          }
         }
-        else
-        {
-          return(
-            <div  className='underline cursor-pointer' onClick={() =>{
-              setShowCommentModal(!showCommentModal);
-              setCommentValue(getValue());
-            }} >
-                  View comment
-            </div>
-          )
-        }
-       }
-      }, 
+      },
       dataType: "string",
       filterFn: "arrIncludesSome",
     }),
@@ -195,33 +185,30 @@ const LaborAudit = () => {
       if (result?.data) {
         setAllScheduleIdAndWorkWeek(result.data);
       }
-     
-        const currentDate = new Date();
-        const dayOfWeek = currentDate.getDay();
-        
-        const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-        const diffToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
-        
-        const monday = new Date(currentDate);
-        monday.setDate(currentDate.getDate() + diffToMonday);
-        
-        const sunday = new Date(currentDate);
-        sunday.setDate(currentDate.getDate() + diffToSunday);
-        
-        const formatDate = (date) => {
-          const month = (date.getMonth() + 1).toString().padStart(2, '0');
-          const day = date.getDate().toString().padStart(2, '0');
-          const year = date.getFullYear();
-          return `${month}/${day}/${year}`;
-        };
-        
-        const currentDateRange = `${formatDate(monday)} - ${formatDate(sunday)}`;
-        setDefaultSchedule(currentDateRange);
-        
-     
 
-   setDefaultSchedule(currentDateRange);
-      
+      const currentDate = new Date();
+      const dayOfWeek = currentDate.getDay();
+
+      const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const diffToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+
+      const monday = new Date(currentDate);
+      monday.setDate(currentDate.getDate() + diffToMonday);
+
+      const sunday = new Date(currentDate);
+      sunday.setDate(currentDate.getDate() + diffToSunday);
+
+      const formatDate = (date) => {
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
+      };
+
+      const currentDateRange = `${formatDate(monday)} - ${formatDate(sunday)}`;
+      setDefaultSchedule(currentDateRange);
+
+      setDefaultSchedule(currentDateRange);
     } catch (error) {
       console.error("Error getting default dates: ", error);
     }
@@ -250,13 +237,15 @@ const LaborAudit = () => {
       setIsVersionFetched(false);
       setIsError(false);
       const startSchedule = defaultSchedule.split("-");
+
+      const scheduleDetails = allScheduleIdAndWorkWeek.find(
+        (item) => item.workWeek === defaultSchedule
+      );
       const getData = {
         url: "versionOneCheck",
         urlParams: {
           companyId: companyID,
-          ScheduleID: allScheduleIdAndWorkWeek.filter(
-            (item) => item.workWeek === defaultSchedule
-          )[0].scheduleID,
+          ScheduleID: scheduleDetails.scheduleID,
           scheduleStart: startSchedule[0],
         },
       };
@@ -270,257 +259,128 @@ const LaborAudit = () => {
     }
   };
 
-  // Function to fetch laborAudit Report
-  const fetchLaborAudit = async (isVersion) => {
-    try {
-      setIsLoading(true);
-      setIsError(false);
+  // Structured the data for Table
 
-      const getData = {
-        url: "laborAudit",
-        urlParams: {
-          companyId: companyID,
-          alignmentId: alignmentID,
-          UnitID: selectedUnit,
-          ScheduleID: allScheduleIdAndWorkWeek.filter(
-            (item) => item.workWeek === defaultSchedule
-          )[0].scheduleID,
-        },
-      };
-      const result = await getCall(getData);
+  const ModifiedDataForTable = async (data, isVersion) => {
+    const datawithId = await data?.map((row, index) => ({
+      ...row,
+      ApptID: index,
+    }));
 
-      const datawithId = await result.data?.map((row, index) => ({
-        ...row,
-        ApptID: index,
-      }));
+    let lstApptIDs = [];
+    let filteredData = [];
 
-      let lstApptIDs = [];
-      let filteredData = [];
+    await datawithId?.forEach((drow) => {
+      let ApptID = parseInt(drow.ApptID);
+      let EditVersion = parseInt(drow.editVersion);
+      let SSN = parseInt(drow.ssn);
+      let EmployeeID = parseInt(drow.employeeID);
+      let JobID = parseInt(drow.jobID);
+      let BusinessDate = new Date(drow.businessDate);
+      let StartTime = new Date(drow.startTime);
+      let EndTime = new Date(drow.endTime);
+      let strComments = drow.detailComments || "";
 
-      await datawithId?.forEach((drow) => {
-        let ApptID = parseInt(drow.ApptID);
-        let EditVersion = parseInt(drow.editVersion);
-        let SSN = parseInt(drow.ssn);
-        let EmployeeID = parseInt(drow.employeeID);
-        let JobID = parseInt(drow.jobID);
-        let BusinessDate = new Date(drow.businessDate);
-        let StartTime = new Date(drow.startTime);
-        let EndTime = new Date(drow.endTime);
-        let strComments = drow.detailComments || "";
+      if (strComments.includes("'")) {
+        strComments = strComments.replace(/'/g, "''");
+      }
 
-        if (strComments.includes("'")) {
-          strComments = strComments.replace(/'/g, "''");
-        }
-
-        let filteredRows = datawithId?.filter((row) => {
-          return (
-            row.ssn === SSN &&
-            row.employeeID === EmployeeID &&
-            row.jobID === JobID &&
-            row.editVersion === EditVersion &&
-            new Date(row.businessDate).getTime() === BusinessDate.getTime() &&
-            new Date(row.startTime).getTime() === StartTime.getTime() &&
-            new Date(row.endTime).getTime() === EndTime.getTime() &&
-            (strComments
-              ? row.detailComments === strComments
-              : !row.detailComments)
-          );
-        });
-
-        if (filteredRows.length > 1) {
-          if (!lstApptIDs.includes(ApptID)) {
-            lstApptIDs.push(ApptID);
-          }
-        }
+      let filteredRows = datawithId?.filter((row) => {
+        return (
+          row.ssn === SSN &&
+          row.employeeID === EmployeeID &&
+          row.jobID === JobID &&
+          row.editVersion === EditVersion &&
+          new Date(row.businessDate).getTime() === BusinessDate.getTime() &&
+          new Date(row.startTime).getTime() === StartTime.getTime() &&
+          new Date(row.endTime).getTime() === EndTime.getTime() &&
+          (strComments
+            ? row.detailComments === strComments
+            : !row.detailComments)
+        );
       });
 
-      if (lstApptIDs.length > 0) {
-        filteredData = datawithId.filter(
-          (row) => !lstApptIDs.includes(row.ApptID)
-        );
-      } else {
-        filteredData = [...datawithId];
+      if (filteredRows.length > 1 && !lstApptIDs.includes(ApptID)) {
+        lstApptIDs.push(ApptID);
+      }
+    });
+
+    if (lstApptIDs.length > 0) {
+      filteredData = datawithId.filter(
+        (row) => !lstApptIDs.includes(row.ApptID)
+      );
+    } else {
+      filteredData = [...datawithId];
+    }
+
+    const newData = filteredData.reduce((acc, item) => {
+      if (!acc[item.editVersion]) {
+        acc[item.editVersion] = {
+          version: item.editVersion,
+          editDate: item.editDate,
+          editDescription: item.label,
+          subRows: [],
+        };
       }
 
-      const newData = filteredData.reduce((acc, item) => {
-        let editDescription = "";
-        let user = "";
+      acc[item.editVersion].subRows.push(item);
+      return acc;
+    }, {});
 
-        switch (item.editDescription.toUpperCase()) {
-          case "APP3":
-            editDescription = "Web Scheduler";
-            break;
-          case "MOBILEAPP":
-            if (item.editFirstName === "UNKNOWN USER") {
-              editDescription = "Scheduling App";
-            } else {
-              editDescription = "Managing App";
-            }
-            break;
-          case "WEB AUTOSAVE":
+    let finalData = [];
+    for (const key in newData) {
+      finalData.push(newData[key]);
+    }
+    let finalData2 = finalData
+      .map((item) => {
+        return {
+          ...item,
+          subRows: item.subRows
+            .map((item2) => {
+              item2.businessDate = dateFormat(item2.businessDate, "mm/dd/yyyy");
+              item2.startTime = dateFormat(
+                item2.startTime,
+                "mm/dd/yyyy hh:MM TT"
+              );
+              item2.endTime = dateFormat(item2.endTime, "mm/dd/yyyy hh:MM TT");
+
+              return item2;
+            })
+            .sort((a, b) => a.startDate - b.startDate),
+        };
+      })
+      .sort((a, b) => b.version - a.version);
+
+    const version1Exist = finalData2.some((obj) => obj.version == 1);
+    const regex = /(\w+)=(\S+)(?=,|$)/g;
+    let match;
+    const extractedValues = {};
+    while ((match = regex.exec(isVersion[0]?.Parameters)) !== null) {
+      const key = match[1];
+      const value = match[2];
+      extractedValues[key] = parseInt(value);
+    }
+    if (!version1Exist) {
+      if (isVersion?.length === 1 && extractedValues.Version == 1) {
+        finalData2.push({
+          version: 1,
+          editDate: isVersion[0].Date,
+          user: isVersion[0].Name,
+          editDescription: `Edit Type: ${isVersion[0].Name} Posted the Schedule`,
+          subRows: [
             {
-            }
-            break;
-          default:
-            if (item.editAction === "Schedule Posted") {
-              editDescription = "Web Scheduler";
-            } else {
-              editDescription = "Client Scheduler";
-            }
-            break;
-        }
-
-        if (item.editFirstName.toUpperCase() === "UNKNOWN USER") {
-          user = `${item.employeeFirstName} ${item.employeeLastName}`;
-        } else {
-          user = `${item.editFirstName} ${item.editLastName}`;
-        }
-
-        if (item.jobName === "JobID# -99") {
-          item.jobName = "Request Off";
-        } else if (item.jobName === "JobID# 0") {
-          item.jobName = "None";
-        }
-
-        if (item.employeeFirstName === "UNKNOWN EMPLOYEE") {
-          if (item.detailComments != 0) {
-            item.detailComments = "";
-          }
-        } else {
-          editDescription =
-            " Saved the Schedule with " + editDescription === "Web Scheduler"
-              ? `the ${editDescription}`
-              : editDescription;
-        }
-
-        if (editDescription === "Managing App") {
-          if (item.jobName === "Request Off") {
-            editDescription =
-              " Approved/Denied Requests Off in the Managing App";
-          } else {
-            editDescription = " Approved a Shift Trade in the Managing App";
-          }
-        } else if (editDescription === "Scheduling App") {
-          editDescription = " Submitted a Request Off from the Scheduling App";
-        } else if (item.editAction === "Schedule Posted") {
-          editDescription = " Posted the Schedule";
-        } else if (
-          result.data.filter(
-            (row) =>
-              row.editVersion == item.editVersion &&
-              row.editAction === "Schedule Modification Warning Shown"
-          ).length !== 0
-        ) {
-          editDescription =
-            editDescription == "Web Scheduler"
-              ? "the" + editDescription
-              : editDescription;
-
-          editDescription =
-            " Saved the Schedule with " +
-            editDescription +
-            " after the Schedule Modification Warning was shown";
-        } else {
-          editDescription =
-            editDescription == "Web Scheduler"
-              ? "the " + editDescription
-              : editDescription;
-
-          editDescription = " Saved the Schedule with " + editDescription;
-        }
-
-        if (!acc[item.editVersion]) {
-          acc[item.editVersion] = {
-            version: item.editVersion,
-            editDate: item.editDate,
-            user: user,
-            editDescription: editDescription,
-            subRows: [],
-          };
-        }
-
-        acc[item.editVersion].subRows.push(item);
-        return acc;
-      }, {});
-
-      let finalData = [];
-      for (const key in newData) {
-        finalData.push(newData[key]);
-      }
-      let finalData2 = finalData
-        .map((item) => {
-          return {
-            ...item,
-            subRows: item.subRows
-              .map((item2) => {
-                item2.businessDate = dateFormat(
-                  item2.businessDate,
-                  "mm/dd/yyyy"
-                );
-                item2.startTime = dateFormat(
-                  item2.startTime,
-                  "mm/dd/yyyy hh:MM TT"
-                );
-                item2.endTime = dateFormat(
-                  item2.endTime,
-                  "mm/dd/yyyy hh:MM TT"
-                );
-
-                return item2;
-              })
-              .sort((a, b) => a.startDate - b.startDate),
-          };
-        })
-        .sort((a, b) => b.version - a.version);
-
-      const version1Exist = finalData2.some((obj) => obj.version == 1);
-      const regex = /(\w+)=(\S+)(?=,|$)/g;
-      let match;
-      const extractedValues = {};
-      while ((match = regex.exec(isVersion[0]?.Parameters)) !== null) {
-        const key = match[1];
-        const value = match[2];
-        extractedValues[key] = parseInt(value);
-      }
-      if (!version1Exist) {
-        if (isVersion?.length === 1 && extractedValues.Version == 1) {
-          finalData2.push({
-            version: 1,
-            editDate: isVersion[0].Date,
-            user: isVersion[0].Name,
-            editDescription: " Posted the Schedule",
-            subRows: [
-              {
-                editVersion: extractedValues.Version,
-                employeeFirstName: isVersion[0].Name.split(" ")[0],
-                employeeLastName: isVersion[0].Name.split(" ")[1],
-                jobName: "",
-                businessDate: dateFormat(isVersion[0].Date, "mm/dd/yyyy"),
-                startTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-                endTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-                detailsComments: "",
-                editAction: "Schedule Posted",
-              },
-            ],
-          });
-        }
-        else if (isVersion?.length > 0) {
-          finalData2.forEach((obj) => {
-            if (obj.version == extractedValues.Version) {
-              obj.subRows.push({
-                editVersion: extractedValues.Version,
-                employeeFirstName: isVersion[0].Name.split(" ")[0],
-                employeeLastName: isVersion[0].Name.split(" ")[1],
-                jobName: "",
-                businessDate: dateFormat(isVersion[0].Date, "mm/dd/yyyy"),
-                startTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-                endTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-                detailsComments: "",
-                editAction: "Schedule Posted",
-              });
-            }
-          });
-        }
+              editVersion: extractedValues.Version,
+              employeeFirstName: isVersion[0].Name.split(" ")[0],
+              employeeLastName: isVersion[0].Name.split(" ")[1],
+              jobName: "",
+              businessDate: dateFormat(isVersion[0].Date, "mm/dd/yyyy"),
+              startTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
+              endTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
+              detailsComments: "",
+              editAction: "Schedule Posted",
+            },
+          ],
+        });
       } else if (isVersion?.length > 0) {
         finalData2.forEach((obj) => {
           if (obj.version == extractedValues.Version) {
@@ -538,7 +398,48 @@ const LaborAudit = () => {
           }
         });
       }
-      setLaborAuditData(finalData2);
+    } else if (isVersion?.length > 0) {
+      finalData2.forEach((obj) => {
+        if (obj.version == extractedValues.Version) {
+          obj.subRows.push({
+            editVersion: extractedValues.Version,
+            employeeFirstName: isVersion[0].Name.split(" ")[0],
+            employeeLastName: isVersion[0].Name.split(" ")[1],
+            jobName: "",
+            businessDate: dateFormat(isVersion[0].Date, "mm/dd/yyyy"),
+            startTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
+            endTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
+            detailsComments: "",
+            editAction: "Schedule Posted",
+          });
+        }
+      });
+    }
+    return finalData2;
+  };
+
+  // Function to fetch laborAudit Report
+  const fetchLaborAudit = async (isVersion) => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+
+      const scheduleID = allScheduleIdAndWorkWeek.filter(
+        (item) => item.workWeek === defaultSchedule
+      )[0].scheduleID;
+
+      const getData = {
+        url: "laborAudit",
+        urlParams: {
+          companyId: companyID,
+          alignmentId: alignmentID,
+          UnitID: selectedUnit,
+          ScheduleID: scheduleID,
+        },
+      };
+      const result = await getCall(getData);
+      const newData = await ModifiedDataForTable(result.data, isVersion);
+      setLaborAuditData(newData);
       setIsLoading(false);
     } catch (error) {
       setIsError(true);
@@ -734,11 +635,7 @@ const LaborAudit = () => {
                 onOptionChange={handleScheduleChange}
               />
             </div>
-            <div className='ml-3 run-button' onClick={fetchVersionCheck}>
-              <div className='py-2 ml-1 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
-                Run
-              </div>
-            </div>
+            <Run fetchData={fetchVersionCheck} />
           </div>
         </div>
         <div>
@@ -788,16 +685,14 @@ const LaborAudit = () => {
           handleUnitSelection={handleUnitSelection}
         />
         <Modal
-						isOpen={showCommentModal}
-						title={'Comment'}
-						onClose={() => {
-							setShowCommentModal(!showCommentModal);
-						}}
-					>
-						<div
-							className='w-[300px] h-auto m-[15px]'
-						>{commentValue}</div>
-					</Modal>
+          isOpen={showCommentModal}
+          title={"Comment"}
+          onClose={() => {
+            setShowCommentModal(!showCommentModal);
+          }}
+        >
+          <div className='w-[300px] h-auto m-[15px]'>{commentValue}</div>
+        </Modal>
       </div>
     </div>
   );

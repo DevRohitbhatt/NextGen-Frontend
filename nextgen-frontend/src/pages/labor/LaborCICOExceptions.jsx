@@ -14,20 +14,23 @@ import {
   ExcelExport as exportToExcel,
   TableHOC,
   Dropdown,
+  Run,
 } from "../../components";
 import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborCICOExceptions from "../../assets/introJSSteps/laborCICOExceptions";
-import { formattingData } from "../../functions/formatingCurrency"; 
+import { formattingData } from "../../functions/formatingCurrency";
 
 const tooltips = {
-	jobDescription: "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
-	shiftName: "The Day Part the exception occurred.",
-	reportType: "The reported exception type.",	
-	exceptionDetail: "Provides additional details about the reported exception, including CICOs and scheduled shift times for Did Not Work exceptions. \nTimes in the exception details are used to calculate the amount of money lost or saved due to the exception.",
+  jobDescription:
+    "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
+  shiftName: "The Day Part the exception occurred.",
+  reportType: "The reported exception type.",
+  exceptionDetail:
+    "Provides additional details about the reported exception, including CICOs and scheduled shift times for Did Not Work exceptions. \nTimes in the exception details are used to calculate the amount of money lost or saved due to the exception.",
   totalCost: "Calculates the cost of the exception.",
-	direction: "above",
-  };
+  direction: "above",
+};
 
 const columnHelper = createColumnHelper();
 
@@ -130,21 +133,21 @@ const LaborCICOExceptions = () => {
         id: "jobDescription",
         header: "Job Description",
         dataType: "string",
-        tooltip: tooltips.jobDescription
+        tooltip: tooltips.jobDescription,
       }),
       columnHelper.accessor("shiftName", {
         id: "shiftName",
         header: "Shift Name",
         dataType: "string",
         size: 100,
-        tooltip: tooltips.shiftName
+        tooltip: tooltips.shiftName,
       }),
       columnHelper.accessor("reportType", {
         id: "reportType",
         header: "Report Type",
         dataType: "string",
         size: 100,
-        tooltip: tooltips.reportType
+        tooltip: tooltips.reportType,
       }),
 
       columnHelper.accessor("exceptionDetail", {
@@ -152,7 +155,7 @@ const LaborCICOExceptions = () => {
         header: "Exception Detail",
         dataType: "string",
         size: 400,
-        tooltip: tooltips.exceptionDetail
+        tooltip: tooltips.exceptionDetail,
       }),
       columnHelper.accessor("totalCost", {
         id: "totalCost",
@@ -160,19 +163,16 @@ const LaborCICOExceptions = () => {
         cell: ({ getValue }) => `$${getValue()}`,
         dataType: "number",
         tooltip: tooltips.totalCost,
-        footer: ({ table }) =>{ 
+        footer: ({ table }) => {
           let totalCost = table
-          .getCoreRowModel()
-          .rows.reduce(
-            (acc, row) => acc + parseFloat(row.original.totalCost),
-            0
-          )
-          totalCost = formattingData(totalCost)
-          return(
-          <div className="font-bold text-start">
-            {totalCost}
-          </div>
-        )},
+            .getCoreRowModel()
+            .rows.reduce(
+              (acc, row) => acc + parseFloat(row.original.totalCost),
+              0
+            );
+          totalCost = formattingData(totalCost);
+          return <div className='font-bold text-start'>{totalCost}</div>;
+        },
       }),
     ],
     []
@@ -315,9 +315,9 @@ const LaborCICOExceptions = () => {
                 }}
               >
                 {row.getIsExpanded() ? (
-                  <CiSquareMinus className="text-[20px]" />
+                  <CiSquareMinus className='text-[20px]' />
                 ) : (
-                  <CiSquarePlus className="text-[20px]" />
+                  <CiSquarePlus className='text-[20px]' />
                 )}
                 {label}
               </div>
@@ -419,8 +419,8 @@ const LaborCICOExceptions = () => {
     <TableHOC
       columns={columns}
       data={laborCICOExceptionsData}
-      headerPosition="left"
-      dataPosition="left"
+      headerPosition='left'
+      dataPosition='left'
       isFooter={true}
       isPaginated={true}
     />
@@ -428,18 +428,18 @@ const LaborCICOExceptions = () => {
 
   return (
     <>
-      <div className="w-[98%] mx-auto">
+      <div className='w-[98%] mx-auto'>
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
+        <h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>
           Clock In - Clock Out Exceptions
         </h2>
-        <header className="optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
-          <div className="flex items-center space-x-1">
+        <header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+          <div className='flex items-center space-x-1'>
             <UnitSelector
               companyId={companyID}
               alignmentId={alignmentID}
@@ -456,19 +456,15 @@ const LaborCICOExceptions = () => {
               onClick={() => setShowDateModal(true)}
               extraClass={"w-[219px]"}
             />
-            <div className="w-36 group-by">
+            <div className='w-36 group-by'>
               <Dropdown
-                title="Group By"
+                title='Group By'
                 options={groupByOptions}
                 selectedOption={groupBy}
                 onOptionChange={handleGroupByChange}
               />
             </div>
-            <div className="run-button" onClick={fetchLaborCICOExceptionsData}>
-              <div className="py-2 ml-2 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
-                Run
-              </div>
-            </div>
+            <Run fetchData={fetchLaborCICOExceptionsData} />
           </div>
           <div>
             <ExportOptions
@@ -491,17 +487,17 @@ const LaborCICOExceptions = () => {
         {isError ? (
           <div>{errorMessage}</div>
         ) : (
-          <div className="relative w-full min-h-56">
+          <div className='relative w-full min-h-56'>
             <Loader loading={isLoading} />
             {!isLoading &&
               (laborCICOExceptionsData.length > 0 ? (
-                <div className="paged-table">{Table}</div>
+                <div className='paged-table'>{Table}</div>
               ) : !selectedUnit ? (
-                <div className="mt-10 text-xl font-medium text-center">
+                <div className='mt-10 text-xl font-medium text-center'>
                   No Unit Selected
                 </div>
               ) : (
-                <div className="mt-10 text-xl font-medium text-center">
+                <div className='mt-10 text-xl font-medium text-center'>
                   No data available
                 </div>
               ))}
@@ -529,7 +525,7 @@ const LaborCICOExceptions = () => {
             handleToDateChange={(toDate) => setSelectedToDate(toDate)}
             selectedFromDate={selectedFromDate}
             selectedToDate={selectedToDate}
-            periodDatesEndpoint="getAllPayPeriodDates"
+            periodDatesEndpoint='getAllPayPeriodDates'
           />
         </div>
       </div>

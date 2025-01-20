@@ -14,17 +14,21 @@ import {
   ExcelExport as exportToExcel,
   TableHOC,
   Dropdown,
+  Run,
 } from "../../components";
 import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import laborCICO from "../../assets/introJSSteps/laborCICO";
 
 const tooltips = {
-	employeeID: "The ID assigned to the employee. Originates from the POS employee information.",
-	jobDescription: "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
-	invalid: "Y = Edited CICO \n\nN = Original CICO \n\nNOTE: This info is only available for Focus POS.",	
-	direction: "above",
-  };
+  employeeID:
+    "The ID assigned to the employee. Originates from the POS employee information.",
+  jobDescription:
+    "Refers to the job type the employee clocked in under. Job descriptions originate from the POS job codes.",
+  invalid:
+    "Y = Edited CICO \n\nN = Original CICO \n\nNOTE: This info is only available for Focus POS.",
+  direction: "above",
+};
 
 const columnHelper = createColumnHelper();
 
@@ -126,9 +130,9 @@ const LaborCICO = () => {
               }}
             >
               {row.getIsExpanded() ? (
-                <CiSquareMinus className="text-[20px]" />
+                <CiSquareMinus className='text-[20px]' />
               ) : (
-                <CiSquarePlus className="text-[20px]" />
+                <CiSquarePlus className='text-[20px]' />
               )}
             </div>
           ) : null,
@@ -147,7 +151,7 @@ const LaborCICO = () => {
         id: "employeeID",
         header: "Employee ID",
         dataType: "number",
-        tooltip: tooltips.employeeID
+        tooltip: tooltips.employeeID,
       }),
       columnHelper.accessor("name", {
         id: "name",
@@ -158,7 +162,7 @@ const LaborCICO = () => {
         id: "jobDescription",
         header: "Job Description",
         dataType: "string",
-        tooltip: tooltips.jobDescription
+        tooltip: tooltips.jobDescription,
       }),
     ];
 
@@ -167,13 +171,13 @@ const LaborCICO = () => {
         id: "jobDescription",
         header: "Job Description",
         dataType: "string",
-        tooltip: tooltips.jobDescription
+        tooltip: tooltips.jobDescription,
       }),
       columnHelper.accessor("employeeID", {
         id: "employeeID",
         header: "Employee ID",
         dataType: "number",
-        tooltip: tooltips.employeeID
+        tooltip: tooltips.employeeID,
       }),
       columnHelper.accessor("name", {
         id: "name",
@@ -216,7 +220,7 @@ const LaborCICO = () => {
         id: "invalid",
         header: "Invalid",
         dataType: "boolean",
-        tooltip: tooltips.invalid
+        tooltip: tooltips.invalid,
       }),
     ];
 
@@ -237,28 +241,29 @@ const LaborCICO = () => {
               if (subSubrow.getCanExpand()) {
                 return (
                   subAcc +
-                  subSubrow.subRows.reduce(
-                    (subsubAcc, subsubsubrow) => {
-                      if (subsubsubrow.original.invalid && subsubsubrow.original.invalid === 'N')
-                        subsubAcc + Number(subsubsubrow.original[field])
-                      else
-                        return subsubAcc;
-                    }
-                  )
+                  subSubrow.subRows.reduce((subsubAcc, subsubsubrow) => {
+                    if (
+                      subsubsubrow.original.invalid &&
+                      subsubsubrow.original.invalid === "N"
+                    )
+                      subsubAcc + Number(subsubsubrow.original[field]);
+                    else return subsubAcc;
+                  })
                 );
               } else {
-                if (subSubrow.original.invalid && subSubrow.original.invalid === 'N')
+                if (
+                  subSubrow.original.invalid &&
+                  subSubrow.original.invalid === "N"
+                )
                   return subAcc + Number(subSubrow.original[field]);
-                else
-                  return subAcc;
+                else return subAcc;
               }
             }, 0)
           );
         } else {
-          if (subrow.original.invalid && subrow.original.invalid === 'N')
+          if (subrow.original.invalid && subrow.original.invalid === "N")
             return acc + Number(subrow.original[field]);
-          else
-            return acc;
+          else return acc;
         }
       }, 0);
       return isDecimal ? sum.toFixed(2) : sum;
@@ -615,18 +620,18 @@ const LaborCICO = () => {
 
   // Detail on top of the table
   const detailOnTop = (
-    <div className="flex items-center space-x-2 text-base font-normal">
+    <div className='flex items-center space-x-2 text-base font-normal'>
       {/* Add any additional details or components you want to display on top */}
-      <div className="text-[14px] font-bold">Expand To:</div>
-      <div className="w-52">
+      <div className='text-[14px] font-bold'>Expand To:</div>
+      <div className='w-52'>
         <Dropdown
           options={viewOptions}
           selectedOption={viewby}
           onOptionChange={(option) => setViewBy(option)}
         />
       </div>
-      <div className="text-[14px] font-bold">Group By:</div>
-      <div className="w-48 group-by">
+      <div className='text-[14px] font-bold'>Group By:</div>
+      <div className='w-48 group-by'>
         <Dropdown
           options={groupOptions}
           selectedOption={groupBy}
@@ -645,25 +650,25 @@ const LaborCICO = () => {
       setIsTableRendered={setIsTableRendered}
       expandCollapseButtons={true}
       detailOnTop={detailOnTop}
-      headerPosition="left"
-      dataPosition="left"
+      headerPosition='left'
+      dataPosition='left'
     />
   );
 
   return (
     <>
-      <div className="w-[98%] mx-auto">
+      <div className='w-[98%] mx-auto'>
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
+        <h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>
           Clock In - Clock Out
         </h2>
-        <header className="optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
-          <div className="flex items-center space-x-1">
+        <header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+          <div className='flex items-center space-x-1'>
             <UnitSelector
               companyId={companyID}
               alignmentId={alignmentID}
@@ -680,11 +685,7 @@ const LaborCICO = () => {
               onClick={() => setShowDateModal(true)}
               extraClass={"w-[219px]"}
             />
-            <div className="run-button" onClick={handleRunClick}>
-              <div className="py-2 ml-1  font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7 text-[14px]">
-                Run
-              </div>
-            </div>
+            <Run fetchData={handleRunClick} />
           </div>
           <div>
             <ExportOptions
@@ -706,17 +707,17 @@ const LaborCICO = () => {
         {isError ? (
           <div>{errorMessage}</div>
         ) : (
-          <div className="relative w-full min-h-56">
+          <div className='relative w-full min-h-56'>
             <Loader loading={isLoading} />
             {!isLoading &&
               (laborCICOData.length > 0 ? (
-                <div className="paged-table">{Table}</div>
+                <div className='paged-table'>{Table}</div>
               ) : !selectedUnit ? (
-                <div className="mt-10 text-xl font-medium text-center">
+                <div className='mt-10 text-xl font-medium text-center'>
                   No Unit Selected
                 </div>
               ) : (
-                <div className="mt-10 text-xl font-medium text-center">
+                <div className='mt-10 text-xl font-medium text-center'>
                   No data available
                 </div>
               ))}
@@ -744,7 +745,7 @@ const LaborCICO = () => {
             handleToDateChange={(toDate) => setSelectedToDate(toDate)}
             selectedFromDate={selectedFromDate}
             selectedToDate={selectedToDate}
-            periodDatesEndpoint="getAllPayPeriodDates"
+            periodDatesEndpoint='getAllPayPeriodDates'
           />
         </div>
       </div>

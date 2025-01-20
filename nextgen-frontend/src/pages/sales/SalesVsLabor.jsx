@@ -16,11 +16,15 @@ import {
   Dropdown,
   LineChart,
   Modal,
+  Run,
 } from "../../components";
 import { createColumnHelper } from "@tanstack/react-table";
 import dateFormat from "dateformat";
 import salesVsLabor from "../../assets/introJSSteps/salesVsLabor";
-import { formattingData, formattingDataWithoutDollr } from "../../functions/formatingCurrency";
+import {
+  formattingData,
+  formattingDataWithoutDollr,
+} from "../../functions/formatingCurrency";
 
 const columnHelper = createColumnHelper();
 
@@ -97,48 +101,47 @@ const SalesVsLabor = () => {
       columnHelper.accessor("grossSales", {
         id: "grossSales",
         header: "Gross Sales",
-        cell: ({ row }) =>{ 
+        cell: ({ row }) => {
           let perGrossSales = calculateSum(row, "grossSales");
-          perGrossSales = formattingData(parseFloat(perGrossSales))
-          return `${perGrossSales}`
+          perGrossSales = formattingData(parseFloat(perGrossSales));
+          return `${perGrossSales}`;
         },
         dataType: "number",
-        footer: ({ table }) =>{
+        footer: ({ table }) => {
           let grossSale = calculateFooterSum(table, "grossSales");
-          grossSale = formattingData(parseFloat(grossSale))
-          return (
-          <div className="text-center">
-            {grossSale}
-          </div>
-        )},
+          grossSale = formattingData(parseFloat(grossSale));
+          return <div className='text-center'>{grossSale}</div>;
+        },
         size: 60,
       }),
       columnHelper.accessor("sales", {
         id: "sales",
         header: "Sales",
-        cell: ({ row }) =>{
+        cell: ({ row }) => {
           let cellSales = calculateSum(row, "sales");
-          cellSales = formattingData(parseFloat(cellSales))
-          return`${cellSales}`},
+          cellSales = formattingData(parseFloat(cellSales));
+          return `${cellSales}`;
+        },
         dataType: "number",
-        footer: ({ table }) =>{ 
-          let footerSales = formattingData(parseFloat(calculateFooterSum(table, "sales")))
-          return (
-          <div className="text-center">
-            {footerSales}
-          </div>
-        )
-      },
+        footer: ({ table }) => {
+          let footerSales = formattingData(
+            parseFloat(calculateFooterSum(table, "sales"))
+          );
+          return <div className='text-center'>{footerSales}</div>;
+        },
         size: 60,
       }),
       columnHelper.accessor("variableLaborMinutes", {
         id: "variableLaborMinutes",
         header: "Variable Labor Minutes",
-        cell: ({ row }) => formattingDataWithoutDollr(calculateSum(row, "variableLaborMinutes")),
+        cell: ({ row }) =>
+          formattingDataWithoutDollr(calculateSum(row, "variableLaborMinutes")),
         dataType: "number",
         footer: ({ table }) => (
-          <div className="text-center">
-            {formattingDataWithoutDollr(calculateFooterSum(table, "variableLaborMinutes"))}
+          <div className='text-center'>
+            {formattingDataWithoutDollr(
+              calculateFooterSum(table, "variableLaborMinutes")
+            )}
           </div>
         ),
         size: 60,
@@ -152,12 +155,16 @@ const SalesVsLabor = () => {
             row,
             "variableLaborHours"
           );
-          return formattingDataWithoutDollr(parseFloat(calculatevariableLaborHours));
+          return formattingDataWithoutDollr(
+            parseFloat(calculatevariableLaborHours)
+          );
         },
         dataType: "number",
         footer: ({ table }) => (
-          <div className="text-center">
-            {formattingDataWithoutDollr(calculateFooterSum(table, "variableLaborHours"))}
+          <div className='text-center'>
+            {formattingDataWithoutDollr(
+              calculateFooterSum(table, "variableLaborHours")
+            )}
           </div>
         ),
         size: 60,
@@ -167,14 +174,18 @@ const SalesVsLabor = () => {
         header: "Variable Labor Dollars",
         cell: ({ row }) => {
           let calculatelaberDollars = calculateSum(row, "variableLaborDollars");
-          calculatelaberDollars = formattingData(parseFloat(calculatelaberDollars));
+          calculatelaberDollars = formattingData(
+            parseFloat(calculatelaberDollars)
+          );
           return `${calculatelaberDollars}`;
         },
         dataType: "number",
         size: 60,
         footer: ({ table }) => (
-          <div className="text-center">
-            {formattingData(parseFloat(calculateFooterSum(table, "variableLaborDollars")))}
+          <div className='text-center'>
+            {formattingData(
+              parseFloat(calculateFooterSum(table, "variableLaborDollars"))
+            )}
           </div>
         ),
       }),
@@ -184,7 +195,7 @@ const SalesVsLabor = () => {
         cell: ({ row }) => `${calculateLaborPercent(row)}%`,
         dataType: "number",
         footer: ({ table }) => (
-          <div className="text-center">{calculateLaborPctFooter(table)}%</div>
+          <div className='text-center'>{calculateLaborPctFooter(table)}%</div>
         ),
         size: 60,
       }),
@@ -359,10 +370,10 @@ const SalesVsLabor = () => {
       const result = await getCall(getData);
 
       const newData = result.data.map((item) => {
-	
-        const quarterMinutes = item.quarterHourText || item.quarterHourText == ":00"
-          ? parseInt(item.quarterHourText.replace(":", ""), 10)
-          : 0;
+        const quarterMinutes =
+          item.quarterHourText || item.quarterHourText == ":00"
+            ? parseInt(item.quarterHourText.replace(":", ""), 10)
+            : 0;
 
         const halfMinutes = item.halfHourText
           ? parseInt(item.halfHourText.replace(":", ""), 10)
@@ -465,9 +476,9 @@ const SalesVsLabor = () => {
               }}
             >
               {row.getIsExpanded() ? (
-                <CiSquareMinus className="text-[20px]" />
+                <CiSquareMinus className='text-[20px]' />
               ) : (
-                <CiSquarePlus className="text-[20px]" />
+                <CiSquarePlus className='text-[20px]' />
               )}
               {label}
             </div>
@@ -637,7 +648,7 @@ const SalesVsLabor = () => {
 
   const detailOnTop = (
     <button
-      className="flex items-center gap-2 px-4 py-2 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button  font-medium text-[var(--tw-primary)] ml-2 text-[14px] h-[43px]"
+      className='flex items-center gap-2 px-4 py-2 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button  font-medium text-[var(--tw-primary)] ml-2 text-[14px] h-[43px]'
       onClick={handleChartClick}
     >
       Chart This Data
@@ -656,18 +667,18 @@ const SalesVsLabor = () => {
 
   return (
     <>
-      <div className="w-[98%] mx-auto">
+      <div className='w-[98%] mx-auto'>
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
+        <h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>
           Sales Vs Labor
         </h2>
-        <header className="optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
-          <div className="flex items-center">
+        <header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+          <div className='flex items-center'>
             <UnitSelector
               companyId={companyID}
               alignmentId={alignmentID}
@@ -684,27 +695,23 @@ const SalesVsLabor = () => {
               onClick={() => setShowDateModal(true)}
               extraClass={"w-[219px]"}
             />
-            <div className="w-36 reportType-selector">
+            <div className='w-36 reportType-selector'>
               <Dropdown
-                title="Report"
+                title='Report'
                 options={reportTypeOptions}
                 selectedOption={selectedReportType}
                 onOptionChange={(option) => setSelectedReportType(option)}
               />
             </div>
-            <div className="w-32 ml-2 group-by">
+            <div className='w-32 ml-2 group-by'>
               <Dropdown
-                title="Group By"
+                title='Group By'
                 options={groupByOptions}
                 selectedOption={groupBy}
                 onOptionChange={(option) => setGroupBy(option)}
               />
             </div>
-            <div className="run-button" onClick={fetchSalesVslaborReport}>
-              <div className="py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
-                Run
-              </div>
-            </div>
+            <Run fetchData={fetchSalesVslaborReport} />
           </div>
           <div>
             <ExportOptions
@@ -727,17 +734,17 @@ const SalesVsLabor = () => {
         {isError ? (
           <div>{errorMessage}</div>
         ) : (
-          <div className="relative w-full min-h-56">
+          <div className='relative w-full min-h-56'>
             <Loader loading={isLoading} />
             {!isLoading &&
               (salesVsLaborData.length > 0 ? (
-                <div className="paged-table">{Table}</div>
+                <div className='paged-table'>{Table}</div>
               ) : !selectedUnit ? (
-                <div className="mt-10 text-xl font-medium text-center">
+                <div className='mt-10 text-xl font-medium text-center'>
                   No Unit Selected
                 </div>
               ) : (
-                <div className="mt-10 text-xl font-medium text-center">
+                <div className='mt-10 text-xl font-medium text-center'>
                   No data available
                 </div>
               ))}
@@ -769,9 +776,9 @@ const SalesVsLabor = () => {
           <Modal
             isOpen={isChartModalOpen}
             onClose={() => setIsChartModalOpen(!isChartModalOpen)}
-            title="Sales Vs Labor Chart"
+            title='Sales Vs Labor Chart'
           >
-            <div className="w-[60rem] p-4">
+            <div className='w-[60rem] p-4'>
               {isChartLoading ? (
                 <Loader loading={isChartLoading} />
               ) : (

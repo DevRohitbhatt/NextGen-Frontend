@@ -1,37 +1,46 @@
-import { useEffect, useState, useRef } from 'react';
-import { getCall } from '../../apis/network';
-import { Steps } from 'intro.js-react';
-import { useSelector } from 'react-redux';
-import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
+import { useEffect, useState, useRef } from "react";
+import { getCall } from "../../apis/network";
+import { Steps } from "intro.js-react";
+import { useSelector } from "react-redux";
+import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
 import {
-	Loader,
-	UnitSelector,
-	CalendarModal,
-	UnitModal,
-	ExportOptions,
-	PdfBuilder,
-	ExcelExport as exportToExcel,
-	TableHOC,
-	Dropdown,
-	Modal,
-} from '../../components';
-import { createColumnHelper } from '@tanstack/react-table';
-import dateFormat from 'dateformat';
-import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
-import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
+  Loader,
+  UnitSelector,
+  CalendarModal,
+  UnitModal,
+  ExportOptions,
+  PdfBuilder,
+  ExcelExport as exportToExcel,
+  TableHOC,
+  Dropdown,
+  Modal,
+  Run,
+} from "../../components";
+import { createColumnHelper } from "@tanstack/react-table";
+import dateFormat from "dateformat";
+import varianceFoodCost from "./../../assets/introJSSteps/varianceFoodCost";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 const tooltips = {
-	actualUsageDollar: "The value of the inventory used during the selected date range using the calculation: \n\n Beg $ + Pur $ + Tr In $ – Tr Out $ – End $ / Comparison Sales",	
-	actualUsagePercent: "Actual Usage $ / Comparison Sales \n\n Tip: Negative Usage indicates a “growth” in inventory, possibly due to missing purchases or missing counts.",
-	idealDollar: "The expected value of the ideal inventory used during the selected date range. \n\n Tip: Only items included in the recipes will be included in ideal calculations.",
-	idealPercent: "Ideal $ / Comparison Sales",	
-	varianceUsageDollar: "The calculated difference between the Actual $ and the Ideal $.",
-	varrianceUsagePercent: "The calculated difference between the Actual % and the Ideal %. \n\n Tip: Run and troubleshoot the Actual FC report after counting to ensure accuracy with this report.",
-	wasteDollar: "The inventory value of items entered in waste countsheets during the selected date range.",
-	wasterPercent:"Waste $ / Comparison Sales $",
-	comparisonName:"Names the sales value used for comparison against inventory. \n\n (Default is Net Sales)",
-	comparisonSales:"Comparison Sales configured for this Department and/or Sub-department. i.e., Net Sales, Department Sales, etc."
-  };
+  actualUsageDollar:
+    "The value of the inventory used during the selected date range using the calculation: \n\n Beg $ + Pur $ + Tr In $ – Tr Out $ – End $ / Comparison Sales",
+  actualUsagePercent:
+    "Actual Usage $ / Comparison Sales \n\n Tip: Negative Usage indicates a “growth” in inventory, possibly due to missing purchases or missing counts.",
+  idealDollar:
+    "The expected value of the ideal inventory used during the selected date range. \n\n Tip: Only items included in the recipes will be included in ideal calculations.",
+  idealPercent: "Ideal $ / Comparison Sales",
+  varianceUsageDollar:
+    "The calculated difference between the Actual $ and the Ideal $.",
+  varrianceUsagePercent:
+    "The calculated difference between the Actual % and the Ideal %. \n\n Tip: Run and troubleshoot the Actual FC report after counting to ensure accuracy with this report.",
+  wasteDollar:
+    "The inventory value of items entered in waste countsheets during the selected date range.",
+  wasterPercent: "Waste $ / Comparison Sales $",
+  comparisonName:
+    "Names the sales value used for comparison against inventory. \n\n (Default is Net Sales)",
+  comparisonSales:
+    "Comparison Sales configured for this Department and/or Sub-department. i.e., Net Sales, Department Sales, etc.",
+};
 
 const columnHelper = createColumnHelper();
 
@@ -72,9 +81,12 @@ const VarianceFoodCost = () => {
   const [showDollarAmounts, setShowDollarAmounts] = useState(true);
   const [showWarnings, setShowWarnings] = useState(false);
 
-	const [isShowHideDepartmentsModalVisible, setIsShowHideDepartmentsModalVisible] = useState(false);
-	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
-	const [checkedItems, setCheckedItems] = useState([]);
+  const [
+    isShowHideDepartmentsModalVisible,
+    setIsShowHideDepartmentsModalVisible,
+  ] = useState(false);
+  const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
+  const [checkedItems, setCheckedItems] = useState([]);
 
   //dropdown variables
   const [view, setView] = useState("Weekly");
@@ -124,272 +136,296 @@ const VarianceFoodCost = () => {
   // columns for tableHOC
   const [columns, setColumns] = useState([]);
 
-	const generatedColumns = [
-		columnHelper.display({
-			id: 'actions',
-			cell: ({ row }) =>
-				row.getCanExpand() && row.depth === 0 ? (
-					<div
-						{...{
-							style: { cursor: 'pointer', paddingLeft: `${row.depth * 2}rem` },
-							className: 'flex items-center gap-2 font-bold capitalize',
-						}}
-					>
-						{row.getIsExpanded() ? (
-							<CiSquareMinus className='text-[20px]' />
-						) : (
-							<CiSquarePlus className='text-[20px]' />
-						)}
-						{row.original.finalDepartment}
-					</div>
-				) : null,
-			groupBy: true,
-			size: '80',
-		}),
-		columnHelper.accessor('department', {
-			id: 'department',
-			header: 'Department',
-			cell: ({ row }) =>
-				row.getCanExpand() ? (
-					<div
-						{...{
-							style: { cursor: 'pointer', width: '100%' },
-							className: 'flex items-center gap-2 font-bold capitalize',
-						}}
-					>
-						{row.getIsExpanded() ? (
-							<CiSquareMinus className='text-[20px]' />
-						) : (
-							<CiSquarePlus className='text-[20px]' />
-						)}
-						{row.original.department}
-					</div>
-				) : null,
-			groupBy: true,
-			dataType: 'string',
-		}),
-		columnHelper.accessor('subDepartment', {
-			id: 'subDepartment',
-			header: 'Sub Department',
-			cell: ({ row }) =>
-				row.getCanExpand() ? (
-					<div
-						{...{
-							style: { cursor: 'pointer', width: '100%' },
-							className: 'flex items-center gap-2 font-bold capitalize',
-						}}
-					>
-						{row.getIsExpanded() ? (
-							<CiSquareMinus className='text-[20px]' />
-						) : (
-							<CiSquarePlus className='text-[20px]' />
-						)}
-						{row.original.subDepartment}
-					</div>
-				) : null,
-			groupBy: true,
-			showDepth: 2,
-			dataType: 'string',
-		}),
-		columnHelper.accessor('description', {
-			id: 'description',
-			header: 'Description',
-			showDepth: 3,
-			dataType: 'string',
-			size: 300,
-		}),
-		columnHelper.accessor('countDisplayUnitName', {
-			id: 'countDisplayUnitName',
-			header: 'UOM',
-			showDepth: 3,
-			dataType: 'string',
-			size: 200,
-		}),
-		columnHelper.accessor('actualNumber', {
-			id: 'actualNumber',
-			header: 'Actual #',
-			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
-			dataType: 'number',
-			size: 90,
-		}),
-		columnHelper.accessor('actualDollar', {
-			id: 'actualDollar',
-			header: 'Actual $',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'actualDollar', getValue),
-			size: 90,
-			tooltip: tooltips.actualUsageDollar
-		}),
-		columnHelper.accessor('actualPct', {
-			id: 'actualPct',
-			header: 'Actual %',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'actualPct', getValue, true),
-			size: 90,
-			tooltip: tooltips.actualUsagePercent
-		}),
-		columnHelper.accessor('idealNumber', {
-			id: 'idealNumber',
-			header: 'Ideal #',
-			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
-			dataType: 'number',
-			size: 90,
-		}),
-		columnHelper.accessor('idealDollar', {
-			id: 'idealDollar',
-			header: 'Ideal $',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'idealDollar', getValue),
-			size: 90,
-			tooltip: tooltips.idealDollar
-		}),
-		columnHelper.accessor('idealPct', {
-			id: 'idealPct',
-			header: 'Ideal %',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'idealPct', getValue, true),
-			size: 90,
-			tooltip: tooltips.idealPercent
-		}),
-		columnHelper.accessor('varianceNumber', {
-			id: 'varianceNumber',
-			header: 'Variance #',
-			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
-			dataType: 'number',
-			size: 100,
-		}),
-		columnHelper.accessor('varianceDollar', {
-			id: 'varianceDollar',
-			header: 'Variance $',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'varianceDollar', getValue),
-			size: 100,
-			tooltip: tooltips.varianceUsageDollar
-		}),
-		columnHelper.accessor('variancePct', {
-			id: 'variancePct',
-			header: 'Variance %',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'variancePct', getValue, true),
-			size: 100,
-			tooltip: tooltips.varrianceUsagePercent
-		}),
-		columnHelper.accessor('wasteNumber', {
-			id: 'wasteNumber',
-			header: 'Waste #',
-			cell: ({ getValue, row }) => (row.getCanExpand() ? '' : getValue()?.toFixed(2)),
-			dataType: 'number',
-			size: 90,
-		}),
-		columnHelper.accessor('wasteDollar', {
-			id: 'wasteDollar',
-			header: 'Waste $',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'wasteDollar', getValue),
-			size: 90,
-			tooltip: tooltips.wasteDollar
-		}),
-		columnHelper.accessor('wastePct', {
-			id: 'wastePct',
-			header: 'Waste %',
-			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'wastePct', getValue, true),
-			size: 90,
-			tooltip: tooltips.wasterPercent
-		}),
-		columnHelper.accessor('comparisonName', {
-			id: 'comparisonName',
-			header: 'Comparison Name',
-			cell: ({ row, getValue }) =>
-				row.getCanExpand() ? row.original?.comparisonName : getValue() !== undefined ? getValue() : '',
-			dataType: 'string',
-			size: 160,
-			tooltip: tooltips.comparisonName
-		}),
-		columnHelper.accessor('comparisonSales', {
-			id: 'comparisonSales',
-			header: 'Comparison Sales',
-			dataType: 'number',
-			cell: ({ row, getValue }) =>
-				row.getCanExpand()
-					? `$${row.original?.comparisonSales?.toFixed(2)}`
-					: getValue() !== undefined
-					? `$${parseFloat(getValue().toFixed(2)).toLocaleString('en-US')}`
-					: '',
-			size: 150,
-			tooltip: tooltips.comparisonSales
-		}),
-	];
+  const generatedColumns = [
+    columnHelper.display({
+      id: "actions",
+      cell: ({ row }) =>
+        row.getCanExpand() && row.depth === 0 ? (
+          <div
+            {...{
+              style: { cursor: "pointer", paddingLeft: `${row.depth * 2}rem` },
+              className: "flex items-center gap-2 font-bold capitalize",
+            }}
+          >
+            {row.getIsExpanded() ? (
+              <CiSquareMinus className='text-[20px]' />
+            ) : (
+              <CiSquarePlus className='text-[20px]' />
+            )}
+            {row.original.finalDepartment}
+          </div>
+        ) : null,
+      groupBy: true,
+      size: "80",
+    }),
+    columnHelper.accessor("department", {
+      id: "department",
+      header: "Department",
+      cell: ({ row }) =>
+        row.getCanExpand() ? (
+          <div
+            {...{
+              style: { cursor: "pointer", width: "100%" },
+              className: "flex items-center gap-2 font-bold capitalize",
+            }}
+          >
+            {row.getIsExpanded() ? (
+              <CiSquareMinus className='text-[20px]' />
+            ) : (
+              <CiSquarePlus className='text-[20px]' />
+            )}
+            {row.original.department}
+          </div>
+        ) : null,
+      groupBy: true,
+      dataType: "string",
+    }),
+    columnHelper.accessor("subDepartment", {
+      id: "subDepartment",
+      header: "Sub Department",
+      cell: ({ row }) =>
+        row.getCanExpand() ? (
+          <div
+            {...{
+              style: { cursor: "pointer", width: "100%" },
+              className: "flex items-center gap-2 font-bold capitalize",
+            }}
+          >
+            {row.getIsExpanded() ? (
+              <CiSquareMinus className='text-[20px]' />
+            ) : (
+              <CiSquarePlus className='text-[20px]' />
+            )}
+            {row.original.subDepartment}
+          </div>
+        ) : null,
+      groupBy: true,
+      showDepth: 2,
+      dataType: "string",
+    }),
+    columnHelper.accessor("description", {
+      id: "description",
+      header: "Description",
+      showDepth: 3,
+      dataType: "string",
+      size: 300,
+    }),
+    columnHelper.accessor("countDisplayUnitName", {
+      id: "countDisplayUnitName",
+      header: "UOM",
+      showDepth: 3,
+      dataType: "string",
+      size: 200,
+    }),
+    columnHelper.accessor("actualNumber", {
+      id: "actualNumber",
+      header: "Actual #",
+      cell: ({ getValue, row }) =>
+        row.getCanExpand() ? "" : getValue()?.toFixed(2),
+      dataType: "number",
+      size: 90,
+    }),
+    columnHelper.accessor("actualDollar", {
+      id: "actualDollar",
+      header: "Actual $",
+      dataType: "number",
+      cell: ({ row, getValue }) => calculateSum(row, "actualDollar", getValue),
+      size: 90,
+      tooltip: tooltips.actualUsageDollar,
+    }),
+    columnHelper.accessor("actualPct", {
+      id: "actualPct",
+      header: "Actual %",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "actualPct", getValue, true),
+      size: 90,
+      tooltip: tooltips.actualUsagePercent,
+    }),
+    columnHelper.accessor("idealNumber", {
+      id: "idealNumber",
+      header: "Ideal #",
+      cell: ({ getValue, row }) =>
+        row.getCanExpand() ? "" : getValue()?.toFixed(2),
+      dataType: "number",
+      size: 90,
+    }),
+    columnHelper.accessor("idealDollar", {
+      id: "idealDollar",
+      header: "Ideal $",
+      dataType: "number",
+      cell: ({ row, getValue }) => calculateSum(row, "idealDollar", getValue),
+      size: 90,
+      tooltip: tooltips.idealDollar,
+    }),
+    columnHelper.accessor("idealPct", {
+      id: "idealPct",
+      header: "Ideal %",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "idealPct", getValue, true),
+      size: 90,
+      tooltip: tooltips.idealPercent,
+    }),
+    columnHelper.accessor("varianceNumber", {
+      id: "varianceNumber",
+      header: "Variance #",
+      cell: ({ getValue, row }) =>
+        row.getCanExpand() ? "" : getValue()?.toFixed(2),
+      dataType: "number",
+      size: 100,
+    }),
+    columnHelper.accessor("varianceDollar", {
+      id: "varianceDollar",
+      header: "Variance $",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "varianceDollar", getValue),
+      size: 100,
+      tooltip: tooltips.varianceUsageDollar,
+    }),
+    columnHelper.accessor("variancePct", {
+      id: "variancePct",
+      header: "Variance %",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "variancePct", getValue, true),
+      size: 100,
+      tooltip: tooltips.varrianceUsagePercent,
+    }),
+    columnHelper.accessor("wasteNumber", {
+      id: "wasteNumber",
+      header: "Waste #",
+      cell: ({ getValue, row }) =>
+        row.getCanExpand() ? "" : getValue()?.toFixed(2),
+      dataType: "number",
+      size: 90,
+    }),
+    columnHelper.accessor("wasteDollar", {
+      id: "wasteDollar",
+      header: "Waste $",
+      dataType: "number",
+      cell: ({ row, getValue }) => calculateSum(row, "wasteDollar", getValue),
+      size: 90,
+      tooltip: tooltips.wasteDollar,
+    }),
+    columnHelper.accessor("wastePct", {
+      id: "wastePct",
+      header: "Waste %",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        calculateSum(row, "wastePct", getValue, true),
+      size: 90,
+      tooltip: tooltips.wasterPercent,
+    }),
+    columnHelper.accessor("comparisonName", {
+      id: "comparisonName",
+      header: "Comparison Name",
+      cell: ({ row, getValue }) =>
+        row.getCanExpand()
+          ? row.original?.comparisonName
+          : getValue() !== undefined
+          ? getValue()
+          : "",
+      dataType: "string",
+      size: 160,
+      tooltip: tooltips.comparisonName,
+    }),
+    columnHelper.accessor("comparisonSales", {
+      id: "comparisonSales",
+      header: "Comparison Sales",
+      dataType: "number",
+      cell: ({ row, getValue }) =>
+        row.getCanExpand()
+          ? `$${row.original?.comparisonSales?.toFixed(2)}`
+          : getValue() !== undefined
+          ? `$${parseFloat(getValue().toFixed(2)).toLocaleString("en-US")}`
+          : "",
+      size: 150,
+      tooltip: tooltips.comparisonSales,
+    }),
+  ];
 
-	// calculate the sum of the subrows
-	const calculateSum = (row, field, getValue, isPercentage = false) => {
-		if (row.getCanExpand()) {
-			const sum = row.subRows
-				.reduce((acc, subrow) => {
-					if (subrow.getCanExpand()) {
-						return (
-							acc +
-							subrow.subRows.reduce((subAcc, subSubrow) => {
-								if (subSubrow.getCanExpand()) {
-									const item = checkedItems.find(
-										(item) => item.name.split(/\/(.+)/)[1] === subSubrow.original.subDepartment
-									);
-									return (
-										subAcc +
-										subSubrow.subRows.reduce(
-											(subsubAcc, subsubsubrow) =>
-												subsubAcc +
-												(item?.includeInGrandTotal && subsubsubrow.original[field]
-													? Number(subsubsubrow.original[field])
-													: 0),
-											0
-										)
-									);
-								} else {
-									return subAcc + (subSubrow.original[field] ? Number(subSubrow.original[field]) : 0);
-								}
-							}, 0)
-						);
-					} else {
-						return acc + (subrow.original[field] ? Number(subrow.original[field]) : 0);
-					}
-				}, 0)
-				.toFixed(2);
-			if (isPercentage) {
-				return `${parseFloat(sum).toLocaleString('en-US', {
-					minimumFractionDigits: 2,
-					maximumFractionDigits: 2,
-				})}%`;
-			}
-			return sum < 0
-				? `-$${Math.abs(parseFloat(sum)).toLocaleString('en-US', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2,
-				  })}`
-				: `$${parseFloat(sum).toLocaleString('en-US', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2,
-				  })}`;
-		} else {
-			const value = getValue();
-			if (!value) return isPercentage ? '0.00%' : '$0.00';
-			if (isPercentage) {
-				return `${parseFloat(value).toLocaleString('en-US', {
-					minimumFractionDigits: 2,
-					maximumFractionDigits: 2,
-				})}%`;
-			}
-			return value < 0
-				? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2,
-				  })}`
-				: `$${parseFloat(value).toLocaleString('en-US', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2,
-				  })}`;
-		}
-	};
+  // calculate the sum of the subrows
+  const calculateSum = (row, field, getValue, isPercentage = false) => {
+    if (row.getCanExpand()) {
+      const sum = row.subRows
+        .reduce((acc, subrow) => {
+          if (subrow.getCanExpand()) {
+            return (
+              acc +
+              subrow.subRows.reduce((subAcc, subSubrow) => {
+                if (subSubrow.getCanExpand()) {
+                  const item = checkedItems.find(
+                    (item) =>
+                      item.name.split(/\/(.+)/)[1] ===
+                      subSubrow.original.subDepartment
+                  );
+                  return (
+                    subAcc +
+                    subSubrow.subRows.reduce(
+                      (subsubAcc, subsubsubrow) =>
+                        subsubAcc +
+                        (item?.includeInGrandTotal &&
+                        subsubsubrow.original[field]
+                          ? Number(subsubsubrow.original[field])
+                          : 0),
+                      0
+                    )
+                  );
+                } else {
+                  return (
+                    subAcc +
+                    (subSubrow.original[field]
+                      ? Number(subSubrow.original[field])
+                      : 0)
+                  );
+                }
+              }, 0)
+            );
+          } else {
+            return (
+              acc +
+              (subrow.original[field] ? Number(subrow.original[field]) : 0)
+            );
+          }
+        }, 0)
+        .toFixed(2);
+      if (isPercentage) {
+        return `${parseFloat(sum).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}%`;
+      }
+      return sum < 0
+        ? `-$${Math.abs(parseFloat(sum)).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`
+        : `$${parseFloat(sum).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`;
+    } else {
+      const value = getValue();
+      if (!value) return isPercentage ? "0.00%" : "$0.00";
+      if (isPercentage) {
+        return `${parseFloat(value).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}%`;
+      }
+      return value < 0
+        ? `-$${Math.abs(parseFloat(value)).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`
+        : `$${parseFloat(value).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`;
+    }
+  };
 
   useEffect(() => {
     if (defaultUnitID) {
@@ -410,68 +446,68 @@ const VarianceFoodCost = () => {
     }
   }, [varianceFoodCostData]);
 
-	useEffect(() => {
-		setViewBy(viewby);
-	}, [isTableRendered]);
+  useEffect(() => {
+    setViewBy(viewby);
+  }, [isTableRendered]);
 
-	useEffect(() => {
-		if (new Date(selectedToDate) < new Date(selectedFromDate)) {
-			const toDate = new Date(selectedToDate);
-			const newFromDate = fromDateOptions
-				.map((option) => new Date(option.name))
-				.filter((date) => date < toDate)
-				.sort((a, b) => b - a)[0];
-			if (newFromDate) {
-				setSelectedFromDate(dateFormat(newFromDate, 'mm-dd-yyyy'));
-			}
-		}
-	}, [selectedToDate]);
+  useEffect(() => {
+    if (new Date(selectedToDate) < new Date(selectedFromDate)) {
+      const toDate = new Date(selectedToDate);
+      const newFromDate = fromDateOptions
+        .map((option) => new Date(option.name))
+        .filter((date) => date < toDate)
+        .sort((a, b) => b - a)[0];
+      if (newFromDate) {
+        setSelectedFromDate(dateFormat(newFromDate, "mm-dd-yyyy"));
+      }
+    }
+  }, [selectedToDate]);
 
-	useEffect(() => {
-		if (new Date(selectedFromDate) > new Date(selectedToDate)) {
-			const fromDate = new Date(selectedFromDate);
-			const toDate = new Date(selectedToDate);
+  useEffect(() => {
+    if (new Date(selectedFromDate) > new Date(selectedToDate)) {
+      const fromDate = new Date(selectedFromDate);
+      const toDate = new Date(selectedToDate);
 
-			if (fromDate > toDate) {
-				const newToDate = toDateOptions
-					.map((option) => new Date(option.name))
-					.filter((date) => date > fromDate)
-					.sort((a, b) => a - b)[0];
-				if (newToDate) {
-					setSelectedToDate(dateFormat(newToDate, 'mm-dd-yyyy'));
-				}
-			}
-		}
-	}, [selectedFromDate]);
+      if (fromDate > toDate) {
+        const newToDate = toDateOptions
+          .map((option) => new Date(option.name))
+          .filter((date) => date > fromDate)
+          .sort((a, b) => a - b)[0];
+        if (newToDate) {
+          setSelectedToDate(dateFormat(newToDate, "mm-dd-yyyy"));
+        }
+      }
+    }
+  }, [selectedFromDate]);
 
-	useEffect(() => {
-		const fetchShowHideDepartments = async () => {
-			try {
-				setCheckedItemsLoaded(false);
-				const getData = {
-					url: 'getShowHideDepartments',
-					urlParams: {
-						companyId: companyID,
-					},
-				};
+  useEffect(() => {
+    const fetchShowHideDepartments = async () => {
+      try {
+        setCheckedItemsLoaded(false);
+        const getData = {
+          url: "getShowHideDepartments",
+          urlParams: {
+            companyId: companyID,
+          },
+        };
 
-				const result = await getCall(getData);
+        const result = await getCall(getData);
 
-				const checkedItems = result.data.map((item) => ({
-					name: `${item.department}/${item.subdepartment}`,
-					showOnReport: item.includeInReport,
-					includeInGrandTotal: item.includeInTotal,
-				}));
+        const checkedItems = result.data.map((item) => ({
+          name: `${item.department}/${item.subdepartment}`,
+          showOnReport: item.includeInReport,
+          includeInGrandTotal: item.includeInTotal,
+        }));
 
-				setCheckedItems(checkedItems);
-				setCheckedItemsLoaded(true);
-			} catch (error) {
-				console.error('Error getting Show Hide Departments data: ', error);
-			}
-		};
+        setCheckedItems(checkedItems);
+        setCheckedItemsLoaded(true);
+      } catch (error) {
+        console.error("Error getting Show Hide Departments data: ", error);
+      }
+    };
 
-		fetchShowHideDepartments();
-	}, []);
+    fetchShowHideDepartments();
+  }, []);
 
   useEffect(() => {
     const fetchDates = async () => {
@@ -685,18 +721,19 @@ const VarianceFoodCost = () => {
     );
   };
 
-	const handleShowHideDepartments = () => {
-		setIsShowHideDepartmentsModalVisible(false);
-		const newVarianceFoodCostData = varianceFoodCostData.filter((item) =>
-			checkedItems.some(
-				(checkedItem) =>
-					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
-			)
-		);
-		setIsTableRendered(false);
-		setColumns(generatedColumns);
-		setFilteredVarianceFoodCostData(newVarianceFoodCostData);
-	};
+  const handleShowHideDepartments = () => {
+    setIsShowHideDepartmentsModalVisible(false);
+    const newVarianceFoodCostData = varianceFoodCostData.filter((item) =>
+      checkedItems.some(
+        (checkedItem) =>
+          checkedItem.name === `${item.department}/${item.subDepartment}` &&
+          checkedItem.showOnReport
+      )
+    );
+    setIsTableRendered(false);
+    setColumns(generatedColumns);
+    setFilteredVarianceFoodCostData(newVarianceFoodCostData);
+  };
 
   const handleShowColumns = (status, type) => {
     if (type === "#") {
@@ -929,8 +966,8 @@ const VarianceFoodCost = () => {
       isTableRendered={isTableRendered}
       setIsTableRendered={setIsTableRendered}
       setTableState={setTableState}
-      headerPosition="left"
-      dataPosition="text-left"
+      headerPosition='left'
+      dataPosition='text-left'
       onCallBack={(e) => {
         getGetActualFoodCostBreakdownIdealReportData(e);
       }}
@@ -1059,28 +1096,28 @@ const VarianceFoodCost = () => {
     };
 
     return (
-      <div className="max-w-5xl mx-auto my-0 p-[4px]  shadow-lg border bg-white min-w-[750px]">
+      <div className='max-w-5xl mx-auto my-0 p-[4px]  shadow-lg border bg-white min-w-[750px]'>
         {/* Header */}
-        <div className="text-center  ">
-          <p className="text-gray-600 text-sm">
+        <div className='text-center  '>
+          <p className='text-gray-600 text-sm'>
             {breakDownSupportData[0]?.description}
           </p>
-          <p className="text-gray-600 text-sm">
+          <p className='text-gray-600 text-sm'>
             Store #{selectedUnit} - {selectedFromDate} to {selectedToDate} (
             {view})
           </p>
         </div>
 
         {/* Actual Section */}
-        <div className="my-[5px]">
+        <div className='my-[5px]'>
           <h3
             onClick={(e) => {
               e.preventDefault(), openCollapse("Actual");
             }}
-            className="text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
+            className='text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
           >
             <span>Actual</span>{" "}
-            <span className="m-1 ">
+            <span className='m-1 '>
               {showAndHideBreakDown.Actual == true ? (
                 <IoIosArrowUp />
               ) : (
@@ -1089,52 +1126,52 @@ const VarianceFoodCost = () => {
             </span>
           </h3>
           {showAndHideBreakDown.Actual == true && (
-            <div className="">
-              <table className="w-full border-collapse border">
-                <thead className="bg-gray-100">
+            <div className=''>
+              <table className='w-full border-collapse border'>
+                <thead className='bg-gray-100'>
                   <tr>
-                    <th className="border p-2 text-left"></th>
+                    <th className='border p-2 text-left'></th>
                     <td></td>
-                    <th className="border text-right  p-[3px]  text-nowrap text-sm">
+                    <th className='border text-right  p-[3px]  text-nowrap text-sm'>
                       # UOM
                     </th>
-                    <th className="border text-right  p-[3px]  text-nowrap text-sm">
+                    <th className='border text-right  p-[3px]  text-nowrap text-sm'>
                       Value
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="border text-left  p-[3px]  text-nowrap text-sm">
-                      <div className="flex align-middle">
-                        <div className="p-1">
+                    <td className='border text-left  p-[3px]  text-nowrap text-sm'>
+                      <div className='flex align-middle'>
+                        <div className='p-1'>
                           <CiSquarePlus />
                         </div>
                         Beginning On-Hand Count: {selectedFromDate}
                       </div>
                     </td>
-                    <td className="border   p-[3px]  text-nowrap text-sm text-center"></td>
-                    <td className="border text-right  p-[3px]  text-nowrap text-sm">
+                    <td className='border   p-[3px]  text-nowrap text-sm text-center'></td>
+                    <td className='border text-right  p-[3px]  text-nowrap text-sm'>
                       {breakDownSupportData[0]?.begCountCases?.toFixed(4)}
                     </td>
-                    <td className="border text-right  p-[3px]  text-nowrap text-sm">
+                    <td className='border text-right  p-[3px]  text-nowrap text-sm'>
                       ${breakDownSupportData[0]?.begCountCost?.toFixed(2)}
                     </td>
                   </tr>
                   <tr
-                    className="cursor-pointer"
+                    className='cursor-pointer'
                     onClick={(e) => {
                       e.preventDefault(), openCollapse("purchaseBetween");
                     }}
                   >
-                    <td className="border text-left  p-[3px]  text-nowrap text-sm ">
-                      <div className="flex align-middle">
+                    <td className='border text-left  p-[3px]  text-nowrap text-sm '>
+                      <div className='flex align-middle'>
                         {showAndHideBreakDown.purchaseBetween ? (
-                          <div className="p-1">
+                          <div className='p-1'>
                             <CiSquareMinus />
                           </div>
                         ) : (
-                          <div className="p-1">
+                          <div className='p-1'>
                             <CiSquarePlus />
                           </div>
                         )}{" "}
@@ -1142,40 +1179,40 @@ const VarianceFoodCost = () => {
                         {selectedToDate}
                       </div>
                     </td>
-                    <td className="border   p-[3px]  text-nowrap text-sm text-center">
+                    <td className='border   p-[3px]  text-nowrap text-sm text-center'>
                       +
                     </td>
-                    <td className="border text-right  p-[3px]  text-nowrap text-sm">
+                    <td className='border text-right  p-[3px]  text-nowrap text-sm'>
                       {breakDownSupportData[0]?.purchaseCases?.toFixed(4)}
                     </td>
-                    <td className="border text-right  p-[3px]  text-nowrap text-sm">
+                    <td className='border text-right  p-[3px]  text-nowrap text-sm'>
                       ${breakDownSupportData[0]?.purchaseCost?.toFixed(2)}
                     </td>
                   </tr>
                   {showAndHideBreakDown.purchaseBetween == true && (
                     <tr>
                       <td colSpan={4}>
-                        <table className="w-[97%] ml-[3%]">
-                          <thead className="bg-gray-100">
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                        <table className='w-[97%] ml-[3%]'>
+                          <thead className='bg-gray-100'>
+                            <th className='border text-left  p-[3px]  text-nowrap text-sm'>
                               Vendor
                             </th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                            <th className='border text-left  p-[3px]  text-nowrap text-sm'>
                               Date
                             </th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                            <th className='border text-left  p-[3px]  text-nowrap text-sm'>
                               Invoices #
                             </th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                            <th className='border text-left  p-[3px]  text-nowrap text-sm'>
                               #
                             </th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                            <th className='border text-left  p-[3px]  text-nowrap text-sm'>
                               UOM
                             </th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                            <th className='border text-left  p-[3px]  text-nowrap text-sm'>
                               Price
                             </th>
-                            <th className="border text-left  p-[3px]  text-nowrap text-sm">
+                            <th className='border text-left  p-[3px]  text-nowrap text-sm'>
                               Total
                             </th>
                           </thead>
@@ -1187,25 +1224,25 @@ const VarianceFoodCost = () => {
                             )}
                             {breakDownIdealDetails.map((item) => (
                               <tr>
-                                <td className="border text-left  p-[3px]  text-nowrap text-sm">
+                                <td className='border text-left  p-[3px]  text-nowrap text-sm'>
                                   {item.VendorName}
                                 </td>
-                                <td className="border text-right  p-[3px]  text-nowrap text-sm">
+                                <td className='border text-right  p-[3px]  text-nowrap text-sm'>
                                   {dateFormat(item.InvoiceDate, "mm-dd-yyyy")}
                                 </td>
-                                <td className="border text-right  p-[3px]  text-nowrap text-sm">
+                                <td className='border text-right  p-[3px]  text-nowrap text-sm'>
                                   {item.VendorInvoiceReference}
                                 </td>
-                                <td className="border text-center  p-[3px]  text-nowrap text-sm">
+                                <td className='border text-center  p-[3px]  text-nowrap text-sm'>
                                   {item.Quantity.toFixed(6)}
                                 </td>
-                                <td className="border text-center  p-[3px]  text-nowrap text-sm">
+                                <td className='border text-center  p-[3px]  text-nowrap text-sm'>
                                   {item.UnitOfMeasure}
                                 </td>
-                                <td className="border text-right  p-[3px]  text-nowrap text-sm">
+                                <td className='border text-right  p-[3px]  text-nowrap text-sm'>
                                   ${item.Price.toFixed(2)}
                                 </td>
-                                <td className="border text-right  p-[3px]  text-nowrap text-sm">
+                                <td className='border text-right  p-[3px]  text-nowrap text-sm'>
                                   ${item.TotalPrice.toFixed(2)}
                                 </td>
                               </tr>
@@ -1216,75 +1253,75 @@ const VarianceFoodCost = () => {
                     </tr>
                   )}
                   <tr>
-                    <td className="border p-[3px]  text-nowrap text-sm">
-                      <div className="flex align-middle">
-                        <div className="p-1">
+                    <td className='border p-[3px]  text-nowrap text-sm'>
+                      <div className='flex align-middle'>
+                        <div className='p-1'>
                           <CiSquarePlus />
                         </div>{" "}
                         Transferred In
                       </div>
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-center">
+                    <td className='border p-[3px]  text-nowrap text-sm text-center'>
                       +
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className='border p-[3px]  text-nowrap text-sm text-right'>
                       {breakDownSupportData[0]?.iTinCountCases}
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className='border p-[3px]  text-nowrap text-sm text-right'>
                       ${breakDownSupportData[0]?.iTinCountCost}
                     </td>
                   </tr>
                   <tr>
-                    <td className="border p-[3px]  text-nowrap text-sm">
-                      <div className="flex align-middle">
-                        <div className="p-1">
+                    <td className='border p-[3px]  text-nowrap text-sm'>
+                      <div className='flex align-middle'>
+                        <div className='p-1'>
                           <CiSquarePlus />
                         </div>{" "}
                         Transferred Out
                       </div>
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-center">
+                    <td className='border p-[3px]  text-nowrap text-sm text-center'>
                       -
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className='border p-[3px]  text-nowrap text-sm text-right'>
                       {breakDownSupportData[0]?.iToutCountCases}
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className='border p-[3px]  text-nowrap text-sm text-right'>
                       ${breakDownSupportData[0]?.iToutCountCost}
                     </td>
                   </tr>
                   <tr>
-                    <td className="border p-[3px]  text-nowrap text-sm">
-                      <div className="flex align-middle">
-                        <div className="p-1">
+                    <td className='border p-[3px]  text-nowrap text-sm'>
+                      <div className='flex align-middle'>
+                        <div className='p-1'>
                           <CiSquarePlus />
                         </div>{" "}
                         Ending On-Hand Count: {selectedToDate}
                       </div>
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-center">
+                    <td className='border p-[3px]  text-nowrap text-sm text-center'>
                       -
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className='border p-[3px]  text-nowrap text-sm text-right'>
                       {breakDownSupportData[0]?.endCountCases}
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className='border p-[3px]  text-nowrap text-sm text-right'>
                       ${breakDownSupportData[0]?.endCountCost}
                     </td>
                   </tr>
                 </tbody>
                 <tfoot>
-                  <tr className="bg-gray-200">
+                  <tr className='bg-gray-200'>
                     <td
-                      className="border p-[3px]  text-nowrap text-sm text-left"
+                      className='border p-[3px]  text-nowrap text-sm text-left'
                       colSpan={2}
                     >
                       Actual Usage{" "}
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className='border p-[3px]  text-nowrap text-sm text-right'>
                       {breakDownSupportData[0]?.usageCases?.toFixed(2)}
                     </td>
-                    <td className="border p-[3px]  text-nowrap text-sm text-right">
+                    <td className='border p-[3px]  text-nowrap text-sm text-right'>
                       ${breakDownSupportData[0]?.usageCost?.toFixed(2)}
                     </td>
                   </tr>
@@ -1295,15 +1332,15 @@ const VarianceFoodCost = () => {
         </div>
 
         {/* Ideal Section */}
-        <div className="">
+        <div className=''>
           <h3
             onClick={(e) => {
               e.preventDefault(), openCollapse("ideal");
             }}
-            className="text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer"
+            className='text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
           >
             <span>Ideal</span>{" "}
-            <span className="m-1 ">
+            <span className='m-1 '>
               {showAndHideBreakDown.ideal == true ? (
                 <IoIosArrowUp />
               ) : (
@@ -1312,28 +1349,28 @@ const VarianceFoodCost = () => {
             </span>
           </h3>
           {showAndHideBreakDown.ideal == true && (
-            <div className="tableHOC pr-1 max-h-[20vh] overflow-auto">
-              <table className="w-full border-collapse ">
-                <thead className="bg-gray-100 sticky top-[0px]">
+            <div className='tableHOC pr-1 max-h-[20vh] overflow-auto'>
+              <table className='w-full border-collapse '>
+                <thead className='bg-gray-100 sticky top-[0px]'>
                   <tr>
-                    <th className=" p-[3px] text-left text-sm">Menu Item</th>
-                    <th className=" p-[3px] text-left text-nowrap text-sm">
+                    <th className=' p-[3px] text-left text-sm'>Menu Item</th>
+                    <th className=' p-[3px] text-left text-nowrap text-sm'>
                       Recipe
                     </th>
-                    <th className=" p-[3px] text-right text-nowrap text-sm">
+                    <th className=' p-[3px] text-right text-nowrap text-sm'>
                       # Sold
                     </th>
-                    <th className=" p-[3px] text-right text-nowrap text-sm">
+                    <th className=' p-[3px] text-right text-nowrap text-sm'>
                       #{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName}{" "}
                       in Recipe
                     </th>
-                    <th className=" p-[3px] text-right text-nowrap text-sm">
+                    <th className=' p-[3px] text-right text-nowrap text-sm'>
                       # {costBreakdownIdealDetails[0]?.MasterItemUOM}
                     </th>
-                    <th className=" p-[3px] text-righ text-nowrapt text-sm">
+                    <th className=' p-[3px] text-righ text-nowrapt text-sm'>
                       Total # {costBreakdownIdealDetails[0]?.MasterItemUOM}
                     </th>
-                    <th className=" p-[3px] text-right text-nowrap text-sm">
+                    <th className=' p-[3px] text-right text-nowrap text-sm'>
                       Cost
                     </th>
                   </tr>
@@ -1341,25 +1378,25 @@ const VarianceFoodCost = () => {
                 <tbody>
                   {costBreakdownIdealDetails.map((item) => (
                     <tr>
-                      <td className="border p-[3px] text-sm">
+                      <td className='border p-[3px] text-sm'>
                         {item.MenuItemDescription}
                       </td>
-                      <td className="border p-[3px] text-sm">
+                      <td className='border p-[3px] text-sm'>
                         {item.VariantLabel}
                       </td>
-                      <td className="border p-[3px] text-right text-sm">
+                      <td className='border p-[3px] text-right text-sm'>
                         {item.MenuItemQuantitySold}
                       </td>
-                      <td className="border p-[3px] text-right text-sm">
+                      <td className='border p-[3px] text-right text-sm'>
                         {item.MasterItemRecipeUOMPerRecipe}
                       </td>
-                      <td className="border p-[3px] text-right text-sm">
+                      <td className='border p-[3px] text-right text-sm'>
                         {item.MasterItemQuantityPerRecipe.toFixed(4)}
                       </td>
-                      <td className="border p-[3px] text-right text-sm">
+                      <td className='border p-[3px] text-right text-sm'>
                         {item.MasterItemQuantityTotal.toFixed(2)}
                       </td>
-                      <td className="border p-[3px] text-right text-sm">
+                      <td className='border p-[3px] text-right text-sm'>
                         $
                         {sumOfCost(
                           item.MasterItemQuantityTotal,
@@ -1370,20 +1407,20 @@ const VarianceFoodCost = () => {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-gray-200 sticky bottom-0">
+                  <tr className='bg-gray-200 sticky bottom-0'>
                     <td
-                      className=" p-[3px]  text-nowrap text-sm text-left"
+                      className=' p-[3px]  text-nowrap text-sm text-left'
                       colSpan={5}
                     >
                       Ideal Usage{" "}
                     </td>
-                    <td className=" p-[3px]  text-nowrap text-sm text-right">
+                    <td className=' p-[3px]  text-nowrap text-sm text-right'>
                       {calculateMasterItemQuantityTotalSum(
                         costBreakdownIdealDetails,
                         "MasterItemQuantityTotal"
                       ).toFixed(2)}
                     </td>
-                    <td className=" p-[3px]  text-nowrap text-sm text-right">
+                    <td className=' p-[3px]  text-nowrap text-sm text-right'>
                       $
                       {calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
                     </td>
@@ -1395,15 +1432,15 @@ const VarianceFoodCost = () => {
         </div>
 
         {/* Variance Section */}
-        <div className="mt-[6px]">
+        <div className='mt-[6px]'>
           <h3
             onClick={(e) => {
               e.preventDefault(), openCollapse("Variance");
             }}
-            className="text-base font-semibold bg-orange-100 py-[3px] px-1 rounded-t-md flex justify-between cursor-pointer"
+            className='text-base font-semibold bg-orange-100 py-[3px] px-1 rounded-t-md flex justify-between cursor-pointer'
           >
             <span> Variance</span>
-            <span className="m-1 ">
+            <span className='m-1 '>
               {showAndHideBreakDown.Variance == true ? (
                 <IoIosArrowUp />
               ) : (
@@ -1412,50 +1449,50 @@ const VarianceFoodCost = () => {
             </span>
           </h3>
           {showAndHideBreakDown.Variance == true && (
-            <table className="w-full border-collapse border">
-              <thead className="bg-gray-100">
+            <table className='w-full border-collapse border'>
+              <thead className='bg-gray-100'>
                 <tr>
-                  <th className="border p-[3px] text-left text-sm">Details</th>
-                  <th className="border p-[3px] text-left text-sm">
+                  <th className='border p-[3px] text-left text-sm'>Details</th>
+                  <th className='border p-[3px] text-left text-sm'>
                     #{costBreakdownIdealDetails[0]?.MasterItemUOM}
                   </th>
-                  <th className="border p-[3px] text-left text-sm">Cost</th>
+                  <th className='border p-[3px] text-left text-sm'>Cost</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border p-[3px] text-left text-sm">
+                  <td className='border p-[3px] text-left text-sm'>
                     Actual Usage
                   </td>
-                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
+                  <td className='border p-[3px]  text-nowrap text-sm  text-right'>
                     {breakDownSupportData[0]?.usageCases?.toFixed(2)}
                   </td>
-                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
+                  <td className='border p-[3px]  text-nowrap text-sm  text-right'>
                     ${breakDownSupportData[0]?.usageCost?.toFixed(2)}
                   </td>
                 </tr>
                 <tr>
-                  <td className="border p-[3px] text-left text-sm">
+                  <td className='border p-[3px] text-left text-sm'>
                     Ideal Usage
                   </td>
-                  <td className="border p-[3px]  text-nowrap text-sm  text-right">
+                  <td className='border p-[3px]  text-nowrap text-sm  text-right'>
                     {calculateMasterItemQuantityTotalSum(
                       costBreakdownIdealDetails,
                       "MasterItemQuantityTotal"
                     ).toFixed(2)}
                   </td>
-                  <td className="border p-[3px]  text-nowrap text-sm text-right text-right">
+                  <td className='border p-[3px]  text-nowrap text-sm text-right text-right'>
                     ${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
                   </td>
                 </tr>
                 <tr>
-                  <td className="border p-[3px] text-left text-sm">
+                  <td className='border p-[3px] text-left text-sm'>
                     Variance Usage
                   </td>
-                  <td className="border p-[3px] text-right text-sm">
+                  <td className='border p-[3px] text-right text-sm'>
                     {totalVariancecs()}
                   </td>
-                  <td className="border p-[3px]  text-nowrap text-sm text-right">
+                  <td className='border p-[3px]  text-nowrap text-sm text-right'>
                     ${totalVariance()}
                   </td>
                 </tr>
@@ -1469,18 +1506,18 @@ const VarianceFoodCost = () => {
 
   return (
     <>
-      <div className="w-[98%] mx-auto pageContainer">
+      <div className='w-[98%] mx-auto pageContainer'>
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
+        <h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>
           Variance Food Cost
         </h2>
-        <header className="optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
-          <div className="flex items-center">
+        <header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+          <div className='flex items-center'>
             <UnitSelector
               companyID={companyID}
               alignmentID={alignmentID}
@@ -1490,10 +1527,10 @@ const VarianceFoodCost = () => {
               setMemberName={setSelectedUnitName}
               onClick={() => setShowUnitModal(true)}
             />
-            <div className="flex gap-2 date-selector">
-              <div className="w-44">
+            <div className='flex gap-2 date-selector'>
+              <div className='w-44'>
                 <Dropdown
-                  title="From Date"
+                  title='From Date'
                   options={fromDateOptions}
                   selectedOption={
                     isDateLoading ? "Loading..." : selectedFromDate
@@ -1501,28 +1538,24 @@ const VarianceFoodCost = () => {
                   onOptionChange={(date) => setSelectedFromDate(date)}
                 />
               </div>
-              <div className="w-44">
+              <div className='w-44'>
                 <Dropdown
-                  title="To Date"
+                  title='To Date'
                   options={toDateOptions}
                   selectedOption={isDateLoading ? "Loading..." : selectedToDate}
                   onOptionChange={(date) => setSelectedToDate(date)}
                 />
               </div>
             </div>
-            <div className="ml-2 w-36 countType-selector">
+            <div className='ml-2 w-36 countType-selector'>
               <Dropdown
                 options={countDropdownOptions}
-                title="Count Type"
+                title='Count Type'
                 selectedOption={view}
                 onOptionChange={handleCountTypeChange}
               />
             </div>
-            <div className="run-button" onClick={fetchVarianceFoodCost}>
-              <div className="py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
-                Run
-              </div>
-            </div>
+            <Run fetchData={fetchVarianceFoodCost} />
           </div>
           <div>
             <ExportOptions
@@ -1544,41 +1577,44 @@ const VarianceFoodCost = () => {
         ) : (
           <>
             {varianceFoodCostData.length > 0 && (
-              <div className="flex flex-row items-center space-x-3">
-                <div className="w-48">
+              <div className='flex flex-row items-center space-x-3'>
+                <div className='w-48'>
                   <Dropdown
-                    title="View Totals By"
+                    title='View Totals By'
                     options={viewOptions}
                     selectedOption={viewby}
                     onOptionChange={(option) => setViewBy(option)}
                   />
                 </div>
                 {/* start  */}
-                <div className="flex items-center justify-center w-28 py-3 text-center capitalize cursor-pointer whitespace-nowrap rounded-3xl  mt-[28px] ">
+                <div className='flex items-center justify-center w-28 py-3 text-center capitalize cursor-pointer whitespace-nowrap rounded-3xl  mt-[28px] '>
                   <div
                     onClick={() => setIsDropdownVisible(!isDropdownVisible)}
-                    className="items-center justify-center w-full px-6 py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid"
+                    className='items-center justify-center w-full px-6 py-2 text-center capitalize  cursor-pointer whitespace-nowrap rounded-3xl hover:border-[var(--tw-primary)] active:border-[var(--tw-primary)] border-2 border-solid'
                   >
-                    <span className="cursor-pointer mt-[47px] text-[14px]"> More....</span>
+                    <span className='cursor-pointer mt-[47px] text-[14px]'>
+                      {" "}
+                      More....
+                    </span>
                   </div>
                   {isDropdownVisible && (
                     <div
-                      className="more-container !mt-[28px] "
+                      className='more-container !mt-[28px] '
                       ref={moreOptionsDropdown}
                     >
                       <div
-                        className="option mb-2 w-[200px] text-[14px]"
+                        className='option mb-2 w-[200px] text-[14px]'
                         onClick={() =>
                           setIsShowHideDepartmentsModalVisible(true)
                         }
                       >
-                        <button className="w-[100%] bg-[#f9f9f9] text-[14px]">
+                        <button className='w-[100%] bg-[#f9f9f9] text-[14px]'>
                           Show/Hide Departments
                         </button>
                       </div>
-                      <div className="option mb-2 w-[200px] text-[14px]">
+                      <div className='option mb-2 w-[200px] text-[14px]'>
                         <button
-                          className="w-[100%] bg-[#f9f9f9] text-[14px]"
+                          className='w-[100%] bg-[#f9f9f9] text-[14px]'
                           onClick={() => {
                             fetchCountsheets(); // For Beginning Countsheet
                             setIsDropdownVisible(false);
@@ -1587,9 +1623,9 @@ const VarianceFoodCost = () => {
                           View Beginning Countsheet
                         </button>
                       </div>
-                      <div className="option mb-2 w-[200px] text-[14px]">
+                      <div className='option mb-2 w-[200px] text-[14px]'>
                         <button
-                          className="w-[100%] bg-[#f9f9f9] text-[14px]"
+                          className='w-[100%] bg-[#f9f9f9] text-[14px]'
                           onClick={() => {
                             fetchCountsheets(true); // For Ending Countsheet
                             setIsDropdownVisible(false);
@@ -1598,9 +1634,9 @@ const VarianceFoodCost = () => {
                           View Ending Countsheet
                         </button>
                       </div>
-                      <div className="option text-[14px]">
+                      <div className='option text-[14px]'>
                         <button
-                          className="w-[100%] bg-[#f9f9f9]"
+                          className='w-[100%] bg-[#f9f9f9]'
                           onClick={() => {
                             handleViewPurchase(
                               selectedFromDate,
@@ -1621,11 +1657,11 @@ const VarianceFoodCost = () => {
                     /^\d+\.\d+\.\d+$/.test(key)
                   )) ||
                   viewby === "Inventory Item") && (
-                  <div className="flex items-center mt-[31px] gap-3">
-                    <div className="text-[14px]">
+                  <div className='flex items-center mt-[31px] gap-3'>
+                    <div className='text-[14px]'>
                       <input
-                        className="mr-1 accent-[var(--tw-primary)] text-[14px]"
-                        type="checkbox"
+                        className='mr-1 accent-[var(--tw-primary)] text-[14px]'
+                        type='checkbox'
                         checked={showQuantities}
                         onChange={(e) =>
                           handleShowColumns(e.target.checked, "#")
@@ -1633,10 +1669,10 @@ const VarianceFoodCost = () => {
                       />
                       Show Quantities
                     </div>
-                    <div className="text-[14px]">
+                    <div className='text-[14px]'>
                       <input
-                        className="mr-1 accent-[var(--tw-primary)] text-[14px] "
-                        type="checkbox"
+                        className='mr-1 accent-[var(--tw-primary)] text-[14px] '
+                        type='checkbox'
                         checked={showDollarAmounts}
                         onChange={(e) =>
                           handleShowColumns(e.target.checked, "$")
@@ -1648,17 +1684,17 @@ const VarianceFoodCost = () => {
                 )}
               </div>
             )}
-            <div className="relative w-full min-h-56">
+            <div className='relative w-full min-h-56'>
               <Loader loading={isLoading} />
               {!isLoading &&
                 (varianceFoodCostData.length > 0 ? (
-                  <div className="paged-table">{Table}</div>
+                  <div className='paged-table'>{Table}</div>
                 ) : !selectedUnit ? (
-                  <div className="mt-10 text-xl font-medium text-center">
+                  <div className='mt-10 text-xl font-medium text-center'>
                     No Unit Selected
                   </div>
                 ) : (
-                  <div className="mt-10 text-xl font-medium text-center">
+                  <div className='mt-10 text-xl font-medium text-center'>
                     No data available
                   </div>
                 ))}
@@ -1691,10 +1727,10 @@ const VarianceFoodCost = () => {
             isOpen={isShowHideDepartmentsModalVisible}
             onClose={() => setIsShowHideDepartmentsModalVisible(false)}
           >
-            <div className="p-4">
-              <table className="w-full border-collapse table-auto select-none">
-                <thead className="sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]">
-                  <tr className="grid grid-cols-3 ">
+            <div className='p-4'>
+              <table className='w-full border-collapse table-auto select-none'>
+                <thead className='sticky top-0 z-[2] w-full bg-white shadow-[0_-1px_0_var(--tw-primary)_inset]'>
+                  <tr className='grid grid-cols-3 '>
                     <th>Department/Subdepartment</th>
                     <th>Show on Report</th>
                     <th>Include in Grand Total</th>
@@ -1704,13 +1740,13 @@ const VarianceFoodCost = () => {
                   {checkedItems.map((item, index) => (
                     <tr
                       key={index}
-                      className="relative text-sm grid grid-cols-3 font-normal py-1 border-y-[0.5px] hover:bg-gray-100 "
+                      className='relative text-sm grid grid-cols-3 font-normal py-1 border-y-[0.5px] hover:bg-gray-100 '
                     >
-                      <td className="">{item.name}</td>
-                      <td className="text-center">
+                      <td className=''>{item.name}</td>
+                      <td className='text-center'>
                         <input
-                          className="accent-[var(--tw-primary)]"
-                          type="checkbox"
+                          className='accent-[var(--tw-primary)]'
+                          type='checkbox'
                           checked={item.showOnReport}
                           onChange={(e) =>
                             setCheckedItems((prev) => {
@@ -1723,11 +1759,11 @@ const VarianceFoodCost = () => {
                           }
                         />
                       </td>
-                      <td className="text-center">
+                      <td className='text-center'>
                         <input
-                          className="accent-[var(--tw-primary)]"
+                          className='accent-[var(--tw-primary)]'
                           checked={item.includeInGrandTotal}
-                          type="checkbox"
+                          type='checkbox'
                           onChange={(e) =>
                             setCheckedItems((prev) => {
                               const newItems = [...prev];
@@ -1742,13 +1778,13 @@ const VarianceFoodCost = () => {
                   ))}
                 </tbody>
               </table>
-              <div className="flex justify-between mt-4">
-                <div className="flex items-center gap-1 accent-[var(--tw-primary)]">
-                  <input type="checkbox" />
+              <div className='flex justify-between mt-4'>
+                <div className='flex items-center gap-1 accent-[var(--tw-primary)]'>
+                  <input type='checkbox' />
                   Save as Company Defaults
                 </div>
                 <button
-                  className="flex items-center gap-2 px-4 py-2 border-solid text-[var(--tw-primary)] focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button"
+                  className='flex items-center gap-2 px-4 py-2 border-solid text-[var(--tw-primary)] focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button'
                   onClick={handleShowHideDepartments}
                 >
                   Update Report
@@ -1761,8 +1797,8 @@ const VarianceFoodCost = () => {
             isOpen={showWarnings}
             onClose={() => setShowWarnings(false)}
           >
-            <div className="p-4 w-[340px]">
-              <p className="text-center">
+            <div className='p-4 w-[340px]'>
+              <p className='text-center'>
                 {`Not enough countsheets of ${Object.keys(viewMap).find(
                   (key) => viewMap[key] === countType
                 )} type to compare for ${selectedUnitName}.`}{" "}
