@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { getCall } from "../../apis/network";
+import { useEffect, useState } from 'react';
+import { getCall } from '../../apis/network';
 import {
   Dropdown,
   UnitSelector,
@@ -11,13 +11,13 @@ import {
   Modal,
   ExcelExport as exportToExcel,
   Run,
-} from "../../components";
-import { useSelector } from "react-redux";
-import { Steps } from "intro.js-react";
-import { createColumnHelper } from "@tanstack/react-table";
-import laborAudit from "../../assets/introJSSteps/laborAudit";
-import dateFormat from "dateformat";
-import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
+} from '../../components';
+import { useSelector } from 'react-redux';
+import { Steps } from 'intro.js-react';
+import { createColumnHelper } from '@tanstack/react-table';
+import laborAudit from '../../assets/introJSSteps/laborAudit';
+import dateFormat from 'dateformat';
+import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 
 const columnHelper = createColumnHelper();
 
@@ -39,19 +39,19 @@ const LaborAudit = () => {
 
   // State variables for selected unit
   const [selectedUnit, setSelectedUnit] = useState();
-  const [selectedUnitName, setSelectedUnitName] = useState("Loading");
+  const [selectedUnitName, setSelectedUnitName] = useState('Loading');
   const [showUnitModal, setShowUnitModal] = useState(false);
 
   // loading and error state variables
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState(
-    "There was an error trying to load the Labor Audit Report, please try again later."
+    'There was an error trying to load the Labor Audit Report, please try again later.'
   );
 
   // For comment Modal
   const [showCommentModal, setShowCommentModal] = useState(false);
-  const [commentValue, setCommentValue] = useState("");
+  const [commentValue, setCommentValue] = useState('');
 
   // Schedule DropDown Variable
   const [defaultSchedule, setDefaultSchedule] = useState();
@@ -81,9 +81,9 @@ const LaborAudit = () => {
   // columns for tableHOC of LaborAudit
 
   const columns = [
-    columnHelper.accessor("employeeFirstName", {
-      id: "employeeFirstName",
-      header: "Employee First Name",
+    columnHelper.accessor('employeeFirstName', {
+      id: 'employeeFirstName',
+      header: 'Employee First Name',
       cell: ({ getValue, row }) =>
         row.getCanExpand() ? (
           <div
@@ -93,58 +93,58 @@ const LaborAudit = () => {
 
             <div className='mr-20 w-20'>Version: {row.original.version}</div>
             <div className='mr-20'>
-              Edit Date:{" "}
-              {dateFormat(row.original.editDate, "mm/dd/yyyy hh:MM TT")}
+              Edit Date:{' '}
+              {dateFormat(row.original.editDate, 'mm/dd/yyyy hh:MM TT')}
             </div>
             <div className='mr-20'>{row.original.editDescription}</div>
           </div>
         ) : (
           <div className='text-left'>{getValue()}</div>
         ),
-      dataType: "string",
-      filterFn: "arrIncludesSome",
+      dataType: 'string',
+      filterFn: 'arrIncludesSome',
     }),
-    columnHelper.accessor("employeeLastName", {
-      id: "employeeLastName",
-      header: "Employee Last Name",
+    columnHelper.accessor('employeeLastName', {
+      id: 'employeeLastName',
+      header: 'Employee Last Name',
       cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
-      dataType: "string",
-      filterFn: "arrIncludesSome",
+      dataType: 'string',
+      filterFn: 'arrIncludesSome',
     }),
-    columnHelper.accessor("jobName", {
-      id: "jobName",
-      header: "Job Name",
+    columnHelper.accessor('jobName', {
+      id: 'jobName',
+      header: 'Job Name',
       cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
-      dataType: "string",
-      filterFn: "arrIncludesSome",
+      dataType: 'string',
+      filterFn: 'arrIncludesSome',
     }),
-    columnHelper.accessor("businessDate", {
-      id: "businessDate",
-      header: "Business Date",
-      dataType: "string",
-      filterFn: "arrIncludesSome",
+    columnHelper.accessor('businessDate', {
+      id: 'businessDate',
+      header: 'Business Date',
+      dataType: 'string',
+      filterFn: 'arrIncludesSome',
     }),
-    columnHelper.accessor("startTime", {
-      id: "startTime",
-      header: "Start Time",
-      dataType: "string",
-      filterFn: "arrIncludesSome",
+    columnHelper.accessor('startTime', {
+      id: 'startTime',
+      header: 'Start Time',
+      dataType: 'string',
+      filterFn: 'arrIncludesSome',
     }),
-    columnHelper.accessor("endTime", {
-      id: "endTime",
-      header: "End Time",
-      dataType: "string",
-      filterFn: "arrIncludesSome",
+    columnHelper.accessor('endTime', {
+      id: 'endTime',
+      header: 'End Time',
+      dataType: 'string',
+      filterFn: 'arrIncludesSome',
     }),
-    columnHelper.accessor("detailComments", {
-      id: "detailsComments",
-      header: "Shift Comments",
+    columnHelper.accessor('detailComments', {
+      id: 'detailsComments',
+      header: 'Shift Comments',
       cell: ({ getValue, row }) => {
         if (row.getCanExpand()) {
           return;
         } else {
           if (!getValue()) {
-            return "";
+            return '';
           } else {
             return (
               <div
@@ -160,14 +160,14 @@ const LaborAudit = () => {
           }
         }
       },
-      dataType: "string",
-      filterFn: "arrIncludesSome",
+      dataType: 'string',
+      filterFn: 'arrIncludesSome',
     }),
-    columnHelper.accessor("editAction", {
-      id: "editAction",
-      header: "Edit Action",
-      dataType: "string",
-      filterFn: "arrIncludesSome",
+    columnHelper.accessor('editAction', {
+      id: 'editAction',
+      header: 'Edit Action',
+      dataType: 'string',
+      filterFn: 'arrIncludesSome',
     }),
   ];
 
@@ -175,7 +175,7 @@ const LaborAudit = () => {
   const getDatesRange = async () => {
     try {
       const getData = {
-        url: "getLaborAuditDateRange",
+        url: 'getLaborAuditDateRange',
         urlParams: {
           companyId: companyID,
           UnitID: selectedUnit,
@@ -199,8 +199,8 @@ const LaborAudit = () => {
       sunday.setDate(currentDate.getDate() + diffToSunday);
 
       const formatDate = (date) => {
-        const month = (date.getMonth() + 1).toString().padStart(2, "0");
-        const day = date.getDate().toString().padStart(2, "0");
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
         const year = date.getFullYear();
         return `${month}/${day}/${year}`;
       };
@@ -210,7 +210,7 @@ const LaborAudit = () => {
 
       setDefaultSchedule(currentDateRange);
     } catch (error) {
-      console.error("Error getting default dates: ", error);
+      console.error('Error getting default dates: ', error);
     }
   };
 
@@ -236,13 +236,13 @@ const LaborAudit = () => {
     try {
       setIsVersionFetched(false);
       setIsError(false);
-      const startSchedule = defaultSchedule.split("-");
+      const startSchedule = defaultSchedule.split('-');
 
       const scheduleDetails = allScheduleIdAndWorkWeek.find(
         (item) => item.workWeek === defaultSchedule
       );
       const getData = {
-        url: "versionOneCheck",
+        url: 'versionOneCheck',
         urlParams: {
           companyId: companyID,
           ScheduleID: scheduleDetails.scheduleID,
@@ -279,7 +279,7 @@ const LaborAudit = () => {
       let BusinessDate = new Date(drow.businessDate);
       let StartTime = new Date(drow.startTime);
       let EndTime = new Date(drow.endTime);
-      let strComments = drow.detailComments || "";
+      let strComments = drow.detailComments || '';
 
       if (strComments.includes("'")) {
         strComments = strComments.replace(/'/g, "''");
@@ -337,12 +337,12 @@ const LaborAudit = () => {
           ...item,
           subRows: item.subRows
             .map((item2) => {
-              item2.businessDate = dateFormat(item2.businessDate, "mm/dd/yyyy");
+              item2.businessDate = dateFormat(item2.businessDate, 'mm/dd/yyyy');
               item2.startTime = dateFormat(
                 item2.startTime,
-                "mm/dd/yyyy hh:MM TT"
+                'mm/dd/yyyy hh:MM TT'
               );
-              item2.endTime = dateFormat(item2.endTime, "mm/dd/yyyy hh:MM TT");
+              item2.endTime = dateFormat(item2.endTime, 'mm/dd/yyyy hh:MM TT');
 
               return item2;
             })
@@ -370,14 +370,14 @@ const LaborAudit = () => {
           subRows: [
             {
               editVersion: extractedValues.Version,
-              employeeFirstName: isVersion[0].Name.split(" ")[0],
-              employeeLastName: isVersion[0].Name.split(" ")[1],
-              jobName: "",
-              businessDate: dateFormat(isVersion[0].Date, "mm/dd/yyyy"),
-              startTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-              endTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-              detailsComments: "",
-              editAction: "Schedule Posted",
+              employeeFirstName: isVersion[0].Name.split(' ')[0],
+              employeeLastName: isVersion[0].Name.split(' ')[1],
+              jobName: '',
+              businessDate: dateFormat(isVersion[0].Date, 'mm/dd/yyyy'),
+              startTime: dateFormat(isVersion[0].Date, 'mm/dd/yyyy hh:MM TT'),
+              endTime: dateFormat(isVersion[0].Date, 'mm/dd/yyyy hh:MM TT'),
+              detailsComments: '',
+              editAction: 'Schedule Posted',
             },
           ],
         });
@@ -386,14 +386,14 @@ const LaborAudit = () => {
           if (obj.version == extractedValues.Version) {
             obj.subRows.push({
               editVersion: extractedValues.Version,
-              employeeFirstName: isVersion[0].Name.split(" ")[0],
-              employeeLastName: isVersion[0].Name.split(" ")[1],
-              jobName: "",
-              businessDate: dateFormat(isVersion[0].Date, "mm/dd/yyyy"),
-              startTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-              endTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-              detailsComments: "",
-              editAction: "Schedule Posted",
+              employeeFirstName: isVersion[0].Name.split(' ')[0],
+              employeeLastName: isVersion[0].Name.split(' ')[1],
+              jobName: '',
+              businessDate: dateFormat(isVersion[0].Date, 'mm/dd/yyyy'),
+              startTime: dateFormat(isVersion[0].Date, 'mm/dd/yyyy hh:MM TT'),
+              endTime: dateFormat(isVersion[0].Date, 'mm/dd/yyyy hh:MM TT'),
+              detailsComments: '',
+              editAction: 'Schedule Posted',
             });
           }
         });
@@ -403,14 +403,14 @@ const LaborAudit = () => {
         if (obj.version == extractedValues.Version) {
           obj.subRows.push({
             editVersion: extractedValues.Version,
-            employeeFirstName: isVersion[0].Name.split(" ")[0],
-            employeeLastName: isVersion[0].Name.split(" ")[1],
-            jobName: "",
-            businessDate: dateFormat(isVersion[0].Date, "mm/dd/yyyy"),
-            startTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-            endTime: dateFormat(isVersion[0].Date, "mm/dd/yyyy hh:MM TT"),
-            detailsComments: "",
-            editAction: "Schedule Posted",
+            employeeFirstName: isVersion[0].Name.split(' ')[0],
+            employeeLastName: isVersion[0].Name.split(' ')[1],
+            jobName: '',
+            businessDate: dateFormat(isVersion[0].Date, 'mm/dd/yyyy'),
+            startTime: dateFormat(isVersion[0].Date, 'mm/dd/yyyy hh:MM TT'),
+            endTime: dateFormat(isVersion[0].Date, 'mm/dd/yyyy hh:MM TT'),
+            detailsComments: '',
+            editAction: 'Schedule Posted',
           });
         }
       });
@@ -429,7 +429,7 @@ const LaborAudit = () => {
       )[0].scheduleID;
 
       const getData = {
-        url: "laborAudit",
+        url: 'laborAudit',
         urlParams: {
           companyId: companyID,
           alignmentId: alignmentID,
@@ -445,19 +445,19 @@ const LaborAudit = () => {
       setIsError(true);
       setIsLoading(false);
       setErrorMessage(
-        "There was an issue loading your data, please try again later."
+        'There was an issue loading your data, please try again later.'
       );
-      console.error("Error getting labor audit report data: ", error);
+      console.error('Error getting labor audit report data: ', error);
     }
   };
 
   // function to handle pdfClick
   const handlePDFClick = () => {
     const pdfData = {
-      title: "Labor Audit Report",
+      title: 'Labor Audit Report',
       subHeaders: [`${defaultSchedule}`, `${selectedUnitName}`],
-      exportType: "pdf",
-      pageOrientation: "landscape",
+      exportType: 'pdf',
+      pageOrientation: 'landscape',
       body: buildPDFBody(),
     };
 
@@ -469,19 +469,19 @@ const LaborAudit = () => {
       const version = row.version;
       const title = `Version: ${version}`;
       return {
-        type: "table",
+        type: 'table',
         title: title,
-        widths: Array(9).fill("auto"),
+        widths: Array(9).fill('auto'),
         dataTypes: [
-          "string",
-          "string",
-          "string",
-          "string",
-          "string",
-          "string",
-          "string",
-          "string",
-          "string",
+          'string',
+          'string',
+          'string',
+          'string',
+          'string',
+          'string',
+          'string',
+          'string',
+          'string',
         ],
         data: formatPDFData(row),
       };
@@ -493,61 +493,61 @@ const LaborAudit = () => {
   const formatPDFData = (row) => {
     return {
       columnHeaders: [
-        "Edit Date",
-        "Employee First Name",
-        "Employee Last Name",
-        "Job Name",
-        "Business Date",
-        "Start Time",
-        "End Time",
-        "Shift Comments",
-        "Edit Action",
+        'Edit Date',
+        'Employee First Name',
+        'Employee Last Name',
+        'Job Name',
+        'Business Date',
+        'Start Time',
+        'End Time',
+        'Shift Comments',
+        'Edit Action',
       ],
 
       rows: row.subRows.map((subRow) => [
         {
-          value: dateFormat(subRow.editDate, "mm/dd/yyyy hh:MM TT"),
-          columnName: "Edit Date",
+          value: dateFormat(subRow.editDate, 'mm/dd/yyyy hh:MM TT'),
+          columnName: 'Edit Date',
         },
         {
           value: subRow.employeeFirstName,
-          cellType: "string",
-          columnName: "Employee First Name",
+          cellType: 'string',
+          columnName: 'Employee First Name',
         },
         {
           value: subRow.employeeLastName,
-          cellType: "string",
-          columnName: "Employee Last Name",
+          cellType: 'string',
+          columnName: 'Employee Last Name',
         },
         {
           value: subRow.jobName,
-          cellType: "string",
-          columnName: "Job Name",
+          cellType: 'string',
+          columnName: 'Job Name',
         },
         {
           value: subRow.businessDate,
-          cellType: "string",
-          columnName: "Business Date",
+          cellType: 'string',
+          columnName: 'Business Date',
         },
         {
           value: subRow.startTime,
-          cellType: "string",
-          columnName: "Start Time",
+          cellType: 'string',
+          columnName: 'Start Time',
         },
         {
           value: subRow.endTime,
-          cellType: "string",
-          columnName: "End Time",
+          cellType: 'string',
+          columnName: 'End Time',
         },
         {
           value: subRow.detailComments,
-          cellType: "string",
-          columnName: "Shift Comments",
+          cellType: 'string',
+          columnName: 'Shift Comments',
         },
         {
           value: subRow.editAction,
-          cellType: "string",
-          columnName: "Edit Action",
+          cellType: 'string',
+          columnName: 'Edit Action',
         },
       ]),
     };
@@ -556,18 +556,18 @@ const LaborAudit = () => {
   const handleExcelClick = () => {
     const data = [
       {
-        name: "Labor Audit",
+        name: 'Labor Audit',
         columns: [
-          { name: "Version", filterButton: true },
-          { name: "Edit Date", filterButton: true },
-          { name: "Employee First Name", filterButton: true },
-          { name: "Employee Last Name", filterButton: true },
-          { name: "Job Name", filterButton: true },
-          { name: "Business Date", filterButton: true },
-          { name: "Start Time", filterButton: true },
-          { name: "End Time", filterButton: true },
-          { name: "Shift Comments", filterButton: true },
-          { name: "Edit Action", filterButton: true },
+          { name: 'Version', filterButton: true },
+          { name: 'Edit Date', filterButton: true },
+          { name: 'Employee First Name', filterButton: true },
+          { name: 'Employee Last Name', filterButton: true },
+          { name: 'Job Name', filterButton: true },
+          { name: 'Business Date', filterButton: true },
+          { name: 'Start Time', filterButton: true },
+          { name: 'End Time', filterButton: true },
+          { name: 'Shift Comments', filterButton: true },
+          { name: 'Edit Action', filterButton: true },
         ],
         data: laborAuditData.flatMap((row) =>
           row.subRows.map((laborAuditRow) => {
@@ -575,7 +575,7 @@ const LaborAudit = () => {
               editVersion: laborAuditRow.editVersion,
               editDate: dateFormat(
                 laborAuditRow.editDate,
-                "mm/dd/yyyy hh:MM TT"
+                'mm/dd/yyyy hh:MM TT'
               ),
               employeeFirstName: laborAuditRow.employeeFirstName,
               employeeLastName: laborAuditRow.employeeLastName,
@@ -591,7 +591,7 @@ const LaborAudit = () => {
       },
     ];
     const filename = `${selectedUnitName} ${defaultSchedule}`;
-    const spreadSheetTitle = "Labor Audit";
+    const spreadSheetTitle = 'Labor Audit';
     const date = `${defaultSchedule}`;
     exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
   };
@@ -631,7 +631,7 @@ const LaborAudit = () => {
               <Dropdown
                 title='Schedule'
                 options={scheduleOptions}
-                selectedOption={defaultSchedule ? defaultSchedule : "Loading"}
+                selectedOption={defaultSchedule ? defaultSchedule : 'Loading'}
                 onOptionChange={handleScheduleChange}
               />
             </div>
@@ -686,7 +686,7 @@ const LaborAudit = () => {
         />
         <Modal
           isOpen={showCommentModal}
-          title={"Comment"}
+          title={'Comment'}
           onClose={() => {
             setShowCommentModal(!showCommentModal);
           }}
