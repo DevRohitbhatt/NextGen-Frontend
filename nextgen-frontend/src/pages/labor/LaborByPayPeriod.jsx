@@ -4,32 +4,30 @@ import { Steps } from "intro.js-react";
 import { useSelector } from "react-redux";
 import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
 import {
-  Loader,
-  UnitSelector,
-  CalendarModal,
-  UnitModal,
-  ExportOptions,
-  DateSelector,
-  PdfBuilder,
-  ExcelExport as exportToExcel,
-  TableHOC,
-  Dropdown,
+	Loader,
+	UnitSelector,
+	CalendarModal,
+	UnitModal,
+	ExportOptions,
+	DateSelector,
+	PdfBuilder,
+	ExcelExport as exportToExcel,
+	TableHOC,
+	Dropdown,
   Run,
-} from "../../components";
-import { createColumnHelper } from "@tanstack/react-table";
-import dateFormat from "dateformat";
-import laborByPayPeriod from "../../assets/introJSSteps/laborByPayPeriod";
-import { formattingData } from "../../functions/formatingCurrency";
+} from '../../components';
+import { createColumnHelper } from '@tanstack/react-table';
+import dateFormat from 'dateformat';
+import laborByPayPeriod from '../../assets/introJSSteps/laborByPayPeriod';
+import { formattingData } from '../../functions/formatingCurrency';
 
 const tooltips = {
-  employeeID:
-    "Refers to the ID assigned to the employee. Originates from the POS employee information.",
-  jobCode: "The job code used when clocking into the POS.",
-  rate: "The payrate associated with the job code used when clocking into the POS.",
-  declaredTips:
-    "Includes credit card tips and declared cash tips entered in the POS.",
-  tipsPercent: "Declared Tips / Pre-Tax Ticket Sales = Tip %",
-  direction: "above",
+	employeeID: 'Refers to the ID assigned to the employee. Originates from the POS employee information.',
+	jobCode: 'The job code used when clocking into the POS.',
+	rate: 'The payrate associated with the job code used when clocking into the POS.',
+	declaredTips: 'Includes credit card tips and declared cash tips entered in the POS.',
+	tipsPercent: 'Declared Tips / Pre-Tax Ticket Sales = Tip %',
+	direction: 'above',
 };
 
 const columnHelper = createColumnHelper();
@@ -100,156 +98,146 @@ const LaborByPayPeriod = () => {
     }
   };
 
-  const columns = useMemo(
-    () => [
-      columnHelper.display({
-        id: "actions",
-        cell: ({ row }) =>
-          row.getCanExpand() ? (
-            <div
-              {...{
-                style: {
-                  cursor: "pointer",
-                  paddingLeft: `${row.depth * 2}rem`,
-                },
-                className: "inline-block",
-              }}
-            >
-              {row.getIsExpanded() ? (
-                <CiSquareMinus className='text-[20px]' />
-              ) : (
-                <CiSquarePlus className='text-[20px]' />
-              )}
-            </div>
-          ) : null,
-        size: "80",
-      }),
-      columnHelper.accessor("unitName", {
-        id: "unitName",
-        header: <div className='w-full text-left'>Unit Name</div>,
-        dataType: "string",
-        cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
-        size: 300,
-      }),
-      columnHelper.accessor("employeeId", {
-        id: "employeeId",
-        header: "Employee ID",
-        dataType: "number",
-        size: 120,
-        tooltip: tooltips.employeeID,
-      }),
-      columnHelper.accessor(
-        (row) =>
-          row.firstName && row.lastName
-            ? `${row.firstName} ${row.lastName}`
-            : "",
-        {
-          id: "fullName",
-          header: (
-            <div className='w-full text-left bg-transparent'>Full Name</div>
-          ),
-          cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
-          dataType: "string",
-        }
-      ),
-      columnHelper.accessor("date", {
-        id: "date",
-        header: "Date",
-        cell: ({ getValue }) => {
-          if (!getValue()) return "";
-          const date = new Date(getValue());
-          const formattedDate = `${
-            date.getMonth() + 1
-          }-${date.getDate()}-${date.getFullYear()}`;
-          return formattedDate;
-        },
-        dataType: "date",
-        size: 100,
-      }),
-      columnHelper.accessor("jobCode", {
-        id: "jobCode",
-        header: "Job Code",
-        dataType: "number",
-        size: 100,
-        cell: ({ row, getValue }) => {
-          if (row.getCanExpand()) {
-            const value = row.subRows.map((subrow) => subrow.original.jobCode);
-            return value[0];
-          } else {
-            return getValue();
-          }
-        },
-        tooltip: tooltips.jobCode,
-      }),
-      columnHelper.accessor("regHours", {
-        id: "regHours",
-        header: "Regular Hours",
-        dataType: "number",
-        size: 140,
-        cell: ({ row }) => {
-          let regHours = calculateSum(row, "regHours");
-          regHours = parseFloat(regHours).toFixed(2);
-          return regHours;
-        },
-      }),
-      columnHelper.accessor("overHours", {
-        id: "overHours",
-        header: "Overtime Hours",
-        cell: ({ row }) => calculateSum(row, "overHours"),
-        dataType: "number",
-        size: 140,
-      }),
-      columnHelper.accessor("rate", {
-        id: "rate",
-        header: "Rate",
-        dataType: "number",
-        size: 60,
-        tooltip: tooltips.rate,
-      }),
-      columnHelper.accessor("declaredTips", {
-        id: "declaredTips",
-        header: "Declared Tips",
-        dataType: "number",
-        size: 120,
-        tooltip: tooltips.declaredTips,
-      }),
-      columnHelper.accessor("preTaxTicketSales", {
-        id: "preTaxTicketSales",
-        header: "Pre-Tax Ticket Sales",
-        cell: ({ row }) => {
-          let preTaxTicketSalesCalculate = calculateSum(
-            row,
-            "preTaxTicketSales"
-          );
-          preTaxTicketSalesCalculate = formattingData(
-            parseFloat(preTaxTicketSalesCalculate)
-          );
+	const columns = useMemo(
+		() => [
+			columnHelper.display({
+				id: 'actions',
+				cell: ({ row }) =>
+					row.getCanExpand() ? (
+						<div
+							{...{
+								style: {
+									cursor: 'pointer',
+									paddingLeft: `${row.depth * 2}rem`,
+								},
+								className: 'inline-block',
+							}}
+						>
+							{row.getIsExpanded() ? (
+								<CiSquareMinus className='text-[20px]' />
+							) : (
+								<CiSquarePlus className='text-[20px]' />
+							)}
+						</div>
+					) : null,
+				size: '80',
+			}),
+			columnHelper.accessor('unitName', {
+				id: 'unitName',
+				header: <div className='w-full text-left'>Unit Name</div>,
+				dataType: 'string',
+				cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
+				size: 300,
+			}),
+			columnHelper.accessor('employeeId', {
+				id: 'employeeId',
+				header: 'Employee ID',
+				dataType: 'number',
+				size: 120,
+				tooltip: tooltips.employeeID,
+			}),
+			columnHelper.accessor((row) => (row.firstName && row.lastName ? `${row.firstName} ${row.lastName}` : ''), {
+				id: 'fullName',
+				header: <div className='w-full text-left bg-transparent'>Full Name</div>,
+				cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
+				dataType: 'string',
+			}),
+			columnHelper.accessor('date', {
+				id: 'date',
+				header: 'Date',
+				cell: ({ getValue }) => {
+					if (!getValue()) return '';
+					const date = new Date(getValue());
+					const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+					return formattedDate;
+				},
+				dataType: 'date',
+				size: 100,
+			}),
+			columnHelper.accessor('jobCode', {
+				id: 'jobCode',
+				header: 'Job Code',
+				dataType: 'number',
+				size: 100,
+				cell: ({ row, getValue }) => {
+					if (row.getCanExpand()) {
+						const value = row.subRows.map((subrow) => subrow.original.jobCode);
+						return value[0];
+					} else {
+						return getValue();
+					}
+				},
+				tooltip: tooltips.jobCode,
+			}),
+			columnHelper.accessor('jobDesc', {
+				id: 'jobDesc',
+				header: 'Job Description',
+				dataType: 'string',
+				size: 140,
+			}),
+			columnHelper.accessor('regHours', {
+				id: 'regHours',
+				header: 'Regular Hours',
+				dataType: 'number',
+				size: 140,
+				cell: ({ row }) => {
+					let regHours = calculateSum(row, 'regHours');
+					regHours = parseFloat(regHours).toFixed(2);
+					return regHours;
+				},
+			}),
+			columnHelper.accessor('overHours', {
+				id: 'overHours',
+				header: 'Overtime Hours',
+				cell: ({ row }) => calculateSum(row, 'overHours'),
+				dataType: 'number',
+				size: 140,
+			}),
+			columnHelper.accessor('rate', {
+				id: 'rate',
+				header: 'Rate',
+				dataType: 'number',
+				cell: ({ getValue, row }) => (row.getCanExpand() ? '' : formattingData(getValue())),
+				size: 60,
+				tooltip: tooltips.rate,
+			}),
+			columnHelper.accessor('declaredTips', {
+				id: 'declaredTips',
+				header: 'Declared Tips',
+				dataType: 'number',
+				size: 120,
+				tooltip: tooltips.declaredTips,
+			}),
+			columnHelper.accessor('preTaxTicketSales', {
+				id: 'preTaxTicketSales',
+				header: 'Pre-Tax Ticket Sales',
+				cell: ({ row }) => {
+					let preTaxTicketSalesCalculate = calculateSum(row, 'preTaxTicketSales');
+					preTaxTicketSalesCalculate = formattingData(parseFloat(preTaxTicketSalesCalculate));
 
-          return `${preTaxTicketSalesCalculate.toLocaleString("en-US")}`;
-        },
-        dataType: "number",
-        size: 160,
-      }),
-      columnHelper.accessor("declaredTipsPct", {
-        id: "declaredTipsPct",
-        header: "Tips %",
-        size: 80,
-        cell: ({ row }) =>
-          parseFloat(calculateSum(row, "declaredTipsPct")).toFixed(2) + "%",
-        dataType: "number",
-        tooltip: tooltips.tipsPercent,
-      }),
-      columnHelper.accessor("pay", {
-        id: "pay",
-        header: "Total Pay",
-        size: 120,
-        cell: ({ row }) =>
-          `${formattingData(parseFloat(calculateSum(row, "pay")))}`,
-        dataType: "number",
-      }),
-    ],
-    []
-  );
+					return `${preTaxTicketSalesCalculate.toLocaleString('en-US')}`;
+				},
+				dataType: 'number',
+				size: 160,
+			}),
+			columnHelper.accessor('declaredTipsPct', {
+				id: 'declaredTipsPct',
+				header: 'Tips %',
+				size: 80,
+				cell: ({ row }) => parseFloat(calculateSum(row, 'declaredTipsPct')).toFixed(2) + '%',
+				dataType: 'number',
+				tooltip: tooltips.tipsPercent,
+			}),
+			columnHelper.accessor('pay', {
+				id: 'pay',
+				header: 'Total Pay',
+				size: 120,
+				cell: ({ row }) => `${formattingData(parseFloat(calculateSum(row, 'pay')))}`,
+				dataType: 'number',
+			}),
+		],
+		[]
+	);
 
   useEffect(() => {
     if (defaultUnitID) {
@@ -302,28 +290,30 @@ const LaborByPayPeriod = () => {
         },
       };
 
-      const result = await getCall(getData);
-      const newData = result.data.map((unit) => ({
-        unitName: unit.unitName, // Keep unitName only at this level
-        subRows: unit.employeeLaborModels.map((employee) => ({
-          firstName: employee.firstName,
-          lastName: employee.lastName,
-          employeeId: employee.laborByPayPeriods[0]?.employeeId || null, // Employee ID at this level,
-          subRows: employee.laborByPayPeriods.map((period) => ({
-            date: period.date,
-            jobCode: period.jobCode,
-            jobDesc: period.jobDesc,
-            regHours: period.regHours,
-            overHours: period.overHours,
-            rate: period.rate,
-            declaredTips: period.declaredTips,
-            preTaxTicketSales: period.preTaxTicketSales,
-            declaredTipsPct: period.declaredTipsPct,
-            regPay: period.regPay,
-            pay: period.pay,
-          })),
-        })),
-      }));
+			const result = await getCall(getData);
+			const newData = result.data.map((unit) => ({
+				unitName: unit.unitName,
+				subRows: unit.employeeLaborModels
+					.map((employee) => ({
+						firstName: employee.firstName,
+						lastName: employee.lastName,
+						employeeId: employee.laborByPayPeriods[0]?.employeeId || null,
+						subRows: employee.laborByPayPeriods.map((period) => ({
+							date: period.date,
+							jobCode: period.jobCode,
+							jobDesc: period.jobDesc,
+							regHours: period.regHours,
+							overHours: period.overHours,
+							rate: period.rate,
+							declaredTips: period.declaredTips,
+							preTaxTicketSales: period.preTaxTicketSales,
+							declaredTipsPct: period.declaredTipsPct,
+							regPay: period.regPay,
+							pay: period.pay,
+						})),
+					}))
+					.sort((a, b) => a.firstName.localeCompare(b.firstName)),
+			}));
 
       setLaborByPayPeriodData(newData);
       setIsLoading(false);
