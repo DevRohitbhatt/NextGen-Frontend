@@ -288,24 +288,26 @@ const LaborByPayPeriod = () => {
 			const result = await getCall(getData);
 			const newData = result.data.map((unit) => ({
 				unitName: unit.unitName, // Keep unitName only at this level
-				subRows: unit.employeeLaborModels.map((employee) => ({
-					firstName: employee.firstName,
-					lastName: employee.lastName,
-					employeeId: employee.laborByPayPeriods[0]?.employeeId || null, // Employee ID at this level,
-					subRows: employee.laborByPayPeriods.map((period) => ({
-						date: period.date,
-						jobCode: period.jobCode,
-						jobDesc: period.jobDesc,
-						regHours: period.regHours,
-						overHours: period.overHours,
-						rate: period.rate,
-						declaredTips: period.declaredTips,
-						preTaxTicketSales: period.preTaxTicketSales,
-						declaredTipsPct: period.declaredTipsPct,
-						regPay: period.regPay,
-						pay: period.pay,
-					})),
-				})),
+				subRows: unit.employeeLaborModels
+					.map((employee) => ({
+						firstName: employee.firstName,
+						lastName: employee.lastName,
+						employeeId: employee.laborByPayPeriods[0]?.employeeId || null, // Employee ID at this level,
+						subRows: employee.laborByPayPeriods.map((period) => ({
+							date: period.date,
+							jobCode: period.jobCode,
+							jobDesc: period.jobDesc,
+							regHours: period.regHours,
+							overHours: period.overHours,
+							rate: period.rate,
+							declaredTips: period.declaredTips,
+							preTaxTicketSales: period.preTaxTicketSales,
+							declaredTipsPct: period.declaredTipsPct,
+							regPay: period.regPay,
+							pay: period.pay,
+						})),
+					}))
+					.sort((a, b) => a.firstName.localeCompare(b.firstName)),
 			}));
 
 			setLaborByPayPeriodData(newData);
