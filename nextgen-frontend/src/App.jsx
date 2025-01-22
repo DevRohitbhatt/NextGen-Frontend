@@ -39,7 +39,8 @@ import {
 	ManagementSalesCoverage,
 	CookChart,
 	CookChartTemplate,
-	SalesSummary
+	SalesSummary,
+	LaborAudit
 } from './pages';
 import { Suspense } from 'react';
 
@@ -162,6 +163,7 @@ const App = () => {
 								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
 								<Route path='/ManagementSalesCoverage' element={<ManagementSalesCoverage />} />
 								<Route path='/SalesSummary' element={<SalesSummary />} />
+								<Route path='/LaborAudit' element={<LaborAudit/>}/>
 								
 							</Routes>
 						</Suspense>
