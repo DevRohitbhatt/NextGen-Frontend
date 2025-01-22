@@ -61,7 +61,9 @@ const urlConfig = {
 	GetVarianceFoodCostPopupReportData: '/api/foodcost/GetVarianceFoodCostPopupReportData',
 	getGrossProfitCategoryItems: '/api/sales/GetGrossProfitCategoryItems',
 	getShowHideDepartments: '/api/foodcost/GetActualFoodCostShowHideDepartment',
-  getVendorItems: '/api/foodcost/getVendorItems',
+	getVendorItems: '/api/foodcost/getVendorItems',
+	getLaborJobType: 'api/labor/getLaborJobType',
+	getMgmtSalesCoverage: 'api/labor/getManagementSalesCoverage',
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',

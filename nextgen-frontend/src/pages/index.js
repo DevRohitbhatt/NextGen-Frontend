@@ -34,6 +34,7 @@ const LaborCICO = lazy(() => import('./labor/LaborCICO'));
 const LaborCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
 const LaborAnalysis = lazy(() => import('./labor/LaborAnalysis'));
 const LaborAudit = lazy(() =>import('./labor/LaborAudit'));
+const ManagementSalesCoverage = lazy(() => import('./labor/ManagementSalesCoverage'));
 
 export {
 	PrepChart,
@@ -62,6 +63,7 @@ export {
 	CountsheetDesigner,
 	PurchaseAnalysis,
 	LaborAnalysis,
+	ManagementSalesCoverage,
 	CookChart,
 	CookChartTemplate,
 	SalesSummary,

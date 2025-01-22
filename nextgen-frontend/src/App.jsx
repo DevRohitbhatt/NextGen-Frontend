@@ -36,6 +36,7 @@ import {
 	PurchaseAnalysis,
 	MenuItemsSold,
 	LaborAnalysis,
+	ManagementSalesCoverage,
 	CookChart,
 	CookChartTemplate,
 	SalesSummary,
@@ -160,6 +161,7 @@ const App = () => {
 								<Route path='/LaborCICOExceptions' element={<LaborCICOExceptions />} />
 								<Route path='/LaborCICO' element={<LaborCICO />} />
 								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
+								<Route path='/ManagementSalesCoverage' element={<ManagementSalesCoverage />} />
 								<Route path='/SalesSummary' element={<SalesSummary />} />
 								<Route path='/LaborAudit' element={<LaborAudit/>}/>
 								
