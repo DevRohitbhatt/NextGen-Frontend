@@ -26,7 +26,7 @@ const MenuItemsSold = lazy(() => import('./sales/MenuItemSold/MenuItemsSold'));
 const SalesVsLabor = lazy(() => import('./sales/SalesVsLabor'));
 const BusinessSummary = lazy(() => import('./sales/BusinessSummary'));
 const MenuGrossProfit = lazy(() => import('./sales/MenuGrossProfit'));
-
+const SalesSummary = lazy(() => import('./sales/SalesSummary'));
 // Labor Pages
 const EmployeeInformation = lazy(() => import('./labor/EmployeeInformation'));
 const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
@@ -64,5 +64,6 @@ export {
 	LaborAnalysis,
 	CookChart,
 	CookChartTemplate,
+	SalesSummary,
 	LaborAudit
 };

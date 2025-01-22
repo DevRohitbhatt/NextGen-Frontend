@@ -6,17 +6,17 @@ import React, {
 } from "react";
 
 const CookDropTableHeader = ({ headerData }) => {
-  const headers = headerData && headerData.length > 0 ? headerData : [];
+  const headers = headerData || [];
 
   return (
     <thead className="bg-white sticky top-0 z-10">
       <tr className="z-10">
         {headers.length > 0 &&
           headers.map((header, index) => (
-            <>
+            <div className="contents"  key={header + index + ""}>
               {index === 0 && (
                 <th
-                  key={header + index + ""}
+                 
                   className="main-header first-header text-nowrap lg:px-[20px] px-2 bg-gray-300 rounded-tl-[10px] sticky left-0 z-10 shadow-[0_-1px_0_var(--tw-primary)_inset]"
                   rowSpan="2"
                 >
@@ -31,25 +31,25 @@ const CookDropTableHeader = ({ headerData }) => {
                         </th>
                       </tr>
                       <tr>
-                        <th className="text-[11px]">Unit</th>
+                        <th className="text-[11px] mt-[5px]">Unit</th>
                       </tr>
                       <tr>
-                        <th className="text-[11px]">Safety Factor</th>
+                        <th className="text-[11px] mb-[5px] mt-[3px]">Safety Factor</th>
                       </tr>
-                      {/* <tr>
-                                        <th >Mix</th>
-                                    </tr> */}
+                     
                     </thead>
                   </table>
                 </th>
+
               )}
               <th
-                key={index}
-                className="p-2 font-semibold text-center text-nowrap shadow-[0_-1px_0_var(--tw-primary)_inset] text-[11px]"
-              >
-                {header.itemName}
-              </th>
-            </>
+              key={index}
+              className="p-2 font-semibold text-center text-nowrap shadow-[0_-1px_0_var(--tw-primary)_inset] text-[11px] "
+            >
+              {header.itemName}
+            </th> 
+              
+            </div>
           ))}
       </tr>
       <tr>
@@ -61,19 +61,19 @@ const CookDropTableHeader = ({ headerData }) => {
             <div className="p-0 text-[11px] font-medium  font-semibold text-center text-nowrap indent-0  align-middle ">
               {header?.unitOfMeasure ? header?.unitOfMeasure : ""}
             </div>
-            <div className="text-[11px]  font-medium  p-0  text-center text-nowrap indent-0  align-middle">
+            <div className="text-[11px] mt-[3px] font-medium  p-0  text-center text-nowrap indent-0  align-middle">
               {header?.safetyFactor ? header?.safetyFactor : ""}%
             </div>
-            {/* <div className='text-[14px] font-medium p-0  text-center text-nowrap indent-0  align-middle'>{header?.mix ? header?.mix : ""}%</div> */}
+     
           </th>
         ))}
       </tr>
       <tr>
         {headers.map((header, index) => (
-          <>
+          <div className="contents" key={index+"wrap"}>
             {index === 0 && (
               <th
-                key={index}
+                
                 className="p-2 text-center   bg-gray-300 text-nowrap sticky left-0 shadow-[0_-1px_0_var(--tw-primary)_inset]"
               >
                 {index === 0 && (
@@ -92,7 +92,7 @@ const CookDropTableHeader = ({ headerData }) => {
                 Need / Have / Cook
               </div>
             </th>
-          </>
+          </div>
         ))}
       </tr>
     </thead>
@@ -218,14 +218,18 @@ const CookDropTableFooter = ({ rows }) => {
         {/* Column totals */}
 
         {columnTotals.map((total, index) => (
-          <>
-            <td
-              key={index}
-              className=" lg:px-4 lg:py-2 shadow-[0_-1px_0_var(--tw-primary)_inset]  text-center font-bold text-[11px]"
-            >
-              <div className="flex justify-center space-x-1"><span className="w-8 text-center text-[11px]">{total}</span> <span className="w-[5px]"></span><span className="w-8 text-center text-[11px]"> </span><span className="w-[5px]"></span><span className="w-8 text-center text-[11px]"></span></div>
-            </td>
-          </>
+          <td
+            key={index}
+            className=" lg:px-4 lg:py-2 shadow-[0_-1px_0_var(--tw-primary)_inset]  text-center font-bold text-[11px]"
+          >
+            <div className="flex justify-center space-x-1">
+              <span className="w-8 text-center text-[11px]">{total}</span>{" "}
+              <span className="w-[5px]"></span>
+              <span className="w-8 text-center text-[11px]"> </span>
+              <span className="w-[5px]"></span>
+              <span className="w-8 text-center text-[11px]"></span>
+            </div>
+          </td>
         ))}
       </tr>
     </tfoot>

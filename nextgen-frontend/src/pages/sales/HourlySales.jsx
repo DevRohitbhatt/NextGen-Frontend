@@ -4,21 +4,21 @@ import { Steps } from "intro.js-react";
 import { useSelector } from "react-redux";
 import hourlySales from "../../assets/introJSSteps/hourlySales";
 import {
-  Dropdown,
-  Loader,
-  UnitSelector,
-  CalendarModal,
-  UnitModal,
-  ExportOptions,
-  DateSelector,
-  PdfBuilder,
-  ExcelExport as exportToExcel,
-  TableHOC,
+	Dropdown,
+	Loader,
+	UnitSelector,
+	CalendarModal,
+	UnitModal,
+	ExportOptions,
+	DateSelector,
+	PdfBuilder,
+	ExcelExport as exportToExcel,
+	TableHOC,
   Run,
-} from "../../components";
-import { createColumnHelper } from "@tanstack/react-table";
-import dateFormat from "dateformat";
-import { formattingData } from "../../functions/formatingCurrency";
+} from '../../components';
+import { createColumnHelper } from '@tanstack/react-table';
+import dateFormat from 'dateformat';
+import { formattingData, formattingDataWithoutDollr } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -300,108 +300,98 @@ const HourlySales = () => {
             ]
           : []),
 
-        columnHelper.accessor("Total", {
-          id: "Total",
-          header: "Total",
-          pinDirection: "left",
-          cell: ({ getValue }) => formattingData(parseFloat(getValue())),
-          size: 100,
-          footer: ({ table }) =>
-            reportType === "Unit, Hour and Day" ? null : (
-              <div className='text-center'>
-                {`${formattingData(
-                  parseFloat(
-                    table
-                      .getRowModel()
-                      .rows.reduce((acc, row) => acc + row.original.Total, 0)
-                      .toFixed(2)
-                  )
-                )}`}
-              </div>
-            ),
-        }),
-        ...(reportType === "Hour and Day"
-          ? [
-              columnHelper.accessor("Avg", {
-                id: "Avg",
-                header: "Avg",
-                pinDirection: "left",
-                cell: ({ getValue }) =>
-                  getValue() !== 0
-                    ? formattingData(parseFloat(getValue()))
-                    : "$0.00",
-                size: 100,
-                footer: ({ table }) => (
-                  <div className='text-center'>
-                    {`${formattingData(
-                      parseFloat(
-                        table
-                          .getRowModel()
-                          .rows.reduce((acc, row) => acc + row.original.Avg, 0)
-                      )
-                    )}`}
-                  </div>
-                ),
-              }),
-            ]
-          : []),
-        ...Object.keys(newData[0] || {})
-          .filter(
-            (key) =>
-              ![
-                "UnitID",
-                "UnitName",
-                "Date",
-                "Total",
-                "HoursSales",
-                "Hour",
-                "Avg",
-                "Mins",
-              ].includes(key)
-          )
-          .filter((key) =>
-            reportType !== "Hour and Day"
-              ? key.startsWith("Hour") || key.startsWith("SalesYN")
-              : !null
-          ) // Filter hour and SalesYN keys
-          .map((item) =>
-            columnHelper.accessor(item, {
-              id: item,
-              header: item.startsWith("SalesYN")
-                ? `Sales YN${item.replace("SalesYN", "")}`
-                : item.startsWith("Hour")
-                ? hourLabels[parseInt(item.replace("Hour", ""), 10)]
-                : /\d{2}\/\d{2}\/\d{4}/.test(item)
-                ? item.replace(/\//g, "-")
-                : item,
-              dataType: "number",
-              size: 120,
-              cell: ({ getValue }) =>
-                getValue() === null
-                  ? 0
-                  : getValue() === "00"
-                  ? 0
-                  : formattingData(parseFloat(getValue())),
-              footer: ({ table }) =>
-                reportType !== "Hour and Day" ? null : item === "" ? (
-                  ""
-                ) : (
-                  <div className='text-center'>
-                    {`${salesType !== "Transaction" ? "" : ""} ${formattingData(
-                      parseFloat(
-                        table
-                          .getRowModel()
-                          .rows.reduce(
-                            (acc, row) => acc + row.original[item],
-                            0
-                          )
-                      )
-                    )}`}
-                  </div>
-                ),
-            })
-          ),
-      ];
+				columnHelper.accessor('Total', {
+					id: 'Total',
+					header: 'Total',
+					pinDirection: 'left',
+					cell: ({ getValue }) => (
+						salesType === 'Transaction' ? formattingDataWithoutDollr(parseFloat(getValue())) : formattingData(parseFloat(getValue()))
+					),
+					size: 100,
+					footer: ({ table }) =>
+						reportType === 'Unit, Hour and Day' ? null : (
+							<div className='text-center'>
+								{`${
+									salesType === 'Transaction' ?
+										formattingDataWithoutDollr(parseFloat((table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original.Total, 0))))
+										:
+										formattingData(parseFloat((table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original.Total, 0))))
+								}`}
+							</div>
+						),
+				}),
+				...(reportType === 'Hour and Day'
+					? [
+							columnHelper.accessor('Avg', {
+								id: 'Avg',
+								header: 'Avg',
+								pinDirection: 'left',
+								cell: ({ getValue }) => (
+									salesType === 'Transaction' ? formattingDataWithoutDollr(parseFloat(getValue())) : formattingData(parseFloat(getValue()))
+								),
+								size: 100,
+								footer: ({ table }) => (
+									<div className='text-center'>
+										{`${
+											salesType === 'Transaction' ?
+												formattingDataWithoutDollr(parseFloat((table
+													.getRowModel()
+													.rows.reduce((acc, row) => acc + row.original.Avg, 0))))
+												:
+												formattingData(parseFloat((table
+													.getRowModel()
+													.rows.reduce((acc, row) => acc + row.original.Avg, 0))))
+										}`}
+									</div>
+								),
+							}),
+					  ]
+					: []),
+				...Object.keys(newData[0] || {})
+					.filter(
+						(key) =>
+							!['UnitID', 'UnitName', 'Date', 'Total', 'HoursSales', 'Hour', 'Avg', 'Mins'].includes(key)
+					)
+					.filter((key) =>
+						reportType !== 'Hour and Day' ? key.startsWith('Hour') || key.startsWith('SalesYN') : !null
+					) // Filter hour and SalesYN keys
+					.map((item) =>
+						columnHelper.accessor(item, {
+							id: item,
+							header: item.startsWith('SalesYN')
+								? `Sales YN${item.replace('SalesYN', '')}`
+								: item.startsWith('Hour')
+								? hourLabels[parseInt(item.replace('Hour', ''), 10)]
+								: /\d{2}\/\d{2}\/\d{4}/.test(item)
+								? item.replace(/\//g, '-')
+								: item,
+							dataType: 'number',
+							size: 120,
+							cell: ({ getValue }) =>
+								getValue() === null
+									? 0
+									: getValue() === '00'
+									? 0
+									: salesType === 'Transaction' ? formattingDataWithoutDollr(parseFloat((getValue()))) : formattingData(parseFloat((getValue()))),
+							footer: ({ table }) =>
+								reportType !== 'Hour and Day' ? null : item === '' ? (
+									''
+								) : (
+									<div className='text-center'>
+										{`${salesType === 'Transaction' ? '' : ''} ${ salesType === 'Transaction'  ? formattingDataWithoutDollr(parseFloat((table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original[item], 0)))) :formattingData(parseFloat((table
+											.getRowModel()
+											.rows.reduce((acc, row) => acc + row.original[item], 0))))}`}
+									</div>
+								),
+						})
+					),
+			];
 
       setColumns(generatedColumns);
       setHourlySalesData(newData);
