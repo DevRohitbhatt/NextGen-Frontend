@@ -287,12 +287,12 @@ const LaborByPayPeriod = () => {
 
 			const result = await getCall(getData);
 			const newData = result.data.map((unit) => ({
-				unitName: unit.unitName, // Keep unitName only at this level
+				unitName: unit.unitName,
 				subRows: unit.employeeLaborModels
 					.map((employee) => ({
 						firstName: employee.firstName,
 						lastName: employee.lastName,
-						employeeId: employee.laborByPayPeriods[0]?.employeeId || null, // Employee ID at this level,
+						employeeId: employee.laborByPayPeriods[0]?.employeeId || null,
 						subRows: employee.laborByPayPeriods.map((period) => ({
 							date: period.date,
 							jobCode: period.jobCode,
