@@ -4,21 +4,22 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
-	Loader,
-	UnitSelector,
-	CalendarModal,
-	UnitModal,
-	ExportOptions,
-	DateSelector,
-	PdfBuilder,
-	ExcelExport as exportToExcel,
-	TableHOC,
-	Dropdown,
-} from '../../components';
-import { createColumnHelper } from '@tanstack/react-table';
-import dateFormat from 'dateformat';
-import laborCICOExceptions from '../../assets/introJSSteps/laborCICOExceptions';
-import { formattingData } from '../../functions/formatingCurrency';
+  Loader,
+  UnitSelector,
+  CalendarModal,
+  UnitModal,
+  ExportOptions,
+  DateSelector,
+  PdfBuilder,
+  ExcelExport as exportToExcel,
+  TableHOC,
+  Dropdown,
+  Run,
+} from "../../components";
+import { createColumnHelper } from "@tanstack/react-table";
+import dateFormat from "dateformat";
+import laborCICOExceptions from "../../assets/introJSSteps/laborCICOExceptions";
+import { formattingData } from "../../functions/formatingCurrency";
 
 const tooltips = {
 	jobDescription:
@@ -465,11 +466,7 @@ const LaborCICOExceptions = () => {
 								onOptionChange={handleGroupByChange}
 							/>
 						</div>
-						<div className='run-button' onClick={fetchLaborCICOExceptionsData}>
-							<div className='py-2 ml-2 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
-								Run
-							</div>
-						</div>
+            <Run fetchData={fetchLaborCICOExceptionsData} />
 					</div>
 					<div>
 						<ExportOptions

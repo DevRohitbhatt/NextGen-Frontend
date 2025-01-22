@@ -33,6 +33,7 @@ const LaborByPayPeriod = lazy(() => import('./labor/LaborByPayPeriod'));
 const LaborCICO = lazy(() => import('./labor/LaborCICO'));
 const LaborCICOExceptions = lazy(() => import('./labor/LaborCICOExceptions'));
 const LaborAnalysis = lazy(() => import('./labor/LaborAnalysis'));
+const LaborAudit = lazy(() =>import('./labor/LaborAudit'));
 
 export {
 	PrepChart,
@@ -63,5 +64,6 @@ export {
 	LaborAnalysis,
 	CookChart,
 	CookChartTemplate,
-	SalesSummary
+	SalesSummary,
+	LaborAudit
 };

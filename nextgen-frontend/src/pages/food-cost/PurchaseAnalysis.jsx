@@ -16,6 +16,7 @@ import {
   VendorSelector,
   VendorModal,
   Dropdown,
+  Run,
 } from "../../components";
 import { createColumnHelper } from "@tanstack/react-table";
 import PurchaseAnalysi from "../../assets/introJSSteps/PurchaseAnalysis";
@@ -25,9 +26,10 @@ import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
 import { formattingData } from "../../functions/formatingCurrency";
 
 const tooltips = {
-	glCode: "Accounting code assigned to the vendor item. \n\nNOTE: GL Codes only populate for Accounting Automation customers.",	
-	direction: "above",
-  };
+  glCode:
+    "Accounting code assigned to the vendor item. \n\nNOTE: GL Codes only populate for Accounting Automation customers.",
+  direction: "above",
+};
 
 const columnHelper = createColumnHelper();
 
@@ -134,7 +136,8 @@ const PurchaseAnalysis = () => {
       columnHelper.accessor("totalAmountIncludingTax", {
         id: "totalAmountIncludingTax",
         header: "Invoice Total",
-        cell: ({ getValue }) => (getValue() ? `${formattingData(getValue())}` : ""),
+        cell: ({ getValue }) =>
+          getValue() ? `${formattingData(getValue())}` : "",
         filterFn: "weakEquals",
         dataType: "number",
         size: 120,
@@ -145,7 +148,7 @@ const PurchaseAnalysis = () => {
         dataType: "string",
         filterFn: "arrIncludesSome",
         size: 200,
-        tooltip: tooltips.glCode
+        tooltip: tooltips.glCode,
       }),
       columnHelper.accessor("vendorItemDescription", {
         id: "vendorItemDescription",
@@ -158,13 +161,13 @@ const PurchaseAnalysis = () => {
         id: "quantity",
         header: "Item Quantity",
         cell: ({ getValue }) => (
-          <div className="text-center">{getValue() ?? 0}</div>
+          <div className='text-center'>{getValue() ?? 0}</div>
         ),
         dataType: "number",
         filterFn: "weakEquals",
         size: 100,
         footer: ({ table }) => (
-          <div className="font-bold text-center">
+          <div className='font-bold text-center'>
             {parseInt(
               table
                 .getFilteredRowModel()
@@ -196,15 +199,14 @@ const PurchaseAnalysis = () => {
         header: "Item Total",
         cell: ({ getValue }) =>
           getValue() ? `$${getValue().toFixed(2)}` : "$0.00",
-        footer: ({ table }) =>{
-          let totalAmount = table.getFilteredRowModel().rows.reduce((acc, row) => acc + row.original.extPrice, 0)
+        footer: ({ table }) => {
+          let totalAmount = table
+            .getFilteredRowModel()
+            .rows.reduce((acc, row) => acc + row.original.extPrice, 0);
           totalAmount = formattingData(totalAmount);
-          
-           return(
-          <div className="font-bold text-start">
-            {totalAmount}
-          </div>
-        )},
+
+          return <div className='font-bold text-start'>{totalAmount}</div>;
+        },
         dataType: "number",
         filterFn: "weakEquals",
         size: 100,
@@ -333,10 +335,13 @@ const PurchaseAnalysis = () => {
   };
 
   useEffect(() => {
-		// check if window.location.search does not have a from date and to date
-		if (!window.location.search.includes("fromDate") && !window.location.search.includes("toDate")) {
+    // check if window.location.search does not have a from date and to date
+    if (
+      !window.location.search.includes("fromDate") &&
+      !window.location.search.includes("toDate")
+    ) {
       getDefaultDates();
-		}
+    }
   }, [selectedCompany]);
 
   const fetchData = async (companyId) => {
@@ -488,9 +493,9 @@ const PurchaseAnalysis = () => {
                 }}
               >
                 {row.getIsExpanded() ? (
-                  <CiSquareMinus className="text-[20px]" />
+                  <CiSquareMinus className='text-[20px]' />
                 ) : (
-                  <CiSquarePlus className="text-[20px]" />
+                  <CiSquarePlus className='text-[20px]' />
                 )}
                 {label}
               </div>
@@ -601,25 +606,25 @@ const PurchaseAnalysis = () => {
       isFooter={true}
       expandCollapseButtons={selectedGroupBy !== "None" ? true : false}
       enableColumnFilters={true}
-      headerPosition="flex-start"
-      dataPosition="text-start"
+      headerPosition='flex-start'
+      dataPosition='text-start'
     />
   );
 
   return (
     <>
-      <div className="w-[98%] mx-auto pageContainer">
+      <div className='w-[98%] mx-auto pageContainer'>
         <Steps
           enabled={introSteps.stepsEnabled}
           steps={introSteps.steps}
           initialStep={introSteps.initialStep}
           onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
         />
-        <h2 className="my-2 text-[18px] leading-tight text-left pageTitle">
+        <h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>
           Purchase Analysis
         </h2>
-        <header className="optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]">
-          <div className="flex items-center">
+        <header className='optionsBar flex justify-between items-center mb-2 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+          <div className='flex items-center'>
             <UnitSelector
               companyID={selectedCompany}
               alignmentID={selectedAlignment}
@@ -642,22 +647,15 @@ const PurchaseAnalysis = () => {
               setVendorName={setSelectedVendorName}
               onClick={() => setVendorShowModal(true)}
             />
-            <div className="min-w-56">
+            <div className='min-w-56'>
               <Dropdown
-                title="Group By"
+                title='Group By'
                 selectedOption={selectedGroupBy}
                 options={groupByOptions}
                 onOptionChange={handleGroupByChange}
               />
             </div>
-            <div
-              className="run-button"
-              onClick={() => fetchPurchaseAnalysisReport()}
-            >
-              <div className="py-2 ml-3 text-[14px] font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7">
-                Run
-              </div>
-            </div>
+            <Run fetchData={() => fetchPurchaseAnalysisReport()} />
           </div>
           <div>
             <ExportOptions
@@ -678,17 +676,17 @@ const PurchaseAnalysis = () => {
         {isError ? (
           <div>{errorMessage}</div>
         ) : (
-          <div className="relative w-full min-h-56">
+          <div className='relative w-full min-h-56'>
             <Loader loading={isLoading} />
             {!isLoading &&
               (purchasetData.length > 0 ? (
-                <div className="paged-table">{Table}</div>
+                <div className='paged-table'>{Table}</div>
               ) : !selectedUnit ? (
-                <div className="mt-10 text-xl font-medium text-center">
+                <div className='mt-10 text-xl font-medium text-center'>
                   No Unit Selected
                 </div>
               ) : (
-                <div className="mt-10 text-xl font-medium text-center">
+                <div className='mt-10 text-xl font-medium text-center'>
                   No data available
                 </div>
               ))}
