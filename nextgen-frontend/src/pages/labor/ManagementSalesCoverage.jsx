@@ -15,6 +15,7 @@ import {
 	ExcelExport as exportToExcel,
 	TableHOC,
 	Modal,
+	Run,
 } from '../../components';
 import Chart from 'react-apexcharts';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -558,11 +559,7 @@ const ManagementSalesCoverage = () => {
 							onOptionChange={(option) => setJobType(option)}
 						/>
 					</div>
-					<div className='run-button' onClick={fetchMgmtSalesCoverageReport}>
-						<div className='py-3 ml-3 text-lg font-bold text-center capitalize border-2 border-solid cursor-pointer px-14 hover:border-[var(--tw-primary)] hover:text-white hover:bg-[var(--tw-primary)] text-nowrap rounded-3xl mt-7'>
-							Run
-						</div>
-					</div>
+					<Run onClick={fetchMgmtSalesCoverageReport} />
 				</div>
 				<div>
 					<ExportOptions
