@@ -15,7 +15,7 @@ export const SuggestedOrderAPI = {
 	) {
 		const response = await api.request({
 			method: 'GET',
-			url: `/api/suggestedorder/getvendorinventoryitems?companyId=${companyID}&unitId=${unitID}&vendorId=${vendorId}&orderFromDate=${orderFromDate}&orderToDate=${orderToDate}&suggestedOrderId=${suggestedOrderId}&${
+			url: `/api/suggestedOrder/getSuggestedOrderDetails?companyId=${companyID}&unitId=${unitID}&vendorId=${vendorId}&orderFromDate=${orderFromDate}&orderToDate=${orderToDate}&suggestedOrderId=${suggestedOrderId}&${
 				purchaseHistoryDaysBack ? `purchaseHistoryDaysBack=${purchaseHistoryDaysBack}` : ''
 			}`,
 			companyID,
@@ -58,7 +58,7 @@ export const SuggestedOrderAPI = {
 	submit: async function (data, cancel = false) {
 		const response = await api.request({
 			method: 'POST',
-			url: `/api/suggestedorder/submitsuggestedorderheader?companyID=${data.companyID}`,
+			url: `/api/suggestedOrder/submitOrderToVendor?companyID=${data.companyID}`,
 			data,
 			signal: cancel ? cancelApiObject[this.submit.name].handleRequestCancellation().signal : undefined,
 		});

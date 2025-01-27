@@ -1,44 +1,41 @@
 const urlConfig = {
-  //Company apis
-  getCompanySetting: "/api/company/settings/getsetting",
-  getAllCompanySettings: "/api/company/settings/getallsettings",
-  getUserRoleSettings: "/api/company/settings/getUserRoleSettings",
-  getAllWeekStartAndEndDates: "api/company/settings/GetAllWeekStartAndEndDates",
-  getCurrentPeriodDates: "/api/company/settings/getCurrentPeriodDates",
-  unitsAndArea: "/api/unitsandareas/getbyid",
-  vendors: "/api/vendor/getvendorsbycompanyID",
-  getAllPeriodDates: "/api/company/settings/getAllPeriodDates",
-  getAllPayPeriodDates: "/api/company/settings/getAllPayPeriodDates",
-  //suggested order apis
-  orderList: "/api/order/GetOrderList",
-  getOrderItem: "/api/suggestedorder/getvendorinventoryitems",
-  getPurchaseOrderDetails: "/api/order/getpurchaseorderdetails",
-  saveSuggestedOrder: "/api/suggestedorder/savesuggestedorder",
-  submitSuggestedOrder: "/api/suggestedorder/submitsuggestedorderheader",
+	//Company apis
+	getCompanySetting: '/api/company/settings/getsetting',
+	getAllCompanySettings: '/api/company/settings/getallsettings',
+	getUserRoleSettings: '/api/company/settings/getUserRoleSettings',
+	getAllWeekStartAndEndDates: 'api/company/settings/GetAllWeekStartAndEndDates',
+	getCurrentPeriodDates: '/api/company/settings/getCurrentPeriodDates',
+	unitsAndArea: '/api/unitsandareas/getbyid',
+	vendors: '/api/vendor/getvendorsbycompanyID',
+	getAllPeriodDates: '/api/company/settings/getAllPeriodDates',
+	getAllPayPeriodDates: '/api/company/settings/getAllPayPeriodDates',
+	//suggested order apis
+	orderList: '/api/order/GetOrderList',
+	getOrderItem: '/api/suggestedOrder/getSuggestedOrderDetails',
+	getPurchaseOrderDetails: '/api/order/getpurchaseorderdetails',
+	saveSuggestedOrder: '/api/suggestedorder/savesuggestedorder',
+	submitSuggestedOrder: '/api/suggestedOrder/submitOrderToVendor',
 
-  //invoices details
-  getInvoiceDetailsData: "/api/foodcost/getInvoiceDetailsData",
-  getVendorInvoiceItems: "/api/foodcost/getVendorInvoiceItems",
-  getInvoiceSummary: "/api/foodcost/getVendorItemsSummary",
-  saveInvoice: "api/foodcost/addUpdateInvoice",
-  deleteInvoice: "api/foodcost/deleteVendorInvoice",
-  addVendorItem: "api/foodcost/addVendorItem",
-  //inventory items apis
-  getInventoryItemsOrderLimits:
-    "/api/inventoryitems/getinventoryitemsorderlimits",
-  updateInventoryItemOrderLimits:
-    "/api/inventoryitems/updateinventoryitemsorderlimit",
-  deleteInventoryItemOrderLimits:
-    "/api/inventoryitems/deleteinventoryitemsorderlimit",
+	//invoices details
+	getInvoiceDetailsData: '/api/foodcost/getInvoiceDetailsData',
+	getVendorInvoiceItems: '/api/foodcost/getVendorInvoiceItems',
+	getInvoiceSummary: '/api/foodcost/getVendorItemsSummary',
+	saveInvoice: 'api/foodcost/addUpdateInvoice',
+	deleteInvoice: 'api/foodcost/deleteVendorInvoice',
+	addVendorItem: 'api/foodcost/addVendorItem',
+	//inventory items apis
+	getInventoryItemsOrderLimits: '/api/inventoryitems/getinventoryitemsorderlimits',
+	updateInventoryItemOrderLimits: '/api/inventoryitems/updateinventoryitemsorderlimit',
+	deleteInventoryItemOrderLimits: '/api/inventoryitems/deleteinventoryitemsorderlimit',
 
-  //prep chart apis
-  getPrepChartDetail: "/api/prepchartdetail",
-  savePrepChartDetail: "/api/prepchartdetail/save",
+	//prep chart apis
+	getPrepChartDetail: '/api/prepchartdetail',
+	savePrepChartDetail: '/api/prepchartdetail/save',
 
-  //prep chart template apis
-  getPrepChartTemplate: "/api/prepcharttemplate",
-  savePrepChartTemplate: "/api/prepcharttemplate/save",
-  getPrepChartTemplateInventoryList: "/api/prepcharttemplate/getinventorylist",
+	//prep chart template apis
+	getPrepChartTemplate: '/api/prepcharttemplate',
+	savePrepChartTemplate: '/api/prepcharttemplate/save',
+	getPrepChartTemplateInventoryList: '/api/prepcharttemplate/getinventorylist',
 
 	//food cost apis
 	inventoryTransferReportData: 'api/foodcost/getInventoryTransferReportData',
@@ -79,22 +76,22 @@ const urlConfig = {
 	discountTypes: 'api/sales/GetDiscountTypesReportData',
 	menuGrossProfit: 'api/sales/getMenuGrossProfitReport',
 	menuGrossProfitRecipeInfo: 'api/sales/GetMenuGrossProfitRecipePopupReport',
-	GetSalesSummaryReport : 'api/sales/GetSalesSummaryReport',
+	GetSalesSummaryReport: 'api/sales/GetSalesSummaryReport',
 	brumitDWP: 'api/sales/GetBrumitDWP2ReportData',
 
-  //labor apis
-  employeeInformation: "api/labor/getEmployeeInformation",
-  laborByPayPeriod: "api/labor/getLaborByPayPeriodReportData",
-  laborCICOExceptions: "api/labor/getLaborCICOExceptionReportData",
-  laborCICO: "api/labor/getLaborCICOReportData",
-  laborAnalysis: "api/labor/getLaborAnalysisData",
-  getJobDetails: "api/labor/getJobDetails",
-  getLaborAuditDateRange: "api/labor/GetEmployeesSchedulesSchedule",
-  laborAudit: "api/labor/GetLaborAuditReportData",
-  versionOneCheck: "api/User/ GetUserActivity",
+	//labor apis
+	employeeInformation: 'api/labor/getEmployeeInformation',
+	laborByPayPeriod: 'api/labor/getLaborByPayPeriodReportData',
+	laborCICOExceptions: 'api/labor/getLaborCICOExceptionReportData',
+	laborCICO: 'api/labor/getLaborCICOReportData',
+	laborAnalysis: 'api/labor/getLaborAnalysisData',
+	getJobDetails: 'api/labor/getJobDetails',
+	getLaborAuditDateRange: 'api/labor/GetEmployeesSchedulesSchedule',
+	laborAudit: 'api/labor/GetLaborAuditReportData',
+	versionOneCheck: 'api/User/ GetUserActivity',
 
-  //Menu item
-  MenuItemsByCompanyID: "api/menus/getMenuItemsByCompanyID",
-  InventoryByCompanyID: "api/prepcharttemplate/getinventorylist",
+	//Menu item
+	MenuItemsByCompanyID: 'api/menus/getMenuItemsByCompanyID',
+	InventoryByCompanyID: 'api/prepcharttemplate/getinventorylist',
 };
 export default urlConfig;
