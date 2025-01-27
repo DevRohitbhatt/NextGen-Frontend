@@ -336,7 +336,13 @@ const VarianceFoodCost = () => {
 			id: 'comparisonName',
 			header: 'Comparison Name',
 			cell: ({ row, getValue }) =>
-				row.getCanExpand() ? row.original?.comparisonName : getValue() !== undefined ? getValue() : '',
+				row.getCanExpand()
+					? row.depth === 0
+						? row.original?.totalComparisonName
+						: row.original?.comparisonName
+					: getValue() !== undefined
+					? getValue()
+					: '',
 			dataType: 'string',
 			size: 160,
 			tooltip: tooltips.comparisonName,
@@ -586,6 +592,15 @@ const VarianceFoodCost = () => {
 									)
 								)
 							),
+							totalComparisonName: (result.data?.varianceFoodCostReportModels || [])
+								.flatMap((department) =>
+									department.subDepartments.flatMap(
+										(subDepartment) => subDepartment.varianceFoodCostModels
+									)
+								)
+								.reduce((max, item) => (item.comparisonSales > max.comparisonSales ? item : max), {
+									comparisonSales: 0,
+								}).comparisonName,
 							totalActualPct: result.data?.actualPct,
 							totalIdealPct: result.data?.idealPct,
 							totalVariancePct: result.data?.variancePct,
