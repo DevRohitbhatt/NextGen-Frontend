@@ -1,25 +1,25 @@
-import { useEffect, useMemo, useState, useRef } from "react";
-import { getCall } from "../../apis/network";
-import { Steps } from "intro.js-react";
-import { useSelector } from "react-redux";
-import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { getCall } from '../../apis/network';
+import { Steps } from 'intro.js-react';
+import { useSelector } from 'react-redux';
+import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
-  Loader,
-  UnitSelector,
-  CalendarModal,
-  UnitModal,
-  ExportOptions,
-  PdfBuilder,
-  ExcelExport as exportToExcel,
-  TableHOC,
-  Dropdown,
-  Modal,
-  Run,
-} from "../../components";
-import { createColumnHelper } from "@tanstack/react-table";
-import actualFoodCosts from "../../assets/introJSSteps/actualFoodCosts";
-import dateFormat from "dateformat";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+	Loader,
+	UnitSelector,
+	CalendarModal,
+	UnitModal,
+	ExportOptions,
+	PdfBuilder,
+	ExcelExport as exportToExcel,
+	TableHOC,
+	Dropdown,
+	Modal,
+	Run,
+} from '../../components';
+import { createColumnHelper } from '@tanstack/react-table';
+import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
+import dateFormat from 'dateformat';
+import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
 const tooltips = {
 	begDollar:
@@ -361,86 +361,75 @@ const ActualFoodCost = () => {
 		}),
 	];
 
-  // calculate the sum of the subrows
-  const calculateSum = (row, field, getValue, isPercentage = false) => {
-    if (row.getCanExpand()) {
-      const sum = row.subRows
-        .reduce((acc, subrow) => {
-          if (subrow.getCanExpand()) {
-            return (
-              acc +
-              subrow.subRows.reduce((subAcc, subSubrow) => {
-                if (subSubrow.getCanExpand()) {
-                  const item = checkedItems.find(
-                    (item) =>
-                      item.name.split(/\/(.+)/)[1] ===
-                      subSubrow.original.subDepartment
-                  );
-                  return (
-                    subAcc +
-                    subSubrow.subRows.reduce(
-                      (subsubAcc, subsubsubrow) =>
-                        subsubAcc +
-                        (item?.includeInGrandTotal &&
-                        subsubsubrow.original[field]
-                          ? Number(subsubsubrow.original[field])
-                          : 0),
-                      0
-                    )
-                  );
-                } else {
-                  return (
-                    subAcc +
-                    (subSubrow.original[field]
-                      ? Number(subSubrow.original[field])
-                      : 0)
-                  );
-                }
-              }, 0)
-            );
-          } else {
-            return (
-              acc +
-              (subrow.original[field] ? Number(subrow.original[field]) : 0)
-            );
-          }
-        }, 0)
-        .toFixed(2);
-      if (isPercentage) {
-        return `${parseFloat(sum).toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}%`;
-      }
-      return sum < 0
-        ? `-$${Math.abs(parseFloat(sum)).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : `$${parseFloat(sum).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`;
-    } else {
-      const value = getValue();
-      if (!value) return isPercentage ? "0.00%" : "$0.00";
-      if (isPercentage) {
-        return `${parseFloat(value).toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}%`;
-      }
-      return value < 0
-        ? `-$${Math.abs(parseFloat(value)).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : `$${parseFloat(value).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`;
-    }
-  };
+	// calculate the sum of the subrows
+	const calculateSum = (row, field, getValue, isPercentage = false) => {
+		if (row.getCanExpand()) {
+			const sum = row.subRows
+				.reduce((acc, subrow) => {
+					if (subrow.getCanExpand()) {
+						return (
+							acc +
+							subrow.subRows.reduce((subAcc, subSubrow) => {
+								if (subSubrow.getCanExpand()) {
+									const item = checkedItems.find(
+										(item) => item.name.split(/\/(.+)/)[1] === subSubrow.original.subDepartment
+									);
+									return (
+										subAcc +
+										subSubrow.subRows.reduce(
+											(subsubAcc, subsubsubrow) =>
+												subsubAcc +
+												(item?.includeInGrandTotal && subsubsubrow.original[field]
+													? Number(subsubsubrow.original[field])
+													: 0),
+											0
+										)
+									);
+								} else {
+									return subAcc + (subSubrow.original[field] ? Number(subSubrow.original[field]) : 0);
+								}
+							}, 0)
+						);
+					} else {
+						return acc + (subrow.original[field] ? Number(subrow.original[field]) : 0);
+					}
+				}, 0)
+				.toFixed(2);
+			if (isPercentage) {
+				return `${parseFloat(sum).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return sum < 0
+				? `-$${Math.abs(parseFloat(sum)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(sum).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`;
+		} else {
+			const value = getValue();
+			if (!value) return isPercentage ? '0.00%' : '$0.00';
+			if (isPercentage) {
+				return `${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return value < 0
+				? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(value).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`;
+		}
+	};
 
 	useEffect(() => {
 		if (defaultUnitID) {
@@ -454,11 +443,6 @@ const ActualFoodCost = () => {
 	useEffect(() => {
 		setColumns(generatedColumns);
 	}, [checkedItemsLoaded]);
-	useEffect(() => {
-		console.log('checkedItemsLoaded', checkedItemsLoaded);
-
-    setColumns(generatedColumns);
-  }, [checkedItemsLoaded]);
 
 	useEffect(() => {
 		if (actualFoodCostData.length > 0) {
@@ -466,68 +450,68 @@ const ActualFoodCost = () => {
 		}
 	}, [actualFoodCostData]);
 
-  useEffect(() => {
-    setViewBy(viewby);
-  }, [isTableRendered]);
+	useEffect(() => {
+		setViewBy(viewby);
+	}, [isTableRendered]);
 
-  useEffect(() => {
-    if (new Date(selectedToDate) < new Date(selectedFromDate)) {
-      const toDate = new Date(selectedToDate);
-      const newFromDate = fromDateOptions
-        .map((option) => new Date(option.name))
-        .filter((date) => date < toDate)
-        .sort((a, b) => b - a)[0];
-      if (newFromDate) {
-        setSelectedFromDate(dateFormat(newFromDate, "mm-dd-yyyy"));
-      }
-    }
-  }, [selectedToDate]);
+	useEffect(() => {
+		if (new Date(selectedToDate) < new Date(selectedFromDate)) {
+			const toDate = new Date(selectedToDate);
+			const newFromDate = fromDateOptions
+				.map((option) => new Date(option.name))
+				.filter((date) => date < toDate)
+				.sort((a, b) => b - a)[0];
+			if (newFromDate) {
+				setSelectedFromDate(dateFormat(newFromDate, 'mm-dd-yyyy'));
+			}
+		}
+	}, [selectedToDate]);
 
-  useEffect(() => {
-    if (new Date(selectedFromDate) > new Date(selectedToDate)) {
-      const fromDate = new Date(selectedFromDate);
-      const toDate = new Date(selectedToDate);
+	useEffect(() => {
+		if (new Date(selectedFromDate) > new Date(selectedToDate)) {
+			const fromDate = new Date(selectedFromDate);
+			const toDate = new Date(selectedToDate);
 
-      if (fromDate > toDate) {
-        const newToDate = toDateOptions
-          .map((option) => new Date(option.name))
-          .filter((date) => date > fromDate)
-          .sort((a, b) => a - b)[0];
-        if (newToDate) {
-          setSelectedToDate(dateFormat(newToDate, "mm-dd-yyyy"));
-        }
-      }
-    }
-  }, [selectedFromDate]);
+			if (fromDate > toDate) {
+				const newToDate = toDateOptions
+					.map((option) => new Date(option.name))
+					.filter((date) => date > fromDate)
+					.sort((a, b) => a - b)[0];
+				if (newToDate) {
+					setSelectedToDate(dateFormat(newToDate, 'mm-dd-yyyy'));
+				}
+			}
+		}
+	}, [selectedFromDate]);
 
-  useEffect(() => {
-    const fetchShowHideDepartments = async () => {
-      try {
-        setCheckedItemsLoaded(false);
-        const getData = {
-          url: "getShowHideDepartments",
-          urlParams: {
-            companyId: companyID,
-          },
-        };
+	useEffect(() => {
+		const fetchShowHideDepartments = async () => {
+			try {
+				setCheckedItemsLoaded(false);
+				const getData = {
+					url: 'getShowHideDepartments',
+					urlParams: {
+						companyId: companyID,
+					},
+				};
 
-        const result = await getCall(getData);
+				const result = await getCall(getData);
 
-        const checkedItems = result.data.map((item) => ({
-          name: `${item.department}/${item.subdepartment}`,
-          showOnReport: item.includeInReport,
-          includeInGrandTotal: item.includeInTotal,
-        }));
+				const checkedItems = result.data.map((item) => ({
+					name: `${item.department}/${item.subdepartment}`,
+					showOnReport: item.includeInReport,
+					includeInGrandTotal: item.includeInTotal,
+				}));
 
-        setCheckedItems(checkedItems);
-        setCheckedItemsLoaded(true);
-      } catch (error) {
-        console.error("Error getting Show Hide Departments data: ", error);
-      }
-    };
+				setCheckedItems(checkedItems);
+				setCheckedItemsLoaded(true);
+			} catch (error) {
+				console.error('Error getting Show Hide Departments data: ', error);
+			}
+		};
 
-    fetchShowHideDepartments();
-  }, []);
+		fetchShowHideDepartments();
+	}, []);
 
 	useEffect(() => {
 		const fetchDates = async () => {
@@ -693,18 +677,17 @@ const ActualFoodCost = () => {
 	const handleShowHideDepartments = () => {
 		setIsShowHideDepartments(false);
 
-    const newActualFoodCostData = actualFoodCostData.filter((item) =>
-      checkedItems.some(
-        (checkedItem) =>
-          checkedItem.name === `${item.department}/${item.subDepartment}` &&
-          checkedItem.showOnReport
-      )
-    );
+		const newActualFoodCostData = actualFoodCostData.filter((item) =>
+			checkedItems.some(
+				(checkedItem) =>
+					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
+			)
+		);
 
-    setIsTableRendered(false);
-    setColumns(generatedColumns);
-    setFilteredActualFoodCostData(newActualFoodCostData);
-  };
+		setIsTableRendered(false);
+		setColumns(generatedColumns);
+		setFilteredActualFoodCostData(newActualFoodCostData);
+	};
 
 	// Function to handle the PDF export
 	const handlePDFClick = (type) => {
@@ -1469,7 +1452,7 @@ const ActualFoodCost = () => {
 								onOptionChange={handleViewChange}
 							/>
 						</div>
-            <Run fetchData={fetchActualFoodCostReport} />
+						<Run fetchData={fetchActualFoodCostReport} />
 					</div>
 					<div>
 						<ExportOptions

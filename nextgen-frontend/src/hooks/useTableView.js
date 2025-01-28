@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
 
-function useTableView(table, view, isTableRendered) {
+function useTableView(table, view, isTableRendered, grouping) {
 	useEffect(() => {
-		console.log(view);
 		if (isTableRendered) {
 			expandParentRowsOnly(table, view);
 		}
-	}, [isTableRendered, view]);
+	}, [view, grouping, isTableRendered]);
 
 	const expandParentRowsOnly = (table, depth) => {
 		const expandedState = {};
@@ -36,6 +35,7 @@ function useTableView(table, view, isTableRendered) {
 				});
 			}
 		});
+
 		table.setExpanded(expandedState);
 	};
 }

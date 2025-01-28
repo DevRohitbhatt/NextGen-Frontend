@@ -76,6 +76,7 @@ const PurchaseAnalysis = () => {
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [receivedData, setReceivedData] = useState(null);
+	const [veiw, setView] = useState(0);
 
 	const [selectedGroupBy, setSelectedGroupBy] = useState('None');
 	const groupByOptions = [
@@ -372,7 +373,6 @@ const PurchaseAnalysis = () => {
 
 			setPurchaseData(newData);
 			setIsLoading(false);
-			setIsTableRendered(true);
 			if (option && isLocationReportRendered === false) {
 				handleGroupByChange(option);
 			}
@@ -465,6 +465,7 @@ const PurchaseAnalysis = () => {
 		}
 
 		setColumns(newColumns);
+		setView(selectedGroupByColumns.length);
 
 		if (isTableRendered && !status) {
 			fetchPurchaseAnalysisReport();
@@ -554,6 +555,9 @@ const PurchaseAnalysis = () => {
 			enableColumnFilters={true}
 			headerPosition='flex-start'
 			dataPosition='text-start'
+			isTableRendered={isTableRendered}
+			setIsTableRendered={setIsTableRendered}
+			view={2}
 		/>
 	);
 
