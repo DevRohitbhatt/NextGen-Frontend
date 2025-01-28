@@ -1054,7 +1054,7 @@ const ActualFoodCost = () => {
 		};
 
 		return (
-			<div className='max-w-5xl mx-auto my-0 p-1 rounded-lg shadow-lg border bg-white min-w-[750px]'>
+			<div className='max-w-5xl p-4 mx-auto my-0 h-full rounded-lg shadow-lg border  bg-white lg:min-w-[750px]'>
 				{/* Header */}
 				<div className='text-center '>
 					<p className='text-sm text-gray-600'>{costBreakActualDetails.description}</p>
@@ -1063,342 +1063,348 @@ const ActualFoodCost = () => {
 					</p>
 				</div>
 
-				{/* Actual Section */}
-				<div className='my-1'>
-					<h3
-						onClick={(e) => {
-							e.preventDefault(), openCollapse('Actual');
-						}}
-						className='text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
-					>
-						<span>Actual</span>{' '}
-						<span className='m-1 '>
-							{showAndHideBreakDown.Actual == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
-						</span>
-					</h3>
-					{showAndHideBreakDown.Actual == true && (
-						<div className=''>
-							<table className='w-full border border-collapse'>
-								<thead className='bg-gray-100'>
-									<tr>
-										<th className='p-2 text-left border'></th>
-										<td></td>
-										<th className='border text-right  p-[3px]  text-nowrap text-sm'># UOM</th>
-										<th className='border text-right  p-[3px]  text-nowrap text-sm'>Value</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td className='border text-left  p-[3px]  text-nowrap text-sm'>
-											<div className='flex align-middle'>
-												<div className='p-1'>
-													<CiSquarePlus />
-												</div>
-												Beginning On-Hand Count: {selectedFromDate}
-											</div>
-										</td>
-										<td className='border   p-[3px]  text-nowrap text-sm text-center'></td>
-										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-											{costBreakActualDetails?.begCountDisplayUnits?.toFixed(4)}
-										</td>
-										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-											${costBreakActualDetails?.begCountCost?.toFixed(2)}
-										</td>
-									</tr>
-									<tr
-										className='cursor-pointer'
-										onClick={(e) => {
-											e.preventDefault(), openCollapse('purchaseBetween');
-										}}
-									>
-										<td className='border text-left  p-[3px]  text-nowrap text-sm '>
-											<div className='flex align-middle'>
-												{showAndHideBreakDown.purchaseBetween ? (
-													<div className='p-1'>
-														<CiSquareMinus />
-													</div>
-												) : (
+				<div className='overflow-auto border rounded-lg my-2 h-[90%] tableHOC'>
+					{/* Actual Section */}
+					<div className='mb-2'>
+						<h3
+							onClick={(e) => {
+								e.preventDefault(), openCollapse('Actual');
+							}}
+							className='text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
+						>
+							<span>Actual</span>{' '}
+							<span className='m-1 '>
+								{showAndHideBreakDown.Actual == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
+							</span>
+						</h3>
+						{showAndHideBreakDown.Actual == true && (
+							<div className=''>
+								<table className='w-full border border-collapse'>
+									<thead className='bg-gray-100'>
+										<tr>
+											<th className='p-2 text-left border'></th>
+											<td></td>
+											<th className='border text-right  p-[3px]  text-nowrap text-sm'># UOM</th>
+											<th className='border text-right  p-[3px]  text-nowrap text-sm'>Value</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td className='border text-left  p-[3px]  text-nowrap text-sm'>
+												<div className='flex align-middle'>
 													<div className='p-1'>
 														<CiSquarePlus />
 													</div>
-												)}{' '}
-												Purchases between {selectedFromDate} and {selectedToDate}
-											</div>
-										</td>
-										<td className='border   p-[3px]  text-nowrap text-sm text-center'>+</td>
-										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-											{costBreakActualDetails?.purchaseCases?.toFixed(4)}
-										</td>
-										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-											${costBreakActualDetails?.purchaseCost?.toFixed(2)}
-										</td>
-									</tr>
-									{showAndHideBreakDown.purchaseBetween == true && (
-										<tr className='ml-[10px] '>
-											<td colSpan={4}>
-												<table className='w-[97%] ml-[3%]'>
-													<thead className='bg-gray-100'>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Vendor
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Date
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Invoices #
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															#
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															UOM
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Price
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Total
-														</th>
-													</thead>
-													<tbody>
-														{breakDownIdealDetails.map((item) => (
-															<tr>
-																<td className='border text-left  p-[3px]  text-nowrap text-sm'>
-																	{item.VendorName}
-																</td>
-																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-																	{dateFormat(item.InvoiceDate, 'mm-dd-yyyy')}
-																</td>
-																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-																	{item.VendorInvoiceReference}
-																</td>
-																<td className='border text-center  p-[3px]  text-nowrap text-sm'>
-																	{item.Quantity.toFixed(6)}
-																</td>
-																<td className='border text-center  p-[3px]  text-nowrap text-sm'>
-																	{item.UnitOfMeasure}
-																</td>
-																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-																	${item.Price.toFixed(2)}
-																</td>
-																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-																	${item.TotalPrice.toFixed(2)}
-																</td>
-															</tr>
-														))}
-														{breakDownIdealDetails.length === 0 && (
-															<td colSpan={7}>
-																There is no any purchases in this period.
-															</td>
-														)}
-													</tbody>
-												</table>
+													Beginning On-Hand Count: {selectedFromDate}
+												</div>
+											</td>
+											<td className='border   p-[3px]  text-nowrap text-sm text-center'></td>
+											<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+												{costBreakActualDetails?.begCountDisplayUnits?.toFixed(4)}
+											</td>
+											<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+												${costBreakActualDetails?.begCountCost?.toFixed(2)}
 											</td>
 										</tr>
-									)}
-									<tr>
-										<td className='border p-[3px]  text-nowrap text-sm'>
-											<div className='flex align-middle'>
-												<div className='p-1'>
-													<CiSquarePlus />
-												</div>{' '}
-												Transferred In
-											</div>
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-center'>+</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											{costBreakActualDetails?.iTinCountCases}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											${costBreakActualDetails?.iTinCountCost}
-										</td>
-									</tr>
-									<tr>
-										<td className='border p-[3px]  text-nowrap text-sm'>
-											<div className='flex align-middle'>
-												<div className='p-1'>
-													<CiSquarePlus />
-												</div>{' '}
-												Transferred Out
-											</div>
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											{costBreakActualDetails?.iToutCountCases}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											${costBreakActualDetails?.iToutCountCost}
-										</td>
-									</tr>
-									<tr>
-										<td className='border p-[3px]  text-nowrap text-sm'>
-											<div className='flex align-middle'>
-												<div className='p-1'>
-													<CiSquarePlus />
-												</div>{' '}
-												Ending On-Hand Count: {selectedToDate}
-											</div>
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											{costBreakActualDetails?.endCountCases}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											${costBreakActualDetails?.endCountCost}
-										</td>
-									</tr>
-								</tbody>
-								<tfoot>
-									<tr className='bg-gray-200'>
-										<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={2}>
-											Actual Usage{' '}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											{costBreakActualDetails?.usageCases?.toFixed(2)}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											${costBreakActualDetails?.usageCost?.toFixed(2)}
-										</td>
-									</tr>
-								</tfoot>
-							</table>
-						</div>
-					)}
-				</div>
+										<tr
+											className='cursor-pointer'
+											onClick={(e) => {
+												e.preventDefault(), openCollapse('purchaseBetween');
+											}}
+										>
+											<td className='border text-left  p-[3px]  text-nowrap text-sm '>
+												<div className='flex align-middle'>
+													{showAndHideBreakDown.purchaseBetween ? (
+														<div className='p-1'>
+															<CiSquareMinus />
+														</div>
+													) : (
+														<div className='p-1'>
+															<CiSquarePlus />
+														</div>
+													)}{' '}
+													Purchases between {selectedFromDate} and {selectedToDate}
+												</div>
+											</td>
+											<td className='border   p-[3px]  text-nowrap text-sm text-center'>+</td>
+											<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+												{costBreakActualDetails?.purchaseCases?.toFixed(4)}
+											</td>
+											<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+												${costBreakActualDetails?.purchaseCost?.toFixed(2)}
+											</td>
+										</tr>
+										{showAndHideBreakDown.purchaseBetween == true && (
+											<tr className='ml-[10px] '>
+												<td colSpan={4}>
+													<table className='w-[97%] ml-[3%]'>
+														<thead className='bg-gray-100'>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Vendor
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Date
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Invoices #
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																#
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																UOM
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Price
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Total
+															</th>
+														</thead>
+														<tbody>
+															{breakDownIdealDetails.map((item) => (
+																<tr>
+																	<td className='border text-left  p-[3px]  text-nowrap text-sm'>
+																		{item.VendorName}
+																	</td>
+																	<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																		{dateFormat(item.InvoiceDate, 'mm-dd-yyyy')}
+																	</td>
+																	<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																		{item.VendorInvoiceReference}
+																	</td>
+																	<td className='border text-center  p-[3px]  text-nowrap text-sm'>
+																		{item.Quantity.toFixed(6)}
+																	</td>
+																	<td className='border text-center  p-[3px]  text-nowrap text-sm'>
+																		{item.UnitOfMeasure}
+																	</td>
+																	<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																		${item.Price.toFixed(2)}
+																	</td>
+																	<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																		${item.TotalPrice.toFixed(2)}
+																	</td>
+																</tr>
+															))}
+															{breakDownIdealDetails.length === 0 && (
+																<td colSpan={7}>
+																	There is no any purchases in this period.
+																</td>
+															)}
+														</tbody>
+													</table>
+												</td>
+											</tr>
+										)}
+										<tr>
+											<td className='border p-[3px]  text-nowrap text-sm'>
+												<div className='flex align-middle'>
+													<div className='p-1'>
+														<CiSquarePlus />
+													</div>{' '}
+													Transferred In
+												</div>
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-center'>+</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{costBreakActualDetails?.iTinCountCases}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${costBreakActualDetails?.iTinCountCost}
+											</td>
+										</tr>
+										<tr>
+											<td className='border p-[3px]  text-nowrap text-sm'>
+												<div className='flex align-middle'>
+													<div className='p-1'>
+														<CiSquarePlus />
+													</div>{' '}
+													Transferred Out
+												</div>
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{costBreakActualDetails?.iToutCountCases}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${costBreakActualDetails?.iToutCountCost}
+											</td>
+										</tr>
+										<tr>
+											<td className='border p-[3px]  text-nowrap text-sm'>
+												<div className='flex align-middle'>
+													<div className='p-1'>
+														<CiSquarePlus />
+													</div>{' '}
+													Ending On-Hand Count: {selectedToDate}
+												</div>
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{costBreakActualDetails?.endCountCases}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${costBreakActualDetails?.endCountCost}
+											</td>
+										</tr>
+									</tbody>
+									<tfoot>
+										<tr className='bg-gray-200'>
+											<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={2}>
+												Actual Usage{' '}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{costBreakActualDetails?.usageCases?.toFixed(2)}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${costBreakActualDetails?.usageCost?.toFixed(2)}
+											</td>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+						)}
+					</div>
 
-				{/* Ideal Section */}
-				<div className='my-1'>
-					<h3
-						onClick={(e) => {
-							e.preventDefault(), openCollapse('ideal');
-						}}
-						className='text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
-					>
-						<span>Ideal</span>{' '}
-						<span className='m-1 '>
-							{showAndHideBreakDown.ideal == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
-						</span>
-					</h3>
-					{showAndHideBreakDown.ideal == true && (
-						<div className='tableHOC pr-1 max-h-[20vh] overflow-auto'>
-							<table className='w-full border-collapse '>
-								<thead className='sticky top-0 bg-gray-100'>
+					{/* Ideal Section */}
+					<div className='w-full my-2 overflow-x-auto'>
+						<h3
+							onClick={(e) => {
+								e.preventDefault(), openCollapse('ideal');
+							}}
+							className='text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
+						>
+							<span>Ideal</span>{' '}
+							<span className='m-1 '>
+								{showAndHideBreakDown.ideal == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
+							</span>
+						</h3>
+						{showAndHideBreakDown.ideal == true && (
+							<div className='pr-1 overflow-auto tableHOC'>
+								<table className='w-full border-collapse '>
+									<thead className='sticky top-0 bg-gray-100'>
+										<tr>
+											<th className=' p-[3px] text-left text-sm'>Menu Item</th>
+											<th className=' p-[3px] text-left text-nowrap text-sm'>Recipe</th>
+											<th className=' p-[3px] text-right text-nowrap text-sm'># Sold</th>
+											<th className=' p-[3px] text-right text-nowrap text-sm'>
+												#{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName} in Recipe
+											</th>
+											<th className=' p-[3px] text-right text-nowrap text-sm'>
+												# {costBreakdownIdealDetails[0]?.MasterItemUOM}
+											</th>
+											<th className=' p-[3px] text-righ text-nowrapt text-sm'>
+												Total # {costBreakdownIdealDetails[0]?.MasterItemUOM}
+											</th>
+											<th className=' p-[3px] text-right text-nowrap text-sm'>Cost</th>
+										</tr>
+									</thead>
+									<tbody>
+										{costBreakdownIdealDetails.map((item) => (
+											<tr>
+												<td className='border p-[3px] text-sm'>{item.MenuItemDescription}</td>
+												<td className='border p-[3px] text-sm'>{item.VariantLabel}</td>
+												<td className='border p-[3px] text-right text-sm'>
+													{item.MenuItemQuantitySold}
+												</td>
+												<td className='border p-[3px] text-right text-sm'>
+													{item.MasterItemRecipeUOMPerRecipe}
+												</td>
+												<td className='border p-[3px] text-right text-sm'>
+													{item.MasterItemQuantityPerRecipe.toFixed(4)}
+												</td>
+												<td className='border p-[3px] text-right text-sm'>
+													{item.MasterItemQuantityTotal.toFixed(2)}
+												</td>
+												<td className='border p-[3px] text-right text-sm'>
+													$
+													{sumOfCost(
+														item.MasterItemQuantityTotal,
+														item.MasterItemIdealUOMCost
+													)}
+												</td>
+											</tr>
+										))}
+									</tbody>
+									<tfoot>
+										<tr className='sticky -bottom-[1px] bg-gray-200'>
+											<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={5}>
+												Ideal Usage{' '}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{calculateMasterItemQuantityTotalSum(
+													costBreakdownIdealDetails,
+													'MasterItemQuantityTotal'
+												).toFixed(2)}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
+											</td>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+						)}
+					</div>
+
+					{/* Variance Section */}
+					<div className='my-2'>
+						<h3
+							onClick={(e) => {
+								e.preventDefault(), openCollapse('Variance');
+							}}
+							className='text-base font-semibold bg-orange-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
+						>
+							<span> Variance</span>
+							<span className='m-1 '>
+								{showAndHideBreakDown.Variance == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
+							</span>
+						</h3>
+						{showAndHideBreakDown.Variance == true && (
+							<table className='w-full border border-collapse'>
+								<thead className='bg-gray-100'>
 									<tr>
-										<th className=' p-[3px] text-left text-sm'>Menu Item</th>
-										<th className=' p-[3px] text-left text-nowrap text-sm'>Recipe</th>
-										<th className=' p-[3px] text-right text-nowrap text-sm'># Sold</th>
-										<th className=' p-[3px] text-right text-nowrap text-sm'>
-											#{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName} in Recipe
+										<th className='border p-[3px] text-left text-sm'>Details</th>
+										<th className='border p-[3px] text-left text-sm'>
+											#{costBreakdownIdealDetails[0]?.MasterItemUOM}
 										</th>
-										<th className=' p-[3px] text-right text-nowrap text-sm'>
-											# {costBreakdownIdealDetails[0]?.MasterItemUOM}
-										</th>
-										<th className=' p-[3px] text-righ text-nowrapt text-sm'>
-											Total # {costBreakdownIdealDetails[0]?.MasterItemUOM}
-										</th>
-										<th className=' p-[3px] text-right text-nowrap text-sm'>Cost</th>
+										<th className='border p-[3px] text-left text-sm'>Cost</th>
 									</tr>
 								</thead>
 								<tbody>
-									{costBreakdownIdealDetails.map((item) => (
-										<tr>
-											<td className='border p-[3px] text-sm'>{item.MenuItemDescription}</td>
-											<td className='border p-[3px] text-sm'>{item.VariantLabel}</td>
-											<td className='border p-[3px] text-right text-sm'>
-												{item.MenuItemQuantitySold}
-											</td>
-											<td className='border p-[3px] text-right text-sm'>
-												{item.MasterItemRecipeUOMPerRecipe}
-											</td>
-											<td className='border p-[3px] text-right text-sm'>
-												{item.MasterItemQuantityPerRecipe.toFixed(4)}
-											</td>
-											<td className='border p-[3px] text-right text-sm'>
-												{item.MasterItemQuantityTotal.toFixed(2)}
-											</td>
-											<td className='border p-[3px] text-right text-sm'>
-												${sumOfCost(item.MasterItemQuantityTotal, item.MasterItemIdealUOMCost)}
-											</td>
-										</tr>
-									))}
-								</tbody>
-								<tfoot>
-									<tr className='sticky bottom-0 bg-gray-200'>
-										<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={5}>
-											Ideal Usage{' '}
+									<tr>
+										<td className='border p-[3px] text-left text-sm'>Actual Usage</td>
+										<td className='border p-[3px]  text-nowrap text-sm  text-right'>
+											{costBreakActualDetails?.usageCases?.toFixed(2)}
 										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+										<td className='border p-[3px]  text-nowrap text-sm  text-right'>
+											${costBreakActualDetails?.usageCost?.toFixed(2)}
+										</td>
+									</tr>
+									<tr>
+										<td className='border p-[3px] text-left text-sm'>Ideal Usage</td>
+										<td className='border p-[3px]  text-nowrap text-sm  text-right'>
 											{calculateMasterItemQuantityTotalSum(
 												costBreakdownIdealDetails,
 												'MasterItemQuantityTotal'
 											).toFixed(2)}
 										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+										<td className='border p-[3px]  text-nowrap text-sm  text-right'>
 											${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
 										</td>
 									</tr>
-								</tfoot>
+									<tr>
+										<td className='border p-[3px] text-left text-sm'>Variance Usage</td>
+										<td className='border p-[3px] text-right text-sm'>{totalVariancecs()}</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											${totalVariance()}
+										</td>
+									</tr>
+								</tbody>
 							</table>
-						</div>
-					)}
-				</div>
-
-				{/* Variance Section */}
-				<div className='my-1'>
-					<h3
-						onClick={(e) => {
-							e.preventDefault(), openCollapse('Variance');
-						}}
-						className='text-base font-semibold bg-orange-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
-					>
-						<span> Variance</span>
-						<span className='m-1 '>
-							{showAndHideBreakDown.Variance == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
-						</span>
-					</h3>
-					{showAndHideBreakDown.Variance == true && (
-						<table className='w-full border border-collapse'>
-							<thead className='bg-gray-100'>
-								<tr>
-									<th className='border p-[3px] text-left text-sm'>Details</th>
-									<th className='border p-[3px] text-left text-sm'>
-										#{costBreakdownIdealDetails[0]?.MasterItemUOM}
-									</th>
-									<th className='border p-[3px] text-left text-sm'>Cost</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td className='border p-[3px] text-left text-sm'>Actual Usage</td>
-									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
-										{costBreakActualDetails?.usageCases?.toFixed(2)}
-									</td>
-									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
-										${costBreakActualDetails?.usageCost?.toFixed(2)}
-									</td>
-								</tr>
-								<tr>
-									<td className='border p-[3px] text-left text-sm'>Ideal Usage</td>
-									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
-										{calculateMasterItemQuantityTotalSum(
-											costBreakdownIdealDetails,
-											'MasterItemQuantityTotal'
-										).toFixed(2)}
-									</td>
-									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
-										${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
-									</td>
-								</tr>
-								<tr>
-									<td className='border p-[3px] text-left text-sm'>Variance Usage</td>
-									<td className='border p-[3px] text-right text-sm'>{totalVariancecs()}</td>
-									<td className='border p-[3px]  text-nowrap text-sm text-right'>
-										${totalVariance()}
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					)}
+						)}
+					</div>
 				</div>
 			</div>
 		);
@@ -1702,7 +1708,7 @@ const ActualFoodCost = () => {
 						{renderBreakdownModal()}
 					</Modal>
 					<Modal title={'Warning'} isOpen={showWarnings} onClose={() => setShowWarnings(false)}>
-						<div className='p-4 w-[340px]'>
+						<div className='p-4'>
 							<p className='text-center'>
 								{`Not enough countsheets of ${Object.keys(viewMap).find(
 									(key) => viewMap[key] === countType
