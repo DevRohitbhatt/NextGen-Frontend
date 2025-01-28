@@ -14,11 +14,11 @@ export const formattingDataWithoutDollr = (value) => {
 	return value < 0
 		? `-${Math.abs(parseFloat(value)).toLocaleString('en-US', {
 				maximumFractionDigits: 2,
-				minimumFractionDigits: 2,
+				minimumFractionDigits: 0,
 		  })}`
 		: `${parseFloat(value).toLocaleString('en-US', {
 				maximumFractionDigits: 2,
-				minimumFractionDigits: 2,
+				minimumFractionDigits: 0,
 		  })}`;
 };
 
