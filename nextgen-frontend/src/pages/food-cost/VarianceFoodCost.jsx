@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from "react";
-import { getCall } from "../../apis/network";
-import { Steps } from "intro.js-react";
-import { useSelector } from "react-redux";
-import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
+import { useEffect, useState, useRef } from 'react';
+import { getCall } from '../../apis/network';
+import { Steps } from 'intro.js-react';
+import { useSelector } from 'react-redux';
+import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
 	Loader,
 	UnitSelector,
@@ -20,7 +20,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
 import varianceFoodCost from './../../assets/introJSSteps/varianceFoodCost';
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
-import { formattingData } from './../../functions/formatingCurrency';
+import { formattingData, formattingDataWithoutDollr } from './../../functions/formatingCurrency';
 
 const tooltips = {
 	actualUsageDollar:
@@ -78,12 +78,9 @@ const VarianceFoodCost = () => {
 	const [showDollarAmounts, setShowDollarAmounts] = useState(true);
 	const [showWarnings, setShowWarnings] = useState(false);
 
-  const [
-    isShowHideDepartmentsModalVisible,
-    setIsShowHideDepartmentsModalVisible,
-  ] = useState(false);
-  const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
-  const [checkedItems, setCheckedItems] = useState([]);
+	const [isShowHideDepartmentsModalVisible, setIsShowHideDepartmentsModalVisible] = useState(false);
+	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
+	const [checkedItems, setCheckedItems] = useState([]);
 
 	//dropdown variables
 	const [view, setView] = useState('Weekly');
@@ -226,7 +223,19 @@ const VarianceFoodCost = () => {
 			id: 'actualPct',
 			header: 'Actual %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'actualPct', getValue, true),
+			cell: ({ row, getValue }) => {
+				if (row.getCanExpand()) {
+					if (row.depth === 0) {
+						return `${formattingDataWithoutDollr(row.original.totalActualPct * 100)}%`;
+					} else if (row.depth === 1) {
+						return `${formattingDataWithoutDollr(row.original.departmentActualPct * 100)}%`;
+					} else {
+						return `${formattingDataWithoutDollr(row.original.subDptActualPct * 100)}%`;
+					}
+				} else {
+					return `${formattingDataWithoutDollr(getValue())}%`;
+				}
+			},
 			size: 90,
 			tooltip: tooltips.actualUsagePercent,
 		}),
@@ -249,7 +258,19 @@ const VarianceFoodCost = () => {
 			id: 'idealPct',
 			header: 'Ideal %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'idealPct', getValue, true),
+			cell: ({ row, getValue }) => {
+				if (row.getCanExpand()) {
+					if (row.depth === 0) {
+						return `${formattingDataWithoutDollr(row.original.totalIdealPct * 100)}%`;
+					} else if (row.depth === 1) {
+						return `${formattingDataWithoutDollr(row.original.departmentIdealPct * 100)}%`;
+					} else {
+						return `${formattingDataWithoutDollr(row.original.subDptIdealPct * 100)}%`;
+					}
+				} else {
+					return `${formattingDataWithoutDollr(getValue())}%`;
+				}
+			},
 			size: 90,
 			tooltip: tooltips.idealPercent,
 		}),
@@ -272,7 +293,19 @@ const VarianceFoodCost = () => {
 			id: 'variancePct',
 			header: 'Variance %',
 			dataType: 'number',
-			cell: ({ row, getValue }) => calculateSum(row, 'variancePct', getValue, true),
+			cell: ({ row, getValue }) => {
+				if (row.getCanExpand()) {
+					if (row.depth === 0) {
+						return `${formattingDataWithoutDollr(row.original.totalVariancePct * 100)}%`;
+					} else if (row.depth === 1) {
+						return `${formattingDataWithoutDollr(row.original.departmentVariancePct * 100)}%`;
+					} else {
+						return `${formattingDataWithoutDollr(row.original.subDptVariancePct * 100)}%`;
+					}
+				} else {
+					return `${formattingDataWithoutDollr(getValue())}%`;
+				}
+			},
 			size: 100,
 			tooltip: tooltips.varrianceUsagePercent,
 		}),
@@ -303,7 +336,13 @@ const VarianceFoodCost = () => {
 			id: 'comparisonName',
 			header: 'Comparison Name',
 			cell: ({ row, getValue }) =>
-				row.getCanExpand() ? row.original?.comparisonName : getValue() !== undefined ? getValue() : '',
+				row.getCanExpand()
+					? row.depth === 0
+						? row.original?.totalComparisonName
+						: row.original?.comparisonName
+					: getValue() !== undefined
+					? getValue()
+					: '',
 			dataType: 'string',
 			size: 160,
 			tooltip: tooltips.comparisonName,
@@ -314,7 +353,9 @@ const VarianceFoodCost = () => {
 			dataType: 'number',
 			cell: ({ row, getValue }) =>
 				row.getCanExpand()
-					? formattingData(row.original?.comparisonSales)
+					? row.depth === 0
+						? `${formattingData(row.original.totalComparisonSales)}`
+						: formattingData(row.original?.comparisonSales)
 					: getValue() !== undefined
 					? formattingData(getValue())
 					: '',
@@ -323,86 +364,75 @@ const VarianceFoodCost = () => {
 		}),
 	];
 
-  // calculate the sum of the subrows
-  const calculateSum = (row, field, getValue, isPercentage = false) => {
-    if (row.getCanExpand()) {
-      const sum = row.subRows
-        .reduce((acc, subrow) => {
-          if (subrow.getCanExpand()) {
-            return (
-              acc +
-              subrow.subRows.reduce((subAcc, subSubrow) => {
-                if (subSubrow.getCanExpand()) {
-                  const item = checkedItems.find(
-                    (item) =>
-                      item.name.split(/\/(.+)/)[1] ===
-                      subSubrow.original.subDepartment
-                  );
-                  return (
-                    subAcc +
-                    subSubrow.subRows.reduce(
-                      (subsubAcc, subsubsubrow) =>
-                        subsubAcc +
-                        (item?.includeInGrandTotal &&
-                        subsubsubrow.original[field]
-                          ? Number(subsubsubrow.original[field])
-                          : 0),
-                      0
-                    )
-                  );
-                } else {
-                  return (
-                    subAcc +
-                    (subSubrow.original[field]
-                      ? Number(subSubrow.original[field])
-                      : 0)
-                  );
-                }
-              }, 0)
-            );
-          } else {
-            return (
-              acc +
-              (subrow.original[field] ? Number(subrow.original[field]) : 0)
-            );
-          }
-        }, 0)
-        .toFixed(2);
-      if (isPercentage) {
-        return `${parseFloat(sum).toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}%`;
-      }
-      return sum < 0
-        ? `-$${Math.abs(parseFloat(sum)).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : `$${parseFloat(sum).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`;
-    } else {
-      const value = getValue();
-      if (!value) return isPercentage ? "0.00%" : "$0.00";
-      if (isPercentage) {
-        return `${parseFloat(value).toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}%`;
-      }
-      return value < 0
-        ? `-$${Math.abs(parseFloat(value)).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : `$${parseFloat(value).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`;
-    }
-  };
+	// calculate the sum of the subrows
+	const calculateSum = (row, field, getValue, isPercentage = false) => {
+		if (row.getCanExpand()) {
+			const sum = row.subRows
+				.reduce((acc, subrow) => {
+					if (subrow.getCanExpand()) {
+						return (
+							acc +
+							subrow.subRows.reduce((subAcc, subSubrow) => {
+								if (subSubrow.getCanExpand()) {
+									const item = checkedItems.find(
+										(item) => item.name.split(/\/(.+)/)[1] === subSubrow.original.subDepartment
+									);
+									return (
+										subAcc +
+										subSubrow.subRows.reduce(
+											(subsubAcc, subsubsubrow) =>
+												subsubAcc +
+												(item?.includeInGrandTotal && subsubsubrow.original[field]
+													? Number(subsubsubrow.original[field])
+													: 0),
+											0
+										)
+									);
+								} else {
+									return subAcc + (subSubrow.original[field] ? Number(subSubrow.original[field]) : 0);
+								}
+							}, 0)
+						);
+					} else {
+						return acc + (subrow.original[field] ? Number(subrow.original[field]) : 0);
+					}
+				}, 0)
+				.toFixed(2);
+			if (isPercentage) {
+				return `${parseFloat(sum).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return sum < 0
+				? `-$${Math.abs(parseFloat(sum)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(sum).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`;
+		} else {
+			const value = getValue();
+			if (!value) return isPercentage ? '0.00%' : '$0.00';
+			if (isPercentage) {
+				return `${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return value < 0
+				? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(value).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`;
+		}
+	};
 
 	useEffect(() => {
 		if (defaultUnitID) {
@@ -423,68 +453,68 @@ const VarianceFoodCost = () => {
 		}
 	}, [varianceFoodCostData]);
 
-  useEffect(() => {
-    setViewBy(viewby);
-  }, [isTableRendered]);
+	useEffect(() => {
+		setViewBy(viewby);
+	}, [isTableRendered]);
 
-  useEffect(() => {
-    if (new Date(selectedToDate) < new Date(selectedFromDate)) {
-      const toDate = new Date(selectedToDate);
-      const newFromDate = fromDateOptions
-        .map((option) => new Date(option.name))
-        .filter((date) => date < toDate)
-        .sort((a, b) => b - a)[0];
-      if (newFromDate) {
-        setSelectedFromDate(dateFormat(newFromDate, "mm-dd-yyyy"));
-      }
-    }
-  }, [selectedToDate]);
+	useEffect(() => {
+		if (new Date(selectedToDate) < new Date(selectedFromDate)) {
+			const toDate = new Date(selectedToDate);
+			const newFromDate = fromDateOptions
+				.map((option) => new Date(option.name))
+				.filter((date) => date < toDate)
+				.sort((a, b) => b - a)[0];
+			if (newFromDate) {
+				setSelectedFromDate(dateFormat(newFromDate, 'mm-dd-yyyy'));
+			}
+		}
+	}, [selectedToDate]);
 
-  useEffect(() => {
-    if (new Date(selectedFromDate) > new Date(selectedToDate)) {
-      const fromDate = new Date(selectedFromDate);
-      const toDate = new Date(selectedToDate);
+	useEffect(() => {
+		if (new Date(selectedFromDate) > new Date(selectedToDate)) {
+			const fromDate = new Date(selectedFromDate);
+			const toDate = new Date(selectedToDate);
 
-      if (fromDate > toDate) {
-        const newToDate = toDateOptions
-          .map((option) => new Date(option.name))
-          .filter((date) => date > fromDate)
-          .sort((a, b) => a - b)[0];
-        if (newToDate) {
-          setSelectedToDate(dateFormat(newToDate, "mm-dd-yyyy"));
-        }
-      }
-    }
-  }, [selectedFromDate]);
+			if (fromDate > toDate) {
+				const newToDate = toDateOptions
+					.map((option) => new Date(option.name))
+					.filter((date) => date > fromDate)
+					.sort((a, b) => a - b)[0];
+				if (newToDate) {
+					setSelectedToDate(dateFormat(newToDate, 'mm-dd-yyyy'));
+				}
+			}
+		}
+	}, [selectedFromDate]);
 
-  useEffect(() => {
-    const fetchShowHideDepartments = async () => {
-      try {
-        setCheckedItemsLoaded(false);
-        const getData = {
-          url: "getShowHideDepartments",
-          urlParams: {
-            companyId: companyID,
-          },
-        };
+	useEffect(() => {
+		const fetchShowHideDepartments = async () => {
+			try {
+				setCheckedItemsLoaded(false);
+				const getData = {
+					url: 'getShowHideDepartments',
+					urlParams: {
+						companyId: companyID,
+					},
+				};
 
-        const result = await getCall(getData);
+				const result = await getCall(getData);
 
-        const checkedItems = result.data.map((item) => ({
-          name: `${item.department}/${item.subdepartment}`,
-          showOnReport: item.includeInReport,
-          includeInGrandTotal: item.includeInTotal,
-        }));
+				const checkedItems = result.data.map((item) => ({
+					name: `${item.department}/${item.subdepartment}`,
+					showOnReport: item.includeInReport,
+					includeInGrandTotal: item.includeInTotal,
+				}));
 
-        setCheckedItems(checkedItems);
-        setCheckedItemsLoaded(true);
-      } catch (error) {
-        console.error("Error getting Show Hide Departments data: ", error);
-      }
-    };
+				setCheckedItems(checkedItems);
+				setCheckedItemsLoaded(true);
+			} catch (error) {
+				console.error('Error getting Show Hide Departments data: ', error);
+			}
+		};
 
-    fetchShowHideDepartments();
-  }, []);
+		fetchShowHideDepartments();
+	}, []);
 
 	useEffect(() => {
 		const fetchDates = async () => {
@@ -551,10 +581,35 @@ const VarianceFoodCost = () => {
 			if (result?.data && result?.data?.length === 0) {
 				setVarianceFoodCostData([]);
 			} else {
-				const newData = result.data?.flatMap((department) =>
+				const newData = result.data?.varianceFoodCostReportModels.flatMap((department) =>
 					department.subDepartments.flatMap((subDepartment) =>
 						subDepartment.varianceFoodCostModels.map((item) => ({
 							finalDepartment: 'TOTAL',
+							totalComparisonSales: Math.max(
+								...(result.data?.varianceFoodCostReportModels || []).flatMap((department) =>
+									department.subDepartments.flatMap((subDepartment) =>
+										subDepartment.varianceFoodCostModels.map((item) => item.comparisonSales)
+									)
+								)
+							),
+							totalComparisonName: (result.data?.varianceFoodCostReportModels || [])
+								.flatMap((department) =>
+									department.subDepartments.flatMap(
+										(subDepartment) => subDepartment.varianceFoodCostModels
+									)
+								)
+								.reduce((max, item) => (item.comparisonSales > max.comparisonSales ? item : max), {
+									comparisonSales: 0,
+								}).comparisonName,
+							totalActualPct: result.data?.actualPct,
+							totalIdealPct: result.data?.idealPct,
+							totalVariancePct: result.data?.variancePct,
+							departmentActualPct: department.actualPct,
+							departmentIdealPct: department.idealPct,
+							departmentVariancePct: department.variancePct,
+							subDptActualPct: subDepartment.actualPct,
+							subDptIdealPct: subDepartment.idealPct,
+							subDptVariancePct: subDepartment.variancePct,
 							comparisonName: item.comparisonName || 'Net Sales',
 							comparisonSales: item.comparisonSales || 0,
 							department: item.department,
@@ -677,19 +732,18 @@ const VarianceFoodCost = () => {
 		);
 	};
 
-  const handleShowHideDepartments = () => {
-    setIsShowHideDepartmentsModalVisible(false);
-    const newVarianceFoodCostData = varianceFoodCostData.filter((item) =>
-      checkedItems.some(
-        (checkedItem) =>
-          checkedItem.name === `${item.department}/${item.subDepartment}` &&
-          checkedItem.showOnReport
-      )
-    );
-    setIsTableRendered(false);
-    setColumns(generatedColumns);
-    setFilteredVarianceFoodCostData(newVarianceFoodCostData);
-  };
+	const handleShowHideDepartments = () => {
+		setIsShowHideDepartmentsModalVisible(false);
+		const newVarianceFoodCostData = varianceFoodCostData.filter((item) =>
+			checkedItems.some(
+				(checkedItem) =>
+					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
+			)
+		);
+		setIsTableRendered(false);
+		setColumns(generatedColumns);
+		setFilteredVarianceFoodCostData(newVarianceFoodCostData);
+	};
 
 	const handleShowColumns = (status, type) => {
 		setIsLoading(true);

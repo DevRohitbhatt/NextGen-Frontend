@@ -21,7 +21,11 @@ const ModalContent = styled.div`
 	border: 1px solid #888;
 	width: max-content;
 	max-width: 80%;
+	height: ${(props) => (props.windowHeight > 700 ? 'fit-content' : '80%')};
 	border-radius: 15px;
+	@media (max-height: 768px) {
+		height: ${(props) => (props.windowHeight > 700 ? 'fit-content' : '80%')};
+	}
 `;
 
 const ModalHeader = styled.div`
@@ -47,6 +51,7 @@ const CloseButton = styled(FaRegWindowClose)`
 
 export default function Modal({ children, isOpen, setIsOpen, onClose, setModalPosition, title }) {
 	const modalRef = React.useRef(null);
+	const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
 
 	useEffect(() => {
 		const updateModalPosition = () => {
@@ -56,16 +61,19 @@ export default function Modal({ children, isOpen, setIsOpen, onClose, setModalPo
 			}
 		};
 
-		updateModalPosition();
+		const handleResize = () => setWindowHeight(window.innerHeight);
 		window.addEventListener('resize', updateModalPosition);
+		window.addEventListener('resize', handleResize);
 
 		return () => {
 			window.removeEventListener('resize', updateModalPosition);
+			window.removeEventListener('resize', handleResize);
 		};
 	}, [isOpen]);
+
 	return isOpen ? (
 		<ModalContainer className='lg:!pt-[100px] !p-[10px] sm:!pt-[80px]' isOpen={isOpen}>
-			<ModalContent ref={modalRef} className='lg:!max-w-[80%] !max-w-full'>
+			<ModalContent ref={modalRef} className='lg:!max-w-[80%] !max-w-full' windowHeight={windowHeight}>
 				<ModalHeader>
 					{title}
 					<CloseButton onClick={onClose} />

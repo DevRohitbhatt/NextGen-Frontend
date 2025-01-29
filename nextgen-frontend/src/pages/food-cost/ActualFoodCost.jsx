@@ -1,25 +1,25 @@
-import { useEffect, useMemo, useState, useRef } from "react";
-import { getCall } from "../../apis/network";
-import { Steps } from "intro.js-react";
-import { useSelector } from "react-redux";
-import { CiSquareMinus, CiSquarePlus } from "react-icons/ci";
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { getCall } from '../../apis/network';
+import { Steps } from 'intro.js-react';
+import { useSelector } from 'react-redux';
+import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
-  Loader,
-  UnitSelector,
-  CalendarModal,
-  UnitModal,
-  ExportOptions,
-  PdfBuilder,
-  ExcelExport as exportToExcel,
-  TableHOC,
-  Dropdown,
-  Modal,
-  Run,
-} from "../../components";
-import { createColumnHelper } from "@tanstack/react-table";
-import actualFoodCosts from "../../assets/introJSSteps/actualFoodCosts";
-import dateFormat from "dateformat";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+	Loader,
+	UnitSelector,
+	CalendarModal,
+	UnitModal,
+	ExportOptions,
+	PdfBuilder,
+	ExcelExport as exportToExcel,
+	TableHOC,
+	Dropdown,
+	Modal,
+	Run,
+} from '../../components';
+import { createColumnHelper } from '@tanstack/react-table';
+import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
+import dateFormat from 'dateformat';
+import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
 const tooltips = {
 	begDollar:
@@ -361,86 +361,75 @@ const ActualFoodCost = () => {
 		}),
 	];
 
-  // calculate the sum of the subrows
-  const calculateSum = (row, field, getValue, isPercentage = false) => {
-    if (row.getCanExpand()) {
-      const sum = row.subRows
-        .reduce((acc, subrow) => {
-          if (subrow.getCanExpand()) {
-            return (
-              acc +
-              subrow.subRows.reduce((subAcc, subSubrow) => {
-                if (subSubrow.getCanExpand()) {
-                  const item = checkedItems.find(
-                    (item) =>
-                      item.name.split(/\/(.+)/)[1] ===
-                      subSubrow.original.subDepartment
-                  );
-                  return (
-                    subAcc +
-                    subSubrow.subRows.reduce(
-                      (subsubAcc, subsubsubrow) =>
-                        subsubAcc +
-                        (item?.includeInGrandTotal &&
-                        subsubsubrow.original[field]
-                          ? Number(subsubsubrow.original[field])
-                          : 0),
-                      0
-                    )
-                  );
-                } else {
-                  return (
-                    subAcc +
-                    (subSubrow.original[field]
-                      ? Number(subSubrow.original[field])
-                      : 0)
-                  );
-                }
-              }, 0)
-            );
-          } else {
-            return (
-              acc +
-              (subrow.original[field] ? Number(subrow.original[field]) : 0)
-            );
-          }
-        }, 0)
-        .toFixed(2);
-      if (isPercentage) {
-        return `${parseFloat(sum).toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}%`;
-      }
-      return sum < 0
-        ? `-$${Math.abs(parseFloat(sum)).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : `$${parseFloat(sum).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`;
-    } else {
-      const value = getValue();
-      if (!value) return isPercentage ? "0.00%" : "$0.00";
-      if (isPercentage) {
-        return `${parseFloat(value).toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}%`;
-      }
-      return value < 0
-        ? `-$${Math.abs(parseFloat(value)).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : `$${parseFloat(value).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`;
-    }
-  };
+	// calculate the sum of the subrows
+	const calculateSum = (row, field, getValue, isPercentage = false) => {
+		if (row.getCanExpand()) {
+			const sum = row.subRows
+				.reduce((acc, subrow) => {
+					if (subrow.getCanExpand()) {
+						return (
+							acc +
+							subrow.subRows.reduce((subAcc, subSubrow) => {
+								if (subSubrow.getCanExpand()) {
+									const item = checkedItems.find(
+										(item) => item.name.split(/\/(.+)/)[1] === subSubrow.original.subDepartment
+									);
+									return (
+										subAcc +
+										subSubrow.subRows.reduce(
+											(subsubAcc, subsubsubrow) =>
+												subsubAcc +
+												(item?.includeInGrandTotal && subsubsubrow.original[field]
+													? Number(subsubsubrow.original[field])
+													: 0),
+											0
+										)
+									);
+								} else {
+									return subAcc + (subSubrow.original[field] ? Number(subSubrow.original[field]) : 0);
+								}
+							}, 0)
+						);
+					} else {
+						return acc + (subrow.original[field] ? Number(subrow.original[field]) : 0);
+					}
+				}, 0)
+				.toFixed(2);
+			if (isPercentage) {
+				return `${parseFloat(sum).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return sum < 0
+				? `-$${Math.abs(parseFloat(sum)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(sum).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`;
+		} else {
+			const value = getValue();
+			if (!value) return isPercentage ? '0.00%' : '$0.00';
+			if (isPercentage) {
+				return `${parseFloat(value).toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})}%`;
+			}
+			return value < 0
+				? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`
+				: `$${parseFloat(value).toLocaleString('en-US', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2,
+				  })}`;
+		}
+	};
 
 	useEffect(() => {
 		if (defaultUnitID) {
@@ -454,11 +443,6 @@ const ActualFoodCost = () => {
 	useEffect(() => {
 		setColumns(generatedColumns);
 	}, [checkedItemsLoaded]);
-	useEffect(() => {
-		console.log('checkedItemsLoaded', checkedItemsLoaded);
-
-    setColumns(generatedColumns);
-  }, [checkedItemsLoaded]);
 
 	useEffect(() => {
 		if (actualFoodCostData.length > 0) {
@@ -466,68 +450,68 @@ const ActualFoodCost = () => {
 		}
 	}, [actualFoodCostData]);
 
-  useEffect(() => {
-    setViewBy(viewby);
-  }, [isTableRendered]);
+	useEffect(() => {
+		setViewBy(viewby);
+	}, [isTableRendered]);
 
-  useEffect(() => {
-    if (new Date(selectedToDate) < new Date(selectedFromDate)) {
-      const toDate = new Date(selectedToDate);
-      const newFromDate = fromDateOptions
-        .map((option) => new Date(option.name))
-        .filter((date) => date < toDate)
-        .sort((a, b) => b - a)[0];
-      if (newFromDate) {
-        setSelectedFromDate(dateFormat(newFromDate, "mm-dd-yyyy"));
-      }
-    }
-  }, [selectedToDate]);
+	useEffect(() => {
+		if (new Date(selectedToDate) < new Date(selectedFromDate)) {
+			const toDate = new Date(selectedToDate);
+			const newFromDate = fromDateOptions
+				.map((option) => new Date(option.name))
+				.filter((date) => date < toDate)
+				.sort((a, b) => b - a)[0];
+			if (newFromDate) {
+				setSelectedFromDate(dateFormat(newFromDate, 'mm-dd-yyyy'));
+			}
+		}
+	}, [selectedToDate]);
 
-  useEffect(() => {
-    if (new Date(selectedFromDate) > new Date(selectedToDate)) {
-      const fromDate = new Date(selectedFromDate);
-      const toDate = new Date(selectedToDate);
+	useEffect(() => {
+		if (new Date(selectedFromDate) > new Date(selectedToDate)) {
+			const fromDate = new Date(selectedFromDate);
+			const toDate = new Date(selectedToDate);
 
-      if (fromDate > toDate) {
-        const newToDate = toDateOptions
-          .map((option) => new Date(option.name))
-          .filter((date) => date > fromDate)
-          .sort((a, b) => a - b)[0];
-        if (newToDate) {
-          setSelectedToDate(dateFormat(newToDate, "mm-dd-yyyy"));
-        }
-      }
-    }
-  }, [selectedFromDate]);
+			if (fromDate > toDate) {
+				const newToDate = toDateOptions
+					.map((option) => new Date(option.name))
+					.filter((date) => date > fromDate)
+					.sort((a, b) => a - b)[0];
+				if (newToDate) {
+					setSelectedToDate(dateFormat(newToDate, 'mm-dd-yyyy'));
+				}
+			}
+		}
+	}, [selectedFromDate]);
 
-  useEffect(() => {
-    const fetchShowHideDepartments = async () => {
-      try {
-        setCheckedItemsLoaded(false);
-        const getData = {
-          url: "getShowHideDepartments",
-          urlParams: {
-            companyId: companyID,
-          },
-        };
+	useEffect(() => {
+		const fetchShowHideDepartments = async () => {
+			try {
+				setCheckedItemsLoaded(false);
+				const getData = {
+					url: 'getShowHideDepartments',
+					urlParams: {
+						companyId: companyID,
+					},
+				};
 
-        const result = await getCall(getData);
+				const result = await getCall(getData);
 
-        const checkedItems = result.data.map((item) => ({
-          name: `${item.department}/${item.subdepartment}`,
-          showOnReport: item.includeInReport,
-          includeInGrandTotal: item.includeInTotal,
-        }));
+				const checkedItems = result.data.map((item) => ({
+					name: `${item.department}/${item.subdepartment}`,
+					showOnReport: item.includeInReport,
+					includeInGrandTotal: item.includeInTotal,
+				}));
 
-        setCheckedItems(checkedItems);
-        setCheckedItemsLoaded(true);
-      } catch (error) {
-        console.error("Error getting Show Hide Departments data: ", error);
-      }
-    };
+				setCheckedItems(checkedItems);
+				setCheckedItemsLoaded(true);
+			} catch (error) {
+				console.error('Error getting Show Hide Departments data: ', error);
+			}
+		};
 
-    fetchShowHideDepartments();
-  }, []);
+		fetchShowHideDepartments();
+	}, []);
 
 	useEffect(() => {
 		const fetchDates = async () => {
@@ -693,18 +677,17 @@ const ActualFoodCost = () => {
 	const handleShowHideDepartments = () => {
 		setIsShowHideDepartments(false);
 
-    const newActualFoodCostData = actualFoodCostData.filter((item) =>
-      checkedItems.some(
-        (checkedItem) =>
-          checkedItem.name === `${item.department}/${item.subDepartment}` &&
-          checkedItem.showOnReport
-      )
-    );
+		const newActualFoodCostData = actualFoodCostData.filter((item) =>
+			checkedItems.some(
+				(checkedItem) =>
+					checkedItem.name === `${item.department}/${item.subDepartment}` && checkedItem.showOnReport
+			)
+		);
 
-    setIsTableRendered(false);
-    setColumns(generatedColumns);
-    setFilteredActualFoodCostData(newActualFoodCostData);
-  };
+		setIsTableRendered(false);
+		setColumns(generatedColumns);
+		setFilteredActualFoodCostData(newActualFoodCostData);
+	};
 
 	// Function to handle the PDF export
 	const handlePDFClick = (type) => {
@@ -1071,7 +1054,7 @@ const ActualFoodCost = () => {
 		};
 
 		return (
-			<div className='max-w-5xl mx-auto my-0 p-1 rounded-lg shadow-lg border bg-white min-w-[750px]'>
+			<div className='max-w-5xl p-4 mx-auto my-0 h-full rounded-lg shadow-lg border  bg-white lg:min-w-[750px]'>
 				{/* Header */}
 				<div className='text-center '>
 					<p className='text-sm text-gray-600'>{costBreakActualDetails.description}</p>
@@ -1080,342 +1063,348 @@ const ActualFoodCost = () => {
 					</p>
 				</div>
 
-				{/* Actual Section */}
-				<div className='my-1'>
-					<h3
-						onClick={(e) => {
-							e.preventDefault(), openCollapse('Actual');
-						}}
-						className='text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
-					>
-						<span>Actual</span>{' '}
-						<span className='m-1 '>
-							{showAndHideBreakDown.Actual == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
-						</span>
-					</h3>
-					{showAndHideBreakDown.Actual == true && (
-						<div className=''>
-							<table className='w-full border border-collapse'>
-								<thead className='bg-gray-100'>
-									<tr>
-										<th className='p-2 text-left border'></th>
-										<td></td>
-										<th className='border text-right  p-[3px]  text-nowrap text-sm'># UOM</th>
-										<th className='border text-right  p-[3px]  text-nowrap text-sm'>Value</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td className='border text-left  p-[3px]  text-nowrap text-sm'>
-											<div className='flex align-middle'>
-												<div className='p-1'>
-													<CiSquarePlus />
-												</div>
-												Beginning On-Hand Count: {selectedFromDate}
-											</div>
-										</td>
-										<td className='border   p-[3px]  text-nowrap text-sm text-center'></td>
-										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-											{costBreakActualDetails?.begCountDisplayUnits?.toFixed(4)}
-										</td>
-										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-											${costBreakActualDetails?.begCountCost?.toFixed(2)}
-										</td>
-									</tr>
-									<tr
-										className='cursor-pointer'
-										onClick={(e) => {
-											e.preventDefault(), openCollapse('purchaseBetween');
-										}}
-									>
-										<td className='border text-left  p-[3px]  text-nowrap text-sm '>
-											<div className='flex align-middle'>
-												{showAndHideBreakDown.purchaseBetween ? (
-													<div className='p-1'>
-														<CiSquareMinus />
-													</div>
-												) : (
+				<div className='overflow-auto border rounded-lg my-2 h-[90%] tableHOC'>
+					{/* Actual Section */}
+					<div className='mb-2'>
+						<h3
+							onClick={(e) => {
+								e.preventDefault(), openCollapse('Actual');
+							}}
+							className='text-base font-semibold bg-blue-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
+						>
+							<span>Actual</span>{' '}
+							<span className='m-1 '>
+								{showAndHideBreakDown.Actual == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
+							</span>
+						</h3>
+						{showAndHideBreakDown.Actual == true && (
+							<div className=''>
+								<table className='w-full border border-collapse'>
+									<thead className='bg-gray-100'>
+										<tr>
+											<th className='p-2 text-left border'></th>
+											<td></td>
+											<th className='border text-right  p-[3px]  text-nowrap text-sm'># UOM</th>
+											<th className='border text-right  p-[3px]  text-nowrap text-sm'>Value</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td className='border text-left  p-[3px]  text-nowrap text-sm'>
+												<div className='flex align-middle'>
 													<div className='p-1'>
 														<CiSquarePlus />
 													</div>
-												)}{' '}
-												Purchases between {selectedFromDate} and {selectedToDate}
-											</div>
-										</td>
-										<td className='border   p-[3px]  text-nowrap text-sm text-center'>+</td>
-										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-											{costBreakActualDetails?.purchaseCases?.toFixed(4)}
-										</td>
-										<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-											${costBreakActualDetails?.purchaseCost?.toFixed(2)}
-										</td>
-									</tr>
-									{showAndHideBreakDown.purchaseBetween == true && (
-										<tr className='ml-[10px] '>
-											<td colSpan={4}>
-												<table className='w-[97%] ml-[3%]'>
-													<thead className='bg-gray-100'>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Vendor
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Date
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Invoices #
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															#
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															UOM
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Price
-														</th>
-														<th className='border text-left  p-[3px]  text-nowrap text-sm'>
-															Total
-														</th>
-													</thead>
-													<tbody>
-														{breakDownIdealDetails.map((item) => (
-															<tr>
-																<td className='border text-left  p-[3px]  text-nowrap text-sm'>
-																	{item.VendorName}
-																</td>
-																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-																	{dateFormat(item.InvoiceDate, 'mm-dd-yyyy')}
-																</td>
-																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-																	{item.VendorInvoiceReference}
-																</td>
-																<td className='border text-center  p-[3px]  text-nowrap text-sm'>
-																	{item.Quantity.toFixed(6)}
-																</td>
-																<td className='border text-center  p-[3px]  text-nowrap text-sm'>
-																	{item.UnitOfMeasure}
-																</td>
-																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-																	${item.Price.toFixed(2)}
-																</td>
-																<td className='border text-right  p-[3px]  text-nowrap text-sm'>
-																	${item.TotalPrice.toFixed(2)}
-																</td>
-															</tr>
-														))}
-														{breakDownIdealDetails.length === 0 && (
-															<td colSpan={7}>
-																There is no any purchases in this period.
-															</td>
-														)}
-													</tbody>
-												</table>
+													Beginning On-Hand Count: {selectedFromDate}
+												</div>
+											</td>
+											<td className='border   p-[3px]  text-nowrap text-sm text-center'></td>
+											<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+												{costBreakActualDetails?.begCountDisplayUnits?.toFixed(4)}
+											</td>
+											<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+												${costBreakActualDetails?.begCountCost?.toFixed(2)}
 											</td>
 										</tr>
-									)}
-									<tr>
-										<td className='border p-[3px]  text-nowrap text-sm'>
-											<div className='flex align-middle'>
-												<div className='p-1'>
-													<CiSquarePlus />
-												</div>{' '}
-												Transferred In
-											</div>
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-center'>+</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											{costBreakActualDetails?.iTinCountCases}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											${costBreakActualDetails?.iTinCountCost}
-										</td>
-									</tr>
-									<tr>
-										<td className='border p-[3px]  text-nowrap text-sm'>
-											<div className='flex align-middle'>
-												<div className='p-1'>
-													<CiSquarePlus />
-												</div>{' '}
-												Transferred Out
-											</div>
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											{costBreakActualDetails?.iToutCountCases}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											${costBreakActualDetails?.iToutCountCost}
-										</td>
-									</tr>
-									<tr>
-										<td className='border p-[3px]  text-nowrap text-sm'>
-											<div className='flex align-middle'>
-												<div className='p-1'>
-													<CiSquarePlus />
-												</div>{' '}
-												Ending On-Hand Count: {selectedToDate}
-											</div>
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											{costBreakActualDetails?.endCountCases}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											${costBreakActualDetails?.endCountCost}
-										</td>
-									</tr>
-								</tbody>
-								<tfoot>
-									<tr className='bg-gray-200'>
-										<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={2}>
-											Actual Usage{' '}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											{costBreakActualDetails?.usageCases?.toFixed(2)}
-										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
-											${costBreakActualDetails?.usageCost?.toFixed(2)}
-										</td>
-									</tr>
-								</tfoot>
-							</table>
-						</div>
-					)}
-				</div>
+										<tr
+											className='cursor-pointer'
+											onClick={(e) => {
+												e.preventDefault(), openCollapse('purchaseBetween');
+											}}
+										>
+											<td className='border text-left  p-[3px]  text-nowrap text-sm '>
+												<div className='flex align-middle'>
+													{showAndHideBreakDown.purchaseBetween ? (
+														<div className='p-1'>
+															<CiSquareMinus />
+														</div>
+													) : (
+														<div className='p-1'>
+															<CiSquarePlus />
+														</div>
+													)}{' '}
+													Purchases between {selectedFromDate} and {selectedToDate}
+												</div>
+											</td>
+											<td className='border   p-[3px]  text-nowrap text-sm text-center'>+</td>
+											<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+												{costBreakActualDetails?.purchaseCases?.toFixed(4)}
+											</td>
+											<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+												${costBreakActualDetails?.purchaseCost?.toFixed(2)}
+											</td>
+										</tr>
+										{showAndHideBreakDown.purchaseBetween == true && (
+											<tr className='ml-[10px] '>
+												<td colSpan={4}>
+													<table className='w-[97%] ml-[3%]'>
+														<thead className='bg-gray-100'>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Vendor
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Date
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Invoices #
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																#
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																UOM
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Price
+															</th>
+															<th className='border text-left  p-[3px]  text-nowrap text-sm'>
+																Total
+															</th>
+														</thead>
+														<tbody>
+															{breakDownIdealDetails.map((item) => (
+																<tr>
+																	<td className='border text-left  p-[3px]  text-nowrap text-sm'>
+																		{item.VendorName}
+																	</td>
+																	<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																		{dateFormat(item.InvoiceDate, 'mm-dd-yyyy')}
+																	</td>
+																	<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																		{item.VendorInvoiceReference}
+																	</td>
+																	<td className='border text-center  p-[3px]  text-nowrap text-sm'>
+																		{item.Quantity.toFixed(6)}
+																	</td>
+																	<td className='border text-center  p-[3px]  text-nowrap text-sm'>
+																		{item.UnitOfMeasure}
+																	</td>
+																	<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																		${item.Price.toFixed(2)}
+																	</td>
+																	<td className='border text-right  p-[3px]  text-nowrap text-sm'>
+																		${item.TotalPrice.toFixed(2)}
+																	</td>
+																</tr>
+															))}
+															{breakDownIdealDetails.length === 0 && (
+																<td colSpan={7}>
+																	There is no any purchases in this period.
+																</td>
+															)}
+														</tbody>
+													</table>
+												</td>
+											</tr>
+										)}
+										<tr>
+											<td className='border p-[3px]  text-nowrap text-sm'>
+												<div className='flex align-middle'>
+													<div className='p-1'>
+														<CiSquarePlus />
+													</div>{' '}
+													Transferred In
+												</div>
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-center'>+</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{costBreakActualDetails?.iTinCountCases}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${costBreakActualDetails?.iTinCountCost}
+											</td>
+										</tr>
+										<tr>
+											<td className='border p-[3px]  text-nowrap text-sm'>
+												<div className='flex align-middle'>
+													<div className='p-1'>
+														<CiSquarePlus />
+													</div>{' '}
+													Transferred Out
+												</div>
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{costBreakActualDetails?.iToutCountCases}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${costBreakActualDetails?.iToutCountCost}
+											</td>
+										</tr>
+										<tr>
+											<td className='border p-[3px]  text-nowrap text-sm'>
+												<div className='flex align-middle'>
+													<div className='p-1'>
+														<CiSquarePlus />
+													</div>{' '}
+													Ending On-Hand Count: {selectedToDate}
+												</div>
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-center'>-</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{costBreakActualDetails?.endCountCases}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${costBreakActualDetails?.endCountCost}
+											</td>
+										</tr>
+									</tbody>
+									<tfoot>
+										<tr className='bg-gray-200'>
+											<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={2}>
+												Actual Usage{' '}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{costBreakActualDetails?.usageCases?.toFixed(2)}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${costBreakActualDetails?.usageCost?.toFixed(2)}
+											</td>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+						)}
+					</div>
 
-				{/* Ideal Section */}
-				<div className='my-1'>
-					<h3
-						onClick={(e) => {
-							e.preventDefault(), openCollapse('ideal');
-						}}
-						className='text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
-					>
-						<span>Ideal</span>{' '}
-						<span className='m-1 '>
-							{showAndHideBreakDown.ideal == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
-						</span>
-					</h3>
-					{showAndHideBreakDown.ideal == true && (
-						<div className='tableHOC pr-1 max-h-[20vh] overflow-auto'>
-							<table className='w-full border-collapse '>
-								<thead className='sticky top-0 bg-gray-100'>
+					{/* Ideal Section */}
+					<div className='w-full my-2 overflow-x-auto'>
+						<h3
+							onClick={(e) => {
+								e.preventDefault(), openCollapse('ideal');
+							}}
+							className='text-base font-semibold bg-green-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
+						>
+							<span>Ideal</span>{' '}
+							<span className='m-1 '>
+								{showAndHideBreakDown.ideal == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
+							</span>
+						</h3>
+						{showAndHideBreakDown.ideal == true && (
+							<div className='pr-1 overflow-auto tableHOC'>
+								<table className='w-full border-collapse '>
+									<thead className='sticky top-0 bg-gray-100'>
+										<tr>
+											<th className=' p-[3px] text-left text-sm'>Menu Item</th>
+											<th className=' p-[3px] text-left text-nowrap text-sm'>Recipe</th>
+											<th className=' p-[3px] text-right text-nowrap text-sm'># Sold</th>
+											<th className=' p-[3px] text-right text-nowrap text-sm'>
+												#{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName} in Recipe
+											</th>
+											<th className=' p-[3px] text-right text-nowrap text-sm'>
+												# {costBreakdownIdealDetails[0]?.MasterItemUOM}
+											</th>
+											<th className=' p-[3px] text-righ text-nowrapt text-sm'>
+												Total # {costBreakdownIdealDetails[0]?.MasterItemUOM}
+											</th>
+											<th className=' p-[3px] text-right text-nowrap text-sm'>Cost</th>
+										</tr>
+									</thead>
+									<tbody>
+										{costBreakdownIdealDetails.map((item) => (
+											<tr>
+												<td className='border p-[3px] text-sm'>{item.MenuItemDescription}</td>
+												<td className='border p-[3px] text-sm'>{item.VariantLabel}</td>
+												<td className='border p-[3px] text-right text-sm'>
+													{item.MenuItemQuantitySold}
+												</td>
+												<td className='border p-[3px] text-right text-sm'>
+													{item.MasterItemRecipeUOMPerRecipe}
+												</td>
+												<td className='border p-[3px] text-right text-sm'>
+													{item.MasterItemQuantityPerRecipe.toFixed(4)}
+												</td>
+												<td className='border p-[3px] text-right text-sm'>
+													{item.MasterItemQuantityTotal.toFixed(2)}
+												</td>
+												<td className='border p-[3px] text-right text-sm'>
+													$
+													{sumOfCost(
+														item.MasterItemQuantityTotal,
+														item.MasterItemIdealUOMCost
+													)}
+												</td>
+											</tr>
+										))}
+									</tbody>
+									<tfoot>
+										<tr className='sticky -bottom-[1px] bg-gray-200'>
+											<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={5}>
+												Ideal Usage{' '}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												{calculateMasterItemQuantityTotalSum(
+													costBreakdownIdealDetails,
+													'MasterItemQuantityTotal'
+												).toFixed(2)}
+											</td>
+											<td className='border p-[3px]  text-nowrap text-sm text-right'>
+												${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
+											</td>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+						)}
+					</div>
+
+					{/* Variance Section */}
+					<div className='my-2'>
+						<h3
+							onClick={(e) => {
+								e.preventDefault(), openCollapse('Variance');
+							}}
+							className='text-base font-semibold bg-orange-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
+						>
+							<span> Variance</span>
+							<span className='m-1 '>
+								{showAndHideBreakDown.Variance == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
+							</span>
+						</h3>
+						{showAndHideBreakDown.Variance == true && (
+							<table className='w-full border border-collapse'>
+								<thead className='bg-gray-100'>
 									<tr>
-										<th className=' p-[3px] text-left text-sm'>Menu Item</th>
-										<th className=' p-[3px] text-left text-nowrap text-sm'>Recipe</th>
-										<th className=' p-[3px] text-right text-nowrap text-sm'># Sold</th>
-										<th className=' p-[3px] text-right text-nowrap text-sm'>
-											#{costBreakdownIdealDetails[0]?.MasterItemRecipeUOMName} in Recipe
+										<th className='border p-[3px] text-left text-sm'>Details</th>
+										<th className='border p-[3px] text-left text-sm'>
+											#{costBreakdownIdealDetails[0]?.MasterItemUOM}
 										</th>
-										<th className=' p-[3px] text-right text-nowrap text-sm'>
-											# {costBreakdownIdealDetails[0]?.MasterItemUOM}
-										</th>
-										<th className=' p-[3px] text-righ text-nowrapt text-sm'>
-											Total # {costBreakdownIdealDetails[0]?.MasterItemUOM}
-										</th>
-										<th className=' p-[3px] text-right text-nowrap text-sm'>Cost</th>
+										<th className='border p-[3px] text-left text-sm'>Cost</th>
 									</tr>
 								</thead>
 								<tbody>
-									{costBreakdownIdealDetails.map((item) => (
-										<tr>
-											<td className='border p-[3px] text-sm'>{item.MenuItemDescription}</td>
-											<td className='border p-[3px] text-sm'>{item.VariantLabel}</td>
-											<td className='border p-[3px] text-right text-sm'>
-												{item.MenuItemQuantitySold}
-											</td>
-											<td className='border p-[3px] text-right text-sm'>
-												{item.MasterItemRecipeUOMPerRecipe}
-											</td>
-											<td className='border p-[3px] text-right text-sm'>
-												{item.MasterItemQuantityPerRecipe.toFixed(4)}
-											</td>
-											<td className='border p-[3px] text-right text-sm'>
-												{item.MasterItemQuantityTotal.toFixed(2)}
-											</td>
-											<td className='border p-[3px] text-right text-sm'>
-												${sumOfCost(item.MasterItemQuantityTotal, item.MasterItemIdealUOMCost)}
-											</td>
-										</tr>
-									))}
-								</tbody>
-								<tfoot>
-									<tr className='sticky bottom-0 bg-gray-200'>
-										<td className='border p-[3px]  text-nowrap text-sm text-left' colSpan={5}>
-											Ideal Usage{' '}
+									<tr>
+										<td className='border p-[3px] text-left text-sm'>Actual Usage</td>
+										<td className='border p-[3px]  text-nowrap text-sm  text-right'>
+											{costBreakActualDetails?.usageCases?.toFixed(2)}
 										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+										<td className='border p-[3px]  text-nowrap text-sm  text-right'>
+											${costBreakActualDetails?.usageCost?.toFixed(2)}
+										</td>
+									</tr>
+									<tr>
+										<td className='border p-[3px] text-left text-sm'>Ideal Usage</td>
+										<td className='border p-[3px]  text-nowrap text-sm  text-right'>
 											{calculateMasterItemQuantityTotalSum(
 												costBreakdownIdealDetails,
 												'MasterItemQuantityTotal'
 											).toFixed(2)}
 										</td>
-										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+										<td className='border p-[3px]  text-nowrap text-sm  text-right'>
 											${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
 										</td>
 									</tr>
-								</tfoot>
+									<tr>
+										<td className='border p-[3px] text-left text-sm'>Variance Usage</td>
+										<td className='border p-[3px] text-right text-sm'>{totalVariancecs()}</td>
+										<td className='border p-[3px]  text-nowrap text-sm text-right'>
+											${totalVariance()}
+										</td>
+									</tr>
+								</tbody>
 							</table>
-						</div>
-					)}
-				</div>
-
-				{/* Variance Section */}
-				<div className='my-1'>
-					<h3
-						onClick={(e) => {
-							e.preventDefault(), openCollapse('Variance');
-						}}
-						className='text-base font-semibold bg-orange-100 py-[4px] px-1 rounded-t-md flex justify-between cursor-pointer'
-					>
-						<span> Variance</span>
-						<span className='m-1 '>
-							{showAndHideBreakDown.Variance == true ? <IoIosArrowUp /> : <IoIosArrowDown />}
-						</span>
-					</h3>
-					{showAndHideBreakDown.Variance == true && (
-						<table className='w-full border border-collapse'>
-							<thead className='bg-gray-100'>
-								<tr>
-									<th className='border p-[3px] text-left text-sm'>Details</th>
-									<th className='border p-[3px] text-left text-sm'>
-										#{costBreakdownIdealDetails[0]?.MasterItemUOM}
-									</th>
-									<th className='border p-[3px] text-left text-sm'>Cost</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td className='border p-[3px] text-left text-sm'>Actual Usage</td>
-									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
-										{costBreakActualDetails?.usageCases?.toFixed(2)}
-									</td>
-									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
-										${costBreakActualDetails?.usageCost?.toFixed(2)}
-									</td>
-								</tr>
-								<tr>
-									<td className='border p-[3px] text-left text-sm'>Ideal Usage</td>
-									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
-										{calculateMasterItemQuantityTotalSum(
-											costBreakdownIdealDetails,
-											'MasterItemQuantityTotal'
-										).toFixed(2)}
-									</td>
-									<td className='border p-[3px]  text-nowrap text-sm  text-right'>
-										${calculateTotalCost(costBreakdownIdealDetails).toFixed(2)}
-									</td>
-								</tr>
-								<tr>
-									<td className='border p-[3px] text-left text-sm'>Variance Usage</td>
-									<td className='border p-[3px] text-right text-sm'>{totalVariancecs()}</td>
-									<td className='border p-[3px]  text-nowrap text-sm text-right'>
-										${totalVariance()}
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					)}
+						)}
+					</div>
 				</div>
 			</div>
 		);
@@ -1469,7 +1458,7 @@ const ActualFoodCost = () => {
 								onOptionChange={handleViewChange}
 							/>
 						</div>
-            <Run fetchData={fetchActualFoodCostReport} />
+						<Run fetchData={fetchActualFoodCostReport} />
 					</div>
 					<div>
 						<ExportOptions
@@ -1719,7 +1708,7 @@ const ActualFoodCost = () => {
 						{renderBreakdownModal()}
 					</Modal>
 					<Modal title={'Warning'} isOpen={showWarnings} onClose={() => setShowWarnings(false)}>
-						<div className='p-4 w-[340px]'>
+						<div className='p-4'>
 							<p className='text-center'>
 								{`Not enough countsheets of ${Object.keys(viewMap).find(
 									(key) => viewMap[key] === countType
