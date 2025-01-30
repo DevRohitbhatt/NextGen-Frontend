@@ -252,8 +252,12 @@ const LaborAudit = () => {
 
       const result = await getCall(getData);
 
+      const schedulePostedData = result.data.filter((item) =>
+        item.Activity.includes('SchedulePosted')
+      );
+
       setIsVersionFetched(true);
-      fetchLaborAudit(result.data);
+      fetchLaborAudit(schedulePostedData);
     } catch {
       setIsError(true);
     }
