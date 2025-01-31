@@ -58,7 +58,7 @@ export const SuggestedOrderAPI = {
 	submit: async function (data, cancel = false) {
 		const response = await api.request({
 			method: 'POST',
-			url: `/api/suggestedOrder/submitOrderToVendor?companyID=${data.companyID}`,
+			url: `/api/suggestedOrder/SubmitSuggestedOrder?companyID=${data.companyID}`,
 			data,
 			signal: cancel ? cancelApiObject[this.submit.name].handleRequestCancellation().signal : undefined,
 		});

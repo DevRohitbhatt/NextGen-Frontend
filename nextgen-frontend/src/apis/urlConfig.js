@@ -14,7 +14,7 @@ const urlConfig = {
 	getOrderItem: '/api/suggestedOrder/getSuggestedOrderDetails',
 	getPurchaseOrderDetails: '/api/order/getpurchaseorderdetails',
 	saveSuggestedOrder: '/api/suggestedorder/savesuggestedorder',
-	submitSuggestedOrder: '/api/suggestedOrder/submitOrderToVendor',
+	submitSuggestedOrder: '/api/suggestedOrder/SubmitSuggestedOrder',
 
 	//invoices details
 	getInvoiceDetailsData: '/api/foodcost/getInvoiceDetailsData',
