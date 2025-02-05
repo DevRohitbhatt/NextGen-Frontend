@@ -48,7 +48,7 @@ const InventoryWeeksOnHand = () => {
 
 	//dropdown variables
 	const [usage, setUsage] = useState('4 Weeks Avg - Actual');
-	const [weekBefore, setWeekBefore] = useState(1);
+	const [weekBefore, setWeekBefore] = useState(4);
 	const dropdownOptions = [
 		{ name: 'Last Week Avg - Actual' },
 		{ name: '2 Weeks Avg - Actual' },
