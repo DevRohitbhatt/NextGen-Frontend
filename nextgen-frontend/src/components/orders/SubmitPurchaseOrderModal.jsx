@@ -198,12 +198,7 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 				autoClose: 3000,
 			});
 			onClose();
-			if (isPDFSelected) {
-				suggestedOrderFunctions.submitSuggestedOrderPDF(orderDetails);
-			} else {
-				suggestedOrderFunctions.submitSuggestedOrderCSV(orderDetails, formatFileName());
-			}
-
+			
 			navigate('/SuggestedOrderList');
 		} catch (error) {
 			toast.update('submit-toast', {
@@ -213,6 +208,11 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 			});
 			console.error('Error submitting Suggested Order', error);
 			onClose();
+		}
+		if (isPDFSelected) {
+			suggestedOrderFunctions.submitSuggestedOrderPDF(orderDetails);
+		} else {
+			suggestedOrderFunctions.submitSuggestedOrderCSV(orderDetails, formatFileName());
 		}
 	};
 

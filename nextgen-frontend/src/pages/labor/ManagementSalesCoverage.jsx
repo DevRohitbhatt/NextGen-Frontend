@@ -559,7 +559,7 @@ const ManagementSalesCoverage = () => {
 							onOptionChange={(option) => setJobType(option)}
 						/>
 					</div>
-					<Run onClick={fetchMgmtSalesCoverageReport} />
+					<Run fetchData={fetchMgmtSalesCoverageReport} />
 				</div>
 				<div>
 					<ExportOptions
