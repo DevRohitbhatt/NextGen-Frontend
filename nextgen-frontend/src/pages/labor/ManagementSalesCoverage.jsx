@@ -525,7 +525,7 @@ const ManagementSalesCoverage = () => {
 	);
 
 	return (
-		<div className='w-[85%] mx-auto'>
+		<div className='w-[98%] mx-auto'>
 			<Steps
 				enabled={introSteps.stepsEnabled}
 				steps={introSteps.steps}
@@ -559,7 +559,7 @@ const ManagementSalesCoverage = () => {
 							onOptionChange={(option) => setJobType(option)}
 						/>
 					</div>
-					<Run onClick={fetchMgmtSalesCoverageReport} />
+					<Run fetchData={fetchMgmtSalesCoverageReport} />
 				</div>
 				<div>
 					<ExportOptions
