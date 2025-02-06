@@ -129,10 +129,8 @@ const Discounts = () => {
 			columnHelper.accessor('salesGenerated', {
 				id: 'salesGenerated',
 				header: 'Sales $ Generated',
-				cell: ({ row, getValue }) =>
-					row.getCanExpand()
-						? ''
-						: `${getValue() !== null && getValue() !== undefined ? formattingData(getValue()) : '0.00'}`,
+				cell: ({ getValue }) =>
+					`${getValue() !== null && getValue() !== undefined ? formattingData(getValue()) : '0.00'}`,
 				dataType: 'price',
 				footer: ({ table }) => (
 					<div className='text-center'>{formattingData(calculateFooterSum(table, 'salesGenerated'))}</div>
@@ -440,16 +438,28 @@ const Discounts = () => {
 					new Set(result.data.flatMap((item) => item.weeks.map((week) => week.weekId)))
 				).sort();
 
-				const weeks = uniqueWeeks.map((weekId) => {
-					const startDate = new Date(selectedFromDate.getFullYear(), 0, 1 + (weekId - 2) * 7);
-					const endDate = new Date(startDate);
-					endDate.setDate(endDate.getDate() + 6);
-					return {
-						weekId,
-						WeekStartDate: dateFormat(startDate, 'mm-dd-yy'),
-						WeekEndDate: dateFormat(endDate, 'mm-dd-yy'),
-					};
-				});
+				const getWeekRange = (startDate, endDate, uniqueWeeks) => {
+					const weeks = [];
+					let currentStartDate = new Date(startDate);
+					currentStartDate.setDate(currentStartDate.getDate() - currentStartDate.getDay() + 1);
+
+					for (let i = 0; i < uniqueWeeks?.length; i++) {
+						const currentEndDate = new Date(currentStartDate);
+						currentEndDate.setDate(currentEndDate.getDate() + 6);
+
+						weeks.push({
+							weekId: uniqueWeeks[i],
+							WeekStartDate: dateFormat(currentStartDate, 'mm-dd-yy'),
+							WeekEndDate: dateFormat(currentEndDate, 'mm-dd-yy'),
+						});
+
+						currentStartDate.setDate(currentStartDate.getDate() + 7);
+					}
+
+					return weeks;
+				};
+
+				const weeks = getWeekRange(selectedFromDate, selectedToDate, uniqueWeeks);
 
 				const generatedColumns = [
 					columnHelper.accessor('discountType', {
@@ -460,6 +470,7 @@ const Discounts = () => {
 					}),
 					columnHelper.group({
 						header: 'Total',
+						customClass: 'border-r border-[var(--primary-color)]',
 						columns: [
 							columnHelper.accessor('totalDiscountAmount', {
 								id: 'totalDiscountAmount',
@@ -509,6 +520,7 @@ const Discounts = () => {
 							columnHelper.accessor('totaldiscountedTickets', {
 								id: 'totaldiscountedTickets',
 								header: 'Disc Cost %',
+								customClass: 'border-r border-[var(--primary-color)]',
 								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
 								dataType: 'percent',
 								footer: ({ table }) => (
@@ -524,6 +536,7 @@ const Discounts = () => {
 							header: `Week ${weekId} (${weeks.find((week) => week.weekId === weekId).WeekStartDate} - ${
 								weeks.find((week) => week.weekId === weekId).WeekEndDate
 							})`,
+							customClass: 'border-r border-[var(--primary-color)]',
 							columns: [
 								columnHelper.accessor(
 									(row) => {
@@ -610,6 +623,7 @@ const Discounts = () => {
 										header: 'Disc Cost %',
 										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
 										dataType: 'percent',
+										customClass: 'border-r border-[var(--primary-color)]',
 										footer: ({ table }) => (
 											<div className='text-center'>
 												{formattingDataWithoutDollr(calculatePctFooter(table, weekId))}%

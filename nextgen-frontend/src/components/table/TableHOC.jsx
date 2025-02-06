@@ -195,7 +195,7 @@ function TableHOC({
 												<th
 													key={header.id}
 													colSpan={header.colSpan}
-													className='py-2 text-[14px] px-[5px] shadow-[0_-1px_0_var(--tw-primary)_inset]'
+													className={`py-2 text-[14px] px-[5px] shadow-[0_-1px_0_var(--tw-primary)_inset] ${header.column.columnDef.customClass}`}
 													style={{
 														minWidth: header.getSize(),
 														width: 'auto',
@@ -275,8 +275,14 @@ function TableHOC({
 													<th
 														key={header.id}
 														colSpan={header.colSpan}
-														className='p-1 py-2 text-right border-b border-gray-300 cursor-pointer text-[12px] px-[5px]'
-														style={{ width: header.getSize() }}
+														className='p-1 py-2 text-right border-b border-gray-300 cursor-pointer text-[12px] px-[5px] shadow-[0_-1px_0_var(--tw-primary)_inset]'
+														style={{
+															minWidth: header.getSize(),
+															width: 'auto',
+															...(header.column.columnDef.pinDirection
+																? getCommonPinningStyles(header.column, 'header')
+																: {}),
+														}}
 													>
 														{header.isPlaceholder ? null : (
 															<>
@@ -319,7 +325,7 @@ function TableHOC({
 										return (
 											<td
 												key={cell.id}
-												className={`${dataPosition} text-nowrap text-[12px] px-[5px]`}
+												className={`${dataPosition} text-nowrap text-[12px] px-[5px] ${cell.column.columnDef.customClass}`}
 												style={
 													cell.column.columnDef.pinDirection
 														? getCommonPinningStyles(cell.column)
@@ -347,7 +353,7 @@ function TableHOC({
 						<tfoot className='sticky z-[2] bg-white h-fit -bottom-1 shadow-[0_1px_0_var(--tw-primary)_inset]'>
 							{table.getFooterGroups().map((footerGroup) => (
 								<>
-									<tr className='' key={footerGroup.id}>
+									<tr className='shadow-[0_1px_0_var(--tw-primary)_inset]' key={footerGroup.id}>
 										{footerGroup.headers.map((footer) => (
 											<td
 												key={footer.id}

@@ -59,8 +59,7 @@ const urlConfig = {
 	getGrossProfitCategoryItems: '/api/sales/GetGrossProfitCategoryItems',
 	getShowHideDepartments: '/api/foodcost/GetActualFoodCostShowHideDepartment',
 	getVendorItems: '/api/foodcost/getVendorItems',
-	getLaborJobType: 'api/labor/getLaborJobType',
-	getMgmtSalesCoverage: 'api/labor/getManagementSalesCoverage',
+
 	//Sales apis
 	hourlySales: 'api/sales/GetSalesHourlyReportData',
 	voids: 'api/sales/getVoidsReportData',
@@ -89,6 +88,8 @@ const urlConfig = {
 	getLaborAuditDateRange: 'api/labor/GetEmployeesSchedulesSchedule',
 	laborAudit: 'api/labor/GetLaborAuditReportData',
 	versionOneCheck: 'api/User/ GetUserActivity',
+	getLaborJobType: 'api/labor/getLaborJobType',
+	getMgmtSalesCoverage: 'api/labor/getManagementSalesCoverage',
 
 	//Menu item
 	MenuItemsByCompanyID: 'api/menus/getMenuItemsByCompanyID',

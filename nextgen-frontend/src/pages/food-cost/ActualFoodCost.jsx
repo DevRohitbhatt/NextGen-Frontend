@@ -720,7 +720,7 @@ const ActualFoodCost = () => {
 	const buildPDFBody = (type) => {
 		const rowsPerTable = 28;
 
-		const data = type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData;
+		const data = filteredActualFoodCostData;
 
 		const headers = columns.slice(1);
 		const body = [];
@@ -815,7 +815,7 @@ const ActualFoodCost = () => {
 					{ name: 'Comparison Name', filter: 'text' },
 					{ name: 'Comparison Sales', filter: 'text' },
 				],
-				data: (type === 'filtered' ? filteredActualFoodCostData : actualFoodCostData).map((row) => ({
+				data: filteredActualFoodCostData.map((row) => ({
 					department: row.department,
 					subDepartment: row.subDepartment,
 					description: row.description,
