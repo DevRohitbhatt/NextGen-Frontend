@@ -11,10 +11,10 @@ const urlConfig = {
 	getAllPayPeriodDates: '/api/company/settings/getAllPayPeriodDates',
 	//suggested order apis
 	orderList: '/api/order/GetOrderList',
-	getOrderItem: '/api/suggestedorder/getvendorinventoryitems',
+	getOrderItem: '/api/suggestedOrder/getSuggestedOrderDetails',
 	getPurchaseOrderDetails: '/api/order/getpurchaseorderdetails',
 	saveSuggestedOrder: '/api/suggestedorder/savesuggestedorder',
-	submitSuggestedOrder: '/api/suggestedorder/submitsuggestedorderheader',
+	submitSuggestedOrder: '/api/suggestedOrder/SubmitSuggestedOrder',
 
 	//invoices details
 	getInvoiceDetailsData: '/api/foodcost/getInvoiceDetailsData',

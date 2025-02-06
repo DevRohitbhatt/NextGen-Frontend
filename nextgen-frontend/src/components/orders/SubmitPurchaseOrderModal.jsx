@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Modal, SimpleTable } from '../index';
 import * as suggestedOrderFunctions from '../../functions/suggestedOrderFunctions';
 import { toast } from 'react-toastify';
-import "react-toastify/dist/ReactToastify.css";
+import 'react-toastify/dist/ReactToastify.css';
 import { postCall } from '../../apis/network';
 
 const FormRow = styled.div`
@@ -86,12 +86,13 @@ const SubmitButton = styled.button`
 	}
 `;
 
-export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, vendorName }) {
+export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, vendorIsIntegrated, vendorName }) {
 	const [isPDFSelected, setIsPDFSelected] = useState(true);
 	const [isCSVSelected, setIsCSVSelected] = useState(false);
 	const [isVendorItemRefSelected, setIsVendorItemRefSelected] = useState(true);
 	const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
 	const [orderDetails, setOrderDetails] = useState([]);
+	const [submitOrderToVendor, setSubmitOrderToVendor] = useState(true);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -102,11 +103,21 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 
 	useEffect(() => {
 		if (orderDetails.length > 0) {
+			console.log('orderDetails', orderDetails);
+
 			setIsPreviewLoaded(true);
 		} else {
 			setIsPreviewLoaded(false);
 		}
 	}, [orderDetails]);
+
+	useEffect(() => {
+		if (vendorIsIntegrated) {
+			setSubmitOrderToVendor(true);
+		} else {
+			setSubmitOrderToVendor(false);
+		}
+	}, [vendorIsIntegrated]);
 
 	const tableHeaders = [
 		{
@@ -165,12 +176,19 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 		}
 
 		try {
+			const newOrderData = {
+				...orderData,
+				submitOrderToVendor,
+			};
+
+			console.log('newOrderData', newOrderData);
+
 			const postData = {
 				url: 'submitSuggestedOrder',
 				urlParams: {
 					companyID: orderData.companyID,
 				},
-				bodyData: orderData,
+				bodyData: newOrderData,
 			};
 
 			await postCall(postData);
@@ -180,12 +198,7 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 				autoClose: 3000,
 			});
 			onClose();
-			if (isPDFSelected) {
-				suggestedOrderFunctions.submitSuggestedOrderPDF(orderDetails);
-			} else {
-				suggestedOrderFunctions.submitSuggestedOrderCSV(orderDetails, formatFileName());
-			}
-
+			
 			navigate('/SuggestedOrderList');
 		} catch (error) {
 			toast.update('submit-toast', {
@@ -196,19 +209,51 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 			console.error('Error submitting Suggested Order', error);
 			onClose();
 		}
+		if (isPDFSelected) {
+			suggestedOrderFunctions.submitSuggestedOrderPDF(orderDetails);
+		} else {
+			suggestedOrderFunctions.submitSuggestedOrderCSV(orderDetails, formatFileName());
+		}
 	};
 
 	return (
 		<Modal isOpen={isOpen} setIsOpen={onClose} onClose={onClose} title='Submit Suggested Order'>
-			<div className='flex w-full mt-7'>
-				<div className=" px-4 ">
-					<div className=' flex justify-between m-5 items-center' onClick={updateExportType}>
+			<div className='flex w-full '>
+				<div className='px-4 '>
+					<div className='flex items-center justify-between m-5 ' onClick={updateExportType}>
 						<div>How would you like to submit the Suggested Order?</div>
-						<div className=' flex justify-center '>
-							<div className={` my-auto ml-2 px-3 py-1 rounded-s-full border-2 border-[var(--tw-primary)] text-[var(--tw-primary)] relative cursor-pointer transition-all  ${isPDFSelected && `bg-[var(--tw-primary)] text-white`}`}>PDF</div>
-							<div className={` my-auto px-3 py-1 rounded-e-full border-2 border-[var(--tw-primary)] text-[var(--tw-primary)] relative cursor-pointer transition-all  ${isCSVSelected && `bg-[var(--tw-primary)] text-white`}`}>CSV</div>
+						<div className='flex justify-center '>
+							<div
+								className={` my-auto ml-2 px-3 py-1 rounded-s-full border-2 border-[var(--tw-primary)] text-[var(--tw-primary)] relative cursor-pointer transition-all  ${
+									isPDFSelected && `bg-[var(--tw-primary)] text-white`
+								}`}
+							>
+								PDF
+							</div>
+							<div
+								className={` my-auto px-3 py-1 rounded-e-full border-2 border-[var(--tw-primary)] text-[var(--tw-primary)] relative cursor-pointer transition-all  ${
+									isCSVSelected && `bg-[var(--tw-primary)] text-white`
+								}`}
+							>
+								CSV
+							</div>
 						</div>
 					</div>
+					{vendorIsIntegrated && (
+						<div className='ml-7'>
+							<label className='inline-flex items-center cursor-pointer'>
+								<input
+									type='checkbox'
+									value=''
+									checked={submitOrderToVendor}
+									onChange={() => setSubmitOrderToVendor(!submitOrderToVendor)}
+									className='sr-only peer'
+								/>
+								<div className="relative w-7 h-4 bg-gray-200 peer-focus:outline-none    rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all  peer-checked:bg-[var(--tw-primary)] "></div>
+								<span className='ml-2 font-medium'>Submit Order to Vendor</span>
+							</label>
+						</div>
+					)}
 					<FormRow $isDisabled={true}>
 						<SubmitModalText>How would you like to sort the order?</SubmitModalText>
 						<SubmitModalButtonContainer>
@@ -217,13 +262,13 @@ export default function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, v
 						</SubmitModalButtonContainer>
 					</FormRow>
 					{!isPreviewLoaded ? (
-						<div className=' text-xl m-auto w-full text-center '>Loading Preview</div>
+						<div className='w-full m-auto text-xl text-center '>Loading Preview</div>
 					) : (
 						<div className=''>
 							<SimpleTable headers={tableHeaders} data={orderDetails} />
 						</div>
 					)}
-					<div className=' flex justify-between m-5 items-center '>
+					<div className='flex items-center justify-between m-5 '>
 						<div></div>
 						<SubmitButton onClick={handleSubmit}>Submit</SubmitButton>
 					</div>
