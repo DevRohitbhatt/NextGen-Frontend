@@ -146,6 +146,7 @@ const ManagementSalesCoverage = () => {
 		columnHelper.accessor('scheduledShifts', {
 			id: 'scheduledShifts',
 			header: 'Scheduled shifts',
+			cell:({getValue}) => <div className='text-left'>{getValue()}</div>
 		}),
 		columnHelper.accessor('actualShifts', {
 			id: 'actualShifts',
@@ -428,53 +429,84 @@ const ManagementSalesCoverage = () => {
 
 		return body;
 	};
-
 	const formatPDFData = (data) => {
+		let totalProjectedSalesCoverage = 0;
+		let totalActualSalesPerCoverage = 0;
+		const rows = data.flatMap((row) =>
+		  row.subRows.map((subRow) => {
+			const projectedValue = Number(subRow.projectedSalesPerCoverage) || 0;
+			const actualsaleValue = Number(subRow.actualSalesPerCoverage) || 0;
+			totalProjectedSalesCoverage += projectedValue;
+			totalActualSalesPerCoverage += actualsaleValue
+	  
+			return [
+			  {
+				value: row.unit,
+				cellType: 'text',
+				columnName: 'Unit',
+			  },
+			  {
+				value: subRow.date,
+				cellType: 'text',
+				columnName: 'Date',
+			  },
+			  {
+				value:
+				  `${formattingDataWithoutDollr(subRow.projectedSalesPerCoverage)}%` ||
+				  '0.00%',
+				cellType: 'text',
+				columnName: 'Projected Sales % Coverage',
+			  },
+			  {
+				value:
+				  `${formattingDataWithoutDollr(subRow.actualSalesPerCoverage)}%` ||
+				  '0.00%',
+				cellType: 'text',
+				columnName: 'Actual Sales % Coverage',
+			  },
+			  {
+				value: subRow.scheduledShifts,
+				cellType: 'text',
+				columnName: 'Scheduled shifts',
+			  },
+			  {
+				value: subRow.actualShifts,
+				cellType: 'text',
+				columnName: 'Actual shifts',
+			  },
+			];
+		  })
+		);
+
+		const footerRow = [
+		  { value: 'Total', cellType: 'text', columnName: 'Unit' },
+		  { value: '', cellType: 'text', columnName: 'Date' },
+		  {
+			value: `${formattingDataWithoutDollr(totalProjectedSalesCoverage)}%`,
+			cellType: 'text',
+			columnName: 'Projected Sales % Coverage',
+		  },
+		  { value:  `${formattingDataWithoutDollr(totalActualSalesPerCoverage)}%`, cellType: 'text', columnName: 'Actual Sales % Coverage' },
+		  { value: '', cellType: 'text', columnName: 'Scheduled shifts' },
+		  { value: '', cellType: 'text', columnName: 'Actual shifts' },
+		];
+	  
+		// Append the footer row at the end of the rows array.
+		rows.push(footerRow);
+	  
 		return {
-			columnHeaders: [
-				'Unit',
-				'Date',
-				'Projected Sales % Coverage',
-				'Actual Sales % Coverage',
-				'Scheduled shifts',
-				'Actual shifts',
-			],
-			rows: data.flatMap((row) =>
-				row.subRows.map((subRow) => [
-					{
-						value: row.unit,
-						cellType: 'text',
-						columnName: 'Unit',
-					},
-					{
-						value: subRow.date,
-						cellType: 'text',
-						columnName: 'Date',
-					},
-					{
-						value: `${formattingDataWithoutDollr(subRow.projectedSalesPerCoverage)}%` || '0.00%',
-						cellType: 'text',
-						columnName: 'Projected Sales % Coverage',
-					},
-					{
-						value: `${formattingDataWithoutDollr(subRow.actualSalesPerCoverage)}%` || '0.00%',
-						cellType: 'text',
-						columnName: 'Actual Sales % Coverage',
-					},
-					{
-						value: subRow.scheduledShifts,
-						cellType: 'text',
-						columnName: 'Scheduled shifts',
-					},
-					{
-						value: subRow.actualShifts,
-						cellType: 'text',
-						columnName: 'Actual shifts',
-					},
-				])
-			),
+		  columnHeaders: [
+			'Unit',
+			'Date',
+			'Projected Sales % Coverage',
+			'Actual Sales % Coverage',
+			'Scheduled shifts',
+			'Actual shifts',
+		  ],
+		  rows: rows,
 		};
-	};
+	  };
+	
 
 	const handleExcelClick = () => {
 		const data = [
