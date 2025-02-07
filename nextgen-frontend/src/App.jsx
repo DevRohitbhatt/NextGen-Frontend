@@ -40,7 +40,7 @@ import {
 	CookChart,
 	CookChartTemplate,
 	SalesSummary,
-	LaborAudit
+	LaborAudit,
 } from './pages';
 import { Suspense } from 'react';
 
@@ -154,6 +154,7 @@ const App = () => {
 								<Route path='/SalesVsLabor' element={<SalesVsLabor />} />
 								<Route path='/BusinessSummary' element={<BusinessSummary />} />
 								<Route path='/MenuGrossProfit' element={<MenuGrossProfit />} />
+								<Route path='/SalesSummary' element={<SalesSummary />} />
 
 								{/* Labor */}
 								<Route path='/EmployeeInformation' element={<EmployeeInformation />} />
@@ -162,9 +163,7 @@ const App = () => {
 								<Route path='/LaborCICO' element={<LaborCICO />} />
 								<Route path='/LaborAnalysis' element={<LaborAnalysis />} />
 								<Route path='/ManagementSalesCoverage' element={<ManagementSalesCoverage />} />
-								<Route path='/SalesSummary' element={<SalesSummary />} />
-								<Route path='/LaborAudit' element={<LaborAudit/>}/>
-								
+								<Route path='/LaborAudit' element={<LaborAudit />} />
 							</Routes>
 						</Suspense>
 					</div>

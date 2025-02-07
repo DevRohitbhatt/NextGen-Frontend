@@ -260,7 +260,7 @@ const BusinessSummary = () => {
 						Object.keys(data)
 							.filter((key) => !['description'].includes(key))
 							.forEach((key) => {
-								data[key] = `$${parseInt(data[key]).toLocaleString('en-US')}`;
+								data[key] = `${parseInt(data[key]).toLocaleString('en-US')}`;
 							});
 					} else {
 						Object.keys(data)
@@ -300,8 +300,6 @@ const BusinessSummary = () => {
 							})
 						),
 				];
-
-				console.log('newData', newData);
 
 				setColumns(generatedColumns);
 				setBusinessSummaryData(newData);
