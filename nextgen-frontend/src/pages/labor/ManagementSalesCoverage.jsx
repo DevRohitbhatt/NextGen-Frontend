@@ -430,15 +430,9 @@ const ManagementSalesCoverage = () => {
 		return body;
 	};
 	const formatPDFData = (data) => {
-		let totalProjectedSalesCoverage = 0;
-		let totalActualSalesPerCoverage = 0;
+	
 		const rows = data.flatMap((row) =>
 		  row.subRows.map((subRow) => {
-			const projectedValue = Number(subRow.projectedSalesPerCoverage) || 0;
-			const actualsaleValue = Number(subRow.actualSalesPerCoverage) || 0;
-			totalProjectedSalesCoverage += projectedValue;
-			totalActualSalesPerCoverage += actualsaleValue
-	  
 			return [
 			  {
 				value: row.unit,
@@ -482,11 +476,11 @@ const ManagementSalesCoverage = () => {
 		  { value: 'Total', cellType: 'text', columnName: 'Unit' },
 		  { value: '', cellType: 'text', columnName: 'Date' },
 		  {
-			value: `${formattingDataWithoutDollr(totalProjectedSalesCoverage)}%`,
+			value: `${formattingDataWithoutDollr(data[0].projectedSalesPerCoverage)}%`,
 			cellType: 'text',
 			columnName: 'Projected Sales % Coverage',
 		  },
-		  { value:  `${formattingDataWithoutDollr(totalActualSalesPerCoverage)}%`, cellType: 'text', columnName: 'Actual Sales % Coverage' },
+		  { value:  `${formattingDataWithoutDollr(data[0].actualSalesPerCoverage)}%`, cellType: 'text', columnName: 'Actual Sales % Coverage' },
 		  { value: '', cellType: 'text', columnName: 'Scheduled shifts' },
 		  { value: '', cellType: 'text', columnName: 'Actual shifts' },
 		];
@@ -508,45 +502,114 @@ const ManagementSalesCoverage = () => {
 	  };
 	
 
-	const handleExcelClick = () => {
-		const data = [
-			{
-				name: '',
-				columns: [
-					{ name: 'Work Week', filter: 'text' },
-					{ name: 'Unit', filter: 'text' },
-					{ name: 'Date', filter: 'text' },
-					{ name: 'Projected Sales % Coverage', filter: 'text' },
-					{ name: 'Actual Sales % Coverage', filter: 'text' },
-					{ name: 'Scheduled shifts', filter: 'text' },
-					{ name: 'Actual shifts', filter: 'text' },
-				],
-				data: mgmtSalesCoverageData.flatMap((week) =>
-					week.subRows.flatMap((unit) =>
-						unit.subRows.map((date) => ({
-							week: `Week ${week.weekNumber}: ${week.week}`,
-							unit: unit.unit,
-							date: date.date,
-							projectedSalesPerCoverage: formattingDataWithoutDollr(date.projectedSalesPerCoverage),
-							actualSalesPerCoverage: formattingDataWithoutDollr(date.actualSalesPerCoverage),
-							scheduledShifts: date.scheduledShifts,
-							actualShifts: date.actualShifts,
-						}))
-					)
-				),
-			},
-		];
+	// const handleExcelClick = () => {
+	// 	const data = [
+	// 		{
+	// 			name: '',
+	// 			columns: [
+	// 				{ name: 'Work Week', filter: 'text' },
+	// 				{ name: 'Unit', filter: 'text' },
+	// 				{ name: 'Date', filter: 'text' },
+	// 				{ name: 'Projected Sales % Coverage', filter: 'text' },
+	// 				{ name: 'Actual Sales % Coverage', filter: 'text' },
+	// 				{ name: 'Scheduled shifts', filter: 'text' },
+	// 				{ name: 'Actual shifts', filter: 'text' },
+	// 			],
+	// 			data: mgmtSalesCoverageData.flatMap((week) =>
+	// 				week.subRows.flatMap((unit) =>
+	// 					unit.subRows.map((date) => ({
+	// 						week: `Week ${week.weekNumber}: ${week.week}`,
+	// 						unit: unit.unit,
+	// 						date: date.date,
+	// 						projectedSalesPerCoverage: formattingDataWithoutDollr(date.projectedSalesPerCoverage),
+	// 						actualSalesPerCoverage: formattingDataWithoutDollr(date.actualSalesPerCoverage),
+	// 						scheduledShifts: date.scheduledShifts,
+	// 						actualShifts: date.actualShifts,
+	// 					}))
+	// 				)
+	// 			),
+	// 		},
+	// 	];
+		
+	// 	const filename = `Management_Sales_Coverage_${selectedUnitName}_${dateFormat(
+	// 		selectedFromDate,
+	// 		'mm-dd-yyyy'
+	// 	)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
+	// 	const spreadSheetTitle = 'Management Sales Coverage Report';
+	// 	const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 
+	// 	exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
+	// };
+	const handleExcelClick = () => {
+		// For each week, create its rows along with a footer row.
+		const tableData = mgmtSalesCoverageData.flatMap((week) => {
+		  // Build all rows for the current week.
+		  const weekRows = week.subRows.flatMap((unit) =>
+			unit.subRows.map((date) => ({
+			  week: `Week ${week.weekNumber}: ${week.week}`,
+			  unit: unit.unit,
+			  date: date.date,
+			  projectedSalesPerCoverage: formattingDataWithoutDollr(date.projectedSalesPerCoverage),
+			  actualSalesPerCoverage: formattingDataWithoutDollr(date.actualSalesPerCoverage),
+			  scheduledShifts: date.scheduledShifts,
+			  actualShifts: date.actualShifts,
+			}))
+		  );
+	  
+		  // Compute the total for projectedSalesPerCoverage for this week.
+		  let weekTotal = 0;
+		  let weekTotalactualSales = 0;
+		  week.subRows.forEach((unit) => {
+			  weekTotal = Number(unit.projectedSalesPerCoverage) || 0;
+			  weekTotalactualSales = Number(unit.actualSalesPerCoverage) || 0;
+		  });
+	  
+		  // Append the footer row for the current week.
+		  weekRows.push({
+			week: 'Total', // Footer label in the "Work Week" column.
+			unit: '',
+			date: '',
+			projectedSalesPerCoverage: formattingDataWithoutDollr(weekTotal) + '%',
+			actualSalesPerCoverage: formattingDataWithoutDollr(weekTotalactualSales) + '%',
+			scheduledShifts: '',
+			actualShifts: '',
+		  });
+	  
+		  return weekRows;
+		});
+	  
+		// Prepare the Excel table object.
+		// Make sure the keys in the tableData objects match the names defined in the columns.
+		const data = [
+		  {
+			name: '',
+			columns: [
+			  { name: 'Work Week', filter: 'text' },
+			  { name: 'Unit', filter: 'text' },
+			  { name: 'Date', filter: 'text' },
+			  { name: 'Projected Sales % Coverage', filter: 'text' },
+			  { name: 'Actual Sales % Coverage', filter: 'text' },
+			  { name: 'Scheduled shifts', filter: 'text' },
+			  { name: 'Actual shifts', filter: 'text' },
+			],
+			data: tableData,
+		  },
+		];
+	  
 		const filename = `Management_Sales_Coverage_${selectedUnitName}_${dateFormat(
-			selectedFromDate,
-			'mm-dd-yyyy'
+		  selectedFromDate,
+		  'mm-dd-yyyy'
 		)}_to_${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
 		const spreadSheetTitle = 'Management Sales Coverage Report';
-		const date = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(selectedToDate, 'mm-dd-yyyy')}`;
-
-		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
-	};
-
+		const dateStr = `${dateFormat(selectedFromDate, 'mm-dd-yyyy')} to ${dateFormat(
+		  selectedToDate,
+		  'mm-dd-yyyy'
+		)}`;
+	  
+		exportToExcel(data, filename, spreadSheetTitle, dateStr, selectedUnitName);
+	  };
+	  
+	  
 	const Table = (
 		<TableHOC
 			columns={columns}
