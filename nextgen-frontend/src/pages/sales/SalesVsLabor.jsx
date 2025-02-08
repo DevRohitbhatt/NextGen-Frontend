@@ -545,7 +545,8 @@ const SalesVsLabor = () => {
 						columnHeaders: columns.slice(1).map((column) => column.header),
 						rows: salesVsLaborData.map((row) =>
 							columns.slice(1).map((column) => ({
-								value: row[column.id],
+								
+								value: column.id === "grossSales" || column.id === "variableLaborDollars" ? formattingData(row[column.id]) : column.id === "variableLaborHours" ? parseFloat(row[column.id]).toFixed(2) : column.id === "laborPercent" ?  parseFloat(row[column.id]).toFixed(2) + "%" : row[column.id],
 								cellType: column.dataType,
 								columnName: column.header,
 							}))
@@ -564,7 +565,7 @@ const SalesVsLabor = () => {
 		const csvData = salesVsLaborData.map((row) =>
 			columns
 				.slice(1)
-				.map((column) => `"${row[column.id]}"`)
+				.map((column) => `"${column.id === "grossSales" || column.id === "variableLaborDollars" ? formattingData(row[column.id]) : column.id === "variableLaborHours" ? parseFloat(row[column.id]).toFixed(2) : column.id === "laborPercent" ?  parseFloat(row[column.id]).toFixed(2) + "%" : row[column.id]}"`)
 				.join(',')
 		);
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
@@ -582,7 +583,7 @@ const SalesVsLabor = () => {
 			{
 				name: '',
 				columns: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
-				data: salesVsLaborData.map((row) => columns.slice(1).map((column) => row[column.id])),
+				data: salesVsLaborData.map((row) => columns.slice(1).map((column) => column.id === "grossSales" || column.id === "variableLaborDollars" ? formattingData(row[column.id]) : column.id === "variableLaborHours" ? parseFloat(row[column.id]).toFixed(2) : column.id === "laborPercent" ?  parseFloat(row[column.id]).toFixed(2) + "%" : row[column.id])),
 			},
 		];
 
@@ -700,21 +701,7 @@ const SalesVsLabor = () => {
               ))}
           </div>
         )}
-				{isError ? (
-					<div>{errorMessage}</div>
-				) : (
-					<div className='relative w-full min-h-56'>
-						<Loader loading={isLoading} />
-						{!isLoading &&
-							(salesVsLaborData.length > 0 ? (
-								<div className='paged-table'>{Table}</div>
-							) : !selectedUnit ? (
-								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
-							) : (
-								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
-							))}
-					</div>
-				)}
+				
 
         <div>
           <UnitModal
