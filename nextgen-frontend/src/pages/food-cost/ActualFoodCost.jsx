@@ -103,6 +103,7 @@ const ActualFoodCost = () => {
 	const [isExportFilteredViewDropDownVisible, setIsExportFilteredViewDropDownVisible] = useState(false);
 	const [checkedItemsLoaded, setCheckedItemsLoaded] = useState(false);
 	const [tableState, setTableState] = useState(false);
+	const [finalTableLoading, setFinalTableLoading] = useState([]);
 
 	//IntroJS variables for the help steps
 	const [introSteps, setIntroSteps] = useState({
@@ -485,6 +486,14 @@ const ActualFoodCost = () => {
 	}, [selectedFromDate]);
 
 	useEffect(() => {
+		setFinalTableLoading(true);
+
+		setTimeout(() => {
+			setFinalTableLoading(false);
+		}, 500);
+	}, [viewby]);
+
+	useEffect(() => {
 		const fetchShowHideDepartments = async () => {
 			try {
 				setCheckedItemsLoaded(false);
@@ -561,6 +570,7 @@ const ActualFoodCost = () => {
 			setIsLoading(true);
 			setIsError(false);
 			setIsTableRendered(false);
+			setFinalTableLoading(true);
 
 			const getData = {
 				url: 'ActualFoodCost',
@@ -624,6 +634,9 @@ const ActualFoodCost = () => {
 				setFilteredActualFoodCostData(newData);
 			}
 			setIsLoading(false);
+			setTimeout(() => {
+				setFinalTableLoading(false);
+			}, 3000);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -1601,7 +1614,16 @@ const ActualFoodCost = () => {
 
 							{!isLoading &&
 								(actualFoodCostData.length > 0 ? (
-									<div className='paged-table'>{Table}</div>
+									<div className='relative'>
+										<div
+											className={`paged-table ${finalTableLoading ? 'opacity-0' : 'opacity-100'}`}
+										>
+											{Table}
+										</div>
+										<div className='absolute top-0 left-0 flex items-center justify-center w-full h-64'>
+											<Loader loading={finalTableLoading} />
+										</div>
+									</div>
 								) : !selectedUnit ? (
 									<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
 								) : (
