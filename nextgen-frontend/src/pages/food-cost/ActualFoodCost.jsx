@@ -20,6 +20,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import actualFoodCosts from '../../assets/introJSSteps/actualFoodCosts';
 import dateFormat from 'dateformat';
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
+import { formattingDataWithoutDollr } from '../../functions/formatingCurrency';
 
 const tooltips = {
 	begDollar:
@@ -757,7 +758,7 @@ const ActualFoodCost = () => {
 						rows: data.slice(i, i + rowsPerTable).map((row) =>
 							columnChunk.map((column) => ({
 								value:
-									column.header?.includes('$') || column.header === 'Comparison Sales'
+									column.header?.includes('$') || column.header === 'Comparison Net Sales'
 										? formattingData(row[column.id])
 										: formatCellValue(row[column.id], column.dataType),
 								cellType: column.dataType,
@@ -826,7 +827,7 @@ const ActualFoodCost = () => {
 					{ name: 'Waste $', filter: 'text' },
 					{ name: 'Waste %', filter: 'text' },
 					{ name: 'Comparison Name', filter: 'text' },
-					{ name: 'Comparison Sales', filter: 'text' },
+					{ name: 'Comparison Net Sales', filter: 'text' },
 				],
 				data: filteredActualFoodCostData.map((row) => ({
 					department: row.department,
@@ -834,23 +835,23 @@ const ActualFoodCost = () => {
 					description: row.description,
 					UOM: row.countDisplayUnitName,
 					begNumber: row.begCountDisplayUnits?.toFixed(2),
-					begDollar: row.begCountCost?.toFixed(2),
+					begDollar: formattingData(row.begCountCost),
 					purNumber: row.purchaseDisplayUnits?.toFixed(2),
-					purDollar: row.purchaseCost?.toFixed(2),
+					purDollar: formattingData(row.purchaseCost),
 					trInNumber: row.iTinCountDisplayUnits?.toFixed(2),
-					trInDollar: row.iTinCountCost?.toFixed(2),
+					trInDollar: formattingData(row.iTinCountCost),
 					trOutNumber: row.iToutCountDisplayUnits?.toFixed(2),
-					trOutDollar: row.iToutCountCost?.toFixed(2),
+					trOutDollar: formattingData(row.iToutCountCost),
 					endNumber: row.endCountDisplayUnits?.toFixed(2),
-					endDollar: row.endCountCost?.toFixed(2),
+					endDollar: formattingData(row.endCountCost),
 					useNumber: row.usageCountDisplayUnits?.toFixed(2),
-					useDollar: row.usageCost?.toFixed(2),
-					usePct: row.usageCostPct?.toFixed(2),
+					useDollar: formattingData(row.usageCost),
+					usePct: `${formattingDataWithoutDollr(row.usageCostPct)}%`,
 					wasteNumber: row.wasteCountDisplayUnits?.toFixed(2),
-					wasteDollar: row.wasteCountCost?.toFixed(2),
-					wasteCostPct: row.wasteCostPct?.toFixed(2),
+					wasteDollar: formattingData(row.wasteCountCost),
+					wasteCostPct: `${formattingDataWithoutDollr(row.wasteCostPct)}%`,
 					comparisonName: row.comparisonName,
-					comparisonSales: row.comparisonSales?.toFixed(2),
+					comparisonSales: formattingData(row.comparisonSales),
 				})),
 			},
 		];
@@ -1616,11 +1617,17 @@ const ActualFoodCost = () => {
 								(actualFoodCostData.length > 0 ? (
 									<div className='relative'>
 										<div
-											className={`paged-table ${finalTableLoading ? 'opacity-0' : 'opacity-100'}`}
+											className={`paged-table ${
+												finalTableLoading ? 'opacity-0 z-0' : 'opacity-100 z-10'
+											}`}
 										>
 											{Table}
 										</div>
-										<div className='absolute top-0 left-0 flex items-center justify-center w-full h-64'>
+										<div
+											className={`absolute top-0 left-0 flex items-center justify-center w-full h-64 ${
+												finalTableLoading ? 'block z-10' : 'hidden z-0'
+											}`}
+										>
 											<Loader loading={finalTableLoading} />
 										</div>
 									</div>
