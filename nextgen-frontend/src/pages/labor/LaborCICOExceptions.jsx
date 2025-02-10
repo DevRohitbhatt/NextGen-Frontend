@@ -384,7 +384,7 @@ const LaborCICOExceptions = () => {
 	const handleCSVClick = () => {
 		const csvHeaders = (groupBy !== 'None' ? columns.slice(1) : columns).map((column) => column.header);
 		const csvData = laborCICOExceptionsData.map((row) =>
-			(groupBy !== 'None' ? columns.slice(1) : columns).map((column) => `"${row[column.id]}"`).join(',')
+			(groupBy !== 'None' ? columns.slice(1) : columns).map((column) => `"${column.id == "totalCost" ? formattingData(row[column.id]) : row[column.id]}"`).join(',')
 		);
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
 		const blob = new Blob([csvString], { type: 'text/csv' });
@@ -404,7 +404,7 @@ const LaborCICOExceptions = () => {
 					name: column.header,
 				})),
 				data: laborCICOExceptionsData.map((row) =>
-					(groupBy !== 'None' ? columns.slice(1) : columns).map((column) => row[column.id])
+					(groupBy !== 'None' ? columns.slice(1) : columns).map((column) => column.id == "totalCost" ? formattingData(row[column.id]) : row[column.id])
 				),
 			},
 		];

@@ -521,7 +521,8 @@ const SalesVsLabor = () => {
 						columnHeaders: columns.slice(1).map((column) => column.header),
 						rows: salesVsLaborData.map((row) =>
 							columns.slice(1).map((column) => ({
-								value: row[column.id],
+								
+								value: column.id === "grossSales" || column.id === "variableLaborDollars" ? formattingData(row[column.id]) : column.id === "variableLaborHours" ? parseFloat(row[column.id]).toFixed(2) : column.id === "laborPercent" ?  parseFloat(row[column.id]).toFixed(2) + "%" : row[column.id],
 								cellType: column.dataType,
 								columnName: column.header,
 							}))
@@ -540,7 +541,7 @@ const SalesVsLabor = () => {
 		const csvData = salesVsLaborData.map((row) =>
 			columns
 				.slice(1)
-				.map((column) => `"${row[column.id]}"`)
+				.map((column) => `"${column.id === "grossSales" || column.id === "variableLaborDollars" ? formattingData(row[column.id]) : column.id === "variableLaborHours" ? parseFloat(row[column.id]).toFixed(2) : column.id === "laborPercent" ?  parseFloat(row[column.id]).toFixed(2) + "%" : row[column.id]}"`)
 				.join(',')
 		);
 		const csvString = [csvHeaders.join(','), ...csvData].join('\n');
@@ -558,7 +559,7 @@ const SalesVsLabor = () => {
 			{
 				name: '',
 				columns: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
-				data: salesVsLaborData.map((row) => columns.slice(1).map((column) => row[column.id])),
+				data: salesVsLaborData.map((row) => columns.slice(1).map((column) => column.id === "grossSales" || column.id === "variableLaborDollars" ? formattingData(row[column.id]) : column.id === "variableLaborHours" ? parseFloat(row[column.id]).toFixed(2) : column.id === "laborPercent" ?  parseFloat(row[column.id]).toFixed(2) + "%" : row[column.id])),
 			},
 		];
 
