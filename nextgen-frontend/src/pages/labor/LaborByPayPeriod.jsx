@@ -460,14 +460,14 @@ const LaborByPayPeriod = () => {
             cellType: "number",
             columnName: "Overtime Hours",
           },
-          { value: subRow.rate, cellType: "number", columnName: "Rate" },
+          { value: formattingData(subRow.rate), cellType: "number", columnName: "Rate" },
           {
             value: subRow.declaredTips || "0 ",
             cellType: "number",
             columnName: "Declared Tips",
           },
           {
-            value: subRow.preTaxTicketSales || "0 ",
+            value: formattingData(subRow.preTaxTicketSales) || "$0.00 ",
             cellType: "number",
             columnName: "Pre-Tax Ticket Sales",
           },
@@ -477,7 +477,7 @@ const LaborByPayPeriod = () => {
             columnName: "Declared Tips %",
           },
           {
-            value: subRow.pay || "0 ",
+            value: formattingData(subRow.pay) || "$0.00 ",
             cellType: "number",
             columnName: "Regular Pay",
           },
@@ -569,11 +569,11 @@ const LaborByPayPeriod = () => {
               jobDesc: period.jobDesc,
               regHoursPeriod: period?.regHours.toFixed(2),
               overHours: period.overHours.toFixed(2),
-              rate: period.rate,
+              rate: formattingData(period.rate),
               declaredTips: period.declaredTips,
-              preTaxTicketSales: period.preTaxTicketSales,
-              declaredTipsPct: period.declaredTipsPct,
-              regPay: period.pay,
+              preTaxTicketSales: formattingData(period.preTaxTicketSales),
+              declaredTipsPct: parseFloat(period.declaredTipsPct).toFixed(2)+"%",
+              regPay: formattingData(period.pay),
             }))
           )
         ),
