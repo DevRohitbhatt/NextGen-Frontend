@@ -76,8 +76,9 @@ const PurchaseAnalysis = () => {
 	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [receivedData, setReceivedData] = useState(null);
-	const [veiw, setView] = useState(0);
+	const [view, setView] = useState(0);
 	const [tableState, setTableState] = useState(null);
+	const [finalTableLoading, setFinalTableLoading] = useState([]);
 
 	const [selectedGroupBy, setSelectedGroupBy] = useState('None');
 	const groupByOptions = [
@@ -232,6 +233,14 @@ const PurchaseAnalysis = () => {
 	const [columns, setColumns] = useState(memoizedColumns);
 
 	useEffect(() => {
+		setFinalTableLoading(true);
+
+		setTimeout(() => {
+			setFinalTableLoading(false);
+		}, 500);
+	}, [selectedGroupBy]);
+
+	useEffect(() => {
 		if (groupOrUnitAccess || defaultUnitID) {
 			setSelectedUnit(groupOrUnitAccess || defaultUnitID);
 		}
@@ -349,6 +358,7 @@ const PurchaseAnalysis = () => {
 			setIsLoading(true);
 			setIsError(false);
 			setIsTableRendered(false);
+			setFinalTableLoading(true);
 
 			const getData = {
 				url: 'PurchaseAnalysis',
@@ -378,6 +388,9 @@ const PurchaseAnalysis = () => {
 				handleGroupByChange(option);
 			}
 			setIsLocationReportRendered(true);
+			setTimeout(() => {
+				setFinalTableLoading(false);
+			}, 3000);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -448,7 +461,7 @@ const PurchaseAnalysis = () => {
 										paddingLeft: `${row.depth * 2}rem`,
 										width: '100%',
 									},
-									className: 'flex items-center gap-2 font-bold inset-0 capitalize',
+									className: 'flex items-center gap-2 absolute font-bold inset-0 capitalize',
 								}}
 							>
 								{row.getIsExpanded() ? (
@@ -466,7 +479,7 @@ const PurchaseAnalysis = () => {
 		}
 
 		setColumns(newColumns);
-		setView(selectedGroupByColumns.length);
+		setView(selectedGroupByColumns.length - 1);
 
 		if (isTableRendered && !status) {
 			fetchPurchaseAnalysisReport();
@@ -559,8 +572,6 @@ const PurchaseAnalysis = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-	console.log('tableState', tableState);
-
 	const Table = (
 		<TableHOC
 			columns={columns}
@@ -573,7 +584,7 @@ const PurchaseAnalysis = () => {
 			dataPosition='text-start'
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
-			view={veiw}
+			view={view}
 			setTableState={setTableState}
 		/>
 	);
@@ -643,7 +654,22 @@ const PurchaseAnalysis = () => {
 						<Loader loading={isLoading} />
 						{!isLoading &&
 							(purchasetData.length > 0 ? (
-								<div className='paged-table'>{Table}</div>
+								<div className='relative'>
+									<div
+										className={`paged-table ${
+											finalTableLoading ? 'opacity-0 z-0' : 'opacity-100 z-10'
+										}`}
+									>
+										{Table}
+									</div>
+									<div
+										className={`absolute top-0 left-0 flex items-center justify-center w-full h-64 ${
+											finalTableLoading ? 'block z-10' : 'hidden z-0'
+										}`}
+									>
+										<Loader loading={finalTableLoading} />
+									</div>
+								</div>
 							) : !selectedUnit ? (
 								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
 							) : (
