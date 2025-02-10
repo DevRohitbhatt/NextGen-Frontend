@@ -314,7 +314,7 @@ const InventoryTransferReport = () => {
   // Function to handle the PDF export
   const handlePDFClick = () => {
     if (!inventoryTransferReportData?.data) return;
-
+    debugger
     const pdfData = {
       title: "Inventory Transfer Report",
       subHeaders: [
@@ -337,7 +337,7 @@ const InventoryTransferReport = () => {
                 value:
                   header.key === "transferTime"
                     ? dateFormat(row[header.key], "mm/dd/yyyy hh:MM TT")
-                    : row[header.key],
+                    : row[header.key] === 0 ? "0.00" :  row[header.key],
                 cellType: header.cellType,
                 columnName: header.label,
               }))
@@ -359,7 +359,7 @@ const InventoryTransferReport = () => {
         headers.map((header) =>
           header.key === "transferTime"
             ? dateFormat(row[header.key], "mm/dd/yyyy hh:MM TT")
-            : row[header.key]
+            : row[header.key] === 0 ? "0.00" : row[header.key]
         ),
       ].join(",")
     );
@@ -387,7 +387,7 @@ const InventoryTransferReport = () => {
           headers.map((header) =>
             header.key === "transferTime"
               ? dateFormat(row[header.key], "mm/dd/yyyy hh:MM TT")
-              : row[header.key]
+              : row[header.key] === 0 ? "0.00" : row[header.key]
           )
         ),
       },
@@ -472,7 +472,7 @@ const InventoryTransferReport = () => {
             {!isLoading && (
               <>
                 {inventoryTransferReportData?.data ? (
-                  <div>
+                  <div className="paged-table">
                     <Table
                       data={inventoryTransferReportData.data}
                       headers={headers}
