@@ -105,6 +105,7 @@ const VarianceFoodCost = () => {
 	const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 	const moreOptionsDropdown = useRef(null);
 	const [tableState, setTableState] = useState(false);
+	const [finalTableLoading, setFinalTableLoading] = useState([]);
 
 	const viewMap = {
 		Weekly: 'WE',
@@ -559,11 +560,20 @@ const VarianceFoodCost = () => {
 		}
 	}, [selectedUnit, countType]);
 
+	useEffect(() => {
+		setFinalTableLoading(true);
+
+		setTimeout(() => {
+			setFinalTableLoading(false);
+		}, 500);
+	}, [viewby]);
+
 	const fetchVarianceFoodCost = async () => {
 		try {
 			setIsLoading(true);
 			setIsError(false);
 			setIsTableRendered(false);
+			setFinalTableLoading(true);
 			const getData = {
 				url: 'varianceFoodCost',
 				urlParams: {
@@ -637,6 +647,9 @@ const VarianceFoodCost = () => {
 				setFilteredVarianceFoodCostData(newData);
 			}
 			setIsLoading(false);
+			setTimeout(() => {
+				setFinalTableLoading(false);
+			}, 3000);
 		} catch (error) {
 			setIsError(true);
 			setIsLoading(false);
@@ -807,12 +820,12 @@ const VarianceFoodCost = () => {
 
 	const buildPDFBody = () => {
 		const formatNumber = (num, prefix = '') => ({
-			value: `${prefix}${num.toFixed(2).toLocaleString('en-US')}`,
+			value: prefix === '$' ? formattingData(num) : formattingDataWithoutDollr(num),
 			cellType: 'number',
 		});
 
 		const formatPercent = (num) => ({
-			value: `${Number(num).toFixed(2).toLocaleString('en-US')}%`,
+			value: `${formattingDataWithoutDollr(num)}%`,
 			cellType: 'number',
 		});
 
@@ -885,7 +898,7 @@ const VarianceFoodCost = () => {
 							columnName: 'Comparison Name',
 						},
 						{
-							value: row.comparisonSales,
+							value: formattingData(row.comparisonSales),
 							cellType: 'number',
 							columnName: 'Comparison Sales',
 						},
@@ -927,20 +940,20 @@ const VarianceFoodCost = () => {
 					'Sub Department': row.subDepartment,
 					Description: row.description,
 					UOM: row.countDisplayUnitName,
-					'Actual #': row.actualNumber?.toFixed(2),
-					'Actual $': row.actualDollar?.toFixed(2),
-					'Actual %': row.actualPct?.toFixed(2),
-					'Ideal #': row.idealNumber?.toFixed(2),
-					'Ideal $': row.idealDollar?.toFixed(2),
-					'Ideal %': row.idealPct?.toFixed(2),
-					'Variance #': row.varianceNumber?.toFixed(2),
-					'Variance $': row.varianceDollar?.toFixed(2),
-					'Variance %': row.variancePct?.toFixed(2),
-					'Waste #': row.wasteNumber?.toFixed(2),
-					'Waste $': row.wasteDollar?.toFixed(2),
-					'Waste %': row.wastePct?.toFixed(2),
+					'Actual #': formattingDataWithoutDollr(row.actualNumber),
+					'Actual $': formattingData(row.actualDollar),
+					'Actual %': `${formattingDataWithoutDollr(row.actualPct)}%`,
+					'Ideal #': formattingDataWithoutDollr(row.idealNumber),
+					'Ideal $': formattingData(row.idealDollar),
+					'Ideal %': `${formattingDataWithoutDollr(row.idealPct)}%`,
+					'Variance #': formattingDataWithoutDollr(row.varianceNumber),
+					'Variance $': formattingData(row.varianceDollar),
+					'Variance %': `${formattingDataWithoutDollr(row.variancePct)}%`,
+					'Waste #': formattingDataWithoutDollr(row.wasteNumber),
+					'Waste $': formattingData(row.wasteDollar),
+					'Waste %': `${formattingDataWithoutDollr(row.wastePct)}%`,
 					'Comparison Name': row.comparisonName,
-					'Comparison Sales': row.comparisonSales?.toFixed(2),
+					'Comparison Sales': formattingData(row.comparisonSales),
 				})),
 			},
 		];
@@ -1617,7 +1630,22 @@ const VarianceFoodCost = () => {
 							<Loader loading={isLoading} />
 							{!isLoading &&
 								(varianceFoodCostData.length > 0 ? (
-									<div className='paged-table'>{Table}</div>
+									<div className='relative'>
+										<div
+											className={`paged-table ${
+												finalTableLoading ? 'opacity-0 z-0' : 'opacity-100 z-10'
+											}`}
+										>
+											{Table}
+										</div>
+										<div
+											className={`absolute top-0 left-0 flex items-center justify-center w-full h-64 ${
+												finalTableLoading ? 'block z-10' : 'hidden z-0'
+											}`}
+										>
+											<Loader loading={finalTableLoading} />
+										</div>
+									</div>
 								) : !selectedUnit ? (
 									<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
 								) : (

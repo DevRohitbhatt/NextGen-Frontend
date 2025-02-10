@@ -23,7 +23,7 @@ import PurchaseAnalysi from '../../assets/introJSSteps/PurchaseAnalysis';
 import { useLocation } from 'react-router-dom';
 import dateFormat from 'dateformat';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
-import { formattingData } from '../../functions/formatingCurrency';
+import { formattingData, formattingDataWithoutDollr } from '../../functions/formatingCurrency';
 
 const tooltips = {
 	glCode: 'Accounting code assigned to the vendor item. \n\nNOTE: GL Codes only populate for Accounting Automation customers.',
@@ -77,6 +77,7 @@ const PurchaseAnalysis = () => {
 
 	const [receivedData, setReceivedData] = useState(null);
 	const [veiw, setView] = useState(0);
+	const [tableState, setTableState] = useState(null);
 
 	const [selectedGroupBy, setSelectedGroupBy] = useState('None');
 	const groupByOptions = [
@@ -137,7 +138,7 @@ const PurchaseAnalysis = () => {
 				header: 'Invoice Total',
 				cell: ({ getValue, row }) => (getValue() && !row.getCanExpand() ? `${formattingData(getValue())}` : ''),
 				filterFn: 'weakEquals',
-				dataType: 'number',
+				dataType: 'currency',
 				size: 120,
 			}),
 			columnHelper.accessor('companyGLCode', {
@@ -164,7 +165,7 @@ const PurchaseAnalysis = () => {
 				size: 100,
 				footer: ({ table }) => (
 					<div className='font-bold text-center'>
-						{parseInt(
+						{formattingDataWithoutDollr(
 							table
 								.getFilteredRowModel()
 								.rows.reduce((acc, row) => acc + parseInt(row.original.quantity.toFixed(0)), 0)
@@ -493,7 +494,12 @@ const PurchaseAnalysis = () => {
 						columnHeaders: columns.map((column) => column.header),
 						rows: purchasetData.map((row) =>
 							columns.map((column) => ({
-								value: column.id === 'date' ? dateFormat(row[column.id], 'mm/dd/yyyy') : row[column.id],
+								value:
+									column.id === 'date'
+										? dateFormat(row[column.id], 'mm/dd/yyyy')
+										: column.dataType === 'currency'
+										? formattingData(row[column.id])
+										: row[column.id] || '0 ',
 								cellType: column.dataType,
 								columnName: column.header,
 							}))
@@ -522,14 +528,22 @@ const PurchaseAnalysis = () => {
 					selectedGroupBy === 'None'
 						? purchasetData.map((row) =>
 								columns.map((column) =>
-									column.id === 'date' ? dateFormat(row[column.id], 'mm/dd/yyyy') : row[column.id]
+									column.id === 'date'
+										? dateFormat(row[column.id], 'mm/dd/yyyy')
+										: column.dataType === 'currency'
+										? formattingData(row[column.id])
+										: row[column.id]
 								)
 						  )
 						: purchasetData.map((row) =>
 								columns
 									.slice(1)
 									.map((column) =>
-										column.id === 'date' ? dateFormat(row[column.id], 'mm/dd/yyyy') : row[column.id]
+										column.id === 'date'
+											? dateFormat(row[column.id], 'mm/dd/yyyy')
+											: column.dataType === 'currency'
+											? formattingData(row[column.id])
+											: row[column.id]
 									)
 						  ),
 			},
@@ -545,6 +559,8 @@ const PurchaseAnalysis = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
+	console.log('tableState', tableState);
+
 	const Table = (
 		<TableHOC
 			columns={columns}
@@ -557,7 +573,8 @@ const PurchaseAnalysis = () => {
 			dataPosition='text-start'
 			isTableRendered={isTableRendered}
 			setIsTableRendered={setIsTableRendered}
-			view={2}
+			view={veiw}
+			setTableState={setTableState}
 		/>
 	);
 
@@ -595,7 +612,7 @@ const PurchaseAnalysis = () => {
 							setVendorName={setSelectedVendorName}
 							onClick={() => setVendorShowModal(true)}
 						/>
-						<div className='min-w-56'>
+						<div className='min-w-56 groupBy-selector'>
 							<Dropdown
 								title='Group By'
 								selectedOption={selectedGroupBy}

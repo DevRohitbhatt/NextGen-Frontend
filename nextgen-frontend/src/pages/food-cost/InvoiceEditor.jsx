@@ -25,7 +25,7 @@ const columnHelper = createColumnHelper();
 
 const InvoiceEditor = () => {
 	const location = useLocation();
-	const { companyID, userID } = useSelector((state) => state.globalState);
+	const [companyID, setCompanyID] = useState(0);
 	const [selectedUnit, setSelectedUnit] = useState();
 	const [selectedUnitName, setSelectedUnitName] = useState();
 	const [selectedVendor, setSelectedVendor] = useState(0);
@@ -111,6 +111,7 @@ const InvoiceEditor = () => {
 		setSelectedVendorName(searchParams.get('vendorName'));
 		setSelectedDate(new Date(searchParams.get('date')));
 		setIsNewInvoice(searchParams.get('newInvoice') === 'true' ? true : false);
+		setCompanyID(searchParams.get('companyID'));
 	}, [location.search]);
 
 	useEffect(() => {
@@ -885,7 +886,11 @@ const InvoiceEditor = () => {
 				<h3>
 					Last Saved By:{' '}
 					<span className='font-medium'>
-						{isLoading ? 'Loading...' : `${invoiceDetails?.userFirstName} ${invoiceDetails?.userLastName}`}
+						{isNewInvoice
+							? 'QsrSupport'
+							: isLoading
+							? 'Loading...'
+							: `${invoiceDetails?.userFirstName} ${invoiceDetails?.userLastName}`}
 					</span>
 				</h3>
 				{!showCommentModal && comment !== undefined && comment.length > 0 ? (

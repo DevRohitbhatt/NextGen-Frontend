@@ -187,19 +187,8 @@ const Invoices = () => {
 			columnHelper.accessor('totalAmountIncludingTax', {
 				id: 'totalAmountIncludingTax',
 				header: 'Total',
-				cell: ({ getValue }) => {
-					const value = getValue();
-					return value < 0
-						? `-$${Math.abs(parseFloat(value)).toLocaleString('en-US', {
-								minimumFractionDigits: 2,
-								maximumFractionDigits: 2,
-						  })}`
-						: `$${parseFloat(value).toLocaleString('en-US', {
-								minimumFractionDigits: 2,
-								maximumFractionDigits: 2,
-						  })}`;
-				},
-				dataType: 'number',
+				cell: ({ getValue }) => formattingData(getValue()),
+				dataType: 'currency',
 				size: 60,
 			}),
 			columnHelper.accessor('lastEditedBy', {
@@ -384,7 +373,7 @@ const Invoices = () => {
 
 	const openInvoiceEditor = (row) => {
 		window.open(
-			`/InvoiceEditor?unitID=${row.unitID}&unitName=${row.unitName}&vendorID=${row.vendorID}&vendorName=${row.name}&date=${row.date}&invoiceID=${row.qsrInvoiceID}&lastEditedBy=${row.lastEditedBy}&invoiceReference=${row.vendorInvoiceReference}&totalAmount=${row.totalAmountIncludingTax}&newInvoice=false`,
+			`/InvoiceEditor?unitID=${row.unitID}&unitName=${row.unitName}&vendorID=${row.vendorID}&vendorName=${row.name}&date=${row.date}&invoiceID=${row.qsrInvoiceID}&lastEditedBy=${row.lastEditedBy}&invoiceReference=${row.vendorInvoiceReference}&totalAmount=${row.totalAmountIncludingTax}&newInvoice=false&companyID=${companyID}`,
 			'_blank'
 		);
 	};
@@ -413,7 +402,7 @@ const Invoices = () => {
 						unitDropdownData?.find((unit) => unit.name === selectedDropdownUnit)?.id
 					}&unitName=${selectedDropdownUnit}&vendorID=${
 						vendorDropdownData?.find((vendor) => vendor.name === selectedDropdownVendor)?.id
-					}&vendorName=${selectedDropdownVendor}&date=${new Date()}&newInvoice=true`,
+					}&vendorName=${selectedDropdownVendor}&date=${new Date()}&newInvoice=true&companyID=${companyID}`,
 					'_blank'
 				);
 			} else {
@@ -478,7 +467,10 @@ const Invoices = () => {
 							columnHeaders: columns.slice(1).map((column) => column.header),
 							rows: searchInvoiceData.map((row) =>
 								columns.slice(1).map((column) => ({
-									value: row[column.id],
+									value:
+										column.dataType === 'currency'
+											? formattingData(row[column.id])
+											: row[column.id] || '0 ',
 									cellType: column.dataType,
 									columnName: column.header,
 								}))
@@ -495,13 +487,19 @@ const Invoices = () => {
 	// Function to handle the Excel export
 	const handleExcelClick = () => {
 		if (isBrowseInvoicesClicked) {
-			if (!invoiceReportData) return;
+			if (invoiceReportData.length < 1) return;
 
 			const data = [
 				{
 					name: '',
 					columns: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
-					data: invoiceReportData.map((row) => columns.slice(1).map((column) => row[column.id])),
+					data: invoiceReportData.map((row) =>
+						columns
+							.slice(1)
+							.map((column) =>
+								column.dataType === 'currency' ? formattingData(row[column.id]) : row[column.id]
+							)
+					),
 				},
 			];
 
@@ -520,7 +518,13 @@ const Invoices = () => {
 				{
 					name: '',
 					columns: columns.slice(1).map((column) => ({ name: column.header, filterButton: true })),
-					data: searchInvoiceData.map((row) => columns.slice(1).map((column) => row[column.id])),
+					data: searchInvoiceData.map((row) =>
+						columns
+							.slice(1)
+							.map((column) =>
+								column.dataType === 'currency' ? formattingData(row[column.id]) : row[column.id]
+							)
+					),
 				},
 			];
 

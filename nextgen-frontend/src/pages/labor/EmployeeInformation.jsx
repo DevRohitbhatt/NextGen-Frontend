@@ -16,14 +16,19 @@ import {
 } from '../../components';
 
 const tooltips = {
-	employeeID: "The ID associated with the employee in the POS. Typically used to clock in/out and track sales.",
-	uniqueID: "An ID that is unique to the employee within an entire company. The unique ID may be re-used as the employee ID depending on employee onboarding procedures. \n\nTypically used for payroll and benefits.",
-	payRate: "The hourly rate an employee is paid. If the employee has more than one job code and payrate assigned their default job payrate will be displayed.",	
-	payrollID: "An ID assigned to an employee for payroll purposes. The Unique ID may be re-used or the SSN may be used.",
-	termDate: "The date an employee separated from the company. \n\nNOTE: An employee with a termination date will not appear on the schedule. If an employee is seasonal, remove the termination date in the POS to re-appear in our Web Scheduler.",
-	phantomEmployee: "This refers to non-employees with employee IDs. Examples include TOGO, DRIVETHRU, BAR, etc. \nN = Employee \nY = Phantom Employee \n\nNOTE: Not all POSes will contain identifiers for phantom employees. Please contact Help Desk for assistance with hiding phantom employees from Labor reports and schedules.",
-	direction: "above",
-  };
+	employeeID: 'The ID associated with the employee in the POS. Typically used to clock in/out and track sales.',
+	uniqueID:
+		'An ID that is unique to the employee within an entire company. The unique ID may be re-used as the employee ID depending on employee onboarding procedures. \n\nTypically used for payroll and benefits.',
+	payRate:
+		'The hourly rate an employee is paid. If the employee has more than one job code and payrate assigned their default job payrate will be displayed.',
+	payrollID:
+		'An ID assigned to an employee for payroll purposes. The Unique ID may be re-used or the SSN may be used.',
+	termDate:
+		'The date an employee separated from the company. \n\nNOTE: An employee with a termination date will not appear on the schedule. If an employee is seasonal, remove the termination date in the POS to re-appear in our Web Scheduler.',
+	phantomEmployee:
+		'This refers to non-employees with employee IDs. Examples include TOGO, DRIVETHRU, BAR, etc. \nN = Employee \nY = Phantom Employee \n\nNOTE: Not all POSes will contain identifiers for phantom employees. Please contact Help Desk for assistance with hiding phantom employees from Labor reports and schedules.',
+	direction: 'above',
+};
 
 const EmployeeInformation = () => {
 	const {
@@ -531,7 +536,7 @@ const EmployeeInformation = () => {
 					{!isLoading && (
 						<>
 							{filteredEmployeeInformationData?.data ? (
-								<div>
+								<div className='paged-table'>
 									<Table
 										data={filteredEmployeeInformationData.data}
 										headers={headers}
