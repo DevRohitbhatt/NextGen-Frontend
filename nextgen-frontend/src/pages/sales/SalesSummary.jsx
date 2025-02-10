@@ -384,7 +384,7 @@ const SalesSummary = () => {
 				['Covers', formattingDataWithoutDollr(salesSummaryData.viewActivityDaily[0]?.nrsTotalOpen) || '0'],
 				['Order Average', `${salesSummaryData.viewActivityDaily[0]?.orderAverage}`],
 				['Labor Cost', `${salesSummaryData.viewActivityDaily[0]?.laborCost}`],
-				['Labor Hours', `${formattingDataWithoutDollr(salesSummaryData.viewActivityDaily[0]?.laborHours)}`],
+				['Labor Hours', `${salesSummaryData.viewActivityDaily[0]?.laborHours}`],
 				[
 					'Labor Percent',
 					`${(

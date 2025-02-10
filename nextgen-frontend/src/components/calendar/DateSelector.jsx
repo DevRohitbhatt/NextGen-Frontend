@@ -27,9 +27,9 @@ export default function DateSelector({
 					className='flex flex-col justify-center m-1 rounded-3xl date-selector'
 				>
 					{isEditable ? (
-						<h3 className='mb-1 ml-2 text-[14px] font-semibold text-nowrap'>Select Date</h3>
+						<h3 className='mb-1 ml-2 text-[16px] font-semibold text-nowrap'>Select Date</h3>
 					) : (
-						<h3 className='mb-1 ml-2 text-[14px] font-semibold text-nowrap'>Date</h3>
+						<h3 className='mb-1 ml-2 text-[16px] font-semibold text-nowrap'>Date</h3>
 					)}
 					<div
 						className={`px-6 py-2 text-center capitalize border-2 border-solid cursor-pointer text-nowrap rounded-3xl  ${

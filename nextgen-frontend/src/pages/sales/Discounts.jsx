@@ -198,7 +198,12 @@ const Discounts = () => {
 				columnHelper.accessor('price', {
 					id: 'price',
 					header: 'Price',
-					cell: ({ row }) => formattingData(calculateSum(row, 'price')),
+					cell: ({ row }) =>
+						row.getCanExpand()
+							? viewBy === 'Summary'
+								? ''
+								: calculateSum(row, 'price')
+							: formattingData(calculateSum(row, 'price')),
 					dataType: 'price',
 					footer: ({ table }) => (
 						<div className='text-center'>{formattingData(calculateFooterSum(table, 'price'))}</div>
@@ -208,7 +213,12 @@ const Discounts = () => {
 				columnHelper.accessor('amountDiscount', {
 					id: 'amountDiscount',
 					header: 'Amount Discount',
-					cell: ({ row }) => formattingData(calculateSum(row, 'amountDiscount')),
+					cell: ({ row }) =>
+						row.getCanExpand()
+							? viewBy === 'Summary'
+								? ''
+								: calculateSum(row, 'amountDiscount')
+							: formattingData(calculateSum(row, 'amountDiscount')),
 					dataType: 'price',
 					footer: ({ table }) => (
 						<div className='text-center'>{formattingData(calculateFooterSum(table, 'amountDiscount'))}</div>
@@ -219,6 +229,7 @@ const Discounts = () => {
 					id: 'itemID',
 					header: 'Item ID',
 					dataType: 'string',
+					cell: ({ row, getValue }) => (row.getCanExpand() ? '' : getValue()),
 					size: 80,
 				}),
 				columnHelper.accessor('salesCategory', {
@@ -229,21 +240,21 @@ const Discounts = () => {
 				}),
 				columnHelper.accessor('menuItem', {
 					id: 'menuItem',
-					header: <div className='w-full text-left'>Menu Item</div>,
+					header: 'Menu Item',
 					cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 					dataType: 'string',
 					size: 180,
 				}),
 				columnHelper.accessor('discountType', {
 					id: 'discountType',
-					header: <div className='w-full text-left'>Discount Type</div>,
+					header: 'Discount Type',
 					cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 					dataType: 'string',
 					size: 120,
 				}),
 				columnHelper.accessor('employee', {
 					id: 'employee',
-					header: <div className='w-full text-left'>Employee</div>,
+					header: 'Employee',
 					cell: ({ getValue }) => <div className='text-left'>{getValue()}</div>,
 					dataType: 'string',
 					size: 80,
@@ -475,7 +486,8 @@ const Discounts = () => {
 							columnHelper.accessor('totalDiscountAmount', {
 								id: 'totalDiscountAmount',
 								header: 'Disc Amount',
-								cell: ({ getValue }) => `${formattingData(getValue())}`,
+								cell: ({ getValue, row }) =>
+									row.getCanExpand() ? '' : `${formattingData(getValue())}`,
 								dataType: 'number',
 								footer: ({ table }) => (
 									<div className='text-center'>
@@ -487,7 +499,8 @@ const Discounts = () => {
 								id: 'totalDiscountedChecks',
 								header: 'Disc Checks',
 								dataType: 'number',
-								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
+								cell: ({ getValue, row }) =>
+									row.getCanExpand() ? '' : `${formattingDataWithoutDollr(getValue())}`,
 								footer: ({ table }) => (
 									<div className='text-center'>
 										{formattingDataWithoutDollr(calculateFooterSum(table, 'totalDiscountedChecks'))}
@@ -498,7 +511,8 @@ const Discounts = () => {
 								id: 'totalDiscountedItems',
 								header: 'Disc Items',
 								dataType: 'number',
-								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
+								cell: ({ getValue, row }) =>
+									row.getCanExpand() ? '' : `${formattingDataWithoutDollr(getValue())}`,
 								footer: ({ table }) => (
 									<div className='text-center'>
 										{formattingDataWithoutDollr(calculateFooterSum(table, 'totalDiscountedItems'))}
@@ -509,7 +523,8 @@ const Discounts = () => {
 							columnHelper.accessor('totalSalesGenerated', {
 								id: 'totalSalesGenerated',
 								header: 'Sales $ Gen',
-								cell: ({ getValue }) => `${formattingData(getValue())}`,
+								cell: ({ getValue, row }) =>
+									row.getCanExpand() ? '' : `${formattingData(getValue())}`,
 								dataType: 'price',
 								footer: ({ table }) => (
 									<div className='text-center'>
@@ -521,7 +536,8 @@ const Discounts = () => {
 								id: 'totaldiscountedTickets',
 								header: 'Disc Cost %',
 								customClass: 'border-r border-[var(--primary-color)]',
-								cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
+								cell: ({ getValue, row }) =>
+									row.getCanExpand() ? '' : `${formattingDataWithoutDollr(getValue())}%`,
 								dataType: 'percent',
 								footer: ({ table }) => (
 									<div className='text-center'>
@@ -546,9 +562,9 @@ const Discounts = () => {
 									{
 										id: `discountAmount_${weekId}`,
 										header: 'Disc Amount',
-										cell: ({ getValue }) => {
+										cell: ({ getValue, row }) => {
 											let discAmount = formattingData(getValue());
-											return discAmount;
+											return row.getCanExpand() ? '' : discAmount;
 										},
 										dataType: 'number',
 										footer: ({ table }) => (
@@ -567,7 +583,8 @@ const Discounts = () => {
 										id: `discountedChecks_${weekId}`,
 										header: 'Disc Checks',
 										dataType: 'number',
-										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
+										cell: ({ getValue, row }) =>
+											row.getCanExpand() ? '' : `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
 												{formattingDataWithoutDollr(
@@ -586,7 +603,8 @@ const Discounts = () => {
 										id: `discountedItems_${weekId}`,
 										header: 'Disc Items',
 										dataType: 'number',
-										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}`,
+										cell: ({ getValue, row }) =>
+											row.getCanExpand() ? '' : `${formattingDataWithoutDollr(getValue())}`,
 										footer: ({ table }) => (
 											<div className='text-center'>
 												{formattingDataWithoutDollr(
@@ -604,7 +622,8 @@ const Discounts = () => {
 									{
 										id: `salesGenerated_${weekId}`,
 										header: 'Sales $ Gen',
-										cell: ({ getValue }) => formattingData(getValue()),
+										cell: ({ getValue, row }) =>
+											row.getCanExpand() ? '' : formattingData(getValue()),
 										dataType: 'price',
 										footer: ({ table }) => (
 											<div className='text-center'>
@@ -621,7 +640,8 @@ const Discounts = () => {
 									{
 										id: `discountedTickets_${weekId}`,
 										header: 'Disc Cost %',
-										cell: ({ getValue }) => `${formattingDataWithoutDollr(getValue())}%`,
+										cell: ({ getValue, row }) =>
+											row.getCanExpand() ? '' : `${formattingDataWithoutDollr(getValue())}%`,
 										dataType: 'percent',
 										customClass: 'border-r border-[var(--primary-color)]',
 										footer: ({ table }) => (
@@ -732,7 +752,7 @@ const Discounts = () => {
 		};
 
 		const selectedGroupByColumns = groupByColumns[option] || [];
-		const newColumns = columnsPassed.map((column) =>
+		const newColumns = (viewBy === 'Summary' ? columnsPassed : memoizedColumns).map((column) =>
 			selectedGroupByColumns.includes(column.id) ? { ...column, groupBy: true, show: false } : column
 		);
 
@@ -758,9 +778,7 @@ const Discounts = () => {
 									paddingLeft: `${row.depth * 2}rem`,
 									width: '100%',
 								}}
-								className={`flex items-center absolute gap-2 font-bold top-0 bottom-0 capitalize ${
-									viewBy === 'Summary' ? 'bg-white' : ''
-								}`}
+								className={`flex items-center gap-2 font-bold capitalize`}
 							>
 								{row.getIsExpanded() ? (
 									<CiSquareMinus className='text-[20px]' />

@@ -15,7 +15,7 @@ import {
 } from '../../components';
 import { createColumnHelper } from '@tanstack/react-table';
 import dateFormat from 'dateformat';
-import { formattingData } from '../../functions/formatingCurrency.js';
+import { formattingData, formattingDataWithoutDollr } from '../../functions/formatingCurrency.js';
 
 const tooltips = {
 	uom: 'References each inventory item’s main UOM.',
@@ -197,8 +197,8 @@ const InventoryWeeksOnHand = () => {
 			columnHelper.accessor('estimatedValueOnHandNow', {
 				id: 'estimatedValueOnHandNow',
 				header: 'Estimated $ On Hand Now',
-				cell: ({ getValue }) => `$${getValue() !== 0 ? getValue().toFixed(2) : 0}`,
-				dataType: 'number',
+				cell: ({ getValue }) => formattingData(getValue()),
+				dataType: 'currency',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
 			}),
@@ -213,8 +213,8 @@ const InventoryWeeksOnHand = () => {
 			columnHelper.accessor('averageValueUsedPerWeek', {
 				id: 'averageValueUsedPerWeek',
 				header: 'Average $ Used Per Week',
-				cell: ({ getValue }) => `$${getValue() !== 0 ? getValue().toFixed(2) : 0}`,
-				dataType: 'number',
+				cell: ({ getValue }) => formattingData(getValue()),
+				dataType: 'currency',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
 			}),
@@ -222,8 +222,8 @@ const InventoryWeeksOnHand = () => {
 				id: 'salesYieldWeeklyAverage',
 				header: 'Sales Yield Weekly Average',
 				cell: ({ getValue }) =>
-					getValue() !== 0 ? `$${Number(getValue().toFixed(2)).toLocaleString('en-US')}` : 0,
-				dataType: 'string',
+					getValue() !== 0 ? `${formattingData(Number(getValue()))}` : formattingData(0),
+				dataType: 'currency',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
 				tooltip: tooltips.salesYieldWeeklyAverage,
@@ -231,7 +231,7 @@ const InventoryWeeksOnHand = () => {
 			columnHelper.accessor('inventoryWeeksOnHandNow', {
 				id: 'inventoryWeeksOnHandNow',
 				header: 'Inventory Weeks On Hand Now',
-				cell: ({ getValue }) => (getValue() !== 0 ? getValue().toFixed(2) : 0),
+				cell: ({ getValue }) => formattingDataWithoutDollr(getValue()),
 				dataType: 'number',
 				filterFn: 'weakEquals',
 				isFilterMenu: true,
@@ -327,7 +327,15 @@ const InventoryWeeksOnHand = () => {
 			typeof column.header === 'object' ? column.header.props.children : column.header
 		);
 		const csvData = inventoryWeeksOnHandReportData.map((row) =>
-			[columns.map((column) => row[column.id])].join(',')
+			columns
+				.map((column) =>
+					column.dataType === 'currency'
+						? `$${parseFloat(row[column.id]).toFixed(2)}`
+						: column.dataType === 'number'
+						? parseFloat(row[column.id]).toFixed(2)
+						: row[column.id] || '0'
+				)
+				.join(',')
 		);
 		const date = dateFormat(new Date(), 'mm-dd-yyyy');
 		const csvString = [`InventoryWeeksOnHand ${date}`, '', csvHeaders.join(','), ...csvData].join('\n');
@@ -351,7 +359,15 @@ const InventoryWeeksOnHand = () => {
 						? { name: column.header.props.children, filterButton: true }
 						: { name: column.header, filterButton: true }
 				),
-				data: inventoryWeeksOnHandReportData.map((row) => columns.map((column) => row[column.id])),
+				data: inventoryWeeksOnHandReportData.map((row) =>
+					columns.map((column) =>
+						column.dataType === 'currency'
+							? formattingData(row[column.id])
+							: column.dataType === 'number'
+							? parseFloat(row[column.id]).toFixed(2)
+							: row[column.id] || '0'
+					)
+				),
 			},
 		];
 
@@ -424,7 +440,7 @@ const InventoryWeeksOnHand = () => {
 						<Loader loading={isLoading} />
 						{!isLoading &&
 							(inventoryWeeksOnHandReportData.length > 0 ? (
-								<div className='mt-4'>
+								<div className='mt-4 paged-table'>
 									{total > 0 && (
 										<div className='text-[16px] font-medium min-w-fit'>{`Total : ${formattingData(
 											parseFloat(total)

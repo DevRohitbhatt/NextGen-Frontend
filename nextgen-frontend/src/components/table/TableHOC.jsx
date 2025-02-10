@@ -101,7 +101,7 @@ function TableHOC({
 		debugTable: false,
 	});
 
-	useTableView(table, view, isTableRendered, grouping);
+	useTableView(table, view, isTableRendered, setExpanded, grouping);
 
 	useEffect(() => {
 		if (setTableState) {

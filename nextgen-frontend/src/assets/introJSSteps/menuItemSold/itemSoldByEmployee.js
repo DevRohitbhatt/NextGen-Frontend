@@ -33,7 +33,7 @@ export default function itemSoldByEmployee() {
 		},
 		{
 			element: '.sale-selector',
-			intro: '-Select the sale type - Net or Gross, you wish to display fot the Item Sold By Employee Report Report',
+			intro: '-Select the sale type - Net or Gross, you wish to display fot the Item Sold By Employee Report',
 		},
 		{
 			element: '.paged-table',

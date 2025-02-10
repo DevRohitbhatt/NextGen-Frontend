@@ -4,27 +4,24 @@ import { getCall } from '../../apis/network';
 import { Steps } from 'intro.js-react';
 import { CiSquareMinus, CiSquarePlus } from 'react-icons/ci';
 import {
-  Loader,
-  UnitSelector,
-  CalendarModal,
-  UnitModal,
-  ExportOptions,
-  DateSelector,
-  PdfBuilder,
-  ExcelExport as exportToExcel,
-  TableHOC,
-  Dropdown,
-  LineChart,
-  Modal,
-  Run,
-} from "../../components";
-import { createColumnHelper } from "@tanstack/react-table";
-import dateFormat from "dateformat";
-import salesVsLabor from "../../assets/introJSSteps/salesVsLabor";
-import {
-  formattingData,
-  formattingDataWithoutDollr,
-} from "../../functions/formatingCurrency";
+	Loader,
+	UnitSelector,
+	CalendarModal,
+	UnitModal,
+	ExportOptions,
+	DateSelector,
+	PdfBuilder,
+	ExcelExport as exportToExcel,
+	TableHOC,
+	Dropdown,
+	LineChart,
+	Modal,
+	Run,
+} from '../../components';
+import { createColumnHelper } from '@tanstack/react-table';
+import dateFormat from 'dateformat';
+import salesVsLabor from '../../assets/introJSSteps/salesVsLabor';
+import { formattingData, formattingDataWithoutDollr } from '../../functions/formatingCurrency';
 
 const columnHelper = createColumnHelper();
 
@@ -56,10 +53,10 @@ const SalesVsLabor = () => {
 	const [selectedUnitName, setSelectedUnitName] = useState('Loading...');
 	const [showModal, setUnitShowModal] = useState(false); // State to manage modal visibility
 
-  //calendar state variables
-  const [selectedFromDate, setSelectedFromDate] = useState(new Date());
-  const [selectedToDate, setSelectedToDate] = useState(new Date());
-  const [showDateModal, setShowDateModal] = useState(false);
+	//calendar state variables
+	const [selectedFromDate, setSelectedFromDate] = useState(new Date());
+	const [selectedToDate, setSelectedToDate] = useState(new Date());
+	const [showDateModal, setShowDateModal] = useState(false);
 
 	const [selectedReportType, setSelectedReportType] = useState('Hourly');
 	const reportTypeOptions = [{ name: 'Hourly' }, { name: 'Half Hour' }, { name: 'Qtr Hour' }];
@@ -75,130 +72,112 @@ const SalesVsLabor = () => {
 		stepsEnabled: false,
 	});
 
-  // columns for tableHOC
-  const memoizedColumns = useMemo(
-    () => [
-      columnHelper.accessor("unitName", {
-        id: "unitName",
-        header: "Unit",
-        dataType: "string",
-      }),
-      columnHelper.accessor("date", {
-        id: "date",
-        header: "Date",
-        dataType: "string",
-      }),
-      columnHelper.accessor("time", {
-        id: "time",
-        header: "Time",
-        dataType: "string",
-        size: 180,
-      }),
-      columnHelper.accessor("grossSales", {
-        id: "grossSales",
-        header: "Gross Sales",
-        cell: ({ row }) => {
-          let perGrossSales = calculateSum(row, "grossSales");
-          perGrossSales = formattingData(parseFloat(perGrossSales));
-          return `${perGrossSales}`;
-        },
-        dataType: "number",
-        footer: ({ table }) => {
-          let grossSale = calculateFooterSum(table, "grossSales");
-          grossSale = formattingData(parseFloat(grossSale));
-          return <div className='text-center'>{grossSale}</div>;
-        },
-        size: 60,
-      }),
-      columnHelper.accessor("sales", {
-        id: "sales",
-        header: "Sales",
-        cell: ({ row }) => {
-          let cellSales = calculateSum(row, "sales");
-          cellSales = formattingData(parseFloat(cellSales));
-          return `${cellSales}`;
-        },
-        dataType: "number",
-        footer: ({ table }) => {
-          let footerSales = formattingData(
-            parseFloat(calculateFooterSum(table, "sales"))
-          );
-          return <div className='text-center'>{footerSales}</div>;
-        },
-        size: 60,
-      }),
-      columnHelper.accessor("variableLaborMinutes", {
-        id: "variableLaborMinutes",
-        header: "Variable Labor Minutes",
-        cell: ({ row }) =>
-          formattingDataWithoutDollr(calculateSum(row, "variableLaborMinutes")),
-        dataType: "number",
-        footer: ({ table }) => (
-          <div className='text-center'>
-            {formattingDataWithoutDollr(
-              calculateFooterSum(table, "variableLaborMinutes")
-            )}
-          </div>
-        ),
-        size: 60,
-      }),
+	// columns for tableHOC
+	const memoizedColumns = useMemo(
+		() => [
+			columnHelper.accessor('unitName', {
+				id: 'unitName',
+				header: 'Unit',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('date', {
+				id: 'date',
+				header: 'Date',
+				dataType: 'string',
+			}),
+			columnHelper.accessor('time', {
+				id: 'time',
+				header: 'Time',
+				dataType: 'string',
+				size: 180,
+			}),
+			columnHelper.accessor('grossSales', {
+				id: 'grossSales',
+				header: 'Gross Sales',
+				cell: ({ row }) => {
+					let perGrossSales = calculateSum(row, 'grossSales');
+					perGrossSales = formattingData(parseFloat(perGrossSales));
+					return `${perGrossSales}`;
+				},
+				dataType: 'number',
+				footer: ({ table }) => {
+					let grossSale = calculateFooterSum(table, 'grossSales');
+					grossSale = formattingData(parseFloat(grossSale));
+					return <div className='text-center'>{grossSale}</div>;
+				},
+				size: 60,
+			}),
+			columnHelper.accessor('sales', {
+				id: 'sales',
+				header: 'Sales',
+				cell: ({ row }) => {
+					let cellSales = calculateSum(row, 'sales');
+					cellSales = formattingData(parseFloat(cellSales));
+					return `${cellSales}`;
+				},
+				dataType: 'number',
+				footer: ({ table }) => {
+					let footerSales = formattingData(parseFloat(calculateFooterSum(table, 'sales')));
+					return <div className='text-center'>{footerSales}</div>;
+				},
+				size: 60,
+			}),
+			columnHelper.accessor('variableLaborMinutes', {
+				id: 'variableLaborMinutes',
+				header: 'Variable Labor Minutes',
+				cell: ({ row }) => formattingDataWithoutDollr(calculateSum(row, 'variableLaborMinutes')),
+				dataType: 'number',
+				footer: ({ table }) => (
+					<div className='text-center'>
+						{formattingDataWithoutDollr(calculateFooterSum(table, 'variableLaborMinutes'))}
+					</div>
+				),
+				size: 60,
+			}),
 
-      columnHelper.accessor("variableLaborHours", {
-        id: "variableLaborHours",
-        header: "Variable Labor Hours",
-        cell: ({ row }) => {
-          let calculatevariableLaborHours = calculateSum(
-            row,
-            "variableLaborHours"
-          );
-          return formattingDataWithoutDollr(
-            parseFloat(calculatevariableLaborHours)
-          );
-        },
-        dataType: "number",
-        footer: ({ table }) => (
-          <div className='text-center'>
-            {formattingDataWithoutDollr(
-              calculateFooterSum(table, "variableLaborHours")
-            )}
-          </div>
-        ),
-        size: 60,
-      }),
-      columnHelper.accessor("variableLaborDollars", {
-        id: "variableLaborDollars",
-        header: "Variable Labor Dollars",
-        cell: ({ row }) => {
-          let calculatelaberDollars = calculateSum(row, "variableLaborDollars");
-          calculatelaberDollars = formattingData(
-            parseFloat(calculatelaberDollars)
-          );
-          return `${calculatelaberDollars}`;
-        },
-        dataType: "number",
-        size: 60,
-        footer: ({ table }) => (
-          <div className='text-center'>
-            {formattingData(
-              parseFloat(calculateFooterSum(table, "variableLaborDollars"))
-            )}
-          </div>
-        ),
-      }),
-      columnHelper.accessor("laborPercent", {
-        id: "laborPercent",
-        header: "Labor Percent",
-        cell: ({ row }) => `${calculateLaborPercent(row)}%`,
-        dataType: "number",
-        footer: ({ table }) => (
-          <div className='text-center'>{calculateLaborPctFooter(table)}%</div>
-        ),
-        size: 60,
-      }),
-    ],
-    []
-  );
-  const [columns, setColumns] = useState(memoizedColumns);
+			columnHelper.accessor('variableLaborHours', {
+				id: 'variableLaborHours',
+				header: 'Variable Labor Hours',
+				cell: ({ row }) => {
+					let calculatevariableLaborHours = calculateSum(row, 'variableLaborHours');
+					return formattingDataWithoutDollr(parseFloat(calculatevariableLaborHours));
+				},
+				dataType: 'number',
+				footer: ({ table }) => (
+					<div className='text-center'>
+						{formattingDataWithoutDollr(calculateFooterSum(table, 'variableLaborHours'))}
+					</div>
+				),
+				size: 60,
+			}),
+			columnHelper.accessor('variableLaborDollars', {
+				id: 'variableLaborDollars',
+				header: 'Variable Labor Dollars',
+				cell: ({ row }) => {
+					let calculatelaberDollars = calculateSum(row, 'variableLaborDollars');
+					calculatelaberDollars = formattingData(parseFloat(calculatelaberDollars));
+					return `${calculatelaberDollars}`;
+				},
+				dataType: 'number',
+				size: 60,
+				footer: ({ table }) => (
+					<div className='text-center'>
+						{formattingData(parseFloat(calculateFooterSum(table, 'variableLaborDollars')))}
+					</div>
+				),
+			}),
+			columnHelper.accessor('laborPercent', {
+				id: 'laborPercent',
+				header: 'Labor Percent',
+				cell: ({ row }) => `${calculateLaborPercent(row)}%`,
+				dataType: 'number',
+				footer: ({ table }) => <div className='text-center'>{calculateLaborPctFooter(table)}%</div>,
+				size: 60,
+			}),
+		],
+		[]
+	);
+	const [columns, setColumns] = useState(memoizedColumns);
 
 	//Default date get
 	const getDefaultDates = async () => {
@@ -327,32 +306,29 @@ const SalesVsLabor = () => {
 		}
 	}, [defaultUnitID, groupOrUnitAccess, defaultUnitName, groupOrUnitAccessName]);
 
-  const fetchSalesVslaborReport = async () => {
-    try {
-      setIsLoading(true);
-      setIsError(false);
-      const getData = {
-        url: "salesVsLabor",
-        urlParams: {
-          companyId: companyID,
-          alignmentId: alignmentID,
-          memberId: selectedUnit,
-          fromDate: dateFormat(selectedFromDate, "yyyy-mm-dd"),
-          toDate: dateFormat(selectedToDate, "yyyy-mm-dd"),
-          reportType:
-            reportTypeOptions.findIndex(
-              (option) => option.name === selectedReportType
-            ) + 1,
-        },
-      };
+	const fetchSalesVslaborReport = async () => {
+		try {
+			setIsLoading(true);
+			setIsError(false);
+			const getData = {
+				url: 'salesVsLabor',
+				urlParams: {
+					companyId: companyID,
+					alignmentId: alignmentID,
+					memberId: selectedUnit,
+					fromDate: dateFormat(selectedFromDate, 'yyyy-mm-dd'),
+					toDate: dateFormat(selectedToDate, 'yyyy-mm-dd'),
+					reportType: reportTypeOptions.findIndex((option) => option.name === selectedReportType) + 1,
+				},
+			};
 
 			const result = await getCall(getData);
 
-      const newData = result.data.map((item) => {
-        const quarterMinutes =
-          item.quarterHourText || item.quarterHourText == ":00"
-            ? parseInt(item.quarterHourText.replace(":", ""), 10)
-            : 0;
+			const newData = result.data.map((item) => {
+				const quarterMinutes =
+					item.quarterHourText || item.quarterHourText == ':00'
+						? parseInt(item.quarterHourText.replace(':', ''), 10)
+						: 0;
 
 				const halfMinutes = item.halfHourText ? parseInt(item.halfHourText.replace(':', ''), 10) : 0;
 
@@ -434,29 +410,29 @@ const SalesVsLabor = () => {
 							  } `
 							: '';
 
-          return (
-            <div
-              {...{
-                style: {
-                  cursor: "pointer",
-                  paddingLeft: `${row.depth * 2}rem`,
-                },
-                className:
-                  "flex items-center absolute top-0 bottom-0 gap-2 font-bold top-0 bottom-0 capitalize",
-              }}
-            >
-              {row.getIsExpanded() ? (
-                <CiSquareMinus className='text-[20px]' />
-              ) : (
-                <CiSquarePlus className='text-[20px]' />
-              )}
-              {label}
-            </div>
-          );
-        },
-        size: 20,
-      })
-    );
+					return (
+						<div
+							{...{
+								style: {
+									cursor: 'pointer',
+									paddingLeft: `${row.depth * 2}rem`,
+								},
+								className:
+									'flex items-center absolute top-0 bottom-0 gap-2 font-bold top-0 bottom-0 capitalize',
+							}}
+						>
+							{row.getIsExpanded() ? (
+								<CiSquareMinus className='text-[20px]' />
+							) : (
+								<CiSquarePlus className='text-[20px]' />
+							)}
+							{label}
+						</div>
+					);
+				},
+				size: 20,
+			})
+		);
 
 		setColumns(finalColumns);
 	};
@@ -597,14 +573,14 @@ const SalesVsLabor = () => {
 		exportToExcel(data, filename, spreadSheetTitle, date, selectedUnitName);
 	};
 
-  const detailOnTop = (
-    <button
-      className='flex items-center gap-2 px-4 py-2 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button  font-medium text-[var(--tw-primary)] ml-2 text-[14px] h-[43px]'
-      onClick={handleChartClick}
-    >
-      Chart This Data
-    </button>
-  );
+	const detailOnTop = (
+		<button
+			className='flex items-center gap-2 px-4 py-2 border-solid  focus:outline-none relative rounded-none border border-[var(--tw-primary)] shadow-[inset_0_0_0_1px_var(--tw-primary)] transition-colors duration-[0.25s] delay-[0.0833s] hover:bg-[var(--tw-primary)] hover:text-white tailwind-button  font-medium text-[var(--tw-primary)] ml-2 text-[14px] h-[43px]'
+			onClick={handleChartClick}
+		>
+			Chart This Data
+		</button>
+	);
 
 	const Table = (
 		<TableHOC
@@ -616,132 +592,119 @@ const SalesVsLabor = () => {
 		/>
 	);
 
-  return (
-    <>
-      <div className='w-[98%] mx-auto'>
-        <Steps
-          enabled={introSteps.stepsEnabled}
-          steps={introSteps.steps}
-          initialStep={introSteps.initialStep}
-          onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
-        />
-        <h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>
-          Sales Vs Labor
-        </h2>
-        <header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
-          <div className='flex items-center'>
-            <UnitSelector
-              companyId={companyID}
-              alignmentId={alignmentID}
-              memberID={selectedUnit}
-              memberName={selectedUnitName}
-              includeAreas={true}
-              setMemberName={setSelectedUnitName}
-              onClick={() => setUnitShowModal(true)}
-            />
-            <DateSelector
-              toDate={selectedToDate}
-              fromDate={selectedFromDate}
-              isDateRange={true}
-              onClick={() => setShowDateModal(true)}
-              extraClass={"w-[219px]"}
-            />
-            <div className='w-36 reportType-selector'>
-              <Dropdown
-                title='Report'
-                options={reportTypeOptions}
-                selectedOption={selectedReportType}
-                onOptionChange={(option) => setSelectedReportType(option)}
-              />
-            </div>
-            <div className='w-32 ml-2 group-by'>
-              <Dropdown
-                title='Group By'
-                options={groupByOptions}
-                selectedOption={groupBy}
-                onOptionChange={(option) => setGroupBy(option)}
-              />
-            </div>
-            <Run fetchData={fetchSalesVslaborReport} />
-          </div>
-          <div>
-            <ExportOptions
-              includePDF={true}
-              handlePDFClick={handlePDFClick}
-              includeCSV={true}
-              handleCSVClick={handleCSVClick}
-              includeExcel={true}
-              handleExcelClick={handleExcelClick}
-              includeHelp={true}
-              handleHelpClick={() =>
-                setIntroSteps({ ...introSteps, stepsEnabled: true })
-              }
-            />
-          </div>
-        </header>
+	return (
+		<>
+			<div className='w-[98%] mx-auto'>
+				<Steps
+					enabled={introSteps.stepsEnabled}
+					steps={introSteps.steps}
+					initialStep={introSteps.initialStep}
+					onExit={() => setIntroSteps({ ...introSteps, stepsEnabled: false })}
+				/>
+				<h2 className='my-2 text-[18px] leading-tight text-left pageTitle'>Sales Vs Labor</h2>
+				<header className='optionsBar flex justify-between items-center mb-0 rounded-2xl p-4 shadow-[0px_3px_20px_-10px_rgba(0,_0,_0,_0.5)]'>
+					<div className='flex items-center'>
+						<UnitSelector
+							companyId={companyID}
+							alignmentId={alignmentID}
+							memberID={selectedUnit}
+							memberName={selectedUnitName}
+							includeAreas={true}
+							setMemberName={setSelectedUnitName}
+							onClick={() => setUnitShowModal(true)}
+						/>
+						<DateSelector
+							toDate={selectedToDate}
+							fromDate={selectedFromDate}
+							isDateRange={true}
+							onClick={() => setShowDateModal(true)}
+							extraClass={'w-[219px]'}
+						/>
+						<div className='w-36 reportType-selector'>
+							<Dropdown
+								title='Report'
+								options={reportTypeOptions}
+								selectedOption={selectedReportType}
+								onOptionChange={(option) => setSelectedReportType(option)}
+							/>
+						</div>
+						<div className='w-32 ml-2 group-by'>
+							<Dropdown
+								title='Group By'
+								options={groupByOptions}
+								selectedOption={groupBy}
+								onOptionChange={(option) => setGroupBy(option)}
+							/>
+						</div>
+						<Run fetchData={fetchSalesVslaborReport} />
+					</div>
+					<div>
+						<ExportOptions
+							includePDF={true}
+							handlePDFClick={handlePDFClick}
+							includeCSV={true}
+							handleCSVClick={handleCSVClick}
+							includeExcel={true}
+							handleExcelClick={handleExcelClick}
+							includeHelp={true}
+							handleHelpClick={() => setIntroSteps({ ...introSteps, stepsEnabled: true })}
+						/>
+					</div>
+				</header>
 
 				{/* Display the table if there is no error and the data is not loading */}
 
-        {isError ? (
-          <div>{errorMessage}</div>
-        ) : (
-          <div className='relative w-full min-h-56'>
-            <Loader loading={isLoading} />
-            {!isLoading &&
-              (salesVsLaborData.length > 0 ? (
-                <div className='paged-table'>{Table}</div>
-              ) : !selectedUnit ? (
-                <div className='mt-10 text-xl font-medium text-center'>
-                  No Unit Selected
-                </div>
-              ) : (
-                <div className='mt-10 text-xl font-medium text-center'>
-                  No data available
-                </div>
-              ))}
-          </div>
-        )}
-				
+				{isError ? (
+					<div>{errorMessage}</div>
+				) : (
+					<div className='relative w-full min-h-56'>
+						<Loader loading={isLoading} />
+						{!isLoading &&
+							(salesVsLaborData.length > 0 ? (
+								<div className='paged-table'>{Table}</div>
+							) : !selectedUnit ? (
+								<div className='mt-10 text-xl font-medium text-center'>No Unit Selected</div>
+							) : (
+								<div className='mt-10 text-xl font-medium text-center'>No data available</div>
+							))}
+					</div>
+				)}
 
-        <div>
-          <UnitModal
-            unitData={unitsAndAreasList}
-            memberID={selectedUnit}
-            memberName={selectedUnitName}
-            show={showModal}
-            includeAreas={true}
-            handleClose={() => {
-              setUnitShowModal(false);
-            }}
-            handleUnitSelection={handleUnitSelection}
-          />
-          <CalendarModal
-            handleClose={() => setShowDateModal(false)}
-            modalOpen={showDateModal}
-            isDateRange={true}
-            handleDateSelection={handleDateSelection}
-            handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
-            handleToDateChange={(toDate) => setSelectedToDate(toDate)}
-            selectedFromDate={selectedFromDate}
-            selectedToDate={selectedToDate}
-          />
-          <Modal
-            isOpen={isChartModalOpen}
-            onClose={() => setIsChartModalOpen(!isChartModalOpen)}
-            title="Sales Vs Labor Chart"
-          >
-            <div className="w-[60rem] p-4">
-              {isChartLoading ? (
-                <Loader loading={isChartLoading} />
-              ) : (
-                <LineChart chartData={chartData} />
-              )}
-            </div>
-          </Modal>
-        </div>
-      </div>
-    </>
-  );
+				<div>
+					<UnitModal
+						unitData={unitsAndAreasList}
+						memberID={selectedUnit}
+						memberName={selectedUnitName}
+						show={showModal}
+						includeAreas={true}
+						handleClose={() => {
+							setUnitShowModal(false);
+						}}
+						handleUnitSelection={handleUnitSelection}
+					/>
+					<CalendarModal
+						handleClose={() => setShowDateModal(false)}
+						modalOpen={showDateModal}
+						isDateRange={true}
+						handleDateSelection={handleDateSelection}
+						handleFromDateChange={(fromDate) => setSelectedFromDate(fromDate)}
+						handleToDateChange={(toDate) => setSelectedToDate(toDate)}
+						selectedFromDate={selectedFromDate}
+						selectedToDate={selectedToDate}
+					/>
+					<Modal
+						isOpen={isChartModalOpen}
+						onClose={() => setIsChartModalOpen(!isChartModalOpen)}
+						title='Sales Vs Labor Chart'
+					>
+						<div className='w-[60rem] p-4'>
+							{isChartLoading ? <Loader loading={isChartLoading} /> : <LineChart chartData={chartData} />}
+						</div>
+					</Modal>
+				</div>
+			</div>
+		</>
+	);
 };
 
 export default SalesVsLabor;
