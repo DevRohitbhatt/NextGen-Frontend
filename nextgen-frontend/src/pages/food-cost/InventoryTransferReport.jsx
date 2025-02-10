@@ -314,7 +314,6 @@ const InventoryTransferReport = () => {
   // Function to handle the PDF export
   const handlePDFClick = () => {
     if (!inventoryTransferReportData?.data) return;
-    debugger
     const pdfData = {
       title: "Inventory Transfer Report",
       subHeaders: [
