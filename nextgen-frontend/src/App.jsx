@@ -127,7 +127,7 @@ const App = () => {
 							}
 						>
 							<Routes>
-								<Route path='/PrepChart' element={<PrepChart />} />
+								<Route path='/' element={<PrepChart />} />
 								<Route path='/PrepChartTemplate' element={<PrepChartTemplate />} />
 								<Route path='/SuggestedOrderList' element={<SuggestedOrderList />} />
 								<Route path='/SuggestedOrder' element={<SuggestedOrder />} />
